@@ -438,3 +438,41 @@ def official_forecasts(country_iso3: str) -> list[dict]:
         return [dict(zip(columns, row)) for row in result.fetchall()]
     finally:
         con.close()
+
+
+def future_trajectory(country_iso3: str, horizons: list[int]) -> list[dict]:
+    if not horizons:
+        return []
+
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        placeholders = ",".join(["?"] * len(horizons))
+        result = con.execute(
+            f"""
+            SELECT
+                o.country_iso3,
+                o.indicator_id,
+                i.name,
+                i.dimension,
+                o.period,
+                o.value,
+                o.unit,
+                o.source_id,
+                s.name AS source_name,
+                o.dataset_id,
+                o.observation_type,
+                o.source_updated_at
+            FROM observations o
+            JOIN indicators i USING (indicator_id)
+            JOIN sources s USING (source_id)
+            WHERE o.country_iso3 = ?
+              AND o.observation_type = 'official_forecast'
+              AND o.period IN ({placeholders})
+            ORDER BY o.period, i.dimension, o.indicator_id, s.priority, o.source_id
+            """,
+            [country_iso3.upper(), *horizons],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
