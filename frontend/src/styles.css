@@ -407,3 +407,81 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+.trajectorySection {
+  padding-top: 46px;
+}
+
+.trajectoryGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.trajectoryCard {
+  border: 1px solid #242a32;
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.trajectoryYear {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+}
+
+.trajectorySources {
+  margin-top: 6px;
+  color: #7f8996;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.trajectoryIndicators {
+  margin-top: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.trajectoryRow {
+  padding-top: 12px;
+  border-top: 1px solid #1c2229;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+}
+
+.trajectoryRow span {
+  color: #aeb7c2;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.trajectoryRow strong {
+  color: #e8edf2;
+  font-size: 13px;
+}
+
+.trajectoryRow small {
+  grid-column: 1 / -1;
+  color: #66717e;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trajectoryEmpty {
+  padding-top: 12px;
+  border-top: 1px solid #1c2229;
+  color: #66717e;
+  font-size: 12px;
+}
+
+@media (max-width: 900px) {
+  .trajectoryGrid {
+    grid-template-columns: 1fr;
+  }
+}
