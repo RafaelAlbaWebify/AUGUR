@@ -10,6 +10,17 @@ type Health = {
   }
 }
 
+type Trend = {
+  direction: string
+  interpretation: string
+  confidence: string
+  slope_per_year: number | null
+  pct_change_1y: number | null
+  pct_change_3y: number | null
+  pct_change_5y: number | null
+  years_used: number
+}
+
 type Indicator = {
   country_iso3: string
   indicator_id: string
@@ -19,13 +30,20 @@ type Indicator = {
   value: number
   unit: string
   source_id: string
-  retrieved_at: string
-  source_updated_at: string | null
+  retrieved_at?: string
+  source_updated_at?: string | null
+  trend?: Trend
 }
 
 type Snapshot = {
   country_iso3: string
   observation_count: number
+  indicators: Indicator[]
+}
+
+type TrendsResponse = {
+  country_iso3: string
+  indicator_count: number
   indicators: Indicator[]
 }
 
@@ -60,13 +78,34 @@ function formatValue(value: number, unit: string) {
       maximumFractionDigits: 2,
     }).format(value)
   }
-
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
+}
+
+function trendSymbol(direction?: string) {
+  if (!direction || direction === 'unknown') return '·'
+  if (direction === 'stable') return '→'
+  if (direction === 'increase' || direction === 'strong_increase') return '↗'
+  return '↘'
+}
+
+function trendLabel(trend?: Trend) {
+  if (!trend) return 'Trend pending'
+  if (trend.interpretation === 'improving') return 'Improving'
+  if (trend.interpretation === 'deteriorating') return 'Deteriorating'
+  if (trend.direction === 'stable') return 'Stable'
+  return 'Contextual'
+}
+
+function changeLabel(value: number | null) {
+  if (value === null) return '—'
+  const sign = value > 0 ? '+' : ''
+  return `${sign}${value.toFixed(1)}%`
 }
 
 export default function App() {
   const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
+  const [trends, setTrends] = useState<TrendsResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -79,24 +118,34 @@ export default function App() {
         if (!response.ok) throw new Error(`Snapshot HTTP ${response.status}`)
         return response.json()
       }),
+      fetch(`${API_BASE}/api/countries/ESP/trends`).then(async (response) => {
+        if (!response.ok) throw new Error(`Trends HTTP ${response.status}`)
+        return response.json()
+      }),
     ])
-      .then(([healthData, snapshotData]) => {
+      .then(([healthData, snapshotData, trendsData]) => {
         setHealth(healthData)
         setSnapshot(snapshotData)
+        setTrends(trendsData)
       })
       .catch((err) => setError(String(err)))
   }, [])
 
   const grouped = useMemo(() => {
     const groups: Record<string, Indicator[]> = {}
+    const trendById = new Map((trends?.indicators ?? []).map((item) => [item.indicator_id, item.trend]))
 
     for (const indicator of snapshot?.indicators ?? []) {
+      const enriched = {
+        ...indicator,
+        trend: trendById.get(indicator.indicator_id),
+      }
       groups[indicator.dimension] ??= []
-      groups[indicator.dimension].push(indicator)
+      groups[indicator.dimension].push(enriched)
     }
 
     return groups
-  }, [snapshot])
+  }, [snapshot, trends])
 
   return (
     <main className="shell">
@@ -118,8 +167,8 @@ export default function App() {
           <div className="label">FIRST COUNTRY SLICE</div>
           <h2>Spain</h2>
           <p>
-            Live local snapshot from AUGUR's analytical store.
-            Source data currently comes from the World Bank WDI pipeline.
+            Live local snapshot from AUGUR's analytical store, now enriched with
+            multi-year trajectory analysis from the historical series.
           </p>
         </div>
 
@@ -167,6 +216,19 @@ export default function App() {
                     {formatValue(indicator.value, indicator.unit)}
                   </div>
 
+                  <div className="trendBlock">
+                    <div className={`trendState ${indicator.trend?.interpretation ?? ''}`}>
+                      <span className="trendArrow">{trendSymbol(indicator.trend?.direction)}</span>
+                      <span>{trendLabel(indicator.trend)}</span>
+                      <small>{indicator.trend?.confidence ?? '—'} confidence</small>
+                    </div>
+                    <div className="trendChanges">
+                      <span>1Y <strong>{changeLabel(indicator.trend?.pct_change_1y ?? null)}</strong></span>
+                      <span>3Y <strong>{changeLabel(indicator.trend?.pct_change_3y ?? null)}</strong></span>
+                      <span>5Y <strong>{changeLabel(indicator.trend?.pct_change_5y ?? null)}</strong></span>
+                    </div>
+                  </div>
+
                   <div className="metricFooter">
                     <span>{indicator.source_id.replace('_', ' ')}</span>
                     <span>{indicator.indicator_id}</span>
@@ -179,7 +241,7 @@ export default function App() {
       })}
 
       <footer>
-        AUGUR v0.1 · Phase 1 · Observed data only
+        AUGUR v0.1 · Phase 1 · Observed data + trend analysis
       </footer>
     </main>
   )
