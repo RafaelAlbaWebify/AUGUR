@@ -374,3 +374,36 @@ footer {
 .trendState.within_target {
   color: #86b991;
 }
+
+
+.sourceQuality {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid #1c2229;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.sourceQuality div {
+  display: grid;
+  gap: 3px;
+}
+
+.sourceQuality strong {
+  color: #aeb7c2;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.sourceQuality span {
+  color: #66717e;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+@media (max-width: 620px) {
+  .sourceQuality {
+    grid-template-columns: 1fr;
+  }
+}
