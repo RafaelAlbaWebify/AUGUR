@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="AUGUR API",
-    version="0.1.0-phase0",
+    version="0.1.0-phase1",
     description="Local-first country trajectory and personal fit engine.",
     lifespan=lifespan,
 )
@@ -38,7 +38,7 @@ app.include_router(router, prefix="/api")
 def root():
     return {
         "name": "AUGUR",
-        "version": "0.1.0-phase0",
+        "version": "0.1.0-phase1",
         "status": "running",
         "docs": "/docs",
     }
