@@ -16,6 +16,14 @@ The first milestone validates the local architecture:
 - PowerShell start/stop scripts
 - frontend/backend health check
 
+## Local ports
+
+AUGUR uses dedicated local ports to avoid conflicts with JOLT and VERIDRA:
+
+- Frontend: http://127.0.0.1:5190
+- Backend: http://127.0.0.1:8020
+- API docs: http://127.0.0.1:8020/docs
+
 ## Quick start
 
 ### Prerequisites
@@ -35,12 +43,6 @@ The first milestone validates the local architecture:
 ```powershell
 .\start-augur.ps1
 ```
-
-Open:
-
-- Frontend: http://127.0.0.1:5173
-- Backend: http://127.0.0.1:8000
-- API docs: http://127.0.0.1:8000/docs
 
 ### Stop
 
