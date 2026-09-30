@@ -25,13 +25,14 @@ def summarize_dimension(indicators: list[dict]) -> dict:
             "direction": direction,
             "confidence": trend.get("confidence", "low"),
             "pct_change_5y": trend.get("pct_change_5y"),
+            "target_status": trend.get("target_status"),
         }
 
         if interpretation == "improving":
             improving.append(signal)
         elif interpretation == "deteriorating":
             deteriorating.append(signal)
-        elif direction == "stable":
+        elif interpretation == "within_target" or direction == "stable":
             stable.append(signal)
         else:
             contextual.append(signal)
@@ -63,7 +64,7 @@ def summarize_dimension(indicators: list[dict]) -> dict:
     else:
         confidence = "low"
 
-    directional_count = len(improving) + len(deteriorating)
+    directional_count = len(improving) + len(deteriorating) + len(stable)
     total_count = len(indicators)
 
     return {
