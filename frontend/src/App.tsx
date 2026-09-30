@@ -37,6 +37,7 @@ type Indicator = {
   interpretation_policy?: string
   target_min?: number | null
   target_max?: number | null
+  sourceQuality?: SourceQualityItem
 }
 
 type Snapshot = {
@@ -75,6 +76,26 @@ type AssessmentResponse = {
   country_iso3: string
   method: string
   dimensions: Record<string, DimensionAssessment>
+}
+
+type SourceQualityItem = {
+  indicator_id: string
+  name: string
+  dimension: string
+  unit: string
+  source_count: number
+  preferred_source_id: string
+  preferred_source_name: string
+  preferred_period: number
+  preferred_value: number
+  freshest_period: number
+  period_spread: number
+  disagreement_pct: number | null
+}
+
+type SourceQualityResponse = {
+  country_iso3: string
+  indicators: SourceQualityItem[]
 }
 
 const API_BASE = 'http://127.0.0.1:8020'
@@ -146,6 +167,7 @@ export default function App() {
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [trends, setTrends] = useState<TrendsResponse | null>(null)
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null)
+  const [sourceQuality, setSourceQuality] = useState<SourceQualityResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -166,12 +188,17 @@ export default function App() {
         if (!response.ok) throw new Error(`Assessment HTTP ${response.status}`)
         return response.json()
       }),
+      fetch(`${API_BASE}/api/countries/ESP/source-quality`).then(async (response) => {
+        if (!response.ok) throw new Error(`Source quality HTTP ${response.status}`)
+        return response.json()
+      }),
     ])
-      .then(([healthData, snapshotData, trendsData, assessmentData]) => {
+      .then(([healthData, snapshotData, trendsData, assessmentData, sourceQualityData]) => {
         setHealth(healthData)
         setSnapshot(snapshotData)
         setTrends(trendsData)
         setAssessment(assessmentData)
+        setSourceQuality(sourceQualityData)
       })
       .catch((err) => setError(String(err)))
   }, [])
@@ -179,6 +206,7 @@ export default function App() {
   const grouped = useMemo(() => {
     const groups: Record<string, Indicator[]> = {}
     const trendById = new Map((trends?.indicators ?? []).map((item) => [item.indicator_id, item]))
+    const qualityById = new Map((sourceQuality?.indicators ?? []).map((item) => [item.indicator_id, item]))
 
     for (const indicator of snapshot?.indicators ?? []) {
       const trendItem = trendById.get(indicator.indicator_id)
@@ -188,13 +216,14 @@ export default function App() {
         interpretation_policy: trendItem?.interpretation_policy,
         target_min: trendItem?.target_min,
         target_max: trendItem?.target_max,
+        sourceQuality: qualityById.get(indicator.indicator_id),
       }
       groups[indicator.dimension] ??= []
       groups[indicator.dimension].push(enriched)
     }
 
     return groups
-  }, [snapshot, trends])
+  }, [snapshot, trends, sourceQuality])
 
   return (
     <main className="shell">
@@ -345,6 +374,30 @@ export default function App() {
                       <span>1Y <strong>{changeLabel(indicator.trend?.pct_change_1y ?? null)}</strong></span>
                       <span>3Y <strong>{changeLabel(indicator.trend?.pct_change_3y ?? null)}</strong></span>
                       <span>5Y <strong>{changeLabel(indicator.trend?.pct_change_5y ?? null)}</strong></span>
+                    </div>
+                  </div>
+
+                  <div className="sourceQuality">
+                    <div>
+                      <strong>{indicator.sourceQuality?.preferred_source_name ?? indicator.source_id.replace('_', ' ')}</strong>
+                      <span>
+                        preferred source · {indicator.sourceQuality?.preferred_period ?? indicator.period}
+                      </span>
+                    </div>
+
+                    <div>
+                      <strong>
+                        {indicator.sourceQuality?.source_count === 2
+                          ? 'Corroborated'
+                          : indicator.sourceQuality?.source_count && indicator.sourceQuality.source_count > 2
+                          ? `${indicator.sourceQuality.source_count} sources`
+                          : 'Single source'}
+                      </strong>
+                      <span>
+                        {indicator.sourceQuality?.disagreement_pct == null
+                          ? 'no comparison available'
+                          : `${indicator.sourceQuality.disagreement_pct.toFixed(2)}% disagreement`}
+                      </span>
                     </div>
                   </div>
 
