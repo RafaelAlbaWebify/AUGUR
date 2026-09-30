@@ -200,3 +200,37 @@ def country_registry() -> list[dict]:
         return [dict(zip(columns, row)) for row in result.fetchall()]
     finally:
         con.close()
+
+
+def indicator_registry() -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT indicator_id, source_indicator, name, dimension, unit, higher_is_better
+            FROM indicators
+            ORDER BY dimension, indicator_id
+            """
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def indicator_series(country_iso3: str, indicator_id: str) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT period, value, unit, source_id, retrieved_at, source_updated_at
+            FROM observations
+            WHERE country_iso3 = ? AND indicator_id = ?
+            ORDER BY period
+            """,
+            [country_iso3.upper(), indicator_id],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
