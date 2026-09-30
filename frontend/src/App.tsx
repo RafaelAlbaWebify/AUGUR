@@ -15,7 +15,7 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    fetch('http://127.0.0.1:8000/api/health')
+    fetch('http://127.0.0.1:8020/api/health')
       .then(async (response) => {
         if (!response.ok) throw new Error(`HTTP ${response.status}`)
         return response.json()
