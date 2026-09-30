@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from math import sqrt
 from statistics import mean
 
 
@@ -15,6 +14,7 @@ class TrendResult:
     pct_change_3y: float | None
     pct_change_5y: float | None
     years_used: int
+    target_status: str | None
 
 
 def _pct_change(current: float, previous: float | None) -> float | None:
@@ -51,21 +51,60 @@ def _direction_from_change(change: float | None) -> str:
     return "strong_decrease" if magnitude >= 10.0 else "decrease"
 
 
-def _interpretation(direction: str, higher_is_better: bool | None) -> str:
-    if direction in {"unknown", "stable"} or higher_is_better is None:
+def _distance_to_range(value: float, target_min: float, target_max: float) -> float:
+    if target_min <= value <= target_max:
+        return 0.0
+    if value < target_min:
+        return target_min - value
+    return value - target_max
+
+
+def _interpret_directional(direction: str, policy: str) -> str:
+    if direction in {"unknown", "stable"}:
         return "neutral_or_contextual"
 
     increasing = direction in {"increase", "strong_increase"}
 
-    if higher_is_better:
+    if policy == "higher":
         return "improving" if increasing else "deteriorating"
 
-    return "deteriorating" if increasing else "improving"
+    if policy == "lower":
+        return "deteriorating" if increasing else "improving"
+
+    return "neutral_or_contextual"
+
+
+def _interpret_target_range(
+    current: float,
+    reference: float | None,
+    target_min: float,
+    target_max: float,
+) -> tuple[str, str]:
+    current_distance = _distance_to_range(current, target_min, target_max)
+
+    if current_distance == 0:
+        return "within_target", "within_target"
+
+    target_status = "below_target" if current < target_min else "above_target"
+
+    if reference is None:
+        return "neutral_or_contextual", target_status
+
+    previous_distance = _distance_to_range(reference, target_min, target_max)
+
+    if current_distance < previous_distance:
+        return "improving", target_status
+    if current_distance > previous_distance:
+        return "deteriorating", target_status
+
+    return "neutral_or_contextual", target_status
 
 
 def calculate_trend(
     series: list[tuple[int, float]],
-    higher_is_better: bool | None,
+    interpretation_policy: str,
+    target_min: float | None = None,
+    target_max: float | None = None,
 ) -> TrendResult:
     clean = sorted(
         {(int(year), float(value)) for year, value in series},
@@ -82,6 +121,7 @@ def calculate_trend(
             pct_change_3y=None,
             pct_change_5y=None,
             years_used=0,
+            target_status=None,
         )
 
     current_year, current_value = clean[-1]
@@ -95,6 +135,13 @@ def calculate_trend(
     window = [(year, value) for year, value in clean if year >= current_year - 5]
     slope = _linear_slope(window)
 
+    reference_year = None
+    for horizon in (5, 3, 1):
+        if current_year - horizon in by_year:
+            reference_year = current_year - horizon
+            break
+
+    reference_value = by_year.get(reference_year) if reference_year is not None else None
     reference_change = (
         changes[5]
         if changes[5] is not None
@@ -104,7 +151,21 @@ def calculate_trend(
     )
 
     direction = _direction_from_change(reference_change)
-    interpretation = _interpretation(direction, higher_is_better)
+    target_status = None
+
+    if interpretation_policy == "target_range":
+        if target_min is None or target_max is None:
+            raise ValueError("target_range policy requires target_min and target_max")
+        interpretation, target_status = _interpret_target_range(
+            current_value,
+            reference_value,
+            target_min,
+            target_max,
+        )
+    elif interpretation_policy in {"higher", "lower"}:
+        interpretation = _interpret_directional(direction, interpretation_policy)
+    else:
+        interpretation = "neutral_or_contextual"
 
     if len(window) >= 5 and changes[5] is not None:
         confidence = "high"
@@ -122,4 +183,5 @@ def calculate_trend(
         pct_change_3y=changes[3],
         pct_change_5y=changes[5],
         years_used=len(window),
+        target_status=target_status,
     )
