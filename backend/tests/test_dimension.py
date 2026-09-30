@@ -1,7 +1,13 @@
 from app.engines.dimension import summarize_dimension
 
 
-def make_indicator(indicator_id: str, interpretation: str, direction: str = "increase", confidence: str = "high"):
+def make_indicator(
+    indicator_id: str,
+    interpretation: str,
+    direction: str = "increase",
+    confidence: str = "high",
+    target_status: str | None = None,
+):
     return {
         "indicator_id": indicator_id,
         "name": indicator_id,
@@ -10,6 +16,7 @@ def make_indicator(indicator_id: str, interpretation: str, direction: str = "inc
             "direction": direction,
             "confidence": confidence,
             "pct_change_5y": 5.0,
+            "target_status": target_status,
         },
     }
 
@@ -41,3 +48,17 @@ def test_dimension_contextual_when_no_directional_interpretation():
 
     assert result["trajectory"] == "contextual"
     assert result["directional_indicator_count"] == 0
+
+
+def test_within_target_counts_as_stable_signal():
+    result = summarize_dimension([
+        make_indicator(
+            "inflation",
+            "within_target",
+            direction="increase",
+            target_status="within_target",
+        ),
+    ])
+
+    assert result["trajectory"] == "stable"
+    assert result["directional_indicator_count"] == 1
