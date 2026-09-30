@@ -358,3 +358,19 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+.targetRule {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 10px;
+  color: #7f8996;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.trendState.within_target {
+  color: #86b991;
+}
