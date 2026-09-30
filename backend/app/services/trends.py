@@ -13,7 +13,9 @@ def country_trends(country_iso3: str) -> dict:
 
         trend = calculate_trend(
             [(row["period"], row["value"]) for row in series],
-            indicator["higher_is_better"],
+            indicator["interpretation_policy"],
+            indicator.get("target_min"),
+            indicator.get("target_max"),
         )
 
         latest = series[-1]
@@ -28,6 +30,9 @@ def country_trends(country_iso3: str) -> dict:
                 "value": latest["value"],
                 "unit": indicator["unit"],
                 "source_id": latest["source_id"],
+                "interpretation_policy": indicator["interpretation_policy"],
+                "target_min": indicator.get("target_min"),
+                "target_max": indicator.get("target_max"),
                 "trend": {
                     "direction": trend.direction,
                     "interpretation": trend.interpretation,
@@ -37,6 +42,7 @@ def country_trends(country_iso3: str) -> dict:
                     "pct_change_3y": trend.pct_change_3y,
                     "pct_change_5y": trend.pct_change_5y,
                     "years_used": trend.years_used,
+                    "target_status": trend.target_status,
                 },
             }
         )
