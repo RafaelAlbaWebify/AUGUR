@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException
 
 from app.core.config import settings
 from app.db.bootstrap import datastore_status
-from app.db.analytics import indicator_source_comparison, source_quality_summary
+from app.db.analytics import (
+    indicator_source_comparison,
+    source_quality_summary,
+    official_forecasts,
+)
 from app.services.country import country_snapshot, list_countries
 from app.services.trends import country_trends
 from app.services.assessment import country_assessment
@@ -89,4 +93,22 @@ def source_quality(country_iso3: str):
     return {
         "country_iso3": country_iso3,
         "indicators": source_quality_summary(country_iso3),
+    }
+
+
+@router.get("/countries/{country_iso3}/forecasts")
+def forecasts(country_iso3: str):
+    country_iso3 = country_iso3.upper()
+    registry = {country["iso3"] for country in list_countries()}
+
+    if country_iso3 not in registry:
+        raise HTTPException(status_code=404, detail="Country is not registered")
+
+    rows = official_forecasts(country_iso3)
+
+    return {
+        "country_iso3": country_iso3,
+        "observation_type": "official_forecast",
+        "forecast_count": len(rows),
+        "forecasts": rows,
     }
