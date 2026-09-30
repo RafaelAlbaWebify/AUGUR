@@ -47,6 +47,32 @@ type TrendsResponse = {
   indicators: Indicator[]
 }
 
+type Signal = {
+  indicator_id: string
+  name: string
+  direction: string
+  confidence: string
+  pct_change_5y: number | null
+}
+
+type DimensionAssessment = {
+  trajectory: string
+  confidence: string
+  indicator_count: number
+  directional_indicator_count: number
+  coverage: number
+  improving_signals: Signal[]
+  deteriorating_signals: Signal[]
+  stable_signals: Signal[]
+  contextual_signals: Signal[]
+}
+
+type AssessmentResponse = {
+  country_iso3: string
+  method: string
+  dimensions: Record<string, DimensionAssessment>
+}
+
 const API_BASE = 'http://127.0.0.1:8020'
 
 const dimensionOrder = [
@@ -106,6 +132,7 @@ export default function App() {
   const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [trends, setTrends] = useState<TrendsResponse | null>(null)
+  const [assessment, setAssessment] = useState<AssessmentResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -122,11 +149,16 @@ export default function App() {
         if (!response.ok) throw new Error(`Trends HTTP ${response.status}`)
         return response.json()
       }),
+      fetch(`${API_BASE}/api/countries/ESP/assessment`).then(async (response) => {
+        if (!response.ok) throw new Error(`Assessment HTTP ${response.status}`)
+        return response.json()
+      }),
     ])
-      .then(([healthData, snapshotData, trendsData]) => {
+      .then(([healthData, snapshotData, trendsData, assessmentData]) => {
         setHealth(healthData)
         setSnapshot(snapshotData)
         setTrends(trendsData)
+        setAssessment(assessmentData)
       })
       .catch((err) => setError(String(err)))
   }, [])
@@ -189,6 +221,66 @@ export default function App() {
           AUGUR data connection failed: {error}
         </section>
       )}
+
+      <section className="assessmentSection">
+        <div className="dimensionHeader">
+          <div>
+            <div className="label">COUNTRY SIGNAL SUMMARY</div>
+            <h3>Current trajectory by dimension</h3>
+          </div>
+          <span>transparent synthesis · no composite score</span>
+        </div>
+
+        <div className="assessmentGrid">
+          {dimensionOrder.map((dimension) => {
+            const item = assessment?.dimensions?.[dimension]
+            if (!item) return null
+
+            const improving = item.improving_signals.map((signal) => signal.name)
+            const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
+
+            return (
+              <article className="assessmentCard" key={dimension}>
+                <div className="assessmentTop">
+                  <span>{dimensionLabels[dimension] ?? dimension}</span>
+                  <span>{item.confidence} confidence</span>
+                </div>
+
+                <div className={`assessmentTrajectory ${item.trajectory}`}>
+                  {item.trajectory.replace('_', ' ')}
+                </div>
+
+                <div className="assessmentCoverage">
+                  Directional coverage: {item.directional_indicator_count}/{item.indicator_count}
+                </div>
+
+                <div className="signalList">
+                  {improving.length > 0 && (
+                    <div>
+                      <strong>Improving</strong>
+                      <span>{improving.join(' · ')}</span>
+                    </div>
+                  )}
+
+                  {deteriorating.length > 0 && (
+                    <div>
+                      <strong>Deteriorating</strong>
+                      <span>{deteriorating.join(' · ')}</span>
+                    </div>
+                  )}
+
+                  {improving.length === 0 && deteriorating.length === 0 && (
+                    <div>
+                      <strong>Interpretation</strong>
+                      <span>Context-dependent signals; no automatic positive/negative verdict.</span>
+                    </div>
+                  )}
+                </div>
+              </article>
+            )
+          })}
+        </div>
+      </section>
 
       {dimensionOrder.map((dimension) => {
         const indicators = grouped[dimension] ?? []
