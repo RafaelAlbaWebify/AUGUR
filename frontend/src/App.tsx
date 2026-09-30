@@ -131,6 +131,9 @@ function formatValue(value: number, unit: string) {
       maximumFractionDigits: 2,
     }).format(value)
   }
+  if (unit === 'usd_ppp_per_hour') {
+    return `${value.toFixed(1)} USD/h PPP`
+  }
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
