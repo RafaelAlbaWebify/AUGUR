@@ -248,9 +248,26 @@ def indicator_series(country_iso3: str, indicator_id: str) -> list[dict]:
     try:
         result = con.execute(
             """
+            WITH ranked AS (
+                SELECT
+                    o.period,
+                    o.value,
+                    o.unit,
+                    o.source_id,
+                    o.retrieved_at,
+                    o.source_updated_at,
+                    s.priority,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY o.period
+                        ORDER BY s.priority ASC, o.source_id ASC
+                    ) AS rn
+                FROM observations o
+                JOIN sources s USING (source_id)
+                WHERE o.country_iso3 = ? AND o.indicator_id = ?
+            )
             SELECT period, value, unit, source_id, retrieved_at, source_updated_at
-            FROM observations
-            WHERE country_iso3 = ? AND indicator_id = ?
+            FROM ranked
+            WHERE rn = 1
             ORDER BY period
             """,
             [country_iso3.upper(), indicator_id],
@@ -297,6 +314,86 @@ def indicator_source_comparison(country_iso3: str) -> list[dict]:
             FROM ranked
             WHERE rn = 1
             ORDER BY indicator_id, source_priority, source_id
+            """,
+            [country_iso3.upper()],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def source_quality_summary(country_iso3: str) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            WITH latest_by_source AS (
+                SELECT
+                    o.country_iso3,
+                    o.indicator_id,
+                    i.name,
+                    i.dimension,
+                    o.period,
+                    o.value,
+                    o.unit,
+                    o.source_id,
+                    s.name AS source_name,
+                    s.priority AS source_priority,
+                    o.dataset_id,
+                    o.retrieved_at,
+                    o.source_updated_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY o.indicator_id, o.source_id
+                        ORDER BY o.period DESC
+                    ) AS rn
+                FROM observations o
+                JOIN indicators i USING (indicator_id)
+                JOIN sources s USING (source_id)
+                WHERE o.country_iso3 = ?
+            ),
+            latest AS (
+                SELECT *
+                FROM latest_by_source
+                WHERE rn = 1
+            ),
+            paired AS (
+                SELECT
+                    indicator_id,
+                    MIN(name) AS name,
+                    MIN(dimension) AS dimension,
+                    MIN(unit) AS unit,
+                    COUNT(*) AS source_count,
+                    MIN_BY(source_id, source_priority) AS preferred_source_id,
+                    MIN_BY(source_name, source_priority) AS preferred_source_name,
+                    MIN_BY(period, source_priority) AS preferred_period,
+                    MIN_BY(value, source_priority) AS preferred_value,
+                    MAX(period) AS freshest_period,
+                    MAX(period) - MIN(period) AS period_spread,
+                    MIN(value) AS min_value,
+                    MAX(value) AS max_value
+                FROM latest
+                GROUP BY indicator_id
+            )
+            SELECT
+                indicator_id,
+                name,
+                dimension,
+                unit,
+                source_count,
+                preferred_source_id,
+                preferred_source_name,
+                preferred_period,
+                preferred_value,
+                freshest_period,
+                period_spread,
+                CASE
+                    WHEN source_count < 2 THEN NULL
+                    WHEN preferred_value = 0 THEN NULL
+                    ELSE ((max_value - min_value) / ABS(preferred_value)) * 100
+                END AS disagreement_pct
+            FROM paired
+            ORDER BY indicator_id
             """,
             [country_iso3.upper()],
         )
