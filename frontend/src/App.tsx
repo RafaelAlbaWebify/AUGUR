@@ -19,6 +19,7 @@ type Trend = {
   pct_change_3y: number | null
   pct_change_5y: number | null
   years_used: number
+  target_status: string | null
 }
 
 type Indicator = {
