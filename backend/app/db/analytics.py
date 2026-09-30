@@ -187,10 +187,11 @@ def latest_observations(country_iso3: str) -> list[dict]:
                     o.source_updated_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY o.indicator_id
-                        ORDER BY o.period DESC
+                        ORDER BY o.period DESC, s.priority ASC, o.source_id ASC
                     ) AS rn
                 FROM observations o
                 JOIN indicators i USING (indicator_id)
+                JOIN sources s USING (source_id)
                 WHERE o.country_iso3 = ?
             )
             SELECT
@@ -253,6 +254,51 @@ def indicator_series(country_iso3: str, indicator_id: str) -> list[dict]:
             ORDER BY period
             """,
             [country_iso3.upper(), indicator_id],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def indicator_source_comparison(country_iso3: str) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT
+                    o.country_iso3,
+                    o.indicator_id,
+                    i.name,
+                    i.dimension,
+                    o.period,
+                    o.value,
+                    o.unit,
+                    o.source_id,
+                    s.name AS source_name,
+                    s.priority AS source_priority,
+                    o.dataset_id,
+                    o.retrieved_at,
+                    o.source_updated_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY o.indicator_id, o.source_id
+                        ORDER BY o.period DESC
+                    ) AS rn
+                FROM observations o
+                JOIN indicators i USING (indicator_id)
+                JOIN sources s USING (source_id)
+                WHERE o.country_iso3 = ?
+            )
+            SELECT
+                country_iso3, indicator_id, name, dimension,
+                period, value, unit, source_id, source_name,
+                source_priority, dataset_id, retrieved_at, source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY indicator_id, source_priority, source_id
+            """,
+            [country_iso3.upper()],
         )
         columns = [column[0] for column in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
