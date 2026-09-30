@@ -33,6 +33,9 @@ type Indicator = {
   retrieved_at?: string
   source_updated_at?: string | null
   trend?: Trend
+  interpretation_policy?: string
+  target_min?: number | null
+  target_max?: number | null
 }
 
 type Snapshot = {
@@ -118,8 +121,17 @@ function trendLabel(trend?: Trend) {
   if (!trend) return 'Trend pending'
   if (trend.interpretation === 'improving') return 'Improving'
   if (trend.interpretation === 'deteriorating') return 'Deteriorating'
+  if (trend.interpretation === 'within_target') return 'Within target'
   if (trend.direction === 'stable') return 'Stable'
   return 'Contextual'
+}
+
+function targetStatusLabel(status?: string | null) {
+  if (!status) return null
+  if (status === 'within_target') return 'Within target'
+  if (status === 'above_target') return 'Above target'
+  if (status === 'below_target') return 'Below target'
+  return status
 }
 
 function changeLabel(value: number | null) {
@@ -165,12 +177,16 @@ export default function App() {
 
   const grouped = useMemo(() => {
     const groups: Record<string, Indicator[]> = {}
-    const trendById = new Map((trends?.indicators ?? []).map((item) => [item.indicator_id, item.trend]))
+    const trendById = new Map((trends?.indicators ?? []).map((item) => [item.indicator_id, item]))
 
     for (const indicator of snapshot?.indicators ?? []) {
+      const trendItem = trendById.get(indicator.indicator_id)
       const enriched = {
         ...indicator,
-        trend: trendById.get(indicator.indicator_id),
+        trend: trendItem?.trend,
+        interpretation_policy: trendItem?.interpretation_policy,
+        target_min: trendItem?.target_min,
+        target_max: trendItem?.target_max,
       }
       groups[indicator.dimension] ??= []
       groups[indicator.dimension].push(enriched)
@@ -314,6 +330,16 @@ export default function App() {
                       <span>{trendLabel(indicator.trend)}</span>
                       <small>{indicator.trend?.confidence ?? '—'} confidence</small>
                     </div>
+
+                    {indicator.interpretation_policy === 'target_range' && (
+                      <div className="targetRule">
+                        <span>{targetStatusLabel(indicator.trend?.target_status)}</span>
+                        <span>
+                          target {indicator.target_min}–{indicator.target_max}
+                        </span>
+                      </div>
+                    )}
+
                     <div className="trendChanges">
                       <span>1Y <strong>{changeLabel(indicator.trend?.pct_change_1y ?? null)}</strong></span>
                       <span>3Y <strong>{changeLabel(indicator.trend?.pct_change_3y ?? null)}</strong></span>
