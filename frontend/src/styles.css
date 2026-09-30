@@ -228,3 +228,52 @@ footer {
   .countryHero { margin-top: 48px; }
   .indicatorGrid { grid-template-columns: 1fr; }
 }
+
+
+.trendBlock {
+  margin-top: 22px;
+  padding-top: 16px;
+  border-top: 1px solid #1c2229;
+}
+
+.trendState {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: #aeb7c2;
+}
+
+.trendState small {
+  margin-left: auto;
+  color: #68737f;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.trendArrow {
+  font-size: 18px;
+}
+
+.trendState.improving {
+  color: #86b991;
+}
+
+.trendState.deteriorating {
+  color: #d39a8f;
+}
+
+.trendChanges {
+  display: flex;
+  gap: 14px;
+  margin-top: 12px;
+  color: #66717e;
+  font-size: 10px;
+  letter-spacing: 0.05em;
+}
+
+.trendChanges strong {
+  color: #9aa4b1;
+  font-weight: 600;
+}
