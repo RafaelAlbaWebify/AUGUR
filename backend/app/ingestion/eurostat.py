@@ -32,6 +32,24 @@ EUROSTAT_SERIES = [
         },
         "unit": "percent",
     },
+    {
+        "indicator_id": "fertility_rate",
+        "dataset_id": "demo_find",
+        "filters": {
+            "geo": "ES",
+            "indic_de": "TOTFERRT",
+        },
+        "unit": "births_per_woman",
+    },
+    {
+        "indicator_id": "population_65_plus_share",
+        "dataset_id": "demo_pjanind",
+        "filters": {
+            "geo": "ES",
+            "indic_de": "PC_Y65_MAX",
+        },
+        "unit": "percent",
+    },
 ]
 
 
