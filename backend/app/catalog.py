@@ -14,6 +14,13 @@ COUNTRIES = [
 
 SOURCES = [
     {
+        "source_id": "IMF",
+        "name": "IMF",
+        "organisation": "International Monetary Fund",
+        "base_url": "https://www.imf.org/external/datamapper/api/v2",
+        "priority": 1,
+    },
+    {
         "source_id": "OECD",
         "name": "OECD",
         "organisation": "Organisation for Economic Co-operation and Development",
@@ -37,6 +44,36 @@ SOURCES = [
 ]
 
 INDICATORS = [
+    {
+        "indicator_id": "real_gdp_growth",
+        "source_indicator": "IMF:WEO:NGDP_RPCH",
+        "name": "Real GDP growth (annual %)",
+        "dimension": "prosperity",
+        "unit": "percent",
+        "interpretation_policy": "higher",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
+        "indicator_id": "imf_inflation_average",
+        "source_indicator": "IMF:WEO:PCPIPCH",
+        "name": "Inflation, average consumer prices (annual %)",
+        "dimension": "prosperity",
+        "unit": "percent",
+        "interpretation_policy": "target_range",
+        "target_min": 1.0,
+        "target_max": 3.0,
+    },
+    {
+        "indicator_id": "imf_unemployment_rate",
+        "source_indicator": "IMF:WEO:LUR",
+        "name": "Unemployment rate (IMF WEO)",
+        "dimension": "productive_capacity",
+        "unit": "percent",
+        "interpretation_policy": "lower",
+        "target_min": None,
+        "target_max": None,
+    },
     {
         "indicator_id": "gdp_per_hour_worked",
         "source_indicator": "OECD:DSD_PDB@DF_PDB:GDPHRS",
