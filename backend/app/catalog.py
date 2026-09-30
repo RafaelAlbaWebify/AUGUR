@@ -14,6 +14,13 @@ COUNTRIES = [
 
 SOURCES = [
     {
+        "source_id": "UN_WPP",
+        "name": "UN World Population Prospects",
+        "organisation": "United Nations DESA Population Division",
+        "base_url": "https://population.un.org/wpp",
+        "priority": 1,
+    },
+    {
         "source_id": "IMF",
         "name": "IMF",
         "organisation": "International Monetary Fund",
@@ -44,6 +51,26 @@ SOURCES = [
 ]
 
 INDICATORS = [
+    {
+        "indicator_id": "median_age",
+        "source_indicator": "UN_WPP:MedianAgePop",
+        "name": "Median age of population",
+        "dimension": "demography",
+        "unit": "years",
+        "interpretation_policy": "contextual",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
+        "indicator_id": "life_expectancy",
+        "source_indicator": "UN_WPP:LEx",
+        "name": "Life expectancy at birth",
+        "dimension": "human_systems",
+        "unit": "years",
+        "interpretation_policy": "higher",
+        "target_min": None,
+        "target_max": None,
+    },
     {
         "indicator_id": "real_gdp_growth",
         "source_indicator": "IMF:WEO:NGDP_RPCH",
