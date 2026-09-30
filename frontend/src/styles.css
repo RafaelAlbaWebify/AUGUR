@@ -277,3 +277,84 @@ footer {
   color: #9aa4b1;
   font-weight: 600;
 }
+
+
+.assessmentSection {
+  padding-top: 46px;
+}
+
+.assessmentGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.assessmentCard {
+  min-height: 210px;
+  border: 1px solid #242a32;
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.assessmentTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  color: #7f8996;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.assessmentTrajectory {
+  margin-top: 26px;
+  font-size: 28px;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  text-transform: capitalize;
+}
+
+.assessmentTrajectory.improving { color: #86b991; }
+.assessmentTrajectory.deteriorating { color: #d39a8f; }
+.assessmentTrajectory.mixed { color: #d6b777; }
+.assessmentTrajectory.stable { color: #9aa4b1; }
+.assessmentTrajectory.contextual { color: #8c96a3; }
+
+.assessmentCoverage {
+  margin-top: 10px;
+  color: #697480;
+  font-size: 11px;
+}
+
+.signalList {
+  margin-top: 24px;
+  padding-top: 14px;
+  border-top: 1px solid #1c2229;
+  display: grid;
+  gap: 10px;
+}
+
+.signalList div {
+  display: grid;
+  gap: 3px;
+}
+
+.signalList strong {
+  color: #8d98a5;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.signalList span {
+  color: #a9b2bc;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+@media (max-width: 900px) {
+  .assessmentGrid {
+    grid-template-columns: 1fr;
+  }
+}
