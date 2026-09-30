@@ -4,6 +4,7 @@ from pathlib import Path
 import duckdb
 
 from app.core.config import settings
+from app.db.analytics import initialize_analytics_schema
 
 
 def initialize_sqlite(path: Path) -> None:
@@ -20,7 +21,7 @@ def initialize_sqlite(path: Path) -> None:
         con.execute(
             """
             INSERT OR REPLACE INTO app_metadata(key, value)
-            VALUES ('schema_version', 'phase0')
+            VALUES ('schema_version', 'phase1')
             """
         )
         con.commit()
@@ -42,7 +43,7 @@ def initialize_duckdb(path: Path) -> None:
         con.execute(
             """
             INSERT OR REPLACE INTO analytics_metadata
-            VALUES ('schema_version', 'phase0')
+            VALUES ('schema_version', 'phase1')
             """
         )
     finally:
@@ -52,6 +53,7 @@ def initialize_duckdb(path: Path) -> None:
 def initialize_datastores() -> None:
     initialize_sqlite(settings.sqlite_path)
     initialize_duckdb(settings.duckdb_path)
+    initialize_analytics_schema()
 
 
 def datastore_status() -> dict[str, bool]:
@@ -72,10 +74,17 @@ def datastore_status() -> dict[str, bool]:
     try:
         con = duckdb.connect(str(settings.duckdb_path), read_only=True)
         try:
-            value = con.execute(
+            metadata_ok = con.execute(
                 "SELECT value FROM analytics_metadata WHERE key='schema_version'"
             ).fetchone()
-            result["duckdb"] = value is not None
+            schema_ok = con.execute(
+                """
+                SELECT COUNT(*)
+                FROM information_schema.tables
+                WHERE table_name IN ('countries', 'sources', 'indicators', 'observations')
+                """
+            ).fetchone()[0]
+            result["duckdb"] = metadata_ok is not None and schema_ok == 4
         finally:
             con.close()
     except Exception:
