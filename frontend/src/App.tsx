@@ -104,16 +104,18 @@ const dimensionOrder = [
   'prosperity',
   'productive_capacity',
   'demography',
+  'fiscal',
 ]
 
 const dimensionLabels: Record<string, string> = {
   prosperity: 'Prosperity',
   productive_capacity: 'Productive capacity',
   demography: 'Demography',
+  fiscal: 'Fiscal sustainability',
 }
 
 function formatValue(value: number, unit: string) {
-  if (unit === 'percent') return `${value.toFixed(1)}%`
+  if (unit === 'percent' || unit === 'percent_gdp') return `${value.toFixed(1)}%`
   if (unit === 'persons') return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)
   if (unit === 'births_per_woman') return value.toFixed(2)
   if (unit === 'constant_2015_usd_per_person') {
