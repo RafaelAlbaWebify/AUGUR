@@ -14,15 +14,15 @@ if (-not (Test-Path (Join-Path $Frontend "node_modules"))) {
     throw "Frontend dependencies not found. Run setup-phase0.ps1 first."
 }
 
-Write-Host "Starting AUGUR backend..."
+Write-Host "Starting AUGUR backend on 8020..."
 $BackendProcess = Start-Process `
     -FilePath $Python `
-    -ArgumentList "-m","uvicorn","app.main:app","--host","127.0.0.1","--port","8000" `
+    -ArgumentList "-m","uvicorn","app.main:app","--host","127.0.0.1","--port","8020" `
     -WorkingDirectory $Backend `
     -PassThru
 $BackendProcess.Id | Set-Content (Join-Path $RunDir "backend.pid")
 
-Write-Host "Starting AUGUR frontend..."
+Write-Host "Starting AUGUR frontend on 5190..."
 $FrontendProcess = Start-Process `
     -FilePath "npm.cmd" `
     -ArgumentList "run","dev" `
@@ -34,9 +34,9 @@ Start-Sleep -Seconds 2
 
 Write-Host ""
 Write-Host "AUGUR running."
-Write-Host "Frontend: http://127.0.0.1:5173"
-Write-Host "Backend:  http://127.0.0.1:8000"
-Write-Host "API docs: http://127.0.0.1:8000/docs"
+Write-Host "Frontend: http://127.0.0.1:5190"
+Write-Host "Backend:  http://127.0.0.1:8020"
+Write-Host "API docs: http://127.0.0.1:8020/docs"
 Write-Host ""
 
-Start-Process "http://127.0.0.1:5173"
+Start-Process "http://127.0.0.1:5190"
