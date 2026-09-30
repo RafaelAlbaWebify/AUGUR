@@ -33,7 +33,9 @@ CREATE TABLE IF NOT EXISTS indicators (
     name VARCHAR NOT NULL,
     dimension VARCHAR NOT NULL,
     unit VARCHAR,
-    higher_is_better BOOLEAN
+    interpretation_policy VARCHAR,
+    target_min DOUBLE,
+    target_max DOUBLE
 );
 
 CREATE TABLE IF NOT EXISTS observations (
@@ -90,16 +92,37 @@ def initialize_analytics_schema() -> None:
                 ],
             )
 
+        existing_columns = {
+            row[1]
+            for row in con.execute("PRAGMA table_info('indicators')").fetchall()
+        }
+
+        if "interpretation_policy" not in existing_columns:
+            con.execute("ALTER TABLE indicators ADD COLUMN interpretation_policy VARCHAR")
+        if "target_min" not in existing_columns:
+            con.execute("ALTER TABLE indicators ADD COLUMN target_min DOUBLE")
+        if "target_max" not in existing_columns:
+            con.execute("ALTER TABLE indicators ADD COLUMN target_max DOUBLE")
+
         for indicator in INDICATORS:
             con.execute(
-                "INSERT OR REPLACE INTO indicators VALUES (?, ?, ?, ?, ?, ?)",
+                """
+                INSERT OR REPLACE INTO indicators
+                (
+                    indicator_id, source_indicator, name, dimension, unit,
+                    interpretation_policy, target_min, target_max
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                """,
                 [
                     indicator["indicator_id"],
                     indicator["source_indicator"],
                     indicator["name"],
                     indicator["dimension"],
                     indicator["unit"],
-                    indicator["higher_is_better"],
+                    indicator["interpretation_policy"],
+                    indicator["target_min"],
+                    indicator["target_max"],
                 ],
             )
     finally:
@@ -207,7 +230,8 @@ def indicator_registry() -> list[dict]:
     try:
         result = con.execute(
             """
-            SELECT indicator_id, source_indicator, name, dimension, unit, higher_is_better
+            SELECT indicator_id, source_indicator, name, dimension, unit,
+                   interpretation_policy, target_min, target_max
             FROM indicators
             ORDER BY dimension, indicator_id
             """
