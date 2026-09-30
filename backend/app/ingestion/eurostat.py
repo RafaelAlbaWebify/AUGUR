@@ -50,6 +50,39 @@ EUROSTAT_SERIES = [
         },
         "unit": "percent",
     },
+    {
+        "indicator_id": "employment_rate_20_64",
+        "dataset_id": "lfsi_emp_a",
+        "filters": {
+            "geo": "ES",
+            "indic_em": "EMP_LFS",
+            "sex": "T",
+            "age": "Y20-64",
+            "unit": "PC_POP",
+        },
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "inflation_hicp",
+        "dataset_id": "prc_hicp_ainr",
+        "filters": {
+            "geo": "ES",
+            "coicop18": "TOTAL",
+            "unit": "RCH_A_AVG",
+        },
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "public_debt_gdp",
+        "dataset_id": "gov_10dd_edpt1",
+        "filters": {
+            "geo": "ES",
+            "sector": "S13",
+            "unit": "PC_GDP",
+            "na_item": "GD",
+        },
+        "unit": "percent_gdp",
+    },
 ]
 
 
