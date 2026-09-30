@@ -1,3 +1,4 @@
+import time
 from datetime import datetime, timezone
 
 import httpx
@@ -11,8 +12,19 @@ DATASET_ID = "WDI"
 
 
 class WorldBankAdapter:
-    def __init__(self, client: httpx.Client | None = None):
-        self.client = client or httpx.Client(timeout=30.0, follow_redirects=True)
+    def __init__(
+        self,
+        client: httpx.Client | None = None,
+        timeout_seconds: float = 90.0,
+        max_retries: int = 3,
+    ):
+        self.timeout_seconds = timeout_seconds
+        self.max_retries = max_retries
+        self.client = client or httpx.Client(
+            timeout=httpx.Timeout(timeout_seconds),
+            follow_redirects=True,
+            headers={"User-Agent": "AUGUR/0.1"},
+        )
         self._owns_client = client is None
 
     def close(self) -> None:
@@ -26,23 +38,46 @@ class WorldBankAdapter:
         start_year: int = 2000,
         end_year: int = 2026,
     ) -> tuple[dict, list[dict]]:
-        response = self.client.get(
-            f"{BASE_URL}/country/{country_iso3}/indicator/{source_indicator}",
-            params={
-                "format": "json",
-                "date": f"{start_year}:{end_year}",
-                "per_page": 100,
-            },
-        )
-        response.raise_for_status()
-        payload = response.json()
+        url = f"{BASE_URL}/country/{country_iso3}/indicator/{source_indicator}"
+        params = {
+            "format": "json",
+            "date": f"{start_year}:{end_year}",
+            "per_page": 100,
+        }
 
-        if not isinstance(payload, list) or len(payload) < 2:
-            raise ValueError(f"Unexpected World Bank response for {source_indicator}")
+        last_error: Exception | None = None
 
-        metadata = payload[0] or {}
-        observations = payload[1] or []
-        return metadata, observations
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                response = self.client.get(url, params=params)
+                response.raise_for_status()
+                payload = response.json()
+
+                if not isinstance(payload, list) or len(payload) < 2:
+                    raise ValueError(
+                        f"Unexpected World Bank response for {source_indicator}"
+                    )
+
+                metadata = payload[0] or {}
+                observations = payload[1] or []
+                return metadata, observations
+
+            except (httpx.TimeoutException, httpx.TransportError, httpx.HTTPStatusError) as exc:
+                last_error = exc
+
+                if attempt >= self.max_retries:
+                    break
+
+                delay_seconds = 2 ** (attempt - 1)
+                print(
+                    f"   retry {attempt}/{self.max_retries - 1} "
+                    f"after {type(exc).__name__} "
+                    f"(waiting {delay_seconds}s)"
+                )
+                time.sleep(delay_seconds)
+
+        assert last_error is not None
+        raise last_error
 
     def normalize(
         self,
@@ -91,34 +126,58 @@ class WorldBankAdapter:
     ) -> dict:
         total_rows = 0
         details = []
+        failures = []
 
-        for indicator in INDICATORS:
-            metadata, observations = self.fetch_indicator(
-                country_iso3,
-                indicator["source_indicator"],
-                start_year,
-                end_year,
+        for index, indicator in enumerate(INDICATORS, start=1):
+            print(
+                f"[{index}/{len(INDICATORS)}] "
+                f"{indicator['indicator_id']} "
+                f"({indicator['source_indicator']})"
             )
-            rows = self.normalize(
-                country_iso3,
-                indicator,
-                metadata,
-                observations,
-            )
-            inserted = upsert_observations(rows)
-            total_rows += inserted
-            details.append(
-                {
-                    "indicator_id": indicator["indicator_id"],
-                    "source_indicator": indicator["source_indicator"],
-                    "rows": inserted,
-                    "source_updated_at": metadata.get("lastupdated"),
-                }
-            )
+
+            try:
+                metadata, observations = self.fetch_indicator(
+                    country_iso3,
+                    indicator["source_indicator"],
+                    start_year,
+                    end_year,
+                )
+                rows = self.normalize(
+                    country_iso3,
+                    indicator,
+                    metadata,
+                    observations,
+                )
+                inserted = upsert_observations(rows)
+                total_rows += inserted
+                details.append(
+                    {
+                        "indicator_id": indicator["indicator_id"],
+                        "source_indicator": indicator["source_indicator"],
+                        "rows": inserted,
+                        "source_updated_at": metadata.get("lastupdated"),
+                    }
+                )
+                print(f"   ok: {inserted} rows")
+
+            except Exception as exc:
+                failures.append(
+                    {
+                        "indicator_id": indicator["indicator_id"],
+                        "source_indicator": indicator["source_indicator"],
+                        "error_type": type(exc).__name__,
+                        "error": str(exc),
+                    }
+                )
+                print(
+                    f"   failed: {type(exc).__name__}: {exc}"
+                )
 
         return {
             "country_iso3": country_iso3.upper(),
             "source": SOURCE_ID,
             "rows": total_rows,
             "indicators": details,
+            "failures": failures,
+            "complete": len(failures) == 0,
         }
