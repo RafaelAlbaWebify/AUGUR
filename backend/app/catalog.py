@@ -14,11 +14,18 @@ COUNTRIES = [
 
 SOURCES = [
     {
+        "source_id": "EUROSTAT",
+        "name": "Eurostat",
+        "organisation": "European Commission / Eurostat",
+        "base_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0",
+        "priority": 1,
+    },
+    {
         "source_id": "WORLD_BANK",
         "name": "World Bank",
         "organisation": "World Bank",
         "base_url": "https://api.worldbank.org/v2",
-        "priority": 1,
+        "priority": 2,
     },
 ]
 
