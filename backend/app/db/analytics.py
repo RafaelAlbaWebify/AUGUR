@@ -193,6 +193,7 @@ def latest_observations(country_iso3: str) -> list[dict]:
                 JOIN indicators i USING (indicator_id)
                 JOIN sources s USING (source_id)
                 WHERE o.country_iso3 = ?
+                  AND o.observation_type = 'observed'
             )
             SELECT
                 country_iso3, indicator_id, name, dimension, period,
@@ -263,7 +264,9 @@ def indicator_series(country_iso3: str, indicator_id: str) -> list[dict]:
                     ) AS rn
                 FROM observations o
                 JOIN sources s USING (source_id)
-                WHERE o.country_iso3 = ? AND o.indicator_id = ?
+                WHERE o.country_iso3 = ?
+                  AND o.indicator_id = ?
+                  AND o.observation_type = 'observed'
             )
             SELECT period, value, unit, source_id, retrieved_at, source_updated_at
             FROM ranked
@@ -306,6 +309,7 @@ def indicator_source_comparison(country_iso3: str) -> list[dict]:
                 JOIN indicators i USING (indicator_id)
                 JOIN sources s USING (source_id)
                 WHERE o.country_iso3 = ?
+                  AND o.observation_type = 'observed'
             )
             SELECT
                 country_iso3, indicator_id, name, dimension,
@@ -351,6 +355,7 @@ def source_quality_summary(country_iso3: str) -> list[dict]:
                 JOIN indicators i USING (indicator_id)
                 JOIN sources s USING (source_id)
                 WHERE o.country_iso3 = ?
+                  AND o.observation_type = 'observed'
             ),
             latest AS (
                 SELECT *
@@ -394,6 +399,38 @@ def source_quality_summary(country_iso3: str) -> list[dict]:
                 END AS disagreement_pct
             FROM paired
             ORDER BY indicator_id
+            """,
+            [country_iso3.upper()],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def official_forecasts(country_iso3: str) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT
+                o.country_iso3,
+                o.indicator_id,
+                i.name,
+                i.dimension,
+                o.period,
+                o.value,
+                o.unit,
+                o.source_id,
+                s.name AS source_name,
+                o.dataset_id,
+                o.source_updated_at
+            FROM observations o
+            JOIN indicators i USING (indicator_id)
+            JOIN sources s USING (source_id)
+            WHERE o.country_iso3 = ?
+              AND o.observation_type = 'official_forecast'
+            ORDER BY o.indicator_id, o.period
             """,
             [country_iso3.upper()],
         )
