@@ -14,6 +14,13 @@ COUNTRIES = [
 
 SOURCES = [
     {
+        "source_id": "OECD",
+        "name": "OECD",
+        "organisation": "Organisation for Economic Co-operation and Development",
+        "base_url": "https://sdmx.oecd.org/public/rest",
+        "priority": 1,
+    },
+    {
         "source_id": "EUROSTAT",
         "name": "Eurostat",
         "organisation": "European Commission / Eurostat",
@@ -30,6 +37,16 @@ SOURCES = [
 ]
 
 INDICATORS = [
+    {
+        "indicator_id": "gdp_per_hour_worked",
+        "source_indicator": "OECD:DSD_PDB@DF_PDB:GDPHRS",
+        "name": "GDP per hour worked (PPP, constant prices)",
+        "dimension": "productive_capacity",
+        "unit": "usd_ppp_per_hour",
+        "interpretation_policy": "higher",
+        "target_min": None,
+        "target_max": None,
+    },
     {
         "indicator_id": "population_total",
         "source_indicator": "SP.POP.TOTL",
