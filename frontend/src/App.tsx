@@ -98,6 +98,35 @@ type SourceQualityResponse = {
   indicators: SourceQualityItem[]
 }
 
+type TrajectoryIndicator = {
+  country_iso3: string
+  indicator_id: string
+  name: string
+  dimension: string
+  period: number
+  value: number
+  unit: string
+  source_id: string
+  source_name: string
+  dataset_id: string
+  observation_type: string
+  source_updated_at?: string | null
+}
+
+type TrajectoryHorizon = {
+  year: number
+  indicator_count: number
+  sources: string[]
+  indicators: TrajectoryIndicator[]
+}
+
+type TrajectoryResponse = {
+  country_iso3: string
+  method: string
+  horizons: TrajectoryHorizon[]
+  notes: string[]
+}
+
 const API_BASE = 'http://127.0.0.1:8020'
 
 const dimensionOrder = [
@@ -176,6 +205,7 @@ export default function App() {
   const [trends, setTrends] = useState<TrendsResponse | null>(null)
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null)
   const [sourceQuality, setSourceQuality] = useState<SourceQualityResponse | null>(null)
+  const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -200,13 +230,18 @@ export default function App() {
         if (!response.ok) throw new Error(`Source quality HTTP ${response.status}`)
         return response.json()
       }),
+      fetch(`${API_BASE}/api/countries/ESP/trajectory`).then(async (response) => {
+        if (!response.ok) throw new Error(`Trajectory HTTP ${response.status}`)
+        return response.json()
+      }),
     ])
-      .then(([healthData, snapshotData, trendsData, assessmentData, sourceQualityData]) => {
+      .then(([healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData]) => {
         setHealth(healthData)
         setSnapshot(snapshotData)
         setTrends(trendsData)
         setAssessment(assessmentData)
         setSourceQuality(sourceQualityData)
+        setTrajectory(trajectoryData)
       })
       .catch((err) => setError(String(err)))
   }, [])
@@ -286,7 +321,42 @@ export default function App() {
         </div>
 
         <div className="assessmentGrid">
-          {dimensionOrder.map((dimension) => {
+          <section className="trajectorySection">
+        <div className="dimensionHeader">
+          <div>
+            <div className="label">OFFICIAL OUTLOOK</div>
+            <h3>2030 · 2035 · 2045</h3>
+          </div>
+          <span>official forecasts/projections · not an AUGUR prediction</span>
+        </div>
+
+        <div className="trajectoryGrid">
+          {(trajectory?.horizons ?? []).map((horizon) => (
+            <article className="trajectoryCard" key={horizon.year}>
+              <div className="trajectoryYear">{horizon.year}</div>
+              <div className="trajectorySources">
+                {horizon.sources.length ? horizon.sources.join(' · ') : 'No official coverage'}
+              </div>
+
+              <div className="trajectoryIndicators">
+                {horizon.indicators.length === 0 && (
+                  <div className="trajectoryEmpty">No official forecast loaded for this horizon.</div>
+                )}
+
+                {horizon.indicators.map((item) => (
+                  <div className="trajectoryRow" key={`${horizon.year}-${item.indicator_id}-${item.source_id}`}>
+                    <span>{item.name}</span>
+                    <strong>{formatValue(item.value, item.unit)}</strong>
+                    <small>{item.source_name}</small>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {dimensionOrder.map((dimension) => {
             const item = assessment?.dimensions?.[dimension]
             if (!item) return null
 
