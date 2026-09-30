@@ -4,6 +4,7 @@ from app.core.config import settings
 from app.db.bootstrap import datastore_status
 from app.services.country import country_snapshot, list_countries
 from app.services.trends import country_trends
+from app.services.assessment import country_assessment
 
 router = APIRouter()
 
@@ -49,3 +50,14 @@ def trends(country_iso3: str):
         raise HTTPException(status_code=404, detail="Country is not registered")
 
     return country_trends(country_iso3)
+
+
+@router.get("/countries/{country_iso3}/assessment")
+def assessment(country_iso3: str):
+    country_iso3 = country_iso3.upper()
+    registry = {country["iso3"] for country in list_countries()}
+
+    if country_iso3 not in registry:
+        raise HTTPException(status_code=404, detail="Country is not registered")
+
+    return country_assessment(country_iso3)
