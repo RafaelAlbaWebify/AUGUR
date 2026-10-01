@@ -68,12 +68,15 @@ export default function ComparePanel({
         <span>{compact ? 'select countries' : 'aligned indicators · no ranking'}</span>
       </div>
 
-      <div className="compareSelectors" aria-label="Comparison countries">
+      <div
+        className="compareSelectors"
+        aria-label={compact ? 'Preview comparison countries' : 'Comparison countries'}
+      >
         {selected.map((iso3, index) => (
           <label key={index}>
             <span>{index + 1}</span>
             <select
-              aria-label={`Compare country ${index + 1}`}
+              aria-label={`${compact ? 'Preview compare' : 'Compare'} country ${index + 1}`}
               value={iso3}
               onChange={(event) => onChange(index, event.target.value)}
             >
