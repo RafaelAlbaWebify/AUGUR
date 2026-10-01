@@ -208,6 +208,17 @@ const dimensionOrder = [
   'strategic_resilience',
 ]
 
+const overviewKpiIds = [
+  'real_gdp_per_capita',
+  'unemployment_rate',
+  'inflation_hicp',
+  'employment_rate_20_64',
+  'housing_cost_overburden_rate',
+  'public_debt_gdp',
+  'fertility_rate',
+  'energy_import_dependency',
+]
+
 const dimensionLabels: Record<string, string> = {
   prosperity: 'Prosperity',
   productive_capacity: 'Productive capacity',
@@ -436,6 +447,16 @@ export default function App() {
 
   const selectedCountryMeta = countries.find((country) => country.iso3 === selectedCountry)
 
+  const overviewKpis = useMemo(() => {
+    const byId = new Map(
+      (snapshot?.indicators ?? []).map((item) => [item.indicator_id, item]),
+    )
+
+    return overviewKpiIds
+      .map((indicatorId) => byId.get(indicatorId))
+      .filter((item): item is Indicator => Boolean(item))
+  }, [snapshot])
+
   const grouped = useMemo(() => {
     const groups: Record<string, Indicator[]> = {}
     const trendById = new Map((trends?.indicators ?? []).map((item) => [item.indicator_id, item]))
@@ -540,6 +561,26 @@ export default function App() {
             selectedCountry={selectedCountry}
             onSelectCountry={setSelectedCountry}
           />
+
+          <section className="overviewKpiStrip" aria-label="Key indicators">
+            {overviewKpis.map((item) => {
+              const trendItem = trends?.indicators.find(
+                (trend) => trend.indicator_id === item.indicator_id,
+              )
+
+              return (
+                <article key={item.indicator_id}>
+                  <span>{item.name}</span>
+                  <strong>{formatValue(item.value, item.unit)}</strong>
+                  <small>
+                    {trendItem?.trend
+                      ? trendLabel(trendItem.trend)
+                      : item.period}
+                  </small>
+                </article>
+              )
+            })}
+          </section>
 
           <section className="assessmentSection overviewAssessment">
             <div className="dimensionHeader">
