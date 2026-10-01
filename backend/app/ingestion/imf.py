@@ -95,15 +95,15 @@ class IMFAdapter:
 
         raise RuntimeError("IMF request failed without an exception")
 
-    def normalize(self, config: dict, payload: dict) -> list[dict]:
+    def normalize(self, country_iso3: str, config: dict, payload: dict) -> list[dict]:
         source_indicator = config["source_indicator"]
         values = payload.get("values", {})
         indicator_values = values.get(source_indicator, {})
-        country_values = indicator_values.get("ESP", {})
+        country_values = indicator_values.get(country_iso3.upper(), {})
 
         if not isinstance(country_values, dict):
             raise ValueError(
-                f"IMF response for {source_indicator} has no ESP series"
+                f"IMF response for {source_indicator} has no {country_iso3.upper()} series"
             )
 
         retrieved_at = datetime.now(timezone.utc)
@@ -117,7 +117,7 @@ class IMFAdapter:
 
             rows.append(
                 {
-                    "country_iso3": "ESP",
+                    "country_iso3": country_iso3.upper(),
                     "indicator_id": config["indicator_id"],
                     "period": year,
                     "value": float(raw_value),
@@ -138,12 +138,12 @@ class IMFAdapter:
 
         if not rows:
             raise ValueError(
-                f"IMF response for {source_indicator} contained no usable ESP observations"
+                f"IMF response for {source_indicator} contained no usable {country_iso3.upper()} observations"
             )
 
         return rows
 
-    def sync_spain(self) -> dict:
+    def sync_country(self, country_iso3: str) -> dict:
         total_rows = 0
         details = []
         failures = []
@@ -157,7 +157,7 @@ class IMFAdapter:
 
             try:
                 payload = self.fetch_indicator(config["source_indicator"])
-                rows = self.normalize(config, payload)
+                rows = self.normalize(country_iso3, config, payload)
                 inserted = upsert_observations(rows)
                 total_rows += inserted
 
@@ -194,7 +194,7 @@ class IMFAdapter:
                 print(f"   failed: {type(exc).__name__}: {exc}")
 
         return {
-            "country_iso3": "ESP",
+            "country_iso3": country_iso3.upper(),
             "source": SOURCE_ID,
             "vintage": "April 2026",
             "rows": total_rows,
