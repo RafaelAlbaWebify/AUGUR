@@ -15,6 +15,7 @@ from app.services.assessment import country_assessment
 from app.services.trajectory import country_future_trajectory
 from app.services.scenarios import country_scenarios
 from app.services.compare import country_comparison
+from app.services.profile_readiness import profile_readiness
 
 router = APIRouter()
 
@@ -187,3 +188,9 @@ def profile_get():
 @router.put("/profile", response_model=PersonalProfileResponse)
 def profile_put(profile: PersonalProfile):
     return save_profile(profile)
+
+
+
+@router.get("/profile/readiness")
+def profile_readiness_get():
+    return profile_readiness(get_profile())
