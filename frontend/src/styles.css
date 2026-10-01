@@ -2080,3 +2080,373 @@ footer {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
+
+
+/* Approved mockup composition */
+.shell {
+  width: min(1880px, calc(100% - 28px));
+  padding: 10px 0 14px;
+}
+
+.dashboardTopbar {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 230px 210px minmax(320px, auto) 1fr;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  border: 1px solid #242a32;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.012);
+}
+
+.brandCompact {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.brandMark {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}
+
+.brandSub {
+  color: #68737f;
+  font-size: 9px;
+  line-height: 1.25;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.topbarCountry {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 8px;
+}
+
+.topbarCountry > span {
+  color: #68737f;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.countrySelect.compact {
+  width: 100%;
+  padding: 8px 28px 8px 9px;
+  font-size: 12px;
+  border-radius: 8px;
+}
+
+.topbarNav {
+  position: static;
+  margin: 0;
+  width: max-content;
+  padding: 4px;
+  border-radius: 9px;
+}
+
+.topbarNav button {
+  padding: 7px 12px;
+  font-size: 11px;
+}
+
+.topbarMeta {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.topbarMeta > div:not(.status) {
+  min-width: 70px;
+  padding: 7px 9px;
+  border: 1px solid #242a32;
+  border-radius: 9px;
+}
+
+.topbarMeta span {
+  display: block;
+  color: #68737f;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.topbarMeta strong {
+  display: block;
+  margin-top: 2px;
+  color: #e4e9ef;
+  font-size: 14px;
+}
+
+.status.compact {
+  margin: 0;
+  padding: 7px 9px;
+  font-size: 10px;
+}
+
+.overviewDashboard {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  grid-template-areas:
+    "map map map map map map map fit fit fit fit fit"
+    "kpi kpi kpi kpi kpi kpi kpi kpi kpi kpi kpi kpi"
+    "dim dim dim dim dim dim dim dim dim util util util";
+  gap: 10px 12px;
+  align-items: stretch;
+}
+
+.overviewMapArea {
+  grid-area: map;
+  min-width: 0;
+}
+
+.overviewFitArea {
+  grid-area: fit;
+  min-width: 0;
+}
+
+.overviewKpiStrip {
+  grid-area: kpi;
+  margin-top: 0;
+}
+
+.overviewDimensions {
+  grid-area: dim;
+  min-width: 0;
+}
+
+.overviewUtilityRail {
+  grid-area: util;
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 10px;
+}
+
+.overviewMapArea .worldMapSection {
+  padding-top: 0;
+}
+
+.overviewMapArea .dimensionHeader {
+  margin-bottom: 8px;
+}
+
+.overviewMapArea .dimensionHeader h3 {
+  font-size: 17px;
+}
+
+.overviewMapArea .worldMapFrame {
+  min-height: 260px;
+  height: 260px;
+}
+
+.overviewMapArea .worldMapSvg {
+  height: 260px;
+}
+
+.overviewFitArea .fitSnapshot {
+  height: 100%;
+  min-height: 302px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+}
+
+.overviewFitArea .fitSnapshotGrid {
+  margin-top: 14px;
+  flex: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: 1fr;
+  gap: 9px;
+}
+
+.overviewFitArea .fitSnapshotGrid > div {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.overviewFitArea .fitSnapshotGrid > div:last-child {
+  grid-column: 1 / -1;
+}
+
+.overviewFitArea .fitSnapshotGrid span {
+  font-size: 9px;
+}
+
+.overviewFitArea .fitSnapshotGrid strong {
+  margin-top: 5px;
+  font-size: 13px;
+}
+
+.overviewKpiStrip {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.overviewKpiStrip article {
+  padding: 10px 11px;
+}
+
+.overviewKpiStrip span {
+  font-size: 10px;
+}
+
+.overviewKpiStrip strong {
+  font-size: 17px;
+}
+
+.overviewKpiStrip small {
+  font-size: 9px;
+}
+
+.overviewDimensions .compactHeader {
+  margin: 0 0 8px;
+  align-items: center;
+}
+
+.overviewDimensions .compactHeader h3 {
+  font-size: 18px;
+}
+
+.overviewDimensions .assessmentGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.overviewDimensions .assessmentCard {
+  min-height: 0;
+  padding: 11px 12px;
+}
+
+.overviewDimensions .assessmentTop {
+  font-size: 9px;
+}
+
+.overviewDimensions .assessmentTrajectory {
+  margin-top: 8px;
+  font-size: 19px;
+}
+
+.overviewDimensions .assessmentCoverage {
+  margin-top: 4px;
+  font-size: 9px;
+}
+
+.overviewDimensions .signalList {
+  margin-top: 8px;
+  padding-top: 7px;
+  gap: 5px;
+}
+
+.overviewDimensions .signalList strong {
+  font-size: 8px;
+}
+
+.overviewDimensions .signalList span {
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+.overviewUtilityRail .outlookPreview,
+.overviewUtilityRail .comparePanel {
+  height: auto;
+}
+
+.overviewUtilityRail .outlookPreview {
+  padding: 12px;
+}
+
+.overviewUtilityRail .comparePanel {
+  padding: 12px;
+}
+
+.overviewUtilityRail .comparePreviewRow > span,
+.overviewUtilityRail .comparePreviewRow small {
+  font-size: 9px;
+}
+
+.overviewUtilityRail .comparePreviewRow b {
+  font-size: 8px;
+}
+
+.overviewUtilityRail .compareSelectors select {
+  font-size: 10px;
+}
+
+.view-overview footer {
+  display: none;
+}
+
+@media (min-width: 1500px) and (min-height: 900px) {
+  body {
+    overflow: hidden;
+  }
+
+  .shell.view-overview:not(.detailsOpen) {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 1499px), (max-height: 899px) {
+  body {
+    overflow-y: auto;
+  }
+
+  .shell {
+    height: auto;
+    overflow: visible;
+  }
+
+  .overviewDashboard {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "map"
+      "fit"
+      "kpi"
+      "dim"
+      "util";
+  }
+
+  .overviewKpiStrip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .overviewDimensions .assessmentGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 800px) {
+  .dashboardTopbar {
+    grid-template-columns: 1fr;
+  }
+
+  .brandCompact {
+    justify-content: space-between;
+  }
+
+  .topbarMeta {
+    justify-self: stretch;
+  }
+
+  .topbarNav {
+    width: 100%;
+  }
+
+  .overviewKpiStrip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
