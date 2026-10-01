@@ -10,6 +10,7 @@ def test_new_eu_dimensions_have_exact_eurostat_series():
     assert housing["filters"]["incgrp"] == "TOTAL"
     assert housing["filters"]["age"] == "TOTAL"
     assert housing["filters"]["sex"] == "T"
+    assert "unit" not in housing["filters"]
 
     education = by_indicator["tertiary_education_25_34"]
     assert education["dataset_id"] == "sdg_04_20"
