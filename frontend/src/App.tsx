@@ -426,6 +426,8 @@ export default function App() {
         onSelectCountry={setSelectedCountry}
       />
 
+      <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
+
       <section className="assessmentSection">
         <div className="dimensionHeader">
           <div>
@@ -436,9 +438,7 @@ export default function App() {
         </div>
 
         <div className="assessmentGrid">
-          <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
-
-      {dimensionOrder.map((dimension) => {
+          {dimensionOrder.map((dimension) => {
             const item = assessment?.dimensions?.[dimension]
             if (!item) return null
 
