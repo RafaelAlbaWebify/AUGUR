@@ -574,3 +574,32 @@ footer {
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
+
+
+.countryTitleRow {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.countryTitleRow h2 {
+  margin-right: auto;
+}
+
+.countrySelect {
+  appearance: none;
+  border: 1px solid #2a313b;
+  border-radius: 10px;
+  background: #11161c;
+  color: #dce3ea;
+  padding: 10px 34px 10px 12px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.countrySelect:focus {
+  outline: 1px solid #596777;
+  outline-offset: 2px;
+}
