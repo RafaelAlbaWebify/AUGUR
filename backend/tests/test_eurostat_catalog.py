@@ -6,11 +6,11 @@ def test_new_eu_dimensions_have_exact_eurostat_series():
     by_indicator = {item["indicator_id"]: item for item in EUROSTAT_SERIES}
 
     housing = by_indicator["housing_cost_overburden_rate"]
-    assert housing["dataset_id"] == "ilc_lvho07a"
-    assert housing["filters"]["incgrp"] == "TOTAL"
+    assert housing["dataset_id"] == "tessi163"
+    assert housing["filters"]["unit"] == "PC"
+    assert housing["filters"]["rskpovth"] == "TOTAL"
     assert housing["filters"]["age"] == "TOTAL"
     assert housing["filters"]["sex"] == "T"
-    assert "unit" not in housing["filters"]
 
     education = by_indicator["tertiary_education_25_34"]
     assert education["dataset_id"] == "sdg_04_20"
