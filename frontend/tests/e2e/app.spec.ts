@@ -207,3 +207,17 @@ test('personal profile remains separate and can be saved locally', async ({ page
 
   await expect(profile.getByText('Saved locally')).toBeVisible()
 })
+
+
+test('map zoom controls change and reset the view', async ({ page }) => {
+  const map = page.getByTestId('world-map')
+  await expect(map).toBeVisible()
+
+  const initialViewBox = await map.getAttribute('viewBox')
+
+  await page.getByRole('button', { name: 'Zoom in' }).click()
+  await expect.poll(async () => map.getAttribute('viewBox')).not.toBe(initialViewBox)
+
+  await page.getByRole('button', { name: 'Reset map' }).click()
+  await expect(map).toHaveAttribute('viewBox', initialViewBox ?? '0 0 1000 500')
+})
