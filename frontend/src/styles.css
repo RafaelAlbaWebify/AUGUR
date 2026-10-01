@@ -2987,3 +2987,167 @@ body {
     max-height: calc(100vh - 92px);
   }
 }
+
+
+/* Final mockup composition corrections */
+.overviewDashboard {
+  grid-template-areas:
+    "map map map map map map fit fit fit fit fit fit"
+    "dim dim dim dim dim dim dim dim dim util util util";
+  grid-template-rows: 338px minmax(0, 1fr);
+  gap: 12px;
+}
+
+.overviewMapArea,
+.overviewFitArea {
+  min-height: 0;
+}
+
+.overviewMapArea .worldMapSection,
+.overviewFitArea .fitSnapshot {
+  height: 100%;
+}
+
+.overviewMapArea .worldMapFrame {
+  min-height: 292px;
+  height: calc(100% - 42px);
+}
+
+.overviewMapArea .worldMapSvg {
+  height: 100%;
+}
+
+.overviewFitArea .fitSnapshot {
+  min-height: 0;
+}
+
+.overviewDimensions {
+  min-height: 0;
+}
+
+.overviewDimensions .compactHeader {
+  min-height: 48px;
+}
+
+.dimensionHeaderActions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.dimensionHeaderActions .overallSignalBalance {
+  min-width: 330px;
+  padding: 7px 9px;
+}
+
+.dimensionHeaderActions .overallSignalBalance > div {
+  gap: 10px;
+}
+
+.dimensionHeaderActions .overallSignalBalance span {
+  font-size: 7px;
+}
+
+.dimensionHeaderActions .overallSignalBalance strong {
+  padding: 4px 7px;
+  font-size: 10px;
+}
+
+.dimensionHeaderActions .overallSignalBalance p {
+  margin-top: 4px;
+  font-size: 8px;
+}
+
+.mockDimensionGrid {
+  align-content: start;
+}
+
+.overviewUtilityRail {
+  grid-template-rows: auto 1fr;
+  align-content: start;
+}
+
+.scenarioPreview {
+  margin-top: 10px;
+  display: grid;
+  gap: 8px;
+}
+
+.scenarioPreviewName {
+  display: block;
+  max-width: 100%;
+  color: #879baa;
+  font-size: 9px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scenarioPreviewRow {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) 58px;
+  align-items: center;
+  gap: 7px;
+}
+
+.scenarioPreviewRow > span {
+  color: #9aacba;
+  font-size: 9px;
+}
+
+.scenarioPreviewRow > strong {
+  color: #dfe7ed;
+  font-size: 9px;
+  text-align: right;
+}
+
+.scenarioPreviewRow > div {
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #172a37;
+}
+
+.scenarioPreviewRow i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+}
+
+.scenarioPreviewRow.optimistic i {
+  background: linear-gradient(90deg, #35b76f, #65dc99);
+}
+
+.scenarioPreviewRow.baseline i {
+  background: linear-gradient(90deg, #4d91c7, #74b9ee);
+}
+
+.scenarioPreviewRow.stress i {
+  background: linear-gradient(90deg, #b46e35, #f0ac57);
+}
+
+.overviewUtilityRail .comparePanel {
+  min-height: 0;
+}
+
+@media (min-width: 1500px) and (min-height: 900px) {
+  .overviewDimensions .assessmentGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .mockDimensionCard {
+    min-height: 136px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .dimensionHeaderActions {
+    align-items: flex-end;
+    flex-direction: column;
+  }
+
+  .dimensionHeaderActions .overallSignalBalance {
+    min-width: 0;
+    width: 100%;
+  }
+}
