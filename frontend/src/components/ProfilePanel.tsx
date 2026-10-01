@@ -72,6 +72,23 @@ type LanguageFitResponse = {
   notes: string[]
 }
 
+type CareerFitResponse = {
+  target_country_iso3: string
+  status: string
+  occupation: {
+    status: string
+    occupation_group: string | null
+    matched_terms: string[]
+  }
+  market_signal: string | null
+  rule_version: string
+  source: null | {
+    label: string
+    url: string
+  }
+  notes: string[]
+}
+
 type FinancialFitResponse = {
   target_country_iso3: string
   status: string
@@ -160,6 +177,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
   const [legalFit, setLegalFit] = useState<LegalFitResponse | null>(null)
   const [languageFit, setLanguageFit] = useState<LanguageFitResponse | null>(null)
+  const [careerFit, setCareerFit] = useState<CareerFitResponse | null>(null)
   const [ttv, setTtv] = useState<TTVResponse | null>(null)
   const fitRequestIdRef = useRef(0)
 
@@ -167,9 +185,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     const requestId = ++fitRequestIdRef.current
 
     try {
-      const [legalResponse, languageResponse, financialResponse, ttvResponse] = await Promise.all([
+      const [legalResponse, languageResponse, careerResponse, financialResponse, ttvResponse] = await Promise.all([
         fetch(`${apiBase}/api/countries/${targetCountry}/legal-fit`),
         fetch(`${apiBase}/api/countries/${targetCountry}/language-fit`),
+        fetch(`${apiBase}/api/countries/${targetCountry}/career-fit`),
         fetch(`${apiBase}/api/countries/${targetCountry}/financial-fit`),
         fetch(`${apiBase}/api/countries/${targetCountry}/ttv`),
       ])
@@ -177,6 +196,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       if (
         !legalResponse.ok ||
         !languageResponse.ok ||
+        !careerResponse.ok ||
         !financialResponse.ok ||
         !ttvResponse.ok ||
         requestId !== fitRequestIdRef.current
@@ -184,9 +204,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         return
       }
 
-      const [legalData, languageData, financialData, ttvData] = await Promise.all([
+      const [legalData, languageData, careerData, financialData, ttvData] = await Promise.all([
         legalResponse.json(),
         languageResponse.json(),
+        careerResponse.json(),
         financialResponse.json(),
         ttvResponse.json(),
       ])
@@ -195,6 +216,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
       setLegalFit(legalData)
       setLanguageFit(languageData)
+      setCareerFit(careerData)
       setFinancialFit(financialData)
       setTtv(ttvData)
     } catch {
@@ -242,6 +264,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   useEffect(() => {
     setLegalFit(null)
     setLanguageFit(null)
+    setCareerFit(null)
     setFinancialFit(null)
     setTtv(null)
     void refreshTargetFits()
@@ -511,6 +534,42 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
           <p>
             B2 is an AUGUR employment heuristic, not a legal requirement. Occupation-specific language evidence is still pending.
+          </p>
+        </div>
+
+        <div className="financialFitCard">
+          <div className="profileReadinessHeader">
+            <strong>CareerFit · {targetCountry}</strong>
+            <span>{careerFit?.status?.replaceAll('_', ' ') ?? 'loading…'}</span>
+          </div>
+
+          {careerFit ? (
+            <div className="financialFitMetrics">
+              <div>
+                <span>Occupation group</span>
+                <strong>
+                  {careerFit.occupation.occupation_group
+                    ? careerFit.occupation.occupation_group.replaceAll('_', ' ')
+                    : 'Unmapped'}
+                </strong>
+              </div>
+              <div>
+                <span>EURES market signal</span>
+                <strong>{careerFit.market_signal?.replaceAll('_', ' ') ?? 'No signal'}</strong>
+              </div>
+              <div>
+                <span>Evidence source</span>
+                <strong>{careerFit.source?.label ?? '—'}</strong>
+              </div>
+            </div>
+          ) : (
+            <p className="financialFitMessage">
+              Loading career-fit evidence…
+            </p>
+          )}
+
+          <p>
+            Broad EURES shortage/surplus evidence only. It does not guarantee vacancies, salary, seniority match or employer demand.
           </p>
         </div>
 
