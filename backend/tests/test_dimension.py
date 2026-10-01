@@ -62,3 +62,26 @@ def test_within_target_counts_as_stable_signal():
 
     assert result["trajectory"] == "stable"
     assert result["directional_indicator_count"] == 1
+
+
+
+def test_single_directional_signal_is_limited_evidence():
+    result = summarize_dimension([
+        make_indicator("housing_cost_overburden_rate", "improving"),
+    ])
+
+    assert result["trajectory"] == "limited_evidence"
+    assert result["confidence"] == "low"
+    assert result["directional_indicator_count"] == 1
+    assert result["evidence_status"] == "limited"
+    assert result["evidence_note"]
+
+
+def test_two_directional_signals_can_define_broad_trajectory():
+    result = summarize_dimension([
+        make_indicator("a", "improving"),
+        make_indicator("b", "improving"),
+    ])
+
+    assert result["trajectory"] == "improving"
+    assert result["evidence_status"] == "sufficient"
