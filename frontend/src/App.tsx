@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import WorldMap from './components/WorldMap'
+import ProfilePanel from './components/ProfilePanel'
 
 type Country = {
   iso2: string
@@ -428,7 +429,9 @@ export default function App() {
         </div>
 
         <div className="assessmentGrid">
-          {dimensionOrder.map((dimension) => {
+          <ProfilePanel apiBase={API_BASE} />
+
+      {dimensionOrder.map((dimension) => {
             const item = assessment?.dimensions?.[dimension]
             if (!item) return null
 
