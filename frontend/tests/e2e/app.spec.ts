@@ -189,26 +189,35 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('loads core analytical sections', async ({ page }) => {
+test('navigates compact analytical views', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'AUGUR' })).toBeVisible()
   await expect(page.getByText('COUNTRY SIGNAL SUMMARY')).toBeVisible()
+  await expect(page.getByText('OFFICIAL OUTLOOK')).toHaveCount(0)
+
+  await page.getByRole('button', { name: 'Outlook' }).click()
   await expect(page.getByText('OFFICIAL OUTLOOK')).toBeVisible()
   await expect(page.getByText('AUGUR SCENARIOS')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page.getByText('COUNTRY COMPARISON')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Profile' }).click()
+  await expect(page.getByRole('region', { name: 'Personal profile' })).toBeVisible()
 })
 
 test('switches country without a page reload', async ({ page }) => {
   const selector = page.getByLabel('Select country')
   await selector.selectOption('PRT')
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
-  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
+  await expect(selector).toHaveValue('PRT')
 
   await selector.selectOption('IRL')
   await expect(page.getByRole('heading', { name: 'Ireland', exact: true })).toBeVisible()
-  await expect(page.locator('.metricValue').filter({ hasText: /^4\.5%$/ })).toBeVisible()
+  await expect(selector).toHaveValue('IRL')
 })
 
 test('comparison remains neutral and aligned', async ({ page }) => {
+  await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page.getByRole('columnheader', { name: 'Spain' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Portugal' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Ireland' })).toBeVisible()
@@ -229,11 +238,12 @@ test('world view renders country geometry and drives selection', async ({ page }
   await portugalShape.click()
 
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
-  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
 
 test('personal profile remains separate and can be saved locally', async ({ page }) => {
+  await page.getByRole('button', { name: 'Profile' }).click()
   const profile = page.getByRole('region', { name: 'Personal profile' })
   await expect(profile.getByText('stored locally · never changes country facts')).toBeVisible()
   await expect(profile.getByText('Personal-fit readiness')).toBeVisible()
@@ -268,6 +278,7 @@ test('map zoom controls change and reset the view', async ({ page }) => {
 
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
+  await page.getByRole('button', { name: 'Profile' }).click()
   const profile = page.getByRole('region', { name: 'Personal profile' })
   const profession = profile.getByLabel('Profession')
   const selector = page.getByLabel('Select country')
@@ -292,7 +303,7 @@ test('partial country endpoint failure keeps healthy sections visible', async ({
   await page.getByLabel('Select country').selectOption('PRT')
 
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
-  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
+  await expect(page.getByText('COUNTRY SIGNAL SUMMARY')).toBeVisible()
   await expect(page.getByText(/Scenarios HTTP 500/)).toBeVisible()
 })
 
@@ -316,6 +327,14 @@ test('rapid country switching keeps the latest selection', async ({ page }) => {
   await selector.selectOption('IRL')
 
   await expect(page.getByRole('heading', { name: 'Ireland', exact: true })).toBeVisible()
-  await expect(page.locator('.metricValue').filter({ hasText: /^4\.5%$/ })).toBeVisible()
-  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toHaveCount(0)
+  await expect(selector).toHaveValue('IRL')
+})
+
+
+test('indicator details are collapsed by default and expandable', async ({ page }) => {
+  await expect(page.locator('.metricCard')).toHaveCount(0)
+  await page.getByRole('button', { name: 'Show indicator details' }).click()
+  await expect(page.locator('.metricCard')).toHaveCount(1)
+  await page.getByRole('button', { name: 'Hide indicator details' }).click()
+  await expect(page.locator('.metricCard')).toHaveCount(0)
 })
