@@ -221,3 +221,16 @@ test('map zoom controls change and reset the view', async ({ page }) => {
   await page.getByRole('button', { name: 'Reset map' }).click()
   await expect(map).toHaveAttribute('viewBox', initialViewBox ?? '0 0 1000 500')
 })
+
+
+test('unsaved profile edits survive target-country switching', async ({ page }) => {
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  const profession = profile.getByLabel('Profession')
+  const selector = page.getByLabel('Select country')
+
+  await profession.fill('Unsaved draft role')
+  await selector.selectOption('PRT')
+
+  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
+  await expect(profession).toHaveValue('Unsaved draft role')
+})
