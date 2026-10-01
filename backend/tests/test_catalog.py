@@ -1,4 +1,4 @@
-from app.catalog import INDICATORS, SOURCES
+from app.catalog import COUNTRIES, INDICATORS, SOURCES, country_config, world_bank_indicators
 
 
 VALID_POLICIES = {
@@ -38,3 +38,22 @@ def test_eurostat_has_higher_priority_than_world_bank_for_eu_data():
     priority = {source["source_id"]: source["priority"] for source in SOURCES}
 
     assert priority["EUROSTAT"] < priority["WORLD_BANK"]
+
+
+
+def test_initial_multi_country_registry():
+    iso3 = {country["iso3"] for country in COUNTRIES}
+    assert {"ESP", "PRT", "IRL"}.issubset(iso3)
+
+
+def test_country_config_resolves_registered_country():
+    assert country_config("prt")["iso2"] == "PT"
+    assert country_config("IRL")["name"] == "Ireland"
+
+
+def test_world_bank_catalog_excludes_source_specific_mappings():
+    indicators = world_bank_indicators()
+    assert indicators
+    assert all(":" not in item["source_indicator"] for item in indicators)
+    assert "population_total" in {item["indicator_id"] for item in indicators}
+    assert "gdp_per_hour_worked" not in {item["indicator_id"] for item in indicators}
