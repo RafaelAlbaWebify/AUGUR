@@ -9,6 +9,7 @@ COUNTRIES = [
         "eu_member": True,
         "eurozone_member": True,
         "oecd_member": True,
+        "labour_market_languages": ["Spanish"],
     },
     {
         "iso2": "PT",
@@ -20,6 +21,7 @@ COUNTRIES = [
         "eu_member": True,
         "eurozone_member": True,
         "oecd_member": True,
+        "labour_market_languages": ["Portuguese"],
     },
     {
         "iso2": "IE",
@@ -31,6 +33,7 @@ COUNTRIES = [
         "eu_member": True,
         "eurozone_member": True,
         "oecd_member": True,
+        "labour_market_languages": ["English"],
     },
 ]
 
