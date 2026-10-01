@@ -15,15 +15,15 @@ ESCO_VERSION = "1.2.1"
 # It is deliberately marked as partial and must never unlock TTV by itself.
 SEED_OCCUPATIONS = [
     {
-        "concept_uri": "http://data.europa.eu/esco/occupation/ict-system-administrator",
+        "concept_uri": "urn:augur:esco-seed:ict-system-administrator",
         "preferred_label": "ICT system administrator",
-        "code": "2522",
+        "code": None,
         "isco_group": "2522",
     },
     {
-        "concept_uri": "http://data.europa.eu/esco/occupation/ict-network-engineer",
+        "concept_uri": "urn:augur:esco-seed:ict-network-engineer",
         "preferred_label": "ICT network engineer",
-        "code": "2523",
+        "code": None,
         "isco_group": "2523",
     },
 ]
@@ -56,22 +56,22 @@ SEED_SKILLS = [
 
 SEED_RELATIONS = [
     {
-        "occupation_uri": "http://data.europa.eu/esco/occupation/ict-system-administrator",
+        "occupation_uri": "urn:augur:esco-seed:ict-system-administrator",
         "skill_uri": "http://data.europa.eu/esco/skill/acf0a78c-f4e3-4bd9-a5cc-9cf4791b3b95",
         "relation_type": "essential",
     },
     {
-        "occupation_uri": "http://data.europa.eu/esco/occupation/ict-network-engineer",
+        "occupation_uri": "urn:augur:esco-seed:ict-network-engineer",
         "skill_uri": "http://data.europa.eu/esco/skill/acf0a78c-f4e3-4bd9-a5cc-9cf4791b3b95",
         "relation_type": "essential",
     },
     {
-        "occupation_uri": "http://data.europa.eu/esco/occupation/ict-system-administrator",
+        "occupation_uri": "urn:augur:esco-seed:ict-system-administrator",
         "skill_uri": "http://data.europa.eu/esco/skill/1e7ed56a-6d6b-422f-962e-38543d150755",
         "relation_type": "essential",
     },
     {
-        "occupation_uri": "http://data.europa.eu/esco/occupation/ict-system-administrator",
+        "occupation_uri": "urn:augur:esco-seed:ict-system-administrator",
         "skill_uri": "http://data.europa.eu/esco/skill/69cfc5ed-6569-4aca-a4cc-fd782ba51d9c",
         "relation_type": "optional",
     },
