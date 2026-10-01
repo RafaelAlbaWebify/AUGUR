@@ -459,6 +459,31 @@ export default function App() {
       .filter((item): item is Indicator => Boolean(item))
   }, [snapshot])
 
+  const outlookPreview = useMemo(() => {
+    const first = scenarios?.indicators?.[0]
+    if (!first) return null
+
+    const baseline = first.scenarios.baseline
+    const improvement = first.scenarios.improvement
+    const stress = first.scenarios.stress
+
+    const values = [improvement, baseline, stress]
+    const max = Math.max(...values.map((value) => Math.abs(value)), 1)
+
+    return {
+      name: first.name,
+      improvement,
+      baseline,
+      stress,
+      widths: {
+        improvement: Math.max(8, (Math.abs(improvement) / max) * 100),
+        baseline: Math.max(8, (Math.abs(baseline) / max) * 100),
+        stress: Math.max(8, (Math.abs(stress) / max) * 100),
+      },
+      unit: first.unit,
+    }
+  }, [scenarios])
+
   const grouped = useMemo(() => {
     const groups: Record<string, Indicator[]> = {}
     const trendById = new Map((trends?.indicators ?? []).map((item) => [item.indicator_id, item]))
@@ -558,39 +583,22 @@ export default function App() {
           <FitSnapshot apiBase={API_BASE} targetCountry={selectedCountry} />
         </section>
 
-        <section className="overviewKpiStrip" aria-label="Key indicators">
-          {overviewKpis.map((item) => {
-            const trendItem = trends?.indicators.find(
-              (trend) => trend.indicator_id === item.indicator_id,
-            )
-
-            return (
-              <article key={item.indicator_id}>
-                <span>{item.name}</span>
-                <strong>{formatValue(item.value, item.unit)}</strong>
-                <small>
-                  {trendItem?.trend
-                    ? trendLabel(trendItem.trend)
-                    : item.period}
-                </small>
-              </article>
-            )
-          })}
-        </section>
-
         <section className="overviewDimensions">
           <div className="dimensionHeader compactHeader">
             <div>
               <div className="label">KEY DIMENSIONS</div>
               <h3>{selectedCountryMeta?.name ?? selectedCountry} at a glance</h3>
             </div>
-            <button
-              type="button"
-              className="detailsToggle"
-              onClick={() => setDetailsExpanded((value) => !value)}
-            >
-              {detailsExpanded ? 'Hide indicators' : 'View all indicators'}
-            </button>
+            <div className="dimensionHeaderActions">
+              <OverallSignalBalance dimensions={assessment?.dimensions} />
+              <button
+                type="button"
+                className="detailsToggle"
+                onClick={() => setDetailsExpanded((value) => !value)}
+              >
+                {detailsExpanded ? 'Hide indicators' : 'View all indicators'}
+              </button>
+            </div>
           </div>
 
           <div className="assessmentGrid mockDimensionGrid">
@@ -610,8 +618,6 @@ export default function App() {
         </section>
 
         <aside className="overviewUtilityRail">
-          <OverallSignalBalance dimensions={assessment?.dimensions} />
-
           <section className="outlookPreview">
             <div className="comparePanelHeader">
               <div>
@@ -623,14 +629,35 @@ export default function App() {
               </button>
             </div>
 
-            <div className="outlookPreviewGrid">
-              {(trajectory?.horizons ?? []).map((horizon) => (
-                <div key={horizon.year}>
-                  <strong>{horizon.year}</strong>
-                  <span>{horizon.indicator_count} indicators</span>
+            {outlookPreview ? (
+              <div className="scenarioPreview">
+                <span className="scenarioPreviewName">{outlookPreview.name}</span>
+                <div className="scenarioPreviewRow optimistic">
+                  <span>Optimistic</span>
+                  <div><i style={{ width: `${outlookPreview.widths.improvement}%` }} /></div>
+                  <strong>{formatValue(outlookPreview.improvement, outlookPreview.unit)}</strong>
                 </div>
-              ))}
-            </div>
+                <div className="scenarioPreviewRow baseline">
+                  <span>Baseline</span>
+                  <div><i style={{ width: `${outlookPreview.widths.baseline}%` }} /></div>
+                  <strong>{formatValue(outlookPreview.baseline, outlookPreview.unit)}</strong>
+                </div>
+                <div className="scenarioPreviewRow stress">
+                  <span>Stress</span>
+                  <div><i style={{ width: `${outlookPreview.widths.stress}%` }} /></div>
+                  <strong>{formatValue(outlookPreview.stress, outlookPreview.unit)}</strong>
+                </div>
+              </div>
+            ) : (
+              <div className="outlookPreviewGrid">
+                {(trajectory?.horizons ?? []).map((horizon) => (
+                  <div key={horizon.year}>
+                    <strong>{horizon.year}</strong>
+                    <span>{horizon.indicator_count} indicators</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           <ComparePanel
