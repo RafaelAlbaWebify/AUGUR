@@ -374,9 +374,9 @@ test('map zoom survives view navigation', async ({ page }) => {
 test('comparison selectors swap countries without duplicates', async ({ page }) => {
   await page.getByRole('button', { name: 'Compare' }).click()
 
-  const first = page.getByLabel('Compare country 1')
-  const second = page.getByLabel('Compare country 2')
-  const third = page.getByLabel('Compare country 3')
+  const first = page.getByLabel('Compare country 1', { exact: true })
+  const second = page.getByLabel('Compare country 2', { exact: true })
+  const third = page.getByLabel('Compare country 3', { exact: true })
 
   await expect(first).toHaveValue('IRL')
   await expect(second).toHaveValue('ESP')
@@ -393,7 +393,7 @@ test('overview shows compact fit and compare previews', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
   await expect(page.getByText('Official horizons')).toBeVisible()
   await expect(page.getByText('Custom comparison')).toBeVisible()
-  await expect(page.getByLabel('Preview compare country 1')).toBeVisible()
+  await expect(page.getByLabel('Preview compare country 1', { exact: true })).toBeVisible()
 })
 
 test('1920x1080 overview fits without clipping or vertical scrolling', async ({ page }) => {
