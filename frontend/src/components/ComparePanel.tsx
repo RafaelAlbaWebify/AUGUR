@@ -91,30 +91,51 @@ export default function ComparePanel({
       </div>
 
       {compact ? (
-        <div className="comparePreviewRows">
+        <div className="compareBarPreview">
           {visibleIndicators.length === 0 && (
             <div className="comparePreviewEmpty">
               Comparison evidence loading…
             </div>
           )}
 
-          {visibleIndicators.map((item) => (
-            <div className="comparePreviewRow" key={item.indicator_id}>
-              <span>{item.name}</span>
-              <div>
-                {selected.map((iso3) => {
-                  const value = item.countries[iso3]
-                  const country = selectedMeta[selected.indexOf(iso3)]
-                  return (
-                    <small key={iso3}>
-                      <b>{country?.name ?? iso3}</b>
-                      {value ? formatValue(value.value, item.unit) : '—'}
-                    </small>
-                  )
-                })}
+          {visibleIndicators.slice(0, 1).map((item) => {
+            const numericValues = selected
+              .map((iso3) => item.countries[iso3]?.value)
+              .filter((value): value is number => typeof value === 'number')
+
+            const maxValue = numericValues.length ? Math.max(...numericValues) : 0
+
+            return (
+              <div key={item.indicator_id}>
+                <div className="compareMetricLabel">
+                  <span>{item.name}</span>
+                  <small>relative within selected set</small>
+                </div>
+
+                <div className="compareBarRows">
+                  {selected.map((iso3, index) => {
+                    const value = item.countries[iso3]
+                    const country = selectedMeta[index]
+                    const width = value && maxValue > 0
+                      ? Math.max(8, (value.value / maxValue) * 100)
+                      : 0
+
+                    return (
+                      <div className="compareBarRow" key={iso3}>
+                        <span>{country?.name ?? iso3}</span>
+                        <div className="compareBarTrack">
+                          <i style={{ width: `${width}%` }} />
+                        </div>
+                        <strong>
+                          {value ? formatValue(value.value, item.unit) : '—'}
+                        </strong>
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       ) : (
         <div className="comparisonTableWrap">
