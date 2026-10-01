@@ -27,7 +27,18 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path.endsWith('/financial-fit')) {
+    if (path.endsWith('/legal-fit')) {
+      body = {
+        target_country_iso3: country,
+        status: 'insufficient_profile',
+        framework: null,
+        work_permit_required: null,
+        short_stay: null,
+        long_stay: null,
+        rule_version: '2026-10-01',
+        notes: [],
+      }
+    } else if (path.endsWith('/financial-fit')) {
       body = {
         target_country_iso3: country,
         status: 'local_income_unknown',
@@ -164,6 +175,7 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await expect(profile.getByText('stored locally · never changes country facts')).toBeVisible()
   await expect(profile.getByText('Personal-fit readiness')).toBeVisible()
   await expect(profile.getByText('0/4 input sets ready')).toBeVisible()
+  await expect(profile.getByText('LegalFit · ESP')).toBeVisible()
   await expect(profile.getByText('FinancialFit · ESP')).toBeVisible()
 
   await profile.getByLabel('Profession').fill('Systems engineer')
