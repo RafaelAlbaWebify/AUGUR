@@ -529,97 +529,130 @@ export default function App() {
         ))}
       </nav>
 
-      <div hidden={activeView !== 'overview'}>
-        <WorldMap
-          countries={countries}
-          selectedCountry={selectedCountry}
-          onSelectCountry={setSelectedCountry}
-        />
+      <div className="overviewDashboard" hidden={activeView !== 'overview'}>
+        <div className="overviewMainColumn">
+          <WorldMap
+            countries={countries}
+            selectedCountry={selectedCountry}
+            onSelectCountry={setSelectedCountry}
+          />
+
+          <section className="assessmentSection overviewAssessment">
+            <div className="dimensionHeader">
+              <div>
+                <div className="label">COUNTRY SIGNAL SUMMARY</div>
+                <h3>Current trajectory by dimension</h3>
+              </div>
+              <span>transparent synthesis · no composite score</span>
+            </div>
+
+            <div className="assessmentGrid">
+              {dimensionOrder.map((dimension) => {
+                const item = assessment?.dimensions?.[dimension]
+                if (!item) return null
+
+                const improving = item.improving_signals.map((signal) => signal.name)
+                const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
+
+                return (
+                  <article className="assessmentCard" key={dimension}>
+                    <div className="assessmentTop">
+                      <span>{dimensionLabels[dimension] ?? dimension}</span>
+                      <span>{item.confidence} confidence</span>
+                    </div>
+
+                    <div className={`assessmentTrajectory ${item.trajectory}`}>
+                      {item.trajectory.replace('_', ' ')}
+                    </div>
+
+                    <div className="assessmentCoverage">
+                      {item.directional_indicator_count}/{item.indicator_count} directional
+                      {item.evidence_status === 'limited' && (
+                        <span className="assessmentEvidenceNote">
+                          limited evidence
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="signalList">
+                      {improving.length > 0 && (
+                        <div>
+                          <strong>Improving</strong>
+                          <span>{improving.slice(0, 2).join(' · ')}</span>
+                        </div>
+                      )}
+
+                      {deteriorating.length > 0 && (
+                        <div>
+                          <strong>Deteriorating</strong>
+                          <span>{deteriorating.slice(0, 2).join(' · ')}</span>
+                        </div>
+                      )}
+
+                      {improving.length === 0 && deteriorating.length === 0 && (
+                        <div>
+                          <strong>Interpretation</strong>
+                          <span>Context-dependent signals</span>
+                        </div>
+                      )}
+                    </div>
+                  </article>
+                )
+              })}
+            </div>
+          </section>
+
+          <div className="detailsToggleRow">
+            <button
+              type="button"
+              className="detailsToggle"
+              onClick={() => setDetailsExpanded((value) => !value)}
+            >
+              {detailsExpanded ? 'Hide indicator details' : 'Show indicator details'}
+            </button>
+            <span>{snapshot?.observation_count ?? 0} current indicators</span>
+          </div>
+        </div>
+
+        <aside className="overviewRail">
+          <FitSnapshot apiBase={API_BASE} targetCountry={selectedCountry} />
+
+          <section className="outlookPreview">
+            <div className="comparePanelHeader">
+              <div>
+                <div className="label">OUTLOOK</div>
+                <strong>Official horizons</strong>
+              </div>
+              <button type="button" onClick={() => setActiveView('outlook')}>
+                Open
+              </button>
+            </div>
+
+            <div className="outlookPreviewGrid">
+              {(trajectory?.horizons ?? []).map((horizon) => (
+                <div key={horizon.year}>
+                  <strong>{horizon.year}</strong>
+                  <span>{horizon.indicator_count} indicators</span>
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <ComparePanel
+            compact
+            countries={countries}
+            selected={compareCountries}
+            onChange={updateCompareCountry}
+            comparison={comparison}
+            formatValue={formatValue}
+            dimensionLabels={dimensionLabels}
+          />
+        </aside>
       </div>
 
       <div hidden={activeView !== 'profile'}>
         <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
       </div>
-
-      {activeView === 'overview' && (
-      <section className="assessmentSection">
-        <div className="dimensionHeader">
-          <div>
-            <div className="label">COUNTRY SIGNAL SUMMARY</div>
-            <h3>Current trajectory by dimension</h3>
-          </div>
-          <span>transparent synthesis · no composite score</span>
-        </div>
-
-        <div className="assessmentGrid">
-          {dimensionOrder.map((dimension) => {
-            const item = assessment?.dimensions?.[dimension]
-            if (!item) return null
-
-            const improving = item.improving_signals.map((signal) => signal.name)
-            const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
-
-            return (
-              <article className="assessmentCard" key={dimension}>
-                <div className="assessmentTop">
-                  <span>{dimensionLabels[dimension] ?? dimension}</span>
-                  <span>{item.confidence} confidence</span>
-                </div>
-
-                <div className={`assessmentTrajectory ${item.trajectory}`}>
-                  {item.trajectory.replace('_', ' ')}
-                </div>
-
-                <div className="assessmentCoverage">
-                  Directional coverage: {item.directional_indicator_count}/{item.indicator_count}
-                  {item.evidence_status === 'limited' && (
-                    <span className="assessmentEvidenceNote">
-                      Broad verdict withheld · only one directional signal
-                    </span>
-                  )}
-                </div>
-
-                <div className="signalList">
-                  {improving.length > 0 && (
-                    <div>
-                      <strong>Improving</strong>
-                      <span>{improving.join(' · ')}</span>
-                    </div>
-                  )}
-
-                  {deteriorating.length > 0 && (
-                    <div>
-                      <strong>Deteriorating</strong>
-                      <span>{deteriorating.join(' · ')}</span>
-                    </div>
-                  )}
-
-                  {improving.length === 0 && deteriorating.length === 0 && (
-                    <div>
-                      <strong>Interpretation</strong>
-                      <span>Context-dependent signals; no automatic positive/negative verdict.</span>
-                    </div>
-                  )}
-                </div>
-              </article>
-            )
-          })}
-        </div>
-      </section>
-      )}
-
-      {activeView === 'overview' && (
-        <div className="detailsToggleRow">
-          <button
-            type="button"
-            className="detailsToggle"
-            onClick={() => setDetailsExpanded((value) => !value)}
-          >
-            {detailsExpanded ? 'Hide indicator details' : 'Show indicator details'}
-          </button>
-          <span>{snapshot?.observation_count ?? 0} current indicators</span>
-        </div>
-      )}
 
       {activeView === 'outlook' && (
       <section className="trajectorySection">
