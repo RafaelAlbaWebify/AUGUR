@@ -85,3 +85,30 @@ def test_two_directional_signals_can_define_broad_trajectory():
 
     assert result["trajectory"] == "improving"
     assert result["evidence_status"] == "sufficient"
+
+
+
+def test_housing_mixed_when_burden_improves_but_market_pressure_worsens():
+    result = summarize_dimension([
+        make_indicator(
+            "housing_cost_overburden_rate",
+            "improving",
+            direction="decrease",
+        ),
+        make_indicator(
+            "real_house_price_index",
+            "deteriorating",
+            direction="increase",
+        ),
+        make_indicator(
+            "rent_price_index",
+            "deteriorating",
+            direction="increase",
+        ),
+    ])
+
+    assert result["trajectory"] == "mixed"
+    assert result["directional_indicator_count"] == 3
+    assert result["evidence_status"] == "sufficient"
+    assert len(result["improving_signals"]) == 1
+    assert len(result["deteriorating_signals"]) == 2
