@@ -49,3 +49,22 @@ def test_un_wpp_normalization_rejects_missing_spain_rows():
         adapter.close()
 
     assert raised
+
+
+
+def test_un_wpp_can_select_portugal():
+    csv_text = (
+        "ISO3_code,Variant,Time,TPopulation1July,TFR,MedianAgePop,LEx\n"
+        "ESP,Medium,2024,48797.875,1.18,45.5,84.1\n"
+        "PRT,Medium,2024,10500.000,1.40,46.0,82.5\n"
+    )
+
+    adapter = UNWPPAdapter(client=None)
+
+    try:
+        rows = adapter.normalize("PRT", csv_text)
+    finally:
+        adapter.close()
+
+    assert rows
+    assert {row["country_iso3"] for row in rows} == {"PRT"}
