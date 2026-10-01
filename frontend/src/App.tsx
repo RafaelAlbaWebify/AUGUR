@@ -481,44 +481,47 @@ export default function App() {
 
   return (
     <main className={`shell view-${activeView} ${detailsExpanded ? 'detailsOpen' : ''}`}>
-      <header>
-        <div>
-          <div className="eyebrow">COUNTRY TRAJECTORY & PERSONAL FIT</div>
-          <h1>AUGUR</h1>
-          <p className="subtitle">Interpret present signals. Explore possible futures.</p>
+      <header className="dashboardTopbar">
+        <div className="brandCompact">
+          <span className="brandMark">AUGUR</span>
+          <span className="brandSub">country trajectory & personal fit</span>
         </div>
 
-        <div className={`status ${health?.status === 'ok' ? 'ok' : ''}`}>
-          <span className="dot" />
-          {health ? `Phase ${health.phase} · ${health.status}` : 'Connecting'}
+        <div className="topbarCountry">
+          <span>Country</span>
+          <select
+            className="countrySelect compact"
+            value={selectedCountry}
+            onChange={(event) => setSelectedCountry(event.target.value)}
+            aria-label="Select country"
+          >
+            {countries.map((country) => (
+              <option value={country.iso3} key={country.iso3}>
+                {country.name}
+              </option>
+            ))}
+          </select>
         </div>
-      </header>
 
-      <section className="countryHero">
-        <div>
-          <div className="label">COUNTRY</div>
-          <div className="countryTitleRow">
-            <h2>{selectedCountryMeta?.name ?? selectedCountry}</h2>
-            <select
-              className="countrySelect"
-              value={selectedCountry}
-              onChange={(event) => setSelectedCountry(event.target.value)}
-              aria-label="Select country"
+        <nav className="viewNav topbarNav" aria-label="AUGUR views">
+          {[
+            ['overview', 'Overview'],
+            ['outlook', 'Outlook'],
+            ['compare', 'Compare'],
+            ['profile', 'Profile'],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              className={activeView === id ? 'active' : ''}
+              onClick={() => setActiveView(id as 'overview' | 'outlook' | 'compare' | 'profile')}
             >
-              {countries.map((country) => (
-                <option value={country.iso3} key={country.iso3}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <p>
-            Live local snapshot from AUGUR's analytical store, now enriched with
-            multi-year trajectory analysis from the historical series.
-          </p>
-        </div>
+              {label}
+            </button>
+          ))}
+        </nav>
 
-        <div className="countryMeta">
+        <div className="topbarMeta">
           <div>
             <span>Indicators</span>
             <strong>{snapshot?.observation_count ?? '—'}</strong>
@@ -527,8 +530,12 @@ export default function App() {
             <span>Country</span>
             <strong>{selectedCountry}</strong>
           </div>
+          <div className={`status compact ${health?.status === 'ok' ? 'ok' : ''}`}>
+            <span className="dot" />
+            {health ? `P${health.phase} · ${health.status}` : 'Connecting'}
+          </div>
         </div>
-      </section>
+      </header>
 
       {error && (
         <section className="error">
@@ -536,132 +543,106 @@ export default function App() {
         </section>
       )}
 
-      <nav className="viewNav" aria-label="AUGUR views">
-        {[
-          ['overview', 'Overview'],
-          ['outlook', 'Outlook'],
-          ['compare', 'Compare'],
-          ['profile', 'Profile'],
-        ].map(([id, label]) => (
-          <button
-            key={id}
-            type="button"
-            className={activeView === id ? 'active' : ''}
-            onClick={() => setActiveView(id as 'overview' | 'outlook' | 'compare' | 'profile')}
-          >
-            {label}
-          </button>
-        ))}
-      </nav>
-
       <div className="overviewDashboard" hidden={activeView !== 'overview'}>
-        <div className="overviewMainColumn">
+        <section className="overviewMapArea">
           <WorldMap
             countries={countries}
             selectedCountry={selectedCountry}
             onSelectCountry={setSelectedCountry}
           />
+        </section>
 
-          <section className="overviewKpiStrip" aria-label="Key indicators">
-            {overviewKpis.map((item) => {
-              const trendItem = trends?.indicators.find(
-                (trend) => trend.indicator_id === item.indicator_id,
-              )
+        <section className="overviewFitArea">
+          <FitSnapshot apiBase={API_BASE} targetCountry={selectedCountry} />
+        </section>
 
-              return (
-                <article key={item.indicator_id}>
-                  <span>{item.name}</span>
-                  <strong>{formatValue(item.value, item.unit)}</strong>
-                  <small>
-                    {trendItem?.trend
-                      ? trendLabel(trendItem.trend)
-                      : item.period}
-                  </small>
-                </article>
-              )
-            })}
-          </section>
+        <section className="overviewKpiStrip" aria-label="Key indicators">
+          {overviewKpis.map((item) => {
+            const trendItem = trends?.indicators.find(
+              (trend) => trend.indicator_id === item.indicator_id,
+            )
 
-          <section className="assessmentSection overviewAssessment">
-            <div className="dimensionHeader">
-              <div>
-                <div className="label">COUNTRY SIGNAL SUMMARY</div>
-                <h3>Current trajectory by dimension</h3>
-              </div>
-              <span>transparent synthesis · no composite score</span>
+            return (
+              <article key={item.indicator_id}>
+                <span>{item.name}</span>
+                <strong>{formatValue(item.value, item.unit)}</strong>
+                <small>
+                  {trendItem?.trend
+                    ? trendLabel(trendItem.trend)
+                    : item.period}
+                </small>
+              </article>
+            )
+          })}
+        </section>
+
+        <section className="overviewDimensions">
+          <div className="dimensionHeader compactHeader">
+            <div>
+              <div className="label">KEY DIMENSIONS</div>
+              <h3>{selectedCountryMeta?.name ?? selectedCountry} at a glance</h3>
             </div>
-
-            <div className="assessmentGrid">
-              {dimensionOrder.map((dimension) => {
-                const item = assessment?.dimensions?.[dimension]
-                if (!item) return null
-
-                const improving = item.improving_signals.map((signal) => signal.name)
-                const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
-
-                return (
-                  <article className="assessmentCard" key={dimension}>
-                    <div className="assessmentTop">
-                      <span>{dimensionLabels[dimension] ?? dimension}</span>
-                      <span>{item.confidence} confidence</span>
-                    </div>
-
-                    <div className={`assessmentTrajectory ${item.trajectory}`}>
-                      {item.trajectory.replace('_', ' ')}
-                    </div>
-
-                    <div className="assessmentCoverage">
-                      {item.directional_indicator_count}/{item.indicator_count} directional
-                      {item.evidence_status === 'limited' && (
-                        <span className="assessmentEvidenceNote">
-                          limited evidence
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="signalList">
-                      {improving.length > 0 && (
-                        <div>
-                          <strong>Improving</strong>
-                          <span>{improving.slice(0, 2).join(' · ')}</span>
-                        </div>
-                      )}
-
-                      {deteriorating.length > 0 && (
-                        <div>
-                          <strong>Deteriorating</strong>
-                          <span>{deteriorating.slice(0, 2).join(' · ')}</span>
-                        </div>
-                      )}
-
-                      {improving.length === 0 && deteriorating.length === 0 && (
-                        <div>
-                          <strong>Interpretation</strong>
-                          <span>Context-dependent signals</span>
-                        </div>
-                      )}
-                    </div>
-                  </article>
-                )
-              })}
-            </div>
-          </section>
-
-          <div className="detailsToggleRow">
             <button
               type="button"
               className="detailsToggle"
               onClick={() => setDetailsExpanded((value) => !value)}
             >
-              {detailsExpanded ? 'Hide indicator details' : 'Show indicator details'}
+              {detailsExpanded ? 'Hide indicators' : 'View all indicators'}
             </button>
-            <span>{snapshot?.observation_count ?? 0} current indicators</span>
           </div>
-        </div>
 
-        <aside className="overviewRail">
-          <FitSnapshot apiBase={API_BASE} targetCountry={selectedCountry} />
+          <div className="assessmentGrid">
+            {dimensionOrder.map((dimension) => {
+              const item = assessment?.dimensions?.[dimension]
+              if (!item) return null
 
+              const improving = item.improving_signals.map((signal) => signal.name)
+              const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
+
+              return (
+                <article className="assessmentCard" key={dimension}>
+                  <div className="assessmentTop">
+                    <span>{dimensionLabels[dimension] ?? dimension}</span>
+                    <span>{item.confidence}</span>
+                  </div>
+
+                  <div className={`assessmentTrajectory ${item.trajectory}`}>
+                    {item.trajectory.replace('_', ' ')}
+                  </div>
+
+                  <div className="assessmentCoverage">
+                    {item.directional_indicator_count}/{item.indicator_count} signals
+                  </div>
+
+                  <div className="signalList">
+                    {improving.length > 0 && (
+                      <div>
+                        <strong>Improving</strong>
+                        <span>{improving.slice(0, 2).join(' · ')}</span>
+                      </div>
+                    )}
+
+                    {deteriorating.length > 0 && (
+                      <div>
+                        <strong>Pressure</strong>
+                        <span>{deteriorating.slice(0, 2).join(' · ')}</span>
+                      </div>
+                    )}
+
+                    {improving.length === 0 && deteriorating.length === 0 && (
+                      <div>
+                        <strong>Context</strong>
+                        <span>Context-dependent signals</span>
+                      </div>
+                    )}
+                  </div>
+                </article>
+              )
+            })}
+          </div>
+        </section>
+
+        <aside className="overviewUtilityRail">
           <section className="outlookPreview">
             <div className="comparePanelHeader">
               <div>
