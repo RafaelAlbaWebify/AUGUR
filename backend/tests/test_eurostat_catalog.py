@@ -10,6 +10,15 @@ def test_new_eu_dimensions_have_exact_eurostat_series():
     assert price_level["filters"]["na_item"] == "PLI_EU27_2020"
     assert price_level["filters"]["ppp_cat"] == "E011"
 
+    house_prices = by_indicator["real_house_price_index"]
+    assert house_prices["dataset_id"] == "tipsho10"
+    assert house_prices["filters"]["unit"] == "I15_A_AVG"
+
+    rents = by_indicator["rent_price_index"]
+    assert rents["dataset_id"] == "prc_hicp_aind"
+    assert rents["filters"]["unit"] == "INX_A_AVG"
+    assert rents["filters"]["coicop"] == "CP041"
+
     housing = by_indicator["housing_cost_overburden_rate"]
     assert housing["dataset_id"] == "tessi163"
     assert housing["filters"]["unit"] == "PC"
@@ -38,3 +47,14 @@ def test_new_dimensions_are_registered_with_safe_interpretation():
 
     assert by_indicator["energy_import_dependency"]["dimension"] == "strategic_resilience"
     assert by_indicator["energy_import_dependency"]["interpretation_policy"] == "contextual"
+
+
+
+def test_housing_market_pressure_indicators_are_directional():
+    by_indicator = {item["indicator_id"]: item for item in INDICATORS}
+
+    assert by_indicator["real_house_price_index"]["dimension"] == "housing"
+    assert by_indicator["real_house_price_index"]["interpretation_policy"] == "lower"
+
+    assert by_indicator["rent_price_index"]["dimension"] == "housing"
+    assert by_indicator["rent_price_index"]["interpretation_policy"] == "lower"
