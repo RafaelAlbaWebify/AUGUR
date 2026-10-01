@@ -1824,9 +1824,15 @@ footer {
     overflow-y: hidden;
   }
 
-  .shell {
+  .shell.view-overview:not(.detailsOpen) {
     height: 100vh;
     overflow: hidden;
+  }
+
+  .shell:not(.view-overview),
+  .shell.detailsOpen {
+    height: auto;
+    overflow: visible;
   }
 
   .overviewDashboard {
