@@ -3,6 +3,8 @@ import WorldMap from './components/WorldMap'
 import ProfilePanel from './components/ProfilePanel'
 import ComparePanel from './components/ComparePanel'
 import FitSnapshot from './components/FitSnapshot'
+import DimensionSummaryCard from './components/DimensionSummaryCard'
+import OverallSignalBalance from './components/OverallSignalBalance'
 
 type Country = {
   iso2: string
@@ -591,58 +593,25 @@ export default function App() {
             </button>
           </div>
 
-          <div className="assessmentGrid">
+          <div className="assessmentGrid mockDimensionGrid">
             {dimensionOrder.map((dimension) => {
               const item = assessment?.dimensions?.[dimension]
               if (!item) return null
 
-              const improving = item.improving_signals.map((signal) => signal.name)
-              const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
-
               return (
-                <article className="assessmentCard" key={dimension}>
-                  <div className="assessmentTop">
-                    <span>{dimensionLabels[dimension] ?? dimension}</span>
-                    <span>{item.confidence}</span>
-                  </div>
-
-                  <div className={`assessmentTrajectory ${item.trajectory}`}>
-                    {item.trajectory.replace('_', ' ')}
-                  </div>
-
-                  <div className="assessmentCoverage">
-                    {item.directional_indicator_count}/{item.indicator_count} signals
-                  </div>
-
-                  <div className="signalList">
-                    {improving.length > 0 && (
-                      <div>
-                        <strong>Improving</strong>
-                        <span>{improving.slice(0, 2).join(' · ')}</span>
-                      </div>
-                    )}
-
-                    {deteriorating.length > 0 && (
-                      <div>
-                        <strong>Pressure</strong>
-                        <span>{deteriorating.slice(0, 2).join(' · ')}</span>
-                      </div>
-                    )}
-
-                    {improving.length === 0 && deteriorating.length === 0 && (
-                      <div>
-                        <strong>Context</strong>
-                        <span>Context-dependent signals</span>
-                      </div>
-                    )}
-                  </div>
-                </article>
+                <DimensionSummaryCard
+                  key={dimension}
+                  label={dimensionLabels[dimension] ?? dimension}
+                  item={item}
+                />
               )
             })}
           </div>
         </section>
 
         <aside className="overviewUtilityRail">
+          <OverallSignalBalance dimensions={assessment?.dimensions} />
+
           <section className="outlookPreview">
             <div className="comparePanelHeader">
               <div>
