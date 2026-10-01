@@ -27,7 +27,20 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path === '/api/profile') {
+    if (path === '/api/profile/readiness') {
+      body = {
+        profile_id: 'default',
+        ready_module_count: 0,
+        module_count: 4,
+        notes: [],
+        modules: {
+          legal_fit: { label: 'LegalFit', ready: false, completed_fields: 0, required_fields: 2, missing_fields: ['current_country', 'citizenships'] },
+          career_fit: { label: 'CareerFit', ready: false, completed_fields: 0, required_fields: 2, missing_fields: ['profession', 'skills'] },
+          language_fit: { label: 'LanguageFit', ready: false, completed_fields: 0, required_fields: 1, missing_fields: ['languages'] },
+          financial_fit: { label: 'FinancialFit', ready: false, completed_fields: 1, required_fields: 3, missing_fields: ['monthly_net_income', 'liquid_savings'] },
+        },
+      }
+    } else if (path === '/api/profile') {
       if (route.request().method() === 'PUT') {
         const payload = route.request().postDataJSON()
         body = {
@@ -141,6 +154,8 @@ test('world view drives country selection without reload', async ({ page }) => {
 test('personal profile remains separate and can be saved locally', async ({ page }) => {
   const profile = page.getByRole('region', { name: 'Personal profile' })
   await expect(profile.getByText('stored locally · never changes country facts')).toBeVisible()
+  await expect(profile.getByText('Personal-fit readiness')).toBeVisible()
+  await expect(profile.getByText('0/4 input sets ready')).toBeVisible()
 
   await profile.getByLabel('Profession').fill('Systems engineer')
   await profile.getByLabel('Household size').fill('2')
