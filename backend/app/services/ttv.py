@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.models.profile import PersonalProfileResponse
 from app.services.financial_fit import financial_fit
 from app.services.legal_fit import legal_fit
+from app.services.language_fit import language_fit
 
 
 STAGE_ORDER = [
@@ -20,13 +21,14 @@ def ttv_status(
     target = target_country_iso3.upper()
     legal = legal_fit(profile, target)
     financial = financial_fit(profile, target)
+    language = language_fit(profile, target)
 
     legal_ready = legal["status"] in {
         "domestic",
         "eu_free_movement_framework",
     }
 
-    language_ready = len(profile.languages) > 0
+    language_ready = bool(language["work_ready"])
     career_ready = bool(profile.profession and profile.skills)
 
     financial_ready = financial["status"] == "portable_income_comparable"
@@ -39,12 +41,8 @@ def ttv_status(
         },
         "language_fit": {
             "ready": language_ready,
-            "status": (
-                "profile_inputs_present"
-                if language_ready
-                else "profile_inputs_missing"
-            ),
-            "evidence_state": "country_evidence_pending",
+            "status": language["status"],
+            "evidence_state": "implemented",
         },
         "career_fit": {
             "ready": career_ready,
@@ -91,6 +89,6 @@ def ttv_status(
         "notes": [
             "TTV is a dependency graph, not a sum of arbitrary scores.",
             "No time estimate is produced until all required country evidence layers are implemented.",
-            "LanguageFit and CareerFit currently check profile-input readiness only.",
+            "LanguageFit uses a country-language CEFR heuristic; CareerFit country evidence is still pending.",
         ],
     }
