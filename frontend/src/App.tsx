@@ -240,6 +240,12 @@ function formatValue(value: number, unit: string) {
   if (unit === 'index_eu27_2020_100') {
     return `${value.toFixed(1)} · EU=100`
   }
+  if (unit === 'index_2015_100') {
+    return `${value.toFixed(1)} · 2015=100`
+  }
+  if (unit === 'index_annual_average') {
+    return value.toFixed(1)
+  }
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
