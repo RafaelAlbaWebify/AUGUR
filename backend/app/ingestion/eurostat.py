@@ -15,6 +15,27 @@ SOURCE_ID = "EUROSTAT"
 
 EUROSTAT_SERIES = [
     {
+        "indicator_id": "real_house_price_index",
+        "dataset_id": "tipsho10",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "unit": "I15_A_AVG",
+        },
+        "unit": "index_2015_100",
+    },
+    {
+        "indicator_id": "rent_price_index",
+        "dataset_id": "prc_hicp_aind",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "unit": "INX_A_AVG",
+            "coicop": "CP041",
+        },
+        "unit": "index_annual_average",
+    },
+    {
         "indicator_id": "household_price_level_index",
         "dataset_id": "prc_ppp_ind",
         "filters": {
