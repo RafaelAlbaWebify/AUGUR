@@ -2450,3 +2450,540 @@ footer {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* Mockup fidelity pass */
+:root {
+  --augur-bg: #071019;
+  --augur-panel: #0a1621;
+  --augur-panel-2: #0d1b27;
+  --augur-border: #1a3446;
+  --augur-border-soft: #142838;
+  --augur-text: #eef5fa;
+  --augur-muted: #8193a4;
+  --augur-green: #4fd38a;
+  --augur-green-soft: rgba(79, 211, 138, 0.14);
+  --augur-amber: #f3b64b;
+  --augur-amber-soft: rgba(243, 182, 75, 0.14);
+  --augur-blue: #67b7ff;
+  --augur-blue-soft: rgba(103, 183, 255, 0.14);
+  --augur-red: #ff7180;
+}
+
+body {
+  background:
+    radial-gradient(circle at 75% -10%, rgba(31, 95, 135, 0.16), transparent 36%),
+    linear-gradient(180deg, #071019 0%, #08131d 100%);
+  color: var(--augur-text);
+}
+
+.shell {
+  width: min(1888px, calc(100% - 20px));
+  padding-top: 8px;
+}
+
+.dashboardTopbar {
+  min-height: 70px;
+  border-color: var(--augur-border);
+  background: linear-gradient(180deg, rgba(12, 28, 40, 0.92), rgba(8, 20, 30, 0.92));
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+}
+
+.brandMark {
+  font-size: 35px;
+  color: #ffffff;
+}
+
+.brandSub {
+  color: #8ea4b7;
+}
+
+.topbarMeta > div:not(.status),
+.countrySelect.compact,
+.topbarNav,
+.status.compact {
+  border-color: var(--augur-border);
+  background: rgba(10, 23, 34, 0.92);
+}
+
+.topbarNav button.active {
+  background: linear-gradient(180deg, #142a3b, #0f2231);
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(103, 183, 255, 0.16);
+}
+
+.overviewDashboard {
+  grid-template-areas:
+    "map map map map map map fit fit fit fit fit fit"
+    "kpi kpi kpi kpi kpi kpi kpi kpi kpi kpi kpi kpi"
+    "dim dim dim dim dim dim dim dim dim util util util";
+  gap: 11px;
+}
+
+.worldMapFrame,
+.fitSnapshot,
+.outlookPreview,
+.comparePanel,
+.overallSignalBalance,
+.mockDimensionCard,
+.overviewKpiStrip article {
+  border-color: var(--augur-border);
+  background:
+    linear-gradient(180deg, rgba(12, 29, 42, 0.92), rgba(8, 21, 31, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.018),
+    0 10px 26px rgba(0,0,0,0.12);
+}
+
+.overviewMapArea .worldMapFrame {
+  min-height: 292px;
+  height: 292px;
+}
+
+.overviewMapArea .worldMapSvg {
+  height: 292px;
+}
+
+.worldMapOcean {
+  fill: #08141e;
+}
+
+.worldCountry {
+  fill: #122432;
+  stroke: #24445a;
+  stroke-width: 0.6;
+}
+
+.worldCountry.registered {
+  fill: #254b63;
+}
+
+.worldCountry.registered:hover,
+.worldCountry.registered:focus {
+  fill: #4a7894;
+  stroke: #d3e9f8;
+}
+
+.worldCountry.selected {
+  fill: #dceeff;
+  stroke: #ffffff;
+  filter: drop-shadow(0 0 5px rgba(103,183,255,0.7));
+}
+
+.worldMapControls,
+.worldMapLegend {
+  border-color: var(--augur-border);
+  background: rgba(7, 18, 28, 0.9);
+}
+
+.worldMapControls button,
+.worldMapLegend button {
+  border-color: #274458;
+  background: #0b1a27;
+  color: #c7d7e4;
+}
+
+.worldMapLegend button.active {
+  border-color: #70b8e8;
+  background: #163348;
+  color: #ffffff;
+}
+
+.overviewFitArea .fitSnapshot {
+  min-height: 334px;
+  padding: 15px;
+}
+
+.mockPanelHeader,
+.mockDimensionHeader,
+.comparePanelHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.mockPanelHeader strong,
+.comparePanelHeader strong {
+  color: #f3f7fa;
+}
+
+.mockPanelHeader > span {
+  color: #72889a;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mockFitGrid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mockFitCard {
+  min-height: 95px;
+  display: grid !important;
+  grid-template-columns: 58px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  padding: 11px !important;
+  border: 1px solid var(--augur-border-soft) !important;
+  border-radius: 12px !important;
+  background: linear-gradient(180deg, rgba(11, 28, 41, 0.9), rgba(8, 20, 30, 0.9)) !important;
+}
+
+.mockFitCard.ttv {
+  grid-column: 1 / -1 !important;
+  min-height: 82px;
+}
+
+.mockFitCard small {
+  color: #aabac6 !important;
+  font-size: 10px !important;
+  text-transform: none !important;
+}
+
+.mockFitCard strong {
+  margin-top: 4px !important;
+  font-size: 13px !important;
+  color: #eef5fa !important;
+}
+
+.mockFitCard p {
+  margin: 4px 0 0;
+  color: #758a9a;
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+.readinessRing {
+  --ring-color: var(--augur-blue);
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, #0a1722 57%, transparent 59%),
+    conic-gradient(var(--ring-color) calc(var(--progress) * 1%), #203342 0);
+  box-shadow: 0 0 16px rgba(103, 183, 255, 0.08);
+}
+
+.readinessRing span {
+  color: #f4f8fb !important;
+  font-size: 15px !important;
+  font-weight: 700;
+}
+
+.mockFitCard.positive .readinessRing {
+  --ring-color: var(--augur-green);
+}
+
+.mockFitCard.warning .readinessRing {
+  --ring-color: var(--augur-amber);
+}
+
+.mockFitCard.warning strong {
+  color: var(--augur-amber) !important;
+}
+
+.mockFitCard.positive strong {
+  color: var(--augur-green) !important;
+}
+
+.ttvRing {
+  --progress: 20;
+  --ring-color: var(--augur-blue);
+}
+
+.overviewKpiStrip article {
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+
+.overviewKpiStrip strong {
+  color: #ffffff;
+  font-size: 18px;
+}
+
+.overviewKpiStrip small {
+  color: #89a0b2;
+}
+
+.overviewDimensions .assessmentGrid.mockDimensionGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mockDimensionCard {
+  min-height: 144px;
+  padding: 12px 13px;
+  border: 1px solid var(--augur-border);
+  border-radius: 12px;
+}
+
+.mockDimensionHeader span {
+  color: #9db0bf;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.mockDimensionHeader small {
+  border: 1px solid #294459;
+  border-radius: 999px;
+  padding: 4px 7px;
+  color: #91a5b5;
+  font-size: 8px;
+  text-transform: capitalize;
+}
+
+.mockDimensionStatusRow {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: 30px minmax(0, auto) 1fr;
+  align-items: center;
+  gap: 7px;
+}
+
+.trajectoryIcon {
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  font-size: 16px;
+  font-weight: 700;
+  background: var(--augur-blue-soft);
+  color: var(--augur-blue);
+}
+
+.mockDimensionStatusRow > strong {
+  font-size: 16px;
+  text-transform: capitalize;
+  color: var(--augur-blue);
+}
+
+.mockDimensionCard.positive .trajectoryIcon {
+  background: var(--augur-green-soft);
+  color: var(--augur-green);
+}
+
+.mockDimensionCard.positive .mockDimensionStatusRow > strong {
+  color: var(--augur-green);
+}
+
+.mockDimensionCard.warning .trajectoryIcon {
+  background: var(--augur-amber-soft);
+  color: var(--augur-amber);
+}
+
+.mockDimensionCard.warning .mockDimensionStatusRow > strong {
+  color: var(--augur-amber);
+}
+
+.mockDimensionCard.negative .trajectoryIcon {
+  background: rgba(255, 113, 128, 0.14);
+  color: var(--augur-red);
+}
+
+.mockDimensionCard.negative .mockDimensionStatusRow > strong {
+  color: var(--augur-red);
+}
+
+.signalBars {
+  height: 31px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: end;
+  gap: 3px;
+  min-width: 54px;
+}
+
+.signalBars i {
+  width: 5px;
+  border-radius: 2px 2px 0 0;
+  background: linear-gradient(180deg, var(--augur-blue), #2a5874);
+  opacity: 0.9;
+}
+
+.mockDimensionCard.positive .signalBars i {
+  background: linear-gradient(180deg, var(--augur-green), #265f47);
+}
+
+.mockDimensionCard.warning .signalBars i {
+  background: linear-gradient(180deg, var(--augur-amber), #6b532b);
+}
+
+.mockDimensionCard ul {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: grid;
+  gap: 4px;
+}
+
+.mockDimensionCard li {
+  position: relative;
+  padding-left: 10px;
+  color: #9fb0bd;
+  font-size: 9px;
+  line-height: 1.25;
+}
+
+.mockDimensionCard li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 5px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--augur-blue);
+}
+
+.mockDimensionCard li.good::before {
+  background: var(--augur-green);
+}
+
+.mockDimensionCard li.warn::before {
+  background: var(--augur-amber);
+}
+
+.overallSignalBalance {
+  padding: 12px;
+  border: 1px solid var(--augur-border);
+  border-radius: 12px;
+}
+
+.overallSignalBalance > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.overallSignalBalance span {
+  color: #768d9e;
+  font-size: 8px;
+  letter-spacing: 0.08em;
+}
+
+.overallSignalBalance strong {
+  border-radius: 8px;
+  padding: 6px 9px;
+  font-size: 12px;
+}
+
+.overallSignalBalance strong.positive {
+  color: var(--augur-green);
+  background: var(--augur-green-soft);
+}
+
+.overallSignalBalance strong.warning {
+  color: var(--augur-amber);
+  background: var(--augur-amber-soft);
+}
+
+.overallSignalBalance strong.neutral {
+  color: var(--augur-blue);
+  background: var(--augur-blue-soft);
+}
+
+.overallSignalBalance strong.negative {
+  color: var(--augur-red);
+  background: rgba(255,113,128,0.12);
+}
+
+.overallSignalBalance p {
+  margin: 8px 0 0;
+  color: #8ca0af;
+  font-size: 9px;
+}
+
+.overviewUtilityRail {
+  grid-template-rows: auto auto 1fr;
+}
+
+.compareBarPreview {
+  margin-top: 9px;
+}
+
+.compareMetricLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: #879baa;
+  font-size: 9px;
+}
+
+.compareMetricLabel small {
+  color: #607787;
+  font-size: 8px;
+}
+
+.compareBarRows {
+  margin-top: 9px;
+  display: grid;
+  gap: 8px;
+}
+
+.compareBarRow {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) 54px;
+  align-items: center;
+  gap: 7px;
+}
+
+.compareBarRow > span {
+  color: #a8b7c3;
+  font-size: 9px;
+}
+
+.compareBarRow > strong {
+  color: #dfe7ed;
+  font-size: 9px;
+  text-align: right;
+}
+
+.compareBarTrack {
+  height: 8px;
+  border-radius: 999px;
+  background: #162936;
+  overflow: hidden;
+}
+
+.compareBarTrack i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #62aee8, #8bc9ff);
+  box-shadow: 0 0 10px rgba(103,183,255,0.18);
+}
+
+.outlookPreview {
+  background: linear-gradient(180deg, rgba(12,29,42,0.92), rgba(9,22,32,0.94));
+}
+
+.outlookPreviewGrid > div {
+  border-color: var(--augur-border-soft);
+  background: #0a1824;
+}
+
+.outlookPreviewGrid > div:first-child strong {
+  color: var(--augur-green);
+}
+
+.outlookPreviewGrid > div:nth-child(2) strong {
+  color: var(--augur-blue);
+}
+
+.outlookPreviewGrid > div:nth-child(3) strong {
+  color: var(--augur-amber);
+}
+
+@media (min-width: 1500px) and (min-height: 900px) {
+  .overviewDashboard {
+    max-height: calc(100vh - 92px);
+  }
+}
