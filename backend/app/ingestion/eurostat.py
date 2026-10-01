@@ -27,11 +27,12 @@ EUROSTAT_SERIES = [
     },
     {
         "indicator_id": "housing_cost_overburden_rate",
-        "dataset_id": "ilc_lvho07a",
+        "dataset_id": "tessi163",
         "filters": {
             "geo": "__GEO__",
             "freq": "A",
-            "incgrp": "TOTAL",
+            "unit": "PC",
+            "rskpovth": "TOTAL",
             "age": "TOTAL",
             "sex": "T",
         },
