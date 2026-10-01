@@ -76,6 +76,23 @@ type FinancialFitResponse = {
   notes: string[]
 }
 
+type TTVStage = {
+  ready: boolean
+  status: string
+  evidence_state: string
+}
+
+type TTVResponse = {
+  target_country_iso3: string
+  method: string
+  stage_order: string[]
+  stages: Record<string, TTVStage>
+  blocked_by: string[]
+  ready_for_time_estimate: boolean
+  time_estimate: null
+  notes: string[]
+}
+
 type ProfilePanelProps = {
   apiBase: string
   targetCountry: string
@@ -127,6 +144,17 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
   const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
   const [legalFit, setLegalFit] = useState<LegalFitResponse | null>(null)
+  const [ttv, setTtv] = useState<TTVResponse | null>(null)
+
+  async function refreshTtv() {
+    try {
+      const response = await fetch(`${apiBase}/api/countries/${targetCountry}/ttv`)
+      if (!response.ok) return
+      setTtv(await response.json())
+    } catch {
+      // Profile editing remains usable if TTV cannot be loaded.
+    }
+  }
 
   async function refreshLegalFit() {
     try {
@@ -173,6 +201,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         void refreshReadiness()
         void refreshLegalFit()
         void refreshFinancialFit()
+        void refreshTtv()
       })
       .catch(() => setStatus('error'))
   }, [apiBase, targetCountry])
@@ -206,6 +235,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       await refreshReadiness()
       await refreshLegalFit()
       await refreshFinancialFit()
+      await refreshTtv()
     } catch {
       setStatus('error')
     }
@@ -447,6 +477,35 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
           <p>
             Relative purchasing power only. This is not a household budget or country score.
+          </p>
+        </div>
+
+        <div className="financialFitCard">
+          <div className="profileReadinessHeader">
+            <strong>TTV dependency path · {targetCountry}</strong>
+            <span>
+              {ttv?.ready_for_time_estimate
+                ? 'time estimate ready'
+                : 'time estimate intentionally blocked'}
+            </span>
+          </div>
+
+          <div className="ttvGrid">
+            {(ttv?.stage_order ?? []).map((stageId, index) => {
+              const stage = ttv?.stages[stageId]
+              return (
+                <div className={stage?.ready ? 'ready' : ''} key={stageId}>
+                  <small>{index + 1}</small>
+                  <strong>{stageId.replace('_', ' ')}</strong>
+                  <span>{stage?.status?.replaceAll('_', ' ') ?? 'loading'}</span>
+                </div>
+              )
+            })}
+          </div>
+
+          <p>
+            AUGUR will not estimate time-to-viability until every required evidence
+            layer is implemented and the dependency chain is clear.
           </p>
         </div>
 
