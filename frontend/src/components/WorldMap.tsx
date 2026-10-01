@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import maplibregl, { type GeoJSONSource, type Map } from 'maplibre-gl'
 import { feature } from 'topojson-client'
 import countriesTopology from 'world-atlas/countries-110m.json'
@@ -58,6 +58,8 @@ export default function WorldMap({
   const containerRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<Map | null>(null)
   const onSelectRef = useRef(onSelectCountry)
+  const registeredRef = useRef(new Set<string>())
+  const [mapUnavailable, setMapUnavailable] = useState(false)
 
   const registered = useMemo(
     () => new Set(countries.map((country) => country.iso3)),
@@ -69,9 +71,16 @@ export default function WorldMap({
   }, [onSelectCountry])
 
   useEffect(() => {
+    registeredRef.current = registered
+  }, [registered])
+
+  useEffect(() => {
     if (!containerRef.current || mapRef.current) return
 
-    const map = new maplibregl.Map({
+    let map: Map
+
+    try {
+      map = new maplibregl.Map({
       container: containerRef.current,
       style: {
         version: 8,
@@ -92,7 +101,11 @@ export default function WorldMap({
       maxZoom: 5,
       attributionControl: false,
       renderWorldCopies: false,
-    })
+      })
+    } catch {
+      setMapUnavailable(true)
+      return
+    }
 
     mapRef.current = map
 
@@ -147,7 +160,7 @@ export default function WorldMap({
 
       map.on('mousemove', 'country-fill', (event) => {
         const iso3 = String(event.features?.[0]?.properties?.iso3 ?? '')
-        map.getCanvas().style.cursor = registered.has(iso3) ? 'pointer' : ''
+        map.getCanvas().style.cursor = registeredRef.current.has(iso3) ? 'pointer' : ''
       })
 
       map.on('mouseleave', 'country-fill', () => {
@@ -156,7 +169,7 @@ export default function WorldMap({
 
       map.on('click', 'country-fill', (event) => {
         const iso3 = String(event.features?.[0]?.properties?.iso3 ?? '')
-        if (registered.has(iso3)) onSelectRef.current(iso3)
+        if (registeredRef.current.has(iso3)) onSelectRef.current(iso3)
       })
     })
 
@@ -164,7 +177,7 @@ export default function WorldMap({
       map.remove()
       mapRef.current = null
     }
-  }, [registered, selectedCountry])
+  }, [])
 
   useEffect(() => {
     const map = mapRef.current
@@ -198,7 +211,13 @@ export default function WorldMap({
       </div>
 
       <div className="worldMapFrame">
-        <div ref={containerRef} className="worldMapCanvas" data-testid="world-map" />
+        <div ref={containerRef} className="worldMapCanvas" data-testid="world-map">
+          {mapUnavailable && (
+            <div className="worldMapFallback">
+              Map rendering unavailable · country navigation remains active
+            </div>
+          )}
+        </div>
         <div className="worldMapLegend">
           {countries.map((country) => (
             <button
