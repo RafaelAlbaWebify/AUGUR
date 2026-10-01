@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 import httpx
 
-from app.catalog import INDICATORS
+from app.catalog import world_bank_indicators
 from app.db.analytics import upsert_observations
 
 BASE_URL = "https://api.worldbank.org/v2"
@@ -128,9 +128,11 @@ class WorldBankAdapter:
         details = []
         failures = []
 
-        for index, indicator in enumerate(INDICATORS, start=1):
+        indicators = world_bank_indicators()
+
+        for index, indicator in enumerate(indicators, start=1):
             print(
-                f"[{index}/{len(INDICATORS)}] "
+                f"[{index}/{len(indicators)}] "
                 f"{indicator['indicator_id']} "
                 f"({indicator['source_indicator']})"
             )
