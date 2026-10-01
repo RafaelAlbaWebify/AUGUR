@@ -24,6 +24,25 @@ def initialize_sqlite(path: Path) -> None:
             VALUES ('schema_version', 'phase1')
             """
         )
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS personal_profile (
+                profile_id TEXT PRIMARY KEY,
+                age INTEGER,
+                current_country TEXT,
+                citizenships_json TEXT NOT NULL DEFAULT '[]',
+                profession TEXT,
+                skills_json TEXT NOT NULL DEFAULT '[]',
+                languages_json TEXT NOT NULL DEFAULT '[]',
+                household_size INTEGER NOT NULL DEFAULT 1,
+                monthly_net_income REAL,
+                liquid_savings REAL,
+                remote_work INTEGER NOT NULL DEFAULT 0,
+                preferences_json TEXT NOT NULL DEFAULT '{}',
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
         con.commit()
     finally:
         con.close()
