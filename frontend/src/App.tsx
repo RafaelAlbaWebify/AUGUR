@@ -498,17 +498,17 @@ export default function App() {
         ))}
       </nav>
 
-      {activeView === 'overview' && (
+      <div hidden={activeView !== 'overview'}>
         <WorldMap
           countries={countries}
           selectedCountry={selectedCountry}
           onSelectCountry={setSelectedCountry}
         />
-      )}
+      </div>
 
-      {activeView === 'profile' && (
+      <div hidden={activeView !== 'profile'}>
         <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
-      )}
+      </div>
 
       {activeView === 'overview' && (
       <section className="assessmentSection">
