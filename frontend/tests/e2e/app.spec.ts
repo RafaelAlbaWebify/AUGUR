@@ -86,11 +86,11 @@ test('switches country without a page reload', async ({ page }) => {
   const selector = page.getByLabel('Select country')
   await selector.selectOption('PRT')
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
-  await expect(page.getByText('6.4%')).toBeVisible()
+  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
 
   await selector.selectOption('IRL')
   await expect(page.getByRole('heading', { name: 'Ireland', exact: true })).toBeVisible()
-  await expect(page.getByText('4.5%')).toBeVisible()
+  await expect(page.locator('.metricValue').filter({ hasText: /^4\.5%$/ })).toBeVisible()
 })
 
 test('comparison remains neutral and aligned', async ({ page }) => {
@@ -109,5 +109,5 @@ test('world view drives country selection without reload', async ({ page }) => {
   await worldView.getByRole('button', { name: 'Portugal' }).click()
 
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
-  await expect(page.getByText('6.4%')).toBeVisible()
+  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
 })
