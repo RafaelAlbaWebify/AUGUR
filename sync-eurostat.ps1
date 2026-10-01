@@ -10,7 +10,7 @@ if (-not (Test-Path $Python)) {
 
 Push-Location $Backend
 try {
-    & $Python -m scripts.sync_eurostat
+    & $Python -m scripts.sync_eurostat @args
 
     if ($LASTEXITCODE -eq 2) {
         Write-Warning "Eurostat sync completed with partial failures."
