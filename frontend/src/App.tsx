@@ -433,7 +433,7 @@ export default function App() {
         </div>
 
         <div className="assessmentGrid">
-          <ProfilePanel apiBase={API_BASE} />
+          <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
 
       {dimensionOrder.map((dimension) => {
             const item = assessment?.dimensions?.[dimension]
