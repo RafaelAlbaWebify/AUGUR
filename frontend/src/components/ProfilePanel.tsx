@@ -21,6 +21,22 @@ type PersonalProfile = {
   updated_at?: string | null
 }
 
+type ReadinessModule = {
+  label: string
+  ready: boolean
+  completed_fields: number
+  required_fields: number
+  missing_fields: string[]
+}
+
+type ReadinessResponse = {
+  profile_id: string
+  modules: Record<string, ReadinessModule>
+  ready_module_count: number
+  module_count: number
+  notes: string[]
+}
+
 type ProfilePanelProps = {
   apiBase: string
 }
@@ -68,6 +84,17 @@ export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
   const [skillsText, setSkillsText] = useState('')
   const [languagesText, setLanguagesText] = useState('')
   const [status, setStatus] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>('loading')
+  const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
+
+  async function refreshReadiness() {
+    try {
+      const response = await fetch(`${apiBase}/api/profile/readiness`)
+      if (!response.ok) return
+      setReadiness(await response.json())
+    } catch {
+      // Profile editing remains usable if readiness cannot be loaded.
+    }
+  }
 
   useEffect(() => {
     fetch(`${apiBase}/api/profile`)
@@ -81,6 +108,7 @@ export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
         setSkillsText(data.skills.join(', '))
         setLanguagesText(formatLanguages(data.languages))
         setStatus('ready')
+        void refreshReadiness()
       })
       .catch(() => setStatus('error'))
   }, [apiBase])
@@ -111,6 +139,7 @@ export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
       const saved = await response.json() as PersonalProfile
       setProfile(saved)
       setStatus('saved')
+      await refreshReadiness()
     } catch {
       setStatus('error')
     }
@@ -245,6 +274,35 @@ export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
             />
             <span>Remote work is viable</span>
           </label>
+        </div>
+
+        <div className="profileReadiness">
+          <div className="profileReadinessHeader">
+            <strong>Personal-fit readiness</strong>
+            <span>
+              {readiness
+                ? `${readiness.ready_module_count}/${readiness.module_count} input sets ready`
+                : 'checking inputs…'}
+            </span>
+          </div>
+
+          <div className="profileReadinessGrid">
+            {Object.entries(readiness?.modules ?? {}).map(([moduleId, item]) => (
+              <div className={item.ready ? 'ready' : ''} key={moduleId}>
+                <strong>{item.label}</strong>
+                <span>
+                  {item.ready
+                    ? 'Profile inputs present'
+                    : `Missing: ${item.missing_fields.join(', ')}`}
+                </span>
+              </div>
+            ))}
+          </div>
+
+          <p>
+            Readiness only confirms that profile inputs exist. Country-fit evidence
+            will be calculated separately.
+          </p>
         </div>
 
         <div className="profileActions">
