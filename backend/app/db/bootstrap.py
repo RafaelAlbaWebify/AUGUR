@@ -26,6 +26,41 @@ def initialize_sqlite(path: Path) -> None:
         )
         con.execute(
             """
+            CREATE TABLE IF NOT EXISTS esco_occupations (
+                concept_uri TEXT PRIMARY KEY,
+                preferred_label TEXT NOT NULL,
+                code TEXT,
+                isco_group TEXT,
+                dataset_version TEXT NOT NULL,
+                source_mode TEXT NOT NULL
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS esco_skills (
+                concept_uri TEXT PRIMARY KEY,
+                preferred_label TEXT NOT NULL,
+                alternative_labels_json TEXT NOT NULL DEFAULT '[]',
+                dataset_version TEXT NOT NULL,
+                source_mode TEXT NOT NULL
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS esco_occupation_skills (
+                occupation_uri TEXT NOT NULL,
+                skill_uri TEXT NOT NULL,
+                relation_type TEXT NOT NULL,
+                dataset_version TEXT NOT NULL,
+                source_mode TEXT NOT NULL,
+                PRIMARY KEY (occupation_uri, skill_uri, relation_type)
+            )
+            """
+        )
+        con.execute(
+            """
             CREATE TABLE IF NOT EXISTS personal_profile (
                 profile_id TEXT PRIMARY KEY,
                 age INTEGER,
@@ -41,6 +76,18 @@ def initialize_sqlite(path: Path) -> None:
                 preferences_json TEXT NOT NULL DEFAULT '{}',
                 updated_at TEXT NOT NULL
             )
+            """
+        )
+        con.execute(
+            """
+            INSERT OR IGNORE INTO app_metadata(key, value)
+            VALUES ('esco_dataset_mode', 'none')
+            """
+        )
+        con.execute(
+            """
+            INSERT OR IGNORE INTO app_metadata(key, value)
+            VALUES ('esco_dataset_version', 'none')
             """
         )
         con.commit()
