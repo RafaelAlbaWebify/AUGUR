@@ -103,8 +103,8 @@ export default function WorldMap({
     x: number
     y: number
     moved: boolean
+    countryIso3: string
   } | null>(null)
-  const suppressClickRef = useRef(false)
   const [viewBox, setViewBox] = useState({
     x: 0,
     y: 0,
@@ -175,6 +175,9 @@ export default function WorldMap({
   }
 
   function handlePointerDown(event: ReactPointerEvent<SVGSVGElement>) {
+    const target = event.target as SVGElement
+    const countryIso3 = target.dataset.country ?? ''
+
     event.currentTarget.setPointerCapture(event.pointerId)
     dragStartRef.current = {
       clientX: event.clientX,
@@ -182,6 +185,7 @@ export default function WorldMap({
       x: viewBox.x,
       y: viewBox.y,
       moved: false,
+      countryIso3,
     }
   }
 
@@ -210,16 +214,19 @@ export default function WorldMap({
 
   function handlePointerUp(event: ReactPointerEvent<SVGSVGElement>) {
     const start = dragStartRef.current
-    if (start?.moved) {
-      suppressClickRef.current = true
-      window.setTimeout(() => {
-        suppressClickRef.current = false
-      }, 0)
-    }
-
     dragStartRef.current = null
+
     if (event.currentTarget.hasPointerCapture(event.pointerId)) {
       event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    if (
+      start &&
+      !start.moved &&
+      start.countryIso3 &&
+      registered.has(start.countryIso3)
+    ) {
+      onSelectCountry(start.countryIso3)
     }
   }
 
@@ -269,11 +276,6 @@ export default function WorldMap({
                 aria-label={isRegistered ? item.iso3 : undefined}
                 role={isRegistered ? 'button' : undefined}
                 tabIndex={isRegistered ? 0 : undefined}
-                onClick={() => {
-                  if (isRegistered && !suppressClickRef.current) {
-                    onSelectCountry(item.iso3)
-                  }
-                }}
                 onKeyDown={(event) => {
                   if (
                     isRegistered &&
