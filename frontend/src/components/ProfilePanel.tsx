@@ -187,23 +187,36 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   }
 
   useEffect(() => {
+    let active = true
+
     fetch(`${apiBase}/api/profile`)
       .then(async (response) => {
         if (!response.ok) throw new Error(`Profile HTTP ${response.status}`)
         return response.json()
       })
       .then((data: PersonalProfile) => {
+        if (!active) return
+
         setProfile(data)
         setCitizenshipsText(data.citizenships.join(', '))
         setSkillsText(data.skills.join(', '))
         setLanguagesText(formatLanguages(data.languages))
         setStatus('ready')
         void refreshReadiness()
-        void refreshLegalFit()
-        void refreshFinancialFit()
-        void refreshTtv()
       })
-      .catch(() => setStatus('error'))
+      .catch(() => {
+        if (active) setStatus('error')
+      })
+
+    return () => {
+      active = false
+    }
+  }, [apiBase])
+
+  useEffect(() => {
+    void refreshLegalFit()
+    void refreshFinancialFit()
+    void refreshTtv()
   }, [apiBase, targetCountry])
 
   async function save() {
