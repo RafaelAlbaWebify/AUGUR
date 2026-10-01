@@ -37,6 +37,26 @@ type ReadinessResponse = {
   notes: string[]
 }
 
+type LegalFitResponse = {
+  target_country_iso3: string
+  status: string
+  framework: string | null
+  work_permit_required: boolean | null
+  basis_citizenships?: string[]
+  short_stay: null | {
+    up_to_months: number
+    residence_registration_generally_required: boolean
+    presence_reporting_may_apply: boolean
+  }
+  long_stay: null | {
+    registration_may_be_required: boolean
+    conditions_depend_on_status: boolean
+    statuses: string[]
+  }
+  rule_version: string
+  notes: string[]
+}
+
 type FinancialFitResponse = {
   target_country_iso3: string
   status: string
@@ -106,6 +126,17 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [status, setStatus] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>('loading')
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
   const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
+  const [legalFit, setLegalFit] = useState<LegalFitResponse | null>(null)
+
+  async function refreshLegalFit() {
+    try {
+      const response = await fetch(`${apiBase}/api/countries/${targetCountry}/legal-fit`)
+      if (!response.ok) return
+      setLegalFit(await response.json())
+    } catch {
+      // Profile editing remains usable if LegalFit cannot be loaded.
+    }
+  }
 
   async function refreshFinancialFit() {
     try {
@@ -140,6 +171,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         setLanguagesText(formatLanguages(data.languages))
         setStatus('ready')
         void refreshReadiness()
+        void refreshLegalFit()
         void refreshFinancialFit()
       })
       .catch(() => setStatus('error'))
@@ -172,6 +204,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       setProfile(saved)
       setStatus('saved')
       await refreshReadiness()
+      await refreshLegalFit()
       await refreshFinancialFit()
     } catch {
       setStatus('error')
@@ -335,6 +368,42 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           <p>
             Readiness only confirms that profile inputs exist. Country-fit evidence
             will be calculated separately.
+          </p>
+        </div>
+
+        <div className="financialFitCard">
+          <div className="profileReadinessHeader">
+            <strong>LegalFit · {targetCountry}</strong>
+            <span>{legalFit?.status?.replaceAll('_', ' ') ?? 'loading…'}</span>
+          </div>
+
+          {legalFit?.status === 'eu_free_movement_framework' ? (
+            <div className="financialFitMetrics">
+              <div>
+                <span>Work permit</span>
+                <strong>Not required</strong>
+              </div>
+              <div>
+                <span>Short stay</span>
+                <strong>Up to {legalFit.short_stay?.up_to_months ?? 3} months</strong>
+              </div>
+              <div>
+                <span>Long stay</span>
+                <strong>Registration may apply</strong>
+              </div>
+            </div>
+          ) : (
+            <p className="financialFitMessage">
+              {legalFit?.status === 'domestic'
+                ? 'Domestic case: cross-border EU free-movement logic is not needed.'
+                : legalFit?.status === 'country_specific_rules_required'
+                ? 'Country-specific immigration rules still need verified implementation for this citizenship.'
+                : 'Complete current country and citizenships to evaluate the legal framework.'}
+            </p>
+          )}
+
+          <p>
+            Legal framework only. Long-stay conditions and national registration formalities still apply.
           </p>
         </div>
 
