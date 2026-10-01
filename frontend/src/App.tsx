@@ -271,6 +271,16 @@ function changeLabel(value: number | null) {
   return `${sign}${value.toFixed(1)}%`
 }
 
+async function fetchJson(
+  url: string,
+  label: string,
+  signal: AbortSignal,
+) {
+  const response = await fetch(url, { signal })
+  if (!response.ok) throw new Error(`${label} HTTP ${response.status}`)
+  return response.json()
+}
+
 export default function App() {
   const [countries, setCountries] = useState<Country[]>([])
   const [selectedCountry, setSelectedCountry] = useState('ESP')
@@ -286,31 +296,38 @@ export default function App() {
 
   useEffect(() => {
     const controller = new AbortController()
+    const signal = controller.signal
 
-    Promise.all([
-      fetch(`${API_BASE}/api/countries`, { signal: controller.signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Countries HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/health`, { signal: controller.signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Health HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/compare?countries=ESP,PRT,IRL`, { signal: controller.signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Comparison HTTP ${response.status}`)
-        return response.json()
-      }),
-    ])
-      .then(([countriesData, healthData, comparisonData]) => {
-        setCountries((countriesData as CountriesResponse).countries)
-        setHealth(healthData)
-        setComparison(comparisonData)
-      })
-      .catch((err) => {
-        if ((err as Error).name !== 'AbortError') {
-          setError(String(err))
-        }
-      })
+    Promise.allSettled([
+      fetchJson(`${API_BASE}/api/countries`, 'Countries', signal),
+      fetchJson(`${API_BASE}/api/health`, 'Health', signal),
+      fetchJson(`${API_BASE}/api/compare?countries=ESP,PRT,IRL`, 'Comparison', signal),
+    ]).then((results) => {
+      if (signal.aborted) return
+
+      const [countriesResult, healthResult, comparisonResult] = results
+      const failures: string[] = []
+
+      if (countriesResult.status === 'fulfilled') {
+        setCountries((countriesResult.value as CountriesResponse).countries)
+      } else {
+        failures.push(String(countriesResult.reason))
+      }
+
+      if (healthResult.status === 'fulfilled') {
+        setHealth(healthResult.value)
+      } else {
+        failures.push(String(healthResult.reason))
+      }
+
+      if (comparisonResult.status === 'fulfilled') {
+        setComparison(comparisonResult.value)
+      } else {
+        failures.push(String(comparisonResult.reason))
+      }
+
+      if (failures.length) setError(failures.join(' · '))
+    })
 
     return () => controller.abort()
   }, [])
@@ -327,45 +344,47 @@ export default function App() {
     setTrajectory(null)
     setScenarios(null)
 
-    Promise.all([
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/snapshot`, { signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Snapshot HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/trends`, { signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Trends HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/assessment`, { signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Assessment HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/source-quality`, { signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Source quality HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/trajectory`, { signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Trajectory HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/scenarios`, { signal }).then(async (response) => {
-        if (!response.ok) throw new Error(`Scenarios HTTP ${response.status}`)
-        return response.json()
-      }),
-    ])
-      .then(([snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData]) => {
-        setSnapshot(snapshotData)
-        setTrends(trendsData)
-        setAssessment(assessmentData)
-        setSourceQuality(sourceQualityData)
-        setTrajectory(trajectoryData)
-        setScenarios(scenarioData)
-      })
-      .catch((err) => {
-        if ((err as Error).name !== 'AbortError') {
-          setError(String(err))
-        }
-      })
+    Promise.allSettled([
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/snapshot`, 'Snapshot', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trends`, 'Trends', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/assessment`, 'Assessment', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/source-quality`, 'Source quality', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trajectory`, 'Trajectory', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/scenarios`, 'Scenarios', signal),
+    ]).then((results) => {
+      if (signal.aborted) return
+
+      const [
+        snapshotResult,
+        trendsResult,
+        assessmentResult,
+        sourceQualityResult,
+        trajectoryResult,
+        scenariosResult,
+      ] = results
+
+      const failures: string[] = []
+
+      if (snapshotResult.status === 'fulfilled') setSnapshot(snapshotResult.value)
+      else failures.push(String(snapshotResult.reason))
+
+      if (trendsResult.status === 'fulfilled') setTrends(trendsResult.value)
+      else failures.push(String(trendsResult.reason))
+
+      if (assessmentResult.status === 'fulfilled') setAssessment(assessmentResult.value)
+      else failures.push(String(assessmentResult.reason))
+
+      if (sourceQualityResult.status === 'fulfilled') setSourceQuality(sourceQualityResult.value)
+      else failures.push(String(sourceQualityResult.reason))
+
+      if (trajectoryResult.status === 'fulfilled') setTrajectory(trajectoryResult.value)
+      else failures.push(String(trajectoryResult.reason))
+
+      if (scenariosResult.status === 'fulfilled') setScenarios(scenariosResult.value)
+      else failures.push(String(scenariosResult.reason))
+
+      if (failures.length) setError(failures.join(' · '))
+    })
 
     return () => controller.abort()
   }, [selectedCountry])
