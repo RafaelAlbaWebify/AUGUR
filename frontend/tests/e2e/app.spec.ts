@@ -27,7 +27,23 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path.endsWith('/legal-fit')) {
+    if (path.endsWith('/ttv')) {
+      body = {
+        target_country_iso3: country,
+        method: 'ttv_dependency_graph_v1',
+        stage_order: ['legal_fit', 'language_fit', 'career_fit', 'financial_fit'],
+        stages: {
+          legal_fit: { ready: false, status: 'insufficient_profile', evidence_state: 'implemented' },
+          language_fit: { ready: false, status: 'profile_inputs_missing', evidence_state: 'country_evidence_pending' },
+          career_fit: { ready: false, status: 'profile_inputs_missing', evidence_state: 'country_evidence_pending' },
+          financial_fit: { ready: false, status: 'insufficient_profile', evidence_state: 'partial' },
+        },
+        blocked_by: ['legal_fit', 'language_fit', 'career_fit', 'financial_fit'],
+        ready_for_time_estimate: false,
+        time_estimate: null,
+        notes: [],
+      }
+    } else if (path.endsWith('/legal-fit')) {
       body = {
         target_country_iso3: country,
         status: 'insufficient_profile',
@@ -177,6 +193,8 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await expect(profile.getByText('0/4 input sets ready')).toBeVisible()
   await expect(profile.getByText('LegalFit · ESP')).toBeVisible()
   await expect(profile.getByText('FinancialFit · ESP')).toBeVisible()
+  await expect(profile.getByText('TTV dependency path · ESP')).toBeVisible()
+  await expect(profile.getByText('time estimate intentionally blocked')).toBeVisible()
 
   await profile.getByLabel('Profession').fill('Systems engineer')
   await profile.getByLabel('Household size').fill('2')
