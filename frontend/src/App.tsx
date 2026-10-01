@@ -285,58 +285,89 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    setError(null)
+    const controller = new AbortController()
 
     Promise.all([
-      fetch(`${API_BASE}/api/countries`).then(async (response) => {
+      fetch(`${API_BASE}/api/countries`, { signal: controller.signal }).then(async (response) => {
         if (!response.ok) throw new Error(`Countries HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/health`).then(async (response) => {
+      fetch(`${API_BASE}/api/health`, { signal: controller.signal }).then(async (response) => {
         if (!response.ok) throw new Error(`Health HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/snapshot`).then(async (response) => {
-        if (!response.ok) throw new Error(`Snapshot HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/trends`).then(async (response) => {
-        if (!response.ok) throw new Error(`Trends HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/assessment`).then(async (response) => {
-        if (!response.ok) throw new Error(`Assessment HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/source-quality`).then(async (response) => {
-        if (!response.ok) throw new Error(`Source quality HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/trajectory`).then(async (response) => {
-        if (!response.ok) throw new Error(`Trajectory HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/countries/${selectedCountry}/scenarios`).then(async (response) => {
-        if (!response.ok) throw new Error(`Scenarios HTTP ${response.status}`)
-        return response.json()
-      }),
-      fetch(`${API_BASE}/api/compare?countries=ESP,PRT,IRL`).then(async (response) => {
+      fetch(`${API_BASE}/api/compare?countries=ESP,PRT,IRL`, { signal: controller.signal }).then(async (response) => {
         if (!response.ok) throw new Error(`Comparison HTTP ${response.status}`)
         return response.json()
       }),
     ])
-      .then(([countriesData, healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData, comparisonData]) => {
+      .then(([countriesData, healthData, comparisonData]) => {
         setCountries((countriesData as CountriesResponse).countries)
         setHealth(healthData)
+        setComparison(comparisonData)
+      })
+      .catch((err) => {
+        if ((err as Error).name !== 'AbortError') {
+          setError(String(err))
+        }
+      })
+
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const signal = controller.signal
+
+    setError(null)
+    setSnapshot(null)
+    setTrends(null)
+    setAssessment(null)
+    setSourceQuality(null)
+    setTrajectory(null)
+    setScenarios(null)
+
+    Promise.all([
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/snapshot`, { signal }).then(async (response) => {
+        if (!response.ok) throw new Error(`Snapshot HTTP ${response.status}`)
+        return response.json()
+      }),
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/trends`, { signal }).then(async (response) => {
+        if (!response.ok) throw new Error(`Trends HTTP ${response.status}`)
+        return response.json()
+      }),
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/assessment`, { signal }).then(async (response) => {
+        if (!response.ok) throw new Error(`Assessment HTTP ${response.status}`)
+        return response.json()
+      }),
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/source-quality`, { signal }).then(async (response) => {
+        if (!response.ok) throw new Error(`Source quality HTTP ${response.status}`)
+        return response.json()
+      }),
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/trajectory`, { signal }).then(async (response) => {
+        if (!response.ok) throw new Error(`Trajectory HTTP ${response.status}`)
+        return response.json()
+      }),
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/scenarios`, { signal }).then(async (response) => {
+        if (!response.ok) throw new Error(`Scenarios HTTP ${response.status}`)
+        return response.json()
+      }),
+    ])
+      .then(([snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData]) => {
         setSnapshot(snapshotData)
         setTrends(trendsData)
         setAssessment(assessmentData)
         setSourceQuality(sourceQualityData)
         setTrajectory(trajectoryData)
         setScenarios(scenarioData)
-        setComparison(comparisonData)
       })
-      .catch((err) => setError(String(err)))
+      .catch((err) => {
+        if ((err as Error).name !== 'AbortError') {
+          setError(String(err))
+        }
+      })
+
+    return () => controller.abort()
   }, [selectedCountry])
 
   const selectedCountryMeta = countries.find((country) => country.iso3 === selectedCountry)
