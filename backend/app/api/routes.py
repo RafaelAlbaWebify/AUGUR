@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Query
 
 from app.core.config import settings
 from app.db.bootstrap import datastore_status
@@ -12,6 +12,7 @@ from app.services.trends import country_trends
 from app.services.assessment import country_assessment
 from app.services.trajectory import country_future_trajectory
 from app.services.scenarios import country_scenarios
+from app.services.compare import country_comparison
 
 router = APIRouter()
 
@@ -136,3 +137,40 @@ def scenarios(country_iso3: str):
         raise HTTPException(status_code=404, detail="Country is not registered")
 
     return country_scenarios(country_iso3)
+
+
+@router.get("/compare")
+def compare(
+    countries: str = Query(
+        "ESP,PRT,IRL",
+        description="Comma-separated ISO3 country codes",
+    )
+):
+    requested = [
+        value.strip().upper()
+        for value in countries.split(",")
+        if value.strip()
+    ]
+
+    if len(requested) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="At least two countries are required for comparison",
+        )
+
+    if len(requested) > 5:
+        raise HTTPException(
+            status_code=400,
+            detail="A maximum of five countries can be compared at once",
+        )
+
+    registry = {country["iso3"] for country in list_countries()}
+    unknown = [code for code in requested if code not in registry]
+
+    if unknown:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Countries are not registered: {', '.join(unknown)}",
+        )
+
+    return country_comparison(requested)
