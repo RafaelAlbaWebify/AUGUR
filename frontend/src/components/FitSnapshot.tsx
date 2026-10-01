@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, type CSSProperties } from 'react'
 
 type FitSnapshotProps = {
   apiBase: string
@@ -137,7 +137,7 @@ export default function FitSnapshot({
           <article className={`mockFitCard ${toneForStatus(value)}`} key={label}>
             <div
               className="readinessRing"
-              style={{ '--progress': percent } as React.CSSProperties}
+              style={{ '--progress': percent } as CSSProperties}
               aria-label={`${label} profile readiness ${percent}%`}
             >
               <span>{percent}</span>
