@@ -1875,3 +1875,208 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* 1920x1080 readable dashboard refinement */
+.shell {
+  width: min(1820px, calc(100% - 32px));
+}
+
+.view-overview footer {
+  display: none;
+}
+
+.overviewDashboard {
+  grid-template-columns: minmax(0, 1fr) 410px;
+  gap: 14px;
+}
+
+.overviewRail {
+  gap: 12px;
+}
+
+.overviewDashboard .worldMapFrame {
+  min-height: 255px;
+}
+
+.overviewDashboard .worldMapSvg {
+  height: 255px;
+}
+
+.overviewKpiStrip {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.overviewKpiStrip article {
+  min-width: 0;
+  border: 1px solid #242a32;
+  border-radius: 9px;
+  padding: 8px 9px;
+  background: rgba(255, 255, 255, 0.014);
+}
+
+.overviewKpiStrip span {
+  display: block;
+  color: #7f8996;
+  font-size: 9px;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overviewKpiStrip strong {
+  display: block;
+  margin-top: 4px;
+  color: #e5eaf0;
+  font-size: 15px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.overviewKpiStrip small {
+  display: block;
+  margin-top: 3px;
+  color: #697480;
+  font-size: 9px;
+  text-transform: capitalize;
+}
+
+.overviewAssessment {
+  padding-top: 10px;
+}
+
+.overviewAssessment .dimensionHeader h3 {
+  font-size: 18px;
+}
+
+.overviewAssessment .assessmentGrid {
+  gap: 8px;
+}
+
+.overviewAssessment .assessmentCard {
+  padding: 10px 11px;
+}
+
+.overviewAssessment .assessmentTop {
+  font-size: 9px;
+}
+
+.overviewAssessment .assessmentTrajectory {
+  margin-top: 8px;
+  font-size: 18px;
+}
+
+.overviewAssessment .assessmentCoverage {
+  font-size: 9px;
+}
+
+.overviewAssessment .signalList {
+  margin-top: 7px;
+  padding-top: 7px;
+}
+
+.overviewAssessment .signalList strong {
+  font-size: 8px;
+}
+
+.overviewAssessment .signalList span {
+  font-size: 10px;
+  line-height: 1.28;
+}
+
+.fitSnapshot,
+.outlookPreview,
+.comparePanel {
+  padding: 12px;
+}
+
+.comparePanelHeader strong {
+  font-size: 13px;
+}
+
+.comparePanelHeader > span,
+.comparePanelHeader > button {
+  font-size: 9px;
+}
+
+.fitSnapshotGrid span {
+  font-size: 8px;
+}
+
+.fitSnapshotGrid strong {
+  font-size: 11px;
+}
+
+.outlookPreviewGrid strong {
+  font-size: 17px;
+}
+
+.outlookPreviewGrid span {
+  font-size: 8px;
+}
+
+.compareSelectors label > span {
+  font-size: 9px;
+}
+
+.compareSelectors select {
+  font-size: 10px;
+  padding: 6px 7px;
+}
+
+.comparePreviewRow > span {
+  font-size: 9px;
+}
+
+.comparePreviewRow small {
+  font-size: 9px;
+}
+
+.comparePreviewRow b {
+  font-size: 8px;
+}
+
+.overviewDashboard .detailsToggleRow {
+  font-size: 10px;
+}
+
+@media (min-width: 1700px) and (min-height: 960px) {
+  .shell {
+    padding-top: 14px;
+  }
+
+  header h1 {
+    font-size: 44px;
+  }
+
+  .countryHero {
+    margin-top: 12px;
+    padding: 10px 0;
+  }
+
+  .countryHero h2 {
+    font-size: 38px;
+  }
+
+  .viewNav {
+    margin-top: 10px;
+  }
+
+  .overviewRail {
+    padding-top: 14px;
+  }
+}
+
+@media (max-width: 1500px) {
+  .overviewDashboard {
+    grid-template-columns: minmax(0, 1fr) 350px;
+  }
+
+  .overviewKpiStrip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
