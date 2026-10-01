@@ -1072,3 +1072,48 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+.worldMapControls {
+  position: absolute;
+  right: 14px;
+  top: 14px;
+  z-index: 2;
+  display: flex;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  background: rgba(11, 14, 18, 0.88);
+  backdrop-filter: blur(14px);
+}
+
+.worldMapControls button {
+  min-width: 34px;
+  height: 32px;
+  border: 1px solid #2a313b;
+  border-radius: 8px;
+  background: #11161c;
+  color: #dce3ea;
+  padding: 0 10px;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.worldMapControls button:hover,
+.worldMapControls button:focus {
+  border-color: #63788c;
+  background: #18212a;
+  outline: none;
+}
+
+.worldMapSvg {
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+}
+
+.worldMapSvg:active {
+  cursor: grabbing;
+}
