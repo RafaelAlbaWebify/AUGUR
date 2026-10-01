@@ -8,7 +8,7 @@ def main() -> int:
     adapter = EurostatAdapter(timeout_seconds=90, max_retries=3)
 
     try:
-        result = adapter.sync_spain()
+        result = adapter.sync_country("ESP")
     finally:
         adapter.close()
 
