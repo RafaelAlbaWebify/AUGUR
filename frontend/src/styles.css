@@ -958,3 +958,51 @@ footer {
     flex-direction: column;
   }
 }
+
+
+.financialFitCard {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #1c2229;
+}
+
+.financialFitMetrics {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.financialFitMetrics > div {
+  border: 1px solid #242a32;
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 5px;
+}
+
+.financialFitMetrics span {
+  color: #66717e;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.financialFitMetrics strong {
+  color: #dce3ea;
+  font-size: 15px;
+}
+
+.financialFitCard > p,
+.financialFitMessage {
+  margin: 10px 0 0;
+  color: #66717e;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+@media (max-width: 620px) {
+  .financialFitMetrics {
+    grid-template-columns: 1fr;
+  }
+}
