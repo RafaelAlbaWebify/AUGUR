@@ -680,14 +680,42 @@ footer {
   min-height: 430px;
 }
 
-.worldMapCanvas {
+.worldMapSvg {
+  display: block;
   width: 100%;
   height: 430px;
-  position: relative;
+  background: #0d1117;
 }
 
-.worldMapCanvas .maplibregl-canvas {
+.worldMapOcean {
+  fill: #0d1117;
+}
+
+.worldCountry {
+  fill: #171d24;
+  stroke: #303a44;
+  stroke-width: 0.55;
+  vector-effect: non-scaling-stroke;
+  transition: fill 120ms ease, stroke 120ms ease;
+}
+
+.worldCountry.registered {
+  fill: #40505f;
+  cursor: pointer;
+}
+
+.worldCountry.registered:hover,
+.worldCountry.registered:focus {
+  fill: #607487;
+  stroke: #c9d6e2;
+  stroke-width: 1.2;
   outline: none;
+}
+
+.worldCountry.selected {
+  fill: #8ea5bc;
+  stroke: #dce8f2;
+  stroke-width: 1.8;
 }
 
 .worldMapLegend {
@@ -735,21 +763,9 @@ footer {
   background: #8ea5bc;
 }
 
-.worldMapFallback {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  color: #66717e;
-  font-size: 12px;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  pointer-events: none;
-}
-
 @media (max-width: 620px) {
   .worldMapFrame,
-  .worldMapCanvas {
+  .worldMapSvg {
     min-height: 340px;
     height: 340px;
   }
