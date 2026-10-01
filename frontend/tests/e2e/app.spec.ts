@@ -174,12 +174,17 @@ test('comparison remains neutral and aligned', async ({ page }) => {
 })
 
 
-test('world view drives country selection without reload', async ({ page }) => {
+test('world view renders country geometry and drives selection', async ({ page }) => {
   await expect(page.getByText('WORLD VIEW')).toBeVisible()
-  await expect(page.getByTestId('world-map')).toBeVisible()
 
-  const worldView = page.getByRole('region', { name: 'World country map' })
-  await worldView.getByRole('button', { name: 'Portugal' }).click()
+  const map = page.getByTestId('world-map')
+  await expect(map).toBeVisible()
+
+  const portugalShape = map.locator('[data-country="PRT"]')
+  await expect(portugalShape).toHaveCount(1)
+  await expect(portugalShape).toBeVisible()
+
+  await portugalShape.click()
 
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
   await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
