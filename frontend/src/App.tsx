@@ -300,6 +300,8 @@ export default function App() {
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
+  const [activeView, setActiveView] = useState<'overview' | 'outlook' | 'compare' | 'profile'>('overview')
+  const [detailsExpanded, setDetailsExpanded] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -478,14 +480,37 @@ export default function App() {
         </section>
       )}
 
-      <WorldMap
-        countries={countries}
-        selectedCountry={selectedCountry}
-        onSelectCountry={setSelectedCountry}
-      />
+      <nav className="viewNav" aria-label="AUGUR views">
+        {[
+          ['overview', 'Overview'],
+          ['outlook', 'Outlook'],
+          ['compare', 'Compare'],
+          ['profile', 'Profile'],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            type="button"
+            className={activeView === id ? 'active' : ''}
+            onClick={() => setActiveView(id as 'overview' | 'outlook' | 'compare' | 'profile')}
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
 
-      <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
+      {activeView === 'overview' && (
+        <WorldMap
+          countries={countries}
+          selectedCountry={selectedCountry}
+          onSelectCountry={setSelectedCountry}
+        />
+      )}
 
+      {activeView === 'profile' && (
+        <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
+      )}
+
+      {activeView === 'overview' && (
       <section className="assessmentSection">
         <div className="dimensionHeader">
           <div>
@@ -550,7 +575,22 @@ export default function App() {
           })}
         </div>
       </section>
+      )}
 
+      {activeView === 'overview' && (
+        <div className="detailsToggleRow">
+          <button
+            type="button"
+            className="detailsToggle"
+            onClick={() => setDetailsExpanded((value) => !value)}
+          >
+            {detailsExpanded ? 'Hide indicator details' : 'Show indicator details'}
+          </button>
+          <span>{snapshot?.observation_count ?? 0} current indicators</span>
+        </div>
+      )}
+
+      {activeView === 'outlook' && (
       <section className="trajectorySection">
         <div className="dimensionHeader">
           <div>
@@ -585,7 +625,9 @@ export default function App() {
           ))}
         </div>
       </section>
+      )}
 
+      {activeView === 'outlook' && (
       <section className="scenarioSection">
         <div className="dimensionHeader">
           <div>
@@ -641,7 +683,9 @@ export default function App() {
           })}
         </div>
       </section>
+      )}
 
+      {activeView === 'compare' && (
       <section className="comparisonSection">
         <div className="dimensionHeader">
           <div>
@@ -690,8 +734,9 @@ export default function App() {
           </table>
         </div>
       </section>
+      )}
 
-      {dimensionOrder.map((dimension) => {
+      {activeView === 'overview' && detailsExpanded && dimensionOrder.map((dimension) => {
         const indicators = grouped[dimension] ?? []
         if (!indicators.length) return null
 
