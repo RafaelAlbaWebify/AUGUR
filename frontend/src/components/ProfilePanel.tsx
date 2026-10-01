@@ -472,7 +472,8 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           </p>
         </div>
 
-        <div className="financialFitCard">
+        <div className="fitGrid">
+          <div className="financialFitCard">
           <div className="profileReadinessHeader">
             <strong>LegalFit · {targetCountry}</strong>
             <span>{legalFit?.status?.replaceAll('_', ' ') ?? 'loading…'}</span>
@@ -630,7 +631,9 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           </p>
         </div>
 
-        <div className="financialFitCard">
+        </div>
+
+        <div className="financialFitCard ttvCard">
           <div className="profileReadinessHeader">
             <strong>TTV dependency path · {targetCountry}</strong>
             <span>
