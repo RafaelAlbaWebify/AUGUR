@@ -111,13 +111,13 @@ class UNWPPAdapter:
 
         raise RuntimeError("UN WPP request failed without an exception")
 
-    def normalize(self, csv_text: str) -> list[dict]:
+    def normalize(self, country_iso3: str, csv_text: str) -> list[dict]:
         reader = csv.DictReader(io.StringIO(csv_text))
         retrieved_at = datetime.now(timezone.utc)
         rows: list[dict] = []
 
         for record in reader:
-            if record.get("ISO3_code") != "ESP":
+            if record.get("ISO3_code") != country_iso3.upper():
                 continue
 
             variant = (record.get("Variant") or "").strip().lower()
@@ -143,7 +143,7 @@ class UNWPPAdapter:
 
                 rows.append(
                     {
-                        "country_iso3": "ESP",
+                        "country_iso3": country_iso3.upper(),
                         "indicator_id": config["indicator_id"],
                         "period": year,
                         "value": float(raw_value) * config["multiplier"],
@@ -163,14 +163,18 @@ class UNWPPAdapter:
                 )
 
         if not rows:
-            raise ValueError("UN WPP CSV contained no usable Spain observations")
+            raise ValueError(
+                f"UN WPP CSV contained no usable {country_iso3.upper()} observations"
+            )
 
         return rows
 
-    def sync_spain(self) -> dict:
-        print("[1/1] UN WPP 2024 demographic indicators (Spain)")
-        csv_text = self.fetch_csv()
-        rows = self.normalize(csv_text)
+    def sync_country(self, country_iso3: str, csv_text: str | None = None) -> dict:
+        print(
+            f"[1/1] UN WPP 2024 demographic indicators ({country_iso3.upper()})"
+        )
+        payload = csv_text if csv_text is not None else self.fetch_csv()
+        rows = self.normalize(country_iso3, payload)
         inserted = upsert_observations(rows)
 
         observed = sum(row["observation_type"] == "observed" for row in rows)
@@ -186,7 +190,7 @@ class UNWPPAdapter:
         )
 
         return {
-            "country_iso3": "ESP",
+            "country_iso3": country_iso3.upper(),
             "source": SOURCE_ID,
             "vintage": "WPP 2024 medium variant",
             "rows": inserted,
