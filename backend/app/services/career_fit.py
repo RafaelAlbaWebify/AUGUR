@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from app.models.profile import PersonalProfileResponse
+from app.services.esco_match import match_profile_skills
 
 
 RULE_VERSION = "EURES_LMI_2024_AS_PUBLISHED_2025"
@@ -45,6 +46,36 @@ COUNTRY_EVIDENCE = {
         "surplus_groups": set(),
     },
 }
+
+
+ESCO_OCCUPATION_HINTS = [
+    (
+        "ICT system administrator",
+        [
+            "system administrator",
+            "systems administrator",
+        ],
+    ),
+    (
+        "ICT network engineer",
+        [
+            "network engineer",
+        ],
+    ),
+]
+
+
+def esco_occupation_hint(profession: str | None) -> str | None:
+    if not profession:
+        return None
+
+    text = profession.strip().lower()
+
+    for label, keywords in ESCO_OCCUPATION_HINTS:
+        if any(keyword in text for keyword in keywords):
+            return label
+
+    return None
 
 
 OCCUPATION_RULES = [
@@ -208,6 +239,7 @@ def career_fit(
     target = target_country_iso3.upper()
     evidence = COUNTRY_EVIDENCE.get(target)
     classification = classify_occupation(profile.profession)
+    esco_label = esco_occupation_hint(profile.profession)
 
     if evidence is None:
         return {
@@ -261,6 +293,21 @@ def career_fit(
     else:
         market_signal = "not_classified_as_shortage_or_surplus"
 
+    skill_match = (
+        match_profile_skills(esco_label, profile.skills)
+        if esco_label
+        else {
+            "status": "occupation_not_mapped_to_esco",
+            "dataset_mode": None,
+            "dataset_version": None,
+            "occupation_label": None,
+            "matched_skills": [],
+            "missing_skills": [],
+            "coverage": None,
+            "evidence_complete": False,
+        }
+    )
+
     return {
         "target_country_iso3": target,
         "status": "evidence_available",
@@ -271,12 +318,8 @@ def career_fit(
             "label": evidence["source_label"],
             "url": evidence["source_url"],
         },
-        "skill_match": {
-            "status": "pending_esco_mapping",
-            "matched_skills": [],
-            "missing_skills": [],
-        },
-        "evidence_complete": False,
+        "skill_match": skill_match,
+        "evidence_complete": bool(skill_match.get("evidence_complete")),
         "notes": [
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             "Country evidence is based on the latest implemented EURES labour-market information for 2024 conditions.",
