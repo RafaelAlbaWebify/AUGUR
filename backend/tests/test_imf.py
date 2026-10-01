@@ -24,7 +24,7 @@ def test_imf_normalization_separates_observed_and_forecast():
     adapter = IMFAdapter(client=None)
 
     try:
-        rows = adapter.normalize(config, payload)
+        rows = adapter.normalize("ESP", config, payload)
     finally:
         adapter.close()
 
@@ -59,7 +59,7 @@ def test_imf_normalization_rejects_missing_spain_series():
 
     try:
         try:
-            adapter.normalize(config, payload)
+            adapter.normalize("ESP", config, payload)
             raised = False
         except ValueError:
             raised = True
