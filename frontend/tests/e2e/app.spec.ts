@@ -396,16 +396,39 @@ test('overview shows compact fit and compare previews', async ({ page }) => {
   await expect(page.getByLabel('Compare country 1')).toBeVisible()
 })
 
-test('desktop overview fits without vertical page scrolling', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 })
+test('1920x1080 overview fits without clipping or vertical scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
   await page.reload()
 
   await expect(page.getByText('COUNTRY SIGNAL SUMMARY')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Key indicators' })).toBeVisible()
 
-  const metrics = await page.evaluate(() => ({
-    scrollHeight: document.documentElement.scrollHeight,
-    innerHeight: window.innerHeight,
-  }))
+  const metrics = await page.evaluate(() => {
+    const details = document.querySelector('.detailsToggleRow')
+    const compare = document.querySelector('.comparePanel.compact')
+    const detailsBottom = details?.getBoundingClientRect().bottom ?? 0
+    const compareBottom = compare?.getBoundingClientRect().bottom ?? 0
+
+    return {
+      scrollHeight: document.documentElement.scrollHeight,
+      innerHeight: window.innerHeight,
+      detailsBottom,
+      compareBottom,
+    }
+  })
 
   expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.innerHeight + 2)
+  expect(metrics.detailsBottom).toBeLessThanOrEqual(metrics.innerHeight)
+  expect(metrics.compareBottom).toBeLessThanOrEqual(metrics.innerHeight)
+})
+
+
+test('overview exposes key indicators without opening details', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.reload()
+
+  const kpis = page.getByRole('region', { name: 'Key indicators' })
+  await expect(kpis).toBeVisible()
+  await expect(kpis.locator('article')).toHaveCount(1)
+  await expect(page.locator('.metricCard')).toHaveCount(0)
 })
