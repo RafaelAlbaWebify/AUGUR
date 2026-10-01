@@ -99,3 +99,15 @@ test('comparison remains neutral and aligned', async ({ page }) => {
   await expect(page.getByRole('columnheader', { name: 'Ireland' })).toBeVisible()
   await expect(page.getByText('aligned indicators · no ranking')).toBeVisible()
 })
+
+
+test('world view drives country selection without reload', async ({ page }) => {
+  await expect(page.getByText('WORLD VIEW')).toBeVisible()
+  await expect(page.getByTestId('world-map')).toBeVisible()
+
+  const worldView = page.getByRole('region', { name: 'World country map' })
+  await worldView.getByRole('button', { name: 'Portugal' }).click()
+
+  await expect(page.getByRole('heading', { name: 'Portugal' })).toBeVisible()
+  await expect(page.getByText('6.4%')).toBeVisible()
+})
