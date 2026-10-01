@@ -1130,3 +1130,360 @@ footer {
   font-size: 10px;
   line-height: 1.35;
 }
+
+
+/* Compact navigation layout */
+.shell {
+  width: min(1280px, calc(100% - 36px));
+  padding-top: 18px;
+}
+
+header {
+  align-items: center;
+}
+
+header h1 {
+  margin: 2px 0 0;
+  font-size: clamp(30px, 4vw, 48px);
+}
+
+.subtitle {
+  display: none;
+}
+
+.eyebrow,
+.label {
+  font-size: 9px;
+  letter-spacing: 0.13em;
+}
+
+.status {
+  padding: 7px 10px;
+  font-size: 11px;
+}
+
+.countryHero {
+  margin-top: 18px;
+  padding: 14px 0;
+  align-items: center;
+}
+
+.countryHero > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.countryHero > div:first-child > .label,
+.countryHero p {
+  display: none;
+}
+
+.countryHero h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 44px);
+}
+
+.countryTitleRow {
+  gap: 10px;
+}
+
+.countrySelect {
+  padding: 8px 30px 8px 10px;
+  font-size: 12px;
+}
+
+.countryMeta {
+  min-width: 210px;
+  grid-template-columns: repeat(2, minmax(90px, 1fr));
+  gap: 8px;
+}
+
+.countryMeta div {
+  padding: 9px 10px;
+}
+
+.countryMeta strong {
+  margin-top: 3px;
+  font-size: 18px;
+}
+
+.viewNav {
+  position: sticky;
+  top: 0;
+  z-index: 8;
+  margin-top: 14px;
+  padding: 6px;
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid #242a32;
+  border-radius: 12px;
+  background: rgba(11, 14, 18, 0.94);
+  backdrop-filter: blur(16px);
+}
+
+.viewNav button {
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: transparent;
+  color: #7f8996;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.viewNav button.active {
+  background: #1b232c;
+  color: #e8edf2;
+}
+
+.worldMapSection,
+.assessmentSection,
+.trajectorySection,
+.scenarioSection,
+.comparisonSection,
+.profileSection,
+.dimensionSection {
+  padding-top: 22px;
+}
+
+.dimensionHeader {
+  margin-bottom: 10px;
+}
+
+.dimensionHeader h3 {
+  margin-top: 3px;
+  font-size: 20px;
+}
+
+.worldMapFrame {
+  min-height: 300px;
+}
+
+.worldMapSvg {
+  height: 300px;
+}
+
+.worldMapLegend {
+  left: 10px;
+  bottom: 10px;
+  padding: 5px;
+  gap: 5px;
+}
+
+.worldMapLegend button {
+  padding: 5px 8px;
+  font-size: 10px;
+}
+
+.worldMapControls {
+  right: 10px;
+  top: 10px;
+  padding: 4px;
+}
+
+.worldMapControls button {
+  min-width: 30px;
+  height: 28px;
+  padding: 0 8px;
+  font-size: 11px;
+}
+
+.assessmentGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.assessmentCard {
+  min-height: 0;
+  padding: 12px;
+  border-radius: 11px;
+}
+
+.assessmentTop {
+  font-size: 9px;
+  gap: 8px;
+}
+
+.assessmentTrajectory {
+  margin-top: 12px;
+  font-size: 19px;
+}
+
+.assessmentCoverage {
+  margin-top: 5px;
+  font-size: 9px;
+}
+
+.signalList {
+  margin-top: 10px;
+  padding-top: 9px;
+  gap: 6px;
+}
+
+.signalList strong {
+  font-size: 8px;
+}
+
+.signalList span {
+  font-size: 10px;
+  line-height: 1.3;
+}
+
+.detailsToggleRow {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 11px;
+  border: 1px solid #242a32;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.detailsToggle {
+  border: 0;
+  background: transparent;
+  color: #c5d0db;
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.detailsToggleRow > span {
+  color: #66717e;
+  font-size: 10px;
+}
+
+.trajectoryGrid {
+  gap: 9px;
+}
+
+.trajectoryCard,
+.scenarioCard {
+  padding: 13px;
+  border-radius: 11px;
+}
+
+.trajectoryYear {
+  font-size: 26px;
+}
+
+.trajectoryIndicators {
+  margin-top: 12px;
+  gap: 8px;
+}
+
+.trajectoryRow {
+  padding-top: 8px;
+  gap: 3px 8px;
+}
+
+.scenarioGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.scenarioRows {
+  margin-top: 10px;
+  gap: 8px;
+}
+
+.scenarioRow {
+  padding-top: 8px;
+}
+
+.scenarioValues {
+  gap: 6px;
+}
+
+.scenarioValues span {
+  padding: 7px;
+}
+
+.comparisonTable th,
+.comparisonTable td {
+  padding: 9px 11px;
+}
+
+.indicatorGrid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+}
+
+.metricCard {
+  min-height: 0;
+  padding: 12px;
+}
+
+.metricValue {
+  margin-top: 14px;
+  font-size: clamp(22px, 2vw, 30px);
+}
+
+.trendBlock {
+  margin-top: 12px;
+  padding-top: 10px;
+}
+
+.sourceQuality {
+  margin-top: 10px;
+  padding-top: 10px;
+}
+
+.metricFooter {
+  padding-top: 12px;
+}
+
+footer {
+  margin-top: 28px;
+}
+
+@media (max-width: 1100px) {
+  .assessmentGrid,
+  .indicatorGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .scenarioGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .assessmentGrid,
+  .indicatorGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .countryHero {
+    align-items: stretch;
+  }
+
+  .countryMeta {
+    min-width: 0;
+  }
+
+  .viewNav {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    width: 100%;
+  }
+}
+
+@media (max-width: 520px) {
+  .assessmentGrid,
+  .indicatorGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .worldMapFrame,
+  .worldMapSvg {
+    min-height: 240px;
+    height: 240px;
+  }
+}
