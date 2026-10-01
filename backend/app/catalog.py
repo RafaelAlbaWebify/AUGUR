@@ -74,6 +74,36 @@ SOURCES = [
 
 INDICATORS = [
     {
+        "indicator_id": "housing_cost_overburden_rate",
+        "source_indicator": "EUROSTAT:ILC_LVHO07A",
+        "name": "Housing cost overburden rate",
+        "dimension": "housing",
+        "unit": "percent",
+        "interpretation_policy": "lower",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
+        "indicator_id": "tertiary_education_25_34",
+        "source_indicator": "EUROSTAT:SDG_04_20",
+        "name": "Tertiary educational attainment, ages 25–34",
+        "dimension": "human_systems",
+        "unit": "percent",
+        "interpretation_policy": "higher",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
+        "indicator_id": "energy_import_dependency",
+        "source_indicator": "EUROSTAT:NRG_IND_ID",
+        "name": "Energy import dependency",
+        "dimension": "strategic_resilience",
+        "unit": "percent",
+        "interpretation_policy": "contextual",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
         "indicator_id": "median_age",
         "source_indicator": "UN_WPP:MedianAgePop",
         "name": "Median age of population",
