@@ -750,54 +750,14 @@ export default function App() {
       )}
 
       {activeView === 'compare' && (
-      <section className="comparisonSection">
-        <div className="dimensionHeader">
-          <div>
-            <div className="label">COUNTRY COMPARISON</div>
-            <h3>Spain · Portugal · Ireland</h3>
-          </div>
-          <span>aligned indicators · no ranking</span>
-        </div>
-
-        <div className="comparisonTableWrap">
-          <table className="comparisonTable">
-            <thead>
-              <tr>
-                <th>Indicator</th>
-                {(comparison?.countries ?? []).map((country) => (
-                  <th key={country.iso3}>{country.name}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {(comparison?.indicators ?? []).map((item) => (
-                <tr key={item.indicator_id}>
-                  <td>
-                    <strong>{item.name}</strong>
-                    <small>{dimensionLabels[item.dimension] ?? item.dimension}</small>
-                  </td>
-
-                  {(comparison?.countries ?? []).map((country) => {
-                    const value = item.countries[country.iso3]
-                    return (
-                      <td key={country.iso3}>
-                        {value ? (
-                          <>
-                            <strong>{formatValue(value.value, item.unit)}</strong>
-                            <small>{value.period} · {value.source_id.replace('_', ' ')}</small>
-                          </>
-                        ) : (
-                          <span className="comparisonMissing">—</span>
-                        )}
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
+        <ComparePanel
+          countries={countries}
+          selected={compareCountries}
+          onChange={updateCompareCountry}
+          comparison={comparison}
+          formatValue={formatValue}
+          dimensionLabels={dimensionLabels}
+        />
       )}
 
       {activeView === 'overview' && detailsExpanded && dimensionOrder.map((dimension) => {
