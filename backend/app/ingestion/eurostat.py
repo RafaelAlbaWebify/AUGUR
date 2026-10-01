@@ -15,6 +15,17 @@ SOURCE_ID = "EUROSTAT"
 
 EUROSTAT_SERIES = [
     {
+        "indicator_id": "household_price_level_index",
+        "dataset_id": "prc_ppp_ind",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "na_item": "PLI_EU27_2020",
+            "ppp_cat": "E011",
+        },
+        "unit": "index_eu27_2020_100",
+    },
+    {
         "indicator_id": "housing_cost_overburden_rate",
         "dataset_id": "ilc_lvho07a",
         "filters": {
