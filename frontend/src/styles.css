@@ -1117,3 +1117,16 @@ footer {
 .worldMapSvg:active {
   cursor: grabbing;
 }
+
+
+.assessmentTrajectory.limited_evidence {
+  color: #8c96a3;
+}
+
+.assessmentEvidenceNote {
+  display: block;
+  margin-top: 5px;
+  color: #7f8996;
+  font-size: 10px;
+  line-height: 1.35;
+}
