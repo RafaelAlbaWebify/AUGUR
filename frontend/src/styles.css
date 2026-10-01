@@ -716,6 +716,7 @@ footer {
   fill: #8ea5bc;
   stroke: #dce8f2;
   stroke-width: 1.8;
+  pointer-events: none;
 }
 
 .worldMapLegend {
