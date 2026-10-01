@@ -197,9 +197,11 @@ const API_BASE = 'http://127.0.0.1:8020'
 const dimensionOrder = [
   'prosperity',
   'productive_capacity',
+  'housing',
   'demography',
   'human_systems',
   'fiscal',
+  'strategic_resilience',
 ]
 
 const dimensionLabels: Record<string, string> = {
@@ -207,7 +209,9 @@ const dimensionLabels: Record<string, string> = {
   productive_capacity: 'Productive capacity',
   demography: 'Demography',
   human_systems: 'Human systems',
+  housing: 'Housing',
   fiscal: 'Fiscal sustainability',
+  strategic_resilience: 'Strategic resilience',
 }
 
 function formatValue(value: number, unit: string) {
