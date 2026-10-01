@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 type LanguageSkill = {
   language: string
@@ -145,34 +145,40 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
   const [legalFit, setLegalFit] = useState<LegalFitResponse | null>(null)
   const [ttv, setTtv] = useState<TTVResponse | null>(null)
+  const fitRequestIdRef = useRef(0)
 
-  async function refreshTtv() {
-    try {
-      const response = await fetch(`${apiBase}/api/countries/${targetCountry}/ttv`)
-      if (!response.ok) return
-      setTtv(await response.json())
-    } catch {
-      // Profile editing remains usable if TTV cannot be loaded.
-    }
-  }
+  async function refreshTargetFits() {
+    const requestId = ++fitRequestIdRef.current
 
-  async function refreshLegalFit() {
     try {
-      const response = await fetch(`${apiBase}/api/countries/${targetCountry}/legal-fit`)
-      if (!response.ok) return
-      setLegalFit(await response.json())
-    } catch {
-      // Profile editing remains usable if LegalFit cannot be loaded.
-    }
-  }
+      const [legalResponse, financialResponse, ttvResponse] = await Promise.all([
+        fetch(`${apiBase}/api/countries/${targetCountry}/legal-fit`),
+        fetch(`${apiBase}/api/countries/${targetCountry}/financial-fit`),
+        fetch(`${apiBase}/api/countries/${targetCountry}/ttv`),
+      ])
 
-  async function refreshFinancialFit() {
-    try {
-      const response = await fetch(`${apiBase}/api/countries/${targetCountry}/financial-fit`)
-      if (!response.ok) return
-      setFinancialFit(await response.json())
+      if (
+        !legalResponse.ok ||
+        !financialResponse.ok ||
+        !ttvResponse.ok ||
+        requestId !== fitRequestIdRef.current
+      ) {
+        return
+      }
+
+      const [legalData, financialData, ttvData] = await Promise.all([
+        legalResponse.json(),
+        financialResponse.json(),
+        ttvResponse.json(),
+      ])
+
+      if (requestId !== fitRequestIdRef.current) return
+
+      setLegalFit(legalData)
+      setFinancialFit(financialData)
+      setTtv(ttvData)
     } catch {
-      // Profile editing remains usable if FinancialFit cannot be loaded.
+      // Profile editing remains usable if target-fit analysis cannot be loaded.
     }
   }
 
@@ -246,9 +252,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       setProfile(saved)
       setStatus('saved')
       await refreshReadiness()
-      await refreshLegalFit()
-      await refreshFinancialFit()
-      await refreshTtv()
+      await refreshTargetFits()
     } catch {
       setStatus('error')
     }
