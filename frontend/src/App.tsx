@@ -321,42 +321,7 @@ export default function App() {
         </div>
 
         <div className="assessmentGrid">
-          <section className="trajectorySection">
-        <div className="dimensionHeader">
-          <div>
-            <div className="label">OFFICIAL OUTLOOK</div>
-            <h3>2030 · 2035 · 2045</h3>
-          </div>
-          <span>official forecasts/projections · not an AUGUR prediction</span>
-        </div>
-
-        <div className="trajectoryGrid">
-          {(trajectory?.horizons ?? []).map((horizon) => (
-            <article className="trajectoryCard" key={horizon.year}>
-              <div className="trajectoryYear">{horizon.year}</div>
-              <div className="trajectorySources">
-                {horizon.sources.length ? horizon.sources.join(' · ') : 'No official coverage'}
-              </div>
-
-              <div className="trajectoryIndicators">
-                {horizon.indicators.length === 0 && (
-                  <div className="trajectoryEmpty">No official forecast loaded for this horizon.</div>
-                )}
-
-                {horizon.indicators.map((item) => (
-                  <div className="trajectoryRow" key={`${horizon.year}-${item.indicator_id}-${item.source_id}`}>
-                    <span>{item.name}</span>
-                    <strong>{formatValue(item.value, item.unit)}</strong>
-                    <small>{item.source_name}</small>
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      {dimensionOrder.map((dimension) => {
+          {dimensionOrder.map((dimension) => {
             const item = assessment?.dimensions?.[dimension]
             if (!item) return null
 
@@ -403,6 +368,41 @@ export default function App() {
               </article>
             )
           })}
+        </div>
+      </section>
+
+      <section className="trajectorySection">
+        <div className="dimensionHeader">
+          <div>
+            <div className="label">OFFICIAL OUTLOOK</div>
+            <h3>2030 · 2035 · 2045</h3>
+          </div>
+          <span>official forecasts/projections · not an AUGUR prediction</span>
+        </div>
+
+        <div className="trajectoryGrid">
+          {(trajectory?.horizons ?? []).map((horizon) => (
+            <article className="trajectoryCard" key={horizon.year}>
+              <div className="trajectoryYear">{horizon.year}</div>
+              <div className="trajectorySources">
+                {horizon.sources.length ? horizon.sources.join(' · ') : 'No official coverage'}
+              </div>
+
+              <div className="trajectoryIndicators">
+                {horizon.indicators.length === 0 && (
+                  <div className="trajectoryEmpty">No official forecast loaded for this horizon.</div>
+                )}
+
+                {horizon.indicators.map((item) => (
+                  <div className="trajectoryRow" key={`${horizon.year}-${item.indicator_id}-${item.source_id}`}>
+                    <span>{item.name}</span>
+                    <strong>{formatValue(item.value, item.unit)}</strong>
+                    <small>{item.source_name}</small>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
         </div>
       </section>
 
