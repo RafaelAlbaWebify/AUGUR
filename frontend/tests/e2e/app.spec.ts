@@ -85,11 +85,11 @@ test('loads core analytical sections', async ({ page }) => {
 test('switches country without a page reload', async ({ page }) => {
   const selector = page.getByLabel('Select country')
   await selector.selectOption('PRT')
-  await expect(page.getByRole('heading', { name: 'Portugal' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
   await expect(page.getByText('6.4%')).toBeVisible()
 
   await selector.selectOption('IRL')
-  await expect(page.getByRole('heading', { name: 'Ireland' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Ireland', exact: true })).toBeVisible()
   await expect(page.getByText('4.5%')).toBeVisible()
 })
 
@@ -108,6 +108,6 @@ test('world view drives country selection without reload', async ({ page }) => {
   const worldView = page.getByRole('region', { name: 'World country map' })
   await worldView.getByRole('button', { name: 'Portugal' }).click()
 
-  await expect(page.getByRole('heading', { name: 'Portugal' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
   await expect(page.getByText('6.4%')).toBeVisible()
 })
