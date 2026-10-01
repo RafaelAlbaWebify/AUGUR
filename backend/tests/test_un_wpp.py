@@ -13,7 +13,7 @@ def test_un_wpp_normalization_separates_estimates_and_projections():
     adapter = UNWPPAdapter(client=None)
 
     try:
-        rows = adapter.normalize(csv_text)
+        rows = adapter.normalize("ESP", csv_text)
     finally:
         adapter.close()
 
@@ -41,7 +41,7 @@ def test_un_wpp_normalization_rejects_missing_spain_rows():
 
     try:
         try:
-            adapter.normalize(csv_text)
+            adapter.normalize("ESP", csv_text)
             raised = False
         except ValueError:
             raised = True
