@@ -27,7 +27,7 @@ def test_ireland_ict_maps_to_shortage_signal():
     assert result["occupation"]["occupation_group"] == "ict_professionals"
     assert result["source"]["label"].startswith("EURES")
     assert result["evidence_complete"] is False
-    assert result["skill_match"]["status"] == "pending_esco_mapping"
+    assert result["skill_match"]["status"] == "occupation_not_mapped_to_esco"
 
 
 def test_portugal_ict_maps_to_shortage_signal():
