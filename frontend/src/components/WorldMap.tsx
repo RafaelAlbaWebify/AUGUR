@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { feature } from 'topojson-client'
 import countriesTopology from 'world-atlas/countries-110m.json'
 
@@ -174,7 +174,7 @@ export default function WorldMap({
     setViewBox({ x: 0, y: 0, width: WIDTH, height: HEIGHT })
   }
 
-  function handlePointerDown(event: React.PointerEvent<SVGSVGElement>) {
+  function handlePointerDown(event: ReactPointerEvent<SVGSVGElement>) {
     event.currentTarget.setPointerCapture(event.pointerId)
     dragStartRef.current = {
       clientX: event.clientX,
@@ -185,7 +185,7 @@ export default function WorldMap({
     }
   }
 
-  function handlePointerMove(event: React.PointerEvent<SVGSVGElement>) {
+  function handlePointerMove(event: ReactPointerEvent<SVGSVGElement>) {
     const start = dragStartRef.current
     const svg = svgRef.current
     if (!start || !svg) return
@@ -208,7 +208,7 @@ export default function WorldMap({
     )
   }
 
-  function handlePointerUp(event: React.PointerEvent<SVGSVGElement>) {
+  function handlePointerUp(event: ReactPointerEvent<SVGSVGElement>) {
     const start = dragStartRef.current
     if (start?.moved) {
       suppressClickRef.current = true
