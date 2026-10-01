@@ -43,6 +43,7 @@ def test_ttv_keeps_time_estimate_blocked_until_all_dependencies_are_viable(monke
         lambda profile, target: {
             "status": "evidence_available",
             "market_signal": "shortage",
+            "evidence_complete": False,
         },
     )
 
@@ -61,8 +62,8 @@ def test_ttv_keeps_time_estimate_blocked_until_all_dependencies_are_viable(monke
 
     result = module.ttv_status(profile, "IRL")
 
-    assert result["blocked_by"] == []
-    assert result["ready_for_time_estimate"] is True
+    assert result["blocked_by"] == ["career_fit"]
+    assert result["ready_for_time_estimate"] is False
     assert result["time_estimate"] is None
     assert result["stages"]["language_fit"]["evidence_state"] == "implemented"
-    assert result["stages"]["career_fit"]["evidence_state"] == "implemented"
+    assert result["stages"]["career_fit"]["evidence_state"] == "partial"
