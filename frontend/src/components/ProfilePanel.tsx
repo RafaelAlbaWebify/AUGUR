@@ -37,8 +37,28 @@ type ReadinessResponse = {
   notes: string[]
 }
 
+type FinancialFitResponse = {
+  target_country_iso3: string
+  status: string
+  reason: string | null
+  portable_income_analysis: null | {
+    origin_country_iso3: string
+    monthly_net_income: number
+    origin_price_level_index: number
+    origin_period: number
+    target_price_level_index: number
+    target_period: number
+    relative_cost_factor: number
+    origin_equivalent_purchasing_power: number
+    purchasing_power_change_pct: number
+    source_id: string
+  }
+  notes: string[]
+}
+
 type ProfilePanelProps = {
   apiBase: string
+  targetCountry: string
 }
 
 const EMPTY_PROFILE: PersonalProfile = {
@@ -78,13 +98,24 @@ function formatLanguages(languages: LanguageSkill[]) {
     .join(', ')
 }
 
-export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
+export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelProps) {
   const [profile, setProfile] = useState<PersonalProfile>(EMPTY_PROFILE)
   const [citizenshipsText, setCitizenshipsText] = useState('')
   const [skillsText, setSkillsText] = useState('')
   const [languagesText, setLanguagesText] = useState('')
   const [status, setStatus] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>('loading')
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
+  const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
+
+  async function refreshFinancialFit() {
+    try {
+      const response = await fetch(`${apiBase}/api/countries/${targetCountry}/financial-fit`)
+      if (!response.ok) return
+      setFinancialFit(await response.json())
+    } catch {
+      // Profile editing remains usable if FinancialFit cannot be loaded.
+    }
+  }
 
   async function refreshReadiness() {
     try {
@@ -109,9 +140,10 @@ export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
         setLanguagesText(formatLanguages(data.languages))
         setStatus('ready')
         void refreshReadiness()
+        void refreshFinancialFit()
       })
       .catch(() => setStatus('error'))
-  }, [apiBase])
+  }, [apiBase, targetCountry])
 
   async function save() {
     setStatus('saving')
@@ -140,6 +172,7 @@ export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
       setProfile(saved)
       setStatus('saved')
       await refreshReadiness()
+      await refreshFinancialFit()
     } catch {
       setStatus('error')
     }
@@ -302,6 +335,49 @@ export default function ProfilePanel({ apiBase }: ProfilePanelProps) {
           <p>
             Readiness only confirms that profile inputs exist. Country-fit evidence
             will be calculated separately.
+          </p>
+        </div>
+
+        <div className="financialFitCard">
+          <div className="profileReadinessHeader">
+            <strong>FinancialFit · {targetCountry}</strong>
+            <span>{financialFit?.status?.replaceAll('_', ' ') ?? 'loading…'}</span>
+          </div>
+
+          {financialFit?.portable_income_analysis ? (
+            <div className="financialFitMetrics">
+              <div>
+                <span>Relative cost factor</span>
+                <strong>×{financialFit.portable_income_analysis.relative_cost_factor.toFixed(2)}</strong>
+              </div>
+              <div>
+                <span>Purchasing-power change</span>
+                <strong>
+                  {financialFit.portable_income_analysis.purchasing_power_change_pct > 0 ? '+' : ''}
+                  {financialFit.portable_income_analysis.purchasing_power_change_pct.toFixed(1)}%
+                </strong>
+              </div>
+              <div>
+                <span>Origin-equivalent income</span>
+                <strong>
+                  {new Intl.NumberFormat('en-US', {
+                    maximumFractionDigits: 0,
+                  }).format(financialFit.portable_income_analysis.origin_equivalent_purchasing_power)}
+                </strong>
+              </div>
+            </div>
+          ) : (
+            <p className="financialFitMessage">
+              {financialFit?.status === 'local_income_unknown'
+                ? 'Current income is not assumed portable. Local salary evidence is required.'
+                : financialFit?.status === 'insufficient_country_evidence'
+                ? 'Country price-level evidence is not loaded yet.'
+                : 'Complete the required financial profile inputs to compare purchasing power.'}
+            </p>
+          )}
+
+          <p>
+            Relative purchasing power only. This is not a household budget or country score.
           </p>
         </div>
 
