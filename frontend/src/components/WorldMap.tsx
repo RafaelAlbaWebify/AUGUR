@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import maplibregl, { type GeoJSONSource, type Map } from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl'
+import type { Map } from 'maplibre-gl'
 import { feature } from 'topojson-client'
 import countriesTopology from 'world-atlas/countries-110m.json'
 import 'maplibre-gl/dist/maplibre-gl.css'
