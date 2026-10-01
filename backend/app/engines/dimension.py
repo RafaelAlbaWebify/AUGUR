@@ -37,7 +37,12 @@ def summarize_dimension(indicators: list[dict]) -> dict:
         else:
             contextual.append(signal)
 
-    if improving and not deteriorating:
+    directional_count = len(improving) + len(deteriorating) + len(stable)
+    total_count = len(indicators)
+
+    if directional_count == 1:
+        trajectory = "limited_evidence"
+    elif improving and not deteriorating:
         trajectory = "improving"
     elif deteriorating and not improving:
         trajectory = "deteriorating"
@@ -64,8 +69,8 @@ def summarize_dimension(indicators: list[dict]) -> dict:
     else:
         confidence = "low"
 
-    directional_count = len(improving) + len(deteriorating) + len(stable)
-    total_count = len(indicators)
+    if trajectory == "limited_evidence":
+        confidence = "low"
 
     return {
         "trajectory": trajectory,
@@ -76,6 +81,18 @@ def summarize_dimension(indicators: list[dict]) -> dict:
             directional_count / total_count
             if total_count
             else 0.0
+        ),
+        "evidence_status": (
+            "sufficient"
+            if directional_count >= 2
+            else "limited"
+            if directional_count == 1
+            else "contextual_only"
+        ),
+        "evidence_note": (
+            "Broad dimension trajectory requires at least two directional signals."
+            if directional_count == 1
+            else None
         ),
         "improving_signals": improving,
         "deteriorating_signals": deteriorating,
