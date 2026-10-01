@@ -332,7 +332,7 @@ def source_quality_summary(country_iso3: str) -> list[dict]:
     try:
         result = con.execute(
             """
-            WITH latest_by_source AS (
+            WITH observed AS (
                 SELECT
                     o.country_iso3,
                     o.indicator_id,
@@ -343,26 +343,27 @@ def source_quality_summary(country_iso3: str) -> list[dict]:
                     o.unit,
                     o.source_id,
                     s.name AS source_name,
-                    s.priority AS source_priority,
-                    o.dataset_id,
-                    o.retrieved_at,
-                    o.source_updated_at,
-                    ROW_NUMBER() OVER (
-                        PARTITION BY o.indicator_id, o.source_id
-                        ORDER BY o.period DESC
-                    ) AS rn
+                    s.priority AS source_priority
                 FROM observations o
                 JOIN indicators i USING (indicator_id)
                 JOIN sources s USING (source_id)
                 WHERE o.country_iso3 = ?
                   AND o.observation_type = 'observed'
             ),
+            latest_by_source AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id, source_id
+                        ORDER BY period DESC
+                    ) AS rn
+                FROM observed
+            ),
             latest AS (
                 SELECT *
                 FROM latest_by_source
                 WHERE rn = 1
             ),
-            paired AS (
+            latest_summary AS (
                 SELECT
                     indicator_id,
                     MIN(name) AS name,
@@ -374,31 +375,65 @@ def source_quality_summary(country_iso3: str) -> list[dict]:
                     MIN_BY(period, source_priority) AS preferred_period,
                     MIN_BY(value, source_priority) AS preferred_value,
                     MAX(period) AS freshest_period,
-                    MAX(period) - MIN(period) AS period_spread,
-                    MIN(value) AS min_value,
-                    MAX(value) AS max_value
+                    MAX(period) - MIN(period) AS period_spread
                 FROM latest
                 GROUP BY indicator_id
+            ),
+            common_periods AS (
+                SELECT
+                    indicator_id,
+                    period,
+                    COUNT(DISTINCT source_id) AS common_source_count
+                FROM observed
+                GROUP BY indicator_id, period
+                HAVING COUNT(DISTINCT source_id) >= 2
+            ),
+            latest_common_period AS (
+                SELECT
+                    indicator_id,
+                    MAX(period) AS common_period
+                FROM common_periods
+                GROUP BY indicator_id
+            ),
+            common_values AS (
+                SELECT
+                    o.indicator_id,
+                    o.period AS common_period,
+                    COUNT(DISTINCT o.source_id) AS common_period_source_count,
+                    MIN(o.value) AS min_value,
+                    MAX(o.value) AS max_value,
+                    MIN_BY(o.value, o.source_priority) AS preferred_common_value
+                FROM observed o
+                JOIN latest_common_period cp
+                  ON cp.indicator_id = o.indicator_id
+                 AND cp.common_period = o.period
+                GROUP BY o.indicator_id, o.period
             )
             SELECT
-                indicator_id,
-                name,
-                dimension,
-                unit,
-                source_count,
-                preferred_source_id,
-                preferred_source_name,
-                preferred_period,
-                preferred_value,
-                freshest_period,
-                period_spread,
+                ls.indicator_id,
+                ls.name,
+                ls.dimension,
+                ls.unit,
+                ls.source_count,
+                ls.preferred_source_id,
+                ls.preferred_source_name,
+                ls.preferred_period,
+                ls.preferred_value,
+                ls.freshest_period,
+                ls.period_spread,
+                cv.common_period,
+                cv.common_period_source_count,
                 CASE
-                    WHEN source_count < 2 THEN NULL
-                    WHEN preferred_value = 0 THEN NULL
-                    ELSE ((max_value - min_value) / ABS(preferred_value)) * 100
+                    WHEN cv.common_period_source_count < 2 THEN NULL
+                    WHEN cv.preferred_common_value = 0 THEN NULL
+                    ELSE (
+                        (cv.max_value - cv.min_value)
+                        / ABS(cv.preferred_common_value)
+                    ) * 100
                 END AS disagreement_pct
-            FROM paired
-            ORDER BY indicator_id
+            FROM latest_summary ls
+            LEFT JOIN common_values cv USING (indicator_id)
+            ORDER BY ls.indicator_id
             """,
             [country_iso3.upper()],
         )
