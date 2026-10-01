@@ -338,3 +338,30 @@ test('indicator details are collapsed by default and expandable', async ({ page 
   await page.getByRole('button', { name: 'Hide indicator details' }).click()
   await expect(page.locator('.metricCard')).toHaveCount(0)
 })
+
+
+test('unsaved profile draft survives view navigation', async ({ page }) => {
+  await page.getByRole('button', { name: 'Profile' }).click()
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  const profession = profile.getByLabel('Profession')
+
+  await profession.fill('Draft preserved across views')
+  await page.getByRole('button', { name: 'Overview' }).click()
+  await page.getByRole('button', { name: 'Profile' }).click()
+
+  await expect(profession).toHaveValue('Draft preserved across views')
+})
+
+test('map zoom survives view navigation', async ({ page }) => {
+  const map = page.getByTestId('world-map')
+  const initialViewBox = await map.getAttribute('viewBox')
+
+  await page.getByRole('button', { name: 'Zoom in' }).click()
+  const zoomedViewBox = await map.getAttribute('viewBox')
+  expect(zoomedViewBox).not.toBe(initialViewBox)
+
+  await page.getByRole('button', { name: 'Outlook' }).click()
+  await page.getByRole('button', { name: 'Overview' }).click()
+
+  await expect(map).toHaveAttribute('viewBox', zoomedViewBox ?? '')
+})
