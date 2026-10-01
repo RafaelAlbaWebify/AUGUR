@@ -121,6 +121,11 @@ def initialize_datastores() -> None:
     initialize_duckdb(settings.duckdb_path)
     initialize_analytics_schema()
 
+    from app.esco_store import esco_status, seed_esco_partial
+
+    if esco_status()["mode"] == "none":
+        seed_esco_partial()
+
 
 def datastore_status() -> dict[str, bool]:
     result = {"sqlite": False, "duckdb": False}
