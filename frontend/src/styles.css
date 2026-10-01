@@ -758,3 +758,123 @@ footer {
     right: 14px;
   }
 }
+
+
+.profileSection {
+  padding-top: 46px;
+}
+
+.profileCard {
+  border: 1px solid #242a32;
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.profileGrid label {
+  display: grid;
+  gap: 7px;
+}
+
+.profileGrid label > span {
+  color: #7f8996;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.profileGrid input[type="text"],
+.profileGrid input[type="number"],
+.profileGrid input:not([type]) {
+  width: 100%;
+}
+
+.profileGrid input {
+  border: 1px solid #2a313b;
+  border-radius: 10px;
+  background: #10151b;
+  color: #e8edf2;
+  padding: 10px 11px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.profileGrid input:focus {
+  outline: 1px solid #596777;
+  outline-offset: 1px;
+}
+
+.profileWide {
+  grid-column: 1 / -1;
+}
+
+.profileCheckbox {
+  align-content: end;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  justify-content: start;
+}
+
+.profileCheckbox input {
+  width: 16px;
+  height: 16px;
+}
+
+.profileCheckbox span {
+  text-transform: none !important;
+  letter-spacing: 0.02em !important;
+  font-size: 12px !important;
+  color: #aeb7c2 !important;
+}
+
+.profileActions {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid #1c2229;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.profileActions span {
+  color: #66717e;
+  font-size: 11px;
+}
+
+.profileActions button {
+  border: 1px solid #536474;
+  border-radius: 10px;
+  background: #18212a;
+  color: #e8edf2;
+  padding: 9px 13px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.profileActions button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (max-width: 620px) {
+  .profileGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .profileWide {
+    grid-column: auto;
+  }
+
+  .profileActions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
