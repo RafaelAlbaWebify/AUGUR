@@ -20,6 +20,7 @@ from app.services.financial_fit import financial_fit
 from app.services.legal_fit import legal_fit
 from app.services.language_fit import language_fit
 from app.services.career_fit import career_fit
+from app.esco_store import esco_status
 from app.services.ttv import ttv_status
 
 router = APIRouter()
@@ -259,3 +260,9 @@ def career_fit_get(country_iso3: str):
         raise HTTPException(status_code=404, detail="Country is not registered")
 
     return career_fit(get_profile(), country_iso3)
+
+
+
+@router.get("/esco/status")
+def esco_status_get():
+    return esco_status()
