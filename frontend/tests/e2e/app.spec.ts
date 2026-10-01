@@ -37,6 +37,12 @@ async function mockApi(page: Page) {
           matched_terms: [],
         },
         market_signal: null,
+        skill_match: {
+          status: 'not_evaluated',
+          matched_skills: [],
+          missing_skills: [],
+        },
+        evidence_complete: false,
         rule_version: 'EURES_LMI_2024_AS_PUBLISHED_2025',
         source: {
           label: country === 'ESP'
