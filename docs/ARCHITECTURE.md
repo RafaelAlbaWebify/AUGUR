@@ -1,0 +1,150 @@
+# AUGUR Architecture
+
+## Purpose
+
+AUGUR is a local-first analytical application for country trajectory, scenario exploration, comparison, and eventual personal viability analysis.
+
+## Analytical pipeline
+
+```text
+Official/public source
+        ↓
+Provider adapter
+        ↓
+Normalized observation
+        ↓
+DuckDB analytical store
+        ↓
+Canonical source selection + evidence quality
+        ↓
+Historical trend engine
+        ↓
+Dimension synthesis
+        ↓
+Official outlook
+        ↓
+AUGUR scenario envelope
+        ↓
+Personal Fit / TTV (planned)
+```
+
+Each stage consumes the output of the previous stage. Forecasts are kept out of historical trend calculations, and personal-fit preferences are kept out of country facts.
+
+## Provider registry
+
+Core providers are registered in `backend/app/providers.py`.
+
+A provider declares:
+
+- provider ID and label;
+- adapter factory;
+- country support predicate;
+- sync function;
+- optional shared-payload preparation hook.
+
+The registry currently contains:
+
+- World Bank
+- Eurostat
+- OECD
+- IMF
+- UN World Population Prospects
+
+`sync_core.py` no longer knows source-specific implementation details. It asks the registry which providers support a country and runs them.
+
+This is intentionally lighter than a runtime plugin marketplace. AUGUR uses trusted first-party provider adapters rather than arbitrary executable third-party extensions.
+
+## Storage
+
+### DuckDB
+
+Analytical data:
+
+- countries
+- sources
+- indicators
+- observations
+
+Observation identity:
+
+`country + indicator + period + source`
+
+### SQLite
+
+Reserved for application/profile/settings state and future personal-fit inputs.
+
+## Backend
+
+FastAPI exposes country evidence and analytical services.
+
+Key API families:
+
+- country registry
+- current snapshots
+- historical trends
+- dimension assessment
+- source evidence quality
+- official forecasts
+- future trajectory horizons
+- AUGUR scenarios
+- multi-country comparison
+
+## Frontend
+
+React + TypeScript + Vite.
+
+Current major views:
+
+- country selector
+- local-first MapLibre world view
+- current trajectory
+- official outlook
+- scenario envelopes
+- country comparison
+- indicator evidence cards
+
+The map uses bundled Natural Earth geometry through `world-atlas`; it does not require a tile API or API key.
+
+## Testing
+
+### Backend
+
+Pytest covers:
+
+- catalog invariants
+- trend interpretation
+- dimension synthesis
+- source adapters
+- scenario logic
+- provider routing
+- comparison alignment
+- source-quality query contract
+
+### Frontend
+
+Production TypeScript/Vite build runs in CI.
+
+Playwright smoke tests mock the API contract and verify:
+
+- core analytical sections render;
+- country switching works without reload;
+- comparison stays aligned and neutral;
+- world-view navigation drives country selection.
+
+This makes UI validation deterministic and independent of third-party source availability.
+
+## CI
+
+GitHub Actions runs on pushes and pull requests:
+
+1. backend dependency install + pytest;
+2. frontend dependency install + production build;
+3. Chromium installation;
+4. Playwright browser smoke suite.
+
+## Local ports
+
+- frontend: 5190
+- backend: 8020
+
+These are intentionally isolated from the other local Webify projects.
