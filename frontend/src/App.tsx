@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
+import WorldMap from './components/WorldMap'
 
 type Country = {
   iso2: string
@@ -410,6 +411,12 @@ export default function App() {
           AUGUR data connection failed: {error}
         </section>
       )}
+
+      <WorldMap
+        countries={countries}
+        selectedCountry={selectedCountry}
+        onSelectCountry={setSelectedCountry}
+      />
 
       <section className="assessmentSection">
         <div className="dimensionHeader">
