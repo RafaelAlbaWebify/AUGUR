@@ -81,6 +81,12 @@ type CareerFitResponse = {
     matched_terms: string[]
   }
   market_signal: string | null
+  skill_match: {
+    status: string
+    matched_skills: string[]
+    missing_skills: string[]
+  }
+  evidence_complete: boolean
   rule_version: string
   source: null | {
     label: string
@@ -558,8 +564,8 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <strong>{careerFit.market_signal?.replaceAll('_', ' ') ?? 'No signal'}</strong>
               </div>
               <div>
-                <span>Evidence source</span>
-                <strong>{careerFit.source?.label ?? '—'}</strong>
+                <span>Skills evidence</span>
+                <strong>{careerFit.skill_match.status.replaceAll('_', ' ')}</strong>
               </div>
             </div>
           ) : (
@@ -569,7 +575,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           )}
 
           <p>
-            Broad EURES shortage/surplus evidence only. It does not guarantee vacancies, salary, seniority match or employer demand.
+            Broad EURES shortage/surplus evidence only. ESCO skill matching is still pending, so CareerFit does not yet unlock TTV.
           </p>
         </div>
 
