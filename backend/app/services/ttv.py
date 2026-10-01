@@ -31,8 +31,9 @@ def ttv_status(
     }
 
     language_ready = bool(language["work_ready"])
-    career_ready = (
-        career["status"] == "evidence_available"
+    career_ready = bool(
+        career.get("evidence_complete")
+        and career["status"] == "evidence_available"
         and career["market_signal"] is not None
     )
 
@@ -58,7 +59,7 @@ def ttv_status(
             ),
             "evidence_state": (
                 "implemented"
-                if career["status"] == "evidence_available"
+                if career.get("evidence_complete")
                 else "partial"
             ),
         },
@@ -98,6 +99,6 @@ def ttv_status(
         "notes": [
             "TTV is a dependency graph, not a sum of arbitrary scores.",
             "No time estimate is produced until all required country evidence layers are implemented.",
-            "LanguageFit uses a country-language CEFR heuristic; CareerFit uses implemented EURES shortage/surplus evidence.",
+            "LanguageFit uses a country-language CEFR heuristic; CareerFit has EURES market evidence but remains partial until ESCO skill matching is implemented.",
         ],
     }
