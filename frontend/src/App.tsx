@@ -455,7 +455,7 @@ export default function App() {
   }, [snapshot, trends, sourceQuality])
 
   return (
-    <main className="shell">
+    <main className={`shell view-${activeView} ${detailsExpanded ? 'detailsOpen' : ''}`}>
       <header>
         <div>
           <div className="eyebrow">COUNTRY TRAJECTORY & PERSONAL FIT</div>
