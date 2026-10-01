@@ -485,3 +485,77 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+.scenarioSection {
+  padding-top: 46px;
+}
+
+.scenarioGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+}
+
+.scenarioCard {
+  border: 1px solid #242a32;
+  border-radius: 14px;
+  padding: 18px;
+  background: rgba(255, 255, 255, 0.018);
+}
+
+.scenarioRows {
+  margin-top: 18px;
+  display: grid;
+  gap: 14px;
+}
+
+.scenarioRow {
+  padding-top: 14px;
+  border-top: 1px solid #1c2229;
+}
+
+.scenarioName {
+  color: #aeb7c2;
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+
+.scenarioValues {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.scenarioValues span {
+  border: 1px solid #20262e;
+  border-radius: 10px;
+  padding: 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.scenarioValues small {
+  color: #66717e;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.scenarioValues strong {
+  color: #e8edf2;
+  font-size: 13px;
+}
+
+.scenarioAssumption {
+  margin-top: 8px;
+  color: #66717e;
+  font-size: 10px;
+  line-height: 1.4;
+}
+
+@media (max-width: 620px) {
+  .scenarioValues {
+    grid-template-columns: 1fr;
+  }
+}
