@@ -6,6 +6,7 @@ from itertools import product
 
 import httpx
 
+from app.catalog import country_config
 from app.db.analytics import upsert_observations
 
 BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
@@ -17,7 +18,7 @@ EUROSTAT_SERIES = [
         "indicator_id": "population_total",
         "dataset_id": "tps00001",
         "filters": {
-            "geo": "ES",
+            "geo": "__GEO__",
         },
         "unit": "persons",
     },
@@ -25,7 +26,7 @@ EUROSTAT_SERIES = [
         "indicator_id": "unemployment_rate",
         "dataset_id": "une_rt_a",
         "filters": {
-            "geo": "ES",
+            "geo": "__GEO__",
             "sex": "T",
             "age": "Y15-74",
             "unit": "PC_ACT",
@@ -36,7 +37,7 @@ EUROSTAT_SERIES = [
         "indicator_id": "fertility_rate",
         "dataset_id": "demo_find",
         "filters": {
-            "geo": "ES",
+            "geo": "__GEO__",
             "indic_de": "TOTFERRT",
         },
         "unit": "births_per_woman",
@@ -45,7 +46,7 @@ EUROSTAT_SERIES = [
         "indicator_id": "population_65_plus_share",
         "dataset_id": "demo_pjanind",
         "filters": {
-            "geo": "ES",
+            "geo": "__GEO__",
             "indic_de": "PC_Y65_MAX",
         },
         "unit": "percent",
@@ -54,7 +55,7 @@ EUROSTAT_SERIES = [
         "indicator_id": "employment_rate_20_64",
         "dataset_id": "lfsi_emp_a",
         "filters": {
-            "geo": "ES",
+            "geo": "__GEO__",
             "indic_em": "EMP_LFS",
             "sex": "T",
             "age": "Y20-64",
@@ -66,7 +67,7 @@ EUROSTAT_SERIES = [
         "indicator_id": "inflation_hicp",
         "dataset_id": "prc_hicp_ainr",
         "filters": {
-            "geo": "ES",
+            "geo": "__GEO__",
             "coicop18": "TOTAL",
             "unit": "RCH_A_AVG",
         },
@@ -76,7 +77,7 @@ EUROSTAT_SERIES = [
         "indicator_id": "public_debt_gdp",
         "dataset_id": "gov_10dd_edpt1",
         "filters": {
-            "geo": "ES",
+            "geo": "__GEO__",
             "sector": "S13",
             "unit": "PC_GDP",
             "na_item": "GD",
@@ -160,7 +161,7 @@ class EurostatAdapter:
 
         raise ValueError("Unsupported Eurostat category index")
 
-    def normalize(self, config: dict, payload: dict) -> list[dict]:
+    def normalize(self, country_iso3: str, config: dict, payload: dict) -> list[dict]:
         dimension_ids = payload["id"]
         dimension_sizes = payload["size"]
         dimensions = payload["dimension"]
@@ -212,7 +213,7 @@ class EurostatAdapter:
 
             rows.append(
                 {
-                    "country_iso3": "ESP",
+                    "country_iso3": country_iso3.upper(),
                     "indicator_id": config["indicator_id"],
                     "period": int(time_code),
                     "value": float(value),
@@ -229,7 +230,9 @@ class EurostatAdapter:
 
         return rows
 
-    def sync_spain(self) -> dict:
+    def sync_country(self, country_iso3: str) -> dict:
+        country = country_config(country_iso3)
+        geo = country["iso2"]
         total_rows = 0
         details = []
         failures = []
@@ -244,9 +247,9 @@ class EurostatAdapter:
             try:
                 payload = self.fetch_dataset(
                     config["dataset_id"],
-                    config["filters"],
+                    {key: (geo if value == "__GEO__" else value) for key, value in config["filters"].items()},
                 )
-                rows = self.normalize(config, payload)
+                rows = self.normalize(country_iso3, config, payload)
                 inserted = upsert_observations(rows)
                 total_rows += inserted
 
@@ -272,7 +275,7 @@ class EurostatAdapter:
                 print(f"   failed: {type(exc).__name__}: {exc}")
 
         return {
-            "country_iso3": "ESP",
+            "country_iso3": country_iso3.upper(),
             "source": SOURCE_ID,
             "rows": total_rows,
             "series": details,
