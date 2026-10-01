@@ -12,7 +12,7 @@ def test_oecd_csv_normalization():
     adapter = OECDAdapter(client=None)
 
     try:
-        rows = adapter.normalize(csv_text)
+        rows = adapter.normalize("ESP", csv_text)
     finally:
         adapter.close()
 
