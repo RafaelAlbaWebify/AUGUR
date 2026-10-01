@@ -40,7 +40,9 @@ def summarize_dimension(indicators: list[dict]) -> dict:
     directional_count = len(improving) + len(deteriorating) + len(stable)
     total_count = len(indicators)
 
-    if directional_count == 1:
+    if improving and not deteriorating and directional_count == 1:
+        trajectory = "limited_evidence"
+    elif deteriorating and not improving and directional_count == 1:
         trajectory = "limited_evidence"
     elif improving and not deteriorating:
         trajectory = "improving"
