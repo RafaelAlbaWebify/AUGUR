@@ -5,6 +5,11 @@ from app.ingestion.eurostat import EUROSTAT_SERIES
 def test_new_eu_dimensions_have_exact_eurostat_series():
     by_indicator = {item["indicator_id"]: item for item in EUROSTAT_SERIES}
 
+    price_level = by_indicator["household_price_level_index"]
+    assert price_level["dataset_id"] == "prc_ppp_ind"
+    assert price_level["filters"]["na_item"] == "PLI_EU27_2020"
+    assert price_level["filters"]["ppp_cat"] == "E011"
+
     housing = by_indicator["housing_cost_overburden_rate"]
     assert housing["dataset_id"] == "tessi163"
     assert housing["filters"]["unit"] == "PC"
