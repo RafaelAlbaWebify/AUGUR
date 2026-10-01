@@ -27,14 +27,29 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path.endsWith('/ttv')) {
+    if (path.endsWith('/language-fit')) {
+      body = {
+        target_country_iso3: country,
+        status: 'target_language_missing',
+        target_languages: [country === 'ESP' ? 'Spanish' : country === 'PRT' ? 'Portuguese' : 'English'],
+        matches: [{
+          language: country === 'ESP' ? 'Spanish' : country === 'PRT' ? 'Portuguese' : 'English',
+          declared_cefr: null,
+          meets_work_ready_heuristic: false,
+        }],
+        work_ready_threshold: 'B2',
+        work_ready: false,
+        method: 'labour_market_language_heuristic_v1',
+        notes: [],
+      }
+    } else if (path.endsWith('/ttv')) {
       body = {
         target_country_iso3: country,
         method: 'ttv_dependency_graph_v1',
         stage_order: ['legal_fit', 'language_fit', 'career_fit', 'financial_fit'],
         stages: {
           legal_fit: { ready: false, status: 'insufficient_profile', evidence_state: 'implemented' },
-          language_fit: { ready: false, status: 'profile_inputs_missing', evidence_state: 'country_evidence_pending' },
+          language_fit: { ready: false, status: 'target_language_missing', evidence_state: 'implemented' },
           career_fit: { ready: false, status: 'profile_inputs_missing', evidence_state: 'country_evidence_pending' },
           financial_fit: { ready: false, status: 'insufficient_profile', evidence_state: 'partial' },
         },
@@ -197,6 +212,7 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await expect(profile.getByText('Personal-fit readiness')).toBeVisible()
   await expect(profile.getByText('0/4 input sets ready')).toBeVisible()
   await expect(profile.getByText('LegalFit · ESP')).toBeVisible()
+  await expect(profile.getByText('LanguageFit · ESP')).toBeVisible()
   await expect(profile.getByText('FinancialFit · ESP')).toBeVisible()
   await expect(profile.getByText('TTV dependency path · ESP')).toBeVisible()
   await expect(profile.getByText('time estimate intentionally blocked')).toBeVisible()
