@@ -21,6 +21,7 @@ def country_scenarios(
         scenario = build_scenario_value(
             row["indicator_id"],
             row["value"],
+            row["period"],
             indicator.get("target_min"),
             indicator.get("target_max"),
         )
@@ -35,19 +36,24 @@ def country_scenarios(
                     "stress": scenario.stress,
                 },
                 "assumption": scenario.assumption,
+                "uncertainty": {
+                    "multiplier": scenario.uncertainty_multiplier,
+                    "level": scenario.uncertainty_level,
+                },
             }
         )
 
     return {
         "country_iso3": country_iso3.upper(),
-        "method": "augur_scenario_envelope_v1",
+        "method": "augur_scenario_envelope_v2",
         "horizons": selected_horizons,
         "scenario_names": ["baseline", "improvement", "stress"],
         "indicators": scenario_rows,
         "notes": [
             "Baseline equals the official forecast/projection.",
             "Improvement and stress are AUGUR model assumptions, not official forecasts.",
-            "Contextual indicators are not directionally adjusted in v1.",
+            "Scenario envelopes widen with horizon: 2030 near, 2035 medium, 2045 long.",
+            "Contextual indicators are not directionally adjusted.",
             "No composite score is produced.",
         ],
     }
