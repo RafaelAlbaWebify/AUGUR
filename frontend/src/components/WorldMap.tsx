@@ -32,7 +32,7 @@ function buildWorldGeoJson() {
   const collection = feature(
     topology as never,
     topology.objects.countries as never,
-  ) as GeoJSON.FeatureCollection
+  ) as unknown as GeoJSON.FeatureCollection
 
   collection.features = collection.features.map((item) => {
     const id = String(item.id ?? '')
