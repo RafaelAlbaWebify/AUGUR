@@ -203,7 +203,7 @@ test('navigates compact analytical views', async ({ page }) => {
   await expect(page.getByText('AUGUR SCENARIOS')).toBeVisible()
 
   await page.getByRole('button', { name: 'Compare' }).click()
-  await expect(page.getByText('COUNTRY COMPARISON')).toBeVisible()
+  await expect(page.getByText('Country comparison')).toBeVisible()
 
   await page.getByRole('button', { name: 'Profile' }).click()
   await expect(page.getByRole('region', { name: 'Personal profile' })).toBeVisible()
@@ -401,7 +401,7 @@ test('1920x1080 overview fits without clipping or vertical scrolling', async ({ 
   await page.reload()
 
   await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Key indicators' })).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
 
   const metrics = await page.evaluate(() => {
     const dimensions = document.querySelector('.overviewDimensions')
@@ -423,12 +423,15 @@ test('1920x1080 overview fits without clipping or vertical scrolling', async ({ 
 })
 
 
-test('overview exposes key indicators without opening details', async ({ page }) => {
+
+
+test('mockup visual language is present in Overview', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.reload()
 
-  const kpis = page.getByRole('region', { name: 'Key indicators' })
-  await expect(kpis).toBeVisible()
-  await expect(kpis.locator('article')).toHaveCount(1)
-  await expect(page.locator('.metricCard')).toHaveCount(0)
+  await expect(page.locator('.readinessRing')).toHaveCount(5)
+  await expect(page.locator('.mockDimensionCard')).toHaveCount(1)
+  await expect(page.locator('.signalBars')).toHaveCount(1)
+  await expect(page.locator('.overallSignalBalance')).toBeVisible()
+  await expect(page.locator('.compareBarTrack')).toHaveCount(1)
 })
