@@ -1,5 +1,21 @@
 import { useEffect, useMemo, useState } from 'react'
 
+type Country = {
+  iso2: string
+  iso3: string
+  name: string
+  region: string
+  subregion: string
+  currency: string
+  eu_member: boolean
+  eurozone_member: boolean
+  oecd_member: boolean
+}
+
+type CountriesResponse = {
+  countries: Country[]
+}
+
 type Health = {
   status: string
   phase: number
@@ -223,6 +239,8 @@ function changeLabel(value: number | null) {
 }
 
 export default function App() {
+  const [countries, setCountries] = useState<Country[]>([])
+  const [selectedCountry, setSelectedCountry] = useState('ESP')
   const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [trends, setTrends] = useState<TrendsResponse | null>(null)
@@ -233,37 +251,44 @@ export default function App() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    setError(null)
+
     Promise.all([
+      fetch(`${API_BASE}/api/countries`).then(async (response) => {
+        if (!response.ok) throw new Error(`Countries HTTP ${response.status}`)
+        return response.json()
+      }),
       fetch(`${API_BASE}/api/health`).then(async (response) => {
         if (!response.ok) throw new Error(`Health HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/countries/ESP/snapshot`).then(async (response) => {
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/snapshot`).then(async (response) => {
         if (!response.ok) throw new Error(`Snapshot HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/countries/ESP/trends`).then(async (response) => {
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/trends`).then(async (response) => {
         if (!response.ok) throw new Error(`Trends HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/countries/ESP/assessment`).then(async (response) => {
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/assessment`).then(async (response) => {
         if (!response.ok) throw new Error(`Assessment HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/countries/ESP/source-quality`).then(async (response) => {
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/source-quality`).then(async (response) => {
         if (!response.ok) throw new Error(`Source quality HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/countries/ESP/trajectory`).then(async (response) => {
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/trajectory`).then(async (response) => {
         if (!response.ok) throw new Error(`Trajectory HTTP ${response.status}`)
         return response.json()
       }),
-      fetch(`${API_BASE}/api/countries/ESP/scenarios`).then(async (response) => {
+      fetch(`${API_BASE}/api/countries/${selectedCountry}/scenarios`).then(async (response) => {
         if (!response.ok) throw new Error(`Scenarios HTTP ${response.status}`)
         return response.json()
       }),
     ])
-      .then(([healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData]) => {
+      .then(([countriesData, healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData]) => {
+        setCountries((countriesData as CountriesResponse).countries)
         setHealth(healthData)
         setSnapshot(snapshotData)
         setTrends(trendsData)
@@ -273,7 +298,9 @@ export default function App() {
         setScenarios(scenarioData)
       })
       .catch((err) => setError(String(err)))
-  }, [])
+  }, [selectedCountry])
+
+  const selectedCountryMeta = countries.find((country) => country.iso3 === selectedCountry)
 
   const grouped = useMemo(() => {
     const groups: Record<string, Indicator[]> = {}
@@ -314,8 +341,22 @@ export default function App() {
 
       <section className="countryHero">
         <div>
-          <div className="label">FIRST COUNTRY SLICE</div>
-          <h2>Spain</h2>
+          <div className="label">COUNTRY</div>
+          <div className="countryTitleRow">
+            <h2>{selectedCountryMeta?.name ?? selectedCountry}</h2>
+            <select
+              className="countrySelect"
+              value={selectedCountry}
+              onChange={(event) => setSelectedCountry(event.target.value)}
+              aria-label="Select country"
+            >
+              {countries.map((country) => (
+                <option value={country.iso3} key={country.iso3}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <p>
             Live local snapshot from AUGUR's analytical store, now enriched with
             multi-year trajectory analysis from the historical series.
@@ -329,7 +370,7 @@ export default function App() {
           </div>
           <div>
             <span>Country</span>
-            <strong>ESP</strong>
+            <strong>{selectedCountry}</strong>
           </div>
         </div>
       </section>
