@@ -77,22 +77,11 @@ export default function ComparePanel({
               value={iso3}
               onChange={(event) => onChange(index, event.target.value)}
             >
-              {countries.map((country) => {
-                const duplicate = selected.some(
-                  (value, selectedIndex) =>
-                    selectedIndex !== index && value === country.iso3,
-                )
-
-                return (
-                  <option
-                    key={country.iso3}
-                    value={country.iso3}
-                    disabled={duplicate}
-                  >
-                    {country.name}
-                  </option>
-                )
-              })}
+              {countries.map((country) => (
+                <option key={country.iso3} value={country.iso3}>
+                  {country.name}
+                </option>
+              ))}
             </select>
           </label>
         ))}
