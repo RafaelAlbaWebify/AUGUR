@@ -135,6 +135,10 @@ type ScenarioIndicator = TrajectoryIndicator & {
     stress: number
   }
   assumption: string
+  uncertainty: {
+    multiplier: number
+    level: string
+  }
 }
 
 type ScenarioResponse = {
@@ -446,7 +450,14 @@ export default function App() {
 
             return (
               <article className="scenarioCard" key={year}>
-                <div className="trajectoryYear">{year}</div>
+                <div className="scenarioYearHeader">
+                  <div className="trajectoryYear">{year}</div>
+                  <div className="uncertaintyBadge">
+                    {items[0]
+                      ? `${items[0].uncertainty.level} uncertainty · ×${items[0].uncertainty.multiplier}`
+                      : 'uncertainty unavailable'}
+                  </div>
+                </div>
 
                 <div className="scenarioRows">
                   {items.map((item) => (
