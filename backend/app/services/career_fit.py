@@ -217,6 +217,12 @@ def career_fit(
             "market_signal": None,
             "rule_version": RULE_VERSION,
             "source": None,
+            "skill_match": {
+                "status": "not_evaluated",
+                "matched_skills": [],
+                "missing_skills": [],
+            },
+            "evidence_complete": False,
             "notes": [
                 "No verified EURES country evidence is implemented for this target.",
                 "No demand signal is inferred.",
@@ -236,6 +242,12 @@ def career_fit(
                 "label": evidence["source_label"],
                 "url": evidence["source_url"],
             },
+            "skill_match": {
+                "status": "not_evaluated",
+                "matched_skills": [],
+                "missing_skills": [],
+            },
+            "evidence_complete": False,
             "notes": [
                 "CareerFit requires a mapped occupation group before EURES shortage/surplus evidence can be applied.",
                 "No country-fit score is produced.",
@@ -259,6 +271,12 @@ def career_fit(
             "label": evidence["source_label"],
             "url": evidence["source_url"],
         },
+        "skill_match": {
+            "status": "pending_esco_mapping",
+            "matched_skills": [],
+            "missing_skills": [],
+        },
+        "evidence_complete": False,
         "notes": [
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             "Country evidence is based on the latest implemented EURES labour-market information for 2024 conditions.",
