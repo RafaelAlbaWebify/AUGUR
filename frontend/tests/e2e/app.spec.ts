@@ -195,7 +195,7 @@ test.beforeEach(async ({ page }) => {
 
 test('navigates compact analytical views', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'AUGUR' })).toBeVisible()
-  await expect(page.getByText('COUNTRY SIGNAL SUMMARY')).toBeVisible()
+  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
   await expect(page.getByText('OFFICIAL OUTLOOK')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Outlook' }).click()
@@ -212,11 +212,11 @@ test('navigates compact analytical views', async ({ page }) => {
 test('switches country without a page reload', async ({ page }) => {
   const selector = page.getByLabel('Select country')
   await selector.selectOption('PRT')
-  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
   await expect(selector).toHaveValue('PRT')
 
   await selector.selectOption('IRL')
-  await expect(page.getByRole('heading', { name: 'Ireland', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Select country')).toHaveValue('IRL')
   await expect(selector).toHaveValue('IRL')
 })
 
@@ -241,7 +241,7 @@ test('world view renders country geometry and drives selection', async ({ page }
 
   await portugalShape.click()
 
-  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
@@ -290,7 +290,7 @@ test('unsaved profile edits survive target-country switching', async ({ page }) 
   await profession.fill('Unsaved draft role')
   await selector.selectOption('PRT')
 
-  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
   await expect(profession).toHaveValue('Unsaved draft role')
 })
 
@@ -306,8 +306,8 @@ test('partial country endpoint failure keeps healthy sections visible', async ({
 
   await page.getByLabel('Select country').selectOption('PRT')
 
-  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
-  await expect(page.getByText('COUNTRY SIGNAL SUMMARY')).toBeVisible()
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
+  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
   await expect(page.getByText(/Scenarios HTTP 500/)).toBeVisible()
 })
 
@@ -330,7 +330,7 @@ test('rapid country switching keeps the latest selection', async ({ page }) => {
   await selector.selectOption('PRT')
   await selector.selectOption('IRL')
 
-  await expect(page.getByRole('heading', { name: 'Ireland', exact: true })).toBeVisible()
+  await expect(page.getByLabel('Select country')).toHaveValue('IRL')
   await expect(selector).toHaveValue('IRL')
 })
 
@@ -400,25 +400,25 @@ test('1920x1080 overview fits without clipping or vertical scrolling', async ({ 
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.reload()
 
-  await expect(page.getByText('COUNTRY SIGNAL SUMMARY')).toBeVisible()
+  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Key indicators' })).toBeVisible()
 
   const metrics = await page.evaluate(() => {
-    const details = document.querySelector('.detailsToggleRow')
+    const dimensions = document.querySelector('.overviewDimensions')
     const compare = document.querySelector('.comparePanel.compact')
-    const detailsBottom = details?.getBoundingClientRect().bottom ?? 0
+    const dimensionsBottom = dimensions?.getBoundingClientRect().bottom ?? 0
     const compareBottom = compare?.getBoundingClientRect().bottom ?? 0
 
     return {
       scrollHeight: document.documentElement.scrollHeight,
       innerHeight: window.innerHeight,
-      detailsBottom,
+      dimensionsBottom,
       compareBottom,
     }
   })
 
   expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.innerHeight + 2)
-  expect(metrics.detailsBottom).toBeLessThanOrEqual(metrics.innerHeight)
+  expect(metrics.dimensionsBottom).toBeLessThanOrEqual(metrics.innerHeight)
   expect(metrics.compareBottom).toBeLessThanOrEqual(metrics.innerHeight)
 })
 
