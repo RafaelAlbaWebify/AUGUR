@@ -19,6 +19,7 @@ from app.services.profile_readiness import profile_readiness
 from app.services.financial_fit import financial_fit
 from app.services.legal_fit import legal_fit
 from app.services.language_fit import language_fit
+from app.services.career_fit import career_fit
 from app.services.ttv import ttv_status
 
 router = APIRouter()
@@ -246,3 +247,15 @@ def language_fit_get(country_iso3: str):
         raise HTTPException(status_code=404, detail="Country is not registered")
 
     return language_fit(get_profile(), country_iso3)
+
+
+
+@router.get("/countries/{country_iso3}/career-fit")
+def career_fit_get(country_iso3: str):
+    country_iso3 = country_iso3.upper()
+    registry = {country["iso3"] for country in list_countries()}
+
+    if country_iso3 not in registry:
+        raise HTTPException(status_code=404, detail="Country is not registered")
+
+    return career_fit(get_profile(), country_iso3)
