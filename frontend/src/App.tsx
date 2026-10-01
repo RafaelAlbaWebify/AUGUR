@@ -84,6 +84,8 @@ type DimensionAssessment = {
   indicator_count: number
   directional_indicator_count: number
   coverage: number
+  evidence_status?: string
+  evidence_note?: string | null
   improving_signals: Signal[]
   deteriorating_signals: Signal[]
   stable_signals: Signal[]
@@ -508,6 +510,11 @@ export default function App() {
 
                 <div className="assessmentCoverage">
                   Directional coverage: {item.directional_indicator_count}/{item.indicator_count}
+                  {item.evidence_status === 'limited' && (
+                    <span className="assessmentEvidenceNote">
+                      Broad verdict withheld · only one directional signal
+                    </span>
+                  )}
                 </div>
 
                 <div className="signalList">
