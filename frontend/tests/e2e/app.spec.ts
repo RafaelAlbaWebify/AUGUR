@@ -27,7 +27,28 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path.endsWith('/language-fit')) {
+    if (path.endsWith('/career-fit')) {
+      body = {
+        target_country_iso3: country,
+        status: 'profession_missing',
+        occupation: {
+          status: 'profession_missing',
+          occupation_group: null,
+          matched_terms: [],
+        },
+        market_signal: null,
+        rule_version: 'EURES_LMI_2024_AS_PUBLISHED_2025',
+        source: {
+          label: country === 'ESP'
+            ? 'EURES Labour Market Information: Spain'
+            : country === 'PRT'
+            ? 'EURES Labour Market Information: Portugal'
+            : 'EURES Labour Market Information: Ireland',
+          url: 'https://eures.europa.eu/',
+        },
+        notes: [],
+      }
+    } else if (path.endsWith('/language-fit')) {
       body = {
         target_country_iso3: country,
         status: 'target_language_missing',
@@ -50,7 +71,7 @@ async function mockApi(page: Page) {
         stages: {
           legal_fit: { ready: false, status: 'insufficient_profile', evidence_state: 'implemented' },
           language_fit: { ready: false, status: 'target_language_missing', evidence_state: 'implemented' },
-          career_fit: { ready: false, status: 'profile_inputs_missing', evidence_state: 'country_evidence_pending' },
+          career_fit: { ready: false, status: 'profession_missing', evidence_state: 'partial' },
           financial_fit: { ready: false, status: 'insufficient_profile', evidence_state: 'partial' },
         },
         blocked_by: ['legal_fit', 'language_fit', 'career_fit', 'financial_fit'],
@@ -213,6 +234,7 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await expect(profile.getByText('0/4 input sets ready')).toBeVisible()
   await expect(profile.getByText('LegalFit · ESP')).toBeVisible()
   await expect(profile.getByText('LanguageFit · ESP')).toBeVisible()
+  await expect(profile.getByText('CareerFit · ESP')).toBeVisible()
   await expect(profile.getByText('FinancialFit · ESP')).toBeVisible()
   await expect(profile.getByText('TTV dependency path · ESP')).toBeVisible()
   await expect(profile.getByText('time estimate intentionally blocked')).toBeVisible()
