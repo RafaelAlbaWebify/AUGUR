@@ -106,6 +106,8 @@ type SourceQualityItem = {
   preferred_value: number
   freshest_period: number
   period_spread: number
+  common_period: number | null
+  common_period_source_count: number | null
   disagreement_pct: number | null
 }
 
@@ -676,8 +678,8 @@ export default function App() {
                       </strong>
                       <span>
                         {indicator.sourceQuality?.disagreement_pct == null
-                          ? 'no comparison available'
-                          : `${indicator.sourceQuality.disagreement_pct.toFixed(2)}% disagreement`}
+                          ? 'no same-period comparison'
+                          : `${indicator.sourceQuality.disagreement_pct.toFixed(2)}% disagreement · ${indicator.sourceQuality.common_period}`}
                       </span>
                     </div>
                   </div>
