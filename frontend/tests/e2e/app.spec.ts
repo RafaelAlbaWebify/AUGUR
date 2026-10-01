@@ -234,3 +234,44 @@ test('unsaved profile edits survive target-country switching', async ({ page }) 
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
   await expect(profession).toHaveValue('Unsaved draft role')
 })
+
+
+test('partial country endpoint failure keeps healthy sections visible', async ({ page }) => {
+  await page.route('**/api/countries/PRT/scenarios', async route => {
+    await route.fulfill({
+      status: 500,
+      contentType: 'application/json',
+      body: JSON.stringify({ detail: 'synthetic scenarios failure' }),
+    })
+  })
+
+  await page.getByLabel('Select country').selectOption('PRT')
+
+  await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
+  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
+  await expect(page.getByText(/Scenarios HTTP 500/)).toBeVisible()
+})
+
+
+test('rapid country switching keeps the latest selection', async ({ page }) => {
+  await page.route('**/api/countries/PRT/snapshot', async route => {
+    await new Promise(resolve => setTimeout(resolve, 250))
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'PRT',
+        observation_count: 1,
+        indicators: [metric('PRT')],
+      }),
+    })
+  })
+
+  const selector = page.getByLabel('Select country')
+  await selector.selectOption('PRT')
+  await selector.selectOption('IRL')
+
+  await expect(page.getByRole('heading', { name: 'Ireland', exact: true })).toBeVisible()
+  await expect(page.locator('.metricValue').filter({ hasText: /^4\.5%$/ })).toBeVisible()
+  await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toHaveCount(0)
+})
