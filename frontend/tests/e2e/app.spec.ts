@@ -147,8 +147,12 @@ async function mockApi(page: Page) {
     } else if (path === '/api/countries') {
       body = { countries }
     } else if (path === '/api/compare') {
+      const requested = (url.searchParams.get('countries') ?? 'IRL,ESP,PRT').split(',')
       body = {
-        countries: countries.map(({ iso3, name }) => ({ iso3, name })),
+        countries: requested.map((iso3) => {
+          const country = countries.find((item) => item.iso3 === iso3)!
+          return { iso3: country.iso3, name: country.name }
+        }),
         indicator_count: 1,
         method: 'aligned_current_observations_v1',
         notes: [],
@@ -364,4 +368,44 @@ test('map zoom survives view navigation', async ({ page }) => {
   await page.getByRole('button', { name: 'Overview' }).click()
 
   await expect(map).toHaveAttribute('viewBox', zoomedViewBox ?? '')
+})
+
+
+test('comparison selectors swap countries without duplicates', async ({ page }) => {
+  await page.getByRole('button', { name: 'Compare' }).click()
+
+  const first = page.getByLabel('Compare country 1')
+  const second = page.getByLabel('Compare country 2')
+  const third = page.getByLabel('Compare country 3')
+
+  await expect(first).toHaveValue('IRL')
+  await expect(second).toHaveValue('ESP')
+  await expect(third).toHaveValue('PRT')
+
+  await first.selectOption('ESP')
+
+  await expect(first).toHaveValue('ESP')
+  await expect(second).toHaveValue('IRL')
+  await expect(third).toHaveValue('PRT')
+})
+
+test('overview shows compact fit and compare previews', async ({ page }) => {
+  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
+  await expect(page.getByText('Official horizons')).toBeVisible()
+  await expect(page.getByText('Custom comparison')).toBeVisible()
+  await expect(page.getByLabel('Compare country 1')).toBeVisible()
+})
+
+test('desktop overview fits without vertical page scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.reload()
+
+  await expect(page.getByText('COUNTRY SIGNAL SUMMARY')).toBeVisible()
+
+  const metrics = await page.evaluate(() => ({
+    scrollHeight: document.documentElement.scrollHeight,
+    innerHeight: window.innerHeight,
+  }))
+
+  expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.innerHeight + 2)
 })
