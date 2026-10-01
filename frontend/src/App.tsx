@@ -127,6 +127,25 @@ type TrajectoryResponse = {
   notes: string[]
 }
 
+type ScenarioIndicator = TrajectoryIndicator & {
+  official_baseline: number
+  scenarios: {
+    baseline: number
+    improvement: number
+    stress: number
+  }
+  assumption: string
+}
+
+type ScenarioResponse = {
+  country_iso3: string
+  method: string
+  horizons: number[]
+  scenario_names: string[]
+  indicators: ScenarioIndicator[]
+  notes: string[]
+}
+
 const API_BASE = 'http://127.0.0.1:8020'
 
 const dimensionOrder = [
@@ -206,6 +225,7 @@ export default function App() {
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null)
   const [sourceQuality, setSourceQuality] = useState<SourceQualityResponse | null>(null)
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
+  const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -234,14 +254,19 @@ export default function App() {
         if (!response.ok) throw new Error(`Trajectory HTTP ${response.status}`)
         return response.json()
       }),
+      fetch(`${API_BASE}/api/countries/ESP/scenarios`).then(async (response) => {
+        if (!response.ok) throw new Error(`Scenarios HTTP ${response.status}`)
+        return response.json()
+      }),
     ])
-      .then(([healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData]) => {
+      .then(([healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData]) => {
         setHealth(healthData)
         setSnapshot(snapshotData)
         setTrends(trendsData)
         setAssessment(assessmentData)
         setSourceQuality(sourceQualityData)
         setTrajectory(trajectoryData)
+        setScenarios(scenarioData)
       })
       .catch((err) => setError(String(err)))
   }, [])
@@ -403,6 +428,55 @@ export default function App() {
               </div>
             </article>
           ))}
+        </div>
+      </section>
+
+      <section className="scenarioSection">
+        <div className="dimensionHeader">
+          <div>
+            <div className="label">AUGUR SCENARIOS</div>
+            <h3>Baseline · Improvement · Stress</h3>
+          </div>
+          <span>baseline = official · alternatives = model assumptions</span>
+        </div>
+
+        <div className="scenarioGrid">
+          {(scenarios?.horizons ?? []).map((year) => {
+            const items = scenarios?.indicators.filter((item) => item.period === year) ?? []
+
+            return (
+              <article className="scenarioCard" key={year}>
+                <div className="trajectoryYear">{year}</div>
+
+                <div className="scenarioRows">
+                  {items.map((item) => (
+                    <div className="scenarioRow" key={`${year}-${item.indicator_id}-${item.source_id}`}>
+                      <div className="scenarioName">{item.name}</div>
+                      <div className="scenarioValues">
+                        <span>
+                          <small>Baseline</small>
+                          <strong>{formatValue(item.scenarios.baseline, item.unit)}</strong>
+                        </span>
+                        <span>
+                          <small>Improvement</small>
+                          <strong>{formatValue(item.scenarios.improvement, item.unit)}</strong>
+                        </span>
+                        <span>
+                          <small>Stress</small>
+                          <strong>{formatValue(item.scenarios.stress, item.unit)}</strong>
+                        </span>
+                      </div>
+                      <div className="scenarioAssumption">{item.assumption}</div>
+                    </div>
+                  ))}
+
+                  {items.length === 0 && (
+                    <div className="trajectoryEmpty">No scenario inputs available for this horizon.</div>
+                  )}
+                </div>
+              </article>
+            )
+          })}
         </div>
       </section>
 
