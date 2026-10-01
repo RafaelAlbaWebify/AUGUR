@@ -2,6 +2,8 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.core.config import settings
 from app.db.bootstrap import datastore_status
+from app.db.profile import get_profile, save_profile
+from app.models.profile import PersonalProfile, PersonalProfileResponse
 from app.db.analytics import (
     indicator_source_comparison,
     source_quality_summary,
@@ -174,3 +176,14 @@ def compare(
         )
 
     return country_comparison(requested)
+
+
+
+@router.get("/profile", response_model=PersonalProfileResponse)
+def profile_get():
+    return get_profile()
+
+
+@router.put("/profile", response_model=PersonalProfileResponse)
+def profile_put(profile: PersonalProfile):
+    return save_profile(profile)
