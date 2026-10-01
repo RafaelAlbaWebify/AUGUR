@@ -27,7 +27,15 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path === '/api/profile/readiness') {
+    if (path.endsWith('/financial-fit')) {
+      body = {
+        target_country_iso3: country,
+        status: 'local_income_unknown',
+        reason: 'portable_income_not_confirmed',
+        portable_income_analysis: null,
+        notes: [],
+      }
+    } else if (path === '/api/profile/readiness') {
       body = {
         profile_id: 'default',
         ready_module_count: 0,
@@ -156,6 +164,7 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await expect(profile.getByText('stored locally · never changes country facts')).toBeVisible()
   await expect(profile.getByText('Personal-fit readiness')).toBeVisible()
   await expect(profile.getByText('0/4 input sets ready')).toBeVisible()
+  await expect(profile.getByText('FinancialFit · ESP')).toBeVisible()
 
   await profile.getByLabel('Profession').fill('Systems engineer')
   await profile.getByLabel('Household size').fill('2')
