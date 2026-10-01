@@ -166,6 +166,28 @@ type ScenarioResponse = {
   notes: string[]
 }
 
+type ComparisonCountryValue = {
+  period: number
+  value: number
+  source_id: string
+}
+
+type ComparisonIndicator = {
+  indicator_id: string
+  name: string
+  dimension: string
+  unit: string
+  countries: Record<string, ComparisonCountryValue>
+}
+
+type ComparisonResponse = {
+  countries: Array<{ iso3: string; name: string }>
+  indicator_count: number
+  indicators: ComparisonIndicator[]
+  method: string
+  notes: string[]
+}
+
 const API_BASE = 'http://127.0.0.1:8020'
 
 const dimensionOrder = [
@@ -248,6 +270,7 @@ export default function App() {
   const [sourceQuality, setSourceQuality] = useState<SourceQualityResponse | null>(null)
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
+  const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -286,8 +309,12 @@ export default function App() {
         if (!response.ok) throw new Error(`Scenarios HTTP ${response.status}`)
         return response.json()
       }),
+      fetch(`${API_BASE}/api/compare?countries=ESP,PRT,IRL`).then(async (response) => {
+        if (!response.ok) throw new Error(`Comparison HTTP ${response.status}`)
+        return response.json()
+      }),
     ])
-      .then(([countriesData, healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData]) => {
+      .then(([countriesData, healthData, snapshotData, trendsData, assessmentData, sourceQualityData, trajectoryData, scenarioData, comparisonData]) => {
         setCountries((countriesData as CountriesResponse).countries)
         setHealth(healthData)
         setSnapshot(snapshotData)
@@ -296,6 +323,7 @@ export default function App() {
         setSourceQuality(sourceQualityData)
         setTrajectory(trajectoryData)
         setScenarios(scenarioData)
+        setComparison(comparisonData)
       })
       .catch((err) => setError(String(err)))
   }, [selectedCountry])
@@ -529,6 +557,55 @@ export default function App() {
               </article>
             )
           })}
+        </div>
+      </section>
+
+      <section className="comparisonSection">
+        <div className="dimensionHeader">
+          <div>
+            <div className="label">COUNTRY COMPARISON</div>
+            <h3>Spain · Portugal · Ireland</h3>
+          </div>
+          <span>aligned indicators · no ranking</span>
+        </div>
+
+        <div className="comparisonTableWrap">
+          <table className="comparisonTable">
+            <thead>
+              <tr>
+                <th>Indicator</th>
+                {(comparison?.countries ?? []).map((country) => (
+                  <th key={country.iso3}>{country.name}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {(comparison?.indicators ?? []).map((item) => (
+                <tr key={item.indicator_id}>
+                  <td>
+                    <strong>{item.name}</strong>
+                    <small>{dimensionLabels[item.dimension] ?? item.dimension}</small>
+                  </td>
+
+                  {(comparison?.countries ?? []).map((country) => {
+                    const value = item.countries[country.iso3]
+                    return (
+                      <td key={country.iso3}>
+                        {value ? (
+                          <>
+                            <strong>{formatValue(value.value, item.unit)}</strong>
+                            <small>{value.period} · {value.source_id.replace('_', ' ')}</small>
+                          </>
+                        ) : (
+                          <span className="comparisonMissing">—</span>
+                        )}
+                      </td>
+                    )
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 
