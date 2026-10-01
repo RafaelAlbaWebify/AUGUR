@@ -210,16 +210,6 @@ const dimensionOrder = [
   'strategic_resilience',
 ]
 
-const overviewKpiIds = [
-  'real_gdp_per_capita',
-  'unemployment_rate',
-  'inflation_hicp',
-  'employment_rate_20_64',
-  'housing_cost_overburden_rate',
-  'public_debt_gdp',
-  'fertility_rate',
-  'energy_import_dependency',
-]
 
 const dimensionLabels: Record<string, string> = {
   prosperity: 'Prosperity',
@@ -448,16 +438,6 @@ export default function App() {
   }, [selectedCountry])
 
   const selectedCountryMeta = countries.find((country) => country.iso3 === selectedCountry)
-
-  const overviewKpis = useMemo(() => {
-    const byId = new Map(
-      (snapshot?.indicators ?? []).map((item) => [item.indicator_id, item]),
-    )
-
-    return overviewKpiIds
-      .map((indicatorId) => byId.get(indicatorId))
-      .filter((item): item is Indicator => Boolean(item))
-  }, [snapshot])
 
   const outlookPreview = useMemo(() => {
     const first = scenarios?.indicators?.[0]
