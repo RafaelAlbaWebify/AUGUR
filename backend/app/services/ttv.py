@@ -4,6 +4,7 @@ from app.models.profile import PersonalProfileResponse
 from app.services.financial_fit import financial_fit
 from app.services.legal_fit import legal_fit
 from app.services.language_fit import language_fit
+from app.services.career_fit import career_fit
 
 
 STAGE_ORDER = [
@@ -22,6 +23,7 @@ def ttv_status(
     legal = legal_fit(profile, target)
     financial = financial_fit(profile, target)
     language = language_fit(profile, target)
+    career = career_fit(profile, target)
 
     legal_ready = legal["status"] in {
         "domestic",
@@ -29,7 +31,10 @@ def ttv_status(
     }
 
     language_ready = bool(language["work_ready"])
-    career_ready = bool(profile.profession and profile.skills)
+    career_ready = (
+        career["status"] == "evidence_available"
+        and career["market_signal"] is not None
+    )
 
     financial_ready = financial["status"] == "portable_income_comparable"
 
@@ -47,11 +52,15 @@ def ttv_status(
         "career_fit": {
             "ready": career_ready,
             "status": (
-                "profile_inputs_present"
-                if career_ready
-                else "profile_inputs_missing"
+                career["market_signal"]
+                if career["status"] == "evidence_available"
+                else career["status"]
             ),
-            "evidence_state": "country_evidence_pending",
+            "evidence_state": (
+                "implemented"
+                if career["status"] == "evidence_available"
+                else "partial"
+            ),
         },
         "financial_fit": {
             "ready": financial_ready,
@@ -89,6 +98,6 @@ def ttv_status(
         "notes": [
             "TTV is a dependency graph, not a sum of arbitrary scores.",
             "No time estimate is produced until all required country evidence layers are implemented.",
-            "LanguageFit uses a country-language CEFR heuristic; CareerFit country evidence is still pending.",
+            "LanguageFit uses a country-language CEFR heuristic; CareerFit uses implemented EURES shortage/surplus evidence.",
         ],
     }
