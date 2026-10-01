@@ -83,8 +83,11 @@ type CareerFitResponse = {
   market_signal: string | null
   skill_match: {
     status: string
+    dataset_mode?: string | null
+    dataset_version?: string | null
     matched_skills: string[]
     missing_skills: string[]
+    coverage?: number | null
   }
   evidence_complete: boolean
   rule_version: string
@@ -565,7 +568,12 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               </div>
               <div>
                 <span>Skills evidence</span>
-                <strong>{careerFit.skill_match.status.replaceAll('_', ' ')}</strong>
+                <strong>
+                  {careerFit.skill_match.status.replaceAll('_', ' ')}
+                  {careerFit.skill_match.dataset_mode
+                    ? ` · ${careerFit.skill_match.dataset_mode}`
+                    : ''}
+                </strong>
               </div>
             </div>
           ) : (
