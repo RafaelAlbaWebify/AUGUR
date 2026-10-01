@@ -57,6 +57,21 @@ type LegalFitResponse = {
   notes: string[]
 }
 
+type LanguageFitResponse = {
+  target_country_iso3: string
+  status: string
+  target_languages: string[]
+  matches: Array<{
+    language: string
+    declared_cefr: string | null
+    meets_work_ready_heuristic: boolean
+  }>
+  work_ready_threshold: string
+  work_ready: boolean
+  method: string
+  notes: string[]
+}
+
 type FinancialFitResponse = {
   target_country_iso3: string
   status: string
@@ -144,6 +159,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
   const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
   const [legalFit, setLegalFit] = useState<LegalFitResponse | null>(null)
+  const [languageFit, setLanguageFit] = useState<LanguageFitResponse | null>(null)
   const [ttv, setTtv] = useState<TTVResponse | null>(null)
   const fitRequestIdRef = useRef(0)
 
@@ -151,14 +167,16 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     const requestId = ++fitRequestIdRef.current
 
     try {
-      const [legalResponse, financialResponse, ttvResponse] = await Promise.all([
+      const [legalResponse, languageResponse, financialResponse, ttvResponse] = await Promise.all([
         fetch(`${apiBase}/api/countries/${targetCountry}/legal-fit`),
+        fetch(`${apiBase}/api/countries/${targetCountry}/language-fit`),
         fetch(`${apiBase}/api/countries/${targetCountry}/financial-fit`),
         fetch(`${apiBase}/api/countries/${targetCountry}/ttv`),
       ])
 
       if (
         !legalResponse.ok ||
+        !languageResponse.ok ||
         !financialResponse.ok ||
         !ttvResponse.ok ||
         requestId !== fitRequestIdRef.current
@@ -166,8 +184,9 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         return
       }
 
-      const [legalData, financialData, ttvData] = await Promise.all([
+      const [legalData, languageData, financialData, ttvData] = await Promise.all([
         legalResponse.json(),
+        languageResponse.json(),
         financialResponse.json(),
         ttvResponse.json(),
       ])
@@ -175,6 +194,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       if (requestId !== fitRequestIdRef.current) return
 
       setLegalFit(legalData)
+      setLanguageFit(languageData)
       setFinancialFit(financialData)
       setTtv(ttvData)
     } catch {
@@ -221,6 +241,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
   useEffect(() => {
     setLegalFit(null)
+    setLanguageFit(null)
     setFinancialFit(null)
     setTtv(null)
     void refreshTargetFits()
@@ -452,6 +473,44 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
           <p>
             Legal framework only. Long-stay conditions and national registration formalities still apply.
+          </p>
+        </div>
+
+        <div className="financialFitCard">
+          <div className="profileReadinessHeader">
+            <strong>LanguageFit · {targetCountry}</strong>
+            <span>{languageFit?.status?.replaceAll('_', ' ') ?? 'loading…'}</span>
+          </div>
+
+          {languageFit ? (
+            <div className="financialFitMetrics">
+              <div>
+                <span>Target language</span>
+                <strong>{languageFit.target_languages.join(' · ') || '—'}</strong>
+              </div>
+              <div>
+                <span>Declared CEFR</span>
+                <strong>
+                  {languageFit.matches
+                    .map((item) => item.declared_cefr ?? '—')
+                    .join(' · ')}
+                </strong>
+              </div>
+              <div>
+                <span>AUGUR work-ready heuristic</span>
+                <strong>
+                  {languageFit.work_ready ? `Meets ${languageFit.work_ready_threshold}+` : `Below ${languageFit.work_ready_threshold}`}
+                </strong>
+              </div>
+            </div>
+          ) : (
+            <p className="financialFitMessage">
+              Loading language-fit evidence…
+            </p>
+          )}
+
+          <p>
+            B2 is an AUGUR employment heuristic, not a legal requirement. Occupation-specific language evidence is still pending.
           </p>
         </div>
 
