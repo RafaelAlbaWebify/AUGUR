@@ -559,3 +559,18 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+
+
+.scenarioYearHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.uncertaintyBadge {
+  color: #7f8996;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
