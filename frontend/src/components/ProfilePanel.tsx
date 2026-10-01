@@ -220,9 +220,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   }, [apiBase])
 
   useEffect(() => {
-    void refreshLegalFit()
-    void refreshFinancialFit()
-    void refreshTtv()
+    setLegalFit(null)
+    setFinancialFit(null)
+    setTtv(null)
+    void refreshTargetFits()
   }, [apiBase, targetCountry])
 
   async function save() {
