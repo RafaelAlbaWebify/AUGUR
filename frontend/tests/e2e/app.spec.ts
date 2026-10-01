@@ -393,7 +393,7 @@ test('overview shows compact fit and compare previews', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
   await expect(page.getByText('Official horizons')).toBeVisible()
   await expect(page.getByText('Custom comparison')).toBeVisible()
-  await expect(page.getByLabel('Compare country 1')).toBeVisible()
+  await expect(page.getByLabel('Preview compare country 1')).toBeVisible()
 })
 
 test('1920x1080 overview fits without clipping or vertical scrolling', async ({ page }) => {
