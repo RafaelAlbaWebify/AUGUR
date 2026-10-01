@@ -235,6 +235,9 @@ function formatValue(value: number, unit: string) {
   if (unit === 'usd_ppp_per_hour') {
     return `${value.toFixed(1)} USD/h PPP`
   }
+  if (unit === 'index_eu27_2020_100') {
+    return `${value.toFixed(1)} · EU=100`
+  }
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
