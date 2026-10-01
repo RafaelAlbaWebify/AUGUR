@@ -11,6 +11,7 @@ from app.services.country import country_snapshot, list_countries
 from app.services.trends import country_trends
 from app.services.assessment import country_assessment
 from app.services.trajectory import country_future_trajectory
+from app.services.scenarios import country_scenarios
 
 router = APIRouter()
 
@@ -124,3 +125,14 @@ def trajectory(country_iso3: str):
         raise HTTPException(status_code=404, detail="Country is not registered")
 
     return country_future_trajectory(country_iso3)
+
+
+@router.get("/countries/{country_iso3}/scenarios")
+def scenarios(country_iso3: str):
+    country_iso3 = country_iso3.upper()
+    registry = {country["iso3"] for country in list_countries()}
+
+    if country_iso3 not in registry:
+        raise HTTPException(status_code=404, detail="Country is not registered")
+
+    return country_scenarios(country_iso3)
