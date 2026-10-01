@@ -74,6 +74,16 @@ SOURCES = [
 
 INDICATORS = [
     {
+        "indicator_id": "household_price_level_index",
+        "source_indicator": "EUROSTAT:PRC_PPP_IND",
+        "name": "Household consumption price level index",
+        "dimension": "prosperity",
+        "unit": "index_eu27_2020_100",
+        "interpretation_policy": "contextual",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
         "indicator_id": "housing_cost_overburden_rate",
         "source_indicator": "EUROSTAT:ILC_LVHO07A",
         "name": "Housing cost overburden rate",
