@@ -27,7 +27,32 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path === '/api/health') {
+    if (path === '/api/profile') {
+      if (route.request().method() === 'PUT') {
+        const payload = route.request().postDataJSON()
+        body = {
+          profile_id: 'default',
+          updated_at: '2026-10-01T00:00:00+00:00',
+          ...payload,
+        }
+      } else {
+        body = {
+          profile_id: 'default',
+          age: null,
+          current_country: null,
+          citizenships: [],
+          profession: null,
+          skills: [],
+          languages: [],
+          household_size: 1,
+          monthly_net_income: null,
+          liquid_savings: null,
+          remote_work: false,
+          preferences: {},
+          updated_at: null,
+        }
+      }
+    } else if (path === '/api/health') {
       body = { status: 'ok', phase: 1, version: 'test', datastores: { sqlite: true, duckdb: true } }
     } else if (path === '/api/countries') {
       body = { countries }
@@ -110,4 +135,16 @@ test('world view drives country selection without reload', async ({ page }) => {
 
   await expect(page.getByRole('heading', { name: 'Portugal', exact: true })).toBeVisible()
   await expect(page.locator('.metricValue').filter({ hasText: /^6\.4%$/ })).toBeVisible()
+})
+
+
+test('personal profile remains separate and can be saved locally', async ({ page }) => {
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(profile.getByText('stored locally · never changes country facts')).toBeVisible()
+
+  await profile.getByLabel('Profession').fill('Systems engineer')
+  await profile.getByLabel('Household size').fill('2')
+  await profile.getByRole('button', { name: 'Save profile' }).click()
+
+  await expect(profile.getByText('Saved locally')).toBeVisible()
 })
