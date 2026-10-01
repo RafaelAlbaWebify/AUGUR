@@ -15,6 +15,43 @@ SOURCE_ID = "EUROSTAT"
 
 EUROSTAT_SERIES = [
     {
+        "indicator_id": "housing_cost_overburden_rate",
+        "dataset_id": "ilc_lvho07a",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "unit": "PC",
+            "incgrp": "TOTAL",
+            "age": "TOTAL",
+            "sex": "T",
+        },
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "tertiary_education_25_34",
+        "dataset_id": "sdg_04_20",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "unit": "PC",
+            "age": "Y25-34",
+            "isced11": "ED5-8",
+            "sex": "T",
+        },
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "energy_import_dependency",
+        "dataset_id": "nrg_ind_id",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "unit": "PC",
+            "siec": "TOTAL",
+        },
+        "unit": "percent",
+    },
+    {
         "indicator_id": "population_total",
         "dataset_id": "tps00001",
         "filters": {
