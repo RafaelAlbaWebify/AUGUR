@@ -4,53 +4,10 @@ import argparse
 
 from app.catalog import COUNTRIES
 from app.db.bootstrap import initialize_datastores
-from app.ingestion.eurostat import EurostatAdapter
-from app.ingestion.imf import IMFAdapter
-from app.ingestion.oecd import OECDAdapter
-from app.ingestion.un_wpp import UNWPPAdapter
-from app.ingestion.world_bank import WorldBankAdapter
+from app.providers import PROVIDERS, providers_for_country
 
 
 DEFAULT_COUNTRIES = ["ESP", "PRT", "IRL"]
-
-
-def sync_country(
-    country_iso3: str,
-    world_bank: WorldBankAdapter,
-    eurostat: EurostatAdapter,
-    oecd: OECDAdapter,
-    imf: IMFAdapter,
-    un_wpp: UNWPPAdapter,
-    un_csv: str,
-) -> dict:
-    print()
-    print("=" * 72)
-    print(f"AUGUR CORE SYNC · {country_iso3}")
-    print("=" * 72)
-
-    results = {}
-
-    print()
-    print("[World Bank]")
-    results["WORLD_BANK"] = world_bank.sync_country(country_iso3)
-
-    print()
-    print("[Eurostat]")
-    results["EUROSTAT"] = eurostat.sync_country(country_iso3)
-
-    print()
-    print("[OECD]")
-    results["OECD"] = oecd.sync_country(country_iso3)
-
-    print()
-    print("[IMF]")
-    results["IMF"] = imf.sync_country(country_iso3)
-
-    print()
-    print("[UN WPP]")
-    results["UN_WPP"] = un_wpp.sync_country(country_iso3, csv_text=un_csv)
-
-    return results
 
 
 def main() -> int:
@@ -72,33 +29,48 @@ def main() -> int:
 
     initialize_datastores()
 
-    world_bank = WorldBankAdapter(timeout_seconds=90, max_retries=3)
-    eurostat = EurostatAdapter(timeout_seconds=90, max_retries=3)
-    oecd = OECDAdapter(timeout_seconds=90, max_retries=3)
-    imf = IMFAdapter(timeout_seconds=90, max_retries=3)
-    un_wpp = UNWPPAdapter(timeout_seconds=120, max_retries=3)
+    adapters = {
+        provider.provider_id: provider.adapter_factory()
+        for provider in PROVIDERS
+    }
+    shared = {}
 
     try:
-        print("Downloading UN WPP bulk file once for this sync...")
-        un_csv = un_wpp.fetch_csv()
+        for provider in PROVIDERS:
+            if provider.prepare is None:
+                shared[provider.provider_id] = None
+                continue
+
+            print(f"Preparing shared payload for {provider.label}...")
+            shared[provider.provider_id] = provider.prepare(
+                adapters[provider.provider_id]
+            )
 
         all_results = {}
+
         for country_iso3 in countries:
-            all_results[country_iso3] = sync_country(
-                country_iso3,
-                world_bank,
-                eurostat,
-                oecd,
-                imf,
-                un_wpp,
-                un_csv,
-            )
+            print()
+            print("=" * 72)
+            print(f"AUGUR CORE SYNC · {country_iso3}")
+            print("=" * 72)
+
+            results = {}
+
+            for provider in providers_for_country(country_iso3):
+                print()
+                print(f"[{provider.label}]")
+
+                results[provider.provider_id] = provider.sync(
+                    adapters[provider.provider_id],
+                    country_iso3,
+                    shared.get(provider.provider_id),
+                )
+
+            all_results[country_iso3] = results
+
     finally:
-        world_bank.close()
-        eurostat.close()
-        oecd.close()
-        imf.close()
-        un_wpp.close()
+        for adapter in adapters.values():
+            adapter.close()
 
     print()
     print("=" * 72)
