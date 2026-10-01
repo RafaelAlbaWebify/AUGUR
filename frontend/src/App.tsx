@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import WorldMap from './components/WorldMap'
 import ProfilePanel from './components/ProfilePanel'
+import ComparePanel from './components/ComparePanel'
+import FitSnapshot from './components/FitSnapshot'
 
 type Country = {
   iso2: string
@@ -300,6 +302,7 @@ export default function App() {
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
+  const [compareCountries, setCompareCountries] = useState<string[]>(['IRL', 'ESP', 'PRT'])
   const [activeView, setActiveView] = useState<'overview' | 'outlook' | 'compare' | 'profile'>('overview')
   const [detailsExpanded, setDetailsExpanded] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -311,11 +314,10 @@ export default function App() {
     Promise.allSettled([
       fetchJson(`${API_BASE}/api/countries`, 'Countries', signal),
       fetchJson(`${API_BASE}/api/health`, 'Health', signal),
-      fetchJson(`${API_BASE}/api/compare?countries=ESP,PRT,IRL`, 'Comparison', signal),
     ]).then((results) => {
       if (signal.aborted) return
 
-      const [countriesResult, healthResult, comparisonResult] = results
+      const [countriesResult, healthResult] = results
       const failures: string[] = []
 
       if (countriesResult.status === 'fulfilled') {
@@ -330,17 +332,46 @@ export default function App() {
         failures.push(String(healthResult.reason))
       }
 
-      if (comparisonResult.status === 'fulfilled') {
-        setComparison(comparisonResult.value)
-      } else {
-        failures.push(String(comparisonResult.reason))
-      }
 
       if (failures.length) setError(failures.join(' · '))
     })
 
     return () => controller.abort()
   }, [])
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const signal = controller.signal
+    const query = compareCountries.join(',')
+
+    fetchJson(
+      `${API_BASE}/api/compare?countries=${query}`,
+      'Comparison',
+      signal,
+    )
+      .then((data) => {
+        if (!signal.aborted) setComparison(data)
+      })
+      .catch((err) => {
+        if ((err as Error).name !== 'AbortError') {
+          setError(String(err))
+        }
+      })
+
+    return () => controller.abort()
+  }, [compareCountries])
+
+  function updateCompareCountry(slot: number, iso3: string) {
+    setCompareCountries((current) => {
+      if (current.some((value, index) => index !== slot && value === iso3)) {
+        return current
+      }
+
+      const next = [...current]
+      next[slot] = iso3
+      return next
+    })
+  }
 
   useEffect(() => {
     const controller = new AbortController()
