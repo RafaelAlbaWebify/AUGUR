@@ -1487,3 +1487,47 @@ footer {
     height: 240px;
   }
 }
+
+
+.fitGrid {
+  margin-top: 14px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.fitGrid .financialFitCard {
+  margin-top: 0;
+  padding: 12px;
+  border: 1px solid #242a32;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.012);
+}
+
+.fitGrid .financialFitMetrics {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.fitGrid .financialFitMetrics > div {
+  padding: 7px;
+}
+
+.fitGrid .financialFitMetrics strong {
+  font-size: 12px;
+}
+
+.fitGrid .financialFitCard > p {
+  margin-top: 7px;
+  font-size: 9px;
+}
+
+.ttvCard {
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .fitGrid {
+    grid-template-columns: 1fr;
+  }
+}
