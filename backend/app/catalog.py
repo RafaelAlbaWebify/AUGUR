@@ -10,6 +10,28 @@ COUNTRIES = [
         "eurozone_member": True,
         "oecd_member": True,
     },
+    {
+        "iso2": "PT",
+        "iso3": "PRT",
+        "name": "Portugal",
+        "region": "Europe",
+        "subregion": "Southern Europe",
+        "currency": "EUR",
+        "eu_member": True,
+        "eurozone_member": True,
+        "oecd_member": True,
+    },
+    {
+        "iso2": "IE",
+        "iso3": "IRL",
+        "name": "Ireland",
+        "region": "Europe",
+        "subregion": "Northern Europe",
+        "currency": "EUR",
+        "eu_member": True,
+        "eurozone_member": True,
+        "oecd_member": True,
+    },
 ]
 
 SOURCES = [
@@ -232,3 +254,21 @@ INDICATORS = [
         "target_max": None,
     },
 ]
+
+
+COUNTRY_BY_ISO3 = {country["iso3"]: country for country in COUNTRIES}
+
+
+def country_config(country_iso3: str) -> dict:
+    key = country_iso3.upper()
+    if key not in COUNTRY_BY_ISO3:
+        raise ValueError(f"Unsupported country: {country_iso3}")
+    return COUNTRY_BY_ISO3[key]
+
+
+def world_bank_indicators() -> list[dict]:
+    return [
+        indicator
+        for indicator in INDICATORS
+        if ":" not in indicator["source_indicator"]
+    ]
