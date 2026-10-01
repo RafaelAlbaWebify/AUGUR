@@ -483,7 +483,7 @@ export default function App() {
     <main className={`shell view-${activeView} ${detailsExpanded ? 'detailsOpen' : ''}`}>
       <header className="dashboardTopbar">
         <div className="brandCompact">
-          <span className="brandMark">AUGUR</span>
+          <h1 className="brandMark">AUGUR</h1>
           <span className="brandSub">country trajectory & personal fit</span>
         </div>
 
