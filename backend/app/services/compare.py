@@ -1,14 +1,14 @@
 from __future__ import annotations
 
+from app.catalog import COUNTRIES
 from app.db.analytics import latest_observations
-from app.services.country import list_countries
 
 
 def build_comparison(
     country_iso3s: list[str],
     snapshots: dict[str, list[dict]],
 ) -> dict:
-    registry = {country["iso3"]: country for country in list_countries()}
+    registry = {country["iso3"]: country for country in COUNTRIES}
 
     indicator_rows: dict[str, dict] = {}
 
