@@ -105,7 +105,7 @@ INDICATORS = [
     },
     {
         "indicator_id": "housing_cost_overburden_rate",
-        "source_indicator": "EUROSTAT:ILC_LVHO07A",
+        "source_indicator": "EUROSTAT:TESSI163",
         "name": "Housing cost overburden rate",
         "dimension": "housing",
         "unit": "percent",
