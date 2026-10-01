@@ -20,7 +20,6 @@ EUROSTAT_SERIES = [
         "filters": {
             "geo": "__GEO__",
             "freq": "A",
-            "unit": "PC",
             "incgrp": "TOTAL",
             "age": "TOTAL",
             "sex": "T",
