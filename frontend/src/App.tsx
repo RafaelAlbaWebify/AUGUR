@@ -363,11 +363,15 @@ export default function App() {
 
   function updateCompareCountry(slot: number, iso3: string) {
     setCompareCountries((current) => {
-      if (current.some((value, index) => index !== slot && value === iso3)) {
-        return current
+      const next = [...current]
+      const existingSlot = current.findIndex(
+        (value, index) => index !== slot && value === iso3,
+      )
+
+      if (existingSlot >= 0) {
+        next[existingSlot] = current[slot]
       }
 
-      const next = [...current]
       next[slot] = iso3
       return next
     })
