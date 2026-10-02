@@ -70,6 +70,9 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert "analysis_ready" in body
     assert "ttv_temporal_model_ready" in body
     assert "ttv_temporal_model_version" in body
+    assert "ttv_temporal_validation" in body
+    assert "ready_for_versioning" in body["ttv_temporal_validation"]
+    assert "gates" in body["ttv_temporal_validation"]
     assert "country_analysis_ready" in body
     assert "local_employment_evidence_ready" in body
     assert "esco_full_ready" in body
