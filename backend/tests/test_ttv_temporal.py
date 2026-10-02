@@ -1,6 +1,7 @@
 from app.models.profile import LanguageSkill, PersonalProfileResponse
 from app.services import ttv_temporal as module
 from app.services.ttv_temporal import (
+    compose_temporal_stages,
     temporal_evidence_graph,
     temporal_model_validation_status,
 )
@@ -72,7 +73,12 @@ def test_temporal_graph_converts_b1_to_b2_hours_using_user_study_intensity():
     assert result["candidate_range"] == {
         "weeks_min": 10,
         "weeks_max": 25,
-        "composition": "parallel_max",
+        "composition": "critical_path_v1",
+        "stage_groups": {
+            "preparation_parallel": ["legal", "language", "skills"],
+            "employment_after_preparation": ["employment"],
+            "financial_after_employment": ["financial"],
+        },
     }
 
 
@@ -235,7 +241,7 @@ def test_temporal_validation_gates_block_versioning():
 
     assert result["ready_for_versioning"] is False
     assert "local_employment_transition" in result["experimental"]
-    assert "composition_parallel_max" in result["experimental"]
+    assert "composition_dependency_graph" in result["experimental"]
     assert "skill_gap_duration" in result["missing"]
     assert "local_financial_transition" in result["missing"]
     assert "external_calibration" in result["missing"]
@@ -344,3 +350,58 @@ def test_local_employment_rejects_age_outside_transition_population(monkeypatch)
     assert result["status"] == "unavailable"
     assert result["reason"] == "profile_age_outside_eurostat_transition_population"
     assert result["profile_age"] == 80
+
+
+def test_temporal_composition_uses_explicit_critical_path():
+    stages = {
+        "legal": {
+            "status": "available",
+            "weeks_min": 2,
+            "weeks_max": 3,
+        },
+        "language": {
+            "status": "available",
+            "weeks_min": 10,
+            "weeks_max": 20,
+        },
+        "skills": {
+            "status": "available",
+            "weeks_min": 4,
+            "weeks_max": 8,
+        },
+        "employment": {
+            "status": "available",
+            "weeks_min": 13,
+            "weeks_max": 26,
+        },
+        "financial": {
+            "status": "available",
+            "weeks_min": 2,
+            "weeks_max": 4,
+        },
+    }
+
+    result = compose_temporal_stages(stages)
+
+    assert result == {
+        "weeks_min": 25,
+        "weeks_max": 50,
+        "composition": "critical_path_v1",
+        "stage_groups": {
+            "preparation_parallel": ["legal", "language", "skills"],
+            "employment_after_preparation": ["employment"],
+            "financial_after_employment": ["financial"],
+        },
+    }
+
+
+def test_temporal_composition_withholds_range_when_any_stage_unavailable():
+    stages = {
+        "legal": {"status": "available", "weeks_min": 0, "weeks_max": 0},
+        "language": {"status": "available", "weeks_min": 4, "weeks_max": 8},
+        "skills": {"status": "unavailable", "weeks_min": None, "weeks_max": None},
+        "employment": {"status": "available", "weeks_min": 13, "weeks_max": 26},
+        "financial": {"status": "available", "weeks_min": 0, "weeks_max": 0},
+    }
+
+    assert compose_temporal_stages(stages) is None
