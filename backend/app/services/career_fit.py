@@ -270,6 +270,40 @@ def classify_occupation(profession: str | None) -> dict:
     }
 
 
+def unit_group_market_signal(
+    target_country_iso3: str,
+    occupation_match: dict,
+) -> dict | None:
+    selected = occupation_match.get("selected")
+    if not selected:
+        return None
+
+    raw_isco = str(selected.get("isco_group") or selected.get("code") or "")
+    digits = "".join(character for character in raw_isco if character.isdigit())
+    if len(digits) < 4:
+        return None
+
+    isco_unit = digits[:4]
+    config = EURES_EVIDENCE_METADATA.get("unit_group_signals", {}).get(isco_unit)
+    if config is None:
+        return None
+
+    target = target_country_iso3.upper()
+    if target in config["shortage_countries"]:
+        signal = "shortage"
+    elif target in config["surplus_countries"]:
+        signal = "surplus"
+    else:
+        signal = "not_classified_as_shortage_or_surplus"
+
+    return {
+        "signal": signal,
+        "isco_unit": isco_unit,
+        "occupation_label": config["occupation_label"],
+        "scope": "isco_unit_group",
+    }
+
+
 def career_fit(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -340,12 +374,24 @@ def career_fit(
             ],
         }
 
-    if group in evidence["shortage_groups"]:
+    unit_signal = unit_group_market_signal(target, occupation_match)
+
+    if unit_signal is not None:
+        market_signal = unit_signal["signal"]
+        market_signal_scope = unit_signal["scope"]
+        market_signal_isco = unit_signal["isco_unit"]
+    elif group in evidence["shortage_groups"]:
         market_signal = "shortage"
+        market_signal_scope = "broad_occupation_group"
+        market_signal_isco = classification.get("isco_submajor")
     elif group in evidence["surplus_groups"]:
         market_signal = "surplus"
+        market_signal_scope = "broad_occupation_group"
+        market_signal_isco = classification.get("isco_submajor")
     else:
         market_signal = "not_classified_as_shortage_or_surplus"
+        market_signal_scope = "broad_occupation_group"
+        market_signal_isco = classification.get("isco_submajor")
 
     skill_match = (
         match_profile_skills(esco_label, profile.skills)
@@ -383,6 +429,8 @@ def career_fit(
         "status": "evidence_available",
         "occupation": classification,
         "market_signal": market_signal,
+        "market_signal_scope": market_signal_scope,
+        "market_signal_isco": market_signal_isco,
         "rule_version": RULE_VERSION,
         "source": {
             "label": evidence["source_label"],
@@ -402,7 +450,8 @@ def career_fit(
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             f"Country evidence uses versioned EURES labour-market information for {EURES_EVIDENCE_METADATA['conditions_year']} conditions, published in {EURES_EVIDENCE_METADATA['report_year']}.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
-            "When ESCO resolves an occupation confidently, CareerFit uses its ISCO sub-major group for EURES mapping; keyword classification is only a fallback.",
+            "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
+            "Verified unit-group evidence takes precedence over broad occupational-group signals when both exist.",
             "ISCO 25 ICT professionals and ISCO 35 information and communications technicians are kept distinct.",
             "Essential ESCO skills are treated as conservative profile-evidence requirements; missing declarations are not inferred as present.",
             "A shortage signal plus complete declared essential-skill coverage is an evidence gate, not a guarantee of employment.",
