@@ -85,6 +85,7 @@ type OverviewPageProps = {
   onCompareCountryChange: (slot: number, iso3: string) => void
   onOpenOutlook: () => void
   onOpenCompare: () => void
+  onOpenDimension: (dimension: string) => void
   formatValue: (value: number, unit: string) => string
   dimensionLabels: Record<string, string>
   layout: DashboardLayout
@@ -113,6 +114,7 @@ export default function OverviewPage({
   onCompareCountryChange,
   onOpenOutlook,
   onOpenCompare,
+  onOpenDimension,
   formatValue,
   dimensionLabels,
   layout,
@@ -174,6 +176,7 @@ export default function OverviewPage({
                   key={dimension}
                   label={dimensionLabels[dimension] ?? dimension}
                   item={item}
+                  onOpen={() => onOpenDimension(dimension)}
                 />
               )
             })}
