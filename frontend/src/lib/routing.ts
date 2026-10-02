@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useState } from 'react'
 
-export type AugurView = 'overview' | 'outlook' | 'profile' | 'compare'
+export type CountryView = 'overview' | 'outlook' | 'profile' | 'indicators'
+export type AugurView = CountryView | 'dimension' | 'compare'
 
 export type AugurRoute =
   | {
       kind: 'country'
-      view: Exclude<AugurView, 'compare'>
+      view: CountryView
       countryIso3: string
+    }
+  | {
+      kind: 'dimension'
+      view: 'dimension'
+      countryIso3: string
+      dimension: string
     }
   | {
       kind: 'compare'
@@ -22,15 +29,33 @@ function normalizedIso3(value: string | null | undefined) {
   return /^[A-Z]{3}$/.test(code) ? code : null
 }
 
+function normalizedDimension(value: string | null | undefined) {
+  const dimension = (value ?? '').toLowerCase()
+  return /^[a-z][a-z0-9_]*$/.test(dimension) ? dimension : null
+}
+
 export function parseAugurRoute(location: Location = window.location): AugurRoute {
   const path = location.pathname.replace(/\/+$/, '') || '/'
-  const countryMatch = path.match(/^\/country\/([A-Za-z]{3})\/(overview|outlook|profile)$/)
+  const countryMatch = path.match(/^\/country\/([A-Za-z]{3})\/(overview|outlook|profile|indicators)$/)
 
   if (countryMatch) {
     return {
       kind: 'country',
       countryIso3: countryMatch[1].toUpperCase(),
-      view: countryMatch[2] as 'overview' | 'outlook' | 'profile',
+      view: countryMatch[2] as CountryView,
+    }
+  }
+
+  const dimensionMatch = path.match(/^\/country\/([A-Za-z]{3})\/dimension\/([a-zA-Z0-9_]+)$/)
+  if (dimensionMatch) {
+    const dimension = normalizedDimension(dimensionMatch[2])
+    if (dimension) {
+      return {
+        kind: 'dimension',
+        view: 'dimension',
+        countryIso3: dimensionMatch[1].toUpperCase(),
+        dimension,
+      }
     }
   }
 
@@ -62,17 +87,33 @@ export function routeHref(route: AugurRoute) {
     return `/compare?countries=${route.countries.join(',')}`
   }
 
+  if (route.kind === 'dimension') {
+    return `/country/${route.countryIso3}/dimension/${route.dimension}`
+  }
+
   return `/country/${route.countryIso3}/${route.view}`
 }
 
 export function countryRoute(
   countryIso3: string,
-  view: 'overview' | 'outlook' | 'profile',
+  view: CountryView,
 ): AugurRoute {
   return {
     kind: 'country',
     countryIso3,
     view,
+  }
+}
+
+export function dimensionRoute(
+  countryIso3: string,
+  dimension: string,
+): AugurRoute {
+  return {
+    kind: 'dimension',
+    countryIso3,
+    view: 'dimension',
+    dimension,
   }
 }
 
