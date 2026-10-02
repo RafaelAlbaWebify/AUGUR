@@ -1,0 +1,52 @@
+{
+  "evidence_id": "eures_lmi_2025_2024_conditions",
+  "rule_version": "EURES_LMI_2024_AS_PUBLISHED_2025",
+  "report_year": 2025,
+  "conditions_year": 2024,
+  "report_url": "https://eures.europa.eu/living-and-working/labour-shortages-and-surpluses-europe_en",
+  "notes": [
+    "Country mappings migrated unchanged from the previously embedded CareerFit evidence table.",
+    "Broad shortage/surplus groups are labour-market signals, not guarantees of individual job availability.",
+    "Future refreshes should update this manifest rather than CareerFit logic."
+  ],
+  "countries": {
+    "ESP": {
+      "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-spain_en",
+      "source_label": "EURES Labour Market Information: Spain",
+      "shortage_groups": [
+        "health_professionals",
+        "plant_machine_operators",
+        "agricultural_forestry_fishery_labourers"
+      ],
+      "surplus_groups": [
+        "science_engineering_professionals",
+        "business_administration_associate_professionals",
+        "science_engineering_associate_professionals"
+      ]
+    },
+    "PRT": {
+      "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-portugal_en",
+      "source_label": "EURES Labour Market Information: Portugal",
+      "shortage_groups": [
+        "health_professionals",
+        "metal_machinery_trades_workers",
+        "ict_professionals"
+      ],
+      "surplus_groups": [
+        "business_administration_associate_professionals",
+        "legal_social_cultural_professionals",
+        "sales_workers"
+      ]
+    },
+    "IRL": {
+      "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-ireland_en",
+      "source_label": "EURES Labour Market Information: Ireland",
+      "shortage_groups": [
+        "science_engineering_professionals",
+        "ict_professionals",
+        "health_professionals"
+      ],
+      "surplus_groups": []
+    }
+  }
+}
