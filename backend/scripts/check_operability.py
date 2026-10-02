@@ -73,6 +73,7 @@ def main() -> int:
         earnings = country["labour_earnings"]
         net_earnings = country["net_earnings"]
         job_transitions = country["job_transitions"]
+        job_vacancies = country["job_vacancies"]
         print(
             f"{country['country_iso3']}: "
             f"observed={country['observed_indicators']} indicators / "
@@ -83,7 +84,10 @@ def main() -> int:
             f"net_earnings={net_earnings['row_count']} rows "
             f"(latest={net_earnings['latest_period']}), "
             f"job_transitions={job_transitions['age_group_count']} age groups / "
-            f"{job_transitions['row_count']} rows"
+            f"{job_transitions['row_count']} rows, "
+            f"job_vacancies={job_vacancies['isco_group_count']} ISCO groups / "
+            f"{job_vacancies['row_count']} rows "
+            f"(latest={job_vacancies['latest_period']})"
         )
 
     print()
