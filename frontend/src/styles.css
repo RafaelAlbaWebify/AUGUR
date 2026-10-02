@@ -3478,3 +3478,281 @@ body {
     min-height: 128px;
   }
 }
+
+
+/* Persistent configurable layout architecture */
+.overviewDashboard {
+  display: block !important;
+  margin-top: 12px;
+  max-height: none !important;
+}
+
+.overviewTopRow,
+.overviewBottomRow {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  align-items: stretch;
+}
+
+.overviewTopRow {
+  min-height: 338px;
+}
+
+.overviewTopRow.fitFirst .overviewFitArea {
+  order: 1;
+}
+
+.overviewTopRow.fitFirst .overviewMapArea {
+  order: 2;
+}
+
+.overviewBottomRow {
+  margin-top: 12px;
+  min-width: 0;
+  align-items: start;
+}
+
+.overviewMapArea,
+.overviewFitArea,
+.overviewDimensions,
+.overviewUtilityRail {
+  min-width: 0;
+  grid-area: auto !important;
+}
+
+.overviewMapArea,
+.overviewFitArea {
+  height: 100%;
+}
+
+.overviewMapArea .worldMapSection,
+.overviewFitArea .fitSnapshot {
+  height: 100%;
+}
+
+.overviewBottomRow .overviewDimensions {
+  width: 100%;
+  overflow: hidden;
+}
+
+.overviewBottomRow .overviewUtilityRail {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible !important;
+}
+
+.overviewUtilityRail.compareFirst .comparePanel {
+  order: 1;
+}
+
+.overviewUtilityRail.compareFirst .outlookPreview {
+  order: 2;
+}
+
+.layoutButton {
+  height: 34px;
+  border: 1px solid var(--augur-border);
+  border-radius: 9px;
+  background: #0a1824;
+  color: #91a6b5;
+  padding: 0 11px;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.layoutButton:hover,
+.layoutButton.active {
+  color: #ffffff;
+  border-color: #3d6783;
+  background: #10283a;
+}
+
+.layoutControls {
+  position: fixed;
+  z-index: 100;
+  top: 86px;
+  right: 20px;
+  width: 360px;
+  padding: 14px;
+  border: 1px solid #2b4a60;
+  border-radius: 14px;
+  background:
+    linear-gradient(180deg, rgba(13,31,44,0.98), rgba(7,19,29,0.99));
+  box-shadow:
+    0 24px 60px rgba(0,0,0,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.03);
+}
+
+.layoutControlsHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.layoutControlsHeader span {
+  display: block;
+  color: #71899a;
+  font-size: 8px;
+  letter-spacing: .09em;
+}
+
+.layoutControlsHeader strong {
+  display: block;
+  margin-top: 3px;
+  font-size: 14px;
+}
+
+.layoutControlsHeader button {
+  width: 28px;
+  height: 28px;
+  border: 1px solid #29485c;
+  border-radius: 8px;
+  background: #0b1c29;
+  color: #a9bbc8;
+  cursor: pointer;
+}
+
+.layoutSlider {
+  display: grid;
+  grid-template-columns: 120px minmax(0,1fr) 64px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.layoutSlider > span {
+  color: #a7b6c1;
+  font-size: 10px;
+}
+
+.layoutSlider input {
+  width: 100%;
+}
+
+.layoutSlider small {
+  color: #6f8494;
+  font-size: 9px;
+  text-align: right;
+}
+
+.layoutOptionRow {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: 92px 1fr 1fr;
+  gap: 6px;
+  align-items: center;
+}
+
+.layoutOptionRow > span {
+  color: #7f93a2;
+  font-size: 9px;
+}
+
+.layoutOptionRow button {
+  border: 1px solid #29465a;
+  border-radius: 8px;
+  background: #0a1925;
+  color: #8296a6;
+  padding: 7px 6px;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.layoutOptionRow button.active {
+  color: #ffffff;
+  border-color: #4b7895;
+  background: #123047;
+}
+
+.layoutChecks {
+  margin-top: 13px;
+  padding-top: 11px;
+  border-top: 1px solid #1d3445;
+  display: grid;
+  grid-template-columns: repeat(3,1fr);
+  gap: 6px;
+}
+
+.layoutChecks label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #96a9b7;
+  font-size: 9px;
+}
+
+.layoutControlsFooter {
+  margin-top: 14px;
+  padding-top: 10px;
+  border-top: 1px solid #1d3445;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.layoutControlsFooter button {
+  border: 1px solid #385b70;
+  border-radius: 8px;
+  background: #0c2030;
+  color: #c2d1dc;
+  padding: 7px 9px;
+  font: inherit;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.layoutControlsFooter small {
+  color: #637988;
+  font-size: 8px;
+}
+
+.shell.detailsOpen {
+  height: auto !important;
+  min-height: 100vh;
+  overflow: visible !important;
+  padding-bottom: 40px;
+}
+
+body:has(.shell.detailsOpen) {
+  overflow-y: auto !important;
+}
+
+.shell.detailsOpen .overviewDashboard {
+  max-height: none !important;
+}
+
+.shell.detailsOpen .dimensionSection {
+  scroll-margin-top: 18px;
+}
+
+@media (min-width: 1500px) and (min-height: 900px) {
+  .shell.view-overview:not(.detailsOpen) {
+    height: 100vh;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 1300px) {
+  .overviewTopRow,
+  .overviewBottomRow {
+    grid-template-columns: 1fr !important;
+  }
+
+  .overviewTopRow.fitFirst .overviewFitArea,
+  .overviewTopRow.fitFirst .overviewMapArea {
+    order: initial;
+  }
+
+  .layoutControls {
+    right: 12px;
+    width: min(360px, calc(100vw - 24px));
+  }
+}
