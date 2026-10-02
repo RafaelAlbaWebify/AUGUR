@@ -33,6 +33,14 @@ type Health = {
   }
 }
 
+type Operability = {
+  status: 'empty' | 'partial' | 'ready'
+  ready: boolean
+  analysis_ready: boolean
+  ttv_temporal_model_ready: boolean
+  blockers: string[]
+}
+
 type Trend = {
   direction: string
   interpretation: string
@@ -281,6 +289,7 @@ export default function App() {
     route.kind === 'compare' ? 'ESP' : route.countryIso3,
   )
   const [health, setHealth] = useState<Health | null>(null)
+  const [operability, setOperability] = useState<Operability | null>(null)
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [trends, setTrends] = useState<TrendsResponse | null>(null)
   const [sourceQuality, setSourceQuality] = useState<SourceQualityResponse | null>(null)
@@ -322,10 +331,11 @@ export default function App() {
     Promise.allSettled([
       fetchJson(`${API_BASE}/api/countries`, 'Countries', signal),
       fetchJson(`${API_BASE}/api/health`, 'Health', signal),
+      fetchJson(`${API_BASE}/api/operability`, 'Operability', signal),
     ]).then((results) => {
       if (signal.aborted) return
 
-      const [countriesResult, healthResult] = results
+      const [countriesResult, healthResult, operabilityResult] = results
       const failures: string[] = []
 
       if (countriesResult.status === 'fulfilled') {
@@ -340,6 +350,11 @@ export default function App() {
         failures.push(String(healthResult.reason))
       }
 
+      if (operabilityResult.status === 'fulfilled') {
+        setOperability(operabilityResult.value)
+      } else {
+        failures.push(String(operabilityResult.reason))
+      }
 
       if (failures.length) setError(failures.join(' · '))
     })
@@ -540,6 +555,13 @@ export default function App() {
           <div>
             <span>Country</span>
             <strong>{selectedCountry}</strong>
+          </div>
+          <div
+            className={`status compact dataStatus ${operability?.status ?? 'connecting'}`}
+            title={operability?.blockers?.length ? `Blockers: ${operability.blockers.join(', ')}` : 'Analytical evidence ready'}
+          >
+            <span className="dot" />
+            {operability ? `Data · ${operability.status}` : 'Data · checking'}
           </div>
           <div className={`status compact ${health?.status === 'ok' ? 'ok' : ''}`}>
             <span className="dot" />
