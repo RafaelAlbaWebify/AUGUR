@@ -66,3 +66,56 @@ def test_financial_fit_uses_relative_price_levels_for_remote_income(monkeypatch)
     assert analysis["origin_equivalent_purchasing_power"] < 3000
     assert analysis["purchasing_power_change_pct"] < 0
     assert analysis["source_id"] == "EUROSTAT"
+
+
+def test_financial_fit_exposes_structural_local_income_reference(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "resolve_esco_occupation",
+        lambda profession: {
+            "status": "matched",
+            "selected": {
+                "preferred_label": "ICT support technician",
+                "match_score": 0.84,
+                "isco_group": "3512",
+            },
+            "candidates": [],
+            "threshold": 0.72,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "latest_labour_earnings",
+        lambda country_iso3, isco08: [
+            {
+                "country_iso3": country_iso3,
+                "period": 2022,
+                "isco08": isco08,
+                "value": 3200.0,
+                "unit": "eur_gross_monthly",
+                "source_id": "EUROSTAT",
+                "dataset_id": "earn_ses22_21",
+                "source_updated_at": "2026-02-09",
+            }
+        ],
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        current_country="ESP",
+        profession="IT support engineer",
+        monthly_net_income=3000,
+        remote_work=False,
+    )
+
+    result = module.financial_fit(profile, "PRT")
+
+    assert result["status"] == "local_income_reference_available"
+    assert result["reason"] == "net_income_not_modelled"
+    assert result["portable_income_analysis"] is None
+    reference = result["local_income_reference"]
+    assert reference["occupation_label"] == "ICT support technician"
+    assert reference["ses_isco_major_group"] == "OC3"
+    assert reference["gross_monthly_mean_eur"] == 3200.0
+    assert reference["period"] == 2022
+    assert reference["dataset_id"] == "earn_ses22_21"
