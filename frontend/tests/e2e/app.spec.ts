@@ -239,12 +239,12 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('topbar distinguishes runtime health from analytical operability', async ({ page }) => {
+test('topbar distinguishes evidence readiness from full product status', async ({ page }) => {
   await expect(page.getByText('P1 · ok')).toBeVisible()
-  await expect(page.getByText('Data · partial')).toBeVisible()
-  await expect(page.getByText('Data · partial')).toHaveAttribute(
+  await expect(page.getByText('Evidence · ready')).toBeVisible()
+  await expect(page.getByText('Evidence · ready')).toHaveAttribute(
     'title',
-    'Blockers: ttv_temporal_model',
+    'Product: partial · Blockers: ttv_temporal_model',
   )
 })
 
