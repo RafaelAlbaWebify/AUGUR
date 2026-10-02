@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from app.db.analytics import analytical_evidence_status
 from app.esco_store import esco_status
+from app.providers import providers_for_country
 
 
 def operability_status() -> dict:
@@ -9,10 +10,27 @@ def operability_status() -> dict:
     esco = esco_status()
     countries = evidence["countries"]
 
+    provider_coverage = {}
+    for country in countries:
+        iso3 = country["country_iso3"]
+        expected = sorted(
+            provider.provider_id
+            for provider in providers_for_country(iso3)
+        )
+        available = sorted(country.get("source_ids") or [])
+        missing = sorted(set(expected) - set(available))
+        provider_coverage[iso3] = {
+            "expected": expected,
+            "available": available,
+            "missing": missing,
+            "complete": len(missing) == 0,
+        }
+
     country_analysis_ready = bool(countries) and all(
         country["observed_rows"] > 0
         and country["observed_indicators"] > 0
         and country["official_forecast_rows"] > 0
+        and provider_coverage[country["country_iso3"]]["complete"]
         for country in countries
     )
 
@@ -65,12 +83,13 @@ def operability_status() -> dict:
         "local_employment_evidence_ready": local_employment_evidence_ready,
         "esco_full_ready": esco_full_ready,
         "personal_fit_full_evidence_ready": personal_fit_full_evidence_ready,
+        "provider_coverage": provider_coverage,
         "blockers": blockers,
         "evidence": evidence,
         "esco": esco,
         "notes": [
             "Runtime health and analytical operability are separate.",
-            "Country analysis requires observed evidence and official forecasts for every registered country.",
+            "Country analysis requires observed evidence, official forecasts and every configured provider for each registered country.",
             "Full local-employment Personal Fit requires Eurostat labour earnings evidence and a full ESCO dataset.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
