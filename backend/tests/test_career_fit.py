@@ -244,6 +244,9 @@ def test_eures_market_evidence_is_versioned_outside_service_logic():
     assert set(COUNTRY_EVIDENCE) == {"ESP", "PRT", "IRL"}
     assert "ict_professionals" in COUNTRY_EVIDENCE["IRL"]["shortage_groups"]
     assert isinstance(COUNTRY_EVIDENCE["ESP"]["surplus_groups"], set)
+    assert COUNTRY_EVIDENCE["ESP"]["eures_country_code"] == "ES"
+    assert COUNTRY_EVIDENCE["PRT"]["eures_country_code"] == "PT"
+    assert COUNTRY_EVIDENCE["IRL"]["eures_country_code"] == "IE"
 
 
 def test_isco_35_support_technician_does_not_inherit_isco_25_shortage(monkeypatch):
