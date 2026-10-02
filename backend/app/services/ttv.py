@@ -14,6 +14,10 @@ STAGE_ORDER = [
     "financial_fit",
 ]
 
+# A duration model must be backed by validated temporal evidence before
+# AUGUR can expose a time estimate. None means deliberately unavailable.
+TEMPORAL_MODEL_VERSION = None
+
 
 def ttv_status(
     profile: PersonalProfileResponse,
@@ -117,7 +121,11 @@ def ttv_status(
     # Temporal evidence is deliberately separate from dependency readiness.
     # AUGUR does not yet have a validated duration model for language acquisition,
     # job search, legal processing or financial transition.
-    temporal_evidence_state = "not_implemented"
+    temporal_evidence_state = (
+        "implemented"
+        if TEMPORAL_MODEL_VERSION is not None
+        else "not_implemented"
+    )
     ready_for_time_estimate = (
         dependency_ready
         and temporal_evidence_state == "implemented"
@@ -132,6 +140,7 @@ def ttv_status(
         "blocker_details": blocker_details,
         "dependency_ready": dependency_ready,
         "temporal_evidence_state": temporal_evidence_state,
+        "temporal_model_version": TEMPORAL_MODEL_VERSION,
         "estimate_status": (
             "available"
             if ready_for_time_estimate
