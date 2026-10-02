@@ -51,6 +51,7 @@ def test_evidence_status_reports_country_and_esco_coverage():
     )
     assert "observed_indicators" in spain
     assert "official_forecast_rows" in spain
+    assert "source_ids" in spain
     assert "labour_earnings" in spain
     assert "isco_group_count" in spain["labour_earnings"]
 
