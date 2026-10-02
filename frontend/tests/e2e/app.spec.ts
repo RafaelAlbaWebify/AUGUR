@@ -288,7 +288,7 @@ test('profile architecture keeps completion evidence outputs and TTV distinct', 
   await expect(profile.getByRole('region', { name: 'TTV readiness' })).toBeVisible()
 
   await expect(profile.getByText('Completion only confirms that required profile inputs exist. It is not a country-fit score.')).toBeVisible()
-  await expect(profile.getByText('Time-to-viability is produced only when every dependency has sufficient evidence.')).toBeVisible()
+  await expect(profile.getByText('Time-to-viability requires both viable dependencies and a validated temporal evidence model. Dependency readiness alone never creates a duration.')).toBeVisible()
 })
 
 
