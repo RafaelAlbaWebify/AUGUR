@@ -1,0 +1,396 @@
+.overviewPageV2 {
+  --ov-gap: 12px;
+  margin-top: 12px;
+  min-width: 0;
+}
+
+.overviewHeroGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 56fr) minmax(0, 44fr);
+  gap: var(--ov-gap);
+  align-items: stretch;
+  min-width: 0;
+  height: 336px;
+}
+
+.overviewMapPanel,
+.overviewFitPanel,
+.overviewDimensionsPanel,
+.overviewInsightRail {
+  min-width: 0;
+}
+
+.overviewMapPanel .worldMapSection,
+.overviewFitPanel .fitSnapshot {
+  height: 100%;
+}
+
+.overviewMapPanel .worldMapSection {
+  display: flex;
+  flex-direction: column;
+}
+
+.overviewMapPanel .dimensionHeader {
+  margin: 0 0 8px;
+  min-height: 34px;
+}
+
+.overviewMapPanel .dimensionHeader h3 {
+  margin-top: 2px;
+  font-size: 16px;
+}
+
+.overviewMapPanel .worldMapFrame {
+  flex: 1;
+  min-height: 0 !important;
+  height: auto !important;
+}
+
+.overviewMapPanel .worldMapSvg {
+  height: 100% !important;
+  min-height: 0;
+}
+
+.overviewFitPanel .fitSnapshot {
+  min-height: 0 !important;
+  padding: 14px;
+}
+
+.overviewFitPanel .mockFitGrid {
+  margin-top: 12px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: 8px;
+}
+
+.overviewFitPanel .mockFitCard {
+  min-height: 0;
+  grid-template-columns: 52px minmax(0, 1fr);
+  padding: 10px !important;
+}
+
+.overviewFitPanel .mockFitCard.ttv {
+  min-height: 0;
+}
+
+.overviewFitPanel .readinessRing {
+  width: 48px;
+  height: 48px;
+}
+
+.overviewFitPanel .readinessRing span {
+  font-size: 14px !important;
+}
+
+.overviewLowerGrid {
+  margin-top: var(--ov-gap);
+  display: grid;
+  grid-template-columns: minmax(0, 75fr) minmax(250px, 25fr);
+  gap: var(--ov-gap);
+  align-items: start;
+  min-width: 0;
+}
+
+.overviewDimensionsPanel {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--augur-border);
+  border-radius: 13px;
+  background:
+    linear-gradient(180deg, rgba(12, 29, 42, 0.92), rgba(8, 21, 31, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.018),
+    0 10px 26px rgba(0,0,0,0.12);
+}
+
+.overviewSectionHeader {
+  min-height: 40px;
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.overviewSectionHeader span,
+.overviewRailHeader span {
+  color: #71889a;
+  font-size: 8px;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.overviewSectionHeader h2 {
+  margin: 3px 0 0;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.overviewSectionHeader small {
+  margin-top: 4px;
+  color: #61798a;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.overviewDimensionGridV2 {
+  margin-top: 9px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 9px;
+  min-width: 0;
+}
+
+.overviewDimensionGridV2 .mockDimensionCard {
+  min-height: 128px;
+  padding: 11px 12px;
+}
+
+.overviewDimensionGridV2 .mockDimensionHeader span {
+  font-size: 8px;
+}
+
+.overviewDimensionGridV2 .mockDimensionHeader small {
+  padding: 3px 6px;
+  font-size: 7px;
+}
+
+.overviewDimensionGridV2 .mockDimensionStatusRow {
+  margin-top: 8px;
+}
+
+.overviewDimensionGridV2 .mockDimensionStatusRow > strong {
+  font-size: 14px;
+}
+
+.overviewDimensionGridV2 .mockDimensionCard ul {
+  margin-top: 8px;
+  gap: 3px;
+}
+
+.overviewDimensionGridV2 .mockDimensionCard li {
+  font-size: 8px;
+  line-height: 1.25;
+}
+
+.overviewInsightRail {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.overviewInsightRail .overallSignalBalance,
+.overviewOutlookCard,
+.overviewCompareCard {
+  border: 1px solid var(--augur-border);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(12, 29, 42, 0.92), rgba(8, 21, 31, 0.94));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.018),
+    0 10px 26px rgba(0,0,0,0.12);
+}
+
+.overviewInsightRail .overallSignalBalance {
+  padding: 11px;
+}
+
+.overviewInsightRail .overallSignalBalance p {
+  margin-top: 5px;
+  font-size: 8px;
+}
+
+.overviewOutlookCard,
+.overviewCompareCard {
+  padding: 11px;
+}
+
+.overviewRailHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.overviewRailHeader strong {
+  display: block;
+  margin-top: 3px;
+  color: #eef5fa;
+  font-size: 12px;
+}
+
+.overviewRailHeader button {
+  border: 1px solid #2b4a60;
+  border-radius: 7px;
+  background: #0b1e2c;
+  color: #9db2c1;
+  padding: 5px 8px;
+  font: inherit;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.overviewRailHeader button:hover {
+  color: #fff;
+  border-color: #4b7895;
+}
+
+.overviewScenarioPreview {
+  margin-top: 9px;
+  display: grid;
+  gap: 7px;
+}
+
+.overviewScenarioPreview > p {
+  margin: 0 0 1px;
+  color: #6f8494;
+  font-size: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.overviewScenarioRow {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) 50px;
+  align-items: center;
+  gap: 6px;
+}
+
+.overviewScenarioRow > span {
+  color: #9babb7;
+  font-size: 8px;
+}
+
+.overviewScenarioRow > div {
+  height: 7px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #162936;
+}
+
+.overviewScenarioRow i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: #67b7ff;
+}
+
+.overviewScenarioRow.optimistic i {
+  background: #4fd38a;
+}
+
+.overviewScenarioRow.stress i {
+  background: #f3b64b;
+}
+
+.overviewScenarioRow > strong {
+  color: #dfe7ed;
+  font-size: 8px;
+  text-align: right;
+}
+
+.overviewRailEmpty {
+  margin-top: 9px;
+  color: #718797;
+  font-size: 9px;
+}
+
+.overviewCompareCard > .comparePanel {
+  margin-top: 9px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.overviewCompareCard > .comparePanel > .comparePanelHeader {
+  display: none;
+}
+
+.overviewCompareCard .compareSelectors {
+  margin-top: 0;
+}
+
+.overviewCompareCard .compareSelectorSlot .countryPicker {
+  min-height: 28px;
+}
+
+.overviewCompareCard .compareSelectorSlot .countryPicker select {
+  height: 27px;
+  font-size: 8px;
+}
+
+.overviewCompareCard .compareBarPreview {
+  margin-top: 8px;
+}
+
+.overviewCompareCard .compareBarRow {
+  grid-template-columns: 58px minmax(0, 1fr) 46px;
+  gap: 5px;
+}
+
+.overviewCompareCard .compareBarRow > span,
+.overviewCompareCard .compareBarRow > strong {
+  font-size: 8px;
+}
+
+.overviewCompareCard .compareBarTrack {
+  height: 6px;
+}
+
+@media (min-width: 1500px) and (min-height: 900px) {
+  .shell.view-overview {
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .overviewPageV2 {
+    height: calc(100vh - 92px);
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 1499px), (max-height: 899px) {
+  .shell.view-overview {
+    height: auto;
+    overflow: visible;
+  }
+
+  .overviewPageV2 {
+    height: auto;
+    overflow: visible;
+  }
+
+  .overviewHeroGrid,
+  .overviewLowerGrid {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .overviewMapPanel .worldMapFrame {
+    height: 320px !important;
+  }
+
+  .overviewFitPanel .fitSnapshot {
+    min-height: 340px !important;
+  }
+
+  .overviewDimensionGridV2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .overviewDimensionGridV2 {
+    grid-template-columns: 1fr;
+  }
+
+  .overviewSectionHeader {
+    display: block;
+  }
+
+  .overviewSectionHeader small {
+    display: block;
+    margin-top: 6px;
+  }
+}
