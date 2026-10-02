@@ -70,6 +70,20 @@ type LanguageFitResponse = {
   work_ready_threshold: string
   work_ready: boolean
   method: string
+  occupation_language_evidence?: {
+    status: string
+    occupation_label: string | null
+    dataset_mode: string | null
+    dataset_version: string | null
+    skills: Array<{
+      skill_uri: string
+      skill_label: string
+      relation_type: string
+    }>
+    essential_skill_count: number
+    optional_skill_count: number
+    evidence_complete: boolean
+  }
   notes: string[]
 }
 
@@ -630,7 +644,17 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             <dl>
               <div><dt>Result</dt><dd>{languageFit ? (languageFit.work_ready ? `Meets AUGUR ${languageFit.work_ready_threshold}+ heuristic` : `Below AUGUR ${languageFit.work_ready_threshold} heuristic`) : 'Loading evidence'}</dd></div>
               <div><dt>Why</dt><dd>{languageFit?.target_languages?.length ? `Target: ${languageFit.target_languages.join(' · ')}` : 'Target-language evidence unavailable.'}</dd></div>
-              <div><dt>Limitation</dt><dd>B2 is an AUGUR employment heuristic, not a legal requirement.</dd></div>
+              <div>
+                <dt>Evidence</dt>
+                <dd>
+                  {languageFit?.occupation_language_evidence?.status === 'occupation_language_evidence_available'
+                    ? `ESCO ${languageFit.occupation_language_evidence.dataset_version ?? ''} · ${languageFit.occupation_language_evidence.occupation_label} · ${languageFit.occupation_language_evidence.essential_skill_count} essential / ${languageFit.occupation_language_evidence.optional_skill_count} optional language skills`
+                    : languageFit?.occupation_language_evidence
+                    ? `ESCO occupation-language evidence: ${languageFit.occupation_language_evidence.status.replaceAll('_', ' ')}`
+                    : 'ESCO occupation-language evidence not evaluated.'}
+                </dd>
+              </div>
+              <div><dt>Limitation</dt><dd>B2 is an AUGUR employment heuristic, not a legal requirement; ESCO relations do not encode CEFR level.</dd></div>
             </dl>
           </article>
 
