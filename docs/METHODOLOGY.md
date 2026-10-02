@@ -234,9 +234,9 @@ Current temporal evidence includes:
 - Cambridge English guided-learning-hour ranges for progression to AUGUR's B2 heuristic, converted to calendar weeks only when the user supplies weekly study intensity;
 - zero skill-training delay only when declared essential ESCO skill coverage is already complete;
 - zero employment-transition delay for preserved remote income;
-- an experimental Eurostat country-level unemployment-to-employment transition baseline for local employment.
+- an experimental Eurostat country-level unemployment-to-employment transition baseline for local employment, using the profile age class when a matching Eurostat group is available and falling back explicitly to ages 15–74 otherwise.
 
-The Eurostat employment baseline is not occupation-specific and uses a constant quarterly-hazard assumption only to produce a validation range. It is not an individual job-offer forecast.
+The Eurostat employment baseline is not occupation-specific and uses a constant quarterly-hazard assumption only to produce a validation range. It is not an individual job-offer forecast. Profiles outside the Eurostat 15–74 transition population are not extrapolated.
 
 Candidate stage durations are currently composed with `parallel_max`: stages that can progress concurrently are not blindly summed. This composition remains experimental and is one of the items that must be validated before a temporal model can be versioned.
 
