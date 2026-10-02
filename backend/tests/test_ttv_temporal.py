@@ -81,6 +81,7 @@ def test_temporal_graph_withholds_calendar_when_study_intensity_is_missing():
 
     result = temporal_evidence_graph(
         profile,
+        "IRL",
         _legal_ready(),
         _language_b1(),
         _career_ready(),
@@ -99,7 +100,8 @@ def test_temporal_graph_withholds_calendar_when_study_intensity_is_missing():
     assert result["unavailable_stages"] == ["language"]
 
 
-def test_temporal_graph_withholds_local_employment_duration():
+def test_temporal_graph_withholds_local_employment_when_baseline_missing(monkeypatch):
+    monkeypatch.setattr(module, "latest_labour_job_transition", lambda country_iso3: None)
     profile = PersonalProfileResponse(
         profile_id="default",
         remote_work=False,
@@ -108,6 +110,7 @@ def test_temporal_graph_withholds_local_employment_duration():
 
     result = temporal_evidence_graph(
         profile,
+        "IRL",
         _legal_ready(),
         {
             "status": "work_ready_heuristic",
@@ -142,6 +145,7 @@ def test_temporal_graph_does_not_assume_beginner_level_when_target_language_miss
 
     result = temporal_evidence_graph(
         profile,
+        "IRL",
         _legal_ready(),
         {
             "status": "target_language_missing",
