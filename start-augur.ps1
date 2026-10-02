@@ -11,6 +11,7 @@ $FrontendPort = 5190
 $BackendUrl = "http://127.0.0.1:$BackendPort"
 $FrontendUrl = "http://127.0.0.1:$FrontendPort"
 $HealthUrl = "$BackendUrl/api/health"
+$OperabilityUrl = "$BackendUrl/api/operability"
 
 New-Item -ItemType Directory -Force -Path $RunDir | Out-Null
 New-Item -ItemType Directory -Force -Path $LogDir | Out-Null
@@ -107,6 +108,22 @@ if (-not $BackendHealthy) {
 
 Write-Host "Backend healthy."
 
+try {
+    $Operability = Invoke-RestMethod -Uri $OperabilityUrl -TimeoutSec 5
+    $OperabilityColor = if ($Operability.status -eq "ready") { "Green" } elseif ($Operability.status -eq "partial") { "Yellow" } else { "Red" }
+    Write-Host "AUGUR operability: $($Operability.status)" -ForegroundColor $OperabilityColor
+
+    if ($Operability.blockers -and $Operability.blockers.Count -gt 0) {
+        Write-Host "Evidence blockers:"
+        foreach ($Blocker in $Operability.blockers) {
+            Write-Host "  - $Blocker"
+        }
+    }
+}
+catch {
+    Write-Warning "Could not read AUGUR operability status: $($_.Exception.Message)"
+}
+
 Write-Host "Starting AUGUR frontend on $FrontendPort..."
 $FrontendProcess = Start-Process `
     -FilePath "npm.cmd" `
@@ -158,6 +175,7 @@ Write-Host "Frontend: $FrontendUrl"
 Write-Host "Backend:  $BackendUrl"
 Write-Host "API docs: $BackendUrl/docs"
 Write-Host "Health:   $HealthUrl"
+Write-Host "Data:     $OperabilityUrl"
 Write-Host "Logs:     $LogDir"
 Write-Host ""
 
