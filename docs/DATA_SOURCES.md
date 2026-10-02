@@ -77,6 +77,29 @@ Current coverage:
 
 The medium variant is used for the official demographic baseline.
 
+## Eurostat Structure of Earnings Survey 2022
+
+Role:
+
+- structural local-employment earnings reference for Personal Fit.
+
+Dataset:
+
+- `earn_ses22_21` — mean monthly earnings by sex, age and ISCO-08 occupation group.
+
+AUGUR requests:
+
+- gross earnings (`ERN`);
+- euro (`EUR`);
+- total sex;
+- total age;
+- enterprises with 10 or more employees;
+- occupation groups retained separately by ISCO-08.
+
+This evidence is stored outside the normal country observation series because occupation is an additional analytical dimension.
+
+SES is four-yearly. The current implemented reference year is 2022, so AUGUR presents it as structural earnings evidence, not a current salary quote or job offer.
+
 ## Country coverage
 
 The first validated multi-country slice is:
@@ -95,7 +118,7 @@ Future dimensions require additional primary sources, likely including:
 - health and education outcomes
 - fiscal structure beyond gross debt
 - energy and strategic resilience
-- labour-market / occupational demand
+- more current or more granular labour-market / occupational earnings evidence
 - migration and legal eligibility
 - national statistical agencies where harmonized supranational series are insufficient
 
