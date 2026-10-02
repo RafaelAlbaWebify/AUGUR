@@ -37,9 +37,9 @@ TEMPORAL_MODEL_VALIDATION_GATES = {
         "state": "missing",
         "reason": "occupation_specific_net_income_household_budget_and_transition_costs_incomplete",
     },
-    "composition_parallel_max": {
+    "composition_dependency_graph": {
         "state": "experimental",
-        "reason": "parallel_stage_composition_not_externally_calibrated",
+        "reason": "explicit_stage_dependencies_not_externally_calibrated",
     },
     "external_calibration": {
         "state": "missing",
@@ -375,6 +375,40 @@ def employment_temporal_evidence(
     }
 
 
+def compose_temporal_stages(stages: dict[str, dict]) -> dict | None:
+    if not all(
+        stage["status"] == "available"
+        for stage in stages.values()
+    ):
+        return None
+
+    preparation_ids = ["legal", "language", "skills"]
+    preparation_min = max(
+        int(stages[stage_id]["weeks_min"])
+        for stage_id in preparation_ids
+    )
+    preparation_max = max(
+        int(stages[stage_id]["weeks_max"])
+        for stage_id in preparation_ids
+    )
+
+    employment_min = int(stages["employment"]["weeks_min"])
+    employment_max = int(stages["employment"]["weeks_max"])
+    financial_min = int(stages["financial"]["weeks_min"])
+    financial_max = int(stages["financial"]["weeks_max"])
+
+    return {
+        "weeks_min": preparation_min + employment_min + financial_min,
+        "weeks_max": preparation_max + employment_max + financial_max,
+        "composition": "critical_path_v1",
+        "stage_groups": {
+            "preparation_parallel": preparation_ids,
+            "employment_after_preparation": ["employment"],
+            "financial_after_employment": ["financial"],
+        },
+    }
+
+
 def temporal_evidence_graph(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -407,19 +441,11 @@ def temporal_evidence_graph(
         if stage["status"] != "available"
     ]
 
-    candidate_range = None
-    if calendar_ready:
-        candidate_range = {
-            "weeks_min": max(
-                int(stage["weeks_min"])
-                for stage in stages.values()
-            ),
-            "weeks_max": max(
-                int(stage["weeks_max"])
-                for stage in stages.values()
-            ),
-            "composition": "parallel_max",
-        }
+    candidate_range = (
+        compose_temporal_stages(stages)
+        if calendar_ready
+        else None
+    )
 
     return {
         "engine_version": TEMPORAL_EVIDENCE_ENGINE_VERSION,
@@ -428,7 +454,7 @@ def temporal_evidence_graph(
         "unavailable_stages": unavailable,
         "candidate_range": candidate_range,
         "notes": [
-            "Stage durations are composed in parallel using the maximum duration, not summed.",
+            "Legal, language and skills preparation may progress in parallel; employment follows preparation and financial transition follows employment in the candidate critical path.",
             "Guided language hours are planning guidance and may vary by learner.",
             "This evidence engine does not activate AUGUR TTV until the temporal model is explicitly versioned.",
         ],
