@@ -81,7 +81,9 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert "local_employment_evidence_ready" in body
     assert "job_transition_evidence_ready" in body
     assert "esco_full_ready" in body
+    assert "personal_fit_core_evidence_ready" in body
     assert "personal_fit_full_evidence_ready" in body
+    assert "career_market_evidence" in body
     assert isinstance(body["blockers"], list)
     assert "evidence" in body
     assert "esco" in body
