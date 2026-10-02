@@ -3641,6 +3641,13 @@ body {
   text-align: right;
 }
 
+.layoutGuardrailNote {
+  margin: 0 0 12px;
+  color: #708595;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
 .layoutOptionRow {
   margin-top: 12px;
   display: grid;
