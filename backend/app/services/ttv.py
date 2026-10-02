@@ -32,6 +32,7 @@ def ttv_status(
 
     temporal_evidence = temporal_evidence_graph(
         profile,
+        target,
         legal,
         language,
         career,
