@@ -325,6 +325,7 @@ def calibration_status() -> dict:
                 "interval_coverage_pct": None,
                 "mean_absolute_midpoint_error_weeks": None,
                 "mean_signed_midpoint_error_weeks": None,
+                "stage_metrics": {},
                 "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
@@ -346,6 +347,7 @@ def calibration_status() -> dict:
             "interval_coverage_pct": None,
             "mean_absolute_midpoint_error_weeks": None,
             "mean_signed_midpoint_error_weeks": None,
+            "stage_metrics": {},
             "externally_calibrated": False,
             "notes": [
                 "Calibration infrastructure is available but contains no observed cases.",
