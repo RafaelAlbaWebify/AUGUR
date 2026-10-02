@@ -258,10 +258,13 @@ def test_career_viability_evidence_does_not_treat_surplus_as_supportive(monkeypa
 
 
 def test_eures_market_evidence_is_versioned_outside_service_logic():
-    assert EURES_EVIDENCE_METADATA["evidence_id"] == "eures_lmi_2025_2024_conditions"
-    assert EURES_EVIDENCE_METADATA["rule_version"] == "EURES_LMI_2024_AS_PUBLISHED_2025"
-    assert EURES_EVIDENCE_METADATA["report_year"] == 2025
-    assert EURES_EVIDENCE_METADATA["conditions_year"] == 2024
+    assert EURES_EVIDENCE_METADATA["evidence_id"] == "eures_market_evidence_composite"
+    assert EURES_EVIDENCE_METADATA["rule_version"] == "EURES_MARKET_COMPOSITE_2026_10"
+    assert EURES_EVIDENCE_METADATA["broad_evidence"]["evidence_id"] == "eures_country_lmi_2024_conditions"
+    assert EURES_EVIDENCE_METADATA["broad_evidence"]["conditions_year"] == 2024
+    assert EURES_EVIDENCE_METADATA["unit_group_evidence"]["evidence_id"] == "eures_shortages_surpluses_2025_annex"
+    assert EURES_EVIDENCE_METADATA["unit_group_evidence"]["conditions_year"] == 2025
+    assert EURES_EVIDENCE_METADATA["unit_group_evidence"]["report_year"] == 2026
     assert set(COUNTRY_EVIDENCE) == {"ESP", "PRT", "IRL"}
     assert "ict_professionals" in COUNTRY_EVIDENCE["IRL"]["shortage_groups"]
     assert isinstance(COUNTRY_EVIDENCE["ESP"]["surplus_groups"], set)
@@ -363,33 +366,42 @@ def test_unit_group_unclassified_overrides_broad_ict_shortage(monkeypatch):
 def test_verified_ict_unit_group_manifest_has_expected_country_signals():
     unit_signals = EURES_EVIDENCE_METADATA["unit_group_signals"]
 
-    assert unit_signals["3512"]["occupation_label"] == "ICT user support technicians"
-    assert "ES" in unit_signals["3512"]["surplus_countries"]
+    assert unit_signals["3512"]["occupation_label"] == "Information and communications technology user support technicians"
+    assert "ES" not in unit_signals["3512"]["surplus_countries"]
     assert "PT" in unit_signals["3512"]["surplus_countries"]
     assert "IE" not in unit_signals["3512"]["shortage_countries"]
+    assert "IE" not in unit_signals["3512"]["surplus_countries"]
 
     assert "IE" in unit_signals["2522"]["shortage_countries"]
     assert "PT" not in unit_signals["2522"]["shortage_countries"]
+    assert "PT" not in unit_signals["2522"]["surplus_countries"]
 
     assert "PT" in unit_signals["2511"]["surplus_countries"]
+    assert "IE" in unit_signals["2512"]["shortage_countries"]
+    assert "PT" in unit_signals["2512"]["shortage_countries"]
+    assert "PT" in unit_signals["2513"]["surplus_countries"]
+    assert "ES" in unit_signals["2521"]["surplus_countries"]
+    assert "IE" in unit_signals["2529"]["shortage_countries"]
+    assert "PT" in unit_signals["2529"]["shortage_countries"]
+    assert "ES" in unit_signals["3511"]["shortage_countries"]
 
 
 def test_broad_shortage_does_not_count_as_complete_market_evidence(monkeypatch):
     _mock_full_esco_career(
         monkeypatch,
         coverage=1.0,
-        isco_group="2512",
+        isco_group="2211",
     )
 
     profile = PersonalProfileResponse(
         profile_id="default",
-        profession="Software developer",
-        skills=["Python", "software design", "testing", "documentation"],
+        profession="General practitioner",
+        skills=["diagnosis", "patient care", "treatment", "documentation"],
     )
 
-    result = career_fit(profile, "IRL")
+    result = career_fit(profile, "PRT")
 
-    assert result["occupation"]["occupation_group"] == "ict_professionals"
+    assert result["occupation"]["occupation_group"] == "health_professionals"
     assert result["market_signal_scope"] == "broad_occupation_group"
     assert result["market_signal"] == "shortage"
     assert result["skill_evidence_complete"] is True
@@ -397,6 +409,9 @@ def test_broad_shortage_does_not_count_as_complete_market_evidence(monkeypatch):
     assert result["evidence_complete"] is False
     assert result["market_signal_supports_viability"] is False
     assert result["viability_evidence_ready"] is False
+    assert result["source"]["evidence_id"] == "eures_country_lmi_2024_conditions"
+    assert result["source"]["conditions_year"] == 2024
+    assert result["source"]["scope"] == "broad_occupation_group"
 
 
 def test_vacancy_rate_context_does_not_override_market_gate(monkeypatch):
@@ -456,6 +471,101 @@ def test_career_market_evidence_status_is_explicitly_partial():
 
     assert result["supported_countries"] == ["ESP", "IRL", "PRT"]
     assert result["broad_country_count"] == 3
-    assert result["unit_group_count"] >= 4
+    assert result["unit_group_count"] >= 13
     assert result["coverage_scope"] == "partial_unit_group_coverage"
     assert result["full_occupation_coverage"] is False
+
+
+def test_latest_unit_group_source_provenance_is_returned(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2512",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Software developer",
+        skills=["Python", "software design", "testing", "documentation"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["market_signal"] == "shortage"
+    assert result["market_signal_scope"] == "isco_unit_group"
+    assert result["market_signal_isco"] == "2512"
+    assert result["source"]["evidence_id"] == "eures_shortages_surpluses_2025_annex"
+    assert result["source"]["rule_version"] == "EURES_SHORTAGES_SURPLUSES_2025_ANNEX"
+    assert result["source"]["report_year"] == 2026
+    assert result["source"]["conditions_year"] == 2025
+    assert result["source"]["scope"] == "isco_unit_group"
+    assert result["rule_version"] == "EURES_SHORTAGES_SURPLUSES_2025_ANNEX"
+
+
+def test_latest_annex_changes_3512_spain_from_old_surplus_to_unclassified(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="3512",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="IT support engineer",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "ESP")
+
+    assert result["market_signal"] == "not_classified_as_shortage_or_surplus"
+    assert result["market_signal_scope"] == "isco_unit_group"
+    assert result["market_evidence_complete"] is True
+    assert result["market_signal_supports_viability"] is False
+
+
+def test_latest_annex_3512_portugal_remains_surplus(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="3512",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="IT support engineer",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "PRT")
+
+    assert result["market_signal"] == "surplus"
+    assert result["market_signal_scope"] == "isco_unit_group"
+    assert result["market_signal_supports_viability"] is False
+
+
+def test_mixed_unit_group_signal_is_not_supportive(monkeypatch):
+    original = career_fit_module.COUNTRY_EVIDENCE["IRL"]["eures_country_code"]
+    monkeypatch.setitem(
+        career_fit_module.COUNTRY_EVIDENCE["IRL"],
+        "eures_country_code",
+        "BE",
+    )
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2511",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Systems analyst",
+        skills=["analysis", "systems", "requirements", "documentation"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert original == "IE"
+    assert result["market_signal"] == "mixed_shortage_and_surplus"
+    assert result["market_evidence_complete"] is True
+    assert result["market_signal_supports_viability"] is False
+    assert result["viability_evidence_ready"] is False
