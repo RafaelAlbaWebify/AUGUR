@@ -249,6 +249,36 @@ test('topbar distinguishes evidence readiness from full product status', async (
 })
 
 
+test('refreshes evidence status when the window regains focus', async ({ page }) => {
+  await expect(page.getByText('Evidence · ready')).toBeVisible()
+
+  await page.route(
+    'http://127.0.0.1:8020/api/operability',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          status: 'partial',
+          ready: false,
+          analysis_ready: false,
+          ttv_temporal_model_ready: false,
+          blockers: ['data_sync_stale'],
+        }),
+      })
+    },
+  )
+
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')))
+
+  await expect(page.getByText('Evidence · partial')).toBeVisible()
+  await expect(page.getByText('Evidence · partial')).toHaveAttribute(
+    'title',
+    'Product: partial · Blockers: data_sync_stale',
+  )
+})
+
+
 test('top navigation uses real routes and unmounts the previous view', async ({ page }) => {
   await expect(page).toHaveURL(/\/country\/ESP\/overview$/)
   await expect(page.getByTestId('world-map')).toBeVisible()
