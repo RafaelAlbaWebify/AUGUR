@@ -128,6 +128,10 @@ type CareerFitResponse = {
   source: null | {
     label: string
     url: string
+    evidence_id?: string
+    report_year?: number
+    conditions_year?: number
+    report_url?: string
   }
   notes: string[]
 }
@@ -743,7 +747,15 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 </dd>
               </div>
               <div>
-                <dt>Evidence</dt>
+                <dt>Market evidence</dt>
+                <dd>
+                  {careerFit?.source
+                    ? `EURES ${careerFit.source.report_year ?? careerFit.rule_version} · ${careerFit.source.conditions_year ? `${careerFit.source.conditions_year} conditions · ` : ''}${careerFit.market_signal?.replaceAll('_', ' ') ?? 'signal unavailable'}${careerFit.source.evidence_id ? ` · ${careerFit.source.evidence_id}` : ''}`
+                    : 'EURES market evidence unavailable.'}
+                </dd>
+              </div>
+              <div>
+                <dt>Skill evidence</dt>
                 <dd>
                   {careerFit?.skill_match.dataset_mode
                     ? `ESCO ${careerFit.skill_match.dataset_mode} · ${careerFit.skill_match.coverage == null ? 'coverage unavailable' : `${Math.round(careerFit.skill_match.coverage * 100)}% essential-skill coverage`}`
