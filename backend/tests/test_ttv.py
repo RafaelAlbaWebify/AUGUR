@@ -9,6 +9,8 @@ def test_ttv_empty_profile_reports_blockers():
 
     assert result["time_estimate"] is None
     assert result["ready_for_time_estimate"] is False
+    assert result["estimate_status"] == "dependencies_blocked"
+    assert result["blocker_details"]
     assert "legal_fit" in result["blocked_by"]
     assert "language_fit" in result["blocked_by"]
     assert "career_fit" in result["blocked_by"]
@@ -108,5 +110,7 @@ def test_ttv_dependencies_can_be_ready_before_temporal_model(monkeypatch):
     assert result["blocked_by"] == []
     assert result["dependency_ready"] is True
     assert result["temporal_evidence_state"] == "not_implemented"
+    assert result["estimate_status"] == "temporal_model_missing"
+    assert result["blocker_details"] == []
     assert result["ready_for_time_estimate"] is False
     assert result["time_estimate"] is None
