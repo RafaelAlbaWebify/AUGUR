@@ -182,6 +182,14 @@ async function mockApi(page: Page) {
       }
     } else if (path === '/api/health') {
       body = { status: 'ok', phase: 1, version: 'test', datastores: { sqlite: true, duckdb: true } }
+    } else if (path === '/api/operability') {
+      body = {
+        status: 'partial',
+        ready: false,
+        analysis_ready: true,
+        ttv_temporal_model_ready: false,
+        blockers: ['ttv_temporal_model'],
+      }
     } else if (path === '/api/countries') {
       body = { countries }
     } else if (path === '/api/compare') {
@@ -230,6 +238,16 @@ test.beforeEach(async ({ page }) => {
   await mockApi(page)
   await page.goto('/')
 })
+
+test('topbar distinguishes runtime health from analytical operability', async ({ page }) => {
+  await expect(page.getByText('P1 · ok')).toBeVisible()
+  await expect(page.getByText('Data · partial')).toBeVisible()
+  await expect(page.getByText('Data · partial')).toHaveAttribute(
+    'title',
+    'Blockers: ttv_temporal_model',
+  )
+})
+
 
 test('top navigation uses real routes and unmounts the previous view', async ({ page }) => {
   await expect(page).toHaveURL(/\/country\/ESP\/overview$/)
