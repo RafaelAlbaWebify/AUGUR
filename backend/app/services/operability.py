@@ -93,6 +93,11 @@ def operability_status() -> dict:
         for country in countries
     )
 
+    job_transition_evidence_ready = bool(countries) and all(
+        country.get("job_transitions", {}).get("row_count", 0) > 0
+        for country in countries
+    )
+
     esco_full_ready = (
         esco["mode"] == "full"
         and esco["occupation_count"] > 0
@@ -120,7 +125,11 @@ def operability_status() -> dict:
         TEMPORAL_MODEL_VERSION is not None
         and temporal_validation["ready_for_versioning"]
     )
-    ready = analysis_ready and ttv_temporal_model_ready
+    ready = (
+        analysis_ready
+        and ttv_temporal_model_ready
+        and job_transition_evidence_ready
+    )
 
     if ready:
         status = "ready"
@@ -138,6 +147,8 @@ def operability_status() -> dict:
         blockers.append("local_employment_earnings")
     if not esco_full_ready:
         blockers.append("full_esco_dataset")
+    if not job_transition_evidence_ready:
+        blockers.append("labour_job_transition_evidence")
     if analysis_ready and not ttv_temporal_model_ready:
         blockers.append("ttv_temporal_model")
 
@@ -152,6 +163,7 @@ def operability_status() -> dict:
         "data_sync_fresh": data_sync_fresh,
         "sync_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
         "local_employment_evidence_ready": local_employment_evidence_ready,
+        "job_transition_evidence_ready": job_transition_evidence_ready,
         "esco_full_ready": esco_full_ready,
         "personal_fit_full_evidence_ready": personal_fit_full_evidence_ready,
         "provider_coverage": provider_coverage,
@@ -163,7 +175,7 @@ def operability_status() -> dict:
             "Country analysis requires observed evidence, official forecasts and every configured provider for each registered country.",
             "Provider synchronization must be no more than 30 days old; source observation years are evaluated separately from retrieval freshness.",
             "Full local-employment Personal Fit requires Eurostat occupational gross earnings, national net-earnings benchmark evidence and a full ESCO dataset.",
-            "Full AUGUR readiness also requires a validated TTV temporal model.",
+            "Full AUGUR readiness also requires loaded job-transition evidence and a validated TTV temporal model.",
             "Analysis readiness is reported separately from full product readiness.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
