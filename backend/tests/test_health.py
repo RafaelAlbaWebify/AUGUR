@@ -65,6 +65,9 @@ def test_operability_endpoint_reports_readiness_and_blockers():
 
     assert body["status"] in {"empty", "partial", "ready"}
     assert isinstance(body["ready"], bool)
+    assert "analysis_ready" in body
+    assert "ttv_temporal_model_ready" in body
+    assert "ttv_temporal_model_version" in body
     assert "country_analysis_ready" in body
     assert "local_employment_evidence_ready" in body
     assert "esco_full_ready" in body
