@@ -11,6 +11,8 @@ from app.core.config import settings
 
 
 CALIBRATION_SCHEMA_VERSION = "ttv-calibration-v1"
+CALIBRATION_PROTOCOL_STATE = "draft_not_approved"
+CALIBRATION_PROTOCOL_VERSION = None
 SUPPORTED_EMPLOYMENT_MODES = {"remote", "local"}
 SUPPORTED_COMPOSITIONS = {"critical_path_v1"}
 CALIBRATION_STAGE_IDS = {
@@ -280,6 +282,8 @@ def import_calibration_csv(path: str | Path) -> dict:
 
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
+        "protocol_state": CALIBRATION_PROTOCOL_STATE,
+        "protocol_version": CALIBRATION_PROTOCOL_VERSION,
         "source_path": str(source_path),
         "imported_count": imported,
         "case_ids": case_ids,
@@ -316,6 +320,8 @@ def calibration_status() -> dict:
                 raise
             return {
                 "schema_version": CALIBRATION_SCHEMA_VERSION,
+                "protocol_state": CALIBRATION_PROTOCOL_STATE,
+                "protocol_version": CALIBRATION_PROTOCOL_VERSION,
                 "infrastructure_ready": False,
                 "case_count": 0,
                 "country_count": 0,
@@ -338,6 +344,8 @@ def calibration_status() -> dict:
     if not cases:
         return {
             "schema_version": CALIBRATION_SCHEMA_VERSION,
+                "protocol_state": CALIBRATION_PROTOCOL_STATE,
+                "protocol_version": CALIBRATION_PROTOCOL_VERSION,
             "infrastructure_ready": True,
             "case_count": 0,
             "country_count": 0,
@@ -425,6 +433,8 @@ def calibration_status() -> dict:
 
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
+        "protocol_state": CALIBRATION_PROTOCOL_STATE,
+        "protocol_version": CALIBRATION_PROTOCOL_VERSION,
         "infrastructure_ready": True,
         "case_count": len(cases),
         "country_count": len(
