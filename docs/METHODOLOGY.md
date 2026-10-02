@@ -163,6 +163,10 @@ LanguageFit compares declared CEFR levels with target labour-market languages.
 
 The current B2 threshold is an AUGUR professional work-readiness heuristic, not a legal requirement.
 
+When a confident ESCO occupation match and ESCO language-skill metadata are available, LanguageFit also exposes occupation-linked language skills as a separate evidence layer. Essential/optional ESCO relationships are preserved.
+
+ESCO occupation-language relationships do **not** encode a CEFR threshold, so they never convert the B2 heuristic into an official or occupation-specific requirement.
+
 ### CareerFit
 
 CareerFit combines:
