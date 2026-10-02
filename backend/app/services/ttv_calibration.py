@@ -349,7 +349,7 @@ def calibration_status() -> dict:
             "schema_version": CALIBRATION_SCHEMA_VERSION,
             "protocol_state": CALIBRATION_PROTOCOL_STATE,
             "protocol_version": CALIBRATION_PROTOCOL_VERSION,
-        "protocol_document": CALIBRATION_PROTOCOL_DOCUMENT,
+            "protocol_document": CALIBRATION_PROTOCOL_DOCUMENT,
             "infrastructure_ready": True,
             "case_count": 0,
             "country_count": 0,
