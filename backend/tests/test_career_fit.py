@@ -20,15 +20,9 @@ def test_esco_resolution_accepts_confident_match(monkeypatch):
         lambda profession, limit=5: [
             {
                 "concept_uri": "urn:test:ict-support",
-                "preferred_label": (
-                    "ICT support technician"
-                    if isco_group.startswith("35")
-                    else "ICT professional"
-                    if isco_group.startswith("25")
-                    else "engineering professional"
-                ),
-                "code": isco_group,
-                "isco_group": isco_group,
+                "preferred_label": "ICT support technician",
+                "code": "3512",
+                "isco_group": "3512",
                 "dataset_version": "test",
                 "source_mode": "full",
                 "match_score": 0.81,
@@ -147,9 +141,15 @@ def _mock_full_esco_career(
         lambda profession, limit=5: [
             {
                 "concept_uri": "urn:test:ict-support",
-                "preferred_label": "ICT support technician",
-                "code": "3512",
-                "isco_group": "3512",
+                "preferred_label": (
+                    "ICT support technician"
+                    if isco_group.startswith("35")
+                    else "ICT professional"
+                    if isco_group.startswith("25")
+                    else "engineering professional"
+                ),
+                "code": isco_group,
+                "isco_group": isco_group,
                 "dataset_version": "1.2.1",
                 "source_mode": "full",
                 "match_score": 0.86,
