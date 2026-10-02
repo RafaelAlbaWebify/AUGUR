@@ -98,6 +98,8 @@ type CareerFitResponse = {
     isco_submajor?: string | null
   }
   market_signal: string | null
+  market_signal_scope?: string
+  market_signal_isco?: string | null
   occupation_match?: {
     status: string
     threshold: number
@@ -752,7 +754,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <dt>Market evidence</dt>
                 <dd>
                   {careerFit?.source
-                    ? `EURES ${careerFit.source.report_year ?? careerFit.rule_version} · ${careerFit.source.conditions_year ? `${careerFit.source.conditions_year} conditions · ` : ''}${careerFit.market_signal?.replaceAll('_', ' ') ?? 'signal unavailable'}${careerFit.source.evidence_id ? ` · ${careerFit.source.evidence_id}` : ''}`
+                    ? `EURES ${careerFit.source.report_year ?? careerFit.rule_version} · ${careerFit.source.conditions_year ? `${careerFit.source.conditions_year} conditions · ` : ''}${careerFit.market_signal?.replaceAll('_', ' ') ?? 'signal unavailable'}${careerFit.market_signal_isco ? ` · ISCO ${careerFit.market_signal_isco} ${careerFit.market_signal_scope === 'isco_unit_group' ? 'unit' : 'broad'}` : ''}${careerFit.source.evidence_id ? ` · ${careerFit.source.evidence_id}` : ''}`
                     : 'EURES market evidence unavailable.'}
                 </dd>
               </div>
