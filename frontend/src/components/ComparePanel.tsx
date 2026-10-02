@@ -1,4 +1,6 @@
+import { countryFlag } from '../lib/countryFlag'
 type Country = {
+  iso2?: string
   iso3: string
   name: string
 }
@@ -82,7 +84,7 @@ export default function ComparePanel({
             >
               {countries.map((country) => (
                 <option key={country.iso3} value={country.iso3}>
-                  {country.name}
+                  {countryFlag(country.iso2, country.iso3)} {country.name}
                 </option>
               ))}
             </select>
@@ -122,7 +124,7 @@ export default function ComparePanel({
 
                     return (
                       <div className="compareBarRow" key={iso3}>
-                        <span>{country?.name ?? iso3}</span>
+                        <span><b className="inlineFlag">{countryFlag(country?.iso2, iso3)}</b>{country?.name ?? iso3}</span>
                         <div className="compareBarTrack">
                           <i style={{ width: `${width}%` }} />
                         </div>
