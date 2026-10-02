@@ -201,7 +201,7 @@ def test_career_viability_evidence_does_not_treat_surplus_as_supportive(monkeypa
 
     profile = PersonalProfileResponse(
         profile_id="default",
-        profession="Systems engineer",
+        profession="Mechanical engineer",
         skills=["Windows", "networking", "ticketing", "troubleshooting"],
     )
 
