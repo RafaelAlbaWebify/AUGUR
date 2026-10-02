@@ -94,6 +94,8 @@ type CareerFitResponse = {
     status: string
     occupation_group: string | null
     matched_terms: string[]
+    mapping_method?: string
+    isco_submajor?: string | null
   }
   market_signal: string | null
   occupation_match?: {
@@ -740,7 +742,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <dt>Why</dt>
                 <dd>
                   {careerFit?.occupation_match?.selected
-                    ? `ESCO: ${careerFit.occupation_match.selected.preferred_label} · ${Math.round(careerFit.occupation_match.selected.match_score * 100)}% label match`
+                    ? `ESCO: ${careerFit.occupation_match.selected.preferred_label} · ${careerFit.occupation.isco_submajor ? `ISCO ${careerFit.occupation.isco_submajor} · ` : ''}${Math.round(careerFit.occupation_match.selected.match_score * 100)}% label match`
                     : careerFit?.occupation.occupation_group
                     ? `Occupation group: ${careerFit.occupation.occupation_group.replaceAll('_', ' ')} · no confident ESCO occupation match`
                     : 'Occupation not yet mapped.'}
