@@ -136,6 +136,9 @@ type FinancialFitResponse = {
   target_country_iso3: string
   status: string
   reason: string | null
+  evidence_state?: string
+  evidence_complete?: boolean
+  blockers?: string[]
   local_income_reference?: null | {
     occupation_label: string
     occupation_match_score: number
@@ -780,6 +783,14 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                     : financialFit?.local_income_reference
                     ? `Eurostat SES ${financialFit.local_income_reference.period} · ${financialFit.local_income_reference.occupation_label} · ${financialFit.local_income_reference.ses_isco_major_group}`
                     : 'Portable or local-income evidence unavailable.'}
+                </dd>
+              </div>
+              <div>
+                <dt>Blockers</dt>
+                <dd>
+                  {financialFit?.blockers?.length
+                    ? financialFit.blockers.map((item) => item.replaceAll('_', ' ')).join(' · ')
+                    : 'No unresolved financial evidence blockers.'}
                 </dd>
               </div>
               <div>
