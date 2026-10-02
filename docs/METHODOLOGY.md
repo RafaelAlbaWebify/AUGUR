@@ -73,11 +73,13 @@ The current dimensions are:
 
 - Prosperity
 - Productive capacity
+- Housing
 - Demography
 - Human systems
 - Fiscal sustainability
+- Strategic resilience
 
-Additional planned dimensions include housing, strategic resilience, and institutional/geopolitical environment.
+Institutional/geopolitical environment remains a future expansion area.
 
 Dimension synthesis is transparent signal aggregation. AUGUR does **not** generate a universal country score.
 
@@ -127,7 +129,7 @@ Publication periods and preferred source IDs remain visible.
 
 ## Personal fit boundary
 
-Future Personal Fit logic must operate **after** the country evidence layer.
+Personal Fit operates **after** the country evidence layer.
 
 Personal preferences may change whether a country fits a household. They must never alter:
 
@@ -137,3 +139,60 @@ Personal preferences may change whether a country fits a household. They must ne
 - country-level evidence quality.
 
 This boundary keeps descriptive country analysis separate from individual decision support.
+
+
+## Current Personal Fit methods
+
+### Profile readiness
+
+Profile readiness only reports whether the inputs required by a Personal Fit module are present. It is not a country-fit result.
+
+### LegalFit
+
+LegalFit currently resolves:
+
+- domestic cases;
+- EU free-movement framework cases for EU citizens moving to an EU target;
+- otherwise, an explicit `country_specific_rules_required` state.
+
+It does not infer visa or residence eligibility where verified country-specific rules are absent.
+
+### LanguageFit
+
+LanguageFit compares declared CEFR levels with target labour-market languages.
+
+The current B2 threshold is an AUGUR professional work-readiness heuristic, not a legal requirement.
+
+### CareerFit
+
+CareerFit combines:
+
+1. transparent profession-to-broad-occupation classification;
+2. EURES shortage/surplus signals for the implemented countries;
+3. local ESCO occupation resolution;
+4. ESCO essential-skill coverage when a full ESCO dataset is loaded.
+
+ESCO occupation resolution is confidence-gated. Low-confidence candidates are not silently accepted.
+
+Seed ESCO data validates the local pipeline but can never mark skill evidence complete.
+
+### FinancialFit
+
+For portable income, FinancialFit compares origin and target household price-level indices and reports relative purchasing-power change.
+
+It does not assume that current income survives relocation unless the profile explicitly states that remote work is viable.
+
+Local-employment income viability still requires additional labour-market salary evidence.
+
+### TTV
+
+TTV is a dependency graph, not an aggregate score.
+
+Current dependencies are:
+
+- LegalFit
+- LanguageFit
+- CareerFit
+- FinancialFit
+
+A time estimate is withheld until all required evidence layers are sufficiently complete. The current implementation therefore exposes readiness and blockers, but does not fabricate a duration.
