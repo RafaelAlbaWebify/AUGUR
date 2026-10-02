@@ -100,6 +100,17 @@ type CareerFitResponse = {
   market_signal: string | null
   market_signal_scope?: string
   market_signal_isco?: string | null
+  vacancy_demand_evidence?: null | {
+    status: string
+    isco_major: string
+    vacancy_rate_pct?: number
+    period?: string
+    nace_scope?: string | null
+    source_id?: string
+    dataset_id?: string
+    granularity: string
+    role: string
+  }
   occupation_match?: {
     status: string
     threshold: number
@@ -776,6 +787,16 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                   {careerFit?.skill_match.dataset_mode
                     ? `ESCO ${careerFit.skill_match.dataset_mode} · ${careerFit.skill_match.coverage == null ? 'coverage unavailable' : `${Math.round(careerFit.skill_match.coverage * 100)}% essential-skill coverage`}`
                     : 'ESCO skill evidence not evaluated.'}
+                </dd>
+              </div>
+              <div>
+                <dt>Demand context</dt>
+                <dd>
+                  {careerFit?.vacancy_demand_evidence?.status === 'available'
+                    ? `Eurostat ${careerFit.vacancy_demand_evidence.period} · ISCO ${careerFit.vacancy_demand_evidence.isco_major} vacancy rate ${careerFit.vacancy_demand_evidence.vacancy_rate_pct?.toFixed(1)}% · context only`
+                    : careerFit?.vacancy_demand_evidence
+                    ? `Eurostat vacancy-rate context: ${careerFit.vacancy_demand_evidence.status.replaceAll('_', ' ')}`
+                    : 'Eurostat vacancy-rate context not evaluated.'}
                 </dd>
               </div>
               <div>
