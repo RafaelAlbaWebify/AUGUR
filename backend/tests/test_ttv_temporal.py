@@ -1,4 +1,5 @@
 from app.models.profile import LanguageSkill, PersonalProfileResponse
+from app.services import ttv_temporal as module
 from app.services.ttv_temporal import temporal_evidence_graph
 
 
@@ -46,6 +47,7 @@ def test_temporal_graph_converts_b1_to_b2_hours_using_user_study_intensity():
 
     result = temporal_evidence_graph(
         profile,
+        "IRL",
         _legal_ready(),
         _language_b1(),
         _career_ready(),
@@ -161,3 +163,61 @@ def test_temporal_graph_does_not_assume_beginner_level_when_target_language_miss
     assert language["status"] == "unavailable"
     assert language["reason"] == "target_language_cefr_required_for_temporal_estimate"
     assert language["current_cefr"] is None
+
+
+def test_local_employment_uses_experimental_country_transition_baseline(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "latest_labour_job_transition",
+        lambda country_iso3: {
+            "country_iso3": country_iso3,
+            "period": 2025,
+            "age_group": "Y15-74",
+            "duration_group": "TOTAL",
+            "probability_pct": 25.0,
+            "source_id": "EUROSTAT",
+            "dataset_id": "lfsi_long_e01",
+        },
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        remote_work=False,
+        preferences={"language_study_hours_per_week": 10},
+    )
+
+    result = temporal_evidence_graph(
+        profile,
+        "IRL",
+        _legal_ready(),
+        {
+            "status": "work_ready_heuristic",
+            "work_ready": True,
+            "matches": [
+                {
+                    "language": "English",
+                    "declared_cefr": "B2",
+                    "meets_work_ready_heuristic": True,
+                }
+            ],
+        },
+        _career_ready(),
+        {
+            "status": "local_income_reference_available",
+            "reason": "net_income_not_modelled",
+        },
+    )
+
+    employment = result["stages"]["employment"]
+
+    assert employment["status"] == "available"
+    assert employment["quarterly_transition_probability_pct"] == 25.0
+    assert employment["weeks_min"] == 39
+    assert employment["weeks_max"] == 78
+    assert employment["range_definition"]["lower_cumulative_probability"] == 0.50
+    assert employment["range_definition"]["upper_cumulative_probability"] == 0.80
+    assert employment["range_definition"]["constant_quarterly_hazard_assumption"] is True
+
+    assert result["stages"]["financial"]["status"] == "unavailable"
+    assert result["calendar_ready"] is False
+    assert result["candidate_range"] is None
