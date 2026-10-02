@@ -119,3 +119,73 @@ def test_financial_fit_exposes_structural_local_income_reference(monkeypatch):
     assert reference["gross_monthly_mean_eur"] == 3200.0
     assert reference["period"] == 2022
     assert reference["dataset_id"] == "earn_ses22_21"
+
+
+def test_financial_fit_keeps_national_net_benchmark_separate(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "resolve_esco_occupation",
+        lambda profession: {
+            "status": "matched",
+            "selected": {
+                "preferred_label": "ICT support technician",
+                "match_score": 0.84,
+                "isco_group": "3512",
+            },
+            "candidates": [],
+            "threshold": 0.72,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "latest_labour_earnings",
+        lambda country_iso3, isco08: [
+            {
+                "country_iso3": country_iso3,
+                "period": 2022,
+                "isco08": isco08,
+                "value": 3200.0,
+                "unit": "eur_gross_monthly",
+                "source_id": "EUROSTAT",
+                "dataset_id": "earn_ses22_21",
+                "source_updated_at": "2026-02-09",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        module,
+        "latest_labour_net_earnings_reference",
+        lambda country_iso3: {
+            "country_iso3": country_iso3,
+            "period": 2025,
+            "earnings_case": "P1_NCH_AW100",
+            "annual_net_eur": 30000.0,
+            "source_id": "EUROSTAT",
+            "dataset_id": "earn_nt_net",
+            "source_updated_at": "2026-09-04",
+        },
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        current_country="ESP",
+        profession="IT support engineer",
+        monthly_net_income=3000,
+        remote_work=False,
+    )
+
+    result = module.financial_fit(profile, "PRT")
+
+    assert result["status"] == "local_income_reference_available"
+    assert result["reason"] == "occupation_specific_net_income_not_modelled"
+
+    gross = result["local_income_reference"]
+    net = result["national_net_earnings_reference"]
+
+    assert gross["gross_monthly_mean_eur"] == 3200.0
+    assert net["annual_net_eur"] == 30000.0
+    assert net["monthly_net_equivalent_eur"] == 2500.0
+    assert net["scope"] == "national_average_worker_standard_case"
+
+    assert "estimated_occupation_net" not in result
+    assert result["portable_income_analysis"] is None
