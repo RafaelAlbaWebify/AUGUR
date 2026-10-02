@@ -13,6 +13,27 @@
   height: 336px;
 }
 
+
+.overviewHeroGrid.fitFirst .overviewMapPanel {
+  order: 2;
+}
+
+.overviewHeroGrid.fitFirst .overviewFitPanel {
+  order: 1;
+}
+
+.overviewInsightRail.compareFirst .overallSignalBalance {
+  order: 1;
+}
+
+.overviewInsightRail.compareFirst .overviewCompareCard {
+  order: 2;
+}
+
+.overviewInsightRail.compareFirst .overviewOutlookCard {
+  order: 3;
+}
+
 .overviewMapPanel,
 .overviewFitPanel,
 .overviewDimensionsPanel,
