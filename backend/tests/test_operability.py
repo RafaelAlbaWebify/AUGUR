@@ -41,6 +41,12 @@ def _country(
             "row_count": 1 if earnings_rows else 0,
             "latest_period": 2025 if earnings_rows else None,
         },
+        "job_transitions": {
+            "country_iso3": iso3,
+            "row_count": 4 if earnings_rows else 0,
+            "age_group_count": 4 if earnings_rows else 0,
+            "latest_period": 2025 if earnings_rows else None,
+        },
     }
 
 
@@ -435,3 +441,47 @@ def test_operability_exposes_temporal_validation_blockers(monkeypatch):
     assert result["ttv_temporal_validation"]["blockers"] == [
         "local_financial_transition"
     ]
+
+
+def test_operability_partial_when_job_transition_evidence_is_missing(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(module, "TEMPORAL_MODEL_VERSION", "ttv-temporal-v1")
+
+    countries = [
+        _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+    ]
+    countries[0]["job_transitions"]["row_count"] = 0
+    countries[0]["job_transitions"]["age_group_count"] = 0
+    countries[0]["job_transitions"]["latest_period"] = None
+
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {"countries": countries},
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["analysis_ready"] is True
+    assert result["ttv_temporal_model_ready"] is True
+    assert result["job_transition_evidence_ready"] is False
+    assert result["ready"] is False
+    assert "labour_job_transition_evidence" in result["blockers"]
