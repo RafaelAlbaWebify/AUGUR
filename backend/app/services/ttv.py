@@ -32,10 +32,20 @@ def ttv_status(
 
     language_ready = bool(language["work_ready"])
     career_ready = bool(
-        career.get("evidence_complete")
-        and career["status"] == "evidence_available"
-        and career["market_signal"] is not None
+        career["status"] == "evidence_available"
+        and career.get("viability_evidence_ready")
     )
+
+    if career["status"] != "evidence_available":
+        career_reason = career["status"]
+    elif not career.get("evidence_complete"):
+        career_reason = "career_evidence_incomplete"
+    elif not career.get("profile_skill_coverage_complete"):
+        career_reason = "essential_skill_coverage_incomplete"
+    elif not career.get("market_signal_supports_viability"):
+        career_reason = "market_signal_not_supportive"
+    else:
+        career_reason = "ready"
 
     financial_ready = financial["status"] == "portable_income_comparable"
 
@@ -44,11 +54,13 @@ def ttv_status(
             "ready": legal_ready,
             "status": legal["status"],
             "evidence_state": "implemented",
+            "reason": "ready" if legal_ready else legal["status"],
         },
         "language_fit": {
             "ready": language_ready,
             "status": language["status"],
             "evidence_state": "implemented",
+            "reason": "ready" if language_ready else language["status"],
         },
         "career_fit": {
             "ready": career_ready,
@@ -62,17 +74,20 @@ def ttv_status(
                 if career.get("evidence_complete")
                 else "partial"
             ),
+            "reason": career_reason,
         },
         "financial_fit": {
             "ready": financial_ready,
             "status": financial["status"],
             "evidence_state": (
                 "implemented"
-                if financial["status"] in {
-                    "portable_income_comparable",
-                    "local_income_unknown",
-                }
+                if financial["status"] == "portable_income_comparable"
                 else "partial"
+            ),
+            "reason": (
+                "ready"
+                if financial_ready
+                else financial.get("reason") or financial["status"]
             ),
         },
     }
@@ -88,6 +103,7 @@ def ttv_status(
             "stage_id": stage_id,
             "status": stages[stage_id]["status"],
             "evidence_state": stages[stage_id]["evidence_state"],
+            "reason": stages[stage_id]["reason"],
         }
         for stage_id in blocked_by
     ]
@@ -129,6 +145,7 @@ def ttv_status(
             "TTV is a dependency graph, not a sum of arbitrary scores.",
             "Dependency readiness and temporal-estimation readiness are separate.",
             "No duration is produced until a validated temporal evidence model exists.",
+            "CareerFit readiness requires complete declared essential-skill coverage and a supportive shortage signal.",
             "Local-employment FinancialFit remains partial when only structural gross earnings evidence is available.",
         ],
     }
