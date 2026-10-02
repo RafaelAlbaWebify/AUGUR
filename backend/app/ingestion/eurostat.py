@@ -7,10 +7,24 @@ from itertools import product
 import httpx
 
 from app.catalog import country_config
-from app.db.analytics import upsert_observations
+from app.db.analytics import upsert_labour_earnings, upsert_observations
 
 BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 SOURCE_ID = "EUROSTAT"
+
+EUROSTAT_EARNINGS = {
+    "dataset_id": "earn_ses22_21",
+    "filters": {
+        "geo": "__GEO__",
+        "freq": "A",
+        "unit": "EUR",
+        "sizeclas": "GE10",
+        "sex": "T",
+        "age": "TOTAL",
+        "indic_se": "ERN",
+    },
+    "unit": "eur_gross_monthly",
+}
 
 
 EUROSTAT_SERIES = [
@@ -299,6 +313,83 @@ class EurostatAdapter:
 
         return rows
 
+    def normalize_earnings(
+        self,
+        country_iso3: str,
+        payload: dict,
+    ) -> list[dict]:
+        dimension_ids = payload["id"]
+        dimension_sizes = payload["size"]
+        dimensions = payload["dimension"]
+        raw_values = payload["value"]
+
+        dimension_codes = [
+            self._ordered_codes(dimensions[dimension_id])
+            for dimension_id in dimension_ids
+        ]
+
+        retrieved_at = datetime.now(timezone.utc)
+        rows: list[dict] = []
+
+        for coordinates in product(
+            *[range(size) for size in dimension_sizes]
+        ):
+            flat_index = 0
+            multiplier = 1
+
+            for coordinate, size in zip(
+                reversed(coordinates),
+                reversed(dimension_sizes),
+            ):
+                flat_index += coordinate * multiplier
+                multiplier *= size
+
+            if isinstance(raw_values, list):
+                value = (
+                    raw_values[flat_index]
+                    if flat_index < len(raw_values)
+                    else None
+                )
+            else:
+                value = raw_values.get(str(flat_index))
+                if value is None:
+                    value = raw_values.get(flat_index)
+
+            if value is None:
+                continue
+
+            labels = {
+                dimension_id: dimension_codes[index][coordinates[index]]
+                for index, dimension_id in enumerate(dimension_ids)
+            }
+
+            time_code = labels.get("time")
+            isco08 = labels.get("isco08")
+
+            if (
+                not time_code
+                or not str(time_code).isdigit()
+                or not isco08
+                or isco08 == "TOTAL"
+            ):
+                continue
+
+            rows.append(
+                {
+                    "country_iso3": country_iso3.upper(),
+                    "period": int(time_code),
+                    "isco08": str(isco08),
+                    "value": float(value),
+                    "unit": EUROSTAT_EARNINGS["unit"],
+                    "source_id": SOURCE_ID,
+                    "dataset_id": EUROSTAT_EARNINGS["dataset_id"],
+                    "retrieved_at": retrieved_at,
+                    "source_updated_at": payload.get("updated"),
+                }
+            )
+
+        return rows
+
     def sync_country(self, country_iso3: str) -> dict:
         country = country_config(country_iso3)
         geo = country["iso2"]
@@ -343,11 +434,45 @@ class EurostatAdapter:
                 )
                 print(f"   failed: {type(exc).__name__}: {exc}")
 
+        earnings_detail = None
+        try:
+            print(
+                f"[earnings] mean monthly earnings by ISCO "
+                f"({EUROSTAT_EARNINGS['dataset_id']})"
+            )
+            payload = self.fetch_dataset(
+                EUROSTAT_EARNINGS["dataset_id"],
+                {
+                    key: (geo if value == "__GEO__" else value)
+                    for key, value in EUROSTAT_EARNINGS["filters"].items()
+                },
+            )
+            earnings_rows = self.normalize_earnings(country_iso3, payload)
+            inserted = upsert_labour_earnings(earnings_rows)
+            total_rows += inserted
+            earnings_detail = {
+                "dataset_id": EUROSTAT_EARNINGS["dataset_id"],
+                "rows": inserted,
+                "source_updated_at": payload.get("updated"),
+            }
+            print(f"   ok: {inserted} earnings rows")
+        except Exception as exc:
+            failures.append(
+                {
+                    "indicator_id": "labour_earnings_by_isco",
+                    "dataset_id": EUROSTAT_EARNINGS["dataset_id"],
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
+            print(f"   failed: {type(exc).__name__}: {exc}")
+
         return {
             "country_iso3": country_iso3.upper(),
             "source": SOURCE_ID,
             "rows": total_rows,
             "series": details,
+            "earnings": earnings_detail,
             "failures": failures,
             "complete": len(failures) == 0,
         }
