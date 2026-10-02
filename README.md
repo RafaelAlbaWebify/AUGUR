@@ -31,6 +31,8 @@ Implemented capabilities include:
 
 AUGUR keeps country evidence separate from personal-fit analysis. Personal profile data can change whether a country fits a household, but never changes country facts, source observations, official forecasts or country trends.
 
+AUGUR deliberately does not report full readiness while TTV duration modelling is unavailable. Country analysis and Personal Fit evidence can be operational independently through the separate `analysis_ready` state.
+
 ## Local ports
 
 AUGUR uses dedicated local ports to avoid conflicts with JOLT and VERIDRA:
@@ -79,9 +81,11 @@ The setup script keeps its historical filename. It installs dependencies and val
 
 The check reports:
 
-- `ready` — country analysis and full Personal Fit evidence prerequisites are loaded;
-- `partial` — the application can run, but one or more evidence layers are incomplete;
+- `ready` — country analysis, full Personal Fit evidence and a validated TTV temporal model are available;
+- `partial` — the application can run, but one or more evidence/model layers are incomplete;
 - `empty` — analytical evidence has not been loaded.
+
+The check also reports `analysis_ready` separately. This can be true while full AUGUR readiness is still false when the TTV temporal model has not yet been validated.
 
 ### Start
 
