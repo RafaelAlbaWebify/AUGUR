@@ -806,6 +806,14 @@ footer {
   letter-spacing: 0.06em;
 }
 
+.profileFieldNote {
+  display: block;
+  min-height: 28px;
+  color: #65707d;
+  font-size: 10px;
+  line-height: 1.35;
+}
+
 .profileGrid input[type="text"],
 .profileGrid input[type="number"],
 .profileGrid input:not([type]) {
