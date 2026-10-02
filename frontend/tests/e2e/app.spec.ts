@@ -54,7 +54,7 @@ async function mockApi(page: Page) {
           missing_skills: [],
         },
         evidence_complete: false,
-        rule_version: 'EURES_LMI_2024_AS_PUBLISHED_2025',
+        rule_version: 'EURES_COUNTRY_LMI_2024',
         source: {
           label: country === 'ESP'
             ? 'EURES Labour Market Information: Spain'
@@ -62,10 +62,12 @@ async function mockApi(page: Page) {
             ? 'EURES Labour Market Information: Portugal'
             : 'EURES Labour Market Information: Ireland',
           url: 'https://eures.europa.eu/',
-          evidence_id: 'eures_lmi_2025_2024_conditions',
+          evidence_id: 'eures_country_lmi_2024_conditions',
+          rule_version: 'EURES_COUNTRY_LMI_2024',
           report_year: 2025,
           conditions_year: 2024,
-          report_url: 'https://eures.europa.eu/living-and-working/labour-shortages-and-surpluses-europe_en',
+          report_url: 'https://eures.europa.eu/',
+          scope: 'broad_occupation_group',
         },
         notes: [],
       }
@@ -432,6 +434,81 @@ test('profile architecture keeps completion evidence outputs and TTV distinct', 
 })
 
 
+test('latest EURES annex provenance is visible for unit-level CareerFit', async ({ page }) => {
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/career-fit',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          target_country_iso3: 'ESP',
+          status: 'evidence_available',
+          occupation: {
+            status: 'mapped',
+            occupation_group: 'information_communications_technicians',
+            matched_terms: [],
+            mapping_method: 'esco_isco_submajor',
+            isco_submajor: '35',
+          },
+          market_signal: 'not_classified_as_shortage_or_surplus',
+          market_signal_scope: 'isco_unit_group',
+          market_signal_isco: '3512',
+          vacancy_demand_evidence: null,
+          occupation_match: {
+            status: 'matched',
+            threshold: 0.72,
+            selected: {
+              preferred_label: 'ICT user support technician',
+              match_score: 0.91,
+              match_method: 'token_overlap',
+              source_mode: 'full',
+              dataset_version: '1.2.1',
+            },
+            candidates: [],
+          },
+          skill_match: {
+            status: 'matched',
+            dataset_mode: 'full',
+            dataset_version: '1.2.1',
+            matched_skills: [],
+            missing_skills: [],
+            coverage: 1,
+          },
+          skill_evidence_complete: true,
+          market_evidence_complete: true,
+          evidence_complete: true,
+          profile_skill_coverage_complete: true,
+          market_signal_supports_viability: false,
+          viability_evidence_ready: false,
+          rule_version: 'EURES_SHORTAGES_SURPLUSES_2025_ANNEX',
+          source: {
+            label: 'EURES Report on labour shortages and surpluses 2025 — Annex',
+            url: 'https://www.ela.europa.eu/en/publications/labour-shortages-and-surpluses-europe-2025',
+            evidence_id: 'eures_shortages_surpluses_2025_annex',
+            rule_version: 'EURES_SHORTAGES_SURPLUSES_2025_ANNEX',
+            report_year: 2026,
+            conditions_year: 2025,
+            report_url: 'https://www.ela.europa.eu/sites/default/files/2026-06/annex-labour-shortages-report-ela-2025.pdf',
+            scope: 'isco_unit_group',
+          },
+          notes: [],
+        }),
+      })
+    },
+  )
+
+  await page.goto('/country/ESP/profile')
+
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(
+    profile.getByText(
+      'EURES 2026 · 2025 conditions · not classified as shortage or surplus · ISCO 3512 unit · eures_shortages_surpluses_2025_annex',
+    ),
+  ).toBeVisible()
+})
+
+
 test('vacancy rate remains contextual in Profile', async ({ page }) => {
   await page.goto('/country/ESP/profile')
 
@@ -450,7 +527,7 @@ test('versioned EURES market evidence is visible in CareerFit', async ({ page })
   const profile = page.getByRole('region', { name: 'Personal profile' })
   await expect(
     profile.getByText(
-      'EURES 2025 · 2024 conditions · signal unavailable · eures_lmi_2025_2024_conditions',
+      'EURES 2025 · 2024 conditions · signal unavailable · eures_country_lmi_2024_conditions',
     ),
   ).toBeVisible()
 })
