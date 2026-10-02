@@ -23,6 +23,7 @@ from app.services.language_fit import language_fit
 from app.services.career_fit import career_fit
 from app.esco_store import esco_status
 from app.services.ttv import ttv_status
+from app.services.operability import operability_status
 
 router = APIRouter()
 
@@ -49,6 +50,11 @@ def evidence_status_get():
         **analytical_evidence_status(),
         "esco": esco_status(),
     }
+
+
+@router.get("/operability")
+def operability_get():
+    return operability_status()
 
 
 @router.get("/countries")
