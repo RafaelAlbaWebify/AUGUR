@@ -82,10 +82,23 @@ def initialize_sqlite(path: Path) -> None:
                 observed_weeks REAL NOT NULL,
                 source_label TEXT,
                 observed_at TEXT,
+                stage_timings_json TEXT NOT NULL DEFAULT '{}',
                 imported_at TEXT NOT NULL
             )
             """
         )
+        ttv_calibration_columns = {
+            row[1]
+            for row in con.execute(
+                "PRAGMA table_info('ttv_calibration_cases')"
+            ).fetchall()
+        }
+        if "stage_timings_json" not in ttv_calibration_columns:
+            con.execute(
+                "ALTER TABLE ttv_calibration_cases "
+                "ADD COLUMN stage_timings_json TEXT NOT NULL DEFAULT '{}'"
+            )
+
         con.execute(
             """
             CREATE TABLE IF NOT EXISTS personal_profile (
