@@ -13,7 +13,8 @@ def main() -> int:
         adapter.close()
 
     print()
-    print("AUGUR Phase 1 World Bank sync")
+    print("AUGUR legacy World Bank diagnostic sync")
+    print("Use scripts.sync_core for the current multi-provider workflow.")
     print("Country:", result["country_iso3"])
     print("Rows stored:", result["rows"])
     print("Indicators succeeded:", len(result["indicators"]))
