@@ -134,6 +134,7 @@ def _mock_full_esco_career(
     market_country_profession="IT support engineer",
     coverage=1.0,
     isco_group="2522",
+    vacancy_rate=4.2,
 ):
     monkeypatch.setattr(
         career_fit_module,
@@ -156,6 +157,25 @@ def _mock_full_esco_career(
                 "match_method": "token_overlap",
             }
         ],
+    )
+
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_job_vacancy_rate",
+        lambda country_iso3, isco08: (
+            {
+                "country_iso3": country_iso3,
+                "period": "2026-Q2",
+                "isco08": isco08,
+                "vacancy_rate_pct": vacancy_rate,
+                "nace_scope": "B-T",
+                "source_id": "EUROSTAT",
+                "dataset_id": "jvs_q_isco_r21",
+                "source_updated_at": "2026-09-15",
+            }
+            if vacancy_rate is not None
+            else None
+        ),
     )
 
     total = 4
@@ -376,3 +396,55 @@ def test_broad_shortage_does_not_count_as_complete_market_evidence(monkeypatch):
     assert result["evidence_complete"] is False
     assert result["market_signal_supports_viability"] is False
     assert result["viability_evidence_ready"] is False
+
+
+def test_vacancy_rate_context_does_not_override_market_gate(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="3512",
+        vacancy_rate=8.7,
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="IT support engineer",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    demand = result["vacancy_demand_evidence"]
+    assert demand["status"] == "available"
+    assert demand["isco_major"] == "OC3"
+    assert demand["vacancy_rate_pct"] == 8.7
+    assert demand["period"] == "2026-Q2"
+    assert demand["role"] == "context_only"
+
+    assert result["market_signal"] == "not_classified_as_shortage_or_surplus"
+    assert result["market_evidence_complete"] is True
+    assert result["market_signal_supports_viability"] is False
+    assert result["viability_evidence_ready"] is False
+
+
+def test_missing_vacancy_rate_does_not_make_complete_eures_evidence_partial(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2522",
+        vacancy_rate=None,
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Systems administrator",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["vacancy_demand_evidence"]["status"] == "evidence_missing"
+    assert result["market_signal"] == "shortage"
+    assert result["market_evidence_complete"] is True
+    assert result["evidence_complete"] is True
+    assert result["viability_evidence_ready"] is True
