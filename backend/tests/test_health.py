@@ -58,6 +58,8 @@ def test_evidence_status_reports_country_and_esco_coverage():
     assert "row_count" in spain["net_earnings"]
     assert "job_transitions" in spain
     assert "age_group_count" in spain["job_transitions"]
+    assert "job_vacancies" in spain
+    assert "isco_group_count" in spain["job_vacancies"]
 
 
 def test_operability_endpoint_reports_readiness_and_blockers():
