@@ -121,6 +121,9 @@ type CareerFitResponse = {
     coverage?: number | null
   }
   evidence_complete: boolean
+  profile_skill_coverage_complete?: boolean
+  market_signal_supports_viability?: boolean
+  viability_evidence_ready?: boolean
   rule_version: string
   source: null | {
     label: string
@@ -163,6 +166,7 @@ type TTVStage = {
   ready: boolean
   status: string
   evidence_state: string
+  reason?: string
 }
 
 type TTVResponse = {
@@ -175,6 +179,7 @@ type TTVResponse = {
     stage_id: string
     status: string
     evidence_state: string
+    reason?: string
   }>
   dependency_ready?: boolean
   temporal_evidence_state?: string
@@ -680,7 +685,17 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                     : 'ESCO skill evidence not evaluated.'}
                 </dd>
               </div>
-              <div><dt>Limitation</dt><dd>{careerFit?.evidence_complete ? 'Current evidence set complete.' : 'Evidence remains partial until a confident ESCO occupation match and full skill dataset are available.'}</dd></div>
+              <div>
+                <dt>TTV gate</dt>
+                <dd>
+                  {careerFit?.viability_evidence_ready
+                    ? 'Supportive shortage signal + complete declared essential-skill coverage'
+                    : careerFit?.evidence_complete
+                    ? `Blocked · ${careerFit.profile_skill_coverage_complete ? 'essential skills covered' : 'essential skill coverage incomplete'} · ${careerFit.market_signal_supports_viability ? 'supportive market signal' : 'market signal not supportive'}`
+                    : 'Blocked · career evidence incomplete'}
+                </dd>
+              </div>
+              <div><dt>Limitation</dt><dd>{careerFit?.evidence_complete ? 'AUGUR only treats declared essential-skill coverage as present; undeclared skills are not inferred.' : 'Evidence remains partial until a confident ESCO occupation match and full skill dataset are available.'}</dd></div>
             </dl>
           </article>
 
@@ -765,7 +780,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 ? `Temporal evidence: ${ttv.temporal_evidence_state?.replaceAll('_', ' ') ?? 'not implemented'}`
                 : ttv?.blocker_details?.length
                 ? ttv.blocker_details
-                    .map((item) => `${item.stage_id.replaceAll('_', ' ')} · ${item.status.replaceAll('_', ' ')} · ${item.evidence_state.replaceAll('_', ' ')}`)
+                    .map((item) => `${item.stage_id.replaceAll('_', ' ')} · ${(item.reason ?? item.status).replaceAll('_', ' ')} · ${item.evidence_state.replaceAll('_', ' ')}`)
                     .join(' | ')
                 : ttv?.blocked_by?.length
                 ? ttv.blocked_by.map((item) => item.replaceAll('_', ' ')).join(' · ')
