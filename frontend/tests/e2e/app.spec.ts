@@ -335,11 +335,23 @@ test('rapid country switching keeps the latest selection', async ({ page }) => {
 })
 
 
-test('indicator details are collapsed by default and expandable', async ({ page }) => {
+test('indicator details enable scrolling and can be collapsed again', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
   await expect(page.locator('.metricCard')).toHaveCount(0)
-  await page.getByRole('button', { name: 'Show indicator details' }).click()
+
+  await page.getByRole('button', { name: 'View all indicators' }).click()
   await expect(page.locator('.metricCard')).toHaveCount(1)
-  await page.getByRole('button', { name: 'Hide indicator details' }).click()
+
+  const expanded = await page.evaluate(() => ({
+    overflowY: getComputedStyle(document.body).overflowY,
+    scrollHeight: document.documentElement.scrollHeight,
+    innerHeight: window.innerHeight,
+  }))
+
+  expect(expanded.overflowY).toBe('auto')
+  expect(expanded.scrollHeight).toBeGreaterThan(expanded.innerHeight)
+
+  await page.getByRole('button', { name: 'Hide indicators' }).click()
   await expect(page.locator('.metricCard')).toHaveCount(0)
 })
 
@@ -481,4 +493,61 @@ test('flags render and lower dashboard panels do not overlap', async ({ page }) 
 
   expect(overlaps(geometry.balance!, geometry.outlook!)).toBe(false)
   expect(overlaps(geometry.balance!, geometry.compare!)).toBe(false)
+})
+
+
+test('dashboard layout persists across reloads', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.getByRole('button', { name: 'Layout' }).click()
+
+  const settings = page.getByRole('region', { name: 'Dashboard layout settings' })
+  await expect(settings).toBeVisible()
+
+  const sliders = settings.locator('input[type="range"]')
+  await sliders.nth(0).fill('58')
+  await sliders.nth(1).fill('70')
+  await settings.getByRole('button', { name: 'Fit · Map' }).click()
+  await settings.getByRole('button', { name: 'Compare first' }).click()
+
+  await page.reload()
+
+  await expect(page.getByRole('button', { name: 'Layout' })).toBeVisible()
+
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('augur.dashboard.layout.v1') ?? '{}'),
+  )
+
+  expect(saved.topSplit).toBe(58)
+  expect(saved.bottomSplit).toBe(70)
+  expect(saved.topOrder).toBe('fit-map')
+  expect(saved.utilityOrder).toBe('compare-outlook')
+
+  const order = await page.evaluate(() => {
+    const fit = document.querySelector('.overviewFitArea')
+    const map = document.querySelector('.overviewMapArea')
+    const compare = document.querySelector('.comparePanel.compact')
+    const outlook = document.querySelector('.outlookPreview')
+
+    return {
+      fitLeft: fit?.getBoundingClientRect().left ?? 0,
+      mapLeft: map?.getBoundingClientRect().left ?? 0,
+      compareTop: compare?.getBoundingClientRect().top ?? 0,
+      outlookTop: outlook?.getBoundingClientRect().top ?? 0,
+    }
+  })
+
+  expect(order.fitLeft).toBeLessThan(order.mapLeft)
+  expect(order.compareTop).toBeLessThan(order.outlookTop)
+})
+
+test('layout controls can hide optional overview sections', async ({ page }) => {
+  await page.getByRole('button', { name: 'Layout' }).click()
+  const settings = page.getByRole('region', { name: 'Dashboard layout settings' })
+
+  await settings.getByLabel('Personal Fit').uncheck()
+  await settings.getByLabel('Outlook').uncheck()
+
+  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toHaveCount(0)
+  await expect(page.locator('.outlookPreview')).toHaveCount(0)
+  await expect(page.locator('.comparePanel.compact')).toBeVisible()
 })
