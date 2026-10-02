@@ -66,6 +66,21 @@ CREATE TABLE IF NOT EXISTS labour_earnings (
     source_updated_at VARCHAR,
     PRIMARY KEY (country_iso3, period, isco08, source_id)
 );
+
+CREATE TABLE IF NOT EXISTS labour_job_transitions (
+    country_iso3 VARCHAR NOT NULL,
+    period INTEGER NOT NULL,
+    age_group VARCHAR NOT NULL,
+    duration_group VARCHAR NOT NULL,
+    probability_pct DOUBLE NOT NULL,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (
+        country_iso3, period, age_group, duration_group, source_id
+    )
+);
 """
 
 
@@ -252,6 +267,73 @@ def latest_labour_earnings(
         )
         columns = [column[0] for column in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def upsert_labour_job_transitions(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO labour_job_transitions
+            (
+                country_iso3, period, age_group, duration_group,
+                probability_pct, source_id, dataset_id,
+                retrieved_at, source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["country_iso3"],
+                    row["period"],
+                    row["age_group"],
+                    row["duration_group"],
+                    row["probability_pct"],
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_labour_job_transition(
+    country_iso3: str,
+    age_group: str = "Y15-74",
+    duration_group: str = "TOTAL",
+) -> dict | None:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT
+                country_iso3, period, age_group, duration_group,
+                probability_pct, source_id, dataset_id,
+                retrieved_at, source_updated_at
+            FROM labour_job_transitions
+            WHERE country_iso3 = ?
+              AND age_group = ?
+              AND duration_group = ?
+            ORDER BY period DESC, source_id ASC
+            LIMIT 1
+            """,
+            [country_iso3.upper(), age_group, duration_group],
+        )
+        row = result.fetchone()
+        if row is None:
+            return None
+        columns = [column[0] for column in result.description]
+        return dict(zip(columns, row))
     finally:
         con.close()
 
