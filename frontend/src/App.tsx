@@ -6,6 +6,7 @@ import FitSnapshot from './components/FitSnapshot'
 import DimensionSummaryCard from './components/DimensionSummaryCard'
 import OverallSignalBalance from './components/OverallSignalBalance'
 import CountrySelect from './components/CountrySelect'
+import LayoutControls, { type DashboardLayout } from './components/LayoutControls'
 
 type Country = {
   iso2: string
@@ -200,6 +201,31 @@ type ComparisonResponse = {
 }
 
 const API_BASE = 'http://127.0.0.1:8020'
+const LAYOUT_STORAGE_KEY = 'augur.dashboard.layout.v1'
+
+const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
+  topSplit: 50,
+  bottomSplit: 75,
+  topOrder: 'map-fit',
+  utilityOrder: 'outlook-compare',
+  showFit: true,
+  showOutlook: true,
+  showCompare: true,
+}
+
+function loadDashboardLayout(): DashboardLayout {
+  try {
+    const raw = localStorage.getItem(LAYOUT_STORAGE_KEY)
+    if (!raw) return DEFAULT_DASHBOARD_LAYOUT
+
+    return {
+      ...DEFAULT_DASHBOARD_LAYOUT,
+      ...JSON.parse(raw),
+    }
+  } catch {
+    return DEFAULT_DASHBOARD_LAYOUT
+  }
+}
 
 const dimensionOrder = [
   'prosperity',
@@ -309,7 +335,31 @@ export default function App() {
   const [compareCountries, setCompareCountries] = useState<string[]>(['IRL', 'ESP', 'PRT'])
   const [activeView, setActiveView] = useState<'overview' | 'outlook' | 'compare' | 'profile'>('overview')
   const [detailsExpanded, setDetailsExpanded] = useState(false)
+  const [layoutOpen, setLayoutOpen] = useState(false)
+  const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>(() => loadDashboardLayout())
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(dashboardLayout))
+  }, [dashboardLayout])
+
+  useEffect(() => {
+    const shouldScroll = activeView !== 'overview' || detailsExpanded
+    document.body.style.overflowY = shouldScroll ? 'auto' : ''
+
+    if (detailsExpanded) {
+      requestAnimationFrame(() => {
+        document.querySelector('.dimensionSection')?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'start',
+        })
+      })
+    }
+
+    return () => {
+      document.body.style.overflowY = ''
+    }
+  }, [activeView, detailsExpanded])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -525,6 +575,13 @@ export default function App() {
         </nav>
 
         <div className="topbarMeta">
+          <button
+            type="button"
+            className={layoutOpen ? 'layoutButton active' : 'layoutButton'}
+            onClick={() => setLayoutOpen((value) => !value)}
+          >
+            Layout
+          </button>
           <div>
             <span>Indicators</span>
             <strong>{snapshot?.observation_count ?? '—'}</strong>
@@ -546,106 +603,143 @@ export default function App() {
         </section>
       )}
 
+      <LayoutControls
+        open={layoutOpen}
+        layout={dashboardLayout}
+        onChange={setDashboardLayout}
+        onClose={() => setLayoutOpen(false)}
+        onReset={() => setDashboardLayout(DEFAULT_DASHBOARD_LAYOUT)}
+      />
+
       <div className="overviewDashboard" hidden={activeView !== 'overview'}>
-        <section className="overviewMapArea">
-          <WorldMap
-            countries={countries}
-            selectedCountry={selectedCountry}
-            onSelectCountry={setSelectedCountry}
-          />
-        </section>
-
-        <section className="overviewFitArea">
-          <FitSnapshot apiBase={API_BASE} targetCountry={selectedCountry} />
-        </section>
-
-        <section className="overviewDimensions">
-          <div className="dimensionOverviewBar">
-            <div>
-              <div className="label">KEY DIMENSIONS</div>
-              <h3>{selectedCountryMeta?.name ?? selectedCountry} at a glance</h3>
-            </div>
-            <div className="dimensionOverviewActions">
-              <OverallSignalBalance dimensions={assessment?.dimensions} />
-              <button
-                type="button"
-                className="detailsToggle"
-                onClick={() => setDetailsExpanded((value) => !value)}
-              >
-                {detailsExpanded ? 'Hide indicators' : 'View all indicators'}
-              </button>
-            </div>
-          </div>
-
-          <div className="assessmentGrid mockDimensionGrid">
-            {dimensionOrder.map((dimension) => {
-              const item = assessment?.dimensions?.[dimension]
-              if (!item) return null
-
-              return (
-                <DimensionSummaryCard
-                  key={dimension}
-                  label={dimensionLabels[dimension] ?? dimension}
-                  item={item}
-                />
-              )
-            })}
-          </div>
-        </section>
-
-        <aside className="overviewUtilityRail">
-          <section className="outlookPreview">
-            <div className="comparePanelHeader">
-              <div>
-                <div className="label">OUTLOOK</div>
-                <strong>Official horizons</strong>
-              </div>
-              <button type="button" onClick={() => setActiveView('outlook')}>
-                Open
-              </button>
-            </div>
-
-            {outlookPreview ? (
-              <div className="scenarioPreview">
-                <span className="scenarioPreviewName">{outlookPreview.name}</span>
-                <div className="scenarioPreviewRow optimistic">
-                  <span>Optimistic</span>
-                  <div><i style={{ width: `${outlookPreview.widths.improvement}%` }} /></div>
-                  <strong>{formatValue(outlookPreview.improvement, outlookPreview.unit)}</strong>
-                </div>
-                <div className="scenarioPreviewRow baseline">
-                  <span>Baseline</span>
-                  <div><i style={{ width: `${outlookPreview.widths.baseline}%` }} /></div>
-                  <strong>{formatValue(outlookPreview.baseline, outlookPreview.unit)}</strong>
-                </div>
-                <div className="scenarioPreviewRow stress">
-                  <span>Stress</span>
-                  <div><i style={{ width: `${outlookPreview.widths.stress}%` }} /></div>
-                  <strong>{formatValue(outlookPreview.stress, outlookPreview.unit)}</strong>
-                </div>
-              </div>
-            ) : (
-              <div className="outlookPreviewGrid">
-                {(trajectory?.horizons ?? []).map((horizon) => (
-                  <div key={horizon.year}>
-                    <strong>{horizon.year}</strong>
-                    <span>{horizon.indicator_count} indicators</span>
-                  </div>
-                ))}
-              </div>
-            )}
+        <div
+          className={`overviewTopRow ${dashboardLayout.topOrder === 'fit-map' ? 'fitFirst' : ''}`}
+          style={{
+            gridTemplateColumns: dashboardLayout.showFit
+              ? `${dashboardLayout.topSplit}fr ${100 - dashboardLayout.topSplit}fr`
+              : '1fr',
+          }}
+        >
+          <section className="overviewMapArea">
+            <WorldMap
+              countries={countries}
+              selectedCountry={selectedCountry}
+              onSelectCountry={setSelectedCountry}
+            />
           </section>
 
-          <ComparePanel
-            compact
-            countries={countries}
-            selected={compareCountries}
-            onChange={updateCompareCountry}
-            comparison={comparison}
-            formatValue={formatValue}
-            dimensionLabels={dimensionLabels}
-          />
-        </aside>
+          {dashboardLayout.showFit && (
+            <section className="overviewFitArea">
+              <FitSnapshot apiBase={API_BASE} targetCountry={selectedCountry} />
+            </section>
+          )}
+        </div>
+
+        <div
+          className="overviewBottomRow"
+          style={{
+            gridTemplateColumns:
+              dashboardLayout.showOutlook || dashboardLayout.showCompare
+                ? `${dashboardLayout.bottomSplit}fr ${100 - dashboardLayout.bottomSplit}fr`
+                : '1fr',
+          }}
+        >
+          <section className="overviewDimensions">
+            <div className="dimensionOverviewBar">
+              <div>
+                <div className="label">KEY DIMENSIONS</div>
+                <h3>{selectedCountryMeta?.name ?? selectedCountry} at a glance</h3>
+              </div>
+              <div className="dimensionOverviewActions">
+                <OverallSignalBalance dimensions={assessment?.dimensions} />
+                <button
+                  type="button"
+                  className="detailsToggle"
+                  onClick={() => setDetailsExpanded((value) => !value)}
+                >
+                  {detailsExpanded ? 'Hide indicators' : 'View all indicators'}
+                </button>
+              </div>
+            </div>
+
+            <div className="assessmentGrid mockDimensionGrid">
+              {dimensionOrder.map((dimension) => {
+                const item = assessment?.dimensions?.[dimension]
+                if (!item) return null
+
+                return (
+                  <DimensionSummaryCard
+                    key={dimension}
+                    label={dimensionLabels[dimension] ?? dimension}
+                    item={item}
+                  />
+                )
+              })}
+            </div>
+          </section>
+
+          {(dashboardLayout.showOutlook || dashboardLayout.showCompare) && (
+            <aside
+              className={`overviewUtilityRail ${dashboardLayout.utilityOrder === 'compare-outlook' ? 'compareFirst' : ''}`}
+            >
+              {dashboardLayout.showOutlook && (
+                <section className="outlookPreview">
+                  <div className="comparePanelHeader">
+                    <div>
+                      <div className="label">OUTLOOK</div>
+                      <strong>Official horizons</strong>
+                    </div>
+                    <button type="button" onClick={() => setActiveView('outlook')}>
+                      Open
+                    </button>
+                  </div>
+
+                  {outlookPreview ? (
+                    <div className="scenarioPreview">
+                      <span className="scenarioPreviewName">{outlookPreview.name}</span>
+                      <div className="scenarioPreviewRow optimistic">
+                        <span>Optimistic</span>
+                        <div><i style={{ width: `${outlookPreview.widths.improvement}%` }} /></div>
+                        <strong>{formatValue(outlookPreview.improvement, outlookPreview.unit)}</strong>
+                      </div>
+                      <div className="scenarioPreviewRow baseline">
+                        <span>Baseline</span>
+                        <div><i style={{ width: `${outlookPreview.widths.baseline}%` }} /></div>
+                        <strong>{formatValue(outlookPreview.baseline, outlookPreview.unit)}</strong>
+                      </div>
+                      <div className="scenarioPreviewRow stress">
+                        <span>Stress</span>
+                        <div><i style={{ width: `${outlookPreview.widths.stress}%` }} /></div>
+                        <strong>{formatValue(outlookPreview.stress, outlookPreview.unit)}</strong>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="outlookPreviewGrid">
+                      {(trajectory?.horizons ?? []).map((horizon) => (
+                        <div key={horizon.year}>
+                          <strong>{horizon.year}</strong>
+                          <span>{horizon.indicator_count} indicators</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </section>
+              )}
+
+              {dashboardLayout.showCompare && (
+                <ComparePanel
+                  compact
+                  countries={countries}
+                  selected={compareCountries}
+                  onChange={updateCompareCountry}
+                  comparison={comparison}
+                  formatValue={formatValue}
+                  dimensionLabels={dimensionLabels}
+                />
+              )}
+            </aside>
+          )}
+        </div>
       </div>
 
       <div hidden={activeView !== 'profile'}>
