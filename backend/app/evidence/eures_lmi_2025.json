@@ -1,14 +1,14 @@
 {
-  "evidence_id": "eures_lmi_2025_2024_conditions",
-  "rule_version": "EURES_LMI_2024_AS_PUBLISHED_2025",
-  "report_year": 2025,
-  "conditions_year": 2024,
-  "report_url": "https://eures.europa.eu/living-and-working/labour-shortages-and-surpluses-europe_en",
+  "evidence_id": "eures_market_evidence_composite",
+  "rule_version": "EURES_MARKET_COMPOSITE_2026_10",
+  "report_year": 2026,
+  "conditions_year": 2025,
+  "report_url": "https://www.ela.europa.eu/en/publications/labour-shortages-and-surpluses-europe-2025",
   "notes": [
-    "Country mappings migrated unchanged from the previously embedded CareerFit evidence table.",
-    "Broad shortage/surplus groups are labour-market signals, not guarantees of individual job availability.",
-    "Future refreshes should update this manifest rather than CareerFit logic.",
-    "Verified unit-group ICT signals are taken from the occupation table in the EURES shortages and surpluses report and take precedence over broad-group signals."
+    "Broad country-page evidence and unit-group annex evidence are versioned separately.",
+    "Broad shortage/surplus groups are contextual fallback signals, not guarantees of individual job availability.",
+    "Verified unit-group signals take precedence over broad-group signals.",
+    "Unit-group coverage is intentionally partial and must not be described as exhaustive."
   ],
   "countries": {
     "ESP": {
@@ -58,92 +58,278 @@
       "occupation_label": "Systems analysts",
       "shortage_countries": [
         "AT",
+        "BE",
         "BG",
-        "CH",
         "CY",
-        "DE",
+        "CZ",
         "IE",
-        "MT",
         "NL",
         "RO",
         "SE",
         "SI"
       ],
       "surplus_countries": [
+        "BE",
         "EL",
+        "FI",
+        "LV",
+        "PT"
+      ]
+    },
+    "2512": {
+      "occupation_label": "Software developers",
+      "shortage_countries": [
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "IE",
+        "IT",
+        "NL",
+        "NO",
         "PT",
-        "SK"
+        "RO",
+        "SE",
+        "SI"
+      ],
+      "surplus_countries": [
+        "AT",
+        "EL",
+        "FI",
+        "LV"
+      ]
+    },
+    "2513": {
+      "occupation_label": "Web and multimedia developers",
+      "shortage_countries": [
+        "BG",
+        "CY",
+        "HR",
+        "NL",
+        "SE",
+        "SI"
+      ],
+      "surplus_countries": [
+        "AT",
+        "DE",
+        "EL",
+        "FI",
+        "PT"
+      ]
+    },
+    "2514": {
+      "occupation_label": "Applications programmers",
+      "shortage_countries": [
+        "AT",
+        "BE",
+        "BG",
+        "CY",
+        "HR",
+        "HU",
+        "NL",
+        "RO",
+        "SE",
+        "SI"
+      ],
+      "surplus_countries": [
+        "CZ",
+        "DE",
+        "EL",
+        "FI",
+        "LV"
+      ]
+    },
+    "2519": {
+      "occupation_label": "Software and applications developers and analysts not elsewhere classified",
+      "shortage_countries": [
+        "BG",
+        "CY",
+        "CZ",
+        "DE",
+        "FI",
+        "LU",
+        "NL",
+        "PT",
+        "RO",
+        "SI"
+      ],
+      "surplus_countries": [
+        "AT",
+        "EL",
+        "FI",
+        "LV"
+      ]
+    },
+    "2521": {
+      "occupation_label": "Database designers and administrators",
+      "shortage_countries": [
+        "BE",
+        "BG",
+        "CY",
+        "CZ",
+        "EL",
+        "IT",
+        "NL",
+        "RO"
+      ],
+      "surplus_countries": [
+        "AT",
+        "DE",
+        "DK",
+        "ES",
+        "FI",
+        "LV"
       ]
     },
     "2522": {
       "occupation_label": "Systems administrators",
       "shortage_countries": [
         "AT",
+        "BE",
         "BG",
-        "CH",
-        "CZ",
-        "DE",
+        "DK",
         "EL",
+        "FI",
         "HR",
         "IE",
-        "IT",
         "LU",
-        "MT",
-        "NL",
-        "SE",
-        "SI",
-        "SK"
+        "NL"
       ],
       "surplus_countries": [
-        "ES",
+        "CZ",
+        "FI",
+        "LV"
+      ]
+    },
+    "2523": {
+      "occupation_label": "Computer network professionals",
+      "shortage_countries": [
+        "AT",
+        "BE",
+        "BG",
+        "EL",
+        "FI",
+        "NL",
+        "RO"
+      ],
+      "surplus_countries": [
+        "FI",
+        "LV"
+      ]
+    },
+    "2529": {
+      "occupation_label": "Database and network professionals not elsewhere classified",
+      "shortage_countries": [
+        "AT",
+        "BG",
+        "CZ",
+        "DK",
+        "EL",
+        "IE",
+        "NL",
+        "PT",
+        "RO",
+        "SE"
+      ],
+      "surplus_countries": [
         "LV"
       ]
     },
     "3511": {
-      "occupation_label": "ICT operations technicians",
+      "occupation_label": "Information and communications technology operations technicians",
       "shortage_countries": [
-        "AT",
+        "BE",
         "BG",
-        "DE",
+        "DK",
         "EL",
         "ES",
-        "FR",
-        "IT",
-        "LT",
-        "LU",
-        "MT",
-        "SK"
+        "SE"
       ],
       "surplus_countries": [
-        "CZ",
-        "DK",
-        "LV",
-        "PT",
+        "AT",
+        "BE",
+        "DE",
+        "FI",
         "RO",
         "SE",
         "SI"
       ]
     },
     "3512": {
-      "occupation_label": "ICT user support technicians",
+      "occupation_label": "Information and communications technology user support technicians",
       "shortage_countries": [
-        "AT",
-        "BE",
         "BG",
-        "DE",
         "DK",
         "EL",
-        "MT",
         "NL",
         "RO",
         "SK"
       ],
       "surplus_countries": [
-        "ES",
+        "AT",
         "FI",
         "LV",
-        "PT"
+        "PT",
+        "SI"
+      ]
+    },
+    "3513": {
+      "occupation_label": "Computer network and systems technicians",
+      "shortage_countries": [
+        "BG",
+        "DE",
+        "EL",
+        "IT",
+        "NL"
+      ],
+      "surplus_countries": [
+        "AT",
+        "CZ",
+        "FI",
+        "LV",
+        "PT",
+        "SI"
+      ]
+    },
+    "3514": {
+      "occupation_label": "Web technicians",
+      "shortage_countries": [
+        "BG",
+        "EL",
+        "IT"
+      ],
+      "surplus_countries": [
+        "AT",
+        "CZ",
+        "DK",
+        "LV",
+        "SI",
+        "SK"
       ]
     }
+  },
+  "broad_evidence": {
+    "evidence_id": "eures_country_lmi_2024_conditions",
+    "rule_version": "EURES_COUNTRY_LMI_2024",
+    "conditions_year": 2024,
+    "source_scope": "broad_occupation_group",
+    "notes": [
+      "Country-page shortage/surplus groups are retained as broad fallback evidence.",
+      "They are not treated as exhaustive unit-group evidence."
+    ]
+  },
+  "unit_group_evidence": {
+    "evidence_id": "eures_shortages_surpluses_2025_annex",
+    "rule_version": "EURES_SHORTAGES_SURPLUSES_2025_ANNEX",
+    "report_year": 2026,
+    "conditions_year": 2025,
+    "report_url": "https://www.ela.europa.eu/sites/default/files/2026-06/annex-labour-shortages-report-ela-2025.pdf",
+    "publication_url": "https://www.ela.europa.eu/en/publications/labour-shortages-and-surpluses-europe-2025",
+    "source_scope": "isco_unit_group",
+    "notes": [
+      "Unit-group shortage/surplus country lists are transcribed from Table 21 of the official 2025 annex.",
+      "This layer supersedes older unit-group rows previously embedded in AUGUR."
+    ]
   }
 }
