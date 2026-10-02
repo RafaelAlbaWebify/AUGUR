@@ -47,8 +47,21 @@ def main() -> int:
     )
     print(f"esco_full_ready: {result['esco_full_ready']}")
     print(
+        "personal_fit_core_evidence_ready: "
+        f"{result['personal_fit_core_evidence_ready']}"
+    )
+    print(
         "personal_fit_full_evidence_ready: "
         f"{result['personal_fit_full_evidence_ready']}"
+    )
+
+    career_market = result["career_market_evidence"]
+    print(
+        "career_market_evidence: "
+        f"scope={career_market['coverage_scope']} "
+        f"countries={career_market['broad_country_count']} "
+        f"verified_unit_groups={career_market['unit_group_count']} "
+        f"full_occupation_coverage={career_market['full_occupation_coverage']}"
     )
 
     if result["blockers"]:
