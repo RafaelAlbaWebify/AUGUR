@@ -123,3 +123,15 @@ Future dimensions require additional primary sources, likely including:
 - national statistical agencies where harmonized supranational series are insufficient
 
 Every added source must preserve provenance, source date, canonical mapping, and observation type.
+
+
+## ESCO language-skill metadata
+
+Role:
+
+- identify ESCO skills and knowledge concepts classified as language-related;
+- preserve essential/optional occupation-skill relationships for LanguageFit.
+
+The ESCO CSV package includes a `languageSkillsCollection` file. AUGUR imports that collection as classification metadata and combines it with occupation-skill relations.
+
+This evidence describes language-related skills associated with an occupation. It does not provide a CEFR level and is not treated as a legal or employer-specific language threshold.
