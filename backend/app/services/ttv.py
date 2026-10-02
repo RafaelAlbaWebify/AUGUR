@@ -83,6 +83,15 @@ def ttv_status(
         if not stages[stage_id]["ready"]
     ]
 
+    blocker_details = [
+        {
+            "stage_id": stage_id,
+            "status": stages[stage_id]["status"],
+            "evidence_state": stages[stage_id]["evidence_state"],
+        }
+        for stage_id in blocked_by
+    ]
+
     evidence_complete = all(
         stages[stage_id]["evidence_state"] == "implemented"
         for stage_id in STAGE_ORDER
@@ -104,8 +113,16 @@ def ttv_status(
         "stage_order": STAGE_ORDER,
         "stages": stages,
         "blocked_by": blocked_by,
+        "blocker_details": blocker_details,
         "dependency_ready": dependency_ready,
         "temporal_evidence_state": temporal_evidence_state,
+        "estimate_status": (
+            "available"
+            if ready_for_time_estimate
+            else "temporal_model_missing"
+            if dependency_ready
+            else "dependencies_blocked"
+        ),
         "ready_for_time_estimate": ready_for_time_estimate,
         "time_estimate": None,
         "notes": [
