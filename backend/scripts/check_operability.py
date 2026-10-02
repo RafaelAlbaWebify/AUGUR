@@ -41,6 +41,10 @@ def main() -> int:
         "local_employment_evidence_ready: "
         f"{result['local_employment_evidence_ready']}"
     )
+    print(
+        "job_transition_evidence_ready: "
+        f"{result['job_transition_evidence_ready']}"
+    )
     print(f"esco_full_ready: {result['esco_full_ready']}")
     print(
         "personal_fit_full_evidence_ready: "
@@ -57,6 +61,7 @@ def main() -> int:
     for country in result["evidence"]["countries"]:
         earnings = country["labour_earnings"]
         net_earnings = country["net_earnings"]
+        job_transitions = country["job_transitions"]
         print(
             f"{country['country_iso3']}: "
             f"observed={country['observed_indicators']} indicators / "
@@ -65,7 +70,9 @@ def main() -> int:
             f"earnings={earnings['isco_group_count']} ISCO groups / "
             f"{earnings['row_count']} rows, "
             f"net_earnings={net_earnings['row_count']} rows "
-            f"(latest={net_earnings['latest_period']})"
+            f"(latest={net_earnings['latest_period']}), "
+            f"job_transitions={job_transitions['age_group_count']} age groups / "
+            f"{job_transitions['row_count']} rows"
         )
 
     print()
