@@ -557,11 +557,25 @@ export default function App() {
             <strong>{selectedCountry}</strong>
           </div>
           <div
-            className={`status compact dataStatus ${operability?.status ?? 'connecting'}`}
-            title={operability?.blockers?.length ? `Blockers: ${operability.blockers.join(', ')}` : 'Analytical evidence ready'}
+            className={`status compact dataStatus ${
+              operability
+                ? operability.analysis_ready
+                  ? 'ready'
+                  : operability.status
+                : 'connecting'
+            }`}
+            title={
+              operability
+                ? operability.blockers?.length
+                  ? `Product: ${operability.status} · Blockers: ${operability.blockers.join(', ')}`
+                  : `Product: ${operability.status} · analytical evidence ready`
+                : 'Checking analytical evidence'
+            }
           >
             <span className="dot" />
-            {operability ? `Data · ${operability.status}` : 'Data · checking'}
+            {operability
+              ? `Evidence · ${operability.analysis_ready ? 'ready' : operability.status}`
+              : 'Evidence · checking'}
           </div>
           <div className={`status compact ${health?.status === 'ok' ? 'ok' : ''}`}>
             <span className="dot" />
