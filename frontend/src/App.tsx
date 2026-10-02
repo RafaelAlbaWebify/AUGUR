@@ -5,6 +5,7 @@ import ComparePanel from './components/ComparePanel'
 import FitSnapshot from './components/FitSnapshot'
 import DimensionSummaryCard from './components/DimensionSummaryCard'
 import OverallSignalBalance from './components/OverallSignalBalance'
+import { countryFlag } from './lib/countryFlag'
 
 type Country = {
   iso2: string
@@ -504,7 +505,7 @@ export default function App() {
           >
             {countries.map((country) => (
               <option value={country.iso3} key={country.iso3}>
-                {country.name}
+                {countryFlag(country.iso2, country.iso3)} {country.name}
               </option>
             ))}
           </select>
@@ -564,12 +565,12 @@ export default function App() {
         </section>
 
         <section className="overviewDimensions">
-          <div className="dimensionHeader compactHeader">
+          <div className="dimensionOverviewBar">
             <div>
               <div className="label">KEY DIMENSIONS</div>
               <h3>{selectedCountryMeta?.name ?? selectedCountry} at a glance</h3>
             </div>
-            <div className="dimensionHeaderActions">
+            <div className="dimensionOverviewActions">
               <OverallSignalBalance dimensions={assessment?.dimensions} />
               <button
                 type="button"
