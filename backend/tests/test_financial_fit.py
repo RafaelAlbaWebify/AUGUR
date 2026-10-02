@@ -124,7 +124,7 @@ def test_financial_fit_exposes_structural_local_income_reference(monkeypatch):
     result = module.financial_fit(profile, "PRT")
 
     assert result["status"] == "local_income_reference_available"
-    assert result["reason"] == "net_income_not_modelled"
+    assert result["reason"] == "occupation_specific_net_income_not_modelled"
     assert result["portable_income_analysis"] is None
     reference = result["local_income_reference"]
     assert reference["occupation_label"] == "ICT support technician"
