@@ -3,6 +3,7 @@ from __future__ import annotations
 from app.db.analytics import analytical_evidence_status
 from app.esco_store import esco_status
 from app.providers import providers_for_country
+from app.services.ttv import TEMPORAL_MODEL_VERSION
 
 
 def operability_status() -> dict:
@@ -59,7 +60,12 @@ def operability_status() -> dict:
         for country in countries
     )
 
-    ready = country_analysis_ready and personal_fit_full_evidence_ready
+    analysis_ready = (
+        country_analysis_ready
+        and personal_fit_full_evidence_ready
+    )
+    ttv_temporal_model_ready = TEMPORAL_MODEL_VERSION is not None
+    ready = analysis_ready and ttv_temporal_model_ready
 
     if ready:
         status = "ready"
@@ -75,10 +81,15 @@ def operability_status() -> dict:
         blockers.append("local_employment_earnings")
     if not esco_full_ready:
         blockers.append("full_esco_dataset")
+    if analysis_ready and not ttv_temporal_model_ready:
+        blockers.append("ttv_temporal_model")
 
     return {
         "status": status,
         "ready": ready,
+        "analysis_ready": analysis_ready,
+        "ttv_temporal_model_ready": ttv_temporal_model_ready,
+        "ttv_temporal_model_version": TEMPORAL_MODEL_VERSION,
         "country_analysis_ready": country_analysis_ready,
         "local_employment_evidence_ready": local_employment_evidence_ready,
         "esco_full_ready": esco_full_ready,
@@ -91,6 +102,8 @@ def operability_status() -> dict:
             "Runtime health and analytical operability are separate.",
             "Country analysis requires observed evidence, official forecasts and every configured provider for each registered country.",
             "Full local-employment Personal Fit requires Eurostat labour earnings evidence and a full ESCO dataset.",
+            "Full AUGUR readiness also requires a validated TTV temporal model.",
+            "Analysis readiness is reported separately from full product readiness.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
     }
