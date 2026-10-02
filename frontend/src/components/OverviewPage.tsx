@@ -3,6 +3,7 @@ import DimensionSummaryCard from './DimensionSummaryCard'
 import FitSnapshot from './FitSnapshot'
 import OverallSignalBalance from './OverallSignalBalance'
 import WorldMap from './WorldMap'
+import type { DashboardLayout } from './LayoutControls'
 import './overview-page.css'
 
 type Country = {
@@ -86,6 +87,7 @@ type OverviewPageProps = {
   onOpenCompare: () => void
   formatValue: (value: number, unit: string) => string
   dimensionLabels: Record<string, string>
+  layout: DashboardLayout
 }
 
 const DIMENSION_ORDER = [
@@ -113,6 +115,7 @@ export default function OverviewPage({
   onOpenCompare,
   formatValue,
   dimensionLabels,
+  layout,
 }: OverviewPageProps) {
   const firstScenario = scenarios?.indicators?.[0] ?? null
 
@@ -137,7 +140,7 @@ export default function OverviewPage({
 
   return (
     <section className="overviewPageV2" aria-label="Country overview">
-      <div className="overviewHeroGrid">
+      <div className={`overviewHeroGrid ${layout.topOrder === 'fit-map' ? 'fitFirst' : ''}`}>
         <section className="overviewMapPanel">
           <WorldMap
             countries={countries}
@@ -177,7 +180,7 @@ export default function OverviewPage({
           </div>
         </section>
 
-        <aside className="overviewInsightRail">
+        <aside className={`overviewInsightRail ${layout.utilityOrder === 'compare-outlook' ? 'compareFirst' : ''}`}>
           <OverallSignalBalance dimensions={assessment?.dimensions} />
 
           <section className="overviewOutlookCard">
