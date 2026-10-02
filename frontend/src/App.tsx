@@ -3,6 +3,7 @@ import ProfilePanel from './components/ProfilePanel'
 import ComparePanel from './components/ComparePanel'
 import CountrySelect from './components/CountrySelect'
 import OverviewPage from './components/OverviewPage'
+import LayoutControls, { type DashboardLayout } from './components/LayoutControls'
 import { countryRoute, compareRoute, useAugurRoute } from './lib/routing'
 
 type Country = {
@@ -198,6 +199,25 @@ type ComparisonResponse = {
 }
 
 const API_BASE = 'http://127.0.0.1:8020'
+const LAYOUT_STORAGE_KEY = 'augur.dashboard.layout.v2'
+const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
+  topOrder: 'map-fit',
+  utilityOrder: 'outlook-compare',
+}
+
+function loadDashboardLayout(): DashboardLayout {
+  try {
+    const raw = localStorage.getItem(LAYOUT_STORAGE_KEY)
+    if (!raw) return DEFAULT_DASHBOARD_LAYOUT
+    const parsed = JSON.parse(raw) as Partial<DashboardLayout>
+    return {
+      topOrder: parsed.topOrder === 'fit-map' ? 'fit-map' : 'map-fit',
+      utilityOrder: parsed.utilityOrder === 'compare-outlook' ? 'compare-outlook' : 'outlook-compare',
+    }
+  } catch {
+    return DEFAULT_DASHBOARD_LAYOUT
+  }
+}
 
 
 const dimensionLabels: Record<string, string> = {
@@ -269,7 +289,13 @@ export default function App() {
     route.kind === 'compare' ? route.countries : ['IRL', 'ESP', 'PRT'],
   )
   const activeView = route.view
+  const [layoutOpen, setLayoutOpen] = useState(false)
+  const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>(() => loadDashboardLayout())
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(dashboardLayout))
+  }, [dashboardLayout])
 
   useEffect(() => {
     document.body.style.overflowY = activeView === 'overview' ? '' : 'auto'
@@ -463,6 +489,15 @@ export default function App() {
         </nav>
 
         <div className="topbarMeta">
+          {activeView === 'overview' && (
+            <button
+              type="button"
+              className={layoutOpen ? 'layoutButton active' : 'layoutButton'}
+              onClick={() => setLayoutOpen((value) => !value)}
+            >
+              Edit layout
+            </button>
+          )}
           <div>
             <span>Indicators</span>
             <strong>{snapshot?.observation_count ?? '—'}</strong>
@@ -484,6 +519,13 @@ export default function App() {
         </section>
       )}
 
+      <LayoutControls
+        open={activeView === 'overview' && layoutOpen}
+        layout={dashboardLayout}
+        onChange={setDashboardLayout}
+        onClose={() => setLayoutOpen(false)}
+        onReset={() => setDashboardLayout(DEFAULT_DASHBOARD_LAYOUT)}
+      />
 
       {activeView === 'overview' && (
         <OverviewPage
@@ -501,6 +543,7 @@ export default function App() {
           onOpenCompare={() => navigateView('compare')}
           formatValue={formatValue}
           dimensionLabels={dimensionLabels}
+          layout={dashboardLayout}
         />
       )}
 
