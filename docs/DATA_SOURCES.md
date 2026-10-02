@@ -112,14 +112,14 @@ All five core providers have been successfully synchronized for these countries.
 
 ## Planned source expansion
 
-Future dimensions require additional primary sources, likely including:
+Future source expansion remains most relevant for:
 
-- housing affordability / housing cost burden
-- health and education outcomes
-- fiscal structure beyond gross debt
-- energy and strategic resilience
-- more current or more granular labour-market / occupational earnings evidence
-- migration and legal eligibility
+- more granular housing affordability and local housing costs;
+- deeper health and education outcomes;
+- fiscal structure beyond gross debt;
+- broader strategic resilience indicators;
+- more current and occupation-specific labour-market earnings and hiring evidence;
+- verified country-specific migration and legal eligibility;
 - national statistical agencies where harmonized supranational series are insufficient
 
 Every added source must preserve provenance, source date, canonical mapping, and observation type.
@@ -135,3 +135,34 @@ Role:
 The ESCO CSV package includes a `languageSkillsCollection` file. AUGUR imports that collection as classification metadata and combines it with occupation-skill relations.
 
 This evidence describes language-related skills associated with an occupation. It does not provide a CEFR level and is not treated as a legal or employer-specific language threshold.
+
+
+## Eurostat labour-market transition baseline
+
+Role:
+
+- experimental timing evidence for local-employment TTV validation.
+
+AUGUR stores this evidence separately from country macro observations.
+
+The current implementation uses a country-level unemployment-to-employment transition probability and converts the quarterly transition probability into cumulative 50% and 80% transition horizons under a constant-quarterly-hazard assumption.
+
+Important limitations:
+
+- country-level, not occupation-specific;
+- not an individual probability of receiving a job offer;
+- not a guarantee of employment;
+- the constant-hazard transformation is an AUGUR modelling assumption;
+- the resulting weeks are candidate temporal evidence only and are not published as TTV while the temporal model remains unversioned.
+
+## Cambridge English guided learning hours
+
+Role:
+
+- planning evidence for language-progression timing.
+
+AUGUR uses published cumulative guided-learning-hour ranges by CEFR level. The current target is AUGUR's B2 professional-work heuristic.
+
+Calendar weeks are only calculated when the user explicitly supplies expected language-study hours per week.
+
+These ranges are learning guidance, not guarantees of elapsed calendar time or employer language requirements.
