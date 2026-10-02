@@ -596,6 +596,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             <div className="profileGrid">
               <label>
                 <span>Household size</span>
+                <small className="profileFieldNote">Stored for future household-budget modelling; not used in current FinancialFit.</small>
                 <input
                   type="number"
                   min={1}
@@ -615,6 +616,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               </label>
               <label>
                 <span>Liquid savings</span>
+                <small className="profileFieldNote">Stored for future transition-cost/runway modelling; not used in current FinancialFit.</small>
                 <input
                   type="number"
                   min={0}
