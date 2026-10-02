@@ -81,6 +81,7 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert "protocol_state" in body["ttv_calibration"]
     assert body["ttv_calibration"]["protocol_state"] == "draft_not_approved"
     assert body["ttv_calibration"]["protocol_version"] is None
+    assert body["ttv_calibration"]["protocol_document"] == "docs/TTV_CALIBRATION_PROTOCOL.md"
     assert "ready_for_versioning" in body["ttv_temporal_validation"]
     assert "gates" in body["ttv_temporal_validation"]
     assert "country_analysis_ready" in body
