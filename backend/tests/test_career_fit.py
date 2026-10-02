@@ -6,6 +6,7 @@ from app.services.career_fit import (
     career_fit,
     classify_occupation,
     resolve_esco_occupation,
+    career_market_evidence_status,
 )
 
 
@@ -448,3 +449,13 @@ def test_missing_vacancy_rate_does_not_make_complete_eures_evidence_partial(monk
     assert result["market_evidence_complete"] is True
     assert result["evidence_complete"] is True
     assert result["viability_evidence_ready"] is True
+
+
+def test_career_market_evidence_status_is_explicitly_partial():
+    result = career_market_evidence_status()
+
+    assert result["supported_countries"] == ["ESP", "IRL", "PRT"]
+    assert result["broad_country_count"] == 3
+    assert result["unit_group_count"] >= 4
+    assert result["coverage_scope"] == "partial_unit_group_coverage"
+    assert result["full_occupation_coverage"] is False
