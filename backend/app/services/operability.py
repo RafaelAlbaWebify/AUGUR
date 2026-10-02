@@ -1,12 +1,33 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
 from app.db.analytics import analytical_evidence_status
 from app.esco_store import esco_status
 from app.providers import providers_for_country
 from app.services.ttv import TEMPORAL_MODEL_VERSION
 
 
+SYNC_FRESHNESS_MAX_DAYS = 30
+
+
+def _as_utc(value):
+    if value is None:
+        return None
+    if value.tzinfo is None:
+        return value.replace(tzinfo=timezone.utc)
+    return value.astimezone(timezone.utc)
+
+
+def _age_days(value, now: datetime) -> float | None:
+    timestamp = _as_utc(value)
+    if timestamp is None:
+        return None
+    return max(0.0, (now - timestamp).total_seconds() / 86400.0)
+
+
 def operability_status() -> dict:
+    now = datetime.now(timezone.utc)
     evidence = analytical_evidence_status()
     esco = esco_status()
     countries = evidence["countries"]
@@ -20,11 +41,33 @@ def operability_status() -> dict:
         )
         available = sorted(country.get("source_ids") or [])
         missing = sorted(set(expected) - set(available))
+        retrieved_at = country.get("provider_retrieved_at") or {}
+
+        provider_freshness = {}
+        stale = []
+        for provider_id in expected:
+            age_days = _age_days(retrieved_at.get(provider_id), now)
+            fresh = (
+                age_days is not None
+                and age_days <= SYNC_FRESHNESS_MAX_DAYS
+            )
+            provider_freshness[provider_id] = {
+                "retrieved_at": retrieved_at.get(provider_id),
+                "age_days": round(age_days, 2) if age_days is not None else None,
+                "fresh": fresh,
+            }
+            if provider_id in available and not fresh:
+                stale.append(provider_id)
+
         provider_coverage[iso3] = {
             "expected": expected,
             "available": available,
             "missing": missing,
+            "stale": stale,
+            "freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
+            "providers": provider_freshness,
             "complete": len(missing) == 0,
+            "fresh": len(missing) == 0 and len(stale) == 0,
         }
 
     country_analysis_ready = bool(countries) and all(
@@ -32,6 +75,12 @@ def operability_status() -> dict:
         and country["observed_indicators"] > 0
         and country["official_forecast_rows"] > 0
         and provider_coverage[country["country_iso3"]]["complete"]
+        and provider_coverage[country["country_iso3"]]["fresh"]
+        for country in countries
+    )
+
+    data_sync_fresh = bool(countries) and all(
+        provider_coverage[country["country_iso3"]]["fresh"]
         for country in countries
     )
 
@@ -77,6 +126,8 @@ def operability_status() -> dict:
     blockers = []
     if not country_analysis_ready:
         blockers.append("country_analysis_evidence")
+    if not data_sync_fresh:
+        blockers.append("data_sync_stale")
     if not local_employment_evidence_ready:
         blockers.append("local_employment_earnings")
     if not esco_full_ready:
@@ -91,6 +142,8 @@ def operability_status() -> dict:
         "ttv_temporal_model_ready": ttv_temporal_model_ready,
         "ttv_temporal_model_version": TEMPORAL_MODEL_VERSION,
         "country_analysis_ready": country_analysis_ready,
+        "data_sync_fresh": data_sync_fresh,
+        "sync_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
         "local_employment_evidence_ready": local_employment_evidence_ready,
         "esco_full_ready": esco_full_ready,
         "personal_fit_full_evidence_ready": personal_fit_full_evidence_ready,
@@ -101,6 +154,7 @@ def operability_status() -> dict:
         "notes": [
             "Runtime health and analytical operability are separate.",
             "Country analysis requires observed evidence, official forecasts and every configured provider for each registered country.",
+            "Provider synchronization must be no more than 30 days old; source observation years are evaluated separately from retrieval freshness.",
             "Full local-employment Personal Fit requires Eurostat labour earnings evidence and a full ESCO dataset.",
             "Full AUGUR readiness also requires a validated TTV temporal model.",
             "Analysis readiness is reported separately from full product readiness.",
