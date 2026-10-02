@@ -241,6 +241,8 @@ Current temporal evidence includes:
 
 The Eurostat employment baseline is not occupation-specific and uses a constant quarterly-hazard assumption only to produce a validation range. It is not an individual job-offer forecast. Profiles outside the Eurostat 15–74 transition population are not extrapolated.
 
+Vacancy and online-advertisement rates may enrich CareerFit because they describe occupational demand. AUGUR does not transform those demand ratios into time-to-employment because they are not transition-duration measures.
+
 Candidate stage durations are currently composed with `parallel_max`: stages that can progress concurrently are not blindly summed. This composition remains experimental and is one of the items that must be validated before a temporal model can be versioned.
 
 Local-employment cases remain blocked from a complete calendar range while FinancialFit lacks a validated net-income / tax / household-budget transition model.
