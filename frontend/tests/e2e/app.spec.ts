@@ -132,8 +132,13 @@ async function mockApi(page: Page) {
     } else if (path.endsWith('/financial-fit')) {
       body = {
         target_country_iso3: country,
-        status: 'local_income_unknown',
-        reason: 'portable_income_not_confirmed',
+        status: 'insufficient_profile',
+        reason: 'monthly_net_income_missing',
+        evidence_state: 'partial',
+        evidence_complete: false,
+        blockers: ['monthly_net_income'],
+        local_income_reference: null,
+        national_net_earnings_reference: null,
         portable_income_analysis: null,
         notes: [],
       }
@@ -352,6 +357,15 @@ test('profile architecture keeps completion evidence outputs and TTV distinct', 
 
   await expect(profile.getByText('Completion only confirms that required profile inputs exist. It is not a country-fit score.')).toBeVisible()
   await expect(profile.getByText('Time-to-viability requires both viable dependencies and a validated temporal evidence model. Dependency readiness alone never creates a duration.')).toBeVisible()
+})
+
+
+test('structured FinancialFit blockers are visible', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(profile.getByText('FINANCIAL', { exact: true })).toBeVisible()
+  await expect(profile.getByText('monthly net income', { exact: true })).toBeVisible()
 })
 
 
