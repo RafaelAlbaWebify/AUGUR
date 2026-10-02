@@ -104,7 +104,7 @@ def test_temporal_graph_withholds_calendar_when_study_intensity_is_missing():
 
 
 def test_temporal_graph_withholds_local_employment_when_baseline_missing(monkeypatch):
-    monkeypatch.setattr(module, "latest_labour_job_transition", lambda country_iso3: None)
+    monkeypatch.setattr(module, "latest_labour_job_transition", lambda country_iso3, age_group="Y15-74", duration_group="TOTAL": None)
     profile = PersonalProfileResponse(
         profile_id="default",
         remote_work=False,
@@ -176,7 +176,7 @@ def test_local_employment_uses_experimental_country_transition_baseline(monkeypa
     monkeypatch.setattr(
         module,
         "latest_labour_job_transition",
-        lambda country_iso3: {
+        lambda country_iso3, age_group="Y15-74", duration_group="TOTAL": {
             "country_iso3": country_iso3,
             "period": 2025,
             "age_group": "Y15-74",
@@ -242,3 +242,105 @@ def test_temporal_validation_gates_block_versioning():
 
     assert result["gates"]["language_guided_hours"]["state"] == "supported"
     assert result["gates"]["remote_income_transition"]["state"] == "supported"
+
+
+def test_local_employment_prefers_profile_age_group(monkeypatch):
+    calls = []
+
+    def fake_transition(country_iso3, age_group="Y15-74", duration_group="TOTAL"):
+        calls.append(age_group)
+        if age_group == "Y25-54":
+            return {
+                "country_iso3": country_iso3,
+                "period": 2025,
+                "age_group": "Y25-54",
+                "duration_group": duration_group,
+                "probability_pct": 30.0,
+                "source_id": "EUROSTAT",
+                "dataset_id": "lfsi_long_e01",
+            }
+        return None
+
+    monkeypatch.setattr(module, "latest_labour_job_transition", fake_transition)
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        age=50,
+        remote_work=False,
+    )
+
+    result = module.employment_temporal_evidence(
+        profile,
+        "IRL",
+        {"status": "local_income_reference_available"},
+        _career_ready(),
+    )
+
+    assert calls == ["Y25-54"]
+    assert result["status"] == "available"
+    assert result["source"]["age_group"] == "Y25-54"
+    assert result["requested_age_group"] == "Y25-54"
+    assert result["age_specific_baseline"] is True
+
+
+def test_local_employment_falls_back_to_total_age_group(monkeypatch):
+    calls = []
+
+    def fake_transition(country_iso3, age_group="Y15-74", duration_group="TOTAL"):
+        calls.append(age_group)
+        if age_group == "Y15-74":
+            return {
+                "country_iso3": country_iso3,
+                "period": 2025,
+                "age_group": "Y15-74",
+                "duration_group": duration_group,
+                "probability_pct": 25.0,
+                "source_id": "EUROSTAT",
+                "dataset_id": "lfsi_long_e01",
+            }
+        return None
+
+    monkeypatch.setattr(module, "latest_labour_job_transition", fake_transition)
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        age=50,
+        remote_work=False,
+    )
+
+    result = module.employment_temporal_evidence(
+        profile,
+        "IRL",
+        {"status": "local_income_reference_available"},
+        _career_ready(),
+    )
+
+    assert calls == ["Y25-54", "Y15-74"]
+    assert result["status"] == "available"
+    assert result["source"]["age_group"] == "Y15-74"
+    assert result["requested_age_group"] == "Y25-54"
+    assert result["age_specific_baseline"] is False
+
+
+def test_local_employment_rejects_age_outside_transition_population(monkeypatch):
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("transition datastore should not be queried")
+
+    monkeypatch.setattr(module, "latest_labour_job_transition", fail_if_called)
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        age=80,
+        remote_work=False,
+    )
+
+    result = module.employment_temporal_evidence(
+        profile,
+        "IRL",
+        {"status": "local_income_reference_available"},
+        _career_ready(),
+    )
+
+    assert result["status"] == "unavailable"
+    assert result["reason"] == "profile_age_outside_eurostat_transition_population"
+    assert result["profile_age"] == 80
