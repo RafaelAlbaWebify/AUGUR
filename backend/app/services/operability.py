@@ -7,6 +7,7 @@ from app.esco_store import esco_status
 from app.providers import providers_for_country
 from app.services.career_fit import career_market_evidence_status
 from app.services.ttv import TEMPORAL_MODEL_VERSION
+from app.services.ttv_calibration import calibration_status
 from app.services.ttv_temporal import temporal_model_validation_status
 
 
@@ -41,6 +42,7 @@ def operability_status() -> dict:
     evidence = analytical_evidence_status()
     esco = esco_status()
     temporal_validation = temporal_model_validation_status()
+    calibration = calibration_status()
     career_market = career_market_evidence_status()
     countries = evidence["countries"]
 
@@ -185,6 +187,7 @@ def operability_status() -> dict:
         "ttv_temporal_model_ready": ttv_temporal_model_ready,
         "ttv_temporal_model_version": TEMPORAL_MODEL_VERSION,
         "ttv_temporal_validation": temporal_validation,
+        "ttv_calibration": calibration,
         "country_analysis_ready": country_analysis_ready,
         "data_sync_fresh": data_sync_fresh,
         "sync_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
@@ -206,6 +209,7 @@ def operability_status() -> dict:
             "Core local-employment Personal Fit requires Eurostat occupational gross earnings, national net-earnings benchmark evidence and a full ESCO dataset.",
             "Full AUGUR readiness also requires loaded job-transition evidence and a validated TTV temporal model.",
             "Analysis readiness uses core Personal Fit evidence and is reported separately from exhaustive market-evidence coverage and full product readiness.",
+            "TTV calibration metrics are descriptive until an external calibration protocol and acceptance criteria are approved.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
     }
