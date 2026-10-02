@@ -190,7 +190,22 @@ For portable income, FinancialFit compares origin and target household price-lev
 
 It does not assume that current income survives relocation unless the profile explicitly states that remote work is viable.
 
-Local-employment income viability still requires additional labour-market salary evidence.
+For local employment, AUGUR now exposes two separate official evidence layers:
+
+- Eurostat SES 2022 mean gross monthly earnings for the matched broad ISCO-08 occupation group;
+- Eurostat annual net earnings for the national standard case `P1_NCH_AW100` (single person without children earning 100% of the average wage).
+
+These layers are deliberately **not merged into an occupation-specific net salary estimate**. The national net benchmark is not occupation-specific and the SES occupational reference is gross.
+
+Local-employment FinancialFit therefore remains partial and exposes structured blockers:
+
+- occupation-specific net income;
+- household budget;
+- transition costs.
+
+Household Budget Survey and national-accounts COICOP evidence may provide useful national context, but AUGUR does not treat those aggregates as an individual household budget.
+
+This conservative boundary also means that liquid savings are not yet converted into a transition runway until a defensible transition-cost model exists.
 
 ### TTV
 
