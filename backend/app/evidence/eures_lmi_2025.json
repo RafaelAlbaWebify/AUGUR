@@ -317,7 +317,8 @@
     "notes": [
       "Country-page shortage/surplus groups are retained as broad fallback evidence.",
       "They are not treated as exhaustive unit-group evidence."
-    ]
+    ],
+    "report_year": 2025
   },
   "unit_group_evidence": {
     "evidence_id": "eures_shortages_surpluses_2025_annex",
