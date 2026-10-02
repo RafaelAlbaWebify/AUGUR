@@ -144,3 +144,41 @@ The `external_calibration` gate remains `missing` until AUGUR has:
 6. evidence that the model performs acceptably on observations not used to design or tune it.
 
 The local calibration workflow is therefore validation infrastructure, not a shortcut to activating `TEMPORAL_MODEL_VERSION`.
+
+
+## Local-financial transition boundary
+
+AUGUR has reviewed the available Eurostat household-spending evidence for a possible local financial transition model.
+
+Relevant sources include:
+
+- Household Budget Surveys (HBS);
+- household final consumption expenditure by COICOP;
+- housing-cost burden indicators;
+- purchasing-power and price-level statistics.
+
+These sources are useful for national or household-group context, but they are not an individual relocation budget and they do not directly encode:
+
+- the target household's actual rent or mortgage;
+- deposit and agency costs;
+- moving costs;
+- utility setup costs;
+- transport changes;
+- household-specific recurring expenditure;
+- monthly savings capacity;
+- the amount of liquid savings the user is willing to deploy;
+- elapsed time required to accumulate any shortfall.
+
+Eurostat also notes that Household Budget Survey comparability is not fully harmonised across countries.
+
+AUGUR therefore does not turn national household expenditure averages into an individual transition-cost estimate.
+
+The `local_financial_transition` gate remains `missing` until AUGUR has a defensible household-level transition-cost input/evidence model. Any future model must distinguish:
+
+1. official contextual price/expenditure evidence;
+2. user-declared household assumptions;
+3. actual transition costs;
+4. savings/runway mechanics;
+5. uncertainty in the resulting duration.
+
+Until then, national expenditure evidence may enrich FinancialFit context, but it must not unlock a TTV duration.
