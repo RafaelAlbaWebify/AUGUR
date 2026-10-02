@@ -42,11 +42,21 @@ def initialize_sqlite(path: Path) -> None:
                 concept_uri TEXT PRIMARY KEY,
                 preferred_label TEXT NOT NULL,
                 alternative_labels_json TEXT NOT NULL DEFAULT '[]',
+                is_language_skill INTEGER NOT NULL DEFAULT 0,
                 dataset_version TEXT NOT NULL,
                 source_mode TEXT NOT NULL
             )
             """
         )
+        esco_skill_columns = {
+            row[1]
+            for row in con.execute("PRAGMA table_info('esco_skills')").fetchall()
+        }
+        if "is_language_skill" not in esco_skill_columns:
+            con.execute(
+                "ALTER TABLE esco_skills ADD COLUMN is_language_skill INTEGER NOT NULL DEFAULT 0"
+            )
+
         con.execute(
             """
             CREATE TABLE IF NOT EXISTS esco_occupation_skills (
