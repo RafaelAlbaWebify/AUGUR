@@ -72,3 +72,26 @@ def test_official_csv_package_can_be_imported_as_full(monkeypatch, tmp_path):
     assert result["dataset_mode"] == "full"
     assert result["coverage"] == 1.0
     assert result["evidence_complete"] is True
+
+
+def test_search_occupations_normalizes_it_to_ict(monkeypatch, tmp_path):
+    _point_modules_to_tmp_db(monkeypatch, tmp_path)
+    esco_store.seed_esco_partial()
+
+    results = esco_store.search_occupations("IT system administrator")
+
+    assert results
+    assert results[0]["preferred_label"] == "ICT system administrator"
+    assert results[0]["match_score"] >= 0.9
+    assert results[0]["match_method"] in {"exact_label", "label_contains"}
+
+
+def test_search_occupations_orders_best_match_first(monkeypatch, tmp_path):
+    _point_modules_to_tmp_db(monkeypatch, tmp_path)
+    esco_store.seed_esco_partial()
+
+    results = esco_store.search_occupations("network engineer")
+
+    assert results
+    assert results[0]["preferred_label"] == "ICT network engineer"
+    assert results[0]["match_score"] >= results[-1]["match_score"]
