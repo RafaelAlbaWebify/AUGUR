@@ -3763,3 +3763,55 @@ body:has(.shell.detailsOpen) {
     width: min(360px, calc(100vw - 24px));
   }
 }
+
+
+@media (max-width: 1200px) {
+  .dashboardTopbar {
+    grid-template-columns: minmax(180px, 1fr) minmax(180px, 220px);
+    grid-template-areas:
+      "brand country"
+      "nav meta";
+    align-items: center;
+  }
+
+  .brandCompact { grid-area: brand; }
+  .topbarCountry { grid-area: country; }
+  .topbarNav {
+    grid-area: nav;
+    width: min(100%, max-content);
+    max-width: 100%;
+  }
+  .topbarMeta {
+    grid-area: meta;
+    justify-self: end;
+    min-width: 0;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 700px) {
+  .dashboardTopbar {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "brand"
+      "country"
+      "nav"
+      "meta";
+  }
+
+  .topbarCountry,
+  .topbarNav,
+  .topbarMeta {
+    width: 100%;
+  }
+
+  .topbarMeta {
+    justify-self: stretch;
+    justify-content: flex-start;
+  }
+
+  .topbarNav {
+    overflow-x: auto;
+  }
+}
