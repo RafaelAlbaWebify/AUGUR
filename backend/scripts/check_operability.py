@@ -12,6 +12,15 @@ def main() -> int:
     print("=" * 72)
     print(f"status: {result['status']}")
     print(f"ready: {result['ready']}")
+    print(f"analysis_ready: {result['analysis_ready']}")
+    print(
+        "ttv_temporal_model_ready: "
+        f"{result['ttv_temporal_model_ready']}"
+    )
+    print(
+        "ttv_temporal_model_version: "
+        f"{result['ttv_temporal_model_version']}"
+    )
     print(f"country_analysis_ready: {result['country_analysis_ready']}")
     print(
         "local_employment_evidence_ready: "
