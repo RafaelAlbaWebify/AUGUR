@@ -27,6 +27,7 @@ Implemented capabilities include:
 - local ESCO dataset import and occupation/skill matching pipeline
 - responsive Overview, Indicators, Dimension Detail, Profile, Compare and Outlook views
 - guarded persistent Edit Layout preferences
+- explicit analytical operability status (`ready` / `partial` / `empty`)
 
 AUGUR keeps country evidence separate from personal-fit analysis. Personal profile data can change whether a country fits a household, but never changes country facts, source observations, official forecasts or country trends.
 
@@ -46,19 +47,49 @@ AUGUR uses dedicated local ports to avoid conflicts with JOLT and VERIDRA:
 - Node.js 22+ / npm
 - Git
 
-### Setup
+### Recommended full bootstrap
+
+```powershell
+.\bootstrap-augur.ps1
+```
+
+This installs the application, runs tests/build, synchronizes the official country-evidence providers and finishes with an operability check.
+
+Without a full ESCO package, country analysis can be operational but CareerFit/TTV evidence remains partial.
+
+To load the official ESCO v1.2.1 English CSV classification, download and extract it from the official ESCO portal and run:
+
+```powershell
+.\bootstrap-augur.ps1 -SkipSetup -SkipSync -EscoPath "C:\path\to\esco"
+```
+
+### Dependency-only setup
 
 ```powershell
 .\setup-phase0.ps1
 ```
 
-The setup script keeps its historical filename, but initializes the current application stack.
+The setup script keeps its historical filename. It installs dependencies and validates the codebase, but does **not** synchronize analytical evidence.
+
+### Verify operability
+
+```powershell
+.\check-operability.ps1
+```
+
+The check reports:
+
+- `ready` — country analysis and full Personal Fit evidence prerequisites are loaded;
+- `partial` — the application can run, but one or more evidence layers are incomplete;
+- `empty` — analytical evidence has not been loaded.
 
 ### Start
 
 ```powershell
 .\start-augur.ps1
 ```
+
+Startup reports both runtime health and analytical operability.
 
 ### Stop
 
