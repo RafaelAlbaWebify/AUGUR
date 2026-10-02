@@ -43,7 +43,7 @@ def _provider_ids():
     return ["WORLD_BANK", "EUROSTAT", "OECD", "IMF", "UN_WPP"]
 
 
-def test_operability_ready_requires_country_earnings_and_full_esco(monkeypatch):
+def test_operability_analysis_ready_still_blocks_without_temporal_model(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
@@ -70,7 +70,45 @@ def test_operability_ready_requires_country_earnings_and_full_esco(monkeypatch):
 
     result = module.operability_status()
 
+    assert result["status"] == "partial"
+    assert result["analysis_ready"] is True
+    assert result["ttv_temporal_model_ready"] is False
+    assert result["ready"] is False
+    assert result["blockers"] == ["ttv_temporal_model"]
+
+
+def test_operability_ready_requires_validated_temporal_model(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(module, "TEMPORAL_MODEL_VERSION", "ttv-temporal-v1")
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {
+            "countries": [
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
     assert result["status"] == "ready"
+    assert result["analysis_ready"] is True
+    assert result["ttv_temporal_model_ready"] is True
+    assert result["ttv_temporal_model_version"] == "ttv-temporal-v1"
     assert result["ready"] is True
     assert result["blockers"] == []
 
