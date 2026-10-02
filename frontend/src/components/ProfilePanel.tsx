@@ -124,6 +124,8 @@ type CareerFitResponse = {
     missing_skills: string[]
     coverage?: number | null
   }
+  skill_evidence_complete?: boolean
+  market_evidence_complete?: boolean
   evidence_complete: boolean
   profile_skill_coverage_complete?: boolean
   market_signal_supports_viability?: boolean
