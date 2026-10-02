@@ -239,7 +239,7 @@ export default function WorldMap({
           <div className="label">WORLD VIEW</div>
           <h3>Registered country coverage</h3>
         </div>
-        <span>local SVG geometry · zoom, pan & click a covered country</span>
+        <span>click a country to explore</span>
       </div>
 
       <div className="worldMapFrame">
@@ -295,7 +295,7 @@ export default function WorldMap({
         <div className="worldMapControls" aria-label="Map controls">
           <button type="button" aria-label="Zoom in" onClick={() => zoomAt(0.8)}>+</button>
           <button type="button" aria-label="Zoom out" onClick={() => zoomAt(1.25)}>−</button>
-          <button type="button" aria-label="Reset map" onClick={resetView}>Reset</button>
+          <button type="button" aria-label="Reset map" onClick={resetView}>◎</button>
         </div>
 
         <div className="worldMapLegend">
