@@ -1,4 +1,5 @@
-import { countryFlag } from '../lib/countryFlag'
+import CountrySelect from './CountrySelect'
+import FlagIcon from './FlagIcon'
 type Country = {
   iso2?: string
   iso3: string
@@ -75,20 +76,16 @@ export default function ComparePanel({
         aria-label={compact ? 'Preview comparison countries' : 'Comparison countries'}
       >
         {selected.map((iso3, index) => (
-          <label key={index}>
+          <div className="compareSelectorSlot" key={index}>
             <span>{index + 1}</span>
-            <select
-              aria-label={`${compact ? 'Preview compare' : 'Compare'} country ${index + 1}`}
+            <CountrySelect
+              countries={countries}
               value={iso3}
-              onChange={(event) => onChange(index, event.target.value)}
-            >
-              {countries.map((country) => (
-                <option key={country.iso3} value={country.iso3}>
-                  {countryFlag(country.iso2, country.iso3)} {country.name}
-                </option>
-              ))}
-            </select>
-          </label>
+              onChange={(next) => onChange(index, next)}
+              ariaLabel={`${compact ? 'Preview compare' : 'Compare'} country ${index + 1}`}
+              compact
+            />
+          </div>
         ))}
       </div>
 
@@ -124,7 +121,7 @@ export default function ComparePanel({
 
                     return (
                       <div className="compareBarRow" key={iso3}>
-                        <span><b className="inlineFlag">{countryFlag(country?.iso2, iso3)}</b>{country?.name ?? iso3}</span>
+                        <span><FlagIcon iso3={iso3} />{country?.name ?? iso3}</span>
                         <div className="compareBarTrack">
                           <i style={{ width: `${width}%` }} />
                         </div>
