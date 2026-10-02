@@ -46,13 +46,16 @@ def main() -> int:
     print("COUNTRY EVIDENCE")
     for country in result["evidence"]["countries"]:
         earnings = country["labour_earnings"]
+        net_earnings = country["net_earnings"]
         print(
             f"{country['country_iso3']}: "
             f"observed={country['observed_indicators']} indicators / "
             f"{country['observed_rows']} rows, "
             f"forecasts={country['official_forecast_rows']}, "
             f"earnings={earnings['isco_group_count']} ISCO groups / "
-            f"{earnings['row_count']} rows"
+            f"{earnings['row_count']} rows, "
+            f"net_earnings={net_earnings['row_count']} rows "
+            f"(latest={net_earnings['latest_period']})"
         )
 
     print()
