@@ -7,7 +7,8 @@
   "notes": [
     "Country mappings migrated unchanged from the previously embedded CareerFit evidence table.",
     "Broad shortage/surplus groups are labour-market signals, not guarantees of individual job availability.",
-    "Future refreshes should update this manifest rather than CareerFit logic."
+    "Future refreshes should update this manifest rather than CareerFit logic.",
+    "Verified unit-group ICT signals are taken from the occupation table in the EURES shortages and surpluses report and take precedence over broad-group signals."
   ],
   "countries": {
     "ESP": {
@@ -47,6 +48,99 @@
         "health_professionals"
       ],
       "surplus_groups": []
+    }
+  },
+  "unit_group_signals": {
+    "2511": {
+      "occupation_label": "Systems analysts",
+      "shortage_countries": [
+        "AT",
+        "BG",
+        "CH",
+        "CY",
+        "DE",
+        "IE",
+        "MT",
+        "NL",
+        "RO",
+        "SE",
+        "SI"
+      ],
+      "surplus_countries": [
+        "EL",
+        "PT",
+        "SK"
+      ]
+    },
+    "2522": {
+      "occupation_label": "Systems administrators",
+      "shortage_countries": [
+        "AT",
+        "BG",
+        "CH",
+        "CZ",
+        "DE",
+        "EL",
+        "HR",
+        "IE",
+        "IT",
+        "LU",
+        "MT",
+        "NL",
+        "SE",
+        "SI",
+        "SK"
+      ],
+      "surplus_countries": [
+        "ES",
+        "LV"
+      ]
+    },
+    "3511": {
+      "occupation_label": "ICT operations technicians",
+      "shortage_countries": [
+        "AT",
+        "BG",
+        "DE",
+        "EL",
+        "ES",
+        "FR",
+        "IT",
+        "LT",
+        "LU",
+        "MT",
+        "SK"
+      ],
+      "surplus_countries": [
+        "CZ",
+        "DK",
+        "LV",
+        "PT",
+        "RO",
+        "SE",
+        "SI"
+      ]
+    },
+    "3512": {
+      "occupation_label": "ICT user support technicians",
+      "shortage_countries": [
+        "AT",
+        "BE",
+        "BG",
+        "DE",
+        "DK",
+        "EL",
+        "MT",
+        "NL",
+        "RO",
+        "SK"
+      ],
+      "surplus_countries": [
+        "ES",
+        "FI",
+        "LV",
+        "PT"
+      ]
     }
   }
 }
