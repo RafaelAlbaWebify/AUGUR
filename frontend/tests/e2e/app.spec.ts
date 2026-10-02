@@ -322,6 +322,15 @@ test('profile architecture keeps completion evidence outputs and TTV distinct', 
 })
 
 
+test('structured TTV blockers are visible', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const ttv = page.getByRole('region', { name: 'TTV readiness' })
+  await expect(ttv.getByText('Blocked by')).toBeVisible()
+  await expect(ttv.locator('.ttvBlockedReason span')).not.toHaveText('Waiting for evidence')
+})
+
+
 test('map zoom controls change and reset the view', async ({ page }) => {
   const map = page.getByTestId('world-map')
   await expect(map).toBeVisible()
