@@ -25,7 +25,7 @@ Official outlook
         ↓
 AUGUR scenario envelope
         ↓
-Personal Fit / TTV (planned)
+Personal Fit / TTV
 ```
 
 Each stage consumes the output of the previous stage. Forecasts are kept out of historical trend calculations, and personal-fit preferences are kept out of country facts.
@@ -71,7 +71,7 @@ Observation identity:
 
 ### SQLite
 
-Reserved for application/profile/settings state and future personal-fit inputs.
+Application/profile/settings state and local personal-fit inputs.
 
 ## Backend
 
@@ -88,6 +88,9 @@ Key API families:
 - future trajectory horizons
 - AUGUR scenarios
 - multi-country comparison
+- personal profile readiness
+- LegalFit, LanguageFit, CareerFit and FinancialFit
+- TTV dependency readiness
 
 ## Frontend
 
@@ -95,13 +98,13 @@ React + TypeScript + Vite.
 
 Current major views:
 
-- country selector
-- local-first MapLibre world view
-- current trajectory
+- routed Overview dashboard
+- local-first world view
+- Personal Fit snapshot and Profile
 - official outlook
 - scenario envelopes
 - country comparison
-- indicator evidence cards
+- guarded persistent Edit Layout controls
 
 The map uses bundled Natural Earth geometry through `world-atlas`; it does not require a tile API or API key.
 
@@ -126,10 +129,13 @@ Production TypeScript/Vite build runs in CI.
 
 Playwright smoke tests mock the API contract and verify:
 
-- core analytical sections render;
+- routed analytical sections render;
 - country switching works without reload;
 - comparison stays aligned and neutral;
-- world-view navigation drives country selection.
+- world-view navigation drives country selection;
+- Profile inputs, completion, evidence, outputs and TTV remain distinct;
+- Edit Layout cannot hide core panels or break approved proportions;
+- desktop, tablet and mobile layouts avoid horizontal overflow.
 
 This makes UI validation deterministic and independent of third-party source availability.
 
@@ -148,3 +154,27 @@ GitHub Actions runs on pushes and pull requests:
 - backend: 8020
 
 These are intentionally isolated from the other local Webify projects.
+
+
+## Personal Fit pipeline
+
+Personal Fit is downstream of country evidence.
+
+Current dependency chain:
+
+```text
+Local profile
+    ↓
+LegalFit
+LanguageFit
+CareerFit
+FinancialFit
+    ↓
+TTV dependency readiness
+```
+
+TTV is not an aggregate score. It remains blocked whenever a required evidence layer is incomplete.
+
+CareerFit combines broad EURES labour-market signals with locally loaded ESCO occupation/skill evidence. Full ESCO CSV packages can be imported into SQLite; seed mode is deliberately partial and never marks skill evidence complete.
+
+Occupation resolution is explicit and confidence-gated. Low-confidence ESCO candidates are exposed but not silently selected.
