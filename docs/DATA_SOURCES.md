@@ -195,28 +195,47 @@ These ranges are learning guidance, not guarantees of elapsed calendar time or e
 
 Role:
 
-- broad labour-market shortage/surplus evidence for CareerFit.
+- versioned labour-market shortage/surplus evidence for CareerFit.
 
-AUGUR keeps the implemented EURES mappings in a versioned evidence manifest:
+AUGUR keeps EURES market evidence in:
 
 `backend/app/evidence/eures_lmi_2025.json`
 
-The current manifest represents 2024 labour-market conditions published in the 2025 EURES material and covers Spain, Portugal and Ireland.
+The manifest deliberately separates two evidence layers.
 
-The manifest is deliberately separate from CareerFit logic. Updating EURES evidence should therefore change the evidence file and its metadata rather than silently changing classification code.
+### Broad country evidence
 
-Where the report table has been explicitly verified at ISCO unit-group level, AUGUR stores those occupation-specific shortage/surplus country lists in the same manifest. Unit-group evidence takes precedence over a broad occupation-group signal.
+The broad fallback layer is retained from the implemented EURES country labour-market pages and represents 2024 conditions.
 
-This matters because a broad group can contain occupations with different country outcomes. For example, ICT professionals and ICT user-support technicians are not treated as interchangeable.
+It provides broad shortage/surplus occupation groups for Spain, Portugal and Ireland.
+
+Broad evidence is useful context, but it does **not** count as complete CareerFit market evidence for TTV.
+
+### ISCO unit-group evidence
+
+The more specific layer is transcribed from the official **Report on labour shortages and surpluses 2025 — Annex**, published in 2026 and describing 2025 conditions.
+
+Current verified unit-group coverage includes 13 ICT ISCO-08 groups:
+
+- 2511, 2512, 2513, 2514, 2519;
+- 2521, 2522, 2523, 2529;
+- 3511, 3512, 3513, 3514.
+
+Unit-group evidence takes precedence over the broad fallback whenever both are available.
+
+This matters because broad groups can contain occupations with different country outcomes. For example, the latest annex classifies ISCO 3512 user-support technicians as surplus in Portugal but does not classify the same occupation as shortage or surplus in Spain or Ireland.
+
+The annex can also report the same occupation as both shortage and surplus within one country. AUGUR preserves that as `mixed_shortage_and_surplus` rather than forcing one direction.
 
 Current limitations:
 
-- not every occupation has yet been transcribed into the verified unit-group layer;
+- only selected ICT unit groups have been transcribed into the verified layer;
+- `full_occupation_coverage` therefore remains false;
 - national methodologies contributing to EURES can differ;
-- the signal does not guarantee vacancy availability for an individual;
-- vacancy count, location, seniority and employer-specific requirements remain separate evidence gaps.
+- a shortage signal does not guarantee individual vacancy availability;
+- location, seniority and employer-specific requirements remain separate evidence gaps.
 
-CareerFit preserves the source page, report year, conditions year and evidence ID in its response.
+CareerFit returns provenance for the layer actually used: evidence ID, rule version, report year, conditions year, source URL and scope. Updating unit-group evidence should update the manifest rather than CareerFit logic.
 
 
 ## Eurostat occupation vacancy rates
