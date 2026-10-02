@@ -25,7 +25,6 @@ EUROSTAT_JOB_TRANSITIONS = {
         "unit": "PC_UNE",
         "duration": "TOTAL",
         "sex": "T",
-        "age": "Y15-74",
     },
     "age_group": "Y15-74",
     "duration_group": "TOTAL",
