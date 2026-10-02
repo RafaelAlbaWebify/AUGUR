@@ -10,12 +10,27 @@ from app.catalog import country_config
 from app.db.analytics import (
     upsert_labour_earnings,
     upsert_labour_job_transitions,
+    upsert_labour_job_vacancy_rates,
     upsert_labour_net_earnings_reference,
     upsert_observations,
 )
 
 BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 SOURCE_ID = "EUROSTAT"
+
+EUROSTAT_JOB_VACANCY_RATES = {
+    "dataset_id": "jvs_q_isco_r21",
+    "filters": {
+        "geo": "__GEO__",
+        "freq": "Q",
+        "indic_em": "JVR",
+        "sizeclas": "TOTAL",
+        "s_adj": "SA",
+    },
+    "unit": "percent",
+    "nace_aggregate_candidates": ["B-T", "B-S", "A-S", "TOTAL"],
+}
+
 
 EUROSTAT_JOB_TRANSITIONS = {
     "dataset_id": "lfsi_long_e01",
@@ -494,6 +509,117 @@ class EurostatAdapter:
 
         return rows
 
+    def normalize_job_vacancy_rates(
+        self,
+        country_iso3: str,
+        payload: dict,
+    ) -> list[dict]:
+        dimension_ids = payload["id"]
+        dimension_sizes = payload["size"]
+        dimensions = payload["dimension"]
+        raw_values = payload["value"]
+
+        dimension_codes = [
+            self._ordered_codes(dimensions[dimension_id])
+            for dimension_id in dimension_ids
+        ]
+
+        nace_dimension_id = (
+            "nace_r21"
+            if "nace_r21" in dimension_ids
+            else "nace_r2"
+            if "nace_r2" in dimension_ids
+            else None
+        )
+        if nace_dimension_id is None:
+            raise ValueError(
+                "Eurostat vacancy-rate payload has no NACE dimension"
+            )
+
+        nace_codes = set(
+            self._ordered_codes(dimensions[nace_dimension_id])
+        )
+        nace_scope = next(
+            (
+                code
+                for code in EUROSTAT_JOB_VACANCY_RATES[
+                    "nace_aggregate_candidates"
+                ]
+                if code in nace_codes
+            ),
+            None,
+        )
+        if nace_scope is None:
+            raise ValueError(
+                "Eurostat vacancy-rate payload has no supported aggregate NACE scope"
+            )
+
+        retrieved_at = datetime.now(timezone.utc)
+        rows: list[dict] = []
+
+        for coordinates in product(
+            *[range(size) for size in dimension_sizes]
+        ):
+            flat_index = 0
+            multiplier = 1
+
+            for coordinate, size in zip(
+                reversed(coordinates),
+                reversed(dimension_sizes),
+            ):
+                flat_index += coordinate * multiplier
+                multiplier *= size
+
+            if isinstance(raw_values, list):
+                value = (
+                    raw_values[flat_index]
+                    if flat_index < len(raw_values)
+                    else None
+                )
+            else:
+                value = raw_values.get(str(flat_index))
+                if value is None:
+                    value = raw_values.get(flat_index)
+
+            if value is None:
+                continue
+
+            labels = {
+                dimension_id: dimension_codes[index][coordinates[index]]
+                for index, dimension_id in enumerate(dimension_ids)
+            }
+
+            period = labels.get("time")
+            isco08 = str(labels.get("isco08") or "")
+            row_nace = labels.get(nace_dimension_id)
+
+            if not period:
+                continue
+            if row_nace != nace_scope:
+                continue
+            if (
+                len(isco08) != 3
+                or not isco08.startswith("OC")
+                or not isco08[-1].isdigit()
+            ):
+                continue
+
+            rows.append(
+                {
+                    "country_iso3": country_iso3.upper(),
+                    "period": str(period),
+                    "isco08": isco08,
+                    "vacancy_rate_pct": float(value),
+                    "nace_scope": nace_scope,
+                    "source_id": SOURCE_ID,
+                    "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
+                    "retrieved_at": retrieved_at,
+                    "source_updated_at": payload.get("updated"),
+                }
+            )
+
+        return rows
+
     def normalize_job_transitions(
         self,
         country_iso3: str,
@@ -688,6 +814,42 @@ class EurostatAdapter:
             )
             print(f"   failed: {type(exc).__name__}: {exc}")
 
+        job_vacancy_detail = None
+        try:
+            print(
+                f"[job-vacancy] vacancy rate by ISCO major group "
+                f"({EUROSTAT_JOB_VACANCY_RATES['dataset_id']})"
+            )
+            payload = self.fetch_dataset(
+                EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
+                {
+                    key: (geo if value == "__GEO__" else value)
+                    for key, value in EUROSTAT_JOB_VACANCY_RATES["filters"].items()
+                },
+            )
+            vacancy_rows = self.normalize_job_vacancy_rates(
+                country_iso3,
+                payload,
+            )
+            inserted = upsert_labour_job_vacancy_rates(vacancy_rows)
+            total_rows += inserted
+            job_vacancy_detail = {
+                "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
+                "rows": inserted,
+                "source_updated_at": payload.get("updated"),
+            }
+            print(f"   ok: {inserted} vacancy-rate rows")
+        except Exception as exc:
+            failures.append(
+                {
+                    "indicator_id": "job_vacancy_rate_by_isco",
+                    "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
+            print(f"   failed: {type(exc).__name__}: {exc}")
+
         job_transition_detail = None
         try:
             print(
@@ -731,6 +893,7 @@ class EurostatAdapter:
             "series": details,
             "earnings": earnings_detail,
             "net_earnings": net_earnings_detail,
+            "job_vacancy": job_vacancy_detail,
             "job_transition": job_transition_detail,
             "failures": failures,
             "complete": len(failures) == 0,
