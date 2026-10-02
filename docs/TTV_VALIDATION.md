@@ -84,3 +84,25 @@ The candidate range therefore follows a critical-path composition:
 `max(legal, language, skills) + employment + financial`
 
 This is more explicit than the previous `parallel_max` rule, but it remains an experimental modelling assumption until externally calibrated. It does not activate a published TTV estimate.
+
+
+## Local-employment transition boundary
+
+The current employment timing stage uses Eurostat's experimental unemployment-to-employment transition probability.
+
+AUGUR has also reviewed Eurostat occupation-level demand evidence:
+
+- job vacancy statistics by occupation;
+- experimental job-vacancy rate by occupation and region;
+- online job-advertisement rate by occupation.
+
+These sources add occupational demand context, but they do **not** report an occupation-specific probability or elapsed time from unemployment to employment.
+
+AUGUR therefore does not convert vacancy rates or advertisement rates into weeks-to-employment.
+
+The `local_employment_transition` validation gate remains `experimental` until one of the following exists:
+
+1. direct occupation-specific transition-duration/probability evidence suitable for the target population; or
+2. an externally calibrated model that demonstrates how occupational demand evidence can be converted into elapsed transition time.
+
+Until then, occupation-level vacancy evidence may improve CareerFit, but it must remain separate from the TTV duration model.
