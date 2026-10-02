@@ -8,6 +8,45 @@ from app.models.profile import PersonalProfileResponse
 
 TEMPORAL_EVIDENCE_ENGINE_VERSION = "ttv-temporal-evidence-v1"
 
+TEMPORAL_MODEL_VALIDATION_GATES = {
+    "legal_domestic_eu_timing": {
+        "state": "supported",
+        "reason": "domestic_and_eu_work_right_timing_is_explicit",
+    },
+    "language_guided_hours": {
+        "state": "supported",
+        "reason": "published_cefr_guided_learning_hour_ranges",
+    },
+    "language_calendar_intensity": {
+        "state": "supported",
+        "reason": "calendar_conversion_requires_explicit_user_hours_per_week",
+    },
+    "skill_gap_duration": {
+        "state": "missing",
+        "reason": "training_duration_for_missing_essential_skills_not_modelled",
+    },
+    "remote_income_transition": {
+        "state": "supported",
+        "reason": "preserved_remote_income_requires_no_job_search_transition",
+    },
+    "local_employment_transition": {
+        "state": "experimental",
+        "reason": "country_level_transition_probability_not_occupation_specific",
+    },
+    "local_financial_transition": {
+        "state": "missing",
+        "reason": "occupation_specific_net_income_household_budget_and_transition_costs_incomplete",
+    },
+    "composition_parallel_max": {
+        "state": "experimental",
+        "reason": "parallel_stage_composition_not_externally_calibrated",
+    },
+    "external_calibration": {
+        "state": "missing",
+        "reason": "candidate_ranges_not_calibrated_against_observed_relocation_outcomes",
+    },
+}
+
 # Cambridge English guided-learning-hour guidance, cumulative from beginner.
 # These are planning ranges, not guarantees of calendar time.
 CEFR_CUMULATIVE_GUIDED_HOURS = {
@@ -25,6 +64,42 @@ LANGUAGE_SOURCE = {
     "url": "https://support.cambridgeenglish.org/hc/en-gb/articles/202838506-Guided-learning-hours",
     "retrieved_basis": "published guidance",
 }
+
+
+def temporal_model_validation_status() -> dict:
+    gates = {
+        gate_id: dict(config)
+        for gate_id, config in TEMPORAL_MODEL_VALIDATION_GATES.items()
+    }
+    blockers = [
+        gate_id
+        for gate_id, config in gates.items()
+        if config["state"] != "supported"
+    ]
+    experimental = [
+        gate_id
+        for gate_id, config in gates.items()
+        if config["state"] == "experimental"
+    ]
+    missing = [
+        gate_id
+        for gate_id, config in gates.items()
+        if config["state"] == "missing"
+    ]
+
+    return {
+        "engine_version": TEMPORAL_EVIDENCE_ENGINE_VERSION,
+        "ready_for_versioning": len(blockers) == 0,
+        "gates": gates,
+        "blockers": blockers,
+        "experimental": experimental,
+        "missing": missing,
+        "notes": [
+            "Supported means the evidence path is implemented with an explicit basis; it does not imply external calibration.",
+            "Experimental gates must be validated or replaced before a published TTV model can be versioned.",
+            "Missing gates have no accepted duration model yet.",
+        ],
+    }
 
 
 def _zero_stage(reason: str, source: dict | None = None) -> dict:
