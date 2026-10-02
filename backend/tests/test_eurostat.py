@@ -131,3 +131,41 @@ def test_eurostat_net_earnings_normalization_preserves_standard_case():
     assert rows[-1]["earnings_case"] == "P1_NCH_AW100"
     assert rows[-1]["annual_net_eur"] == 31500.0
     assert rows[-1]["dataset_id"] == "earn_nt_net"
+
+
+def test_eurostat_job_transition_normalization_keeps_all_age_classes():
+    payload = {
+        "id": ["geo", "age", "duration", "time"],
+        "size": [1, 4, 1, 1],
+        "dimension": {
+            "geo": {"category": {"index": {"IE": 0}}},
+            "age": {
+                "category": {
+                    "index": {
+                        "Y15-24": 0,
+                        "Y25-54": 1,
+                        "Y55-74": 2,
+                        "Y15-74": 3,
+                    },
+                }
+            },
+            "duration": {"category": {"index": {"TOTAL": 0}}},
+            "time": {"category": {"index": {"2025": 0}}},
+        },
+        "value": [31.0, 39.0, 22.0, 35.0],
+        "updated": "2026-06-11",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize_job_transitions("IRL", payload)
+    finally:
+        adapter.close()
+
+    assert len(rows) == 4
+    assert {row["age_group"] for row in rows} == {
+        "Y15-24",
+        "Y25-54",
+        "Y55-74",
+        "Y15-74",
+    }
