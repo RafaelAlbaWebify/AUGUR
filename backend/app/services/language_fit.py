@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from app.catalog import country_config
 from app.models.profile import PersonalProfileResponse
+from app.esco_store import esco_status, occupation_language_skill_rows
+from app.services.career_fit import resolve_esco_occupation
 
 
 CEFR_ORDER = {
@@ -16,6 +18,83 @@ CEFR_ORDER = {
 WORK_READY_THRESHOLD = "B2"
 
 
+def occupation_language_evidence(
+    profile: PersonalProfileResponse,
+) -> dict:
+    if not profile.profession or not profile.profession.strip():
+        return {
+            "status": "profession_missing",
+            "occupation_match": None,
+            "occupation_label": None,
+            "dataset_mode": None,
+            "dataset_version": None,
+            "skills": [],
+            "essential_skill_count": 0,
+            "optional_skill_count": 0,
+            "evidence_complete": False,
+        }
+
+    occupation_match = resolve_esco_occupation(profile.profession)
+    selected = occupation_match.get("selected")
+
+    if not selected:
+        return {
+            "status": "no_confident_occupation_match",
+            "occupation_match": occupation_match,
+            "occupation_label": None,
+            "dataset_mode": None,
+            "dataset_version": None,
+            "skills": [],
+            "essential_skill_count": 0,
+            "optional_skill_count": 0,
+            "evidence_complete": False,
+        }
+
+    status = esco_status()
+    rows = occupation_language_skill_rows(selected["preferred_label"])
+    skills = [
+        {
+            "skill_uri": row["skill_uri"],
+            "skill_label": row["skill_label"],
+            "relation_type": row["relation_type"],
+        }
+        for row in rows
+    ]
+
+    essential_count = sum(
+        1
+        for item in skills
+        if item["relation_type"] == "essential"
+    )
+    optional_count = sum(
+        1
+        for item in skills
+        if item["relation_type"] != "essential"
+    )
+
+    if status["mode"] != "full":
+        evidence_status = "partial_dataset"
+        evidence_complete = False
+    elif skills:
+        evidence_status = "occupation_language_evidence_available"
+        evidence_complete = True
+    else:
+        evidence_status = "no_occupation_language_evidence_listed"
+        evidence_complete = True
+
+    return {
+        "status": evidence_status,
+        "occupation_match": occupation_match,
+        "occupation_label": selected["preferred_label"],
+        "dataset_mode": status["mode"],
+        "dataset_version": status["version"],
+        "skills": skills,
+        "essential_skill_count": essential_count,
+        "optional_skill_count": optional_count,
+        "evidence_complete": evidence_complete,
+    }
+
+
 def language_fit(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -23,6 +102,7 @@ def language_fit(
     target = target_country_iso3.upper()
     country = country_config(target)
     target_languages = country.get("labour_market_languages", [])
+    occupation_evidence = occupation_language_evidence(profile)
 
     declared = {
         item.language.strip().lower(): (
@@ -78,10 +158,13 @@ def language_fit(
         "matches": matches,
         "work_ready_threshold": WORK_READY_THRESHOLD,
         "work_ready": work_ready,
-        "method": "labour_market_language_heuristic_v1",
+        "method": "labour_market_language_heuristic_v2",
+        "occupation_language_evidence": occupation_evidence,
         "notes": [
             "B2 is an AUGUR modelling heuristic for general professional work-readiness, not a legal requirement.",
-            "Occupation-specific language evidence from job postings is not implemented yet.",
+            "ESCO language-skill relationships are occupation evidence and do not encode a CEFR requirement.",
+            "ESCO evidence does not override the declared-language heuristic.",
+            "Occupation-specific language evidence from live job postings is not implemented yet.",
             "No country-fit score is produced.",
         ],
     }
