@@ -87,6 +87,24 @@ The check reports:
 
 The check also reports `analysis_ready` separately. This can be true while full AUGUR readiness is still false when the TTV temporal model has not yet been validated.
 
+### Refresh evidence
+
+Use the incremental refresh workflow to keep synchronized evidence inside AUGUR's operability freshness window without rerunning dependency installation:
+
+```powershell
+.\refresh-augur.ps1
+```
+
+This runs the current multi-provider country evidence synchronization and then `check-operability.ps1`.
+
+The existing ESCO dataset is preserved by default. To import or refresh a full official ESCO package at the same time:
+
+```powershell
+.\refresh-augur.ps1 -EscoPath "C:\path\to\esco"
+```
+
+Use `-SkipSync` only when you intentionally want to refresh ESCO and re-check operability without synchronizing country evidence.
+
 ### Start
 
 ```powershell
