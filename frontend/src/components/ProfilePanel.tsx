@@ -157,8 +157,14 @@ type TTVResponse = {
   stage_order: string[]
   stages: Record<string, TTVStage>
   blocked_by: string[]
+  blocker_details?: Array<{
+    stage_id: string
+    status: string
+    evidence_state: string
+  }>
   dependency_ready?: boolean
   temporal_evidence_state?: string
+  estimate_status?: string
   ready_for_time_estimate: boolean
   time_estimate: null
   notes: string[]
