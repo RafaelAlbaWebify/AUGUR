@@ -29,6 +29,7 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     assert result["case_count"] == 0
     assert result["externally_calibrated"] is False
     assert result["interval_coverage_pct"] is None
+    assert result["stage_metrics"] == {}
 
 
 def test_calibration_metrics_are_descriptive_only(
@@ -123,4 +124,73 @@ def test_calibration_case_rejects_invalid_values(field, value):
     case[field] = value
 
     with pytest.raises(ValueError):
+        module.validate_calibration_case(case)
+
+
+def test_stage_level_calibration_metrics_are_reported(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    module.upsert_calibration_case(
+        {
+            "case_id": "case-stage-001",
+            "country_iso3": "IRL",
+            "employment_mode": "local",
+            "engine_version": "ttv-temporal-evidence-v1",
+            "composition": "critical_path_v1",
+            "candidate_weeks_min": 20,
+            "candidate_weeks_max": 40,
+            "observed_weeks": 30,
+            "stage_timings": {
+                "language": {
+                    "candidate_weeks_min": 10,
+                    "candidate_weeks_max": 20,
+                    "observed_weeks": 18,
+                },
+                "employment": {
+                    "candidate_weeks_min": 10,
+                    "candidate_weeks_max": 20,
+                    "observed_weeks": 24,
+                },
+            },
+        }
+    )
+
+    result = module.calibration_status()
+
+    assert result["stage_metrics"]["language"] == {
+        "case_count": 1,
+        "interval_coverage_pct": 100.0,
+        "mean_absolute_midpoint_error_weeks": 3.0,
+        "mean_signed_midpoint_error_weeks": -3.0,
+    }
+    assert result["stage_metrics"]["employment"] == {
+        "case_count": 1,
+        "interval_coverage_pct": 0.0,
+        "mean_absolute_midpoint_error_weeks": 9.0,
+        "mean_signed_midpoint_error_weeks": -9.0,
+    }
+
+
+def test_stage_level_calibration_rejects_partial_timing_payload():
+    case = {
+        "case_id": "case-stage-001",
+        "country_iso3": "ESP",
+        "employment_mode": "local",
+        "engine_version": "ttv-temporal-evidence-v1",
+        "composition": "critical_path_v1",
+        "candidate_weeks_min": 8,
+        "candidate_weeks_max": 18,
+        "observed_weeks": 12,
+        "stage_timings": {
+            "language": {
+                "candidate_weeks_min": 4,
+                "candidate_weeks_max": 8,
+            }
+        },
+    }
+
+    with pytest.raises(ValueError, match="requires candidate min/max and observed weeks"):
         module.validate_calibration_case(case)
