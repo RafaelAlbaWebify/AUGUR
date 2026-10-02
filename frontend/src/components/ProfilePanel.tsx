@@ -146,9 +146,11 @@ type CareerFitResponse = {
     label: string
     url: string
     evidence_id?: string
+    rule_version?: string
     report_year?: number
     conditions_year?: number
     report_url?: string
+    scope?: string
   }
   notes: string[]
 }
