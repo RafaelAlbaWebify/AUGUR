@@ -46,6 +46,9 @@ def test_ttv_keeps_time_estimate_blocked_until_all_dependencies_are_viable(monke
             "status": "evidence_available",
             "market_signal": "shortage",
             "evidence_complete": False,
+            "profile_skill_coverage_complete": False,
+            "market_signal_supports_viability": True,
+            "viability_evidence_ready": False,
         },
     )
 
@@ -101,6 +104,9 @@ def test_ttv_dependencies_can_be_ready_before_temporal_model(monkeypatch):
             "status": "evidence_available",
             "market_signal": "shortage",
             "evidence_complete": True,
+            "profile_skill_coverage_complete": True,
+            "market_signal_supports_viability": True,
+            "viability_evidence_ready": True,
         },
     )
 
@@ -114,3 +120,93 @@ def test_ttv_dependencies_can_be_ready_before_temporal_model(monkeypatch):
     assert result["blocker_details"] == []
     assert result["ready_for_time_estimate"] is False
     assert result["time_estimate"] is None
+
+
+def test_ttv_blocks_career_when_essential_skill_coverage_is_incomplete(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "legal_fit",
+        lambda profile, target: {"status": "eu_free_movement_framework"},
+    )
+    monkeypatch.setattr(
+        module,
+        "language_fit",
+        lambda profile, target: {
+            "status": "work_ready_heuristic",
+            "work_ready": True,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "financial_fit",
+        lambda profile, target: {
+            "status": "portable_income_comparable",
+            "reason": None,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "career_fit",
+        lambda profile, target: {
+            "status": "evidence_available",
+            "market_signal": "shortage",
+            "evidence_complete": True,
+            "profile_skill_coverage_complete": False,
+            "market_signal_supports_viability": True,
+            "viability_evidence_ready": False,
+        },
+    )
+
+    result = module.ttv_status(
+        PersonalProfileResponse(profile_id="default"),
+        "IRL",
+    )
+
+    assert result["blocked_by"] == ["career_fit"]
+    assert result["stages"]["career_fit"]["reason"] == "essential_skill_coverage_incomplete"
+    assert result["dependency_ready"] is False
+
+
+def test_ttv_blocks_career_when_market_signal_is_not_supportive(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "legal_fit",
+        lambda profile, target: {"status": "eu_free_movement_framework"},
+    )
+    monkeypatch.setattr(
+        module,
+        "language_fit",
+        lambda profile, target: {
+            "status": "work_ready_heuristic",
+            "work_ready": True,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "financial_fit",
+        lambda profile, target: {
+            "status": "portable_income_comparable",
+            "reason": None,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "career_fit",
+        lambda profile, target: {
+            "status": "evidence_available",
+            "market_signal": "surplus",
+            "evidence_complete": True,
+            "profile_skill_coverage_complete": True,
+            "market_signal_supports_viability": False,
+            "viability_evidence_ready": False,
+        },
+    )
+
+    result = module.ttv_status(
+        PersonalProfileResponse(profile_id="default"),
+        "ESP",
+    )
+
+    assert result["blocked_by"] == ["career_fit"]
+    assert result["stages"]["career_fit"]["reason"] == "market_signal_not_supportive"
+    assert result["dependency_ready"] is False
