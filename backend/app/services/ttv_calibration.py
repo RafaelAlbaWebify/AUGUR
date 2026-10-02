@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import json
 import math
 import sqlite3
 from datetime import datetime, timezone
@@ -12,6 +13,13 @@ from app.core.config import settings
 CALIBRATION_SCHEMA_VERSION = "ttv-calibration-v1"
 SUPPORTED_EMPLOYMENT_MODES = {"remote", "local"}
 SUPPORTED_COMPOSITIONS = {"critical_path_v1"}
+CALIBRATION_STAGE_IDS = {
+    "legal",
+    "language",
+    "skills",
+    "employment",
+    "financial",
+}
 
 
 def _as_float(value, field_name: str) -> float:
@@ -24,6 +32,87 @@ def _as_float(value, field_name: str) -> float:
         raise ValueError(f"{field_name} must be finite")
 
     return result
+
+
+def _normalize_stage_timings(value) -> dict:
+    if value in (None, "", {}):
+        return {}
+
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                "stage_timings_json must be valid JSON"
+            ) from exc
+
+    if not isinstance(value, dict):
+        raise ValueError("stage_timings_json must be an object")
+
+    normalized = {}
+    for stage_id, stage in value.items():
+        if stage_id not in CALIBRATION_STAGE_IDS:
+            raise ValueError(
+                f"unsupported calibration stage: {stage_id}"
+            )
+        if not isinstance(stage, dict):
+            raise ValueError(
+                f"stage {stage_id} must be an object"
+            )
+
+        candidate_min = stage.get("candidate_weeks_min")
+        candidate_max = stage.get("candidate_weeks_max")
+        observed = stage.get("observed_weeks")
+
+        if (
+            candidate_min is None
+            and candidate_max is None
+            and observed is None
+        ):
+            continue
+
+        if (
+            candidate_min is None
+            or candidate_max is None
+            or observed is None
+        ):
+            raise ValueError(
+                f"stage {stage_id} requires candidate min/max and observed weeks"
+            )
+
+        candidate_min = _as_float(
+            candidate_min,
+            f"{stage_id}.candidate_weeks_min",
+        )
+        candidate_max = _as_float(
+            candidate_max,
+            f"{stage_id}.candidate_weeks_max",
+        )
+        observed = _as_float(
+            observed,
+            f"{stage_id}.observed_weeks",
+        )
+
+        if candidate_min < 0:
+            raise ValueError(
+                f"{stage_id}.candidate_weeks_min must be >= 0"
+            )
+        if candidate_max < candidate_min:
+            raise ValueError(
+                f"{stage_id}.candidate_weeks_max must be >= candidate minimum"
+            )
+        if observed < 0:
+            raise ValueError(
+                f"{stage_id}.observed_weeks must be >= 0"
+            )
+
+        normalized[stage_id] = {
+            "candidate_weeks_min": candidate_min,
+            "candidate_weeks_max": candidate_max,
+            "observed_weeks": observed,
+        }
+
+    return normalized
 
 
 def validate_calibration_case(case: dict) -> dict:
@@ -74,6 +163,11 @@ def validate_calibration_case(case: dict) -> dict:
 
     source_label = str(case.get("source_label") or "").strip() or None
     observed_at = str(case.get("observed_at") or "").strip() or None
+    stage_timings = _normalize_stage_timings(
+        case.get("stage_timings_json")
+        if "stage_timings_json" in case
+        else case.get("stage_timings")
+    )
 
     return {
         "case_id": case_id,
@@ -86,6 +180,7 @@ def validate_calibration_case(case: dict) -> dict:
         "observed_weeks": observed,
         "source_label": source_label,
         "observed_at": observed_at,
+        "stage_timings": stage_timings,
     }
 
 
@@ -108,9 +203,10 @@ def upsert_calibration_case(case: dict) -> dict:
                 observed_weeks,
                 source_label,
                 observed_at,
+                stage_timings_json,
                 imported_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 normalized["case_id"],
@@ -123,6 +219,10 @@ def upsert_calibration_case(case: dict) -> dict:
                 normalized["observed_weeks"],
                 normalized["source_label"],
                 normalized["observed_at"],
+                json.dumps(
+                    normalized["stage_timings"],
+                    sort_keys=True,
+                ),
                 imported_at,
             ),
         )
@@ -205,6 +305,7 @@ def calibration_status() -> dict:
                     observed_weeks,
                     source_label,
                     observed_at,
+                    stage_timings_json,
                     imported_at
                 FROM ttv_calibration_cases
                 ORDER BY imported_at, case_id
@@ -269,6 +370,57 @@ def calibration_status() -> dict:
         signed_errors.append(signed_error)
         absolute_errors.append(abs(signed_error))
 
+    stage_metrics = {}
+    for stage_id in sorted(CALIBRATION_STAGE_IDS):
+        stage_rows = []
+        for case in cases:
+            raw = case.get("stage_timings_json") or "{}"
+            try:
+                stage_timings = json.loads(raw)
+            except json.JSONDecodeError:
+                continue
+            stage = stage_timings.get(stage_id)
+            if stage:
+                stage_rows.append(stage)
+
+        if not stage_rows:
+            continue
+
+        covered_stage = 0
+        absolute_stage_errors = []
+        signed_stage_errors = []
+
+        for stage in stage_rows:
+            lower = float(stage["candidate_weeks_min"])
+            upper = float(stage["candidate_weeks_max"])
+            observed = float(stage["observed_weeks"])
+            midpoint = (lower + upper) / 2.0
+
+            if lower <= observed <= upper:
+                covered_stage += 1
+
+            signed_error = midpoint - observed
+            signed_stage_errors.append(signed_error)
+            absolute_stage_errors.append(abs(signed_error))
+
+        stage_metrics[stage_id] = {
+            "case_count": len(stage_rows),
+            "interval_coverage_pct": round(
+                covered_stage / len(stage_rows) * 100.0,
+                2,
+            ),
+            "mean_absolute_midpoint_error_weeks": round(
+                sum(absolute_stage_errors)
+                / len(absolute_stage_errors),
+                2,
+            ),
+            "mean_signed_midpoint_error_weeks": round(
+                sum(signed_stage_errors)
+                / len(signed_stage_errors),
+                2,
+            ),
+        }
+
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
         "infrastructure_ready": True,
@@ -297,6 +449,7 @@ def calibration_status() -> dict:
             sum(signed_errors) / len(signed_errors),
             2,
         ),
+        "stage_metrics": stage_metrics,
         "externally_calibrated": False,
         "notes": [
             "Metrics describe observed calibration cases only.",
