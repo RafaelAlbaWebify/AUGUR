@@ -26,6 +26,8 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     result = module.calibration_status()
 
     assert result["infrastructure_ready"] is True
+    assert result["protocol_state"] == "draft_not_approved"
+    assert result["protocol_version"] is None
     assert result["case_count"] == 0
     assert result["externally_calibrated"] is False
     assert result["interval_coverage_pct"] is None
