@@ -56,6 +56,38 @@ ISCO_SUBMAJOR_TO_MARKET_GROUP = {
 ESCO_OCCUPATION_MATCH_THRESHOLD = 0.72
 
 
+def career_market_evidence_status() -> dict:
+    unit_groups = EURES_EVIDENCE_METADATA.get("unit_group_signals", {})
+    supported_countries = sorted(COUNTRY_EVIDENCE)
+    broad_country_count = sum(
+        1
+        for country in COUNTRY_EVIDENCE.values()
+        if country.get("shortage_groups") is not None
+        and country.get("surplus_groups") is not None
+    )
+
+    return {
+        "evidence_id": EURES_EVIDENCE_METADATA["evidence_id"],
+        "rule_version": EURES_EVIDENCE_METADATA["rule_version"],
+        "report_year": EURES_EVIDENCE_METADATA["report_year"],
+        "conditions_year": EURES_EVIDENCE_METADATA["conditions_year"],
+        "supported_countries": supported_countries,
+        "broad_country_count": broad_country_count,
+        "unit_group_count": len(unit_groups),
+        "coverage_scope": (
+            "partial_unit_group_coverage"
+            if unit_groups
+            else "broad_groups_only"
+        ),
+        "full_occupation_coverage": False,
+        "notes": [
+            "Broad country-level occupation groups are implemented for all supported countries.",
+            "Verified ISCO unit-group evidence currently covers only selected occupations.",
+            "CareerFit exposes incomplete market coverage instead of treating the EURES catalog as exhaustive.",
+        ],
+    }
+
+
 def resolve_esco_occupation(profession: str | None) -> dict:
     if not profession or not profession.strip():
         return {
