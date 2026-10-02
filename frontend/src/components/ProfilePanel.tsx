@@ -183,6 +183,32 @@ type TTVResponse = {
   }>
   dependency_ready?: boolean
   temporal_evidence_state?: string
+  temporal_model_version?: string | null
+  temporal_evidence_ready?: boolean
+  temporal_evidence?: {
+    engine_version: string
+    calendar_ready: boolean
+    unavailable_stages: string[]
+    candidate_range: null | {
+      weeks_min: number
+      weeks_max: number
+      composition: string
+    }
+    stages: Record<string, {
+      status: string
+      weeks_min: number | null
+      weeks_max: number | null
+      reason: string
+      guided_hours_min?: number | null
+      guided_hours_max?: number | null
+      weekly_study_hours?: number | null
+    }>
+  }
+  candidate_time_range?: null | {
+    weeks_min: number
+    weeks_max: number
+    composition: string
+  }
   estimate_status?: string
   ready_for_time_estimate: boolean
   time_estimate: null
@@ -810,6 +836,29 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 ? ttv.blocked_by.map((item) => item.replaceAll('_', ' ')).join(' · ')
                 : 'Waiting for evidence'}
             </span>
+          </div>
+        )}
+
+        {ttv?.temporal_evidence && (
+          <div className="ttvTemporalEvidence">
+            <strong>Temporal evidence · candidate only</strong>
+            {ttv.candidate_time_range ? (
+              <span>
+                {ttv.candidate_time_range.weeks_min}–{ttv.candidate_time_range.weeks_max} weeks · parallel max · not an AUGUR estimate
+              </span>
+            ) : (
+              <span>
+                Missing calendar evidence: {ttv.temporal_evidence.unavailable_stages.join(' · ') || 'none'}
+              </span>
+            )}
+            {ttv.temporal_evidence.stages.language?.guided_hours_min != null && (
+              <small>
+                Language: {ttv.temporal_evidence.stages.language.guided_hours_min}–{ttv.temporal_evidence.stages.language.guided_hours_max} guided hours
+                {ttv.temporal_evidence.stages.language.weekly_study_hours
+                  ? ` · ${ttv.temporal_evidence.stages.language.weekly_study_hours} h/week`
+                  : ' · add study hours/week for calendar conversion'}
+              </small>
+            )}
           </div>
         )}
 
