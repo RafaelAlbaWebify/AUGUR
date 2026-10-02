@@ -451,6 +451,82 @@ test('structured TTV blockers are visible', async ({ page }) => {
 })
 
 
+test('candidate TTV range shows critical-path composition', async ({ page }) => {
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/ttv',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          target_country_iso3: 'ESP',
+          method: 'ttv_dependency_graph_v1',
+          stage_order: ['legal_fit', 'language_fit', 'career_fit', 'financial_fit'],
+          stages: {
+            legal_fit: { ready: true, status: 'eu_free_movement_framework', evidence_state: 'implemented' },
+            language_fit: { ready: true, status: 'work_ready_heuristic', evidence_state: 'implemented' },
+            career_fit: { ready: true, status: 'shortage', evidence_state: 'implemented' },
+            financial_fit: { ready: true, status: 'portable_income_comparable', evidence_state: 'implemented' },
+          },
+          blocked_by: [],
+          blocker_details: [],
+          dependency_ready: true,
+          temporal_evidence_state: 'not_implemented',
+          temporal_model_version: null,
+          temporal_evidence_ready: true,
+          temporal_evidence: {
+            engine_version: 'ttv-temporal-evidence-v1',
+            calendar_ready: true,
+            unavailable_stages: [],
+            candidate_range: {
+              weeks_min: 10,
+              weeks_max: 25,
+              composition: 'critical_path_v1',
+              stage_groups: {
+                preparation_parallel: ['legal', 'language', 'skills'],
+                employment_after_preparation: ['employment'],
+                financial_after_employment: ['financial'],
+              },
+            },
+            stages: {
+              legal: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
+              language: { status: 'available', weeks_min: 10, weeks_max: 25, reason: 'test' },
+              skills: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
+              employment: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
+              financial: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
+            },
+          },
+          candidate_time_range: {
+            weeks_min: 10,
+            weeks_max: 25,
+            composition: 'critical_path_v1',
+            stage_groups: {
+              preparation_parallel: ['legal', 'language', 'skills'],
+              employment_after_preparation: ['employment'],
+              financial_after_employment: ['financial'],
+            },
+          },
+          estimate_status: 'temporal_model_missing',
+          ready_for_time_estimate: false,
+          time_estimate: null,
+          notes: [],
+        }),
+      })
+    },
+  )
+
+  await page.goto('/country/ESP/profile')
+
+  const ttv = page.getByRole('region', { name: 'TTV readiness' })
+  await expect(
+    ttv.getByText(
+      '10–25 weeks · critical path: preparation parallel → employment → financial · not an AUGUR estimate',
+    ),
+  ).toBeVisible()
+  await expect(ttv.getByText('Estimate available')).toHaveCount(0)
+})
+
+
 test('candidate temporal evidence remains explicitly non-estimate', async ({ page }) => {
   await page.goto('/country/ESP/profile')
 
