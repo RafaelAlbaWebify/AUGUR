@@ -1,7 +1,7 @@
 import { useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react'
 import { feature } from 'topojson-client'
 import countriesTopology from 'world-atlas/countries-110m.json'
-import { countryFlag } from '../lib/countryFlag'
+import FlagIcon from './FlagIcon'
 
 type Country = {
   iso2?: string
@@ -306,7 +306,7 @@ export default function WorldMap({
               className={country.iso3 === selectedCountry ? 'active' : ''}
               onClick={() => onSelectCountry(country.iso3)}
             >
-              <span className="countryFlag">{countryFlag(country.iso2, country.iso3)}</span>
+              <FlagIcon iso3={country.iso3} />
               {country.name}
             </button>
           ))}
