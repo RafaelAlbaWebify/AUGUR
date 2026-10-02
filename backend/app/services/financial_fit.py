@@ -1,6 +1,10 @@
 from __future__ import annotations
 
-from app.db.analytics import latest_labour_earnings, latest_observations
+from app.db.analytics import (
+    latest_labour_earnings,
+    latest_labour_net_earnings_reference,
+    latest_observations,
+)
 from app.services.career_fit import resolve_esco_occupation
 from app.models.profile import PersonalProfileResponse
 
@@ -47,6 +51,26 @@ def _local_income_reference(
     }
 
 
+def _national_net_earnings_reference(
+    target_country_iso3: str,
+) -> dict | None:
+    row = latest_labour_net_earnings_reference(target_country_iso3)
+    if row is None:
+        return None
+
+    annual_net = float(row["annual_net_eur"])
+    return {
+        "earnings_case": row["earnings_case"],
+        "annual_net_eur": annual_net,
+        "monthly_net_equivalent_eur": annual_net / 12.0,
+        "period": row["period"],
+        "source_id": row["source_id"],
+        "dataset_id": row["dataset_id"],
+        "source_updated_at": row.get("source_updated_at"),
+        "scope": "national_average_worker_standard_case",
+    }
+
+
 def financial_fit(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -79,6 +103,7 @@ def financial_fit(
 
     if not profile.remote_work:
         local_income_reference = _local_income_reference(profile, target)
+        national_net_reference = _national_net_earnings_reference(target)
 
         if local_income_reference is None:
             return {
@@ -87,6 +112,7 @@ def financial_fit(
                 "reason": "local_earnings_evidence_missing",
                 "portable_income_analysis": None,
                 "local_income_reference": None,
+                "national_net_earnings_reference": national_net_reference,
                 "notes": [
                     "AUGUR will not assume current income survives relocation.",
                     "No sufficiently matched Eurostat SES occupation earnings reference is available.",
@@ -97,13 +123,16 @@ def financial_fit(
         return {
             "target_country_iso3": target,
             "status": "local_income_reference_available",
-            "reason": "net_income_not_modelled",
+            "reason": "occupation_specific_net_income_not_modelled",
             "portable_income_analysis": None,
             "local_income_reference": local_income_reference,
+            "national_net_earnings_reference": national_net_reference,
             "notes": [
                 "Eurostat SES provides a structural gross monthly earnings reference, not a job offer or current salary quote.",
-                "The reference is a mean for a broad ISCO-08 major group and enterprises with 10 or more employees.",
-                "Net pay, taxes, household budget and location-specific salary variation are not yet modelled.",
+                "The SES reference is a mean for a broad ISCO-08 major group and enterprises with 10 or more employees.",
+                "Eurostat annual net earnings provide a separate national average-worker standard-case benchmark.",
+                "AUGUR does not derive occupation-specific net pay by applying the national benchmark to the occupational gross reference.",
+                "Household budget and location-specific salary variation are not yet modelled.",
                 "This evidence remains partial and does not unlock TTV.",
                 "No score is produced.",
             ],
@@ -136,6 +165,7 @@ def financial_fit(
         "status": "portable_income_comparable",
         "reason": None,
         "local_income_reference": None,
+        "national_net_earnings_reference": None,
         "portable_income_analysis": {
             "origin_country_iso3": origin,
             "monthly_net_income": profile.monthly_net_income,
