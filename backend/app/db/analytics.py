@@ -53,6 +53,19 @@ CREATE TABLE IF NOT EXISTS observations (
     source_decimal INTEGER,
     PRIMARY KEY (country_iso3, indicator_id, period, source_id)
 );
+
+CREATE TABLE IF NOT EXISTS labour_earnings (
+    country_iso3 VARCHAR NOT NULL,
+    period INTEGER NOT NULL,
+    isco08 VARCHAR NOT NULL,
+    value DOUBLE NOT NULL,
+    unit VARCHAR NOT NULL,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (country_iso3, period, isco08, source_id)
+);
 """
 
 
@@ -167,6 +180,80 @@ def upsert_observations(rows: list[dict]) -> int:
     finally:
         con.close()
 
+
+
+def upsert_labour_earnings(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO labour_earnings
+            (
+                country_iso3, period, isco08, value, unit,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["country_iso3"],
+                    row["period"],
+                    row["isco08"],
+                    row["value"],
+                    row["unit"],
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_labour_earnings(
+    country_iso3: str,
+    isco08: str | None = None,
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        params: list[str] = [country_iso3.upper()]
+        isco_filter = ""
+        if isco08:
+            isco_filter = "AND isco08 = ?"
+            params.append(isco08.upper())
+
+        result = con.execute(
+            f"""
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY isco08
+                        ORDER BY period DESC, source_id ASC
+                    ) AS rn
+                FROM labour_earnings
+                WHERE country_iso3 = ?
+                {isco_filter}
+            )
+            SELECT
+                country_iso3, period, isco08, value, unit,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY isco08
+            """,
+            params,
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
 
 def latest_observations(country_iso3: str) -> list[dict]:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
