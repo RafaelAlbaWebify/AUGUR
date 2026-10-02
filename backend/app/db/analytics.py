@@ -598,3 +598,83 @@ def future_trajectory(country_iso3: str, horizons: list[int]) -> list[dict]:
         return [dict(zip(columns, row)) for row in result.fetchall()]
     finally:
         con.close()
+
+
+def analytical_evidence_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        observation_rows = con.execute(
+            """
+            SELECT
+                c.iso3 AS country_iso3,
+                COUNT(o.indicator_id) FILTER (
+                    WHERE o.observation_type = 'observed'
+                ) AS observed_rows,
+                COUNT(DISTINCT o.indicator_id) FILTER (
+                    WHERE o.observation_type = 'observed'
+                ) AS observed_indicators,
+                MAX(o.period) FILTER (
+                    WHERE o.observation_type = 'observed'
+                ) AS latest_observed_period,
+                COUNT(o.indicator_id) FILTER (
+                    WHERE o.observation_type = 'official_forecast'
+                ) AS official_forecast_rows,
+                COUNT(DISTINCT o.source_id) AS source_count
+            FROM countries c
+            LEFT JOIN observations o
+              ON o.country_iso3 = c.iso3
+            GROUP BY c.iso3
+            ORDER BY c.iso3
+            """
+        ).fetchall()
+
+        earnings_rows = con.execute(
+            """
+            SELECT
+                c.iso3 AS country_iso3,
+                COUNT(e.isco08) AS row_count,
+                COUNT(DISTINCT e.isco08) AS isco_group_count,
+                MAX(e.period) AS latest_period
+            FROM countries c
+            LEFT JOIN labour_earnings e
+              ON e.country_iso3 = c.iso3
+            GROUP BY c.iso3
+            ORDER BY c.iso3
+            """
+        ).fetchall()
+
+        observation_columns = [
+            "country_iso3",
+            "observed_rows",
+            "observed_indicators",
+            "latest_observed_period",
+            "official_forecast_rows",
+            "source_count",
+        ]
+        earnings_columns = [
+            "country_iso3",
+            "row_count",
+            "isco_group_count",
+            "latest_period",
+        ]
+
+        observations = {
+            row[0]: dict(zip(observation_columns, row))
+            for row in observation_rows
+        }
+        earnings = {
+            row[0]: dict(zip(earnings_columns, row))
+            for row in earnings_rows
+        }
+
+        return {
+            "countries": [
+                {
+                    **observations[country_iso3],
+                    "labour_earnings": earnings[country_iso3],
+                }
+                for country_iso3 in sorted(observations)
+            ]
+        }
+    finally:
+        con.close()
