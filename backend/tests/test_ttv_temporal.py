@@ -1,6 +1,9 @@
 from app.models.profile import LanguageSkill, PersonalProfileResponse
 from app.services import ttv_temporal as module
-from app.services.ttv_temporal import temporal_evidence_graph
+from app.services.ttv_temporal import (
+    temporal_evidence_graph,
+    temporal_model_validation_status,
+)
 
 
 def _legal_ready():
@@ -225,3 +228,17 @@ def test_local_employment_uses_experimental_country_transition_baseline(monkeypa
     assert result["stages"]["financial"]["status"] == "unavailable"
     assert result["calendar_ready"] is False
     assert result["candidate_range"] is None
+
+
+def test_temporal_validation_gates_block_versioning():
+    result = temporal_model_validation_status()
+
+    assert result["ready_for_versioning"] is False
+    assert "local_employment_transition" in result["experimental"]
+    assert "composition_parallel_max" in result["experimental"]
+    assert "skill_gap_duration" in result["missing"]
+    assert "local_financial_transition" in result["missing"]
+    assert "external_calibration" in result["missing"]
+
+    assert result["gates"]["language_guided_hours"]["state"] == "supported"
+    assert result["gates"]["remote_income_transition"]["state"] == "supported"
