@@ -190,6 +190,8 @@ def test_career_viability_evidence_requires_shortage_and_complete_essential_skil
     result = career_fit(profile, "IRL")
 
     assert result["market_signal"] == "shortage"
+    assert result["skill_evidence_complete"] is True
+    assert result["market_evidence_complete"] is True
     assert result["evidence_complete"] is True
     assert result["profile_skill_coverage_complete"] is True
     assert result["market_signal_supports_viability"] is True
@@ -346,3 +348,28 @@ def test_verified_ict_unit_group_manifest_has_expected_country_signals():
     assert "PT" not in unit_signals["2522"]["shortage_countries"]
 
     assert "PT" in unit_signals["2511"]["surplus_countries"]
+
+
+def test_broad_shortage_does_not_count_as_complete_market_evidence(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2512",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Software developer",
+        skills=["Python", "software design", "testing", "documentation"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["occupation"]["occupation_group"] == "ict_professionals"
+    assert result["market_signal_scope"] == "broad_occupation_group"
+    assert result["market_signal"] == "shortage"
+    assert result["skill_evidence_complete"] is True
+    assert result["market_evidence_complete"] is False
+    assert result["evidence_complete"] is False
+    assert result["market_signal_supports_viability"] is False
+    assert result["viability_evidence_ready"] is False
