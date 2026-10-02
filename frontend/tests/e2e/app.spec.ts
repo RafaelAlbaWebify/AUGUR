@@ -445,7 +445,7 @@ test('mockup visual language is present in Overview', async ({ page }) => {
   await expect(page.locator('.mockDimensionCard')).toHaveCount(1)
   await expect(page.locator('.signalBars')).toHaveCount(1)
   await expect(page.locator('.overallSignalBalance')).toBeVisible()
-  await expect(page.locator('.compareBarTrack')).toHaveCount(1)
+  await expect(page.locator('.compareBarTrack')).toHaveCount(3)
 })
 
 
@@ -504,8 +504,18 @@ test('dashboard layout persists across reloads', async ({ page }) => {
   await expect(settings).toBeVisible()
 
   const sliders = settings.locator('input[type="range"]')
-  await sliders.nth(0).fill('58')
-  await sliders.nth(1).fill('70')
+  await sliders.nth(0).evaluate((node) => {
+    const input = node as HTMLInputElement
+    input.value = '58'
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+  })
+  await sliders.nth(1).evaluate((node) => {
+    const input = node as HTMLInputElement
+    input.value = '70'
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    input.dispatchEvent(new Event('change', { bubbles: true }))
+  })
   await settings.getByRole('button', { name: 'Fit · Map' }).click()
   await settings.getByRole('button', { name: 'Compare first' }).click()
 
