@@ -1,0 +1,313 @@
+.profilePageV2 {
+  display: grid;
+  gap: 18px;
+  padding: 18px 24px 28px;
+}
+
+.profilePageHeader,
+.profileSectionHeading,
+.profileSaveRow,
+.fitOutputHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.profilePageHeader > div:first-child > span,
+.profileSectionHeading > div > span,
+.fitOutputHeader > span {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--muted, #667085);
+}
+
+.profilePageHeader h2,
+.profileSectionHeading h3 {
+  margin: 4px 0 0;
+}
+
+.profilePageHeader p,
+.profileCompletionCard p,
+.ttvReadinessSection p {
+  margin: 4px 0 0;
+  color: var(--muted, #667085);
+}
+
+.profileTargetBadge {
+  min-width: 110px;
+  padding: 10px 14px;
+  border: 1px solid var(--border, #d7dce3);
+  border-radius: 12px;
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.profileTargetBadge span {
+  font-size: 11px;
+  color: var(--muted, #667085);
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.profileTopGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, .8fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.profileEditorCard,
+.profileCompletionCard,
+.profileEvidenceSection,
+.fitOutputsSection,
+.ttvReadinessSection {
+  border: 1px solid var(--border, #d7dce3);
+  border-radius: 14px;
+  background: var(--panel, #fff);
+  padding: 18px;
+}
+
+.profileFieldGroup + .profileFieldGroup {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border, #e6e8ec);
+}
+
+.profileFieldGroup h4 {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+
+.profileGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.profileGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.profileGrid label > span {
+  font-size: 12px;
+  color: var(--muted, #667085);
+}
+
+.profileGrid input[type="text"],
+.profileGrid input[type="number"],
+.profileGrid input:not([type]) {
+  width: 100%;
+}
+
+.profileWide {
+  grid-column: 1 / -1;
+}
+
+.profileCheckbox {
+  display: flex !important;
+  align-items: center;
+  gap: 8px !important;
+  align-self: end;
+  min-height: 38px;
+}
+
+.profileSaveRow {
+  margin-top: 18px;
+  justify-content: flex-end;
+}
+
+.profileCompletionCard {
+  position: sticky;
+  top: 84px;
+}
+
+.completionMeter {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--track, #eef1f4);
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+.completionMeter i {
+  display: block;
+  height: 100%;
+  background: currentColor;
+}
+
+.completionList {
+  display: grid;
+  gap: 10px;
+}
+
+.completionList > div {
+  display: grid;
+  grid-template-columns: 22px 1fr;
+  gap: 8px;
+  align-items: start;
+}
+
+.completionList strong,
+.completionList small {
+  display: block;
+}
+
+.completionList small {
+  margin-top: 2px;
+  color: var(--muted, #667085);
+}
+
+.evidenceStatusGrid,
+.fitOutputGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.evidenceStatusCard,
+.fitOutputCard {
+  border: 1px solid var(--border, #d7dce3);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.evidenceStatusCard {
+  display: grid;
+  gap: 5px;
+}
+
+.evidenceStatusCard > span:nth-of-type(2) {
+  text-transform: uppercase;
+  font-size: 11px;
+  letter-spacing: .08em;
+}
+
+.evidenceStatusCard small {
+  color: var(--muted, #667085);
+}
+
+.evidenceStateMark {
+  font-size: 18px;
+}
+
+.fitOutputHeader {
+  align-items: flex-start;
+}
+
+.fitOutputHeader strong {
+  font-size: 12px;
+  text-transform: capitalize;
+  text-align: right;
+}
+
+.fitOutputCard dl {
+  margin: 14px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.fitOutputCard dl > div {
+  display: grid;
+  gap: 3px;
+}
+
+.fitOutputCard dt {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--muted, #667085);
+}
+
+.fitOutputCard dd {
+  margin: 0;
+  font-size: 13px;
+}
+
+.ttvDependencyPath {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 16px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+}
+
+.ttvStageWrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ttvStage {
+  min-width: 130px;
+  padding: 12px;
+  border: 1px solid var(--border, #d7dce3);
+  border-radius: 12px;
+  display: grid;
+  gap: 3px;
+}
+
+.ttvStage small {
+  color: var(--muted, #667085);
+}
+
+.ttvConnector {
+  align-self: center;
+  color: var(--muted, #667085);
+}
+
+.ttvBlockedReason {
+  margin-top: 14px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.ttvBlockedReason span {
+  color: var(--muted, #667085);
+}
+
+@media (max-width: 1180px) {
+  .profileTopGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .profileCompletionCard {
+    position: static;
+  }
+
+  .evidenceStatusGrid,
+  .fitOutputGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .profilePageV2 {
+    padding: 14px;
+  }
+
+  .profilePageHeader,
+  .profileSectionHeading,
+  .fitOutputHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .profileGrid,
+  .evidenceStatusGrid,
+  .fitOutputGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .profileWide {
+    grid-column: auto;
+  }
+}
