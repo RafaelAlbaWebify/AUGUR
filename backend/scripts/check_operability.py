@@ -56,6 +56,17 @@ def main() -> int:
         for blocker in result["blockers"]:
             print(f"  - {blocker}")
 
+        if (
+            "data_sync_stale" in result["blockers"]
+            or "local_employment_earnings" in result["blockers"]
+            or "labour_job_transition_evidence" in result["blockers"]
+        ):
+            print()
+            print(
+                "Refresh hint: run .\\refresh-augur.ps1 "
+                "to synchronize official evidence and re-check operability."
+            )
+
     print()
     print("COUNTRY EVIDENCE")
     for country in result["evidence"]["countries"]:
