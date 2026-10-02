@@ -393,6 +393,15 @@ test('personal profile remains separate and can be saved locally', async ({ page
 })
 
 
+test('profile marks future financial inputs that do not affect current FinancialFit', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(profile.getByText('Stored for future household-budget modelling; not used in current FinancialFit.')).toBeVisible()
+  await expect(profile.getByText('Stored for future transition-cost/runway modelling; not used in current FinancialFit.')).toBeVisible()
+})
+
+
 test('profile architecture keeps completion evidence outputs and TTV distinct', async ({ page }) => {
   await page.goto('/country/ESP/profile')
 
