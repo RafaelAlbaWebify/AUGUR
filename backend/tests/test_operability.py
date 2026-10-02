@@ -35,17 +35,32 @@ def _country(
             "row_count": earnings_rows,
             "isco_group_count": earnings_groups,
             "latest_period": 2022 if earnings_rows else None,
+            "latest_retrieved_at": (
+                retrieved_at
+                if retrieved_at is not None
+                else datetime.now(timezone.utc)
+            ) if earnings_rows else None,
         },
         "net_earnings": {
             "country_iso3": iso3,
             "row_count": 1 if earnings_rows else 0,
             "latest_period": 2025 if earnings_rows else None,
+            "latest_retrieved_at": (
+                retrieved_at
+                if retrieved_at is not None
+                else datetime.now(timezone.utc)
+            ) if earnings_rows else None,
         },
         "job_transitions": {
             "country_iso3": iso3,
             "row_count": 4 if earnings_rows else 0,
             "age_group_count": 4 if earnings_rows else 0,
             "latest_period": 2025 if earnings_rows else None,
+            "latest_retrieved_at": (
+                retrieved_at
+                if retrieved_at is not None
+                else datetime.now(timezone.utc)
+            ) if earnings_rows else None,
         },
     }
 
@@ -484,4 +499,47 @@ def test_operability_partial_when_job_transition_evidence_is_missing(monkeypatch
     assert result["ttv_temporal_model_ready"] is True
     assert result["job_transition_evidence_ready"] is False
     assert result["ready"] is False
+    assert "labour_job_transition_evidence" in result["blockers"]
+
+
+def test_operability_rejects_stale_auxiliary_labour_evidence(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+
+    countries = [
+        _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+    ]
+    stale_time = datetime.now(timezone.utc) - timedelta(days=45)
+    countries[0]["labour_earnings"]["latest_retrieved_at"] = stale_time
+    countries[0]["net_earnings"]["latest_retrieved_at"] = stale_time
+    countries[0]["job_transitions"]["latest_retrieved_at"] = stale_time
+
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {"countries": countries},
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["local_employment_evidence_ready"] is False
+    assert result["job_transition_evidence_ready"] is False
+    assert "local_employment_earnings" in result["blockers"]
     assert "labour_job_transition_evidence" in result["blockers"]
