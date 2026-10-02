@@ -17,6 +17,7 @@ type DimensionAssessment = {
 type DimensionSummaryCardProps = {
   label: string
   item: DimensionAssessment
+  onOpen?: () => void
 }
 
 function tone(trajectory: string) {
@@ -53,13 +54,26 @@ function signalBars(item: DimensionAssessment) {
 export default function DimensionSummaryCard({
   label,
   item,
+  onOpen,
 }: DimensionSummaryCardProps) {
   const improving = item.improving_signals.map((signal) => signal.name)
   const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
   const bars = signalBars(item)
 
   return (
-    <article className={`mockDimensionCard ${tone(item.trajectory)}`}>
+    <article
+      className={`mockDimensionCard ${tone(item.trajectory)} ${onOpen ? 'clickable' : ''}`}
+      role={onOpen ? 'button' : undefined}
+      tabIndex={onOpen ? 0 : undefined}
+      aria-label={onOpen ? `Open ${label} dimension` : undefined}
+      onClick={onOpen}
+      onKeyDown={onOpen ? (event) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault()
+          onOpen()
+        }
+      } : undefined}
+    >
       <div className="mockDimensionHeader">
         <span>{label}</span>
         <small>{item.confidence} confidence</small>
