@@ -2191,6 +2191,22 @@ footer {
   font-size: 10px;
 }
 
+.dataStatus.ready .dot {
+  background: #7fb48a;
+}
+
+.dataStatus.partial .dot {
+  background: #d7a85a;
+}
+
+.dataStatus.empty .dot {
+  background: #c66f6f;
+}
+
+.dataStatus.connecting .dot {
+  background: #788594;
+}
+
 .overviewDashboard {
   margin-top: 12px;
   display: grid;
