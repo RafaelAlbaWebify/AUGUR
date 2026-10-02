@@ -82,9 +82,9 @@ def test_operability_partial_when_country_analysis_ready_but_esco_is_seed(monkey
         "analytical_evidence_status",
         lambda: {
             "countries": [
-                _country("ESP", 100, 18, 12, 9, 9),
-                _country("IRL", 100, 18, 12, 9, 9),
-                _country("PRT", 100, 18, 12, 9, 9),
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
             ]
         },
     )
