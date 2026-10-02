@@ -3815,3 +3815,98 @@ body:has(.shell.detailsOpen) {
     overflow-x: auto;
   }
 }
+
+
+.indicatorEvidencePage {
+  min-width: 0;
+  padding-top: 18px;
+}
+
+.indicatorEvidenceHero {
+  padding: 16px 18px;
+  border: 1px solid var(--augur-border);
+  border-radius: 14px;
+  background: rgba(255,255,255,0.012);
+}
+
+.indicatorEvidenceHeroMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.indicatorEvidenceHeroMeta button,
+.mockDimensionCard.clickable {
+  font: inherit;
+}
+
+.indicatorEvidenceHeroMeta button {
+  border: 1px solid #385b70;
+  border-radius: 8px;
+  background: #0c2030;
+  color: #c2d1dc;
+  padding: 7px 9px;
+  cursor: pointer;
+}
+
+.mockDimensionCard.clickable {
+  cursor: pointer;
+}
+
+.mockDimensionCard.clickable:hover,
+.mockDimensionCard.clickable:focus-visible {
+  border-color: #4b7895;
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.03),
+    0 0 0 1px rgba(75,120,149,0.18);
+}
+
+.dimensionDetailSummary {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 150px)) minmax(240px, 1fr);
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--augur-border);
+  border-radius: 12px;
+  background: rgba(255,255,255,0.012);
+}
+
+.dimensionDetailSummary > div {
+  display: grid;
+  gap: 4px;
+}
+
+.dimensionDetailSummary span {
+  color: #71889a;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.dimensionDetailSummary strong {
+  text-transform: capitalize;
+}
+
+.dimensionDetailSummary p {
+  margin: 0;
+  color: #8194a3;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.indicatorEvidenceDimension {
+  padding-top: 22px;
+}
+
+@media (max-width: 760px) {
+  .dimensionDetailSummary {
+    grid-template-columns: 1fr;
+  }
+
+  .indicatorEvidenceHeroMeta {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
