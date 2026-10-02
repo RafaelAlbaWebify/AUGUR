@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import math
 
+from app.db.analytics import latest_labour_job_transition
 from app.models.profile import PersonalProfileResponse
 
 
@@ -173,9 +174,28 @@ def financial_temporal_evidence(financial: dict) -> dict:
     )
 
 
+def _quarters_to_cumulative_probability(
+    quarterly_probability: float,
+    target_probability: float,
+) -> int | None:
+    if not (0 < quarterly_probability <= 1):
+        return None
+    if not (0 < target_probability < 1):
+        return None
+    if quarterly_probability == 1:
+        return 1
+
+    return math.ceil(
+        math.log(1 - target_probability)
+        / math.log(1 - quarterly_probability)
+    )
+
+
 def employment_temporal_evidence(
     profile: PersonalProfileResponse,
+    target_country_iso3: str,
     financial: dict,
+    career: dict,
 ) -> dict:
     if (
         profile.remote_work
@@ -183,13 +203,62 @@ def employment_temporal_evidence(
     ):
         return _zero_stage("existing_remote_income_preserved")
 
-    return _unavailable_stage(
-        "local_job_search_temporal_baseline_not_yet_integrated"
+    if not career.get("viability_evidence_ready"):
+        return _unavailable_stage(
+            "career_viability_required_before_job_search_baseline"
+        )
+
+    row = latest_labour_job_transition(target_country_iso3)
+    if row is None:
+        return _unavailable_stage(
+            "eurostat_job_transition_baseline_missing"
+        )
+
+    quarterly_probability = float(row["probability_pct"]) / 100.0
+    median_quarters = _quarters_to_cumulative_probability(
+        quarterly_probability,
+        0.50,
     )
+    upper_quarters = _quarters_to_cumulative_probability(
+        quarterly_probability,
+        0.80,
+    )
+
+    if median_quarters is None or upper_quarters is None:
+        return _unavailable_stage(
+            "invalid_job_transition_probability"
+        )
+
+    return {
+        "status": "available",
+        "weeks_min": median_quarters * 13,
+        "weeks_max": upper_quarters * 13,
+        "reason": "eurostat_experimental_job_transition_baseline",
+        "source": {
+            "label": "Eurostat — unemployment to employment transition probability",
+            "dataset_id": row["dataset_id"],
+            "source_id": row["source_id"],
+            "period": row["period"],
+            "age_group": row["age_group"],
+            "duration_group": row["duration_group"],
+        },
+        "quarterly_transition_probability_pct": row["probability_pct"],
+        "range_definition": {
+            "lower_cumulative_probability": 0.50,
+            "upper_cumulative_probability": 0.80,
+            "constant_quarterly_hazard_assumption": True,
+        },
+        "limitations": [
+            "Experimental country-level transition probability.",
+            "Not occupation-specific and not an individual job-offer forecast.",
+            "Quarter-to-quarter probability is treated as constant only for AUGUR range modelling.",
+        ],
+    }
 
 
 def temporal_evidence_graph(
     profile: PersonalProfileResponse,
+    target_country_iso3: str,
     legal: dict,
     language: dict,
     career: dict,
@@ -200,7 +269,12 @@ def temporal_evidence_graph(
         "language": language_temporal_evidence(profile, language),
         "skills": skills_temporal_evidence(career),
         "financial": financial_temporal_evidence(financial),
-        "employment": employment_temporal_evidence(profile, financial),
+        "employment": employment_temporal_evidence(
+            profile,
+            target_country_iso3,
+            financial,
+            career,
+        ),
     }
 
     calendar_ready = all(
