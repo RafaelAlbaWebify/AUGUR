@@ -37,6 +37,21 @@ EURES_EVIDENCE_METADATA, COUNTRY_EVIDENCE = _load_eures_evidence()
 RULE_VERSION = EURES_EVIDENCE_METADATA["rule_version"]
 
 
+ISCO_SUBMAJOR_TO_MARKET_GROUP = {
+    "21": "science_engineering_professionals",
+    "22": "health_professionals",
+    "25": "ict_professionals",
+    "26": "legal_social_cultural_professionals",
+    "31": "science_engineering_associate_professionals",
+    "33": "business_administration_associate_professionals",
+    "35": "information_communications_technicians",
+    "52": "sales_workers",
+    "72": "metal_machinery_trades_workers",
+    "81": "plant_machine_operators",
+    "92": "agricultural_forestry_fishery_labourers",
+}
+
+
 ESCO_OCCUPATION_MATCH_THRESHOLD = 0.72
 
 
@@ -62,6 +77,38 @@ def resolve_esco_occupation(profession: str | None) -> dict:
         "candidates": candidates,
         "threshold": ESCO_OCCUPATION_MATCH_THRESHOLD,
     }
+
+def classify_esco_market_group(
+    occupation_match: dict,
+) -> dict | None:
+    selected = occupation_match.get("selected")
+    if not selected:
+        return None
+
+    raw_isco = str(selected.get("isco_group") or selected.get("code") or "")
+    digits = "".join(character for character in raw_isco if character.isdigit())
+    if len(digits) < 2:
+        return None
+
+    submajor = digits[:2]
+    group = ISCO_SUBMAJOR_TO_MARKET_GROUP.get(submajor)
+    if group is None:
+        return {
+            "status": "isco_group_unmapped",
+            "occupation_group": f"isco_{submajor}",
+            "matched_terms": [],
+            "mapping_method": "esco_isco_submajor",
+            "isco_submajor": submajor,
+        }
+
+    return {
+        "status": "mapped",
+        "occupation_group": group,
+        "matched_terms": [],
+        "mapping_method": "esco_isco_submajor",
+        "isco_submajor": submajor,
+    }
+
 
 OCCUPATION_RULES = [
     (
@@ -177,6 +224,8 @@ def classify_occupation(profession: str | None) -> dict:
             "status": "profession_missing",
             "occupation_group": None,
             "matched_terms": [],
+            "mapping_method": "keyword_fallback",
+            "isco_submajor": None,
         }
 
     text = profession.strip().lower()
@@ -201,6 +250,8 @@ def classify_occupation(profession: str | None) -> dict:
             "status": "occupation_unmapped",
             "occupation_group": None,
             "matched_terms": [],
+            "mapping_method": "keyword_fallback",
+            "isco_submajor": None,
         }
 
     # Prefer the most specific match by longest matched keyword.
@@ -214,6 +265,8 @@ def classify_occupation(profession: str | None) -> dict:
         "status": "mapped",
         "occupation_group": best["occupation_group"],
         "matched_terms": best["matched_terms"],
+        "mapping_method": "keyword_fallback",
+        "isco_submajor": None,
     }
 
 
@@ -223,8 +276,11 @@ def career_fit(
 ) -> dict:
     target = target_country_iso3.upper()
     evidence = COUNTRY_EVIDENCE.get(target)
-    classification = classify_occupation(profile.profession)
     occupation_match = resolve_esco_occupation(profile.profession)
+    classification = (
+        classify_esco_market_group(occupation_match)
+        or classify_occupation(profile.profession)
+    )
     esco_label = occupation_match["selected"]["preferred_label"] if occupation_match["selected"] else None
 
     if evidence is None:
@@ -346,7 +402,8 @@ def career_fit(
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             f"Country evidence uses versioned EURES labour-market information for {EURES_EVIDENCE_METADATA['conditions_year']} conditions, published in {EURES_EVIDENCE_METADATA['report_year']}.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
-            "ESCO occupation resolution uses transparent local label matching and refuses low-confidence matches.",
+            "When ESCO resolves an occupation confidently, CareerFit uses its ISCO sub-major group for EURES mapping; keyword classification is only a fallback.",
+            "ISCO 25 ICT professionals and ISCO 35 information and communications technicians are kept distinct.",
             "Essential ESCO skills are treated as conservative profile-evidence requirements; missing declarations are not inferred as present.",
             "A shortage signal plus complete declared essential-skill coverage is an evidence gate, not a guarantee of employment.",
             "No country ranking or composite score is produced.",
