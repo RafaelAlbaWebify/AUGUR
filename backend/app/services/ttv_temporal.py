@@ -266,6 +266,18 @@ def _quarters_to_cumulative_probability(
     )
 
 
+def _preferred_job_transition_age_group(age: int | None) -> str | None:
+    if age is None:
+        return "Y15-74"
+    if 15 <= age <= 24:
+        return "Y15-24"
+    if 25 <= age <= 54:
+        return "Y25-54"
+    if 55 <= age <= 74:
+        return "Y55-74"
+    return None
+
+
 def employment_temporal_evidence(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -283,11 +295,39 @@ def employment_temporal_evidence(
             "career_viability_required_before_job_search_baseline"
         )
 
-    row = latest_labour_job_transition(target_country_iso3)
-    if row is None:
-        return _unavailable_stage(
-            "eurostat_job_transition_baseline_missing"
+    preferred_age_group = _preferred_job_transition_age_group(
+        profile.age
+    )
+    if preferred_age_group is None:
+        return {
+            **_unavailable_stage(
+                "profile_age_outside_eurostat_transition_population"
+            ),
+            "profile_age": profile.age,
+            "requested_age_group": None,
+        }
+
+    row = latest_labour_job_transition(
+        target_country_iso3,
+        age_group=preferred_age_group,
+    )
+    age_specific = row is not None and preferred_age_group != "Y15-74"
+
+    if row is None and preferred_age_group != "Y15-74":
+        row = latest_labour_job_transition(
+            target_country_iso3,
+            age_group="Y15-74",
         )
+        age_specific = False
+
+    if row is None:
+        return {
+            **_unavailable_stage(
+                "eurostat_job_transition_baseline_missing"
+            ),
+            "profile_age": profile.age,
+            "requested_age_group": preferred_age_group,
+        }
 
     quarterly_probability = float(row["probability_pct"]) / 100.0
     median_quarters = _quarters_to_cumulative_probability(
@@ -317,6 +357,9 @@ def employment_temporal_evidence(
             "age_group": row["age_group"],
             "duration_group": row["duration_group"],
         },
+        "profile_age": profile.age,
+        "requested_age_group": preferred_age_group,
+        "age_specific_baseline": age_specific,
         "quarterly_transition_probability_pct": row["probability_pct"],
         "range_definition": {
             "lower_cumulative_probability": 0.50,
@@ -325,6 +368,7 @@ def employment_temporal_evidence(
         },
         "limitations": [
             "Experimental country-level transition probability.",
+            "Age-specific evidence is used when the matching Eurostat age class exists; otherwise AUGUR falls back to ages 15–74.",
             "Not occupation-specific and not an individual job-offer forecast.",
             "Quarter-to-quarter probability is treated as constant only for AUGUR range modelling.",
         ],
