@@ -6,7 +6,7 @@ import FitSnapshot from './components/FitSnapshot'
 import DimensionSummaryCard from './components/DimensionSummaryCard'
 import OverallSignalBalance from './components/OverallSignalBalance'
 import CountrySelect from './components/CountrySelect'
-import LayoutControls, { type DashboardLayout } from './components/LayoutControls'
+import { countryRoute, compareRoute, useAugurRoute } from './lib/routing'
 
 type Country = {
   iso2: string
@@ -201,30 +201,14 @@ type ComparisonResponse = {
 }
 
 const API_BASE = 'http://127.0.0.1:8020'
-const LAYOUT_STORAGE_KEY = 'augur.dashboard.layout.v1'
-
-const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
+const LEGACY_OVERVIEW_LAYOUT = {
   topSplit: 50,
   bottomSplit: 75,
-  topOrder: 'map-fit',
-  utilityOrder: 'outlook-compare',
+  topOrder: 'map-fit' as const,
+  utilityOrder: 'outlook-compare' as const,
   showFit: true,
   showOutlook: true,
   showCompare: true,
-}
-
-function loadDashboardLayout(): DashboardLayout {
-  try {
-    const raw = localStorage.getItem(LAYOUT_STORAGE_KEY)
-    if (!raw) return DEFAULT_DASHBOARD_LAYOUT
-
-    return {
-      ...DEFAULT_DASHBOARD_LAYOUT,
-      ...JSON.parse(raw),
-    }
-  } catch {
-    return DEFAULT_DASHBOARD_LAYOUT
-  }
 }
 
 const dimensionOrder = [
@@ -322,8 +306,11 @@ async function fetchJson(
 }
 
 export default function App() {
+  const { route, navigate } = useAugurRoute()
   const [countries, setCountries] = useState<Country[]>([])
-  const [selectedCountry, setSelectedCountry] = useState('ESP')
+  const [selectedCountry, setSelectedCountry] = useState(
+    route.kind === 'country' ? route.countryIso3 : 'ESP',
+  )
   const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
   const [trends, setTrends] = useState<TrendsResponse | null>(null)
@@ -332,34 +319,28 @@ export default function App() {
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
-  const [compareCountries, setCompareCountries] = useState<string[]>(['IRL', 'ESP', 'PRT'])
-  const [activeView, setActiveView] = useState<'overview' | 'outlook' | 'compare' | 'profile'>('overview')
+  const [compareCountries, setCompareCountries] = useState<string[]>(
+    route.kind === 'compare' ? route.countries : ['IRL', 'ESP', 'PRT'],
+  )
   const [detailsExpanded, setDetailsExpanded] = useState(false)
-  const [layoutOpen, setLayoutOpen] = useState(false)
-  const [dashboardLayout, setDashboardLayout] = useState<DashboardLayout>(() => loadDashboardLayout())
+  const dashboardLayout = LEGACY_OVERVIEW_LAYOUT
+  const activeView = route.view
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    localStorage.setItem(LAYOUT_STORAGE_KEY, JSON.stringify(dashboardLayout))
-  }, [dashboardLayout])
-
-  useEffect(() => {
-    const shouldScroll = activeView !== 'overview' || detailsExpanded
-    document.body.style.overflowY = shouldScroll ? 'auto' : ''
-
-    if (detailsExpanded) {
-      requestAnimationFrame(() => {
-        document.querySelector('.dimensionSection')?.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start',
-        })
-      })
-    }
-
+    document.body.style.overflowY = activeView === 'overview' ? '' : 'auto'
     return () => {
       document.body.style.overflowY = ''
     }
-  }, [activeView, detailsExpanded])
+  }, [activeView])
+
+  useEffect(() => {
+    if (route.kind === 'country') {
+      setSelectedCountry(route.countryIso3)
+    } else {
+      setCompareCountries(route.countries)
+    }
+  }, [route])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -427,8 +408,30 @@ export default function App() {
       }
 
       next[slot] = iso3
+
+      if (route.kind === 'compare') {
+        navigate(compareRoute(next), { replace: true })
+      }
+
       return next
     })
+  }
+
+  function changeCountry(iso3: string) {
+    setSelectedCountry(iso3)
+
+    if (route.kind === 'country') {
+      navigate(countryRoute(iso3, route.view))
+    }
+  }
+
+  function navigateView(view: 'overview' | 'outlook' | 'compare' | 'profile') {
+    if (view === 'compare') {
+      navigate(compareRoute(compareCountries))
+      return
+    }
+
+    navigate(countryRoute(selectedCountry, view))
   }
 
   useEffect(() => {
@@ -550,7 +553,7 @@ export default function App() {
           <CountrySelect
             countries={countries}
             value={selectedCountry}
-            onChange={setSelectedCountry}
+            onChange={changeCountry}
             ariaLabel="Select country"
             compact
           />
@@ -567,7 +570,7 @@ export default function App() {
               key={id}
               type="button"
               className={activeView === id ? 'active' : ''}
-              onClick={() => setActiveView(id as 'overview' | 'outlook' | 'compare' | 'profile')}
+              onClick={() => navigateView(id as 'overview' | 'outlook' | 'compare' | 'profile')}
             >
               {label}
             </button>
@@ -575,13 +578,6 @@ export default function App() {
         </nav>
 
         <div className="topbarMeta">
-          <button
-            type="button"
-            className={layoutOpen ? 'layoutButton active' : 'layoutButton'}
-            onClick={() => setLayoutOpen((value) => !value)}
-          >
-            Layout
-          </button>
           <div>
             <span>Indicators</span>
             <strong>{snapshot?.observation_count ?? '—'}</strong>
@@ -603,15 +599,9 @@ export default function App() {
         </section>
       )}
 
-      <LayoutControls
-        open={layoutOpen}
-        layout={dashboardLayout}
-        onChange={setDashboardLayout}
-        onClose={() => setLayoutOpen(false)}
-        onReset={() => setDashboardLayout(DEFAULT_DASHBOARD_LAYOUT)}
-      />
 
-      <div className="overviewDashboard" hidden={activeView !== 'overview'}>
+      {activeView === 'overview' && (
+      <div className="overviewDashboard">
         <div
           className={`overviewTopRow ${dashboardLayout.topOrder === 'fit-map' ? 'fitFirst' : ''}`}
           style={{
@@ -689,7 +679,7 @@ export default function App() {
                       <div className="label">OUTLOOK</div>
                       <strong>Official horizons</strong>
                     </div>
-                    <button type="button" onClick={() => setActiveView('outlook')}>
+                    <button type="button" onClick={() => navigateView('outlook')}>
                       Open
                     </button>
                   </div>
@@ -741,10 +731,13 @@ export default function App() {
           )}
         </div>
       </div>
+      )}
 
-      <div hidden={activeView !== 'profile'}>
+      {activeView === 'profile' && (
+      <div>
         <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
       </div>
+      )}
 
       {activeView === 'outlook' && (
       <section className="trajectorySection">
