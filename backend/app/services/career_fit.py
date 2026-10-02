@@ -289,9 +289,18 @@ def unit_group_market_signal(
         return None
 
     target = target_country_iso3.upper()
-    if target in config["shortage_countries"]:
+    country_evidence = COUNTRY_EVIDENCE.get(target)
+    eures_country_code = (
+        country_evidence.get("eures_country_code")
+        if country_evidence
+        else None
+    )
+    if eures_country_code is None:
+        return None
+
+    if eures_country_code in config["shortage_countries"]:
         signal = "shortage"
-    elif target in config["surplus_countries"]:
+    elif eures_country_code in config["surplus_countries"]:
         signal = "surplus"
     else:
         signal = "not_classified_as_shortage_or_surplus"
