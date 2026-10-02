@@ -189,3 +189,27 @@ AUGUR uses published cumulative guided-learning-hour ranges by CEFR level. The c
 Calendar weeks are only calculated when the user explicitly supplies expected language-study hours per week.
 
 These ranges are learning guidance, not guarantees of elapsed calendar time or employer language requirements.
+
+
+## EURES labour shortages and surpluses
+
+Role:
+
+- broad labour-market shortage/surplus evidence for CareerFit.
+
+AUGUR keeps the implemented EURES mappings in a versioned evidence manifest:
+
+`backend/app/evidence/eures_lmi_2025.json`
+
+The current manifest represents 2024 labour-market conditions published in the 2025 EURES material and covers Spain, Portugal and Ireland.
+
+The manifest is deliberately separate from CareerFit logic. Updating EURES evidence should therefore change the evidence file and its metadata rather than silently changing classification code.
+
+Current limitations:
+
+- signals are broad occupation-group evidence;
+- national methodologies contributing to EURES can differ;
+- the signal does not guarantee vacancy availability for an individual;
+- vacancy count, location, seniority and employer-specific requirements remain separate evidence gaps.
+
+CareerFit preserves the source page, report year, conditions year and evidence ID in its response.
