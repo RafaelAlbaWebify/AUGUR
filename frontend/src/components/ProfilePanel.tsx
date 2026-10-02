@@ -147,6 +147,16 @@ type FinancialFitResponse = {
     dataset_id: string
     source_updated_at?: string | null
   }
+  national_net_earnings_reference?: null | {
+    earnings_case: string
+    annual_net_eur: number
+    monthly_net_equivalent_eur: number
+    period: number
+    source_id: string
+    dataset_id: string
+    source_updated_at?: string | null
+    scope: string
+  }
   portable_income_analysis: null | {
     origin_country_iso3: string
     monthly_net_income: number
@@ -776,7 +786,9 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <dt>Limitation</dt>
                 <dd>
                   {financialFit?.local_income_reference
-                    ? 'Structural mean gross earnings only; net pay, taxes, location and household budget are not yet modelled.'
+                    ? financialFit.national_net_earnings_reference
+                      ? `Gross occupation reference + €${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(financialFit.national_net_earnings_reference.monthly_net_equivalent_eur)} net/month national average-worker benchmark; occupation-specific net pay is not inferred.`
+                      : 'Structural mean gross earnings only; occupation-specific net pay, taxes, location and household budget are not yet modelled.'
                     : 'Local-income and household assumptions may require additional evidence.'}
                 </dd>
               </div>
