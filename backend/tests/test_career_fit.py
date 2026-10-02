@@ -121,3 +121,93 @@ def test_unmapped_profession_does_not_infer_demand(monkeypatch):
 
     assert result["status"] == "occupation_unmapped"
     assert result["market_signal"] is None
+
+
+def _mock_full_esco_career(monkeypatch, market_country_profession="IT support engineer", coverage=1.0):
+    monkeypatch.setattr(
+        career_fit_module,
+        "search_occupations",
+        lambda profession, limit=5: [
+            {
+                "concept_uri": "urn:test:ict-support",
+                "preferred_label": "ICT support technician",
+                "code": "3512",
+                "isco_group": "3512",
+                "dataset_version": "1.2.1",
+                "source_mode": "full",
+                "match_score": 0.86,
+                "match_method": "token_overlap",
+            }
+        ],
+    )
+
+    total = 4
+    matched = int(total * coverage)
+    monkeypatch.setattr(
+        career_fit_module,
+        "match_profile_skills",
+        lambda occupation_label, profile_skills: {
+            "status": "matched",
+            "dataset_mode": "full",
+            "dataset_version": "1.2.1",
+            "occupation_label": occupation_label,
+            "matched_skills": [],
+            "missing_skills": [],
+            "essential_skill_count": total,
+            "essential_skills_matched": matched,
+            "coverage": matched / total,
+            "evidence_complete": True,
+        },
+    )
+
+
+def test_career_viability_evidence_requires_shortage_and_complete_essential_skills(monkeypatch):
+    _mock_full_esco_career(monkeypatch, coverage=1.0)
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="IT support engineer",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["market_signal"] == "shortage"
+    assert result["evidence_complete"] is True
+    assert result["profile_skill_coverage_complete"] is True
+    assert result["market_signal_supports_viability"] is True
+    assert result["viability_evidence_ready"] is True
+
+
+def test_career_viability_evidence_blocks_incomplete_essential_skill_coverage(monkeypatch):
+    _mock_full_esco_career(monkeypatch, coverage=0.5)
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="IT support engineer",
+        skills=["Windows"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["market_signal"] == "shortage"
+    assert result["evidence_complete"] is True
+    assert result["profile_skill_coverage_complete"] is False
+    assert result["viability_evidence_ready"] is False
+
+
+def test_career_viability_evidence_does_not_treat_surplus_as_supportive(monkeypatch):
+    _mock_full_esco_career(monkeypatch, coverage=1.0)
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Systems engineer",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "ESP")
+
+    assert result["market_signal"] == "surplus"
+    assert result["profile_skill_coverage_complete"] is True
+    assert result["market_signal_supports_viability"] is False
+    assert result["viability_evidence_ready"] is False
