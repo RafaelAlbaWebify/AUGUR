@@ -390,6 +390,57 @@ test('comparison selectors swap countries without duplicates', async ({ page }) 
   await expect(third).toHaveValue('PRT')
 })
 
+test('guarded Edit Layout persists safe panel ordering', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.goto('/country/ESP/overview')
+
+  await page.getByRole('button', { name: 'Edit layout' }).click()
+  const controls = page.getByRole('region', { name: 'Dashboard layout settings' })
+  await expect(controls).toBeVisible()
+  await expect(controls.getByText('Core panels, approved proportions and responsive behaviour stay fixed.')).toBeVisible()
+  await expect(controls.locator('input[type="range"]')).toHaveCount(0)
+  await expect(controls.locator('input[type="checkbox"]')).toHaveCount(0)
+
+  await controls.getByRole('button', { name: 'Fit · Map' }).click()
+  await controls.getByRole('button', { name: 'Compare first' }).click()
+
+  const reordered = await page.evaluate(() => ({
+    mapLeft: document.querySelector('.overviewMapPanel')!.getBoundingClientRect().left,
+    fitLeft: document.querySelector('.overviewFitPanel')!.getBoundingClientRect().left,
+    outlookTop: document.querySelector('.overviewOutlookCard')!.getBoundingClientRect().top,
+    compareTop: document.querySelector('.overviewCompareCard')!.getBoundingClientRect().top,
+  }))
+
+  expect(reordered.fitLeft).toBeLessThan(reordered.mapLeft)
+  expect(reordered.compareTop).toBeLessThan(reordered.outlookTop)
+
+  await page.reload()
+
+  const persisted = await page.evaluate(() => ({
+    mapLeft: document.querySelector('.overviewMapPanel')!.getBoundingClientRect().left,
+    fitLeft: document.querySelector('.overviewFitPanel')!.getBoundingClientRect().left,
+    outlookTop: document.querySelector('.overviewOutlookCard')!.getBoundingClientRect().top,
+    compareTop: document.querySelector('.overviewCompareCard')!.getBoundingClientRect().top,
+  }))
+
+  expect(persisted.fitLeft).toBeLessThan(persisted.mapLeft)
+  expect(persisted.compareTop).toBeLessThan(persisted.outlookTop)
+
+  await page.getByRole('button', { name: 'Edit layout' }).click()
+  await page.getByRole('region', { name: 'Dashboard layout settings' }).getByRole('button', { name: 'Reset layout' }).click()
+
+  const reset = await page.evaluate(() => ({
+    mapLeft: document.querySelector('.overviewMapPanel')!.getBoundingClientRect().left,
+    fitLeft: document.querySelector('.overviewFitPanel')!.getBoundingClientRect().left,
+    outlookTop: document.querySelector('.overviewOutlookCard')!.getBoundingClientRect().top,
+    compareTop: document.querySelector('.overviewCompareCard')!.getBoundingClientRect().top,
+  }))
+
+  expect(reset.mapLeft).toBeLessThan(reset.fitLeft)
+  expect(reset.outlookTop).toBeLessThan(reset.compareTop)
+})
+
+
 test('direct route refresh preserves country and view', async ({ page }) => {
   await page.goto('/country/PRT/outlook')
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
