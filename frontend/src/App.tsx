@@ -201,11 +201,19 @@ type ComparisonResponse = {
 }
 
 const API_BASE = 'http://127.0.0.1:8020'
-const LEGACY_OVERVIEW_LAYOUT = {
+const LEGACY_OVERVIEW_LAYOUT: {
+  topSplit: number
+  bottomSplit: number
+  topOrder: 'map-fit' | 'fit-map'
+  utilityOrder: 'outlook-compare' | 'compare-outlook'
+  showFit: boolean
+  showOutlook: boolean
+  showCompare: boolean
+} = {
   topSplit: 50,
   bottomSplit: 75,
-  topOrder: 'map-fit' as const,
-  utilityOrder: 'outlook-compare' as const,
+  topOrder: 'map-fit',
+  utilityOrder: 'outlook-compare',
   showFit: true,
   showOutlook: true,
   showCompare: true,
