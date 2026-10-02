@@ -831,6 +831,22 @@ def analytical_evidence_status() -> dict:
             """
         ).fetchall()
 
+        job_transition_rows = con.execute(
+            """
+            SELECT
+                c.iso3 AS country_iso3,
+                COUNT(j.age_group) AS row_count,
+                COUNT(DISTINCT j.age_group) AS age_group_count,
+                MAX(j.period) AS latest_period,
+                MAX(j.retrieved_at) AS latest_retrieved_at
+            FROM countries c
+            LEFT JOIN labour_job_transitions j
+              ON j.country_iso3 = c.iso3
+            GROUP BY c.iso3
+            ORDER BY c.iso3
+            """
+        ).fetchall()
+
         observation_columns = [
             "country_iso3",
             "observed_rows",
@@ -856,6 +872,14 @@ def analytical_evidence_status() -> dict:
             "latest_retrieved_at",
         ]
 
+        job_transition_columns = [
+            "country_iso3",
+            "row_count",
+            "age_group_count",
+            "latest_period",
+            "latest_retrieved_at",
+        ]
+
         provider_freshness = {}
         for country_iso3, source_id, latest_retrieved_at in provider_freshness_rows:
             provider_freshness.setdefault(country_iso3, {})[source_id] = latest_retrieved_at
@@ -874,6 +898,10 @@ def analytical_evidence_status() -> dict:
             row[0]: dict(zip(net_earnings_columns, row))
             for row in net_earnings_rows
         }
+        job_transitions = {
+            row[0]: dict(zip(job_transition_columns, row))
+            for row in job_transition_rows
+        }
 
         return {
             "countries": [
@@ -881,6 +909,7 @@ def analytical_evidence_status() -> dict:
                     **observations[country_iso3],
                     "labour_earnings": earnings[country_iso3],
                     "net_earnings": net_earnings[country_iso3],
+                    "job_transitions": job_transitions[country_iso3],
                 }
                 for country_iso3 in sorted(observations)
             ]
