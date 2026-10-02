@@ -67,6 +67,18 @@ CREATE TABLE IF NOT EXISTS labour_earnings (
     PRIMARY KEY (country_iso3, period, isco08, source_id)
 );
 
+CREATE TABLE IF NOT EXISTS labour_net_earnings_reference (
+    country_iso3 VARCHAR NOT NULL,
+    period INTEGER NOT NULL,
+    earnings_case VARCHAR NOT NULL,
+    annual_net_eur DOUBLE NOT NULL,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (country_iso3, period, earnings_case, source_id)
+);
+
 CREATE TABLE IF NOT EXISTS labour_job_transitions (
     country_iso3 VARCHAR NOT NULL,
     period INTEGER NOT NULL,
@@ -267,6 +279,68 @@ def latest_labour_earnings(
         )
         columns = [column[0] for column in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def upsert_labour_net_earnings_reference(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO labour_net_earnings_reference
+            (
+                country_iso3, period, earnings_case, annual_net_eur,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["country_iso3"],
+                    row["period"],
+                    row["earnings_case"],
+                    row["annual_net_eur"],
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_labour_net_earnings_reference(
+    country_iso3: str,
+    earnings_case: str = "P1_NCH_AW100",
+) -> dict | None:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT
+                country_iso3, period, earnings_case, annual_net_eur,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            FROM labour_net_earnings_reference
+            WHERE country_iso3 = ?
+              AND earnings_case = ?
+            ORDER BY period DESC, source_id ASC
+            LIMIT 1
+            """,
+            [country_iso3.upper(), earnings_case],
+        )
+        row = result.fetchone()
+        if row is None:
+            return None
+        columns = [column[0] for column in result.description]
+        return dict(zip(columns, row))
     finally:
         con.close()
 
