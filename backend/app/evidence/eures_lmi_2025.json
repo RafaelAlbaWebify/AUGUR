@@ -23,7 +23,8 @@
         "science_engineering_professionals",
         "business_administration_associate_professionals",
         "science_engineering_associate_professionals"
-      ]
+      ],
+      "eures_country_code": "ES"
     },
     "PRT": {
       "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-portugal_en",
@@ -37,7 +38,8 @@
         "business_administration_associate_professionals",
         "legal_social_cultural_professionals",
         "sales_workers"
-      ]
+      ],
+      "eures_country_code": "PT"
     },
     "IRL": {
       "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-ireland_en",
@@ -47,7 +49,8 @@
         "ict_professionals",
         "health_professionals"
       ],
-      "surplus_groups": []
+      "surplus_groups": [],
+      "eures_country_code": "IE"
     }
   },
   "unit_group_signals": {
