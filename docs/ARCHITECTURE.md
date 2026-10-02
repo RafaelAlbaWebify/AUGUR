@@ -99,6 +99,8 @@ React + TypeScript + Vite.
 Current major views:
 
 - routed Overview dashboard
+- routed Indicators evidence view
+- routed Dimension Detail drill-down
 - local-first world view
 - Personal Fit snapshot and Profile
 - official outlook
