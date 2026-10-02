@@ -344,8 +344,8 @@ def calibration_status() -> dict:
     if not cases:
         return {
             "schema_version": CALIBRATION_SCHEMA_VERSION,
-                "protocol_state": CALIBRATION_PROTOCOL_STATE,
-                "protocol_version": CALIBRATION_PROTOCOL_VERSION,
+            "protocol_state": CALIBRATION_PROTOCOL_STATE,
+            "protocol_version": CALIBRATION_PROTOCOL_VERSION,
             "infrastructure_ready": True,
             "case_count": 0,
             "country_count": 0,
