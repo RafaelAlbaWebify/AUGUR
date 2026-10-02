@@ -523,7 +523,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           </div>
         </section>
 
-        <aside className="profileCompletionCard" aria-label="Profile completion">
+        <aside className="profileCompletionCard" role="region" aria-label="Profile completion">
           <div className="profileSectionHeading">
             <div>
               <span>PROFILE COMPLETION</span>
