@@ -56,6 +56,8 @@ def test_evidence_status_reports_country_and_esco_coverage():
     assert "isco_group_count" in spain["labour_earnings"]
     assert "net_earnings" in spain
     assert "row_count" in spain["net_earnings"]
+    assert "job_transitions" in spain
+    assert "age_group_count" in spain["job_transitions"]
 
 
 def test_operability_endpoint_reports_readiness_and_blockers():
@@ -75,6 +77,7 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert "gates" in body["ttv_temporal_validation"]
     assert "country_analysis_ready" in body
     assert "local_employment_evidence_ready" in body
+    assert "job_transition_evidence_ready" in body
     assert "esco_full_ready" in body
     assert "personal_fit_full_evidence_ready" in body
     assert isinstance(body["blockers"], list)
