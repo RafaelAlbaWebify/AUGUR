@@ -171,10 +171,13 @@ ESCO occupation-language relationships do **not** encode a CEFR threshold, so th
 
 CareerFit combines:
 
-1. transparent profession-to-broad-occupation classification;
-2. EURES shortage/surplus signals for the implemented countries;
-3. local ESCO occupation resolution;
-4. ESCO essential-skill coverage when a full ESCO dataset is loaded.
+1. local ESCO occupation resolution;
+2. ISCO sub-major mapping from the resolved ESCO occupation;
+3. versioned EURES shortage/surplus signals for the implemented countries;
+4. ESCO essential-skill coverage when a full ESCO dataset is loaded;
+5. transparent keyword classification only when ESCO has no confident occupation match.
+
+When ESCO resolves confidently, its ISCO group is authoritative for the EURES mapping. AUGUR therefore keeps categories such as ISCO 25 (ICT professionals) and ISCO 35 (information and communications technicians) distinct instead of merging them because the job title contains similar words.
 
 ESCO occupation resolution is confidence-gated. Low-confidence candidates are not silently accepted.
 
