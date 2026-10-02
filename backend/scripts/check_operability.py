@@ -22,6 +22,16 @@ def main() -> int:
         f"{result['ttv_temporal_model_version']}"
     )
     print(f"country_analysis_ready: {result['country_analysis_ready']}")
+
+    print()
+    print("TTV TEMPORAL VALIDATION")
+    validation = result["ttv_temporal_validation"]
+    print(f"ready_for_versioning: {validation['ready_for_versioning']}")
+    for gate_id, gate in validation["gates"].items():
+        print(
+            f"  {gate_id}: {gate['state']} "
+            f"({gate['reason']})"
+        )
     print(
         "data_sync_fresh: "
         f"{result['data_sync_fresh']} "
