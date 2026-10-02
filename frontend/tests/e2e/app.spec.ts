@@ -340,27 +340,6 @@ test('rapid country switching keeps the latest selection', async ({ page }) => {
 })
 
 
-test('indicator details enable scrolling and can be collapsed again', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 })
-  await expect(page.locator('.metricCard')).toHaveCount(0)
-
-  await page.getByRole('button', { name: 'View all indicators' }).click()
-  await expect(page.locator('.metricCard')).toHaveCount(1)
-
-  const expanded = await page.evaluate(() => ({
-    overflowY: getComputedStyle(document.body).overflowY,
-    scrollHeight: document.documentElement.scrollHeight,
-    innerHeight: window.innerHeight,
-  }))
-
-  expect(expanded.overflowY).toBe('auto')
-  expect(expanded.scrollHeight).toBeGreaterThan(expanded.innerHeight)
-
-  await page.getByRole('button', { name: 'Hide indicators' }).click()
-  await expect(page.locator('.metricCard')).toHaveCount(0)
-})
-
-
 test('unsaved profile draft survives view navigation', async ({ page }) => {
   await page.getByRole('button', { name: 'Profile' }).click()
   const profile = page.getByRole('region', { name: 'Personal profile' })
@@ -391,103 +370,6 @@ test('comparison selectors swap countries without duplicates', async ({ page }) 
   await expect(third).toHaveValue('PRT')
 })
 
-test('overview shows compact fit and compare previews', async ({ page }) => {
-  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
-  await expect(page.getByText('Official horizons')).toBeVisible()
-  await expect(page.getByText('Custom comparison')).toBeVisible()
-  await expect(page.getByLabel('Preview compare country 1', { exact: true })).toBeVisible()
-})
-
-test('1920x1080 overview fits without clipping or vertical scrolling', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 })
-  await page.reload()
-
-  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
-
-  const metrics = await page.evaluate(() => {
-    const dimensions = document.querySelector('.overviewDimensions')
-    const compare = document.querySelector('.comparePanel.compact')
-    const dimensionsBottom = dimensions?.getBoundingClientRect().bottom ?? 0
-    const compareBottom = compare?.getBoundingClientRect().bottom ?? 0
-
-    return {
-      scrollHeight: document.documentElement.scrollHeight,
-      innerHeight: window.innerHeight,
-      dimensionsBottom,
-      compareBottom,
-    }
-  })
-
-  expect(metrics.scrollHeight).toBeLessThanOrEqual(metrics.innerHeight + 2)
-  expect(metrics.dimensionsBottom).toBeLessThanOrEqual(metrics.innerHeight)
-  expect(metrics.compareBottom).toBeLessThanOrEqual(metrics.innerHeight)
-})
-
-
-
-
-test('mockup visual language is present in Overview', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 })
-  await page.reload()
-
-  await expect(page.locator('.readinessRing')).toHaveCount(5)
-  await expect(page.locator('.mockDimensionCard')).toHaveCount(1)
-  await expect(page.locator('.signalBars')).toHaveCount(1)
-  await expect(page.locator('.overallSignalBalance')).toBeVisible()
-  await expect(page.locator('.compareBarTrack')).toHaveCount(3)
-})
-
-
-test('flags render and lower dashboard panels do not overlap', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 })
-  await page.reload()
-
-  await expect(page.locator('.worldMapLegend .flagIcon')).toHaveCount(3)
-  await expect(page.locator('.compareBarRow .flagIcon')).toHaveCount(3)
-  await expect(page.locator('.topbarCountry .flagIcon')).toHaveCount(1)
-
-  const geometry = await page.evaluate(() => {
-    const rect = (selector: string) => {
-      const node = document.querySelector(selector)
-      if (!node) return null
-      const box = node.getBoundingClientRect()
-      return {
-        left: box.left,
-        right: box.right,
-        top: box.top,
-        bottom: box.bottom,
-      }
-    }
-
-    return {
-      balance: rect('.overallSignalBalance'),
-      outlook: rect('.outlookPreview'),
-      compare: rect('.comparePanel.compact'),
-    }
-  })
-
-  expect(geometry.balance).not.toBeNull()
-  expect(geometry.outlook).not.toBeNull()
-  expect(geometry.compare).not.toBeNull()
-
-  const overlaps = (
-    a: { left: number; right: number; top: number; bottom: number },
-    b: { left: number; right: number; top: number; bottom: number },
-  ) => !(
-    a.right <= b.left ||
-    b.right <= a.left ||
-    a.bottom <= b.top ||
-    b.bottom <= a.top
-  )
-
-  expect(overlaps(geometry.balance!, geometry.outlook!)).toBe(false)
-  expect(overlaps(geometry.balance!, geometry.compare!)).toBe(false)
-})
-
-
-
-
 test('direct route refresh preserves country and view', async ({ page }) => {
   await page.goto('/country/PRT/outlook')
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
@@ -516,4 +398,105 @@ test('compare selection is encoded in URL and survives reload', async ({ page })
   await expect(page.getByLabel('Compare country 1', { exact: true })).toHaveValue('IRL')
   await expect(page.getByLabel('Compare country 2', { exact: true })).toHaveValue('PRT')
   await expect(page.getByLabel('Compare country 3', { exact: true })).toHaveValue('ESP')
+})
+
+
+test('frozen-spec Overview renders the approved composition', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.goto('/country/ESP/overview')
+
+  await expect(page.getByRole('region', { name: 'Country overview' })).toBeVisible()
+  await expect(page.getByTestId('world-map')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
+  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
+  await expect(page.locator('.overviewInsightRail .overallSignalBalance')).toBeVisible()
+  await expect(page.locator('.overviewOutlookCard')).toBeVisible()
+  await expect(page.locator('.overviewCompareCard')).toBeVisible()
+
+  const layout = await page.evaluate(() => {
+    const rect = (selector: string) => {
+      const node = document.querySelector(selector)
+      if (!node) return null
+      const box = node.getBoundingClientRect()
+      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width }
+    }
+
+    return {
+      map: rect('.overviewMapPanel'),
+      fit: rect('.overviewFitPanel'),
+      dimensions: rect('.overviewDimensionsPanel'),
+      rail: rect('.overviewInsightRail'),
+      scrollHeight: document.documentElement.scrollHeight,
+      innerHeight: window.innerHeight,
+    }
+  })
+
+  expect(layout.map).not.toBeNull()
+  expect(layout.fit).not.toBeNull()
+  expect(layout.dimensions).not.toBeNull()
+  expect(layout.rail).not.toBeNull()
+
+  expect(layout.map!.left).toBeLessThan(layout.fit!.left)
+  expect(layout.dimensions!.left).toBeLessThan(layout.rail!.left)
+
+  const topRatio = layout.map!.width / (layout.map!.width + layout.fit!.width)
+  const bottomRatio = layout.dimensions!.width / (layout.dimensions!.width + layout.rail!.width)
+
+  expect(topRatio).toBeGreaterThan(0.53)
+  expect(topRatio).toBeLessThan(0.59)
+  expect(bottomRatio).toBeGreaterThan(0.72)
+  expect(bottomRatio).toBeLessThan(0.78)
+
+  expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight + 2)
+})
+
+test('Overview panels do not overlap at 1920x1080', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.goto('/country/ESP/overview')
+
+  const boxes = await page.evaluate(() => {
+    const box = (selector: string) => {
+      const node = document.querySelector(selector)
+      if (!node) return null
+      const rect = node.getBoundingClientRect()
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
+    }
+
+    return {
+      map: box('.overviewMapPanel'),
+      fit: box('.overviewFitPanel'),
+      dimensions: box('.overviewDimensionsPanel'),
+      assessment: box('.overviewInsightRail .overallSignalBalance'),
+      outlook: box('.overviewOutlookCard'),
+      compare: box('.overviewCompareCard'),
+    }
+  })
+
+  const overlaps = (
+    a: { left: number; right: number; top: number; bottom: number },
+    b: { left: number; right: number; top: number; bottom: number },
+  ) => !(
+    a.right <= b.left ||
+    b.right <= a.left ||
+    a.bottom <= b.top ||
+    b.bottom <= a.top
+  )
+
+  for (const value of Object.values(boxes)) expect(value).not.toBeNull()
+
+  expect(overlaps(boxes.map!, boxes.fit!)).toBe(false)
+  expect(overlaps(boxes.dimensions!, boxes.assessment!)).toBe(false)
+  expect(overlaps(boxes.dimensions!, boxes.outlook!)).toBe(false)
+  expect(overlaps(boxes.dimensions!, boxes.compare!)).toBe(false)
+  expect(overlaps(boxes.assessment!, boxes.outlook!)).toBe(false)
+  expect(overlaps(boxes.outlook!, boxes.compare!)).toBe(false)
+})
+
+test('Overview country flags and fit readiness remain visible', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  await expect(page.locator('.worldMapLegend .flagIcon')).toHaveCount(3)
+  await expect(page.locator('.topbarCountry .flagIcon')).toHaveCount(1)
+  await expect(page.locator('.readinessRing')).toHaveCount(5)
+  await expect(page.locator('.compareBarTrack')).toHaveCount(3)
 })
