@@ -1,6 +1,12 @@
 from app.models.profile import PersonalProfileResponse
 from app.services import career_fit as career_fit_module
-from app.services.career_fit import career_fit, classify_occupation, resolve_esco_occupation
+from app.services.career_fit import (
+    COUNTRY_EVIDENCE,
+    EURES_EVIDENCE_METADATA,
+    career_fit,
+    classify_occupation,
+    resolve_esco_occupation,
+)
 
 
 def _disable_esco_lookup(monkeypatch):
@@ -211,3 +217,13 @@ def test_career_viability_evidence_does_not_treat_surplus_as_supportive(monkeypa
     assert result["profile_skill_coverage_complete"] is True
     assert result["market_signal_supports_viability"] is False
     assert result["viability_evidence_ready"] is False
+
+
+def test_eures_market_evidence_is_versioned_outside_service_logic():
+    assert EURES_EVIDENCE_METADATA["evidence_id"] == "eures_lmi_2025_2024_conditions"
+    assert EURES_EVIDENCE_METADATA["rule_version"] == "EURES_LMI_2024_AS_PUBLISHED_2025"
+    assert EURES_EVIDENCE_METADATA["report_year"] == 2025
+    assert EURES_EVIDENCE_METADATA["conditions_year"] == 2024
+    assert set(COUNTRY_EVIDENCE) == {"ESP", "PRT", "IRL"}
+    assert "ict_professionals" in COUNTRY_EVIDENCE["IRL"]["shortage_groups"]
+    assert isinstance(COUNTRY_EVIDENCE["ESP"]["surplus_groups"], set)
