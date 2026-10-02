@@ -5,6 +5,7 @@ from app.services.financial_fit import financial_fit
 from app.services.legal_fit import legal_fit
 from app.services.language_fit import language_fit
 from app.services.career_fit import career_fit
+from app.services.ttv_temporal import temporal_evidence_graph
 
 
 STAGE_ORDER = [
@@ -28,6 +29,14 @@ def ttv_status(
     financial = financial_fit(profile, target)
     language = language_fit(profile, target)
     career = career_fit(profile, target)
+
+    temporal_evidence = temporal_evidence_graph(
+        profile,
+        legal,
+        language,
+        career,
+        financial,
+    )
 
     legal_ready = legal["status"] in {
         "domestic",
@@ -141,6 +150,9 @@ def ttv_status(
         "dependency_ready": dependency_ready,
         "temporal_evidence_state": temporal_evidence_state,
         "temporal_model_version": TEMPORAL_MODEL_VERSION,
+        "temporal_evidence_ready": temporal_evidence["calendar_ready"],
+        "temporal_evidence": temporal_evidence,
+        "candidate_time_range": temporal_evidence["candidate_range"],
         "estimate_status": (
             "available"
             if ready_for_time_estimate
@@ -154,6 +166,7 @@ def ttv_status(
             "TTV is a dependency graph, not a sum of arbitrary scores.",
             "Dependency readiness and temporal-estimation readiness are separate.",
             "No duration is produced until a validated temporal evidence model exists.",
+            "A candidate temporal range may be exposed for validation without becoming an AUGUR estimate.",
             "CareerFit readiness requires complete declared essential-skill coverage and a supportive shortage signal.",
             "Local-employment FinancialFit remains partial when only structural gross earnings evidence is available.",
         ],
