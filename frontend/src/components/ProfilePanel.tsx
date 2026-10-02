@@ -82,6 +82,22 @@ type CareerFitResponse = {
     matched_terms: string[]
   }
   market_signal: string | null
+  occupation_match?: {
+    status: string
+    threshold: number
+    selected: null | {
+      preferred_label: string
+      match_score: number
+      match_method: string
+      source_mode?: string
+      dataset_version?: string
+    }
+    candidates: Array<{
+      preferred_label: string
+      match_score: number
+      match_method: string
+    }>
+  }
   skill_match: {
     status: string
     dataset_mode?: string | null
@@ -603,8 +619,25 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             <div className="fitOutputHeader"><span>CAREER</span><strong>{careerFit?.status?.replaceAll('_', ' ') ?? 'loading'}</strong></div>
             <dl>
               <div><dt>Result</dt><dd>{careerFit?.market_signal?.replaceAll('_', ' ') ?? 'No conclusive market signal'}</dd></div>
-              <div><dt>Why</dt><dd>{careerFit?.occupation.occupation_group ? `Occupation group: ${careerFit.occupation.occupation_group.replaceAll('_', ' ')}` : 'Occupation not yet mapped.'}</dd></div>
-              <div><dt>Limitation</dt><dd>{careerFit?.evidence_complete ? 'Current evidence set complete.' : 'Evidence is partial; broad EURES signals do not by themselves unlock TTV.'}</dd></div>
+              <div>
+                <dt>Why</dt>
+                <dd>
+                  {careerFit?.occupation_match?.selected
+                    ? `ESCO: ${careerFit.occupation_match.selected.preferred_label} · ${Math.round(careerFit.occupation_match.selected.match_score * 100)}% label match`
+                    : careerFit?.occupation.occupation_group
+                    ? `Occupation group: ${careerFit.occupation.occupation_group.replaceAll('_', ' ')} · no confident ESCO occupation match`
+                    : 'Occupation not yet mapped.'}
+                </dd>
+              </div>
+              <div>
+                <dt>Evidence</dt>
+                <dd>
+                  {careerFit?.skill_match.dataset_mode
+                    ? `ESCO ${careerFit.skill_match.dataset_mode} · ${careerFit.skill_match.coverage == null ? 'coverage unavailable' : `${Math.round(careerFit.skill_match.coverage * 100)}% essential-skill coverage`}`
+                    : 'ESCO skill evidence not evaluated.'}
+                </dd>
+              </div>
+              <div><dt>Limitation</dt><dd>{careerFit?.evidence_complete ? 'Current evidence set complete.' : 'Evidence remains partial until a confident ESCO occupation match and full skill dataset are available.'}</dd></div>
             </dl>
           </article>
 
