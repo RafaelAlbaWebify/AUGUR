@@ -1,3 +1,51 @@
+
+.profilePageV2,
+.profilePageV2 > *,
+.profileTopGrid,
+.profileEditorCard,
+.profileCompletionCard,
+.profileEvidenceSection,
+.fitOutputsSection,
+.ttvReadinessSection,
+.profileGrid,
+.profileGrid > *,
+.evidenceStatusGrid,
+.evidenceStatusCard,
+.fitOutputGrid,
+.fitOutputCard {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.profileGrid input {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.profileSectionHeading,
+.fitOutputHeader,
+.ttvBlockedReason {
+  min-width: 0;
+}
+
+.profileSectionHeading > *,
+.fitOutputHeader > *,
+.ttvBlockedReason > * {
+  min-width: 0;
+}
+
+.fitOutputCard dd,
+.evidenceStatusCard small,
+.profileCompletionCard p,
+.ttvReadinessSection p {
+  overflow-wrap: anywhere;
+}
+
+.ttvDependencyPath {
+  width: 100%;
+  max-width: 100%;
+}
+
 .profilePageV2 {
   display: grid;
   gap: 18px;
