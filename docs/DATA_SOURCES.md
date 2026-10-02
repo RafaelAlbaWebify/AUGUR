@@ -205,9 +205,13 @@ The current manifest represents 2024 labour-market conditions published in the 2
 
 The manifest is deliberately separate from CareerFit logic. Updating EURES evidence should therefore change the evidence file and its metadata rather than silently changing classification code.
 
+Where the report table has been explicitly verified at ISCO unit-group level, AUGUR stores those occupation-specific shortage/surplus country lists in the same manifest. Unit-group evidence takes precedence over a broad occupation-group signal.
+
+This matters because a broad group can contain occupations with different country outcomes. For example, ICT professionals and ICT user-support technicians are not treated as interchangeable.
+
 Current limitations:
 
-- signals are broad occupation-group evidence;
+- not every occupation has yet been transcribed into the verified unit-group layer;
 - national methodologies contributing to EURES can differ;
 - the signal does not guarantee vacancy availability for an individual;
 - vacancy count, location, seniority and employer-specific requirements remain separate evidence gaps.
