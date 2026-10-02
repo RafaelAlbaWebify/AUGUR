@@ -816,6 +816,21 @@ def analytical_evidence_status() -> dict:
             """
         ).fetchall()
 
+        net_earnings_rows = con.execute(
+            """
+            SELECT
+                c.iso3 AS country_iso3,
+                COUNT(n.earnings_case) AS row_count,
+                MAX(n.period) AS latest_period,
+                MAX(n.retrieved_at) AS latest_retrieved_at
+            FROM countries c
+            LEFT JOIN labour_net_earnings_reference n
+              ON n.country_iso3 = c.iso3
+            GROUP BY c.iso3
+            ORDER BY c.iso3
+            """
+        ).fetchall()
+
         observation_columns = [
             "country_iso3",
             "observed_rows",
@@ -834,6 +849,13 @@ def analytical_evidence_status() -> dict:
             "latest_retrieved_at",
         ]
 
+        net_earnings_columns = [
+            "country_iso3",
+            "row_count",
+            "latest_period",
+            "latest_retrieved_at",
+        ]
+
         provider_freshness = {}
         for country_iso3, source_id, latest_retrieved_at in provider_freshness_rows:
             provider_freshness.setdefault(country_iso3, {})[source_id] = latest_retrieved_at
@@ -848,12 +870,17 @@ def analytical_evidence_status() -> dict:
             row[0]: dict(zip(earnings_columns, row))
             for row in earnings_rows
         }
+        net_earnings = {
+            row[0]: dict(zip(net_earnings_columns, row))
+            for row in net_earnings_rows
+        }
 
         return {
             "countries": [
                 {
                     **observations[country_iso3],
                     "labour_earnings": earnings[country_iso3],
+                    "net_earnings": net_earnings[country_iso3],
                 }
                 for country_iso3 in sorted(observations)
             ]
