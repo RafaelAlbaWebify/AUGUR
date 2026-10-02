@@ -75,6 +75,9 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert "ttv_temporal_model_ready" in body
     assert "ttv_temporal_model_version" in body
     assert "ttv_temporal_validation" in body
+    assert "ttv_calibration" in body
+    assert "infrastructure_ready" in body["ttv_calibration"]
+    assert "externally_calibrated" in body["ttv_calibration"]
     assert "ready_for_versioning" in body["ttv_temporal_validation"]
     assert "gates" in body["ttv_temporal_validation"]
     assert "country_analysis_ready" in body
