@@ -6,6 +6,7 @@ from app.db.analytics import analytical_evidence_status
 from app.esco_store import esco_status
 from app.providers import providers_for_country
 from app.services.ttv import TEMPORAL_MODEL_VERSION
+from app.services.ttv_temporal import temporal_model_validation_status
 
 
 SYNC_FRESHNESS_MAX_DAYS = 30
@@ -30,6 +31,7 @@ def operability_status() -> dict:
     now = datetime.now(timezone.utc)
     evidence = analytical_evidence_status()
     esco = esco_status()
+    temporal_validation = temporal_model_validation_status()
     countries = evidence["countries"]
 
     provider_coverage = {}
@@ -114,7 +116,10 @@ def operability_status() -> dict:
         country_analysis_ready
         and personal_fit_full_evidence_ready
     )
-    ttv_temporal_model_ready = TEMPORAL_MODEL_VERSION is not None
+    ttv_temporal_model_ready = (
+        TEMPORAL_MODEL_VERSION is not None
+        and temporal_validation["ready_for_versioning"]
+    )
     ready = analysis_ready and ttv_temporal_model_ready
 
     if ready:
@@ -142,6 +147,7 @@ def operability_status() -> dict:
         "analysis_ready": analysis_ready,
         "ttv_temporal_model_ready": ttv_temporal_model_ready,
         "ttv_temporal_model_version": TEMPORAL_MODEL_VERSION,
+        "ttv_temporal_validation": temporal_validation,
         "country_analysis_ready": country_analysis_ready,
         "data_sync_fresh": data_sync_fresh,
         "sync_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
