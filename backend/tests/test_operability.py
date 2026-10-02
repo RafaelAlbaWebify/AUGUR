@@ -54,12 +54,29 @@ def _all_providers(_country_iso3: str):
     ]
 
 
+def _supported_temporal_validation():
+    return {
+        "engine_version": "test",
+        "ready_for_versioning": True,
+        "gates": {},
+        "blockers": [],
+        "experimental": [],
+        "missing": [],
+        "notes": [],
+    }
+
+
 def _provider_ids():
     return ["WORLD_BANK", "EUROSTAT", "OECD", "IMF", "UN_WPP"]
 
 
 def test_operability_analysis_ready_still_blocks_without_temporal_model(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
     monkeypatch.setattr(
         module,
         "analytical_evidence_status",
@@ -94,6 +111,11 @@ def test_operability_analysis_ready_still_blocks_without_temporal_model(monkeypa
 
 def test_operability_ready_requires_validated_temporal_model(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
     monkeypatch.setattr(module, "TEMPORAL_MODEL_VERSION", "ttv-temporal-v1")
     monkeypatch.setattr(
         module,
@@ -132,6 +154,11 @@ def test_operability_partial_when_country_analysis_ready_but_esco_is_seed(monkey
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
         "analytical_evidence_status",
         lambda: {
             "countries": [
@@ -164,6 +191,11 @@ def test_operability_partial_when_country_analysis_ready_but_esco_is_seed(monkey
 
 def test_operability_partial_when_datastores_have_only_seed_esco(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
     monkeypatch.setattr(
         module,
         "analytical_evidence_status",
@@ -200,6 +232,11 @@ def test_operability_empty_when_no_evidence_or_esco(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
         "analytical_evidence_status",
         lambda: {
             "countries": [
@@ -229,6 +266,11 @@ def test_operability_empty_when_no_evidence_or_esco(monkeypatch):
 
 def test_operability_partial_when_a_configured_provider_is_missing(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
 
     incomplete_sources = ["WORLD_BANK", "EUROSTAT", "OECD", "IMF"]
     monkeypatch.setattr(
@@ -265,6 +307,11 @@ def test_operability_partial_when_a_configured_provider_is_missing(monkeypatch):
 
 def test_operability_partial_when_provider_sync_is_stale(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
 
     stale_time = datetime.now(timezone.utc) - timedelta(days=45)
     monkeypatch.setattr(
@@ -301,6 +348,11 @@ def test_operability_partial_when_provider_sync_is_stale(monkeypatch):
 
 def test_operability_partial_when_net_earnings_reference_is_missing(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
 
     countries = [
         _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
@@ -331,3 +383,55 @@ def test_operability_partial_when_net_earnings_reference_is_missing(monkeypatch)
 
     assert result["local_employment_evidence_ready"] is False
     assert "local_employment_earnings" in result["blockers"]
+
+
+def test_operability_exposes_temporal_validation_blockers(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {
+            "countries": [
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        lambda: {
+            "engine_version": "test",
+            "ready_for_versioning": False,
+            "gates": {
+                "local_financial_transition": {
+                    "state": "missing",
+                    "reason": "not_modelled",
+                }
+            },
+            "blockers": ["local_financial_transition"],
+            "experimental": [],
+            "missing": ["local_financial_transition"],
+            "notes": [],
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["ttv_temporal_model_ready"] is False
+    assert result["ttv_temporal_validation"]["ready_for_versioning"] is False
+    assert result["ttv_temporal_validation"]["blockers"] == [
+        "local_financial_transition"
+    ]
