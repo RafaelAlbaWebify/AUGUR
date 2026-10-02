@@ -67,3 +67,46 @@ def test_ttv_keeps_time_estimate_blocked_until_all_dependencies_are_viable(monke
     assert result["time_estimate"] is None
     assert result["stages"]["language_fit"]["evidence_state"] == "implemented"
     assert result["stages"]["career_fit"]["evidence_state"] == "partial"
+
+
+def test_ttv_dependencies_can_be_ready_before_temporal_model(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "legal_fit",
+        lambda profile, target: {
+            "status": "eu_free_movement_framework",
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "financial_fit",
+        lambda profile, target: {
+            "status": "portable_income_comparable",
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "language_fit",
+        lambda profile, target: {
+            "status": "work_ready_heuristic",
+            "work_ready": True,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "career_fit",
+        lambda profile, target: {
+            "status": "evidence_available",
+            "market_signal": "shortage",
+            "evidence_complete": True,
+        },
+    )
+
+    profile = PersonalProfileResponse(profile_id="default")
+    result = module.ttv_status(profile, "IRL")
+
+    assert result["blocked_by"] == []
+    assert result["dependency_ready"] is True
+    assert result["temporal_evidence_state"] == "not_implemented"
+    assert result["ready_for_time_estimate"] is False
+    assert result["time_estimate"] is None
