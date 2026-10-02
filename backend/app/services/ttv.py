@@ -87,6 +87,16 @@ def ttv_status(
         stages[stage_id]["evidence_state"] == "implemented"
         for stage_id in STAGE_ORDER
     )
+    dependency_ready = not blocked_by and evidence_complete
+
+    # Temporal evidence is deliberately separate from dependency readiness.
+    # AUGUR does not yet have a validated duration model for language acquisition,
+    # job search, legal processing or financial transition.
+    temporal_evidence_state = "not_implemented"
+    ready_for_time_estimate = (
+        dependency_ready
+        and temporal_evidence_state == "implemented"
+    )
 
     return {
         "target_country_iso3": target,
@@ -94,11 +104,14 @@ def ttv_status(
         "stage_order": STAGE_ORDER,
         "stages": stages,
         "blocked_by": blocked_by,
-        "ready_for_time_estimate": not blocked_by and evidence_complete,
+        "dependency_ready": dependency_ready,
+        "temporal_evidence_state": temporal_evidence_state,
+        "ready_for_time_estimate": ready_for_time_estimate,
         "time_estimate": None,
         "notes": [
             "TTV is a dependency graph, not a sum of arbitrary scores.",
-            "No time estimate is produced until all required country evidence layers are implemented.",
-            "LanguageFit uses a country-language CEFR heuristic; CareerFit has EURES market evidence but remains partial until ESCO skill matching is implemented.",
+            "Dependency readiness and temporal-estimation readiness are separate.",
+            "No duration is produced until a validated temporal evidence model exists.",
+            "Local-employment FinancialFit remains partial when only structural gross earnings evidence is available.",
         ],
     }
