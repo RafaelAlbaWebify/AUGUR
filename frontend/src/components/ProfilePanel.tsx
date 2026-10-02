@@ -119,6 +119,17 @@ type FinancialFitResponse = {
   target_country_iso3: string
   status: string
   reason: string | null
+  local_income_reference?: null | {
+    occupation_label: string
+    occupation_match_score: number
+    isco_group: string
+    ses_isco_major_group: string
+    gross_monthly_mean_eur: number
+    period: number
+    source_id: string
+    dataset_id: string
+    source_updated_at?: string | null
+  }
   portable_income_analysis: null | {
     origin_country_iso3: string
     monthly_net_income: number
@@ -644,9 +655,34 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           <article className="fitOutputCard">
             <div className="fitOutputHeader"><span>FINANCIAL</span><strong>{financialFit?.status?.replaceAll('_', ' ') ?? 'loading'}</strong></div>
             <dl>
-              <div><dt>Result</dt><dd>{financialFit?.portable_income_analysis ? `${financialFit.portable_income_analysis.purchasing_power_change_pct > 0 ? '+' : ''}${financialFit.portable_income_analysis.purchasing_power_change_pct.toFixed(1)}% purchasing-power change` : 'Not yet conclusive'}</dd></div>
-              <div><dt>Why</dt><dd>{financialFit?.portable_income_analysis ? `Relative cost factor ×${financialFit.portable_income_analysis.relative_cost_factor.toFixed(2)}` : 'Portable-income analysis unavailable.'}</dd></div>
-              <div><dt>Limitation</dt><dd>Local-income and household assumptions may require additional evidence.</dd></div>
+              <div>
+                <dt>Result</dt>
+                <dd>
+                  {financialFit?.portable_income_analysis
+                    ? `${financialFit.portable_income_analysis.purchasing_power_change_pct > 0 ? '+' : ''}${financialFit.portable_income_analysis.purchasing_power_change_pct.toFixed(1)}% purchasing-power change`
+                    : financialFit?.local_income_reference
+                    ? `€${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(financialFit.local_income_reference.gross_monthly_mean_eur)} gross/month reference`
+                    : 'Not yet conclusive'}
+                </dd>
+              </div>
+              <div>
+                <dt>Why</dt>
+                <dd>
+                  {financialFit?.portable_income_analysis
+                    ? `Relative cost factor ×${financialFit.portable_income_analysis.relative_cost_factor.toFixed(2)}`
+                    : financialFit?.local_income_reference
+                    ? `Eurostat SES ${financialFit.local_income_reference.period} · ${financialFit.local_income_reference.occupation_label} · ${financialFit.local_income_reference.ses_isco_major_group}`
+                    : 'Portable or local-income evidence unavailable.'}
+                </dd>
+              </div>
+              <div>
+                <dt>Limitation</dt>
+                <dd>
+                  {financialFit?.local_income_reference
+                    ? 'Structural mean gross earnings only; net pay, taxes, location and household budget are not yet modelled.'
+                    : 'Local-income and household assumptions may require additional evidence.'}
+                </dd>
+              </div>
             </dl>
           </article>
         </div>
