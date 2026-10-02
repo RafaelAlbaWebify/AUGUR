@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from app.db.analytics import analytical_evidence_status
 from app.esco_store import esco_status
 from app.providers import providers_for_country
+from app.services.career_fit import career_market_evidence_status
 from app.services.ttv import TEMPORAL_MODEL_VERSION
 from app.services.ttv_temporal import temporal_model_validation_status
 
@@ -40,6 +41,7 @@ def operability_status() -> dict:
     evidence = analytical_evidence_status()
     esco = esco_status()
     temporal_validation = temporal_model_validation_status()
+    career_market = career_market_evidence_status()
     countries = evidence["countries"]
 
     provider_coverage = {}
@@ -125,9 +127,13 @@ def operability_status() -> dict:
         and esco["relation_count"] > 0
     )
 
-    personal_fit_full_evidence_ready = (
+    personal_fit_core_evidence_ready = (
         local_employment_evidence_ready
         and esco_full_ready
+    )
+    personal_fit_full_evidence_ready = (
+        personal_fit_core_evidence_ready
+        and career_market["full_occupation_coverage"]
     )
 
     any_country_evidence = any(
@@ -139,7 +145,7 @@ def operability_status() -> dict:
 
     analysis_ready = (
         country_analysis_ready
-        and personal_fit_full_evidence_ready
+        and personal_fit_core_evidence_ready
     )
     ttv_temporal_model_ready = (
         TEMPORAL_MODEL_VERSION is not None
@@ -186,7 +192,9 @@ def operability_status() -> dict:
         "local_employment_evidence_ready": local_employment_evidence_ready,
         "job_transition_evidence_ready": job_transition_evidence_ready,
         "esco_full_ready": esco_full_ready,
+        "personal_fit_core_evidence_ready": personal_fit_core_evidence_ready,
         "personal_fit_full_evidence_ready": personal_fit_full_evidence_ready,
+        "career_market_evidence": career_market,
         "provider_coverage": provider_coverage,
         "blockers": blockers,
         "evidence": evidence,
@@ -195,9 +203,9 @@ def operability_status() -> dict:
             "Runtime health and analytical operability are separate.",
             "Country analysis requires observed evidence, official forecasts and every configured provider for each registered country.",
             "Provider synchronization and auxiliary labour evidence retrieval must be no more than 30 days old; source observation years are evaluated separately from retrieval freshness.",
-            "Full local-employment Personal Fit requires Eurostat occupational gross earnings, national net-earnings benchmark evidence and a full ESCO dataset.",
+            "Core local-employment Personal Fit requires Eurostat occupational gross earnings, national net-earnings benchmark evidence and a full ESCO dataset.",
             "Full AUGUR readiness also requires loaded job-transition evidence and a validated TTV temporal model.",
-            "Analysis readiness is reported separately from full product readiness.",
+            "Analysis readiness uses core Personal Fit evidence and is reported separately from exhaustive market-evidence coverage and full product readiness.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
     }
