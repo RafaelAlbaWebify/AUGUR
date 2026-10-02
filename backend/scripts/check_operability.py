@@ -103,6 +103,16 @@ def main() -> int:
         "externally_calibrated: "
         f"{calibration['externally_calibrated']}"
     )
+    if calibration.get("stage_metrics"):
+        print("stage_metrics:")
+        for stage_id, metrics in calibration["stage_metrics"].items():
+            print(
+                f"  {stage_id}: "
+                f"cases={metrics['case_count']} "
+                f"coverage={metrics['interval_coverage_pct']}% "
+                f"mae={metrics['mean_absolute_midpoint_error_weeks']}w "
+                f"bias={metrics['mean_signed_midpoint_error_weeks']}w"
+            )
 
     print()
     print("COUNTRY EVIDENCE")
