@@ -67,3 +67,32 @@ def test_eurostat_earnings_normalization_keeps_isco_dimension():
     assert {row["period"] for row in rows} == {2022}
     assert {row["unit"] for row in rows} == {"eur_gross_monthly"}
     assert {row["dataset_id"] for row in rows} == {"earn_ses22_21"}
+
+
+def test_eurostat_job_transition_normalization_keeps_probability_context():
+    payload = {
+        "id": ["geo", "age", "duration", "time"],
+        "size": [1, 1, 1, 2],
+        "dimension": {
+            "geo": {"category": {"index": {"IE": 0}}},
+            "age": {"category": {"index": {"Y15-74": 0}}},
+            "duration": {"category": {"index": {"TOTAL": 0}}},
+            "time": {"category": {"index": {"2024": 0, "2025": 1}}},
+        },
+        "value": [37.0, 38.0],
+        "updated": "2026-06-11",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize_job_transitions("IRL", payload)
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert rows[-1]["country_iso3"] == "IRL"
+    assert rows[-1]["period"] == 2025
+    assert rows[-1]["age_group"] == "Y15-74"
+    assert rows[-1]["duration_group"] == "TOTAL"
+    assert rows[-1]["probability_pct"] == 38.0
+    assert rows[-1]["dataset_id"] == "lfsi_long_e01"
