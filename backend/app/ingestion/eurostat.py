@@ -7,10 +7,29 @@ from itertools import product
 import httpx
 
 from app.catalog import country_config
-from app.db.analytics import upsert_labour_earnings, upsert_observations
+from app.db.analytics import (
+    upsert_labour_earnings,
+    upsert_labour_job_transitions,
+    upsert_observations,
+)
 
 BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 SOURCE_ID = "EUROSTAT"
+
+EUROSTAT_JOB_TRANSITIONS = {
+    "dataset_id": "lfsi_long_e01",
+    "filters": {
+        "geo": "__GEO__",
+        "freq": "A",
+        "unit": "PC_UNE",
+        "duration": "TOTAL",
+        "sex": "T",
+        "age": "Y15-74",
+    },
+    "age_group": "Y15-74",
+    "duration_group": "TOTAL",
+}
+
 
 EUROSTAT_EARNINGS = {
     "dataset_id": "earn_ses22_21",
@@ -390,6 +409,87 @@ class EurostatAdapter:
 
         return rows
 
+    def normalize_job_transitions(
+        self,
+        country_iso3: str,
+        payload: dict,
+    ) -> list[dict]:
+        dimension_ids = payload["id"]
+        dimension_sizes = payload["size"]
+        dimensions = payload["dimension"]
+        raw_values = payload["value"]
+
+        dimension_codes = [
+            self._ordered_codes(dimensions[dimension_id])
+            for dimension_id in dimension_ids
+        ]
+
+        retrieved_at = datetime.now(timezone.utc)
+        rows: list[dict] = []
+
+        for coordinates in product(
+            *[range(size) for size in dimension_sizes]
+        ):
+            flat_index = 0
+            multiplier = 1
+
+            for coordinate, size in zip(
+                reversed(coordinates),
+                reversed(dimension_sizes),
+            ):
+                flat_index += coordinate * multiplier
+                multiplier *= size
+
+            if isinstance(raw_values, list):
+                value = (
+                    raw_values[flat_index]
+                    if flat_index < len(raw_values)
+                    else None
+                )
+            else:
+                value = raw_values.get(str(flat_index))
+                if value is None:
+                    value = raw_values.get(flat_index)
+
+            if value is None:
+                continue
+
+            labels = {
+                dimension_id: dimension_codes[index][coordinates[index]]
+                for index, dimension_id in enumerate(dimension_ids)
+            }
+
+            time_code = labels.get("time")
+            age_group = labels.get("age") or labels.get("AGE")
+            duration_group = labels.get("duration")
+
+            if not time_code or not str(time_code).isdigit():
+                continue
+
+            rows.append(
+                {
+                    "country_iso3": country_iso3.upper(),
+                    "period": int(time_code),
+                    "age_group": (
+                        str(age_group)
+                        if age_group
+                        else EUROSTAT_JOB_TRANSITIONS["age_group"]
+                    ),
+                    "duration_group": (
+                        str(duration_group)
+                        if duration_group
+                        else EUROSTAT_JOB_TRANSITIONS["duration_group"]
+                    ),
+                    "probability_pct": float(value),
+                    "source_id": SOURCE_ID,
+                    "dataset_id": EUROSTAT_JOB_TRANSITIONS["dataset_id"],
+                    "retrieved_at": retrieved_at,
+                    "source_updated_at": payload.get("updated"),
+                }
+            )
+
+        return rows
+
     def sync_country(self, country_iso3: str) -> dict:
         country = country_config(country_iso3)
         geo = country["iso2"]
@@ -467,12 +567,49 @@ class EurostatAdapter:
             )
             print(f"   failed: {type(exc).__name__}: {exc}")
 
+        job_transition_detail = None
+        try:
+            print(
+                f"[job-transition] unemployment to employment probability "
+                f"({EUROSTAT_JOB_TRANSITIONS['dataset_id']})"
+            )
+            payload = self.fetch_dataset(
+                EUROSTAT_JOB_TRANSITIONS["dataset_id"],
+                {
+                    key: (geo if value == "__GEO__" else value)
+                    for key, value in EUROSTAT_JOB_TRANSITIONS["filters"].items()
+                },
+            )
+            transition_rows = self.normalize_job_transitions(
+                country_iso3,
+                payload,
+            )
+            inserted = upsert_labour_job_transitions(transition_rows)
+            total_rows += inserted
+            job_transition_detail = {
+                "dataset_id": EUROSTAT_JOB_TRANSITIONS["dataset_id"],
+                "rows": inserted,
+                "source_updated_at": payload.get("updated"),
+            }
+            print(f"   ok: {inserted} transition rows")
+        except Exception as exc:
+            failures.append(
+                {
+                    "indicator_id": "unemployment_to_employment_probability",
+                    "dataset_id": EUROSTAT_JOB_TRANSITIONS["dataset_id"],
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                }
+            )
+            print(f"   failed: {type(exc).__name__}: {exc}")
+
         return {
             "country_iso3": country_iso3.upper(),
             "source": SOURCE_ID,
             "rows": total_rows,
             "series": details,
             "earnings": earnings_detail,
+            "job_transition": job_transition_detail,
             "failures": failures,
             "complete": len(failures) == 0,
         }
