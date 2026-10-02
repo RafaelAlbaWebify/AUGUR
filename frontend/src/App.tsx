@@ -1,11 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
-import WorldMap from './components/WorldMap'
+import { useEffect, useState } from 'react'
 import ProfilePanel from './components/ProfilePanel'
 import ComparePanel from './components/ComparePanel'
-import FitSnapshot from './components/FitSnapshot'
-import DimensionSummaryCard from './components/DimensionSummaryCard'
-import OverallSignalBalance from './components/OverallSignalBalance'
 import CountrySelect from './components/CountrySelect'
+import OverviewPage from './components/OverviewPage'
 import { countryRoute, compareRoute, useAugurRoute } from './lib/routing'
 
 type Country = {
@@ -201,33 +198,6 @@ type ComparisonResponse = {
 }
 
 const API_BASE = 'http://127.0.0.1:8020'
-const LEGACY_OVERVIEW_LAYOUT: {
-  topSplit: number
-  bottomSplit: number
-  topOrder: 'map-fit' | 'fit-map'
-  utilityOrder: 'outlook-compare' | 'compare-outlook'
-  showFit: boolean
-  showOutlook: boolean
-  showCompare: boolean
-} = {
-  topSplit: 50,
-  bottomSplit: 75,
-  topOrder: 'map-fit',
-  utilityOrder: 'outlook-compare',
-  showFit: true,
-  showOutlook: true,
-  showCompare: true,
-}
-
-const dimensionOrder = [
-  'prosperity',
-  'productive_capacity',
-  'housing',
-  'demography',
-  'human_systems',
-  'fiscal',
-  'strategic_resilience',
-]
 
 
 const dimensionLabels: Record<string, string> = {
@@ -273,36 +243,6 @@ function formatValue(value: number, unit: string) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
-function trendSymbol(direction?: string) {
-  if (!direction || direction === 'unknown') return '·'
-  if (direction === 'stable') return '→'
-  if (direction === 'increase' || direction === 'strong_increase') return '↗'
-  return '↘'
-}
-
-function trendLabel(trend?: Trend) {
-  if (!trend) return 'Trend pending'
-  if (trend.interpretation === 'improving') return 'Improving'
-  if (trend.interpretation === 'deteriorating') return 'Deteriorating'
-  if (trend.interpretation === 'within_target') return 'Within target'
-  if (trend.direction === 'stable') return 'Stable'
-  return 'Contextual'
-}
-
-function targetStatusLabel(status?: string | null) {
-  if (!status) return null
-  if (status === 'within_target') return 'Within target'
-  if (status === 'above_target') return 'Above target'
-  if (status === 'below_target') return 'Below target'
-  return status
-}
-
-function changeLabel(value: number | null) {
-  if (value === null) return '—'
-  const sign = value > 0 ? '+' : ''
-  return `${sign}${value.toFixed(1)}%`
-}
-
 async function fetchJson(
   url: string,
   label: string,
@@ -321,17 +261,13 @@ export default function App() {
   )
   const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
-  const [trends, setTrends] = useState<TrendsResponse | null>(null)
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null)
-  const [sourceQuality, setSourceQuality] = useState<SourceQualityResponse | null>(null)
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
   const [compareCountries, setCompareCountries] = useState<string[]>(
     route.kind === 'compare' ? route.countries : ['IRL', 'ESP', 'PRT'],
   )
-  const [detailsExpanded, setDetailsExpanded] = useState(false)
-  const dashboardLayout = LEGACY_OVERVIEW_LAYOUT
   const activeView = route.view
   const [error, setError] = useState<string | null>(null)
 
@@ -448,17 +384,13 @@ export default function App() {
 
     setError(null)
     setSnapshot(null)
-    setTrends(null)
     setAssessment(null)
-    setSourceQuality(null)
     setTrajectory(null)
     setScenarios(null)
 
     Promise.allSettled([
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/snapshot`, 'Snapshot', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trends`, 'Trends', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/assessment`, 'Assessment', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/source-quality`, 'Source quality', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trajectory`, 'Trajectory', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/scenarios`, 'Scenarios', signal),
     ]).then((results) => {
@@ -466,9 +398,7 @@ export default function App() {
 
       const [
         snapshotResult,
-        trendsResult,
         assessmentResult,
-        sourceQualityResult,
         trajectoryResult,
         scenariosResult,
       ] = results
@@ -478,14 +408,8 @@ export default function App() {
       if (snapshotResult.status === 'fulfilled') setSnapshot(snapshotResult.value)
       else failures.push(String(snapshotResult.reason))
 
-      if (trendsResult.status === 'fulfilled') setTrends(trendsResult.value)
-      else failures.push(String(trendsResult.reason))
-
       if (assessmentResult.status === 'fulfilled') setAssessment(assessmentResult.value)
       else failures.push(String(assessmentResult.reason))
-
-      if (sourceQualityResult.status === 'fulfilled') setSourceQuality(sourceQualityResult.value)
-      else failures.push(String(sourceQualityResult.reason))
 
       if (trajectoryResult.status === 'fulfilled') setTrajectory(trajectoryResult.value)
       else failures.push(String(trajectoryResult.reason))
@@ -501,55 +425,8 @@ export default function App() {
 
   const selectedCountryMeta = countries.find((country) => country.iso3 === selectedCountry)
 
-  const outlookPreview = useMemo(() => {
-    const first = scenarios?.indicators?.[0]
-    if (!first) return null
-
-    const baseline = first.scenarios.baseline
-    const improvement = first.scenarios.improvement
-    const stress = first.scenarios.stress
-
-    const values = [improvement, baseline, stress]
-    const max = Math.max(...values.map((value) => Math.abs(value)), 1)
-
-    return {
-      name: first.name,
-      improvement,
-      baseline,
-      stress,
-      widths: {
-        improvement: Math.max(8, (Math.abs(improvement) / max) * 100),
-        baseline: Math.max(8, (Math.abs(baseline) / max) * 100),
-        stress: Math.max(8, (Math.abs(stress) / max) * 100),
-      },
-      unit: first.unit,
-    }
-  }, [scenarios])
-
-  const grouped = useMemo(() => {
-    const groups: Record<string, Indicator[]> = {}
-    const trendById = new Map((trends?.indicators ?? []).map((item) => [item.indicator_id, item]))
-    const qualityById = new Map((sourceQuality?.indicators ?? []).map((item) => [item.indicator_id, item]))
-
-    for (const indicator of snapshot?.indicators ?? []) {
-      const trendItem = trendById.get(indicator.indicator_id)
-      const enriched = {
-        ...indicator,
-        trend: trendItem?.trend,
-        interpretation_policy: trendItem?.interpretation_policy,
-        target_min: trendItem?.target_min,
-        target_max: trendItem?.target_max,
-        sourceQuality: qualityById.get(indicator.indicator_id),
-      }
-      groups[indicator.dimension] ??= []
-      groups[indicator.dimension].push(enriched)
-    }
-
-    return groups
-  }, [snapshot, trends, sourceQuality])
-
   return (
-    <main className={`shell view-${activeView} ${detailsExpanded ? 'detailsOpen' : ''}`}>
+    <main className={`shell view-${activeView}`}>
       <header className="dashboardTopbar">
         <div className="brandCompact">
           <h1 className="brandMark">AUGUR</h1>
@@ -609,136 +486,22 @@ export default function App() {
 
 
       {activeView === 'overview' && (
-      <div className="overviewDashboard">
-        <div
-          className={`overviewTopRow ${dashboardLayout.topOrder === 'fit-map' ? 'fitFirst' : ''}`}
-          style={{
-            gridTemplateColumns: dashboardLayout.showFit
-              ? `${dashboardLayout.topSplit}fr ${100 - dashboardLayout.topSplit}fr`
-              : '1fr',
-          }}
-        >
-          <section className="overviewMapArea">
-            <WorldMap
-              countries={countries}
-              selectedCountry={selectedCountry}
-              onSelectCountry={changeCountry}
-            />
-          </section>
-
-          {dashboardLayout.showFit && (
-            <section className="overviewFitArea">
-              <FitSnapshot apiBase={API_BASE} targetCountry={selectedCountry} />
-            </section>
-          )}
-        </div>
-
-        <div
-          className="overviewBottomRow"
-          style={{
-            gridTemplateColumns:
-              dashboardLayout.showOutlook || dashboardLayout.showCompare
-                ? `${dashboardLayout.bottomSplit}fr ${100 - dashboardLayout.bottomSplit}fr`
-                : '1fr',
-          }}
-        >
-          <section className="overviewDimensions">
-            <div className="dimensionOverviewBar">
-              <div>
-                <div className="label">KEY DIMENSIONS</div>
-                <h3>{selectedCountryMeta?.name ?? selectedCountry} at a glance</h3>
-              </div>
-              <div className="dimensionOverviewActions">
-                <OverallSignalBalance dimensions={assessment?.dimensions} />
-                <button
-                  type="button"
-                  className="detailsToggle"
-                  onClick={() => setDetailsExpanded((value) => !value)}
-                >
-                  {detailsExpanded ? 'Hide indicators' : 'View all indicators'}
-                </button>
-              </div>
-            </div>
-
-            <div className="assessmentGrid mockDimensionGrid">
-              {dimensionOrder.map((dimension) => {
-                const item = assessment?.dimensions?.[dimension]
-                if (!item) return null
-
-                return (
-                  <DimensionSummaryCard
-                    key={dimension}
-                    label={dimensionLabels[dimension] ?? dimension}
-                    item={item}
-                  />
-                )
-              })}
-            </div>
-          </section>
-
-          {(dashboardLayout.showOutlook || dashboardLayout.showCompare) && (
-            <aside
-              className={`overviewUtilityRail ${dashboardLayout.utilityOrder === 'compare-outlook' ? 'compareFirst' : ''}`}
-            >
-              {dashboardLayout.showOutlook && (
-                <section className="outlookPreview">
-                  <div className="comparePanelHeader">
-                    <div>
-                      <div className="label">OUTLOOK</div>
-                      <strong>Official horizons</strong>
-                    </div>
-                    <button type="button" onClick={() => navigateView('outlook')}>
-                      Open
-                    </button>
-                  </div>
-
-                  {outlookPreview ? (
-                    <div className="scenarioPreview">
-                      <span className="scenarioPreviewName">{outlookPreview.name}</span>
-                      <div className="scenarioPreviewRow optimistic">
-                        <span>Optimistic</span>
-                        <div><i style={{ width: `${outlookPreview.widths.improvement}%` }} /></div>
-                        <strong>{formatValue(outlookPreview.improvement, outlookPreview.unit)}</strong>
-                      </div>
-                      <div className="scenarioPreviewRow baseline">
-                        <span>Baseline</span>
-                        <div><i style={{ width: `${outlookPreview.widths.baseline}%` }} /></div>
-                        <strong>{formatValue(outlookPreview.baseline, outlookPreview.unit)}</strong>
-                      </div>
-                      <div className="scenarioPreviewRow stress">
-                        <span>Stress</span>
-                        <div><i style={{ width: `${outlookPreview.widths.stress}%` }} /></div>
-                        <strong>{formatValue(outlookPreview.stress, outlookPreview.unit)}</strong>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="outlookPreviewGrid">
-                      {(trajectory?.horizons ?? []).map((horizon) => (
-                        <div key={horizon.year}>
-                          <strong>{horizon.year}</strong>
-                          <span>{horizon.indicator_count} indicators</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </section>
-              )}
-
-              {dashboardLayout.showCompare && (
-                <ComparePanel
-                  compact
-                  countries={countries}
-                  selected={compareCountries}
-                  onChange={updateCompareCountry}
-                  comparison={comparison}
-                  formatValue={formatValue}
-                  dimensionLabels={dimensionLabels}
-                />
-              )}
-            </aside>
-          )}
-        </div>
-      </div>
+        <OverviewPage
+          apiBase={API_BASE}
+          countries={countries}
+          selectedCountry={selectedCountry}
+          selectedCountryName={selectedCountryMeta?.name ?? selectedCountry}
+          assessment={assessment}
+          scenarios={scenarios}
+          compareCountries={compareCountries}
+          comparison={comparison}
+          onCountryChange={changeCountry}
+          onCompareCountryChange={updateCompareCountry}
+          onOpenOutlook={() => navigateView('outlook')}
+          onOpenCompare={() => navigateView('compare')}
+          formatValue={formatValue}
+          dimensionLabels={dimensionLabels}
+        />
       )}
 
       {activeView === 'profile' && (
@@ -852,90 +615,6 @@ export default function App() {
           dimensionLabels={dimensionLabels}
         />
       )}
-
-      {activeView === 'overview' && detailsExpanded && dimensionOrder.map((dimension) => {
-        const indicators = grouped[dimension] ?? []
-        if (!indicators.length) return null
-
-        return (
-          <section className="dimensionSection" key={dimension}>
-            <div className="dimensionHeader">
-              <div>
-                <div className="label">DIMENSION</div>
-                <h3>{dimensionLabels[dimension] ?? dimension}</h3>
-              </div>
-              <span>{indicators.length} indicators</span>
-            </div>
-
-            <div className="indicatorGrid">
-              {indicators.map((indicator) => (
-                <article className="metricCard" key={indicator.indicator_id}>
-                  <div className="metricTop">
-                    <span className="metricName">{indicator.name}</span>
-                    <span className="metricYear">{indicator.period}</span>
-                  </div>
-
-                  <div className="metricValue">
-                    {formatValue(indicator.value, indicator.unit)}
-                  </div>
-
-                  <div className="trendBlock">
-                    <div className={`trendState ${indicator.trend?.interpretation ?? ''}`}>
-                      <span className="trendArrow">{trendSymbol(indicator.trend?.direction)}</span>
-                      <span>{trendLabel(indicator.trend)}</span>
-                      <small>{indicator.trend?.confidence ?? '—'} confidence</small>
-                    </div>
-
-                    {indicator.interpretation_policy === 'target_range' && (
-                      <div className="targetRule">
-                        <span>{targetStatusLabel(indicator.trend?.target_status)}</span>
-                        <span>
-                          target {indicator.target_min}–{indicator.target_max}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="trendChanges">
-                      <span>1Y <strong>{changeLabel(indicator.trend?.pct_change_1y ?? null)}</strong></span>
-                      <span>3Y <strong>{changeLabel(indicator.trend?.pct_change_3y ?? null)}</strong></span>
-                      <span>5Y <strong>{changeLabel(indicator.trend?.pct_change_5y ?? null)}</strong></span>
-                    </div>
-                  </div>
-
-                  <div className="sourceQuality">
-                    <div>
-                      <strong>{indicator.sourceQuality?.preferred_source_name ?? indicator.source_id.replace('_', ' ')}</strong>
-                      <span>
-                        preferred source · {indicator.sourceQuality?.preferred_period ?? indicator.period}
-                      </span>
-                    </div>
-
-                    <div>
-                      <strong>
-                        {indicator.sourceQuality?.source_count === 2
-                          ? 'Corroborated'
-                          : indicator.sourceQuality?.source_count && indicator.sourceQuality.source_count > 2
-                          ? `${indicator.sourceQuality.source_count} sources`
-                          : 'Single source'}
-                      </strong>
-                      <span>
-                        {indicator.sourceQuality?.disagreement_pct == null
-                          ? 'no same-period comparison'
-                          : `${indicator.sourceQuality.disagreement_pct.toFixed(2)}% disagreement · ${indicator.sourceQuality.common_period}`}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="metricFooter">
-                    <span>{indicator.source_id.replace('_', ' ')}</span>
-                    <span>{indicator.indicator_id}</span>
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        )
-      })}
 
       <footer>
         AUGUR v0.1 · Phase 1 · Observed data + trend analysis
