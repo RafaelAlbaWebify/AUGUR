@@ -614,7 +614,7 @@ export default function App() {
             <WorldMap
               countries={countries}
               selectedCountry={selectedCountry}
-              onSelectCountry={setSelectedCountry}
+              onSelectCountry={changeCountry}
             />
           </section>
 
