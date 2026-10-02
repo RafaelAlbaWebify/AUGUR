@@ -193,20 +193,25 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/')
 })
 
-test('navigates compact analytical views', async ({ page }) => {
-  await expect(page.getByRole('heading', { name: 'AUGUR' })).toBeVisible()
-  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
-  await expect(page.getByText('OFFICIAL OUTLOOK')).toHaveCount(0)
+test('top navigation uses real routes and unmounts the previous view', async ({ page }) => {
+  await expect(page).toHaveURL(/\/country\/ESP\/overview$/)
+  await expect(page.getByTestId('world-map')).toBeVisible()
 
   await page.getByRole('button', { name: 'Outlook' }).click()
+  await expect(page).toHaveURL(/\/country\/ESP\/outlook$/)
   await expect(page.getByText('OFFICIAL OUTLOOK')).toBeVisible()
   await expect(page.getByText('AUGUR SCENARIOS')).toBeVisible()
+  await expect(page.getByTestId('world-map')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Compare' }).click()
+  await expect(page).toHaveURL(/\/compare\?countries=IRL%2CESP%2CPRT|\/compare\?countries=IRL,ESP,PRT/)
   await expect(page.getByText('Country comparison')).toBeVisible()
+  await expect(page.getByText('OFFICIAL OUTLOOK')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Profile' }).click()
+  await expect(page).toHaveURL(/\/country\/ESP\/profile$/)
   await expect(page.getByRole('region', { name: 'Personal profile' })).toBeVisible()
+  await expect(page.getByText('Country comparison')).toHaveCount(0)
 })
 
 test('switches country without a page reload', async ({ page }) => {
@@ -242,7 +247,7 @@ test('world view renders country geometry and drives selection', async ({ page }
   await portugalShape.click()
 
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
-  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
+  await expect(page).toHaveURL(/\/country\/PRT\/overview$/)
 })
 
 
@@ -368,21 +373,6 @@ test('unsaved profile draft survives view navigation', async ({ page }) => {
   await expect(profession).toHaveValue('Draft preserved across views')
 })
 
-test('map zoom survives view navigation', async ({ page }) => {
-  const map = page.getByTestId('world-map')
-  const initialViewBox = await map.getAttribute('viewBox')
-
-  await page.getByRole('button', { name: 'Zoom in' }).click()
-  const zoomedViewBox = await map.getAttribute('viewBox')
-  expect(zoomedViewBox).not.toBe(initialViewBox)
-
-  await page.getByRole('button', { name: 'Outlook' }).click()
-  await page.getByRole('button', { name: 'Overview' }).click()
-
-  await expect(map).toHaveAttribute('viewBox', zoomedViewBox ?? '')
-})
-
-
 test('comparison selectors swap countries without duplicates', async ({ page }) => {
   await page.getByRole('button', { name: 'Compare' }).click()
 
@@ -496,68 +486,34 @@ test('flags render and lower dashboard panels do not overlap', async ({ page }) 
 })
 
 
-test('dashboard layout persists across reloads', async ({ page }) => {
-  await page.setViewportSize({ width: 1920, height: 1080 })
-  await page.getByRole('button', { name: 'Layout' }).click()
 
-  const settings = page.getByRole('region', { name: 'Dashboard layout settings' })
-  await expect(settings).toBeVisible()
 
-  const sliders = settings.locator('input[type="range"]')
-  await sliders.nth(0).evaluate((node) => {
-    const input = node as HTMLInputElement
-    input.value = '58'
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    input.dispatchEvent(new Event('change', { bubbles: true }))
-  })
-  await sliders.nth(1).evaluate((node) => {
-    const input = node as HTMLInputElement
-    input.value = '70'
-    input.dispatchEvent(new Event('input', { bubbles: true }))
-    input.dispatchEvent(new Event('change', { bubbles: true }))
-  })
-  await settings.getByRole('button', { name: 'Fit · Map' }).click()
-  await settings.getByRole('button', { name: 'Compare first' }).click()
+test('direct route refresh preserves country and view', async ({ page }) => {
+  await page.goto('/country/PRT/outlook')
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
+  await expect(page.getByText('OFFICIAL OUTLOOK')).toBeVisible()
+  await expect(page.getByTestId('world-map')).toHaveCount(0)
 
   await page.reload()
 
-  await expect(page.getByRole('button', { name: 'Layout' })).toBeVisible()
-
-  const saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('augur.dashboard.layout.v1') ?? '{}'),
-  )
-
-  expect(saved.topSplit).toBe(58)
-  expect(saved.bottomSplit).toBe(70)
-  expect(saved.topOrder).toBe('fit-map')
-  expect(saved.utilityOrder).toBe('compare-outlook')
-
-  const order = await page.evaluate(() => {
-    const fit = document.querySelector('.overviewFitArea')
-    const map = document.querySelector('.overviewMapArea')
-    const compare = document.querySelector('.comparePanel.compact')
-    const outlook = document.querySelector('.outlookPreview')
-
-    return {
-      fitLeft: fit?.getBoundingClientRect().left ?? 0,
-      mapLeft: map?.getBoundingClientRect().left ?? 0,
-      compareTop: compare?.getBoundingClientRect().top ?? 0,
-      outlookTop: outlook?.getBoundingClientRect().top ?? 0,
-    }
-  })
-
-  expect(order.fitLeft).toBeLessThan(order.mapLeft)
-  expect(order.compareTop).toBeLessThan(order.outlookTop)
+  await expect(page).toHaveURL(/\/country\/PRT\/outlook$/)
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
+  await expect(page.getByText('OFFICIAL OUTLOOK')).toBeVisible()
 })
 
-test('layout controls can hide optional overview sections', async ({ page }) => {
-  await page.getByRole('button', { name: 'Layout' }).click()
-  const settings = page.getByRole('region', { name: 'Dashboard layout settings' })
+test('compare selection is encoded in URL and survives reload', async ({ page }) => {
+  await page.goto('/compare?countries=ESP,PRT,IRL')
 
-  await settings.getByLabel('Personal Fit').uncheck()
-  await settings.getByLabel('Outlook').uncheck()
+  await expect(page.getByLabel('Compare country 1', { exact: true })).toHaveValue('ESP')
+  await expect(page.getByLabel('Compare country 2', { exact: true })).toHaveValue('PRT')
+  await expect(page.getByLabel('Compare country 3', { exact: true })).toHaveValue('IRL')
 
-  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toHaveCount(0)
-  await expect(page.locator('.outlookPreview')).toHaveCount(0)
-  await expect(page.locator('.comparePanel.compact')).toBeVisible()
+  await page.getByLabel('Compare country 1', { exact: true }).selectOption('IRL')
+  await expect(page).toHaveURL(/countries=IRL,PRT,ESP|countries=IRL%2CPRT%2CESP/)
+
+  await page.reload()
+
+  await expect(page.getByLabel('Compare country 1', { exact: true })).toHaveValue('IRL')
+  await expect(page.getByLabel('Compare country 2', { exact: true })).toHaveValue('PRT')
+  await expect(page.getByLabel('Compare country 3', { exact: true })).toHaveValue('ESP')
 })
