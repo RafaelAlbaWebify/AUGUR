@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import ProfilePanel from './components/ProfilePanel'
 import ComparePanel from './components/ComparePanel'
 import CountrySelect from './components/CountrySelect'
 import OverviewPage from './components/OverviewPage'
+import IndicatorsPage from './components/IndicatorsPage'
 import LayoutControls, { type DashboardLayout } from './components/LayoutControls'
-import { countryRoute, compareRoute, useAugurRoute } from './lib/routing'
+import { countryRoute, compareRoute, dimensionRoute, useAugurRoute, type CountryView } from './lib/routing'
 
 type Country = {
   iso2: string
@@ -277,10 +278,12 @@ export default function App() {
   const { route, navigate } = useAugurRoute()
   const [countries, setCountries] = useState<Country[]>([])
   const [selectedCountry, setSelectedCountry] = useState(
-    route.kind === 'country' ? route.countryIso3 : 'ESP',
+    route.kind === 'compare' ? 'ESP' : route.countryIso3,
   )
   const [health, setHealth] = useState<Health | null>(null)
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null)
+  const [trends, setTrends] = useState<TrendsResponse | null>(null)
+  const [sourceQuality, setSourceQuality] = useState<SourceQualityResponse | null>(null)
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null)
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
@@ -305,10 +308,10 @@ export default function App() {
   }, [activeView])
 
   useEffect(() => {
-    if (route.kind === 'country') {
-      setSelectedCountry(route.countryIso3)
-    } else {
+    if (route.kind === 'compare') {
       setCompareCountries(route.countries)
+    } else {
+      setSelectedCountry(route.countryIso3)
     }
   }, [route])
 
@@ -392,10 +395,12 @@ export default function App() {
 
     if (route.kind === 'country') {
       navigate(countryRoute(iso3, route.view))
+    } else if (route.kind === 'dimension') {
+      navigate(dimensionRoute(iso3, route.dimension))
     }
   }
 
-  function navigateView(view: 'overview' | 'outlook' | 'compare' | 'profile') {
+  function navigateView(view: CountryView | 'compare') {
     if (view === 'compare') {
       navigate(compareRoute(compareCountries))
       return
@@ -410,12 +415,16 @@ export default function App() {
 
     setError(null)
     setSnapshot(null)
+    setTrends(null)
+    setSourceQuality(null)
     setAssessment(null)
     setTrajectory(null)
     setScenarios(null)
 
     Promise.allSettled([
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/snapshot`, 'Snapshot', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trends`, 'Trends', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/source-quality`, 'Source quality', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/assessment`, 'Assessment', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trajectory`, 'Trajectory', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/scenarios`, 'Scenarios', signal),
@@ -424,6 +433,8 @@ export default function App() {
 
       const [
         snapshotResult,
+        trendsResult,
+        sourceQualityResult,
         assessmentResult,
         trajectoryResult,
         scenariosResult,
@@ -433,6 +444,12 @@ export default function App() {
 
       if (snapshotResult.status === 'fulfilled') setSnapshot(snapshotResult.value)
       else failures.push(String(snapshotResult.reason))
+
+      if (trendsResult.status === 'fulfilled') setTrends(trendsResult.value)
+      else failures.push(String(trendsResult.reason))
+
+      if (sourceQualityResult.status === 'fulfilled') setSourceQuality(sourceQualityResult.value)
+      else failures.push(String(sourceQualityResult.reason))
 
       if (assessmentResult.status === 'fulfilled') setAssessment(assessmentResult.value)
       else failures.push(String(assessmentResult.reason))
@@ -450,6 +467,23 @@ export default function App() {
   }, [selectedCountry])
 
   const selectedCountryMeta = countries.find((country) => country.iso3 === selectedCountry)
+
+  const enrichedIndicators = useMemo(() => {
+    const trendById = new Map(
+      (trends?.indicators ?? []).map((item) => [item.indicator_id, item]),
+    )
+
+    return (snapshot?.indicators ?? []).map((indicator) => {
+      const trendItem = trendById.get(indicator.indicator_id)
+      return {
+        ...indicator,
+        trend: trendItem?.trend,
+        interpretation_policy: trendItem?.interpretation_policy,
+        target_min: trendItem?.target_min,
+        target_max: trendItem?.target_max,
+      }
+    })
+  }, [snapshot, trends])
 
   return (
     <main className={`shell view-${activeView}`}>
@@ -473,6 +507,7 @@ export default function App() {
         <nav className="viewNav topbarNav" aria-label="AUGUR views">
           {[
             ['overview', 'Overview'],
+            ['indicators', 'Indicators'],
             ['outlook', 'Outlook'],
             ['compare', 'Compare'],
             ['profile', 'Profile'],
@@ -480,8 +515,8 @@ export default function App() {
             <button
               key={id}
               type="button"
-              className={activeView === id ? 'active' : ''}
-              onClick={() => navigateView(id as 'overview' | 'outlook' | 'compare' | 'profile')}
+              className={activeView === id || (activeView === 'dimension' && id === 'indicators') ? 'active' : ''}
+              onClick={() => navigateView(id as CountryView | 'compare')}
             >
               {label}
             </button>
@@ -541,6 +576,7 @@ export default function App() {
           onCompareCountryChange={updateCompareCountry}
           onOpenOutlook={() => navigateView('outlook')}
           onOpenCompare={() => navigateView('compare')}
+          onOpenDimension={(dimension) => navigate(dimensionRoute(selectedCountry, dimension))}
           formatValue={formatValue}
           dimensionLabels={dimensionLabels}
           layout={dashboardLayout}
@@ -551,6 +587,20 @@ export default function App() {
       <div>
         <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
       </div>
+      )}
+
+      {(activeView === 'indicators' || activeView === 'dimension') && (
+        <IndicatorsPage
+          countryName={selectedCountryMeta?.name ?? selectedCountry}
+          indicators={enrichedIndicators}
+          sourceQuality={sourceQuality?.indicators ?? []}
+          assessment={assessment?.dimensions}
+          dimension={route.kind === 'dimension' ? route.dimension : null}
+          dimensionLabels={dimensionLabels}
+          formatValue={formatValue}
+          onOpenDimension={(dimension) => navigate(dimensionRoute(selectedCountry, dimension))}
+          onBackToIndicators={() => navigate(countryRoute(selectedCountry, 'indicators'))}
+        />
       )}
 
       {activeView === 'outlook' && (
