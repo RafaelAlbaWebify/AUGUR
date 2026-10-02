@@ -363,6 +363,46 @@ export default function App() {
   }, [])
 
   useEffect(() => {
+    let controller: AbortController | null = null
+
+    function refreshRuntimeState() {
+      controller?.abort()
+      controller = new AbortController()
+      const signal = controller.signal
+
+      Promise.allSettled([
+        fetchJson(`${API_BASE}/api/health`, 'Health', signal),
+        fetchJson(`${API_BASE}/api/operability`, 'Operability', signal),
+      ]).then(([healthResult, operabilityResult]) => {
+        if (signal.aborted) return
+
+        if (healthResult.status === 'fulfilled') {
+          setHealth(healthResult.value)
+        }
+
+        if (operabilityResult.status === 'fulfilled') {
+          setOperability(operabilityResult.value)
+        }
+      })
+    }
+
+    function handleVisibilityChange() {
+      if (document.visibilityState === 'visible') {
+        refreshRuntimeState()
+      }
+    }
+
+    window.addEventListener('focus', refreshRuntimeState)
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+
+    return () => {
+      controller?.abort()
+      window.removeEventListener('focus', refreshRuntimeState)
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+    }
+  }, [])
+
+  useEffect(() => {
     const controller = new AbortController()
     const signal = controller.signal
     const query = compareCountries.join(',')
