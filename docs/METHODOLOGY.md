@@ -180,6 +180,10 @@ ESCO occupation resolution is confidence-gated. Low-confidence candidates are no
 
 Seed ESCO data validates the local pipeline but can never mark skill evidence complete.
 
+AUGUR distinguishes **evidence completeness** from **viability evidence**. A full ESCO dataset can make the occupational evidence complete, but TTV does not treat CareerFit as ready unless the profile also declares complete coverage of the ESCO skills marked essential for that occupation and the implemented EURES signal is supportive (`shortage`).
+
+This is deliberately conservative: ESCO essential skills are normally required across employers and contexts, but a supportive shortage signal plus declared skill coverage is still not a guarantee of employment.
+
 ### FinancialFit
 
 For portable income, FinancialFit compares origin and target household price-level indices and reports relative purchasing-power change.
