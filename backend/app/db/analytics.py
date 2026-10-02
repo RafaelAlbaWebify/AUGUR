@@ -698,6 +698,7 @@ def analytical_evidence_status() -> dict:
                 MAX(o.period) FILTER (
                     WHERE o.observation_type = 'observed'
                 ) AS latest_observed_period,
+                MAX(o.retrieved_at) AS latest_retrieved_at,
                 COUNT(o.indicator_id) FILTER (
                     WHERE o.observation_type = 'official_forecast'
                 ) AS official_forecast_rows,
@@ -719,7 +720,8 @@ def analytical_evidence_status() -> dict:
                 c.iso3 AS country_iso3,
                 COUNT(e.isco08) AS row_count,
                 COUNT(DISTINCT e.isco08) AS isco_group_count,
-                MAX(e.period) AS latest_period
+                MAX(e.period) AS latest_period,
+                MAX(e.retrieved_at) AS latest_retrieved_at
             FROM countries c
             LEFT JOIN labour_earnings e
               ON e.country_iso3 = c.iso3
@@ -733,6 +735,7 @@ def analytical_evidence_status() -> dict:
             "observed_rows",
             "observed_indicators",
             "latest_observed_period",
+            "latest_retrieved_at",
             "official_forecast_rows",
             "source_count",
             "source_ids",
@@ -742,6 +745,7 @@ def analytical_evidence_status() -> dict:
             "row_count",
             "isco_group_count",
             "latest_period",
+            "latest_retrieved_at",
         ]
 
         observations = {}
