@@ -87,6 +87,8 @@ def main() -> int:
         f"infrastructure_ready: "
         f"{calibration['infrastructure_ready']}"
     )
+    print(f"protocol_state: {calibration['protocol_state']}")
+    print(f"protocol_version: {calibration['protocol_version']}")
     print(f"case_count: {calibration['case_count']}")
     print(f"country_count: {calibration['country_count']}")
     print(
