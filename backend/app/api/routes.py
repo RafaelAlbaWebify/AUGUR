@@ -5,6 +5,7 @@ from app.db.bootstrap import datastore_status
 from app.db.profile import get_profile, save_profile
 from app.models.profile import PersonalProfile, PersonalProfileResponse
 from app.db.analytics import (
+    analytical_evidence_status,
     indicator_source_comparison,
     source_quality_summary,
     official_forecasts,
@@ -39,6 +40,14 @@ def health():
             "sqlite": str(settings.sqlite_path),
             "duckdb": str(settings.duckdb_path),
         },
+    }
+
+
+@router.get("/evidence/status")
+def evidence_status_get():
+    return {
+        **analytical_evidence_status(),
+        "esco": esco_status(),
     }
 
 
