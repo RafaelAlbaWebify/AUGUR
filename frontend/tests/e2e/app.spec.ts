@@ -571,3 +571,65 @@ test('Overview country flags and fit readiness remain visible', async ({ page })
   await expect(page.locator('.readinessRing')).toHaveCount(5)
   await expect(page.locator('.compareBarTrack')).toHaveCount(3)
 })
+
+
+test('responsive shell avoids horizontal overflow across core views', async ({ page }) => {
+  const cases = [
+    { width: 1366, height: 768 },
+    { width: 1024, height: 768 },
+    { width: 390, height: 844 },
+  ]
+
+  for (const viewport of cases) {
+    await page.setViewportSize(viewport)
+
+    for (const path of [
+      '/country/ESP/overview',
+      '/country/ESP/outlook',
+      '/country/ESP/profile',
+      '/compare?countries=ESP,PRT,IRL',
+    ]) {
+      await page.goto(path)
+      await expect(page.locator('main.shell')).toBeVisible()
+
+      const overflow = await page.evaluate(() => ({
+        scrollWidth: document.documentElement.scrollWidth,
+        innerWidth: window.innerWidth,
+      }))
+
+      expect(
+        overflow.scrollWidth,
+        `horizontal overflow at ${viewport.width}x${viewport.height} on ${path}`,
+      ).toBeLessThanOrEqual(overflow.innerWidth + 2)
+    }
+  }
+})
+
+test('responsive Overview preserves every frozen core panel', async ({ page }) => {
+  for (const viewport of [
+    { width: 1366, height: 768 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport)
+    await page.goto('/country/ESP/overview')
+
+    await expect(page.getByTestId('world-map')).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
+    await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
+    await expect(page.locator('.overviewInsightRail .overallSignalBalance')).toBeVisible()
+    await expect(page.locator('.overviewOutlookCard')).toBeVisible()
+    await expect(page.locator('.overviewCompareCard')).toBeVisible()
+  }
+})
+
+test('mobile Profile keeps its five information layers reachable', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/country/ESP/profile')
+
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(profile.getByRole('region', { name: 'Profile inputs' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Profile completion' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Personal-fit evidence' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Fit outputs' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'TTV readiness' })).toBeVisible()
+})
