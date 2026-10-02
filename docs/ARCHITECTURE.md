@@ -180,3 +180,23 @@ TTV is not an aggregate score. It remains blocked whenever a required evidence l
 CareerFit combines broad EURES labour-market signals with locally loaded ESCO occupation/skill evidence. Full ESCO CSV packages can be imported into SQLite; seed mode is deliberately partial and never marks skill evidence complete.
 
 Occupation resolution is explicit and confidence-gated. Low-confidence ESCO candidates are exposed but not silently selected.
+
+
+## Operability state
+
+Runtime health and analytical operability are separate concepts.
+
+`/api/health` answers whether the local application datastores are technically available.
+
+`/api/operability` evaluates whether AUGUR has enough evidence to be used as intended. It checks:
+
+- observed and official-forecast evidence for every registered country;
+- coverage of every provider configured for that country;
+- provider retrieval freshness;
+- Eurostat labour-earnings evidence;
+- full ESCO occupation/skill/relation coverage;
+- availability of a validated TTV temporal model.
+
+Provider synchronization older than 30 days is considered stale by the current operational policy. This tests whether the local cache has been refreshed recently; it does not require each source's statistical observation year to be within 30 days.
+
+AUGUR reports analysis readiness separately from full product readiness. The product can therefore be analytically useful while still refusing to publish a TTV duration.
