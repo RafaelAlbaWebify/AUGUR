@@ -75,3 +75,36 @@ jobs:
 
       - name: Run browser smoke tests
         run: npm run test:e2e -- --project=chromium
+
+
+  ops-scripts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Parse PowerShell scripts
+        shell: pwsh
+        run: |
+          $failed = $false
+
+          Get-ChildItem -Path . -Recurse -Filter *.ps1 | ForEach-Object {
+            $tokens = $null
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile(
+              $_.FullName,
+              [ref]$tokens,
+              [ref]$errors
+            ) | Out-Null
+
+            if ($errors.Count -gt 0) {
+              $failed = $true
+              Write-Host "PowerShell parse errors in $($_.FullName)" -ForegroundColor Red
+              $errors | ForEach-Object { Write-Host "  $($_.Message)" }
+            }
+          }
+
+          if ($failed) {
+            exit 1
+          }
