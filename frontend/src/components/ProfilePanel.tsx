@@ -139,6 +139,15 @@ type ProfilePanelProps = {
   targetCountry: string
 }
 
+type ProfileDraftCache = {
+  profile: PersonalProfile
+  citizenshipsText: string
+  skillsText: string
+  languagesText: string
+}
+
+let profileDraftCache: ProfileDraftCache | null = null
+
 const EMPTY_PROFILE: PersonalProfile = {
   age: null,
   current_country: null,
@@ -177,11 +186,21 @@ function formatLanguages(languages: LanguageSkill[]) {
 }
 
 export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelProps) {
-  const [profile, setProfile] = useState<PersonalProfile>(EMPTY_PROFILE)
-  const [citizenshipsText, setCitizenshipsText] = useState('')
-  const [skillsText, setSkillsText] = useState('')
-  const [languagesText, setLanguagesText] = useState('')
-  const [status, setStatus] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>('loading')
+  const [profile, setProfile] = useState<PersonalProfile>(
+    () => profileDraftCache?.profile ?? EMPTY_PROFILE,
+  )
+  const [citizenshipsText, setCitizenshipsText] = useState(
+    () => profileDraftCache?.citizenshipsText ?? '',
+  )
+  const [skillsText, setSkillsText] = useState(
+    () => profileDraftCache?.skillsText ?? '',
+  )
+  const [languagesText, setLanguagesText] = useState(
+    () => profileDraftCache?.languagesText ?? '',
+  )
+  const [status, setStatus] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>(
+    () => profileDraftCache ? 'ready' : 'loading',
+  )
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
   const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
   const [legalFit, setLegalFit] = useState<LegalFitResponse | null>(null)
@@ -189,6 +208,15 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [careerFit, setCareerFit] = useState<CareerFitResponse | null>(null)
   const [ttv, setTtv] = useState<TTVResponse | null>(null)
   const fitRequestIdRef = useRef(0)
+
+  useEffect(() => {
+    profileDraftCache = {
+      profile,
+      citizenshipsText,
+      skillsText,
+      languagesText,
+    }
+  }, [profile, citizenshipsText, skillsText, languagesText])
 
   async function refreshTargetFits() {
     const requestId = ++fitRequestIdRef.current
@@ -244,6 +272,12 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   }
 
   useEffect(() => {
+    if (profileDraftCache) {
+      setStatus('ready')
+      void refreshReadiness()
+      return
+    }
+
     let active = true
 
     fetch(`${apiBase}/api/profile`)
@@ -304,6 +338,12 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
       const saved = await response.json() as PersonalProfile
       setProfile(saved)
+      profileDraftCache = {
+        profile: saved,
+        citizenshipsText: saved.citizenships.join(', '),
+        skillsText: saved.skills.join(', '),
+        languagesText: formatLanguages(saved.languages),
+      }
       setStatus('saved')
       await refreshReadiness()
       await refreshTargetFits()
