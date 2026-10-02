@@ -81,6 +81,28 @@ def main() -> int:
             )
 
     print()
+    print("TTV CALIBRATION")
+    calibration = result["ttv_calibration"]
+    print(
+        f"infrastructure_ready: "
+        f"{calibration['infrastructure_ready']}"
+    )
+    print(f"case_count: {calibration['case_count']}")
+    print(f"country_count: {calibration['country_count']}")
+    print(
+        "interval_coverage_pct: "
+        f"{calibration['interval_coverage_pct']}"
+    )
+    print(
+        "mean_absolute_midpoint_error_weeks: "
+        f"{calibration['mean_absolute_midpoint_error_weeks']}"
+    )
+    print(
+        "externally_calibrated: "
+        f"{calibration['externally_calibrated']}"
+    )
+
+    print()
     print("COUNTRY EVIDENCE")
     for country in result["evidence"]["countries"]:
         earnings = country["labour_earnings"]
