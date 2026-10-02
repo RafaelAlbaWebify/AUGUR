@@ -163,6 +163,9 @@ def esco_status() -> dict:
         )
         occupations = con.execute("SELECT COUNT(*) FROM esco_occupations").fetchone()[0]
         skills = con.execute("SELECT COUNT(*) FROM esco_skills").fetchone()[0]
+        language_skills = con.execute(
+            "SELECT COUNT(*) FROM esco_skills WHERE is_language_skill = 1"
+        ).fetchone()[0]
         relations = con.execute("SELECT COUNT(*) FROM esco_occupation_skills").fetchone()[0]
     finally:
         con.close()
@@ -172,6 +175,7 @@ def esco_status() -> dict:
         "version": metadata.get("esco_dataset_version", "none"),
         "occupation_count": occupations,
         "skill_count": skills,
+        "language_skill_count": language_skills,
         "relation_count": relations,
     }
 
@@ -184,6 +188,17 @@ def _find_csv(root: Path, needle: str) -> Path:
     ]
     if not candidates:
         raise FileNotFoundError(f"ESCO CSV not found: {needle}")
+    return sorted(candidates, key=lambda value: len(str(value)))[0]
+
+
+def _find_csv_optional(root: Path, needle: str) -> Path | None:
+    candidates = [
+        path
+        for path in root.rglob("*.csv")
+        if needle.lower() in path.stem.lower()
+    ]
+    if not candidates:
+        return None
     return sorted(candidates, key=lambda value: len(str(value)))[0]
 
 
@@ -205,10 +220,27 @@ def import_esco_csv_package(root: Path, version: str = ESCO_VERSION) -> dict:
     occupations_file = _find_csv(root, "occupations")
     skills_file = _find_csv(root, "skills")
     relations_file = _find_csv(root, "occupationSkillRelations")
+    language_skills_file = _find_csv_optional(root, "languageSkillsCollection")
 
     occupation_rows = _read_csv(occupations_file)
     skill_rows = _read_csv(skills_file)
     relation_rows = _read_csv(relations_file)
+    language_skill_uris = set()
+
+    if language_skills_file:
+        for row in _read_csv(language_skills_file):
+            uri = _first(
+                row,
+                [
+                    "conceptUri",
+                    "concept_uri",
+                    "skillUri",
+                    "skill_uri",
+                    "uri",
+                ],
+            )
+            if uri:
+                language_skill_uris.add(uri)
 
     con = _connect()
     try:
@@ -261,11 +293,17 @@ def import_esco_csv_package(root: Path, version: str = ESCO_VERSION) -> dict:
                 """
                 INSERT OR REPLACE INTO esco_skills (
                     concept_uri, preferred_label, alternative_labels_json,
-                    dataset_version, source_mode
+                    is_language_skill, dataset_version, source_mode
                 )
-                VALUES (?, ?, ?, ?, 'full')
+                VALUES (?, ?, ?, ?, ?, 'full')
                 """,
-                [uri, label, json.dumps(alternatives), version],
+                [
+                    uri,
+                    label,
+                    json.dumps(alternatives),
+                    1 if uri in language_skill_uris else 0,
+                    version,
+                ],
             )
 
         for row in relation_rows:
@@ -323,6 +361,11 @@ def import_esco_csv_package(root: Path, version: str = ESCO_VERSION) -> dict:
             "occupations": str(occupations_file),
             "skills": str(skills_file),
             "relations": str(relations_file),
+            "language_skills": (
+                str(language_skills_file)
+                if language_skills_file
+                else None
+            ),
         },
     }
 
@@ -338,6 +381,7 @@ def occupation_skill_rows(occupation_label: str) -> list[dict]:
                 s.concept_uri AS skill_uri,
                 s.preferred_label AS skill_label,
                 s.alternative_labels_json,
+                s.is_language_skill,
                 r.relation_type,
                 r.source_mode
             FROM esco_occupations o
@@ -443,3 +487,12 @@ def search_occupations(query: str, limit: int = 5) -> list[dict]:
         reverse=True,
     )
     return candidates[: max(1, limit)]
+
+
+
+def occupation_language_skill_rows(occupation_label: str) -> list[dict]:
+    return [
+        row
+        for row in occupation_skill_rows(occupation_label)
+        if bool(row.get("is_language_skill"))
+    ]
