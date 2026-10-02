@@ -54,6 +54,10 @@ if ($EscoPath) {
 else {
     Write-Host ""
     Write-Warning "No full ESCO package was supplied."
+    Invoke-Step "Load partial ESCO seed" {
+        & (Join-Path $Root "import-esco.ps1") -Seed -Version "1.2.1"
+    } | Out-Null
+
     Write-Host "Country analysis can still be operational, but CareerFit/TTV evidence remains partial with seed ESCO."
     Write-Host "Download ESCO v1.2.1 CSV (English classification) from the official ESCO portal,"
     Write-Host "extract it, then rerun:"
