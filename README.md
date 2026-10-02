@@ -107,6 +107,36 @@ The existing ESCO dataset is preserved by default. To import or refresh a full o
 
 Use `-SkipSync` only when you intentionally want to refresh ESCO and re-check operability without synchronizing country evidence.
 
+### Import TTV calibration cases
+
+AUGUR includes a local-only calibration store for anonymous observed TTV cases. This infrastructure does **not** activate the TTV model or mark it externally calibrated.
+
+CSV columns:
+
+```text
+case_id,country_iso3,employment_mode,engine_version,composition,candidate_weeks_min,candidate_weeks_max,observed_weeks,source_label,observed_at
+```
+
+Required columns are everything through `observed_weeks`. `source_label` and `observed_at` are optional.
+
+Example import:
+
+```powershell
+.\import-ttv-calibration.ps1 -Path ".\my-calibration-cases.csv"
+```
+
+The local SQLite calibration table stores no full personal profile payload. It records only anonymous case identifiers, country, employment mode, candidate range, observed duration and provenance labels.
+
+`check-operability.ps1` reports descriptive calibration metrics:
+
+- observed case count;
+- country count;
+- candidate-interval coverage;
+- mean absolute midpoint error;
+- mean signed midpoint error.
+
+These metrics remain descriptive until AUGUR has an approved external-calibration protocol and acceptance criteria.
+
 ### Start
 
 ```powershell
