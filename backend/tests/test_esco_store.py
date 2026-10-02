@@ -95,3 +95,43 @@ def test_search_occupations_orders_best_match_first(monkeypatch, tmp_path):
     assert results
     assert results[0]["preferred_label"] == "ICT network engineer"
     assert results[0]["match_score"] >= results[-1]["match_score"]
+
+
+
+def test_full_import_marks_language_skill_collection(monkeypatch, tmp_path):
+    _point_modules_to_tmp_db(monkeypatch, tmp_path)
+
+    package = tmp_path / "language-package"
+    package.mkdir()
+
+    (package / "occupations_en.csv").write_text(
+        "conceptUri,preferredLabel,code,iscoGroup\n"
+        "urn:test:occupation,ICT support technician,3512.1,3512\n",
+        encoding="utf-8",
+    )
+    (package / "skills_en.csv").write_text(
+        "conceptUri,preferredLabel,altLabels\n"
+        "urn:test:language,communicate in English,English communication\n"
+        "urn:test:technical,troubleshoot ICT system,ICT troubleshooting\n",
+        encoding="utf-8",
+    )
+    (package / "occupationSkillRelations_en.csv").write_text(
+        "occupationUri,skillUri,relationType\n"
+        "urn:test:occupation,urn:test:language,essential\n"
+        "urn:test:occupation,urn:test:technical,optional\n",
+        encoding="utf-8",
+    )
+    (package / "languageSkillsCollection_en.csv").write_text(
+        "conceptUri\n"
+        "urn:test:language\n",
+        encoding="utf-8",
+    )
+
+    status = esco_store.import_esco_csv_package(package, version="test-language")
+
+    assert status["language_skill_count"] == 1
+    rows = esco_store.occupation_language_skill_rows("ICT support technician")
+    assert len(rows) == 1
+    assert rows[0]["skill_label"] == "communicate in English"
+    assert rows[0]["relation_type"] == "essential"
+    assert rows[0]["is_language_skill"] == 1
