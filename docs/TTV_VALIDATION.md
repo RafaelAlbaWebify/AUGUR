@@ -40,7 +40,7 @@ and by:
 | remote_income_transition | supported | Preserved remote income does not require a job-search transition stage. |
 | local_employment_transition | experimental | Country-level unemployment-to-employment transitions are not occupation-specific. |
 | local_financial_transition | missing | Occupation-specific net income, household budget and transition costs are incomplete. |
-| composition_parallel_max | experimental | Concurrent-stage composition has not been externally calibrated. |
+| composition_dependency_graph | experimental | The stage dependency graph is explicit, but its sequencing assumptions have not been externally calibrated. |
 | external_calibration | missing | Candidate ranges have not been calibrated against observed relocation outcomes. |
 
 ## What does not qualify as validation
@@ -67,3 +67,20 @@ The model should only receive a non-null `TEMPORAL_MODEL_VERSION` when:
 5. the resulting duration remains inspectable as stage evidence rather than an opaque score.
 
 Until then, withholding a TTV duration is the intended product behaviour.
+
+
+## Candidate composition
+
+The candidate temporal engine no longer assumes that every stage progresses fully in parallel.
+
+Current experimental dependency structure:
+
+1. legal, language and skills preparation may progress in parallel;
+2. employment transition follows preparation;
+3. financial transition follows employment.
+
+The candidate range therefore follows a critical-path composition:
+
+`max(legal, language, skills) + employment + financial`
+
+This is more explicit than the previous `parallel_max` rule, but it remains an experimental modelling assumption until externally calibrated. It does not activate a published TTV estimate.
