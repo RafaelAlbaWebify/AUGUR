@@ -19,9 +19,8 @@ REQUIREMENTS = {
     "financial_fit": {
         "label": "FinancialFit",
         "fields": [
-            "household_size",
+            "current_country",
             "monthly_net_income",
-            "liquid_savings",
         ],
     },
 }
