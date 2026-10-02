@@ -478,7 +478,7 @@ def career_fit(
             "status": classification["status"],
             "occupation": classification,
             "market_signal": None,
-            "rule_version": RULE_VERSION,
+            "rule_version": BROAD_EVIDENCE_METADATA["rule_version"],
             "source": market_signal_source(evidence, None),
             "occupation_match": occupation_match,
             "skill_match": {
