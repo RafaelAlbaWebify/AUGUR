@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from app.models.profile import PersonalProfileResponse
 from app.services.esco_match import match_profile_skills
+from app.esco_store import search_occupations
 
 
 RULE_VERSION = "EURES_LMI_2024_AS_PUBLISHED_2025"
@@ -48,35 +49,31 @@ COUNTRY_EVIDENCE = {
 }
 
 
-ESCO_OCCUPATION_HINTS = [
-    (
-        "ICT system administrator",
-        [
-            "system administrator",
-            "systems administrator",
-        ],
-    ),
-    (
-        "ICT network engineer",
-        [
-            "network engineer",
-        ],
-    ),
-]
+ESCO_OCCUPATION_MATCH_THRESHOLD = 0.72
 
 
-def esco_occupation_hint(profession: str | None) -> str | None:
-    if not profession:
-        return None
+def resolve_esco_occupation(profession: str | None) -> dict:
+    if not profession or not profession.strip():
+        return {
+            "status": "profession_missing",
+            "selected": None,
+            "candidates": [],
+            "threshold": ESCO_OCCUPATION_MATCH_THRESHOLD,
+        }
 
-    text = profession.strip().lower()
+    candidates = search_occupations(profession, limit=5)
+    selected = (
+        candidates[0]
+        if candidates and candidates[0]["match_score"] >= ESCO_OCCUPATION_MATCH_THRESHOLD
+        else None
+    )
 
-    for label, keywords in ESCO_OCCUPATION_HINTS:
-        if any(keyword in text for keyword in keywords):
-            return label
-
-    return None
-
+    return {
+        "status": "matched" if selected else "no_confident_match",
+        "selected": selected,
+        "candidates": candidates,
+        "threshold": ESCO_OCCUPATION_MATCH_THRESHOLD,
+    }
 
 OCCUPATION_RULES = [
     (
@@ -239,7 +236,8 @@ def career_fit(
     target = target_country_iso3.upper()
     evidence = COUNTRY_EVIDENCE.get(target)
     classification = classify_occupation(profile.profession)
-    esco_label = esco_occupation_hint(profile.profession)
+    occupation_match = resolve_esco_occupation(profile.profession)
+    esco_label = occupation_match["selected"]["preferred_label"] if occupation_match["selected"] else None
 
     if evidence is None:
         return {
@@ -249,6 +247,7 @@ def career_fit(
             "market_signal": None,
             "rule_version": RULE_VERSION,
             "source": None,
+            "occupation_match": occupation_match,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
@@ -318,12 +317,14 @@ def career_fit(
             "label": evidence["source_label"],
             "url": evidence["source_url"],
         },
+        "occupation_match": occupation_match,
         "skill_match": skill_match,
         "evidence_complete": bool(skill_match.get("evidence_complete")),
         "notes": [
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             "Country evidence is based on the latest implemented EURES labour-market information for 2024 conditions.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
+            "ESCO occupation resolution uses transparent local label matching and refuses low-confidence matches.",
             "No country ranking or composite score is produced.",
         ],
     }
