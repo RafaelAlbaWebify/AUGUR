@@ -53,3 +53,21 @@ def test_evidence_status_reports_country_and_esco_coverage():
     assert "official_forecast_rows" in spain
     assert "labour_earnings" in spain
     assert "isco_group_count" in spain["labour_earnings"]
+
+
+def test_operability_endpoint_reports_readiness_and_blockers():
+    with TestClient(app) as client:
+        response = client.get("/api/operability")
+
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["status"] in {"empty", "partial", "ready"}
+    assert isinstance(body["ready"], bool)
+    assert "country_analysis_ready" in body
+    assert "local_employment_evidence_ready" in body
+    assert "esco_full_ready" in body
+    assert "personal_fit_full_evidence_ready" in body
+    assert isinstance(body["blockers"], list)
+    assert "evidence" in body
+    assert "esco" in body
