@@ -71,6 +71,23 @@ def initialize_sqlite(path: Path) -> None:
         )
         con.execute(
             """
+            CREATE TABLE IF NOT EXISTS ttv_calibration_cases (
+                case_id TEXT PRIMARY KEY,
+                country_iso3 TEXT NOT NULL,
+                employment_mode TEXT NOT NULL,
+                engine_version TEXT NOT NULL,
+                composition TEXT NOT NULL,
+                candidate_weeks_min REAL NOT NULL,
+                candidate_weeks_max REAL NOT NULL,
+                observed_weeks REAL NOT NULL,
+                source_label TEXT,
+                observed_at TEXT,
+                imported_at TEXT NOT NULL
+            )
+            """
+        )
+        con.execute(
+            """
             CREATE TABLE IF NOT EXISTS personal_profile (
                 profile_id TEXT PRIMARY KEY,
                 age INTEGER,
