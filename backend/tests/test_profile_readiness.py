@@ -11,6 +11,10 @@ def test_empty_profile_reports_missing_fit_inputs():
     assert "citizenships" in result["modules"]["legal_fit"]["missing_fields"]
     assert "profession" in result["modules"]["career_fit"]["missing_fields"]
     assert "languages" in result["modules"]["language_fit"]["missing_fields"]
+    assert result["modules"]["financial_fit"]["missing_fields"] == [
+        "current_country",
+        "monthly_net_income",
+    ]
 
 
 def test_complete_profile_marks_dependency_modules_ready():
