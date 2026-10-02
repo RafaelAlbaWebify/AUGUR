@@ -37,6 +37,17 @@ async function mockApi(page: Page) {
           matched_terms: [],
         },
         market_signal: null,
+        vacancy_demand_evidence: {
+          status: 'available',
+          isco_major: 'OC3',
+          vacancy_rate_pct: 3.4,
+          period: '2026-Q2',
+          nace_scope: 'B-T',
+          source_id: 'EUROSTAT',
+          dataset_id: 'jvs_q_isco_r21',
+          granularity: 'isco_major_group',
+          role: 'context_only',
+        },
         skill_match: {
           status: 'not_evaluated',
           matched_skills: [],
@@ -418,6 +429,18 @@ test('profile architecture keeps completion evidence outputs and TTV distinct', 
 
   await expect(profile.getByText('Completion only confirms that required profile inputs exist. It is not a country-fit score.')).toBeVisible()
   await expect(profile.getByText('Time-to-viability requires both viable dependencies and a validated temporal evidence model. Dependency readiness alone never creates a duration.')).toBeVisible()
+})
+
+
+test('vacancy rate remains contextual in Profile', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(
+    profile.getByText(
+      'Eurostat 2026-Q2 · ISCO OC3 vacancy rate 3.4% · context only',
+    ),
+  ).toBeVisible()
 })
 
 
