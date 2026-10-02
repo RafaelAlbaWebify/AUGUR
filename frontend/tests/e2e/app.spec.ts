@@ -89,6 +89,30 @@ async function mockApi(page: Page) {
         ],
         dependency_ready: false,
         temporal_evidence_state: 'not_implemented',
+        temporal_model_version: null,
+        temporal_evidence_ready: false,
+        temporal_evidence: {
+          engine_version: 'ttv-temporal-evidence-v1',
+          calendar_ready: false,
+          unavailable_stages: ['language', 'skills', 'financial', 'employment'],
+          candidate_range: null,
+          stages: {
+            legal: { status: 'unavailable', weeks_min: null, weeks_max: null, reason: 'legal_timing_not_verified_for_profile' },
+            language: {
+              status: 'guided_hours_available_calendar_missing',
+              weeks_min: null,
+              weeks_max: null,
+              reason: 'language_study_hours_per_week_missing',
+              guided_hours_min: 100,
+              guided_hours_max: 250,
+              weekly_study_hours: null,
+            },
+            skills: { status: 'unavailable', weeks_min: null, weeks_max: null, reason: 'career_skill_evidence_incomplete' },
+            financial: { status: 'unavailable', weeks_min: null, weeks_max: null, reason: 'financial_transition_duration_not_modelled_for_current_status' },
+            employment: { status: 'unavailable', weeks_min: null, weeks_max: null, reason: 'local_job_search_temporal_baseline_not_yet_integrated' },
+          },
+        },
+        candidate_time_range: null,
         estimate_status: 'dependencies_blocked',
         ready_for_time_estimate: false,
         time_estimate: null,
@@ -337,6 +361,16 @@ test('structured TTV blockers are visible', async ({ page }) => {
   const ttv = page.getByRole('region', { name: 'TTV readiness' })
   await expect(ttv.getByText('Blocked by')).toBeVisible()
   await expect(ttv.locator('.ttvBlockedReason span')).not.toHaveText('Waiting for evidence')
+})
+
+
+test('candidate temporal evidence remains explicitly non-estimate', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const ttv = page.getByRole('region', { name: 'TTV readiness' })
+  await expect(ttv.getByText('Temporal evidence · candidate only')).toBeVisible()
+  await expect(ttv.getByText('Language: 100–250 guided hours · add study hours/week for calendar conversion')).toBeVisible()
+  await expect(ttv.getByText('Estimate available')).toHaveCount(0)
 })
 
 
