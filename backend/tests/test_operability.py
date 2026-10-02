@@ -1,3 +1,5 @@
+from types import SimpleNamespace
+
 from app.services import operability as module
 
 
@@ -8,6 +10,7 @@ def _country(
     official_forecast_rows: int,
     earnings_rows: int,
     earnings_groups: int,
+    source_ids: list[str] | None = None,
 ):
     return {
         "country_iso3": iso3,
@@ -15,7 +18,8 @@ def _country(
         "observed_indicators": observed_indicators,
         "latest_observed_period": 2025 if observed_rows else None,
         "official_forecast_rows": official_forecast_rows,
-        "source_count": 5 if observed_rows else 0,
+        "source_count": len(source_ids or []) if observed_rows else 0,
+        "source_ids": source_ids or [],
         "labour_earnings": {
             "country_iso3": iso3,
             "row_count": earnings_rows,
@@ -25,15 +29,30 @@ def _country(
     }
 
 
+def _all_providers(_country_iso3: str):
+    return [
+        SimpleNamespace(provider_id="WORLD_BANK"),
+        SimpleNamespace(provider_id="EUROSTAT"),
+        SimpleNamespace(provider_id="OECD"),
+        SimpleNamespace(provider_id="IMF"),
+        SimpleNamespace(provider_id="UN_WPP"),
+    ]
+
+
+def _provider_ids():
+    return ["WORLD_BANK", "EUROSTAT", "OECD", "IMF", "UN_WPP"]
+
+
 def test_operability_ready_requires_country_earnings_and_full_esco(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
         "analytical_evidence_status",
         lambda: {
             "countries": [
-                _country("ESP", 100, 18, 12, 9, 9),
-                _country("IRL", 100, 18, 12, 9, 9),
-                _country("PRT", 100, 18, 12, 9, 9),
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
             ]
         },
     )
@@ -57,6 +76,7 @@ def test_operability_ready_requires_country_earnings_and_full_esco(monkeypatch):
 
 
 def test_operability_partial_when_country_analysis_ready_but_esco_is_seed(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
         "analytical_evidence_status",
@@ -90,14 +110,15 @@ def test_operability_partial_when_country_analysis_ready_but_esco_is_seed(monkey
 
 
 def test_operability_partial_when_datastores_have_only_seed_esco(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
         "analytical_evidence_status",
         lambda: {
             "countries": [
-                _country("ESP", 0, 0, 0, 0, 0),
-                _country("IRL", 0, 0, 0, 0, 0),
-                _country("PRT", 0, 0, 0, 0, 0),
+                _country("ESP", 0, 0, 0, 0, 0, []),
+                _country("IRL", 0, 0, 0, 0, 0, []),
+                _country("PRT", 0, 0, 0, 0, 0, []),
             ]
         },
     )
@@ -123,6 +144,7 @@ def test_operability_partial_when_datastores_have_only_seed_esco(monkeypatch):
 
 
 def test_operability_empty_when_no_evidence_or_esco(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
         "analytical_evidence_status",
@@ -150,3 +172,39 @@ def test_operability_empty_when_no_evidence_or_esco(monkeypatch):
 
     assert result["status"] == "empty"
     assert result["ready"] is False
+
+
+def test_operability_partial_when_a_configured_provider_is_missing(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+
+    incomplete_sources = ["WORLD_BANK", "EUROSTAT", "OECD", "IMF"]
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {
+            "countries": [
+                _country("ESP", 100, 18, 12, 9, 9, incomplete_sources),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["status"] == "partial"
+    assert result["country_analysis_ready"] is False
+    assert result["provider_coverage"]["ESP"]["complete"] is False
+    assert result["provider_coverage"]["ESP"]["missing"] == ["UN_WPP"]
+    assert "country_analysis_evidence" in result["blockers"]
