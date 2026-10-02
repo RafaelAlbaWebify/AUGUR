@@ -93,16 +93,18 @@ def ttv_status(
         "financial_fit": {
             "ready": financial_ready,
             "status": financial["status"],
-            "evidence_state": (
+            "evidence_state": financial.get(
+                "evidence_state",
                 "implemented"
                 if financial["status"] == "portable_income_comparable"
-                else "partial"
+                else "partial",
             ),
             "reason": (
                 "ready"
                 if financial_ready
                 else financial.get("reason") or financial["status"]
             ),
+            "blockers": financial.get("blockers", []),
         },
     }
 
@@ -118,6 +120,7 @@ def ttv_status(
             "status": stages[stage_id]["status"],
             "evidence_state": stages[stage_id]["evidence_state"],
             "reason": stages[stage_id]["reason"],
+            "blockers": stages[stage_id].get("blockers", []),
         }
         for stage_id in blocked_by
     ]
