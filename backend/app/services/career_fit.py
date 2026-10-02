@@ -1,52 +1,40 @@
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 from app.models.profile import PersonalProfileResponse
 from app.services.esco_match import match_profile_skills
 from app.esco_store import search_occupations
 
 
-RULE_VERSION = "EURES_LMI_2024_AS_PUBLISHED_2025"
+EURES_EVIDENCE_PATH = (
+    Path(__file__).resolve().parents[1]
+    / "evidence"
+    / "eures_lmi_2025.json"
+)
 
-COUNTRY_EVIDENCE = {
-    "ESP": {
-        "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-spain_en",
-        "source_label": "EURES Labour Market Information: Spain",
-        "shortage_groups": {
-            "health_professionals",
-            "plant_machine_operators",
-            "agricultural_forestry_fishery_labourers",
-        },
-        "surplus_groups": {
-            "science_engineering_professionals",
-            "business_administration_associate_professionals",
-            "science_engineering_associate_professionals",
-        },
-    },
-    "PRT": {
-        "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-portugal_en",
-        "source_label": "EURES Labour Market Information: Portugal",
-        "shortage_groups": {
-            "health_professionals",
-            "metal_machinery_trades_workers",
-            "ict_professionals",
-        },
-        "surplus_groups": {
-            "business_administration_associate_professionals",
-            "legal_social_cultural_professionals",
-            "sales_workers",
-        },
-    },
-    "IRL": {
-        "source_url": "https://eures.europa.eu/living-and-working/labour-market-information/labour-market-information-ireland_en",
-        "source_label": "EURES Labour Market Information: Ireland",
-        "shortage_groups": {
-            "science_engineering_professionals",
-            "ict_professionals",
-            "health_professionals",
-        },
-        "surplus_groups": set(),
-    },
-}
+
+def _load_eures_evidence() -> tuple[dict, dict]:
+    payload = json.loads(EURES_EVIDENCE_PATH.read_text(encoding="utf-8"))
+    countries = {
+        country_iso3: {
+            **config,
+            "shortage_groups": set(config["shortage_groups"]),
+            "surplus_groups": set(config["surplus_groups"]),
+        }
+        for country_iso3, config in payload["countries"].items()
+    }
+    metadata = {
+        key: value
+        for key, value in payload.items()
+        if key != "countries"
+    }
+    return metadata, countries
+
+
+EURES_EVIDENCE_METADATA, COUNTRY_EVIDENCE = _load_eures_evidence()
+RULE_VERSION = EURES_EVIDENCE_METADATA["rule_version"]
 
 
 ESCO_OCCUPATION_MATCH_THRESHOLD = 0.72
@@ -275,6 +263,10 @@ def career_fit(
             "source": {
                 "label": evidence["source_label"],
                 "url": evidence["source_url"],
+                "evidence_id": EURES_EVIDENCE_METADATA["evidence_id"],
+                "report_year": EURES_EVIDENCE_METADATA["report_year"],
+                "conditions_year": EURES_EVIDENCE_METADATA["conditions_year"],
+                "report_url": EURES_EVIDENCE_METADATA["report_url"],
             },
             "occupation_match": occupation_match,
             "skill_match": {
@@ -339,6 +331,10 @@ def career_fit(
         "source": {
             "label": evidence["source_label"],
             "url": evidence["source_url"],
+            "evidence_id": EURES_EVIDENCE_METADATA["evidence_id"],
+            "report_year": EURES_EVIDENCE_METADATA["report_year"],
+            "conditions_year": EURES_EVIDENCE_METADATA["conditions_year"],
+            "report_url": EURES_EVIDENCE_METADATA["report_url"],
         },
         "occupation_match": occupation_match,
         "skill_match": skill_match,
@@ -348,7 +344,7 @@ def career_fit(
         "viability_evidence_ready": viability_evidence_ready,
         "notes": [
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
-            "Country evidence is based on the latest implemented EURES labour-market information for 2024 conditions.",
+            f"Country evidence uses versioned EURES labour-market information for {EURES_EVIDENCE_METADATA['conditions_year']} conditions, published in {EURES_EVIDENCE_METADATA['report_year']}.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
             "ESCO occupation resolution uses transparent local label matching and refuses low-confidence matches.",
             "Essential ESCO skills are treated as conservative profile-evidence requirements; missing declarations are not inferred as present.",
