@@ -435,3 +435,52 @@ test('mockup visual language is present in Overview', async ({ page }) => {
   await expect(page.locator('.overallSignalBalance')).toBeVisible()
   await expect(page.locator('.compareBarTrack')).toHaveCount(1)
 })
+
+
+test('flags render and lower dashboard panels do not overlap', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.reload()
+
+  await expect(page.locator('.countryFlag')).toHaveCount(3)
+  await expect(page.locator('.inlineFlag')).toHaveCount(3)
+
+  const optionText = await page.getByLabel('Select country').locator('option').first().textContent()
+  expect(optionText).toContain('🇪🇸')
+
+  const geometry = await page.evaluate(() => {
+    const rect = (selector: string) => {
+      const node = document.querySelector(selector)
+      if (!node) return null
+      const box = node.getBoundingClientRect()
+      return {
+        left: box.left,
+        right: box.right,
+        top: box.top,
+        bottom: box.bottom,
+      }
+    }
+
+    return {
+      balance: rect('.overallSignalBalance'),
+      outlook: rect('.outlookPreview'),
+      compare: rect('.comparePanel.compact'),
+    }
+  })
+
+  expect(geometry.balance).not.toBeNull()
+  expect(geometry.outlook).not.toBeNull()
+  expect(geometry.compare).not.toBeNull()
+
+  const overlaps = (
+    a: { left: number; right: number; top: number; bottom: number },
+    b: { left: number; right: number; top: number; bottom: number },
+  ) => !(
+    a.right <= b.left ||
+    b.right <= a.left ||
+    a.bottom <= b.top ||
+    b.bottom <= a.top
+  )
+
+  expect(overlaps(geometry.balance!, geometry.outlook!)).toBe(false)
+  expect(overlaps(geometry.balance!, geometry.compare!)).toBe(false)
+})
