@@ -95,6 +95,22 @@ def test_operability_analysis_ready_still_blocks_without_temporal_model(monkeypa
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         _supported_temporal_validation,
     )
@@ -134,8 +150,40 @@ def test_operability_ready_requires_validated_temporal_model(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 100,
+            "coverage_scope": "full_unit_group_coverage",
+            "full_occupation_coverage": True,
+            "notes": [],
+        },
     )
     monkeypatch.setattr(module, "TEMPORAL_MODEL_VERSION", "ttv-temporal-v1")
     monkeypatch.setattr(
@@ -173,6 +221,22 @@ def test_operability_ready_requires_validated_temporal_model(monkeypatch):
 
 def test_operability_partial_when_country_analysis_ready_but_esco_is_seed(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
     monkeypatch.setattr(
         module,
         "temporal_model_validation_status",
@@ -214,6 +278,22 @@ def test_operability_partial_when_datastores_have_only_seed_esco(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         _supported_temporal_validation,
     )
@@ -253,6 +333,22 @@ def test_operability_empty_when_no_evidence_or_esco(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         _supported_temporal_validation,
     )
@@ -287,6 +383,22 @@ def test_operability_empty_when_no_evidence_or_esco(monkeypatch):
 
 def test_operability_partial_when_a_configured_provider_is_missing(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
     monkeypatch.setattr(
         module,
         "temporal_model_validation_status",
@@ -330,6 +442,22 @@ def test_operability_partial_when_provider_sync_is_stale(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         _supported_temporal_validation,
     )
@@ -369,6 +497,22 @@ def test_operability_partial_when_provider_sync_is_stale(monkeypatch):
 
 def test_operability_partial_when_net_earnings_reference_is_missing(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
     monkeypatch.setattr(
         module,
         "temporal_model_validation_status",
@@ -432,6 +576,22 @@ def test_operability_exposes_temporal_validation_blockers(monkeypatch):
     )
     monkeypatch.setattr(
         module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         lambda: {
             "engine_version": "test",
@@ -460,6 +620,22 @@ def test_operability_exposes_temporal_validation_blockers(monkeypatch):
 
 def test_operability_partial_when_job_transition_evidence_is_missing(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
     monkeypatch.setattr(
         module,
         "temporal_model_validation_status",
@@ -506,6 +682,22 @@ def test_operability_rejects_stale_auxiliary_labour_evidence(monkeypatch):
     monkeypatch.setattr(module, "providers_for_country", _all_providers)
     monkeypatch.setattr(
         module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         _supported_temporal_validation,
     )
@@ -543,3 +735,57 @@ def test_operability_rejects_stale_auxiliary_labour_evidence(monkeypatch):
     assert result["job_transition_evidence_ready"] is False
     assert "local_employment_earnings" in result["blockers"]
     assert "labour_job_transition_evidence" in result["blockers"]
+
+
+def test_operability_distinguishes_core_from_full_personal_fit_evidence(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+
+    countries = [
+        _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+    ]
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {"countries": countries},
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["personal_fit_core_evidence_ready"] is True
+    assert result["personal_fit_full_evidence_ready"] is False
+    assert result["analysis_ready"] is True
+    assert result["career_market_evidence"]["coverage_scope"] == "partial_unit_group_coverage"
