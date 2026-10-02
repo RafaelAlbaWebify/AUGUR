@@ -169,3 +169,95 @@ def test_eurostat_job_transition_normalization_keeps_all_age_classes():
         "Y55-74",
         "Y15-74",
     }
+
+
+def test_eurostat_job_vacancy_normalization_keeps_major_isco_and_aggregate_nace():
+    payload = {
+        "id": [
+            "geo",
+            "s_adj",
+            "nace_r21",
+            "sizeclas",
+            "isco08",
+            "indic_em",
+            "time",
+        ],
+        "size": [1, 1, 2, 1, 4, 1, 1],
+        "dimension": {
+            "geo": {"category": {"index": {"ES": 0}}},
+            "s_adj": {"category": {"index": {"SA": 0}}},
+            "nace_r21": {
+                "category": {
+                    "index": {"B-T": 0, "J": 1},
+                }
+            },
+            "sizeclas": {"category": {"index": {"TOTAL": 0}}},
+            "isco08": {
+                "category": {
+                    "index": {
+                        "TOTAL": 0,
+                        "OC2": 1,
+                        "OC3": 2,
+                        "OC1-3": 3,
+                    },
+                }
+            },
+            "indic_em": {"category": {"index": {"JVR": 0}}},
+            "time": {"category": {"index": {"2026-Q2": 0}}},
+        },
+        "value": [
+            2.0,
+            3.5,
+            2.8,
+            3.1,
+            1.9,
+            4.2,
+            3.8,
+            4.0,
+        ],
+        "updated": "2026-09-15",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize_job_vacancy_rates("ESP", payload)
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["isco08"] for row in rows} == {"OC2", "OC3"}
+    assert {row["nace_scope"] for row in rows} == {"B-T"}
+    assert {row["period"] for row in rows} == {"2026-Q2"}
+    assert {row["dataset_id"] for row in rows} == {"jvs_q_isco_r21"}
+    assert {row["vacancy_rate_pct"] for row in rows} == {3.5, 2.8}
+
+
+def test_eurostat_job_vacancy_normalization_refuses_unknown_aggregate_scope():
+    payload = {
+        "id": [
+            "geo",
+            "nace_r21",
+            "isco08",
+            "time",
+        ],
+        "size": [1, 1, 1, 1],
+        "dimension": {
+            "geo": {"category": {"index": {"ES": 0}}},
+            "nace_r21": {"category": {"index": {"J": 0}}},
+            "isco08": {"category": {"index": {"OC2": 0}}},
+            "time": {"category": {"index": {"2026-Q2": 0}}},
+        },
+        "value": [3.5],
+        "updated": "2026-09-15",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        try:
+            adapter.normalize_job_vacancy_rates("ESP", payload)
+        except ValueError as exc:
+            assert "aggregate NACE scope" in str(exc)
+        else:
+            raise AssertionError("expected aggregate NACE scope validation")
+    finally:
+        adapter.close()
