@@ -909,6 +909,22 @@ def analytical_evidence_status() -> dict:
             """
         ).fetchall()
 
+        job_vacancy_rows = con.execute(
+            """
+            SELECT
+                c.iso3 AS country_iso3,
+                COUNT(v.isco08) AS row_count,
+                COUNT(DISTINCT v.isco08) AS isco_group_count,
+                MAX(v.period) AS latest_period,
+                MAX(v.retrieved_at) AS latest_retrieved_at
+            FROM countries c
+            LEFT JOIN labour_job_vacancy_rates v
+              ON v.country_iso3 = c.iso3
+            GROUP BY c.iso3
+            ORDER BY c.iso3
+            """
+        ).fetchall()
+
         job_transition_rows = con.execute(
             """
             SELECT
@@ -950,6 +966,14 @@ def analytical_evidence_status() -> dict:
             "latest_retrieved_at",
         ]
 
+        job_vacancy_columns = [
+            "country_iso3",
+            "row_count",
+            "isco_group_count",
+            "latest_period",
+            "latest_retrieved_at",
+        ]
+
         job_transition_columns = [
             "country_iso3",
             "row_count",
@@ -976,6 +1000,10 @@ def analytical_evidence_status() -> dict:
             row[0]: dict(zip(net_earnings_columns, row))
             for row in net_earnings_rows
         }
+        job_vacancies = {
+            row[0]: dict(zip(job_vacancy_columns, row))
+            for row in job_vacancy_rows
+        }
         job_transitions = {
             row[0]: dict(zip(job_transition_columns, row))
             for row in job_transition_rows
@@ -987,6 +1015,7 @@ def analytical_evidence_status() -> dict:
                     **observations[country_iso3],
                     "labour_earnings": earnings[country_iso3],
                     "net_earnings": net_earnings[country_iso3],
+                    "job_vacancies": job_vacancies[country_iso3],
                     "job_transitions": job_transitions[country_iso3],
                 }
                 for country_iso3 in sorted(observations)
