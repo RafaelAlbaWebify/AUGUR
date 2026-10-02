@@ -36,6 +36,11 @@ def _country(
             "isco_group_count": earnings_groups,
             "latest_period": 2022 if earnings_rows else None,
         },
+        "net_earnings": {
+            "country_iso3": iso3,
+            "row_count": 1 if earnings_rows else 0,
+            "latest_period": 2025 if earnings_rows else None,
+        },
     }
 
 
@@ -292,3 +297,37 @@ def test_operability_partial_when_provider_sync_is_stale(monkeypatch):
     assert result["provider_coverage"]["ESP"]["fresh"] is False
     assert set(result["provider_coverage"]["ESP"]["stale"]) == set(_provider_ids())
     assert "data_sync_stale" in result["blockers"]
+
+
+def test_operability_partial_when_net_earnings_reference_is_missing(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+
+    countries = [
+        _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+    ]
+    countries[0]["net_earnings"]["row_count"] = 0
+    countries[0]["net_earnings"]["latest_period"] = None
+
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {"countries": countries},
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["local_employment_evidence_ready"] is False
+    assert "local_employment_earnings" in result["blockers"]
