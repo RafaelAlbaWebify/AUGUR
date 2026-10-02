@@ -217,3 +217,28 @@ Current limitations:
 - vacancy count, location, seniority and employer-specific requirements remain separate evidence gaps.
 
 CareerFit preserves the source page, report year, conditions year and evidence ID in its response.
+
+
+## Eurostat occupation vacancy rates
+
+Role:
+
+- supplemental unmet-demand context for CareerFit.
+
+Dataset:
+
+- `jvs_q_isco_r21` — quarterly job-vacancy statistics by occupation and NACE Rev. 2.1 activity.
+
+AUGUR ingests the job vacancy rate (`JVR`) for national aggregate activity, total establishment size and seasonally adjusted data. Only ISCO major groups (`OC1`–`OC9`) are retained.
+
+This evidence is intentionally broader than the resolved ESCO occupation. It is therefore labelled `context_only`.
+
+A vacancy rate:
+
+- does not replace EURES shortage/surplus classification;
+- does not make CareerFit evidence complete;
+- does not change the TTV viability gate;
+- is not a job-finding probability;
+- is not converted into weeks-to-employment.
+
+Its purpose is to expose recent official unmet-demand context alongside the more occupation-specific EURES evidence.
