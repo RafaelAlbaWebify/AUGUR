@@ -287,3 +287,62 @@ def test_isco_25_ict_professional_can_use_ict_professional_shortage(monkeypatch)
     assert result["occupation"]["occupation_group"] == "ict_professionals"
     assert result["market_signal"] == "shortage"
     assert result["viability_evidence_ready"] is True
+
+
+def test_unit_group_surplus_overrides_broad_ict_shortage(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2511",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Systems analyst",
+        skills=["analysis", "systems", "requirements", "documentation"],
+    )
+
+    result = career_fit(profile, "PRT")
+
+    assert result["occupation"]["occupation_group"] == "ict_professionals"
+    assert result["market_signal_scope"] == "isco_unit_group"
+    assert result["market_signal_isco"] == "2511"
+    assert result["market_signal"] == "surplus"
+    assert result["market_signal_supports_viability"] is False
+    assert result["viability_evidence_ready"] is False
+
+
+def test_unit_group_unclassified_overrides_broad_ict_shortage(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2522",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Systems administrator",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "PRT")
+
+    assert result["occupation"]["occupation_group"] == "ict_professionals"
+    assert result["market_signal_scope"] == "isco_unit_group"
+    assert result["market_signal_isco"] == "2522"
+    assert result["market_signal"] == "not_classified_as_shortage_or_surplus"
+    assert result["viability_evidence_ready"] is False
+
+
+def test_verified_ict_unit_group_manifest_has_expected_country_signals():
+    unit_signals = EURES_EVIDENCE_METADATA["unit_group_signals"]
+
+    assert unit_signals["3512"]["occupation_label"] == "ICT user support technicians"
+    assert "ES" in unit_signals["3512"]["surplus_countries"]
+    assert "PT" in unit_signals["3512"]["surplus_countries"]
+    assert "IE" not in unit_signals["3512"]["shortage_countries"]
+
+    assert "IE" in unit_signals["2522"]["shortage_countries"]
+    assert "PT" not in unit_signals["2522"]["shortage_countries"]
+
+    assert "PT" in unit_signals["2511"]["surplus_countries"]
