@@ -3,6 +3,7 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from app.db.analytics import latest_labour_job_vacancy_rate
 from app.models.profile import PersonalProfileResponse
 from app.services.esco_match import match_profile_skills
 from app.esco_store import search_occupations
@@ -313,6 +314,51 @@ def unit_group_market_signal(
     }
 
 
+def occupation_vacancy_demand_evidence(
+    target_country_iso3: str,
+    occupation_match: dict,
+) -> dict | None:
+    selected = occupation_match.get("selected")
+    if not selected:
+        return None
+
+    raw_isco = str(selected.get("isco_group") or selected.get("code") or "")
+    digits = "".join(character for character in raw_isco if character.isdigit())
+    if not digits:
+        return None
+
+    isco_major = f"OC{digits[0]}"
+    row = latest_labour_job_vacancy_rate(
+        target_country_iso3,
+        isco_major,
+    )
+    if row is None:
+        return {
+            "status": "evidence_missing",
+            "isco_major": isco_major,
+            "granularity": "isco_major_group",
+            "role": "context_only",
+        }
+
+    return {
+        "status": "available",
+        "isco_major": isco_major,
+        "vacancy_rate_pct": row["vacancy_rate_pct"],
+        "period": row["period"],
+        "nace_scope": row.get("nace_scope"),
+        "source_id": row["source_id"],
+        "dataset_id": row["dataset_id"],
+        "source_updated_at": row.get("source_updated_at"),
+        "granularity": "isco_major_group",
+        "role": "context_only",
+        "notes": [
+            "Vacancy rate is unmet-demand context, not a job-finding probability.",
+            "ISCO major-group vacancy evidence is broader than the resolved occupation.",
+            "This evidence does not change CareerFit completeness or TTV timing.",
+        ],
+    }
+
+
 def career_fit(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -325,6 +371,10 @@ def career_fit(
         or classify_occupation(profile.profession)
     )
     esco_label = occupation_match["selected"]["preferred_label"] if occupation_match["selected"] else None
+    vacancy_demand_evidence = occupation_vacancy_demand_evidence(
+        target,
+        occupation_match,
+    )
 
     if evidence is None:
         return {
@@ -335,6 +385,7 @@ def career_fit(
             "rule_version": RULE_VERSION,
             "source": None,
             "occupation_match": occupation_match,
+            "vacancy_demand_evidence": vacancy_demand_evidence,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
@@ -463,6 +514,7 @@ def career_fit(
             "report_url": EURES_EVIDENCE_METADATA["report_url"],
         },
         "occupation_match": occupation_match,
+        "vacancy_demand_evidence": vacancy_demand_evidence,
         "skill_match": skill_match,
         "skill_evidence_complete": skill_evidence_complete,
         "market_evidence_complete": market_evidence_complete,
@@ -473,6 +525,7 @@ def career_fit(
         "notes": [
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             f"Country evidence uses versioned EURES labour-market information for {EURES_EVIDENCE_METADATA['conditions_year']} conditions, published in {EURES_EVIDENCE_METADATA['report_year']}.",
+            "Eurostat vacancy-rate evidence is contextual demand evidence at ISCO major-group level and does not change the shortage/surplus gate.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
             "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
             "Verified unit-group evidence takes precedence over broad occupational-group signals when both exist.",
