@@ -100,6 +100,27 @@ This evidence is stored outside the normal country observation series because oc
 
 SES is four-yearly. The current implemented reference year is 2022, so AUGUR presents it as structural earnings evidence, not a current salary quote or job offer.
 
+## Eurostat annual net earnings
+
+Role:
+
+- national net-income benchmark for local-employment FinancialFit.
+
+Dataset:
+
+- `earn_nt_net` — annual net earnings.
+
+Current standard case:
+
+- frequency: annual;
+- currency: euro;
+- earnings structure: net;
+- earnings case: `P1_NCH_AW100` — single person without children earning 100% of the average wage.
+
+This is a national average-worker benchmark. AUGUR does not apply it as a tax conversion factor to the occupation-specific gross SES value and does not describe it as occupation-specific net pay.
+
+The dataset currently covers observations through 2025.
+
 ## Country coverage
 
 The first validated multi-country slice is:
