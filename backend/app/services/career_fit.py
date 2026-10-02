@@ -35,6 +35,8 @@ def _load_eures_evidence() -> tuple[dict, dict]:
 
 
 EURES_EVIDENCE_METADATA, COUNTRY_EVIDENCE = _load_eures_evidence()
+BROAD_EVIDENCE_METADATA = EURES_EVIDENCE_METADATA["broad_evidence"]
+UNIT_GROUP_EVIDENCE_METADATA = EURES_EVIDENCE_METADATA["unit_group_evidence"]
 RULE_VERSION = EURES_EVIDENCE_METADATA["rule_version"]
 
 
@@ -69,8 +71,10 @@ def career_market_evidence_status() -> dict:
     return {
         "evidence_id": EURES_EVIDENCE_METADATA["evidence_id"],
         "rule_version": EURES_EVIDENCE_METADATA["rule_version"],
-        "report_year": EURES_EVIDENCE_METADATA["report_year"],
-        "conditions_year": EURES_EVIDENCE_METADATA["conditions_year"],
+        "broad_evidence": BROAD_EVIDENCE_METADATA,
+        "unit_group_evidence": UNIT_GROUP_EVIDENCE_METADATA,
+        "report_year": UNIT_GROUP_EVIDENCE_METADATA["report_year"],
+        "conditions_year": UNIT_GROUP_EVIDENCE_METADATA["conditions_year"],
         "supported_countries": supported_countries,
         "broad_country_count": broad_country_count,
         "unit_group_count": len(unit_groups),
@@ -331,9 +335,14 @@ def unit_group_market_signal(
     if eures_country_code is None:
         return None
 
-    if eures_country_code in config["shortage_countries"]:
+    in_shortage = eures_country_code in config["shortage_countries"]
+    in_surplus = eures_country_code in config["surplus_countries"]
+
+    if in_shortage and in_surplus:
+        signal = "mixed_shortage_and_surplus"
+    elif in_shortage:
         signal = "shortage"
-    elif eures_country_code in config["surplus_countries"]:
+    elif in_surplus:
         signal = "surplus"
     else:
         signal = "not_classified_as_shortage_or_surplus"
@@ -343,6 +352,34 @@ def unit_group_market_signal(
         "isco_unit": isco_unit,
         "occupation_label": config["occupation_label"],
         "scope": "isco_unit_group",
+    }
+
+
+def market_signal_source(
+    country_evidence: dict,
+    unit_signal: dict | None,
+) -> dict:
+    if unit_signal is not None:
+        return {
+            "label": "EURES Report on labour shortages and surpluses 2025 — Annex",
+            "url": UNIT_GROUP_EVIDENCE_METADATA["publication_url"],
+            "evidence_id": UNIT_GROUP_EVIDENCE_METADATA["evidence_id"],
+            "rule_version": UNIT_GROUP_EVIDENCE_METADATA["rule_version"],
+            "report_year": UNIT_GROUP_EVIDENCE_METADATA["report_year"],
+            "conditions_year": UNIT_GROUP_EVIDENCE_METADATA["conditions_year"],
+            "report_url": UNIT_GROUP_EVIDENCE_METADATA["report_url"],
+            "scope": "isco_unit_group",
+        }
+
+    return {
+        "label": country_evidence["source_label"],
+        "url": country_evidence["source_url"],
+        "evidence_id": BROAD_EVIDENCE_METADATA["evidence_id"],
+        "rule_version": BROAD_EVIDENCE_METADATA["rule_version"],
+        "report_year": BROAD_EVIDENCE_METADATA["report_year"],
+        "conditions_year": BROAD_EVIDENCE_METADATA["conditions_year"],
+        "report_url": country_evidence["source_url"],
+        "scope": "broad_occupation_group",
     }
 
 
@@ -442,14 +479,7 @@ def career_fit(
             "occupation": classification,
             "market_signal": None,
             "rule_version": RULE_VERSION,
-            "source": {
-                "label": evidence["source_label"],
-                "url": evidence["source_url"],
-                "evidence_id": EURES_EVIDENCE_METADATA["evidence_id"],
-                "report_year": EURES_EVIDENCE_METADATA["report_year"],
-                "conditions_year": EURES_EVIDENCE_METADATA["conditions_year"],
-                "report_url": EURES_EVIDENCE_METADATA["report_url"],
-            },
+            "source": market_signal_source(evidence, None),
             "occupation_match": occupation_match,
             "skill_match": {
                 "status": "not_evaluated",
@@ -484,6 +514,8 @@ def career_fit(
         market_signal = "not_classified_as_shortage_or_surplus"
         market_signal_scope = "broad_occupation_group"
         market_signal_isco = classification.get("isco_submajor")
+
+    market_source = market_signal_source(evidence, unit_signal)
 
     skill_match = (
         match_profile_skills(esco_label, profile.skills)
@@ -536,15 +568,8 @@ def career_fit(
         "market_signal": market_signal,
         "market_signal_scope": market_signal_scope,
         "market_signal_isco": market_signal_isco,
-        "rule_version": RULE_VERSION,
-        "source": {
-            "label": evidence["source_label"],
-            "url": evidence["source_url"],
-            "evidence_id": EURES_EVIDENCE_METADATA["evidence_id"],
-            "report_year": EURES_EVIDENCE_METADATA["report_year"],
-            "conditions_year": EURES_EVIDENCE_METADATA["conditions_year"],
-            "report_url": EURES_EVIDENCE_METADATA["report_url"],
-        },
+        "rule_version": market_source["rule_version"],
+        "source": market_source,
         "occupation_match": occupation_match,
         "vacancy_demand_evidence": vacancy_demand_evidence,
         "skill_match": skill_match,
@@ -556,7 +581,7 @@ def career_fit(
         "viability_evidence_ready": viability_evidence_ready,
         "notes": [
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
-            f"Country evidence uses versioned EURES labour-market information for {EURES_EVIDENCE_METADATA['conditions_year']} conditions, published in {EURES_EVIDENCE_METADATA['report_year']}.",
+            f"Market signal source: {market_source['evidence_id']} · {market_source['conditions_year']} conditions · {market_source['scope']}.",
             "Eurostat vacancy-rate evidence is contextual demand evidence at ISCO major-group level and does not change the shortage/surplus gate.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
             "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
