@@ -216,6 +216,11 @@ type TTVResponse = {
       weeks_min: number
       weeks_max: number
       composition: string
+      stage_groups?: {
+        preparation_parallel: string[]
+        employment_after_preparation: string[]
+        financial_after_employment: string[]
+      }
     }
     stages: Record<string, {
       status: string
@@ -231,6 +236,11 @@ type TTVResponse = {
     weeks_min: number
     weeks_max: number
     composition: string
+    stage_groups?: {
+      preparation_parallel: string[]
+      employment_after_preparation: string[]
+      financial_after_employment: string[]
+    }
   }
   estimate_status?: string
   ready_for_time_estimate: boolean
@@ -887,7 +897,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             <strong>Temporal evidence · candidate only</strong>
             {ttv.candidate_time_range ? (
               <span>
-                {ttv.candidate_time_range.weeks_min}–{ttv.candidate_time_range.weeks_max} weeks · parallel max · not an AUGUR estimate
+                {ttv.candidate_time_range.weeks_min}–{ttv.candidate_time_range.weeks_max} weeks · {ttv.candidate_time_range.composition === 'critical_path_v1' ? 'critical path: preparation parallel → employment → financial' : ttv.candidate_time_range.composition.replaceAll('_', ' ')} · not an AUGUR estimate
               </span>
             ) : (
               <span>
