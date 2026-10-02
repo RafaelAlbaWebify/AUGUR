@@ -79,6 +79,19 @@ CREATE TABLE IF NOT EXISTS labour_net_earnings_reference (
     PRIMARY KEY (country_iso3, period, earnings_case, source_id)
 );
 
+CREATE TABLE IF NOT EXISTS labour_job_vacancy_rates (
+    country_iso3 VARCHAR NOT NULL,
+    period VARCHAR NOT NULL,
+    isco08 VARCHAR NOT NULL,
+    vacancy_rate_pct DOUBLE NOT NULL,
+    nace_scope VARCHAR,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (country_iso3, period, isco08, source_id)
+);
+
 CREATE TABLE IF NOT EXISTS labour_job_transitions (
     country_iso3 VARCHAR NOT NULL,
     period INTEGER NOT NULL,
@@ -335,6 +348,71 @@ def latest_labour_net_earnings_reference(
             LIMIT 1
             """,
             [country_iso3.upper(), earnings_case],
+        )
+        row = result.fetchone()
+        if row is None:
+            return None
+        columns = [column[0] for column in result.description]
+        return dict(zip(columns, row))
+    finally:
+        con.close()
+
+
+def upsert_labour_job_vacancy_rates(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO labour_job_vacancy_rates
+            (
+                country_iso3, period, isco08, vacancy_rate_pct,
+                nace_scope, source_id, dataset_id,
+                retrieved_at, source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["country_iso3"],
+                    row["period"],
+                    row["isco08"],
+                    row["vacancy_rate_pct"],
+                    row.get("nace_scope"),
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_labour_job_vacancy_rate(
+    country_iso3: str,
+    isco08: str,
+) -> dict | None:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT
+                country_iso3, period, isco08, vacancy_rate_pct,
+                nace_scope, source_id, dataset_id,
+                retrieved_at, source_updated_at
+            FROM labour_job_vacancy_rates
+            WHERE country_iso3 = ?
+              AND isco08 = ?
+            ORDER BY period DESC, source_id ASC
+            LIMIT 1
+            """,
+            [country_iso3.upper(), isco08.upper()],
         )
         row = result.fetchone()
         if row is None:
