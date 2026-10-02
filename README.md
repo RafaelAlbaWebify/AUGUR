@@ -16,7 +16,7 @@ Implemented capabilities include:
 - DuckDB analytical store
 - automated backend and browser tests
 - PowerShell start/stop scripts
-- country routing with refresh-safe URLs
+- country routing with refresh-safe URLs, including indicator and dimension drill-down
 - observed-data snapshots and historical trend analysis
 - dimension synthesis
 - official outlook and AUGUR scenario envelopes
@@ -25,7 +25,7 @@ Implemented capabilities include:
 - LegalFit, LanguageFit, CareerFit and FinancialFit
 - TTV dependency readiness
 - local ESCO dataset import and occupation/skill matching pipeline
-- responsive Overview, Profile, Compare and Outlook views
+- responsive Overview, Indicators, Dimension Detail, Profile, Compare and Outlook views
 - guarded persistent Edit Layout preferences
 
 AUGUR keeps country evidence separate from personal-fit analysis. Personal profile data can change whether a country fits a household, but never changes country facts, source observations, official forecasts or country trends.
