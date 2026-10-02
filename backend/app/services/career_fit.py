@@ -273,6 +273,7 @@ def career_fit(
                 "label": evidence["source_label"],
                 "url": evidence["source_url"],
             },
+            "occupation_match": occupation_match,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
