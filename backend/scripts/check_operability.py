@@ -23,6 +23,11 @@ def main() -> int:
     )
     print(f"country_analysis_ready: {result['country_analysis_ready']}")
     print(
+        "data_sync_fresh: "
+        f"{result['data_sync_fresh']} "
+        f"(max {result['sync_freshness_max_days']} days)"
+    )
+    print(
         "local_employment_evidence_ready: "
         f"{result['local_employment_evidence_ready']}"
     )
@@ -54,9 +59,12 @@ def main() -> int:
     print("PROVIDER COVERAGE")
     for country_iso3, coverage in result["provider_coverage"].items():
         missing = ", ".join(coverage["missing"]) if coverage["missing"] else "none"
+        stale = ", ".join(coverage.get("stale", [])) if coverage.get("stale") else "none"
         print(
             f"{country_iso3}: complete={coverage['complete']} "
-            f"missing={missing}"
+            f"fresh={coverage.get('fresh', False)} "
+            f"missing={missing} "
+            f"stale={stale}"
         )
 
     esco = result["esco"]
