@@ -1,7 +1,7 @@
 {
   "name": "augur-frontend",
   "private": true,
-  "version": "0.1.0-phase0",
+  "version": "0.1.0-phase1",
   "type": "module",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
