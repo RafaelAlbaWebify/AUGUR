@@ -61,6 +61,9 @@ def test_financial_fit_uses_relative_price_levels_for_remote_income(monkeypatch)
     result = module.financial_fit(profile, "IRL")
 
     assert result["status"] == "portable_income_comparable"
+    assert result["evidence_state"] == "implemented"
+    assert result["evidence_complete"] is True
+    assert result["blockers"] == []
     analysis = result["portable_income_analysis"]
     assert round(analysis["relative_cost_factor"], 3) == round(138 / 95, 3)
     assert analysis["origin_equivalent_purchasing_power"] < 3000
@@ -178,6 +181,13 @@ def test_financial_fit_keeps_national_net_benchmark_separate(monkeypatch):
 
     assert result["status"] == "local_income_reference_available"
     assert result["reason"] == "occupation_specific_net_income_not_modelled"
+    assert result["evidence_state"] == "partial"
+    assert result["evidence_complete"] is False
+    assert result["blockers"] == [
+        "occupation_specific_net_income",
+        "household_budget",
+        "transition_costs",
+    ]
 
     gross = result["local_income_reference"]
     net = result["national_net_earnings_reference"]
