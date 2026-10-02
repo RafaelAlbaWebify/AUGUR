@@ -234,6 +234,36 @@ test('comparison remains neutral and aligned', async ({ page }) => {
 })
 
 
+test('Indicators route exposes drill-down evidence', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+  await page.getByRole('button', { name: 'Indicators' }).click()
+
+  await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
+  await expect(page.getByRole('region', { name: 'Indicators' })).toBeVisible()
+  await expect(page.getByText('Spain evidence')).toBeVisible()
+  await expect(page.getByText('Unemployment', { exact: true })).toBeVisible()
+})
+
+test('Overview dimension cards drill into persistent dimension routes', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  await page.getByRole('button', { name: 'Open Productive capacity dimension' }).click()
+
+  await expect(page).toHaveURL(/\/country\/ESP\/dimension\/productive_capacity$/)
+  await expect(page.getByRole('region', { name: 'Dimension detail' })).toBeVisible()
+  await expect(page.getByText('Productive capacity · Spain')).toBeVisible()
+  await expect(page.getByText('Unemployment', { exact: true })).toBeVisible()
+
+  await page.reload()
+
+  await expect(page).toHaveURL(/\/country\/ESP\/dimension\/productive_capacity$/)
+  await expect(page.getByRole('region', { name: 'Dimension detail' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'All indicators' }).click()
+  await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
+})
+
+
 test('world view renders country geometry and drives selection', async ({ page }) => {
   await expect(page.getByText('WORLD VIEW')).toBeVisible()
 
@@ -585,6 +615,8 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
 
     for (const path of [
       '/country/ESP/overview',
+      '/country/ESP/indicators',
+      '/country/ESP/dimension/productive_capacity',
       '/country/ESP/outlook',
       '/country/ESP/profile',
       '/compare?countries=ESP,PRT,IRL',
