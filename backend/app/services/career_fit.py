@@ -412,15 +412,28 @@ def career_fit(
     essential_matched = skill_match.get("essential_skills_matched") or 0
     skill_coverage = skill_match.get("coverage")
 
-    profile_skill_coverage_complete = bool(
+    skill_evidence_complete = bool(
         skill_match.get("evidence_complete")
+    )
+    market_evidence_complete = unit_signal is not None
+
+    profile_skill_coverage_complete = bool(
+        skill_evidence_complete
         and essential_total > 0
         and essential_matched == essential_total
         and skill_coverage == 1.0
     )
-    market_signal_supports_viability = market_signal == "shortage"
+    market_signal_supports_viability = bool(
+        market_evidence_complete
+        and market_signal == "shortage"
+    )
+    evidence_complete = bool(
+        skill_evidence_complete
+        and market_evidence_complete
+    )
     viability_evidence_ready = bool(
-        profile_skill_coverage_complete
+        evidence_complete
+        and profile_skill_coverage_complete
         and market_signal_supports_viability
     )
 
@@ -442,7 +455,9 @@ def career_fit(
         },
         "occupation_match": occupation_match,
         "skill_match": skill_match,
-        "evidence_complete": bool(skill_match.get("evidence_complete")),
+        "skill_evidence_complete": skill_evidence_complete,
+        "market_evidence_complete": market_evidence_complete,
+        "evidence_complete": evidence_complete,
         "profile_skill_coverage_complete": profile_skill_coverage_complete,
         "market_signal_supports_viability": market_signal_supports_viability,
         "viability_evidence_ready": viability_evidence_ready,
@@ -452,6 +467,7 @@ def career_fit(
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
             "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
             "Verified unit-group evidence takes precedence over broad occupational-group signals when both exist.",
+            "Broad-group EURES evidence remains descriptive but does not count as complete CareerFit evidence for TTV.",
             "ISCO 25 ICT professionals and ISCO 35 information and communications technicians are kept distinct.",
             "Essential ESCO skills are treated as conservative profile-evidence requirements; missing declarations are not inferred as present.",
             "A shortage signal plus complete declared essential-skill coverage is an evidence gate, not a guarantee of employment.",
