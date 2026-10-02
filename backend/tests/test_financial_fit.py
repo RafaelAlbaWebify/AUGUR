@@ -15,7 +15,12 @@ def test_financial_fit_requires_current_country():
     assert result["reason"] == "current_country_missing"
 
 
-def test_financial_fit_does_not_assume_income_portability():
+def test_financial_fit_does_not_assume_income_portability(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "latest_labour_net_earnings_reference",
+        lambda country_iso3: None,
+    )
     profile = PersonalProfileResponse(
         profile_id="default",
         current_country="ESP",
@@ -72,6 +77,11 @@ def test_financial_fit_uses_relative_price_levels_for_remote_income(monkeypatch)
 
 
 def test_financial_fit_exposes_structural_local_income_reference(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "latest_labour_net_earnings_reference",
+        lambda country_iso3: None,
+    )
     monkeypatch.setattr(
         module,
         "resolve_esco_occupation",
