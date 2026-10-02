@@ -51,6 +51,10 @@ async function mockApi(page: Page) {
             ? 'EURES Labour Market Information: Portugal'
             : 'EURES Labour Market Information: Ireland',
           url: 'https://eures.europa.eu/',
+          evidence_id: 'eures_lmi_2025_2024_conditions',
+          report_year: 2025,
+          conditions_year: 2024,
+          report_url: 'https://eures.europa.eu/living-and-working/labour-shortages-and-surpluses-europe_en',
         },
         notes: [],
       }
@@ -414,6 +418,18 @@ test('profile architecture keeps completion evidence outputs and TTV distinct', 
 
   await expect(profile.getByText('Completion only confirms that required profile inputs exist. It is not a country-fit score.')).toBeVisible()
   await expect(profile.getByText('Time-to-viability requires both viable dependencies and a validated temporal evidence model. Dependency readiness alone never creates a duration.')).toBeVisible()
+})
+
+
+test('versioned EURES market evidence is visible in CareerFit', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(
+    profile.getByText(
+      'EURES 2025 · 2024 conditions · signal unavailable · eures_lmi_2025_2024_conditions',
+    ),
+  ).toBeVisible()
 })
 
 
