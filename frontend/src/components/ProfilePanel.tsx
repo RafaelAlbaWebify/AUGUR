@@ -700,7 +700,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             {ttv?.ready_for_time_estimate
               ? 'Estimate available'
               : ttv?.dependency_ready
-              ? 'Dependencies ready · temporal model pending'
+              ? 'Dependencies ready · temporal model missing'
               : 'Time estimate unavailable'}
           </strong>
         </div>
@@ -729,8 +729,18 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
         {!ttv?.ready_for_time_estimate && (
           <div className="ttvBlockedReason">
-            <strong>Blocked by</strong>
-            <span>{ttv?.blocked_by?.length ? ttv.blocked_by.map((item) => item.replaceAll('_', ' ')).join(' · ') : 'Waiting for evidence'}</span>
+            <strong>{ttv?.dependency_ready ? 'Timing model' : 'Blocked by'}</strong>
+            <span>
+              {ttv?.dependency_ready
+                ? `Temporal evidence: ${ttv.temporal_evidence_state?.replaceAll('_', ' ') ?? 'not implemented'}`
+                : ttv?.blocker_details?.length
+                ? ttv.blocker_details
+                    .map((item) => `${item.stage_id.replaceAll('_', ' ')} · ${item.status.replaceAll('_', ' ')} · ${item.evidence_state.replaceAll('_', ' ')}`)
+                    .join(' | ')
+                : ttv?.blocked_by?.length
+                ? ttv.blocked_by.map((item) => item.replaceAll('_', ' ')).join(' · ')
+                : 'Waiting for evidence'}
+            </span>
           </div>
         )}
 
