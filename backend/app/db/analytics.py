@@ -714,6 +714,18 @@ def analytical_evidence_status() -> dict:
             """
         ).fetchall()
 
+        provider_freshness_rows = con.execute(
+            """
+            SELECT
+                country_iso3,
+                source_id,
+                MAX(retrieved_at) AS latest_retrieved_at
+            FROM observations
+            GROUP BY country_iso3, source_id
+            ORDER BY country_iso3, source_id
+            """
+        ).fetchall()
+
         earnings_rows = con.execute(
             """
             SELECT
@@ -748,10 +760,15 @@ def analytical_evidence_status() -> dict:
             "latest_retrieved_at",
         ]
 
+        provider_freshness = {}
+        for country_iso3, source_id, latest_retrieved_at in provider_freshness_rows:
+            provider_freshness.setdefault(country_iso3, {})[source_id] = latest_retrieved_at
+
         observations = {}
         for row in observation_rows:
             item = dict(zip(observation_columns, row))
             item["source_ids"] = sorted(item.get("source_ids") or [])
+            item["provider_retrieved_at"] = provider_freshness.get(row[0], {})
             observations[row[0]] = item
         earnings = {
             row[0]: dict(zip(earnings_columns, row))
