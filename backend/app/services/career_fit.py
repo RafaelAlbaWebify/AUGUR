@@ -254,6 +254,9 @@ def career_fit(
                 "missing_skills": [],
             },
             "evidence_complete": False,
+            "profile_skill_coverage_complete": False,
+            "market_signal_supports_viability": False,
+            "viability_evidence_ready": False,
             "notes": [
                 "No verified EURES country evidence is implemented for this target.",
                 "No demand signal is inferred.",
@@ -280,6 +283,9 @@ def career_fit(
                 "missing_skills": [],
             },
             "evidence_complete": False,
+            "profile_skill_coverage_complete": False,
+            "market_signal_supports_viability": False,
+            "viability_evidence_ready": False,
             "notes": [
                 "CareerFit requires a mapped occupation group before EURES shortage/surplus evidence can be applied.",
                 "No country-fit score is produced.",
@@ -308,6 +314,22 @@ def career_fit(
         }
     )
 
+    essential_total = skill_match.get("essential_skill_count") or 0
+    essential_matched = skill_match.get("essential_skills_matched") or 0
+    skill_coverage = skill_match.get("coverage")
+
+    profile_skill_coverage_complete = bool(
+        skill_match.get("evidence_complete")
+        and essential_total > 0
+        and essential_matched == essential_total
+        and skill_coverage == 1.0
+    )
+    market_signal_supports_viability = market_signal == "shortage"
+    viability_evidence_ready = bool(
+        profile_skill_coverage_complete
+        and market_signal_supports_viability
+    )
+
     return {
         "target_country_iso3": target,
         "status": "evidence_available",
@@ -321,11 +343,16 @@ def career_fit(
         "occupation_match": occupation_match,
         "skill_match": skill_match,
         "evidence_complete": bool(skill_match.get("evidence_complete")),
+        "profile_skill_coverage_complete": profile_skill_coverage_complete,
+        "market_signal_supports_viability": market_signal_supports_viability,
+        "viability_evidence_ready": viability_evidence_ready,
         "notes": [
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             "Country evidence is based on the latest implemented EURES labour-market information for 2024 conditions.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
             "ESCO occupation resolution uses transparent local label matching and refuses low-confidence matches.",
+            "Essential ESCO skills are treated as conservative profile-evidence requirements; missing declarations are not inferred as present.",
+            "A shortage signal plus complete declared essential-skill coverage is an evidence gate, not a guarantee of employment.",
             "No country ranking or composite score is produced.",
         ],
     }
