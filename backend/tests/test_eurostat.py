@@ -96,3 +96,38 @@ def test_eurostat_job_transition_normalization_keeps_probability_context():
     assert rows[-1]["duration_group"] == "TOTAL"
     assert rows[-1]["probability_pct"] == 38.0
     assert rows[-1]["dataset_id"] == "lfsi_long_e01"
+
+
+def test_eurostat_net_earnings_normalization_preserves_standard_case():
+    payload = {
+        "id": ["geo", "ecase", "time"],
+        "size": [1, 1, 2],
+        "dimension": {
+            "geo": {"category": {"index": {"ES": 0}}},
+            "ecase": {
+                "category": {
+                    "index": {"P1_NCH_AW100": 0},
+                }
+            },
+            "time": {
+                "category": {
+                    "index": {"2024": 0, "2025": 1},
+                }
+            },
+        },
+        "value": [30000.0, 31500.0],
+        "updated": "2026-09-04",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize_net_earnings("ESP", payload)
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert rows[-1]["country_iso3"] == "ESP"
+    assert rows[-1]["period"] == 2025
+    assert rows[-1]["earnings_case"] == "P1_NCH_AW100"
+    assert rows[-1]["annual_net_eur"] == 31500.0
+    assert rows[-1]["dataset_id"] == "earn_nt_net"
