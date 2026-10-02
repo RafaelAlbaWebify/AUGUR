@@ -41,7 +41,7 @@ and by:
 | local_employment_transition | experimental | Country-level unemployment-to-employment transitions are not occupation-specific. |
 | local_financial_transition | missing | Occupation-specific net income, household budget and transition costs are incomplete. |
 | composition_dependency_graph | experimental | The stage dependency graph is explicit, but its sequencing assumptions have not been externally calibrated. |
-| external_calibration | missing | Candidate ranges have not been calibrated against observed relocation outcomes. |
+| external_calibration | missing | Local calibration infrastructure exists, but candidate ranges have not been validated against an approved representative set of observed relocation outcomes. |
 
 ## What does not qualify as validation
 
@@ -106,3 +106,41 @@ The `local_employment_transition` validation gate remains `experimental` until o
 2. an externally calibrated model that demonstrates how occupational demand evidence can be converted into elapsed transition time.
 
 Until then, occupation-level vacancy evidence may improve CareerFit, but it must remain separate from the TTV duration model.
+
+
+## External calibration infrastructure
+
+AUGUR now includes a local-only calibration store and CSV import workflow.
+
+This infrastructure records only the minimum fields required to compare an observed outcome with the candidate range:
+
+- anonymous `case_id`;
+- target country;
+- remote/local employment mode;
+- temporal evidence engine version;
+- composition version;
+- candidate range minimum and maximum;
+- observed weeks to viability;
+- optional provenance label and observation date.
+
+It deliberately does **not** store the full personal profile in the calibration table.
+
+The current descriptive metrics are:
+
+- candidate-interval coverage;
+- mean absolute error against the candidate-range midpoint;
+- mean signed midpoint error;
+- sample count and country coverage.
+
+These metrics do not constitute validation on their own.
+
+The `external_calibration` gate remains `missing` until AUGUR has:
+
+1. a documented definition of the observed Time-to-Viability outcome;
+2. a representative multi-country sample;
+3. inclusion/exclusion rules;
+4. an approved calibration/evaluation protocol;
+5. acceptance criteria defined before evaluating the final holdout sample;
+6. evidence that the model performs acceptably on observations not used to design or tune it.
+
+The local calibration workflow is therefore validation infrastructure, not a shortcut to activating `TEMPORAL_MODEL_VERSION`.
