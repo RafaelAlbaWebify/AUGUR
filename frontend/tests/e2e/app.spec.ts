@@ -441,11 +441,9 @@ test('flags render and lower dashboard panels do not overlap', async ({ page }) 
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.reload()
 
-  await expect(page.locator('.countryFlag')).toHaveCount(3)
-  await expect(page.locator('.inlineFlag')).toHaveCount(3)
-
-  const optionText = await page.getByLabel('Select country').locator('option').first().textContent()
-  expect(optionText).toContain('🇪🇸')
+  await expect(page.locator('.worldMapLegend .flagIcon')).toHaveCount(3)
+  await expect(page.locator('.compareBarRow .flagIcon')).toHaveCount(3)
+  await expect(page.locator('.topbarCountry .flagIcon')).toHaveCount(1)
 
   const geometry = await page.evaluate(() => {
     const rect = (selector: string) => {
