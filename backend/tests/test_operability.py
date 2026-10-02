@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 from app.services import operability as module
@@ -11,6 +12,7 @@ def _country(
     earnings_rows: int,
     earnings_groups: int,
     source_ids: list[str] | None = None,
+    retrieved_at=None,
 ):
     return {
         "country_iso3": iso3,
@@ -20,6 +22,14 @@ def _country(
         "official_forecast_rows": official_forecast_rows,
         "source_count": len(source_ids or []) if observed_rows else 0,
         "source_ids": source_ids or [],
+        "provider_retrieved_at": {
+            source_id: (
+                retrieved_at
+                if retrieved_at is not None
+                else datetime.now(timezone.utc)
+            )
+            for source_id in (source_ids or [])
+        },
         "labour_earnings": {
             "country_iso3": iso3,
             "row_count": earnings_rows,
@@ -246,3 +256,39 @@ def test_operability_partial_when_a_configured_provider_is_missing(monkeypatch):
     assert result["provider_coverage"]["ESP"]["complete"] is False
     assert result["provider_coverage"]["ESP"]["missing"] == ["UN_WPP"]
     assert "country_analysis_evidence" in result["blockers"]
+
+
+def test_operability_partial_when_provider_sync_is_stale(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+
+    stale_time = datetime.now(timezone.utc) - timedelta(days=45)
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {
+            "countries": [
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids(), stale_time),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["status"] == "partial"
+    assert result["data_sync_fresh"] is False
+    assert result["provider_coverage"]["ESP"]["fresh"] is False
+    assert set(result["provider_coverage"]["ESP"]["stale"]) == set(_provider_ids())
+    assert "data_sync_stale" in result["blockers"]
