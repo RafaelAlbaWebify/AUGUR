@@ -157,6 +157,8 @@ type TTVResponse = {
   stage_order: string[]
   stages: Record<string, TTVStage>
   blocked_by: string[]
+  dependency_ready?: boolean
+  temporal_evidence_state?: string
   ready_for_time_estimate: boolean
   time_estimate: null
   notes: string[]
@@ -694,7 +696,13 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             <span>TTV READINESS · {targetCountry}</span>
             <h3>Dependency path</h3>
           </div>
-          <strong>{ttv?.ready_for_time_estimate ? 'Estimate available' : 'Time estimate unavailable'}</strong>
+          <strong>
+            {ttv?.ready_for_time_estimate
+              ? 'Estimate available'
+              : ttv?.dependency_ready
+              ? 'Dependencies ready · temporal model pending'
+              : 'Time estimate unavailable'}
+          </strong>
         </div>
 
         <div className="ttvDependencyPath">
@@ -726,7 +734,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           </div>
         )}
 
-        <p>Time-to-viability is produced only when every dependency has sufficient evidence.</p>
+        <p>
+          Time-to-viability requires both viable dependencies and a validated temporal evidence model.
+          Dependency readiness alone never creates a duration.
+        </p>
       </section>
     </section>
   )
