@@ -87,6 +87,7 @@ def operability_status() -> dict:
     local_employment_evidence_ready = bool(countries) and all(
         country["labour_earnings"]["row_count"] > 0
         and country["labour_earnings"]["isco_group_count"] > 0
+        and country.get("net_earnings", {}).get("row_count", 0) > 0
         for country in countries
     )
 
@@ -155,7 +156,7 @@ def operability_status() -> dict:
             "Runtime health and analytical operability are separate.",
             "Country analysis requires observed evidence, official forecasts and every configured provider for each registered country.",
             "Provider synchronization must be no more than 30 days old; source observation years are evaluated separately from retrieval freshness.",
-            "Full local-employment Personal Fit requires Eurostat labour earnings evidence and a full ESCO dataset.",
+            "Full local-employment Personal Fit requires Eurostat occupational gross earnings, national net-earnings benchmark evidence and a full ESCO dataset.",
             "Full AUGUR readiness also requires a validated TTV temporal model.",
             "Analysis readiness is reported separately from full product readiness.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
