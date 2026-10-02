@@ -5,7 +5,7 @@ import ComparePanel from './components/ComparePanel'
 import FitSnapshot from './components/FitSnapshot'
 import DimensionSummaryCard from './components/DimensionSummaryCard'
 import OverallSignalBalance from './components/OverallSignalBalance'
-import { countryFlag } from './lib/countryFlag'
+import CountrySelect from './components/CountrySelect'
 
 type Country = {
   iso2: string
@@ -497,18 +497,13 @@ export default function App() {
 
         <div className="topbarCountry">
           <span>Country</span>
-          <select
-            className="countrySelect compact"
+          <CountrySelect
+            countries={countries}
             value={selectedCountry}
-            onChange={(event) => setSelectedCountry(event.target.value)}
-            aria-label="Select country"
-          >
-            {countries.map((country) => (
-              <option value={country.iso3} key={country.iso3}>
-                {countryFlag(country.iso2, country.iso3)} {country.name}
-              </option>
-            ))}
-          </select>
+            onChange={setSelectedCountry}
+            ariaLabel="Select country"
+            compact
+          />
         </div>
 
         <nav className="viewNav topbarNav" aria-label="AUGUR views">
