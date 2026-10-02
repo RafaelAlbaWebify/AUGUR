@@ -196,11 +196,42 @@ Local-employment income viability still requires additional labour-market salary
 
 TTV is a dependency graph, not an aggregate score.
 
-Current dependencies are:
+Current viability dependencies are:
 
 - LegalFit
 - LanguageFit
 - CareerFit
 - FinancialFit
 
-A time estimate is withheld until all required evidence layers are sufficiently complete. The current implementation therefore exposes readiness and blockers, but does not fabricate a duration.
+A separate temporal-evidence engine now evaluates candidate timing evidence for:
+
+- legal access;
+- language progression;
+- essential-skill gaps;
+- financial transition;
+- employment transition.
+
+The temporal engine may expose a **candidate range for validation**, but AUGUR does not publish that range as a TTV estimate while `TEMPORAL_MODEL_VERSION` remains unset.
+
+Current temporal evidence includes:
+
+- zero additional legal delay for domestic cases and EU free-movement work rights;
+- Cambridge English guided-learning-hour ranges for progression to AUGUR's B2 heuristic, converted to calendar weeks only when the user supplies weekly study intensity;
+- zero skill-training delay only when declared essential ESCO skill coverage is already complete;
+- zero employment-transition delay for preserved remote income;
+- an experimental Eurostat country-level unemployment-to-employment transition baseline for local employment.
+
+The Eurostat employment baseline is not occupation-specific and uses a constant quarterly-hazard assumption only to produce a validation range. It is not an individual job-offer forecast.
+
+Candidate stage durations are currently composed with `parallel_max`: stages that can progress concurrently are not blindly summed. This composition remains experimental and is one of the items that must be validated before a temporal model can be versioned.
+
+Local-employment cases remain blocked from a complete calendar range while FinancialFit lacks a validated net-income / tax / household-budget transition model.
+
+AUGUR therefore distinguishes:
+
+1. dependency readiness;
+2. temporal evidence readiness;
+3. candidate temporal range;
+4. published TTV estimate.
+
+Only the fourth requires an explicitly versioned and validated temporal model.
