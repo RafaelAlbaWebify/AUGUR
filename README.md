@@ -117,7 +117,9 @@ CSV columns:
 case_id,country_iso3,employment_mode,engine_version,composition,candidate_weeks_min,candidate_weeks_max,observed_weeks,source_label,observed_at
 ```
 
-Required columns are everything through `observed_weeks`. `source_label` and `observed_at` are optional.
+Required columns are everything through `observed_weeks`. `source_label`, `observed_at` and `stage_timings_json` are optional.
+
+When stage-level observations are available, `stage_timings_json` may contain anonymised timings for `legal`, `language`, `skills`, `employment` and `financial`. Each included stage must provide its candidate minimum, candidate maximum and observed weeks.
 
 Example import:
 
