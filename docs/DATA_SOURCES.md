@@ -168,6 +168,8 @@ AUGUR stores this evidence separately from country macro observations.
 
 The current implementation uses a country-level unemployment-to-employment transition probability and converts the quarterly transition probability into cumulative 50% and 80% transition horizons under a constant-quarterly-hazard assumption.
 
+AUGUR now ingests all published age classes from the selected dataset. When the profile age maps to an available Eurostat group, that group is preferred; otherwise the model falls back explicitly to the 15–74 aggregate. Profiles outside the dataset's 15–74 population are withheld rather than extrapolated.
+
 Important limitations:
 
 - country-level, not occupation-specific;
