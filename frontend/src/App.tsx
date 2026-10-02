@@ -732,7 +732,7 @@ export default function App() {
       )}
 
       <footer>
-        AUGUR v0.1 · Phase 1 · Observed data + trend analysis
+        AUGUR v0.1 · Phase 1 · country evidence + personal fit
       </footer>
     </main>
   )
