@@ -31,7 +31,9 @@ Implemented capabilities include:
 
 AUGUR keeps country evidence separate from personal-fit analysis. Personal profile data can change whether a country fits a household, but never changes country facts, source observations, official forecasts or country trends.
 
-AUGUR deliberately does not report full readiness while TTV duration modelling is unavailable. Country analysis and Personal Fit evidence can be operational independently through the separate `analysis_ready` state.
+AUGUR deliberately does not report full readiness while TTV duration modelling is unavailable. Country analysis and core Personal Fit evidence can be operational independently through the separate `analysis_ready` state.
+
+Career market evidence coverage is reported separately. Broad EURES evidence exists for the supported countries, while verified ISCO unit-group coverage is intentionally partial and is never described as exhaustive.
 
 ## Local ports
 
