@@ -619,7 +619,10 @@ def analytical_evidence_status() -> dict:
                 COUNT(o.indicator_id) FILTER (
                     WHERE o.observation_type = 'official_forecast'
                 ) AS official_forecast_rows,
-                COUNT(DISTINCT o.source_id) AS source_count
+                COUNT(DISTINCT o.source_id) AS source_count,
+                LIST(DISTINCT o.source_id) FILTER (
+                    WHERE o.source_id IS NOT NULL
+                ) AS source_ids
             FROM countries c
             LEFT JOIN observations o
               ON o.country_iso3 = c.iso3
@@ -650,6 +653,7 @@ def analytical_evidence_status() -> dict:
             "latest_observed_period",
             "official_forecast_rows",
             "source_count",
+            "source_ids",
         ]
         earnings_columns = [
             "country_iso3",
@@ -658,10 +662,11 @@ def analytical_evidence_status() -> dict:
             "latest_period",
         ]
 
-        observations = {
-            row[0]: dict(zip(observation_columns, row))
-            for row in observation_rows
-        }
+        observations = {}
+        for row in observation_rows:
+            item = dict(zip(observation_columns, row))
+            item["source_ids"] = sorted(item.get("source_ids") or [])
+            observations[row[0]] = item
         earnings = {
             row[0]: dict(zip(earnings_columns, row))
             for row in earnings_rows
