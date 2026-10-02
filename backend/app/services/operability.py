@@ -27,6 +27,14 @@ def _age_days(value, now: datetime) -> float | None:
     return max(0.0, (now - timestamp).total_seconds() / 86400.0)
 
 
+def _is_fresh(value, now: datetime) -> bool:
+    age_days = _age_days(value, now)
+    return (
+        age_days is not None
+        and age_days <= SYNC_FRESHNESS_MAX_DAYS
+    )
+
+
 def operability_status() -> dict:
     now = datetime.now(timezone.utc)
     evidence = analytical_evidence_status()
@@ -89,32 +97,23 @@ def operability_status() -> dict:
     local_employment_evidence_ready = bool(countries) and all(
         country["labour_earnings"]["row_count"] > 0
         and country["labour_earnings"]["isco_group_count"] > 0
-        and (
-            (_age_days(
-                country["labour_earnings"].get("latest_retrieved_at"),
-                now,
-            ) or float("inf"))
-            <= SYNC_FRESHNESS_MAX_DAYS
+        and _is_fresh(
+            country["labour_earnings"].get("latest_retrieved_at"),
+            now,
         )
         and country.get("net_earnings", {}).get("row_count", 0) > 0
-        and (
-            (_age_days(
-                country.get("net_earnings", {}).get("latest_retrieved_at"),
-                now,
-            ) or float("inf"))
-            <= SYNC_FRESHNESS_MAX_DAYS
+        and _is_fresh(
+            country.get("net_earnings", {}).get("latest_retrieved_at"),
+            now,
         )
         for country in countries
     )
 
     job_transition_evidence_ready = bool(countries) and all(
         country.get("job_transitions", {}).get("row_count", 0) > 0
-        and (
-            (_age_days(
-                country.get("job_transitions", {}).get("latest_retrieved_at"),
-                now,
-            ) or float("inf"))
-            <= SYNC_FRESHNESS_MAX_DAYS
+        and _is_fresh(
+            country.get("job_transitions", {}).get("latest_retrieved_at"),
+            now,
         )
         for country in countries
     )
