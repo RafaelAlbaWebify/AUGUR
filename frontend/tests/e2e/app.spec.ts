@@ -255,20 +255,38 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await page.getByRole('button', { name: 'Profile' }).click()
   const profile = page.getByRole('region', { name: 'Personal profile' })
   await expect(profile.getByText('stored locally · never changes country facts')).toBeVisible()
-  await expect(profile.getByText('Personal-fit readiness')).toBeVisible()
-  await expect(profile.getByText('0/4 input sets ready')).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Profile completion' })).toBeVisible()
+  await expect(profile.getByText('0 / 4 input sets ready')).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Personal-fit evidence' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Fit outputs' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'TTV readiness' })).toBeVisible()
   await expect(profile.getByText('LegalFit · ESP')).toBeVisible()
   await expect(profile.getByText('LanguageFit · ESP')).toBeVisible()
   await expect(profile.getByText('CareerFit · ESP')).toBeVisible()
   await expect(profile.getByText('FinancialFit · ESP')).toBeVisible()
-  await expect(profile.getByText('TTV dependency path · ESP')).toBeVisible()
-  await expect(profile.getByText('time estimate intentionally blocked')).toBeVisible()
+  await expect(profile.getByText('TTV READINESS · ESP')).toBeVisible()
+  await expect(profile.getByText('Time estimate unavailable')).toBeVisible()
 
   await profile.getByLabel('Profession').fill('Systems engineer')
   await profile.getByLabel('Household size').fill('2')
   await profile.getByRole('button', { name: 'Save profile' }).click()
 
   await expect(profile.getByText('Saved locally')).toBeVisible()
+})
+
+
+test('profile architecture keeps completion evidence outputs and TTV distinct', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await expect(profile.getByRole('region', { name: 'Profile inputs' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Profile completion' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Personal-fit evidence' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'Fit outputs' })).toBeVisible()
+  await expect(profile.getByRole('region', { name: 'TTV readiness' })).toBeVisible()
+
+  await expect(profile.getByText('Completion only confirms that required profile inputs exist. It is not a country-fit score.')).toBeVisible()
+  await expect(profile.getByText('Time-to-viability is produced only when every dependency has sufficient evidence.')).toBeVisible()
 })
 
 
