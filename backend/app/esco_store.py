@@ -362,3 +362,84 @@ def occupation_skill_rows(occupation_label: str) -> list[dict]:
         return rows
     finally:
         con.close()
+
+
+def _normalize_occupation_text(value: str) -> str:
+    import re
+
+    text = value.lower().strip()
+    text = text.replace("information technology", "ict")
+    text = re.sub(r"\bit\b", "ict", text)
+    text = re.sub(r"[^a-z0-9+#.]+", " ", text)
+    return re.sub(r"\s+", " ", text).strip()
+
+
+def search_occupations(query: str, limit: int = 5) -> list[dict]:
+    normalized_query = _normalize_occupation_text(query)
+    if not normalized_query:
+        return []
+
+    query_tokens = {
+        token
+        for token in normalized_query.split()
+        if len(token) > 1
+    }
+    if not query_tokens:
+        return []
+
+    con = _connect()
+    try:
+        rows = con.execute(
+            """
+            SELECT concept_uri, preferred_label, code, isco_group,
+                   dataset_version, source_mode
+            FROM esco_occupations
+            """
+        ).fetchall()
+    finally:
+        con.close()
+
+    candidates = []
+    for row in rows:
+        item = dict(row)
+        normalized_label = _normalize_occupation_text(item["preferred_label"])
+        label_tokens = {
+            token
+            for token in normalized_label.split()
+            if len(token) > 1
+        }
+        if not label_tokens:
+            continue
+
+        if normalized_query == normalized_label:
+            score = 1.0
+            method = "exact_label"
+        elif normalized_query in normalized_label or normalized_label in normalized_query:
+            score = 0.92
+            method = "label_contains"
+        else:
+            intersection = query_tokens & label_tokens
+            if not intersection:
+                continue
+
+            query_coverage = len(intersection) / len(query_tokens)
+            label_coverage = len(intersection) / len(label_tokens)
+            score = (0.65 * query_coverage) + (0.35 * label_coverage)
+            method = "token_overlap"
+
+        candidates.append(
+            {
+                **item,
+                "match_score": round(score, 4),
+                "match_method": method,
+            }
+        )
+
+    candidates.sort(
+        key=lambda item: (
+            item["match_score"],
+            len(item["preferred_label"]),
+        ),
+        reverse=True,
+    )
+    return candidates[: max(1, limit)]
