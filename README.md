@@ -114,7 +114,7 @@ AUGUR includes a local-only calibration store for anonymous observed TTV cases. 
 CSV columns:
 
 ```text
-case_id,country_iso3,employment_mode,engine_version,composition,candidate_weeks_min,candidate_weeks_max,observed_weeks,source_label,observed_at
+case_id,country_iso3,employment_mode,engine_version,composition,candidate_weeks_min,candidate_weeks_max,observed_weeks,source_label,observed_at,stage_timings_json
 ```
 
 Required columns are everything through `observed_weeks`. `source_label`, `observed_at` and `stage_timings_json` are optional.
