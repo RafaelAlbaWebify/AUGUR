@@ -525,6 +525,30 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <span>Languages · optional CEFR</span>
                 <input value={languagesText} placeholder="Spanish:C2, English:B2" onChange={(event) => setLanguagesText(event.target.value)} />
               </label>
+              <label>
+                <span>Language study hours / week · TTV</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={80}
+                  step={1}
+                  value={
+                    typeof profile.preferences.language_study_hours_per_week === 'number'
+                      ? profile.preferences.language_study_hours_per_week
+                      : ''
+                  }
+                  placeholder="e.g. 10"
+                  onChange={(event) => {
+                    const preferences = { ...profile.preferences }
+                    if (event.target.value) {
+                      preferences.language_study_hours_per_week = Number(event.target.value)
+                    } else {
+                      delete preferences.language_study_hours_per_week
+                    }
+                    setProfile({ ...profile, preferences })
+                  }}
+                />
+              </label>
             </div>
           </div>
 
