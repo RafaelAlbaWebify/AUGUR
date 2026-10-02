@@ -89,12 +89,33 @@ def operability_status() -> dict:
     local_employment_evidence_ready = bool(countries) and all(
         country["labour_earnings"]["row_count"] > 0
         and country["labour_earnings"]["isco_group_count"] > 0
+        and (
+            (_age_days(
+                country["labour_earnings"].get("latest_retrieved_at"),
+                now,
+            ) or float("inf"))
+            <= SYNC_FRESHNESS_MAX_DAYS
+        )
         and country.get("net_earnings", {}).get("row_count", 0) > 0
+        and (
+            (_age_days(
+                country.get("net_earnings", {}).get("latest_retrieved_at"),
+                now,
+            ) or float("inf"))
+            <= SYNC_FRESHNESS_MAX_DAYS
+        )
         for country in countries
     )
 
     job_transition_evidence_ready = bool(countries) and all(
         country.get("job_transitions", {}).get("row_count", 0) > 0
+        and (
+            (_age_days(
+                country.get("job_transitions", {}).get("latest_retrieved_at"),
+                now,
+            ) or float("inf"))
+            <= SYNC_FRESHNESS_MAX_DAYS
+        )
         for country in countries
     )
 
@@ -162,6 +183,7 @@ def operability_status() -> dict:
         "country_analysis_ready": country_analysis_ready,
         "data_sync_fresh": data_sync_fresh,
         "sync_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
+        "auxiliary_evidence_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
         "local_employment_evidence_ready": local_employment_evidence_ready,
         "job_transition_evidence_ready": job_transition_evidence_ready,
         "esco_full_ready": esco_full_ready,
@@ -173,7 +195,7 @@ def operability_status() -> dict:
         "notes": [
             "Runtime health and analytical operability are separate.",
             "Country analysis requires observed evidence, official forecasts and every configured provider for each registered country.",
-            "Provider synchronization must be no more than 30 days old; source observation years are evaluated separately from retrieval freshness.",
+            "Provider synchronization and auxiliary labour evidence retrieval must be no more than 30 days old; source observation years are evaluated separately from retrieval freshness.",
             "Full local-employment Personal Fit requires Eurostat occupational gross earnings, national net-earnings benchmark evidence and a full ESCO dataset.",
             "Full AUGUR readiness also requires loaded job-transition evidence and a validated TTV temporal model.",
             "Analysis readiness is reported separately from full product readiness.",
