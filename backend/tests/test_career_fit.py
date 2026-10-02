@@ -20,9 +20,15 @@ def test_esco_resolution_accepts_confident_match(monkeypatch):
         lambda profession, limit=5: [
             {
                 "concept_uri": "urn:test:ict-support",
-                "preferred_label": "ICT support technician",
-                "code": "3512",
-                "isco_group": "3512",
+                "preferred_label": (
+                    "ICT support technician"
+                    if isco_group.startswith("35")
+                    else "ICT professional"
+                    if isco_group.startswith("25")
+                    else "engineering professional"
+                ),
+                "code": isco_group,
+                "isco_group": isco_group,
                 "dataset_version": "test",
                 "source_mode": "full",
                 "match_score": 0.81,
@@ -129,7 +135,12 @@ def test_unmapped_profession_does_not_infer_demand(monkeypatch):
     assert result["market_signal"] is None
 
 
-def _mock_full_esco_career(monkeypatch, market_country_profession="IT support engineer", coverage=1.0):
+def _mock_full_esco_career(
+    monkeypatch,
+    market_country_profession="IT support engineer",
+    coverage=1.0,
+    isco_group="2522",
+):
     monkeypatch.setattr(
         career_fit_module,
         "search_occupations",
@@ -203,7 +214,11 @@ def test_career_viability_evidence_blocks_incomplete_essential_skill_coverage(mo
 
 
 def test_career_viability_evidence_does_not_treat_surplus_as_supportive(monkeypatch):
-    _mock_full_esco_career(monkeypatch, coverage=1.0)
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2144",
+    )
 
     profile = PersonalProfileResponse(
         profile_id="default",
@@ -227,3 +242,48 @@ def test_eures_market_evidence_is_versioned_outside_service_logic():
     assert set(COUNTRY_EVIDENCE) == {"ESP", "PRT", "IRL"}
     assert "ict_professionals" in COUNTRY_EVIDENCE["IRL"]["shortage_groups"]
     assert isinstance(COUNTRY_EVIDENCE["ESP"]["surplus_groups"], set)
+
+
+def test_isco_35_support_technician_does_not_inherit_isco_25_shortage(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="3512",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="IT support engineer",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["occupation"]["mapping_method"] == "esco_isco_submajor"
+    assert result["occupation"]["isco_submajor"] == "35"
+    assert result["occupation"]["occupation_group"] == "information_communications_technicians"
+    assert result["market_signal"] == "not_classified_as_shortage_or_surplus"
+    assert result["profile_skill_coverage_complete"] is True
+    assert result["market_signal_supports_viability"] is False
+    assert result["viability_evidence_ready"] is False
+
+
+def test_isco_25_ict_professional_can_use_ict_professional_shortage(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2522",
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Systems administrator",
+        skills=["Windows", "networking", "ticketing", "troubleshooting"],
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["occupation"]["isco_submajor"] == "25"
+    assert result["occupation"]["occupation_group"] == "ict_professionals"
+    assert result["market_signal"] == "shortage"
+    assert result["viability_evidence_ready"] is True
