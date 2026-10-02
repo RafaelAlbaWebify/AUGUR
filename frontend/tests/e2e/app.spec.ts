@@ -152,7 +152,7 @@ async function mockApi(page: Page) {
           legal_fit: { label: 'LegalFit', ready: false, completed_fields: 0, required_fields: 2, missing_fields: ['current_country', 'citizenships'] },
           career_fit: { label: 'CareerFit', ready: false, completed_fields: 0, required_fields: 2, missing_fields: ['profession', 'skills'] },
           language_fit: { label: 'LanguageFit', ready: false, completed_fields: 0, required_fields: 1, missing_fields: ['languages'] },
-          financial_fit: { label: 'FinancialFit', ready: false, completed_fields: 1, required_fields: 3, missing_fields: ['monthly_net_income', 'liquid_savings'] },
+          financial_fit: { label: 'FinancialFit', ready: false, completed_fields: 0, required_fields: 2, missing_fields: ['current_country', 'monthly_net_income'] },
         },
       }
     } else if (path === '/api/profile') {
