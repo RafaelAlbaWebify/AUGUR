@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 
-export type CountryView = 'overview' | 'outlook' | 'profile' | 'indicators'
+export type CountryView = 'overview' | 'outlook' | 'profile' | 'indicators' | 'skills'
 export type AugurView = CountryView | 'dimension' | 'compare'
 
 export type AugurRoute =
@@ -36,7 +36,7 @@ function normalizedDimension(value: string | null | undefined) {
 
 export function parseAugurRoute(location: Location = window.location): AugurRoute {
   const path = location.pathname.replace(/\/+$/, '') || '/'
-  const countryMatch = path.match(/^\/country\/([A-Za-z]{3})\/(overview|outlook|profile|indicators)$/)
+  const countryMatch = path.match(/^\/country\/([A-Za-z]{3})\/(overview|outlook|profile|indicators|skills)$/)
 
   if (countryMatch) {
     return {
