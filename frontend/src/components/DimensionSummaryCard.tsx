@@ -58,14 +58,20 @@ export default function DimensionSummaryCard({
     >
       <div className="mockDimensionHeader">
         <span>{label}</span>
-        <small>{item.confidence} confidence</small>
+        <small>
+          {item.directional_indicator_count > 0
+            ? `${item.confidence} trend evidence`
+            : 'contextual evidence'}
+        </small>
       </div>
 
       <div className="mockDimensionStatusRow">
         <span className="trajectoryIcon">{icon(item.trajectory)}</span>
         <strong>{item.trajectory.replace('_', ' ')}</strong>
         <small className="signalEvidenceCount">
-          {item.directional_indicator_count}/{item.indicator_count} directional
+          {item.directional_indicator_count > 0
+            ? `${item.indicator_count} indicators · ${item.directional_indicator_count} directional`
+            : `${item.indicator_count} indicators · none directional`}
         </small>
       </div>
 
