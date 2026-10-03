@@ -6,6 +6,7 @@ export type CountryCity = {
 
 export type CountryVisual = {
   heroImage: string
+  fallbackImage: string
   alt: string
   focalPoint?: string
   eyebrow?: string
@@ -15,7 +16,8 @@ export type CountryVisual = {
 
 const COUNTRY_VISUALS: Record<string, CountryVisual> = {
   ESP: {
-    heroImage: '/country-images/ESP.svg',
+    heroImage: '/country-images/ESP.webp',
+    fallbackImage: '/country-images/ESP.svg',
     alt: 'Spain country visual',
     focalPoint: '50% 52%',
     eyebrow: 'Spain',
@@ -28,7 +30,8 @@ const COUNTRY_VISUALS: Record<string, CountryVisual> = {
     ],
   },
   PRT: {
-    heroImage: '/country-images/PRT.svg',
+    heroImage: '/country-images/PRT.webp',
+    fallbackImage: '/country-images/PRT.svg',
     alt: 'Portugal country visual',
     focalPoint: '50% 52%',
     eyebrow: 'Portugal',
@@ -41,7 +44,8 @@ const COUNTRY_VISUALS: Record<string, CountryVisual> = {
     ],
   },
   IRL: {
-    heroImage: '/country-images/IRL.svg',
+    heroImage: '/country-images/IRL.webp',
+    fallbackImage: '/country-images/IRL.svg',
     alt: 'Ireland country visual',
     focalPoint: '50% 48%',
     eyebrow: 'Ireland',
@@ -56,7 +60,8 @@ const COUNTRY_VISUALS: Record<string, CountryVisual> = {
 }
 
 export const DEFAULT_COUNTRY_VISUAL: CountryVisual = {
-  heroImage: '/country-images/default.svg',
+  heroImage: '/country-images/default.webp',
+  fallbackImage: '/country-images/default.svg',
   alt: 'Country landscape visual',
   focalPoint: '50% 50%',
 }
