@@ -512,9 +512,13 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     {
       id: 'financial',
       label: 'FinancialFit',
-      state: !financialFit || !financialFit.portable_income_analysis
+      state: !financialFit
         ? 'incomplete'
-        : 'complete',
+        : financialFit.evidence_complete
+        ? 'complete'
+        : financialFit.evidence_state === 'partial'
+        ? 'partial'
+        : 'incomplete',
       detail: financialFit?.status?.replaceAll('_', ' ') ?? 'loading',
     },
   ]
@@ -841,9 +845,13 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               <div>
                 <dt>Blockers</dt>
                 <dd>
-                  {financialFit?.blockers?.length
+                  {!financialFit
+                    ? 'Loading financial evidence.'
+                    : financialFit.blockers?.length
                     ? financialFit.blockers.map((item) => item.replaceAll('_', ' ')).join(' · ')
-                    : 'No unresolved financial evidence blockers.'}
+                    : financialFit.evidence_complete
+                    ? 'No unresolved financial evidence blockers.'
+                    : 'Financial evidence remains incomplete; no explicit blocker list was returned.'}
                 </dd>
               </div>
               <div>
