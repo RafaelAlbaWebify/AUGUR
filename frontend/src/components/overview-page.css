@@ -559,6 +559,138 @@
   }
 }
 
+@media (min-width: 1500px) and (min-height: 900px) and (max-height: 999px) {
+  .overviewPageV2 {
+    grid-template-rows: minmax(0, 49fr) minmax(0, 51fr);
+    gap: 10px;
+    margin-top: 10px;
+    padding-bottom: 6px;
+  }
+
+  .overviewHeroGrid,
+  .overviewLowerGrid {
+    gap: 10px;
+  }
+
+  .shell.view-overview > .dashboardTopbar {
+    min-height: 64px;
+  }
+
+  .shell.view-overview .dashboardTopbar {
+    padding: 8px 12px;
+  }
+
+  .shell.view-overview .brandMark {
+    font-size: 31px;
+  }
+
+  .overviewMapPanel .dimensionHeader {
+    min-height: 36px;
+    margin-bottom: 7px;
+  }
+
+  .overviewMapPanel .dimensionHeader h3 {
+    font-size: 17px;
+  }
+
+  .overviewFitPanel .fitSnapshot {
+    padding: 11px;
+  }
+
+  .overviewFitPanel .mockFitGrid {
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .overviewFitPanel .mockFitCard {
+    padding: 8px 10px !important;
+    grid-template-columns: 46px minmax(0, 1fr);
+  }
+
+  .overviewFitPanel .readinessRing {
+    width: 44px;
+    height: 44px;
+  }
+
+  .overviewFitPanel .mockFitCard strong {
+    font-size: 12px !important;
+  }
+
+  .overviewFitPanel .mockFitCard p {
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  .overviewDimensionsPanel {
+    padding: 12px;
+  }
+
+  .overviewSectionHeader {
+    min-height: 38px;
+  }
+
+  .overviewSectionHeader h2 {
+    font-size: 17px;
+  }
+
+  .overviewDimensionGridV2 {
+    margin-top: 8px;
+    gap: 8px;
+  }
+
+  .overviewDimensionGridV2 .mockDimensionCard {
+    padding: 10px 12px;
+  }
+
+  .overviewDimensionGridV2 .mockDimensionStatusRow {
+    margin-top: 7px;
+  }
+
+  .overviewDimensionGridV2 .mockDimensionCard ul {
+    margin-top: 7px;
+    gap: 3px;
+  }
+
+  .overviewInsightRail {
+    gap: 8px;
+    grid-template-rows: minmax(62px, .55fr) minmax(108px, .95fr) minmax(142px, 1.35fr);
+  }
+
+  .overviewInsightRail .overallSignalBalance,
+  .overviewOutlookCard,
+  .overviewCompareCard {
+    padding: 10px;
+  }
+
+  .overviewInsightRail .overallSignalBalance p {
+    margin-top: 4px;
+    font-size: 9px;
+  }
+
+  .overviewScenarioPreview {
+    margin-top: 7px;
+    gap: 6px;
+  }
+
+  .overviewScenarioRow {
+    grid-template-columns: 62px minmax(0, 1fr) 52px;
+    gap: 6px;
+  }
+
+  .overviewCompareCard > .comparePanel {
+    margin-top: 7px;
+  }
+
+  .overviewCompareCard .compareBarPreview {
+    margin-top: 7px;
+  }
+
+  .overviewCompareCard .compareBarRow {
+    grid-template-columns: 66px minmax(0, 1fr) 46px;
+    gap: 5px;
+  }
+}
+
 @media (max-width: 1499px), (max-height: 899px) {
   .shell.view-overview {
     height: auto;
