@@ -843,56 +843,17 @@ test('comparison selectors swap countries without duplicates', async ({ page }) 
   await expect(third).toHaveValue('PRT')
 })
 
-test('guarded Edit Layout persists safe panel ordering', async ({ page }) => {
+test('Country Radar uses a fixed evidence-first composition', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
 
-  await page.getByRole('button', { name: 'Edit layout' }).click()
-  const controls = page.getByRole('region', { name: 'Dashboard layout settings' })
-  await expect(controls).toBeVisible()
-  await expect(controls.getByText('Core panels, approved proportions and responsive behaviour stay fixed.')).toBeVisible()
-  await expect(controls.locator('input[type="range"]')).toHaveCount(0)
-  await expect(controls.locator('input[type="checkbox"]')).toHaveCount(0)
-
-  await controls.getByRole('button', { name: 'Fit · Map' }).click()
-  await controls.getByRole('button', { name: 'Compare first' }).click()
-
-  const reordered = await page.evaluate(() => ({
-    mapLeft: document.querySelector('.overviewMapPanel')!.getBoundingClientRect().left,
-    fitLeft: document.querySelector('.overviewFitPanel')!.getBoundingClientRect().left,
-    outlookTop: document.querySelector('.overviewOutlookCard')!.getBoundingClientRect().top,
-    compareTop: document.querySelector('.overviewCompareCard')!.getBoundingClientRect().top,
-  }))
-
-  expect(reordered.fitLeft).toBeLessThan(reordered.mapLeft)
-  expect(reordered.compareTop).toBeLessThan(reordered.outlookTop)
-
-  await page.reload()
-
-  const persisted = await page.evaluate(() => ({
-    mapLeft: document.querySelector('.overviewMapPanel')!.getBoundingClientRect().left,
-    fitLeft: document.querySelector('.overviewFitPanel')!.getBoundingClientRect().left,
-    outlookTop: document.querySelector('.overviewOutlookCard')!.getBoundingClientRect().top,
-    compareTop: document.querySelector('.overviewCompareCard')!.getBoundingClientRect().top,
-  }))
-
-  expect(persisted.fitLeft).toBeLessThan(persisted.mapLeft)
-  expect(persisted.compareTop).toBeLessThan(persisted.outlookTop)
-
-  await page.getByRole('button', { name: 'Edit layout' }).click()
-  await page.getByRole('region', { name: 'Dashboard layout settings' }).getByRole('button', { name: 'Reset layout' }).click()
-
-  const reset = await page.evaluate(() => ({
-    mapLeft: document.querySelector('.overviewMapPanel')!.getBoundingClientRect().left,
-    fitLeft: document.querySelector('.overviewFitPanel')!.getBoundingClientRect().left,
-    outlookTop: document.querySelector('.overviewOutlookCard')!.getBoundingClientRect().top,
-    compareTop: document.querySelector('.overviewCompareCard')!.getBoundingClientRect().top,
-  }))
-
-  expect(reset.mapLeft).toBeLessThan(reset.fitLeft)
-  expect(reset.outlookTop).toBeLessThan(reset.compareTop)
+  await expect(page.locator('.countryRadarHero')).toBeVisible()
+  await expect(page.locator('.countryIdentityCard')).toBeVisible()
+  await expect(page.locator('.countryRadarMap')).toBeVisible()
+  await expect(page.locator('.recentChangesPanel')).toBeVisible()
+  await expect(page.locator('.countryMetricGrid')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Edit layout' })).toHaveCount(0)
 })
-
 
 test('direct route refresh preserves country and view', async ({ page }) => {
   await page.goto('/country/PRT/outlook')
@@ -925,93 +886,52 @@ test('compare selection is encoded in URL and survives reload', async ({ page })
 })
 
 
-test('frozen-spec Overview renders the approved composition', async ({ page }) => {
+test('Country Radar renders the approved evidence composition', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
 
   await expect(page.getByRole('region', { name: 'Country overview' })).toBeVisible()
   await expect(page.getByTestId('world-map')).toBeVisible()
-  await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
   await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
-  await expect(page.locator('.overviewInsightRail .overallSignalBalance')).toBeVisible()
-  await expect(page.locator('.overviewOutlookCard')).toBeVisible()
-  await expect(page.locator('.overviewCompareCard')).toBeVisible()
+  await expect(page.getByText('Latest one-year movements')).toBeVisible()
+  await expect(page.locator('.countryMetricCard')).toHaveCount(1)
 
-  const layout = await page.evaluate(() => {
-    const rect = (selector: string) => {
-      const node = document.querySelector(selector)
-      if (!node) return null
-      const box = node.getBoundingClientRect()
-      return { left: box.left, right: box.right, top: box.top, bottom: box.bottom, width: box.width }
-    }
-
-    return {
-      map: rect('.overviewMapPanel'),
-      fit: rect('.overviewFitPanel'),
-      dimensions: rect('.overviewDimensionsPanel'),
-      rail: rect('.overviewInsightRail'),
-      scrollHeight: document.documentElement.scrollHeight,
-      innerHeight: window.innerHeight,
-    }
-  })
-
-  expect(layout.map).not.toBeNull()
-  expect(layout.fit).not.toBeNull()
-  expect(layout.dimensions).not.toBeNull()
-  expect(layout.rail).not.toBeNull()
-
-  expect(layout.map!.left).toBeLessThan(layout.fit!.left)
-  expect(layout.dimensions!.left).toBeLessThan(layout.rail!.left)
-
-  const topRatio = layout.map!.width / (layout.map!.width + layout.fit!.width)
-  const bottomRatio = layout.dimensions!.width / (layout.dimensions!.width + layout.rail!.width)
-
-  expect(topRatio).toBeGreaterThan(0.53)
-  expect(topRatio).toBeLessThan(0.59)
-  expect(bottomRatio).toBeGreaterThan(0.72)
-  expect(bottomRatio).toBeLessThan(0.78)
-
-  expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight + 2)
+  const overflow = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    innerWidth: window.innerWidth,
+  }))
+  expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.innerWidth + 2)
 })
 
-test('Overview stays complete at 1920x900', async ({ page }) => {
+test('Country Radar stays readable at 1920x900', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 900 })
   await page.goto('/country/ESP/overview')
 
-  const layout = await page.evaluate(() => {
+  await expect(page.locator('.countryRadarHero')).toBeVisible()
+  await expect(page.locator('.countryMetricGrid')).toBeVisible()
+
+  const boxes = await page.evaluate(() => {
     const box = (selector: string) => {
       const node = document.querySelector(selector)
       if (!node) return null
       const rect = node.getBoundingClientRect()
       return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
     }
-
     return {
-      map: box('.overviewMapPanel'),
-      fit: box('.overviewFitPanel'),
-      lower: box('.overviewLowerGrid'),
-      dimensions: box('.overviewDimensionsPanel'),
-      outlook: box('.overviewOutlookCard'),
-      compare: box('.overviewCompareCard'),
-      scrollHeight: document.documentElement.scrollHeight,
-      innerHeight: window.innerHeight,
+      identity: box('.countryIdentityCard'),
+      map: box('.countryRadarMap'),
+      changes: box('.recentChangesPanel'),
+      metrics: box('.countryMetricGrid'),
     }
   })
 
-  for (const key of ['map', 'fit', 'lower', 'dimensions', 'outlook', 'compare'] as const) {
-    expect(layout[key]).not.toBeNull()
-  }
-
-  expect(layout.map!.bottom).toBeLessThanOrEqual(layout.lower!.top - 2)
-  expect(layout.fit!.bottom).toBeLessThanOrEqual(layout.lower!.top - 2)
-  expect(layout.dimensions!.bottom).toBeLessThanOrEqual(layout.innerHeight - 4)
-  expect(layout.outlook!.bottom).toBeLessThanOrEqual(layout.innerHeight - 4)
-  expect(layout.compare!.bottom).toBeLessThanOrEqual(layout.innerHeight - 4)
-  expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight + 2)
+  for (const value of Object.values(boxes)) expect(value).not.toBeNull()
+  expect(boxes.identity!.right).toBeLessThanOrEqual(boxes.map!.left)
+  expect(boxes.map!.right).toBeLessThanOrEqual(boxes.changes!.left)
+  expect(boxes.metrics!.top).toBeGreaterThan(boxes.map!.top)
 })
 
-
-test('Overview panels do not overlap at 1920x1080', async ({ page }) => {
+test('Country Radar panels do not overlap at 1920x1080', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
 
@@ -1022,35 +942,21 @@ test('Overview panels do not overlap at 1920x1080', async ({ page }) => {
       const rect = node.getBoundingClientRect()
       return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
     }
-
-    return {
-      map: box('.overviewMapPanel'),
-      fit: box('.overviewFitPanel'),
-      dimensions: box('.overviewDimensionsPanel'),
-      assessment: box('.overviewInsightRail .overallSignalBalance'),
-      outlook: box('.overviewOutlookCard'),
-      compare: box('.overviewCompareCard'),
-    }
+    return [
+      box('.countryIdentityCard'),
+      box('.countryRadarMap'),
+      box('.recentChangesPanel'),
+    ]
   })
 
   const overlaps = (
     a: { left: number; right: number; top: number; bottom: number },
     b: { left: number; right: number; top: number; bottom: number },
-  ) => !(
-    a.right <= b.left ||
-    b.right <= a.left ||
-    a.bottom <= b.top ||
-    b.bottom <= a.top
-  )
+  ) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top)
 
-  for (const value of Object.values(boxes)) expect(value).not.toBeNull()
-
-  expect(overlaps(boxes.map!, boxes.fit!)).toBe(false)
-  expect(overlaps(boxes.dimensions!, boxes.assessment!)).toBe(false)
-  expect(overlaps(boxes.dimensions!, boxes.outlook!)).toBe(false)
-  expect(overlaps(boxes.dimensions!, boxes.compare!)).toBe(false)
-  expect(overlaps(boxes.assessment!, boxes.outlook!)).toBe(false)
-  expect(overlaps(boxes.outlook!, boxes.compare!)).toBe(false)
+  for (const value of boxes) expect(value).not.toBeNull()
+  expect(overlaps(boxes[0]!, boxes[1]!)).toBe(false)
+  expect(overlaps(boxes[1]!, boxes[2]!)).toBe(false)
 })
 
 test('Overview country flags and fit readiness remain visible', async ({ page }) => {
@@ -1357,80 +1263,29 @@ test('captures full AUGUR UI audit set', async ({ page }) => {
   }
 })
 
-test('overview hero never overlaps lower dashboard row', async ({ page }) => {
+test('Country Radar hero never overlaps metric cards', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
 
-  const fit = page.locator('.overviewFitPanel')
-  const lower = page.locator('.overviewLowerGrid')
-  const map = page.locator('.overviewMapPanel')
-
-  const [fitBox, lowerBox, mapBox] = await Promise.all([
-    fit.boundingBox(),
-    lower.boundingBox(),
-    map.boundingBox(),
-  ])
-
-  expect(fitBox).not.toBeNull()
-  expect(lowerBox).not.toBeNull()
-  expect(mapBox).not.toBeNull()
-
-  expect((fitBox?.y ?? 0) + (fitBox?.height ?? 0)).toBeLessThanOrEqual(
-    (lowerBox?.y ?? 0) - 2,
-  )
-  expect((mapBox?.y ?? 0) + (mapBox?.height ?? 0)).toBeLessThanOrEqual(
-    (lowerBox?.y ?? 0) - 2,
-  )
+  const hero = await page.locator('.countryRadarHero').boundingBox()
+  const metrics = await page.locator('.countryMetricGrid').boundingBox()
+  expect(hero).not.toBeNull()
+  expect(metrics).not.toBeNull()
+  expect((hero?.y ?? 0) + (hero?.height ?? 0)).toBeLessThanOrEqual((metrics?.y ?? 0) - 2)
 })
 
-
-test('overview keeps last-row content inside desktop viewport', async ({ page }) => {
+test('Country Radar keeps core content within desktop width', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
 
-  const viewportHeight = await page.evaluate(() => window.innerHeight)
-
-  const cards = page.locator('.overviewDimensionGridV2 .mockDimensionCard')
-  const lastCard = cards.last()
-  const compareCard = page.locator('.overviewCompareCard')
-
-  const [lastBox, compareBox] = await Promise.all([
-    lastCard.boundingBox(),
-    compareCard.boundingBox(),
-  ])
-
-  expect(lastBox).not.toBeNull()
-  expect(compareBox).not.toBeNull()
-
-  expect((lastBox?.y ?? 0) + (lastBox?.height ?? 0)).toBeLessThanOrEqual(
-    viewportHeight - 4,
-  )
-  expect((compareBox?.y ?? 0) + (compareBox?.height ?? 0)).toBeLessThanOrEqual(
-    viewportHeight - 4,
-  )
-
-  const clipped = await page.evaluate(() => {
-    const selectors = [
-      '.overviewDimensionGridV2 .mockDimensionCard',
-      '.overviewCompareCard',
-      '.overviewOutlookCard',
-      '.overallSignalBalance',
-    ]
-    return selectors.flatMap(selector =>
-      Array.from(document.querySelectorAll<HTMLElement>(selector))
-        .filter(el => {
-          const rect = el.getBoundingClientRect()
-          return rect.bottom > window.innerHeight || rect.right > window.innerWidth
-        })
-        .map(el => selector),
-    )
-  })
-
-  expect(clipped).toEqual([])
+  const overflow = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    innerWidth: window.innerWidth,
+  }))
+  expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.innerWidth + 2)
 })
 
-
-test('responsive Overview preserves every frozen core panel', async ({ page }) => {
+test('responsive Country Radar preserves core panels', async ({ page }) => {
   for (const viewport of [
     { width: 1366, height: 768 },
     { width: 390, height: 844 },
@@ -1439,22 +1294,21 @@ test('responsive Overview preserves every frozen core panel', async ({ page }) =
     await page.goto('/country/ESP/overview')
 
     await expect(page.getByTestId('world-map')).toBeVisible()
-    await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
-    await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
-    await expect(page.locator('.overviewInsightRail .overallSignalBalance')).toBeVisible()
-    await expect(page.locator('.overviewOutlookCard')).toBeVisible()
-    await expect(page.locator('.overviewCompareCard')).toBeVisible()
+    await expect(page.locator('.countryIdentityCard')).toBeVisible()
+    await expect(page.locator('.recentChangesPanel')).toBeVisible()
+    await expect(page.locator('.countryMetricGrid')).toBeVisible()
   }
 })
 
-test('mobile Profile keeps its five information layers reachable', async ({ page }) => {
+test('mobile My Fit keeps summary, completion, actions and evidence reachable', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 })
   await page.goto('/country/ESP/profile')
 
   const profile = page.getByRole('region', { name: 'Personal profile' })
-  await expect(profile.getByRole('region', { name: 'Profile inputs' })).toBeVisible()
+  await expect(profile.getByText('Your profile', { exact: true })).toBeVisible()
   await expect(profile.getByRole('region', { name: 'Profile completion' })).toBeVisible()
+  await expect(profile.getByText('Key gaps and actions')).toBeVisible()
+  await expect(profile.getByText('Your priorities')).toBeVisible()
   await expect(profile.getByRole('region', { name: 'Personal-fit evidence' })).toBeVisible()
-  await expect(profile.getByRole('region', { name: 'Fit outputs' })).toBeVisible()
-  await expect(profile.getByRole('region', { name: 'TTV readiness' })).toBeVisible()
 })
+
