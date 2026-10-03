@@ -10,34 +10,32 @@ export default function OverallSignalBalance({
   dimensions,
 }: OverallSignalBalanceProps) {
   const values = Object.values(dimensions ?? {})
-  const counts = {
-    improving: values.filter((item) => item.trajectory === 'improving').length,
-    deteriorating: values.filter((item) => item.trajectory === 'deteriorating').length,
-    mixed: values.filter((item) => item.trajectory === 'mixed').length,
-    stable: values.filter((item) => item.trajectory === 'stable').length,
-    contextual: values.filter((item) => item.trajectory === 'contextual').length,
-    limited: values.filter((item) => item.trajectory === 'limited_evidence').length,
-  }
-
-  const summary = [
-    ['improving', counts.improving],
-    ['deteriorating', counts.deteriorating],
-    ['mixed', counts.mixed],
-    ['stable', counts.stable],
-    ['contextual', counts.contextual],
-    ['limited evidence', counts.limited],
-  ]
-    .filter(([, count]) => Number(count) > 0)
-    .map(([label, count]) => `${count} ${label}`)
-    .join(' · ')
+  const counts = [
+    ['Improving', values.filter((item) => item.trajectory === 'improving').length],
+    ['Deteriorating', values.filter((item) => item.trajectory === 'deteriorating').length],
+    ['Mixed', values.filter((item) => item.trajectory === 'mixed').length],
+    ['Stable', values.filter((item) => item.trajectory === 'stable').length],
+    ['Contextual', values.filter((item) => item.trajectory === 'contextual').length],
+    ['Limited evidence', values.filter((item) => item.trajectory === 'limited_evidence').length],
+  ] as const
 
   return (
     <section className="overallSignalBalance">
-      <div>
+      <div className="trajectorySummaryHeader">
         <span>DIMENSION TRAJECTORIES</span>
         <strong>{values.length ? `${values.length} assessed` : 'Loading…'}</strong>
       </div>
-      <p>{summary || 'No trajectory evidence available yet.'}</p>
+
+      <div className="trajectoryCountRow" aria-label="Dimension trajectory counts">
+        {counts
+          .filter(([, count]) => count > 0)
+          .map(([label, count]) => (
+            <span className="trajectoryCountChip" key={label}>
+              <strong>{count}</strong>
+              <small>{label}</small>
+            </span>
+          ))}
+      </div>
     </section>
   )
 }
