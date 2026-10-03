@@ -302,10 +302,10 @@ export default function OverviewPage({
             <div className="mapModeToggle" role="group" aria-label="Map layer">
               <button
                 type="button"
-                className={mapMode === 'country' ? 'active' : ''}
-                onClick={() => setMapMode('country')}
+                className={mapMode === 'map' ? 'active' : ''}
+                onClick={() => setMapMode('map')}
               >
-                Countries
+                Map
               </button>
               <button
                 type="button"
