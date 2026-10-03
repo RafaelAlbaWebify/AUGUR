@@ -6,6 +6,7 @@ import OverviewPage from './components/OverviewPage'
 import IndicatorsPage from './components/IndicatorsPage'
 import LayoutControls, { type DashboardLayout } from './components/LayoutControls'
 import SkillsLanguagesPage from './components/SkillsLanguagesPage'
+import FuturePathsPage from './components/FuturePathsPage'
 import { countryRoute, compareRoute, dimensionRoute, useAugurRoute, type CountryView } from './lib/routing'
 
 type Country = {
@@ -688,113 +689,13 @@ export default function App() {
       )}
 
       {activeView === 'outlook' && (
-      <section className="trajectorySection">
-        <div className="dimensionHeader">
-          <div>
-            <div className="label">OFFICIAL OUTLOOK</div>
-            <h3>2030 · 2035 · 2045</h3>
-          </div>
-          <span>official forecasts/projections · not an AUGUR prediction</span>
-        </div>
-
-        <div className="trajectoryGrid">
-          {(trajectory?.horizons ?? []).map((horizon) => (
-            <article className="trajectoryCard" key={horizon.year}>
-              <div className="trajectoryYear">{horizon.year}</div>
-              <div className="trajectorySources">
-                {horizon.sources.length ? horizon.sources.join(' · ') : 'No official coverage'}
-              </div>
-
-              <div className="trajectoryIndicators">
-                {horizon.indicators.length === 0 && (
-                  <div className="trajectoryEmpty">No official forecast loaded for this horizon.</div>
-                )}
-
-                {horizon.indicators.map((item) => (
-                  <div className="trajectoryRow" key={`${horizon.year}-${item.indicator_id}-${item.source_id}`}>
-                    <span>{item.name}</span>
-                    <strong>{formatValue(item.value, item.unit)}</strong>
-                    <small>{item.source_name}</small>
-                  </div>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
-      )}
-
-      {activeView === 'outlook' && (
-      <section className="scenarioSection">
-        <div className="dimensionHeader">
-          <div>
-            <div className="label">AUGUR SCENARIOS</div>
-            <h3>Baseline · Improvement · Stress</h3>
-          </div>
-          <span>baseline = official · alternatives = model assumptions</span>
-        </div>
-
-        <div className="scenarioGrid">
-          {(scenarios?.horizons ?? []).map((year) => {
-            const items = scenarios?.indicators.filter((item) => item.period === year) ?? []
-
-            return (
-              <article className="scenarioCard" key={year}>
-                <div className="scenarioYearHeader">
-                  <div className="trajectoryYear">{year}</div>
-                  <div className="uncertaintyBadge">
-                    {items[0]
-                      ? `model horizon · ${items[0].uncertainty.level} · ×${items[0].uncertainty.multiplier}`
-                      : 'model horizon unavailable'}
-                  </div>
-                </div>
-
-                <div className="scenarioRows">
-                  {items.map((item) => (
-                    <div className="scenarioRow" key={`${year}-${item.indicator_id}-${item.source_id}`}>
-                      <div className="scenarioName">{item.name}</div>
-                      {(
-                        Math.abs(item.scenarios.improvement - item.scenarios.baseline) > 1e-9 ||
-                        Math.abs(item.scenarios.stress - item.scenarios.baseline) > 1e-9
-                      ) ? (
-                        <div className="scenarioValues">
-                          <span>
-                            <small>Baseline · official</small>
-                            <strong>{formatValue(item.scenarios.baseline, item.unit)}</strong>
-                          </span>
-                          <span>
-                            <small>Improvement · AUGUR</small>
-                            <strong>{formatValue(item.scenarios.improvement, item.unit)}</strong>
-                          </span>
-                          <span>
-                            <small>Stress · AUGUR</small>
-                            <strong>{formatValue(item.scenarios.stress, item.unit)}</strong>
-                          </span>
-                        </div>
-                      ) : (
-                        <div className="scenarioValues contextualScenario">
-                          <span>
-                            <small>Baseline · official</small>
-                            <strong>{formatValue(item.scenarios.baseline, item.unit)}</strong>
-                          </span>
-                          <span className="scenarioNoAdjustment">
-                            No directional AUGUR adjustment for this contextual indicator.
-                          </span>
-                        </div>
-                      )}
-                      <div className="scenarioAssumption">{item.assumption}</div>
-                    </div>
-                  ))}
-
-                  {items.length === 0 && (
-                    <div className="trajectoryEmpty">No scenario inputs available for this horizon.</div>
-                  )}
-                </div>
-              </article>
-            )
-          })}
-        </div>
-      </section>
+        <FuturePathsPage
+          countryName={selectedCountryMeta?.name ?? selectedCountry}
+          currentIndicators={enrichedIndicators}
+          trajectory={trajectory}
+          scenarios={scenarios}
+          formatValue={formatValue}
+        />
       )}
 
       {activeView === 'compare' && (
