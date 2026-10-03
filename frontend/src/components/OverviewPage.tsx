@@ -269,15 +269,20 @@ export default function OverviewPage({
       </header>
 
       <div className="countryRadarHero">
-        <section
-          className="countryIdentityCard"
-          style={{
-            backgroundImage: `linear-gradient(180deg, rgba(2,10,16,.08) 0%, rgba(2,10,16,.18) 38%, rgba(2,10,16,.94) 100%), url(${visual.heroImage})`,
-            backgroundPosition: visual.focalPoint,
-          }}
-          role="img"
-          aria-label={visual.alt}
-        >
+        <section className="countryIdentityCard">
+          <img
+            className="countryHeroImage"
+            src={visual.heroImage}
+            alt={visual.alt}
+            style={{ objectPosition: visual.focalPoint }}
+            onError={(event) => {
+              const image = event.currentTarget
+              if (image.src.endsWith(visual.fallbackImage)) return
+              image.src = visual.fallbackImage
+            }}
+          />
+          <div className="countryHeroOverlay" aria-hidden="true" />
+
           <div className="countryHeroMeta">
             <span>{selectedCountry}</span>
             <span>{currentIndicators.length} indicators</span>
