@@ -397,6 +397,46 @@
     grid-template-rows: auto minmax(118px, auto) minmax(150px, 1fr);
   }
 
+  .shell.view-overview .dashboardTopbar {
+    min-height: 72px;
+    grid-template-columns: 245px 225px minmax(340px, auto) 1fr;
+    gap: 16px;
+    padding: 10px 14px;
+  }
+
+  .shell.view-overview .brandMark {
+    font-size: 34px;
+  }
+
+  .shell.view-overview .brandSub,
+  .shell.view-overview .topbarCountry > span {
+    font-size: 10px;
+  }
+
+  .shell.view-overview .countrySelect.compact {
+    font-size: 13px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+  }
+
+  .shell.view-overview .topbarNav button {
+    padding: 8px 13px;
+    font-size: 12px;
+  }
+
+  .shell.view-overview .topbarMeta span {
+    font-size: 9px;
+  }
+
+  .shell.view-overview .topbarMeta strong {
+    font-size: 15px;
+  }
+
+  .shell.view-overview .status.compact {
+    font-size: 11px;
+    padding: 8px 10px;
+  }
+
   .overviewMapPanel .worldMapLegend button {
     font-size: 10px;
     padding: 6px 10px;
