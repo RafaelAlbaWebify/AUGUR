@@ -590,6 +590,51 @@ test('versioned EURES market evidence is visible in CareerFit', async ({ page })
 })
 
 
+
+
+test('FinancialFit partial evidence is not shown as complete or empty', async ({ page }) => {
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/financial-fit',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          target_country_iso3: 'ESP',
+          status: 'local_income_reference_available',
+          reason: 'occupation_specific_net_income_not_modelled',
+          evidence_state: 'partial',
+          evidence_complete: false,
+          blockers: ['occupation_specific_net_income', 'household_budget'],
+          portable_income_analysis: null,
+          local_income_reference: {
+            occupation_label: 'ICT support technician',
+            occupation_match_score: 0.9,
+            isco_group: '3512',
+            ses_isco_major_group: 'OC3',
+            gross_monthly_mean_eur: 3200,
+            period: 2022,
+            source_id: 'EUROSTAT',
+            dataset_id: 'earn_ses_main',
+          },
+          national_net_earnings_reference: null,
+          notes: [],
+        }),
+      })
+    },
+  )
+
+  await page.goto('/country/ESP/profile')
+
+  const evidence = page.getByRole('region', { name: 'Personal-fit evidence' })
+  const financialCard = evidence.locator('.evidenceStatusCard').filter({ hasText: 'FinancialFit' })
+  await expect(financialCard.getByText('partial', { exact: true })).toBeVisible()
+
+  const outputs = page.getByRole('region', { name: 'Fit outputs' })
+  await expect(outputs.getByText('occupation specific net income', { exact: true })).toBeVisible()
+  await expect(outputs.getByText('household budget', { exact: true })).toBeVisible()
+})
+
 test('structured FinancialFit blockers are visible', async ({ page }) => {
   await page.goto('/country/ESP/profile')
 
