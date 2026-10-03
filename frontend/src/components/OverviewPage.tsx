@@ -1,15 +1,30 @@
-import ComparePanel from './ComparePanel'
-import DimensionSummaryCard from './DimensionSummaryCard'
-import FitSnapshot from './FitSnapshot'
-import OverallSignalBalance from './OverallSignalBalance'
 import WorldMap from './WorldMap'
-import type { DashboardLayout } from './LayoutControls'
 import './overview-page.css'
 
 type Country = {
   iso2?: string
   iso3: string
   name: string
+}
+
+type Trend = {
+  direction: string
+  interpretation: string
+  confidence: string
+  pct_change_1y: number | null
+  pct_change_3y: number | null
+  pct_change_5y: number | null
+}
+
+type Indicator = {
+  indicator_id: string
+  name: string
+  dimension: string
+  period: number
+  value: number
+  unit: string
+  source_id: string
+  trend?: Trend
 }
 
 type Signal = {
@@ -77,6 +92,7 @@ type OverviewPageProps = {
   countries: Country[]
   selectedCountry: string
   selectedCountryName: string
+  currentIndicators: Indicator[]
   assessment: AssessmentResponse | null
   scenarios: ScenarioResponse | null
   compareCountries: string[]
@@ -88,61 +104,104 @@ type OverviewPageProps = {
   onOpenDimension: (dimension: string) => void
   formatValue: (value: number, unit: string) => string
   dimensionLabels: Record<string, string>
-  layout: DashboardLayout
+  layout: unknown
 }
 
 const DIMENSION_ORDER = [
   'prosperity',
   'productive_capacity',
   'housing',
-  'demography',
   'human_systems',
+  'demography',
   'fiscal',
   'strategic_resilience',
 ]
 
+function changeLabel(value: number | null | undefined) {
+  if (value == null) return '—'
+  const sign = value > 0 ? '+' : ''
+  return `${sign}${value.toFixed(1)}%`
+}
+
+function trajectoryTone(value?: string) {
+  if (value === 'improving') return 'good'
+  if (value === 'deteriorating') return 'bad'
+  if (value === 'mixed') return 'warn'
+  return 'neutral'
+}
+
 export default function OverviewPage({
-  apiBase,
   countries,
   selectedCountry,
   selectedCountryName,
+  currentIndicators,
   assessment,
-  scenarios,
-  compareCountries,
-  comparison,
   onCountryChange,
-  onCompareCountryChange,
-  onOpenOutlook,
-  onOpenCompare,
   onOpenDimension,
   formatValue,
   dimensionLabels,
-  layout,
 }: OverviewPageProps) {
-  const firstScenario = scenarios?.indicators?.[0] ?? null
+  const directional = Object.values(assessment?.dimensions ?? {}).reduce(
+    (sum, item) => sum + item.directional_indicator_count,
+    0,
+  )
+  const total = Object.values(assessment?.dimensions ?? {}).reduce(
+    (sum, item) => sum + item.indicator_count,
+    0,
+  )
 
-  const preview = firstScenario
-    ? {
-        name: firstScenario.name,
-        unit: firstScenario.unit,
-        optimistic: firstScenario.scenarios.improvement,
-        baseline: firstScenario.scenarios.baseline,
-        stress: firstScenario.scenarios.stress,
-      }
-    : null
+  const recentChanges = [...currentIndicators]
+    .filter((item) => item.trend?.pct_change_1y != null && item.trend?.interpretation !== 'neutral_or_contextual')
+    .sort((a, b) => Math.abs(b.trend?.pct_change_1y ?? 0) - Math.abs(a.trend?.pct_change_1y ?? 0))
+    .slice(0, 4)
 
-  const hasScenarioSpread = preview
-    ? (
-        Math.abs(preview.optimistic - preview.baseline) > 1e-9 ||
-        Math.abs(preview.stress - preview.baseline) > 1e-9
-      )
-    : false
+  const improvingSignals = Object.values(assessment?.dimensions ?? {})
+    .flatMap((item) => item.improving_signals)
+    .slice(0, 3)
+  const pressureSignals = Object.values(assessment?.dimensions ?? {})
+    .flatMap((item) => item.deteriorating_signals)
+    .slice(0, 3)
 
+  const representative = DIMENSION_ORDER.map((dimension) => {
+    const candidates = currentIndicators.filter((item) => item.dimension === dimension)
+    const preferred = candidates.find((item) => item.trend?.interpretation === 'improving' || item.trend?.interpretation === 'deteriorating')
+      ?? candidates[0]
+    return preferred ? { dimension, item: preferred } : null
+  }).filter((entry): entry is { dimension: string; item: Indicator } => Boolean(entry))
 
   return (
-    <section className="overviewPageV2" aria-label="Country overview">
-      <div className={`overviewHeroGrid ${layout.topOrder === 'fit-map' ? 'fitFirst' : ''}`}>
-        <section className="overviewMapPanel">
+    <section className="countryRadarPage" aria-label="Country overview">
+      <header className="countryRadarHeader">
+        <div>
+          <span>1. COUNTRY RADAR / Overview</span>
+          <h2>{selectedCountryName} — country trajectory</h2>
+        </div>
+        <p>Key signals at a glance. No single composite score.</p>
+      </header>
+
+      <div className="countryRadarHero">
+        <section className="countryIdentityCard">
+          <div>
+            <span>COUNTRY</span>
+            <h3>{selectedCountryName}</h3>
+            <strong>{selectedCountry}</strong>
+          </div>
+          <dl>
+            <div><dt>Indicators loaded</dt><dd>{currentIndicators.length}</dd></div>
+            <div><dt>Directional evidence</dt><dd>{directional} / {total || '—'}</dd></div>
+            <div><dt>Dimensions assessed</dt><dd>{Object.keys(assessment?.dimensions ?? {}).length}</dd></div>
+          </dl>
+          <p>Country-level evidence. Regional/city insight appears only when a verified subnational source is available.</p>
+        </section>
+
+        <section className="countryRadarMap">
+          <div className="radarPanelTopline">
+            <div>
+              <span>MAP</span>
+              <strong>Registered country coverage</strong>
+            </div>
+            <span>Regional layer not yet implemented</span>
+          </div>
           <WorldMap
             countries={countries}
             selectedCountry={selectedCountry}
@@ -150,104 +209,78 @@ export default function OverviewPage({
           />
         </section>
 
-        <section className="overviewFitPanel">
-          <FitSnapshot apiBase={apiBase} targetCountry={selectedCountry} />
-        </section>
-      </div>
-
-      <div className="overviewLowerGrid">
-        <section className="overviewDimensionsPanel">
-          <div className="overviewSectionHeader">
-            <div>
-              <span>KEY DIMENSIONS</span>
-              <h2>{selectedCountryName} at a glance</h2>
-            </div>
-            <small>trajectory · confidence · contributing signals</small>
+        <section className="recentChangesPanel">
+          <div className="radarPanelTopline">
+            <div><span>RECENT CHANGES</span><strong>Latest one-year movements</strong></div>
           </div>
-
-          <div className="overviewDimensionGridV2">
-            {DIMENSION_ORDER.map((dimension) => {
-              const item = assessment?.dimensions?.[dimension]
-              if (!item) return null
-
-              return (
-                <DimensionSummaryCard
-                  key={dimension}
-                  label={dimensionLabels[dimension] ?? dimension}
-                  item={item}
-                  onOpen={() => onOpenDimension(dimension)}
-                />
-              )
-            })}
-          </div>
-        </section>
-
-        <aside className={`overviewInsightRail ${layout.utilityOrder === 'compare-outlook' ? 'compareFirst' : ''}`}>
-          <OverallSignalBalance dimensions={assessment?.dimensions} />
-
-          <section className="overviewOutlookCard">
-            <div className="overviewRailHeader">
-              <div>
-                <span>OUTLOOK</span>
-                <strong>Official baseline + AUGUR envelope</strong>
-              </div>
-              <button type="button" onClick={onOpenOutlook}>Open</button>
-            </div>
-
-            {preview ? (
-              <div className="overviewScenarioPreview">
-                <p>{preview.name}</p>
-                <div className="overviewScenarioRow evidenceOnly">
-                  <span>Baseline</span>
-                  <small>official</small>
-                  <strong>{formatValue(preview.baseline, preview.unit)}</strong>
+          <div className="recentChangeList">
+            {recentChanges.map((item) => (
+              <article key={item.indicator_id} className={trajectoryTone(item.trend?.interpretation)}>
+                <span className="changeArrow">{item.trend?.interpretation === 'improving' ? '↑' : item.trend?.interpretation === 'deteriorating' ? '↓' : '→'}</span>
+                <div>
+                  <strong>{item.name}</strong>
+                  <small>{changeLabel(item.trend?.pct_change_1y)} · {item.period} · {item.source_id.replaceAll('_', ' ')}</small>
                 </div>
+              </article>
+            ))}
+            {!recentChanges.length && <span className="radarEmpty">No directional one-year changes available.</span>}
+          </div>
 
-                {hasScenarioSpread ? (
-                  <>
-                    <div className="overviewScenarioRow evidenceOnly">
-                      <span>Improvement</span>
-                      <small>AUGUR model</small>
-                      <strong>{formatValue(preview.optimistic, preview.unit)}</strong>
-                    </div>
-                    <div className="overviewScenarioRow evidenceOnly">
-                      <span>Stress</span>
-                      <small>AUGUR model</small>
-                      <strong>{formatValue(preview.stress, preview.unit)}</strong>
-                    </div>
-                  </>
-                ) : (
-                  <div className="overviewScenarioNote">
-                    No directional AUGUR envelope applied to this contextual indicator.
-                  </div>
-                )}
-              </div>
-            ) : (
-              <div className="overviewRailEmpty">Scenario evidence loading…</div>
-            )}
-          </section>
-
-          <section className="overviewCompareCard">
-            <div className="overviewRailHeader">
-              <div>
-                <span>COMPARE</span>
-                <strong>Country snapshot</strong>
-              </div>
-              <button type="button" onClick={onOpenCompare}>Open</button>
+          <div className="signalSplit">
+            <div>
+              <strong>Improving signals</strong>
+              {improvingSignals.length
+                ? improvingSignals.map((item) => <span key={item.indicator_id}>+ {item.name}</span>)
+                : <span>None currently classified</span>}
             </div>
-
-            <ComparePanel
-              compact
-              countries={countries}
-              selected={compareCountries}
-              onChange={onCompareCountryChange}
-              comparison={comparison}
-              formatValue={formatValue}
-              dimensionLabels={dimensionLabels}
-            />
-          </section>
-        </aside>
+            <div>
+              <strong>Key pressures</strong>
+              {pressureSignals.length
+                ? pressureSignals.map((item) => <span key={item.indicator_id}>− {item.name}</span>)
+                : <span>None currently classified</span>}
+            </div>
+          </div>
+        </section>
       </div>
+
+      <section className="countryMetricGrid">
+        {representative.map(({ dimension, item }) => {
+          const dimensionState = assessment?.dimensions?.[dimension]
+          return (
+            <button
+              type="button"
+              key={dimension}
+              className={`countryMetricCard ${trajectoryTone(dimensionState?.trajectory)}`}
+              onClick={() => onOpenDimension(dimension)}
+            >
+              <div className="countryMetricTop">
+                <span>{dimensionLabels[dimension] ?? dimension}</span>
+                <small>{dimensionState?.trajectory?.replaceAll('_', ' ') ?? 'contextual'}</small>
+              </div>
+              <strong className="countryMetricName">{item.name}</strong>
+              <div className="countryMetricValue">{formatValue(item.value, item.unit)}</div>
+              <div className="countryMetricTrend">
+                <strong>{changeLabel(item.trend?.pct_change_1y)}</strong>
+                <span>1y · {item.trend?.confidence ?? 'evidence pending'} evidence</span>
+              </div>
+              <div className="countryMetricFooter">
+                <span>{item.source_id.replaceAll('_', ' ')}</span>
+                <span>{item.period}</span>
+              </div>
+            </button>
+          )
+        })}
+      </section>
+
+      <section className="countryRadarFooter">
+        <div>
+          <span>WHAT THIS VIEW MEANS</span>
+          <strong>Level + direction + evidence, not a universal ranking</strong>
+        </div>
+        <p>
+          Open any domain to inspect the contributing indicators, source quality and disagreements before treating a trajectory as decision evidence.
+        </p>
+      </section>
     </section>
   )
 }
