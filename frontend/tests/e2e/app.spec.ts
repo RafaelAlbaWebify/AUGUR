@@ -956,7 +956,33 @@ test('Overview country flags and fit readiness remain visible', async ({ page })
 
 
 
-test('Overview distinguishes observed evidence from modelled presentation', async ({ page }) => {
+test('Overview distinguishes official baseline from AUGUR model envelope', async ({ page }) => {
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/scenarios',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          country_iso3: 'ESP',
+          method: 'test',
+          horizons: [2030],
+          scenario_names: ['baseline', 'improvement', 'stress'],
+          indicators: [{
+            name: 'Fertility rate, total',
+            unit: 'births_per_woman',
+            scenarios: {
+              baseline: 1.26,
+              improvement: 1.42,
+              stress: 1.08,
+            },
+          }],
+          notes: [],
+        }),
+      })
+    },
+  )
+
   await page.setViewportSize({ width: 1920, height: 900 })
   await page.goto('/country/ESP/overview')
 
@@ -966,6 +992,7 @@ test('Overview distinguishes observed evidence from modelled presentation', asyn
   await expect(page.getByText('Baseline')).toBeVisible()
   await expect(page.getByText('official')).toBeVisible()
   await expect(page.getByText('Improvement')).toBeVisible()
+  await expect(page.getByText('Stress')).toBeVisible()
   await expect(page.getByText('AUGUR model')).toHaveCount(2)
 })
 
