@@ -23,6 +23,7 @@ type RegionalMapProps = {
   selectedRegion: string | null
   onSelectRegion: (regionId: string, regionName: string) => void
   cities?: CityMarker[]
+  showRegionList?: boolean
 }
 
 type Bounds = {
@@ -102,6 +103,7 @@ export default function RegionalMap({
   selectedRegion,
   onSelectRegion,
   cities = [],
+  showRegionList = false,
 }: RegionalMapProps) {
   const [features, setFeatures] = useState<RegionFeature[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -217,23 +219,25 @@ export default function RegionalMap({
         </div>
       </div>
 
-      <div className="regionalRegionList" aria-label="Regions">
-        {features.map((feature) => {
-          const id = feature.properties?.NUTS_ID ?? ''
-          const name = feature.properties?.NAME_LATN ?? feature.properties?.NUTS_NAME ?? id
-          return (
-            <button
-              key={id}
-              type="button"
-              className={selectedRegion === id ? 'active' : ''}
-              onClick={() => onSelectRegion(id, name)}
-            >
-              <span>{id}</span>
-              {name}
-            </button>
-          )
-        })}
-      </div>
+      {showRegionList && (
+        <div className="regionalRegionList" aria-label="Regions">
+          {features.map((feature) => {
+            const id = feature.properties?.NUTS_ID ?? ''
+            const name = feature.properties?.NAME_LATN ?? feature.properties?.NUTS_NAME ?? id
+            return (
+              <button
+                key={id}
+                type="button"
+                className={selectedRegion === id ? 'active' : ''}
+                onClick={() => onSelectRegion(id, name)}
+              >
+                <span>{id}</span>
+                {name}
+              </button>
+            )
+          })}
+        </div>
+      )}
 
       <small className="regionalMapSource">
         Geography: Eurostat GISCO · NUTS 2024 · level 2 · EPSG:4326
