@@ -173,7 +173,7 @@ export default function OverviewPage({
     return {
       ...domain,
       item: preferred ?? null,
-      assessment: domain.dimension ? assessment?.dimensions?.[domain.dimension] : undefined,
+      assessment: preferred ? assessment?.dimensions?.[preferred.dimension] : undefined,
     }
   })
 
@@ -257,8 +257,8 @@ export default function OverviewPage({
             type="button"
             key={id}
             className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
-            onClick={() => dimension && item ? onOpenDimension(dimension) : undefined}
-            disabled={!dimension || !item}
+            onClick={() => item ? onOpenDimension(item.dimension) : undefined}
+            disabled={!item}
           >
             <div className="countryMetricTop">
               <span>{label}</span>
