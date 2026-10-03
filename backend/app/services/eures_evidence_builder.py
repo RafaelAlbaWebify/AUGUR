@@ -170,6 +170,42 @@ def build_eures_unit_group_evidence(
             continue
 
         isco_unit = resolution["isco_unit"]
+
+        expected_raw = str(row.get("expected_isco") or "").strip()
+        if expected_raw:
+            expected_digits = "".join(
+                character
+                for character in expected_raw
+                if character.isdigit()
+            )
+            if len(expected_digits) < 4:
+                unresolved.append(
+                    {
+                        "row_number": row_number,
+                        "status": "unresolved",
+                        "reason": "invalid_expected_isco",
+                        "occupation_label": occupation_label,
+                        "expected_isco": expected_raw,
+                        "candidates": resolution["candidates"],
+                    }
+                )
+                continue
+
+            expected_isco = expected_digits[:4]
+            if expected_isco != isco_unit:
+                unresolved.append(
+                    {
+                        "row_number": row_number,
+                        "status": "unresolved",
+                        "reason": "expected_isco_mismatch",
+                        "occupation_label": occupation_label,
+                        "expected_isco": expected_isco,
+                        "resolved_isco": isco_unit,
+                        "candidates": resolution["candidates"],
+                    }
+                )
+                continue
+
         if isco_unit in resolved:
             unresolved.append(
                 {
