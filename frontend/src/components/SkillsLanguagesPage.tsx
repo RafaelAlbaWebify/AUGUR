@@ -31,6 +31,7 @@ type CareerFit = {
     period?: string
     source_id?: string
     granularity?: string
+    isco_major?: string
   } | null
   skill_match?: {
     dataset_mode?: string | null
@@ -301,7 +302,7 @@ export default function SkillsLanguagesPage({
               <li>Occupation: {career?.occupation_match?.selected?.preferred_label ?? 'not confidently resolved'}.</li>
               <li>Market signal: {career?.market_signal?.replaceAll('_', ' ') ?? 'not available'}{career?.market_signal_isco ? ` · ISCO ${career.market_signal_isco}` : ''}.</li>
               <li>Market evidence: {career?.source?.label ?? 'not available'}{career?.source?.conditions_year ? ` · ${career.source.conditions_year} conditions` : ''}{career?.source?.evidence_id ? ` · ${career.source.evidence_id}` : ''}.</li>
-              <li>Vacancy context: {career?.vacancy_demand_evidence?.status === 'available' ? `Eurostat ${career.vacancy_demand_evidence.period} · ISCO ${career.vacancy_demand_evidence.granularity ?? 'group'} vacancy rate ${career.vacancy_demand_evidence.vacancy_rate_pct?.toFixed(1)}% · context only` : 'not available'}.</li>
+              <li>Vacancy context: {career?.vacancy_demand_evidence?.status === 'available' ? `Eurostat ${career.vacancy_demand_evidence.period} · ISCO ${career.vacancy_demand_evidence.isco_major ?? career.vacancy_demand_evidence.granularity ?? 'group'} vacancy rate ${career.vacancy_demand_evidence.vacancy_rate_pct?.toFixed(1)}% · context only` : 'not available'}.</li>
               <li>Skill evidence: {career?.skill_match?.dataset_version ?? career?.skill_match?.dataset_mode ?? 'not available'}.</li>
               <li>Live skill demand, employer counts and rising-skill trends are intentionally withheld until a job-posting evidence source is integrated.</li>
             </ul>
