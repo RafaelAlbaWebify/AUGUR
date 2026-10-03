@@ -801,3 +801,385 @@
   font-size: 9px;
   line-height: 1.35;
 }
+
+
+/* Country Radar */
+.countryRadarPage {
+  display: grid;
+  gap: 12px;
+  padding: 16px 18px 22px;
+}
+
+.countryRadarHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.countryRadarHeader > div > span {
+  display: block;
+  color: #f3f8fb;
+  font-size: 23px;
+  font-weight: 900;
+}
+
+.countryRadarHeader h2 {
+  margin: 4px 0 0;
+  color: #97adbc;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.countryRadarHeader p {
+  margin: 0;
+  color: #8098a8;
+  font-size: 10px;
+}
+
+.countryRadarHero {
+  display: grid;
+  grid-template-columns: minmax(230px, .7fr) minmax(440px, 1.35fr) minmax(330px, .95fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.countryIdentityCard,
+.countryRadarMap,
+.recentChangesPanel,
+.countryRadarFooter {
+  border: 1px solid var(--augur-border);
+  border-radius: 13px;
+  background: linear-gradient(180deg, rgba(9, 24, 36, .95), rgba(6, 17, 27, .96));
+  box-shadow: 0 12px 26px rgba(0,0,0,.16);
+}
+
+.countryIdentityCard {
+  display: grid;
+  align-content: space-between;
+  gap: 12px;
+  padding: 14px;
+}
+
+.countryIdentityCard > div > span,
+.radarPanelTopline span,
+.countryRadarFooter span {
+  color: #6f8798;
+  font-size: 8px;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.countryIdentityCard h3 {
+  margin: 4px 0 0;
+  color: #f1f7fa;
+  font-size: 26px;
+}
+
+.countryIdentityCard > div > strong {
+  display: inline-flex;
+  margin-top: 6px;
+  padding: 4px 7px;
+  border: 1px solid var(--augur-border);
+  border-radius: 999px;
+  color: #8fc7eb;
+  font-size: 9px;
+}
+
+.countryIdentityCard dl {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.countryIdentityCard dl > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--augur-border-soft);
+}
+
+.countryIdentityCard dt {
+  color: #7790a1;
+  font-size: 8px;
+}
+
+.countryIdentityCard dd {
+  margin: 0;
+  color: #dbe7ee;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.countryIdentityCard p {
+  margin: 0;
+  color: #6f8798;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.countryRadarMap {
+  overflow: hidden;
+  min-height: 318px;
+}
+
+.radarPanelTopline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--augur-border-soft);
+}
+
+.radarPanelTopline > div {
+  display: grid;
+  gap: 3px;
+}
+
+.radarPanelTopline strong {
+  color: #dce8ef;
+  font-size: 10px;
+}
+
+.recentChangesPanel {
+  display: grid;
+  align-content: start;
+  overflow: hidden;
+}
+
+.recentChangeList {
+  display: grid;
+  gap: 0;
+}
+
+.recentChangeList article {
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr);
+  gap: 7px;
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--augur-border-soft);
+}
+
+.changeArrow {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  background: rgba(85, 113, 133, .14);
+  color: #92a8b6;
+  font-weight: 900;
+}
+
+.recentChangeList article.good .changeArrow { color: #63d99a; }
+.recentChangeList article.bad .changeArrow { color: #ed747d; }
+.recentChangeList article.warn .changeArrow { color: #e4bd5f; }
+
+.recentChangeList article > div {
+  display: grid;
+  gap: 2px;
+}
+
+.recentChangeList strong {
+  color: #e6eff4;
+  font-size: 9px;
+}
+
+.recentChangeList small {
+  color: #738b9c;
+  font-size: 8px;
+}
+
+.signalSplit {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 10px 12px 12px;
+}
+
+.signalSplit > div {
+  display: grid;
+  align-content: start;
+  gap: 5px;
+  padding: 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 9px;
+  background: rgba(5, 16, 25, .45);
+}
+
+.signalSplit strong {
+  color: #cfdce4;
+  font-size: 9px;
+}
+
+.signalSplit span {
+  color: #7790a1;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.countryMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.countryMetricCard {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid var(--augur-border);
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(9, 24, 36, .94), rgba(6, 17, 27, .96));
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.countryMetricCard:hover {
+  border-color: rgba(93, 168, 215, .42);
+}
+
+.countryMetricTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 7px;
+}
+
+.countryMetricTop > span {
+  color: #dfe9ef;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.countryMetricTop small {
+  color: #6f8798;
+  font-size: 7px;
+  text-transform: capitalize;
+}
+
+.countryMetricName {
+  color: #7f97a7;
+  font-size: 8px;
+  font-weight: 600;
+  line-height: 1.35;
+  min-height: 22px;
+}
+
+.countryMetricValue {
+  color: #f0f6f9;
+  font-size: 19px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.countryMetricTrend {
+  display: grid;
+  gap: 2px;
+}
+
+.countryMetricTrend strong {
+  font-size: 11px;
+}
+
+.countryMetricCard.good .countryMetricTrend strong { color: #63d99a; }
+.countryMetricCard.bad .countryMetricTrend strong { color: #ed747d; }
+.countryMetricCard.warn .countryMetricTrend strong { color: #e4bd5f; }
+.countryMetricCard.neutral .countryMetricTrend strong { color: #8fa4b2; }
+
+.countryMetricTrend span {
+  color: #6f8798;
+  font-size: 7px;
+}
+
+.countryMetricFooter {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--augur-border-soft);
+  color: #637d8f;
+  font-size: 7px;
+}
+
+.countryRadarFooter {
+  display: grid;
+  grid-template-columns: minmax(240px, .7fr) minmax(0, 1.5fr);
+  gap: 14px;
+  align-items: center;
+  padding: 10px 12px;
+}
+
+.countryRadarFooter > div {
+  display: grid;
+  gap: 4px;
+}
+
+.countryRadarFooter strong {
+  color: #dce8ef;
+  font-size: 9px;
+}
+
+.countryRadarFooter p {
+  margin: 0;
+  color: #7891a2;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.radarEmpty {
+  padding: 12px;
+  color: #71899a;
+  font-size: 9px;
+}
+
+@media (max-width: 1500px) {
+  .countryMetricGrid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .countryRadarHero {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .recentChangesPanel {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 760px) {
+  .countryRadarPage {
+    padding: 14px;
+  }
+
+  .countryRadarHeader,
+  .countryRadarHero,
+  .countryRadarFooter {
+    grid-template-columns: 1fr;
+  }
+
+  .countryRadarHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .countryMetricGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .recentChangesPanel {
+    grid-column: auto;
+  }
+
+  .signalSplit {
+    grid-template-columns: 1fr;
+  }
+}
