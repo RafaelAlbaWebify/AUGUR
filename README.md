@@ -161,6 +161,42 @@ A full official ESCO CSV package can be imported locally with the repository imp
 
 Occupation resolution is transparent: candidate ESCO occupations include a match score and method, and low-confidence matches are refused rather than silently accepted.
 
+### Build EURES market-evidence review
+
+Annual EURES unit-group updates are prepared as review artifacts rather than written directly into production evidence.
+
+Prerequisites:
+
+- import the full official ESCO dataset;
+- normalize the source table to CSV with these columns:
+
+```text
+occupation_label,shortage_countries,surplus_countries
+```
+
+Country lists use two-letter EURES country codes separated by spaces, commas, semicolons or pipes.
+
+For the current 2025 EURES annex:
+
+```powershell
+.\build-eures-market-evidence.ps1 -Path ".\eures-2025-normalized.csv"
+```
+
+The command:
+
+1. resolves each occupation label against the local full ESCO dataset;
+2. requires a configurable confidence threshold and ambiguity margin;
+3. derives the ISCO unit group only from the accepted ESCO match;
+4. validates country codes;
+5. reports duplicate ISCO assignments;
+6. writes `exports\eures_market_review.json`;
+7. keeps ambiguous/unresolved rows explicit;
+8. **never modifies** `backend/app/evidence/eures_lmi_2025.json` automatically.
+
+Exit code `0` means every row resolved and the artifact is ready for human review. Exit code `2` means unresolved rows remain and production evidence is unchanged.
+
+This workflow is intentionally separate from live synchronization because the official ELA annual annex is published as a report/dashboard rather than a stable machine-readable CSV feed. citeturn613579search1turn613579search0
+
 ## Testing and CI
 
 GitHub Actions runs:
