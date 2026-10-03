@@ -1771,3 +1771,18 @@
   padding-top: 10px;
   border-top: 1px solid var(--augur-border-soft);
 }
+
+
+.countryMetricPeerBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 21px;
+  padding: 0 7px;
+  border: 1px solid rgba(83, 189, 135, .34);
+  border-radius: 999px;
+  background: rgba(17, 78, 48, .2);
+  color: #8cdeb0;
+  font-size: 7px;
+  font-weight: 800;
+  white-space: nowrap;
+}
