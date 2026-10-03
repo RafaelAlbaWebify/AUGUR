@@ -1748,3 +1748,26 @@
     min-height: 360px;
   }
 }
+
+
+.viewAllChanges {
+  margin: 8px 12px 0;
+  justify-self: start;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #4fd8ff;
+  font-size: 9px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.viewAllChanges:hover {
+  color: #a6edff;
+}
+
+.recentChangesPanel .signalSplit {
+  margin-top: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--augur-border-soft);
+}
