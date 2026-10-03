@@ -953,6 +953,76 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
 })
 
 test('captures Overview desktop visual artifact', async ({ page }) => {
+  const dimension = (
+    trajectory: 'improving' | 'mixed' | 'contextual',
+    signalName: string,
+  ) => ({
+    trajectory,
+    confidence: 'high',
+    indicator_count: 3,
+    directional_indicator_count: trajectory === 'contextual' ? 0 : 2,
+    coverage: 1,
+    improving_signals: trajectory === 'improving'
+      ? [{ indicator_id: signalName, name: signalName, direction: 'increase', confidence: 'high', pct_change_5y: 5 }]
+      : [],
+    deteriorating_signals: [],
+    stable_signals: trajectory === 'mixed'
+      ? [{ indicator_id: signalName, name: signalName, direction: 'stable', confidence: 'medium', pct_change_5y: 0 }]
+      : [],
+    contextual_signals: trajectory === 'contextual'
+      ? [{ indicator_id: signalName, name: signalName, direction: 'contextual', confidence: 'high', pct_change_5y: null }]
+      : [],
+  })
+
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/assessment',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          country_iso3: 'ESP',
+          method: 'visual-fixture',
+          dimensions: {
+            prosperity: dimension('improving', 'Real GDP growth'),
+            productive_capacity: dimension('improving', 'Employment rate'),
+            housing: dimension('mixed', 'Housing cost burden'),
+            demography: dimension('contextual', 'Population structure'),
+            human_systems: dimension('improving', 'Tertiary attainment'),
+            fiscal: dimension('contextual', 'Fiscal balance'),
+            strategic_resilience: dimension('contextual', 'Energy resilience'),
+          },
+        }),
+      })
+    },
+  )
+
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/scenarios',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          country_iso3: 'ESP',
+          method: 'visual-fixture',
+          horizons: [2030, 2035, 2045],
+          scenario_names: ['baseline', 'improvement', 'stress'],
+          indicators: [{
+            name: 'Fertility rate, total',
+            unit: 'ratio',
+            scenarios: {
+              baseline: 1.26,
+              improvement: 1.42,
+              stress: 1.08,
+            },
+          }],
+          notes: [],
+        }),
+      })
+    },
+  )
+
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
   await page.screenshot({
