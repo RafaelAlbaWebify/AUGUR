@@ -114,10 +114,10 @@ AUGUR includes a local-only calibration store for anonymous observed TTV cases. 
 CSV columns:
 
 ```text
-case_id,country_iso3,employment_mode,engine_version,composition,candidate_weeks_min,candidate_weeks_max,observed_weeks,source_label,observed_at,stage_timings_json
+case_id,country_iso3,employment_mode,engine_version,composition,candidate_weeks_min,candidate_weeks_max,observed_weeks,sample_role,start_event_definition_version,viability_outcome_definition_version,source_label,observed_at,stage_timings_json
 ```
 
-Required columns are everything through `observed_weeks`. `source_label`, `observed_at` and `stage_timings_json` are optional.
+Required import columns remain everything through `observed_weeks`. `sample_role` defaults to `development`. Start/outcome definition versions, `source_label`, `observed_at` and `stage_timings_json` are optional for development cases. Holdout imports are blocked while the calibration protocol has no approved version.
 
 When stage-level observations are available, `stage_timings_json` may contain anonymised timings for `legal`, `language`, `skills`, `employment` and `financial`. Each included stage must provide its candidate minimum, candidate maximum and observed weeks.
 
