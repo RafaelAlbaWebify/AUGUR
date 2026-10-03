@@ -616,3 +616,47 @@
     gap: 3px;
   }
 }
+
+
+/* Desktop density pass: keep related profile inputs on one visual row. */
+.profileGridPersonal {
+  grid-template-columns: minmax(120px, .55fr) minmax(180px, .7fr) minmax(260px, 1.35fr);
+}
+
+.profileGridCareer {
+  grid-template-columns: minmax(220px, .8fr) minmax(320px, 1.6fr);
+}
+
+.profileGridLanguages {
+  grid-template-columns: minmax(320px, 1.5fr) minmax(220px, .8fr);
+}
+
+.profileGridFinancial {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 1180px) {
+  .profileGridPersonal,
+  .profileGridCareer,
+  .profileGridLanguages,
+  .profileGridFinancial {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profileGridPersonal > label:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .profileGridPersonal,
+  .profileGridCareer,
+  .profileGridLanguages,
+  .profileGridFinancial {
+    grid-template-columns: 1fr;
+  }
+
+  .profileGridPersonal > label:last-child {
+    grid-column: auto;
+  }
+}
