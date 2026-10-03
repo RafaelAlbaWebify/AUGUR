@@ -115,17 +115,72 @@ async function mockApi(page: Page) {
           {
             type: 'Feature',
             properties: { NUTS_ID: 'ES11', NAME_LATN: 'Galicia', NUTS_NAME: 'Galicia', CNTR_CODE: 'ES', LEVL_CODE: 2 },
-            geometry: { type: 'Polygon', coordinates: [[[-9.3, 41.8], [-6.7, 41.8], [-6.7, 43.8], [-9.3, 43.8], [-9.3, 41.8]]] },
+            geometry: { type: 'Polygon', coordinates: [[[-9.3, 41.8], [-6.6, 41.8], [-6.7, 43.8], [-9.3, 43.8], [-9.3, 41.8]]] },
           },
           {
             type: 'Feature',
             properties: { NUTS_ID: 'ES12', NAME_LATN: 'Principado de Asturias', NUTS_NAME: 'Principado de Asturias', CNTR_CODE: 'ES', LEVL_CODE: 2 },
-            geometry: { type: 'Polygon', coordinates: [[[-7.2, 42.8], [-4.5, 42.8], [-4.5, 43.7], [-7.2, 43.7], [-7.2, 42.8]]] },
+            geometry: { type: 'Polygon', coordinates: [[[-7.0, 42.7], [-4.5, 42.7], [-4.5, 43.7], [-7.0, 43.7], [-7.0, 42.7]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES13', NAME_LATN: 'Cantabria', NUTS_NAME: 'Cantabria', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-4.5, 42.7], [-3.1, 42.7], [-3.1, 43.5], [-4.5, 43.5], [-4.5, 42.7]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES21', NAME_LATN: 'País Vasco', NUTS_NAME: 'País Vasco', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-3.1, 42.5], [-1.5, 42.5], [-1.5, 43.5], [-3.1, 43.5], [-3.1, 42.5]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES22', NAME_LATN: 'Navarra', NUTS_NAME: 'Navarra', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-1.8, 41.8], [-0.7, 41.8], [-0.7, 43.0], [-1.8, 43.0], [-1.8, 41.8]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES24', NAME_LATN: 'Aragón', NUTS_NAME: 'Aragón', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-1.6, 40.4], [0.9, 40.4], [0.9, 42.8], [-1.6, 42.8], [-1.6, 40.4]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES30', NAME_LATN: 'Comunidad de Madrid', NUTS_NAME: 'Comunidad de Madrid', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-4.6, 39.8], [-3.0, 39.8], [-3.0, 41.2], [-4.6, 41.2], [-4.6, 39.8]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES41', NAME_LATN: 'Castilla y León', NUTS_NAME: 'Castilla y León', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-7.7, 40.7], [-1.7, 40.7], [-1.7, 42.8], [-7.7, 42.8], [-7.7, 40.7]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES42', NAME_LATN: 'Castilla-La Mancha', NUTS_NAME: 'Castilla-La Mancha', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-5.0, 38.0], [-0.8, 38.0], [-0.8, 40.8], [-5.0, 40.8], [-5.0, 38.0]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES43', NAME_LATN: 'Extremadura', NUTS_NAME: 'Extremadura', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-7.6, 37.0], [-4.8, 37.0], [-4.8, 40.0], [-7.6, 40.0], [-7.6, 37.0]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES51', NAME_LATN: 'Cataluña', NUTS_NAME: 'Cataluña', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[0.2, 40.5], [3.3, 40.5], [3.3, 42.9], [0.2, 42.9], [0.2, 40.5]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES52', NAME_LATN: 'Comunitat Valenciana', NUTS_NAME: 'Comunitat Valenciana', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-1.5, 37.8], [0.8, 37.8], [0.8, 40.8], [-1.5, 40.8], [-1.5, 37.8]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES61', NAME_LATN: 'Andalucía', NUTS_NAME: 'Andalucía', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-7.6, 36.0], [-1.6, 36.0], [-1.6, 38.8], [-7.6, 38.8], [-7.6, 36.0]]] },
           },
           {
             type: 'Feature',
             properties: { NUTS_ID: 'PT11', NAME_LATN: 'Norte', NUTS_NAME: 'Norte', CNTR_CODE: 'PT', LEVL_CODE: 2 },
-            geometry: { type: 'Polygon', coordinates: [[[-9, 40.8], [-6.2, 40.8], [-6.2, 42.2], [-9, 42.2], [-9, 40.8]]] },
+            geometry: { type: 'Polygon', coordinates: [[[-9.0, 40.8], [-6.2, 40.8], [-6.2, 42.2], [-9.0, 42.2], [-9.0, 40.8]]] },
           },
           {
             type: 'Feature',
@@ -332,20 +387,21 @@ async function mockApi(page: Page) {
           const country = countries.find((item) => item.iso3 === iso3)!
           return { iso3: country.iso3, name: country.name }
         }),
-        indicator_count: 1,
+        indicator_count: overviewMetrics('ESP').length,
         method: 'aligned_current_observations_v1',
         notes: [],
-        indicators: [{
-          indicator_id: 'unemployment_rate',
-          name: 'Unemployment',
-          dimension: 'productive_capacity',
-          unit: 'percent',
-          countries: {
-            ESP: { period: 2025, value: 10.4, source_id: 'EUROSTAT' },
-            PRT: { period: 2025, value: 6.4, source_id: 'EUROSTAT' },
-            IRL: { period: 2025, value: 4.5, source_id: 'EUROSTAT' },
-          },
-        }],
+        indicators: overviewMetrics('ESP').map((espItem) => ({
+          indicator_id: espItem.indicator_id,
+          name: espItem.name,
+          dimension: espItem.dimension,
+          unit: espItem.unit,
+          countries: Object.fromEntries(
+            ['ESP', 'PRT', 'IRL'].map((iso3) => {
+              const item = overviewMetrics(iso3).find((candidate) => candidate.indicator_id === espItem.indicator_id)!
+              return [iso3, { period: item.period, value: item.value, source_id: item.source_id }]
+            }),
+          ),
+        })),
       }
     } else if (path.endsWith('/snapshot')) {
       body = { country_iso3: country, observation_count: overviewMetrics(country).length, indicators: overviewMetrics(country) }
