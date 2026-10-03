@@ -368,6 +368,15 @@ export default function OverviewPage({
         </section>
       </div>
 
+      {selectedRegion && (
+        <div className="regionalFocusNotice">
+          <strong>{selectedRegion.name} selected</strong>
+          <span>
+            Map focus is regional · domain cards remain national evidence until a verified regional series is available.
+          </span>
+        </div>
+      )}
+
       <section className="countryMetricGrid">
         {representative.map(({ id, label, dimension, item, assessment: dimensionState }) => (
           <button
