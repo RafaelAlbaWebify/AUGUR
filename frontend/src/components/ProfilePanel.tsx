@@ -676,9 +676,9 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
           <div className="profileFieldGroup">
             <h4>Financial / household</h4>
             <div className="profileGrid profileGridFinancial">
-              <label><span>Household size</span><input type="number" min={1} max={20} value={profile.household_size} onChange={(event) => setProfile({ ...profile, household_size: Number(event.target.value) || 1 })} /></label>
+              <label><span>Household size</span><small className="profileFieldNote">Stored for future household-budget modelling; not used in current FinancialFit.</small><input type="number" min={1} max={20} value={profile.household_size} onChange={(event) => setProfile({ ...profile, household_size: Number(event.target.value) || 1 })} /></label>
               <label><span>Monthly net income</span><input type="number" min={0} value={profile.monthly_net_income ?? ''} onChange={(event) => setProfile({ ...profile, monthly_net_income: event.target.value ? Number(event.target.value) : null })} /></label>
-              <label><span>Liquid savings</span><input type="number" min={0} value={profile.liquid_savings ?? ''} onChange={(event) => setProfile({ ...profile, liquid_savings: event.target.value ? Number(event.target.value) : null })} /></label>
+              <label><span>Liquid savings</span><small className="profileFieldNote">Stored for future transition-cost/runway modelling; not used in current FinancialFit.</small><input type="number" min={0} value={profile.liquid_savings ?? ''} onChange={(event) => setProfile({ ...profile, liquid_savings: event.target.value ? Number(event.target.value) : null })} /></label>
               <label className="profileCheckbox"><input type="checkbox" checked={profile.remote_work} onChange={(event) => setProfile({ ...profile, remote_work: event.target.checked })} /><span>Remote work is viable</span></label>
             </div>
           </div>
@@ -756,10 +756,36 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             </dl>
           </article>
         </div>
-        <div className="ttvCompact">
-          <strong>TTV</strong>
-          <span>{ttv?.ready_for_time_estimate ? 'Estimate available' : ttv?.dependency_ready ? 'Dependencies ready · temporal model incomplete' : 'Blocked by incomplete dependencies'}</span>
-        </div>
+        <section className="ttvCompact" role="region" aria-label="TTV readiness">
+          <div>
+            <strong>TTV</strong>
+            <span>{ttv?.ready_for_time_estimate ? 'Estimate available' : ttv?.dependency_ready ? 'Dependencies ready · temporal model incomplete' : 'Blocked by incomplete dependencies'}</span>
+          </div>
+          {!ttv?.dependency_ready && (
+            <div className="ttvCompactEvidence">
+              <strong>Blocked by</strong>
+              <span>{ttv?.blocked_by?.length ? ttv.blocked_by.join(' · ').replaceAll('_', ' ') : 'Waiting for evidence'}</span>
+            </div>
+          )}
+          {ttv?.candidate_time_range && (
+            <div className="ttvCompactEvidence">
+              <strong>Temporal evidence · candidate only</strong>
+              <span>
+                {ttv.candidate_time_range.weeks_min}–{ttv.candidate_time_range.weeks_max} weeks · critical path: preparation parallel → employment → financial · not an AUGUR estimate
+              </span>
+            </div>
+          )}
+          {ttv?.temporal_evidence?.stages?.language && (
+            <div className="ttvCompactEvidence">
+              <strong>Language planning evidence</strong>
+              <span>
+                {ttv.temporal_evidence.stages.language.guided_hours_min != null && ttv.temporal_evidence.stages.language.guided_hours_max != null
+                  ? `Language: ${ttv.temporal_evidence.stages.language.guided_hours_min}–${ttv.temporal_evidence.stages.language.guided_hours_max} guided hours${ttv.temporal_evidence.stages.language.weekly_study_hours == null ? ' · add study hours/week for calendar conversion' : ''}`
+                  : 'Language timing evidence unavailable'}
+              </span>
+            </div>
+          )}
+        </section>
       </details>
     </section>
   )
