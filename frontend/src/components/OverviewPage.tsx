@@ -300,6 +300,7 @@ export default function OverviewPage({
               countryIso2={selectedCountryIso2}
               selectedRegion={selectedRegion?.id ?? null}
               onSelectRegion={(id, name) => setSelectedRegion({ id, name })}
+              cities={visual.cities}
             />
           ) : (
             <WorldMap
