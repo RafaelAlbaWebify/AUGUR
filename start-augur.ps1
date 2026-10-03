@@ -22,11 +22,58 @@ $BackendErr = Join-Path $LogDir "backend.err.log"
 $FrontendOut = Join-Path $LogDir "frontend.out.log"
 $FrontendErr = Join-Path $LogDir "frontend.err.log"
 
-function Test-PortInUse {
+function Get-PortListeners {
     param([int]$Port)
 
-    $connection = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
-    return $null -ne $connection
+    $connections = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
+    $listeners = @()
+
+    foreach ($connection in $connections) {
+        if (-not $connection.OwningProcess) {
+            continue
+        }
+
+        $process = Get-CimInstance Win32_Process -Filter "ProcessId = $($connection.OwningProcess)" -ErrorAction SilentlyContinue
+
+        $listeners += [pscustomobject]@{
+            Port = $Port
+            Pid = [int]$connection.OwningProcess
+            Name = $process.Name
+            CommandLine = $process.CommandLine
+        }
+    }
+
+    return @($listeners | Sort-Object Pid -Unique)
+}
+
+function Test-AugurProcess {
+    param($Listener)
+
+    if ($null -eq $Listener -or -not $Listener.CommandLine) {
+        return $false
+    }
+
+    return $Listener.CommandLine -like "*$Root*"
+}
+
+function Show-PortConflict {
+    param(
+        [int]$Port,
+        [array]$Listeners
+    )
+
+    Write-Host ""
+    Write-Host "Port $Port is already in use by a non-AUGUR process." -ForegroundColor Red
+
+    foreach ($listener in $Listeners) {
+        Write-Host "  PID $($listener.Pid) · $($listener.Name)"
+        if ($listener.CommandLine) {
+            Write-Host "  $($listener.CommandLine)"
+        }
+    }
+
+    Write-Host ""
+    Write-Host "AUGUR will not stop or replace that process." -ForegroundColor Yellow
 }
 
 function Show-BackendFailure {
@@ -54,59 +101,80 @@ if (-not (Test-Path (Join-Path $Frontend "node_modules"))) {
     throw "Frontend dependencies not found. Run setup-phase0.ps1 first."
 }
 
-if (Test-PortInUse $BackendPort) {
-    throw "Port $BackendPort is already in use. Stop the conflicting process before starting AUGUR."
-}
+$BackendListeners = @(Get-PortListeners -Port $BackendPort)
+$ReuseBackend = $false
 
-if (Test-PortInUse $FrontendPort) {
-    throw "Port $FrontendPort is already in use. Stop the conflicting process before starting AUGUR."
-}
+if ($BackendListeners.Count -gt 0) {
+    $ForeignBackendListeners = @($BackendListeners | Where-Object { -not (Test-AugurProcess $_) })
 
-Remove-Item $BackendOut,$BackendErr,$FrontendOut,$FrontendErr -Force -ErrorAction SilentlyContinue
-
-Write-Host "Starting AUGUR backend on $BackendPort..."
-$BackendProcess = Start-Process `
-    -FilePath $Python `
-    -ArgumentList "-m","uvicorn","app.main:app","--host","127.0.0.1","--port","$BackendPort" `
-    -WorkingDirectory $Backend `
-    -RedirectStandardOutput $BackendOut `
-    -RedirectStandardError $BackendErr `
-    -PassThru
-
-$BackendProcess.Id | Set-Content (Join-Path $RunDir "backend.pid")
-
-Write-Host "Waiting for backend health..."
-$BackendHealthy = $false
-
-for ($Attempt = 1; $Attempt -le 30; $Attempt++) {
-    Start-Sleep -Milliseconds 500
-
-    $BackendProcess.Refresh()
-
-    if ($BackendProcess.HasExited) {
-        Show-BackendFailure
-        throw "AUGUR backend exited with code $($BackendProcess.ExitCode)."
+    if ($ForeignBackendListeners.Count -gt 0) {
+        Show-PortConflict -Port $BackendPort -Listeners $ForeignBackendListeners
+        throw "Cannot start AUGUR while port $BackendPort is owned by another project or process."
     }
 
     try {
-        $Health = Invoke-RestMethod -Uri $HealthUrl -TimeoutSec 2
-        if ($Health.status -eq "ok") {
-            $BackendHealthy = $true
-            break
+        $ExistingHealth = Invoke-RestMethod -Uri $HealthUrl -TimeoutSec 2
+        if ($ExistingHealth.status -eq "ok") {
+            $ReuseBackend = $true
+            Write-Host "AUGUR backend already running on $BackendPort. Reusing it." -ForegroundColor Green
         }
     }
     catch {
-        # Backend may still be starting.
+        # Listener belongs to AUGUR but does not answer health checks.
+    }
+
+    if (-not $ReuseBackend) {
+        throw "A stale AUGUR backend is listening on port $BackendPort but is not healthy. Run .\stop-augur.ps1, then start AUGUR again."
     }
 }
 
-if (-not $BackendHealthy) {
-    Stop-Process -Id $BackendProcess.Id -Force -ErrorAction SilentlyContinue
-    Show-BackendFailure
-    throw "AUGUR backend did not become healthy at $HealthUrl."
-}
+if (-not $ReuseBackend) {
+    Remove-Item $BackendOut,$BackendErr -Force -ErrorAction SilentlyContinue
 
-Write-Host "Backend healthy."
+    Write-Host "Starting AUGUR backend on $BackendPort..."
+    $BackendProcess = Start-Process `
+        -FilePath $Python `
+        -ArgumentList "-m","uvicorn","app.main:app","--host","127.0.0.1","--port","$BackendPort" `
+        -WorkingDirectory $Backend `
+        -RedirectStandardOutput $BackendOut `
+        -RedirectStandardError $BackendErr `
+        -PassThru
+
+    $BackendProcess.Id | Set-Content (Join-Path $RunDir "backend.pid")
+
+    Write-Host "Waiting for backend health..."
+    $BackendHealthy = $false
+
+    for ($Attempt = 1; $Attempt -le 30; $Attempt++) {
+        Start-Sleep -Milliseconds 500
+
+        $BackendProcess.Refresh()
+
+        if ($BackendProcess.HasExited) {
+            Show-BackendFailure
+            throw "AUGUR backend exited with code $($BackendProcess.ExitCode)."
+        }
+
+        try {
+            $Health = Invoke-RestMethod -Uri $HealthUrl -TimeoutSec 2
+            if ($Health.status -eq "ok") {
+                $BackendHealthy = $true
+                break
+            }
+        }
+        catch {
+            # Backend may still be starting.
+        }
+    }
+
+    if (-not $BackendHealthy) {
+        Stop-Process -Id $BackendProcess.Id -Force -ErrorAction SilentlyContinue
+        Show-BackendFailure
+        throw "AUGUR backend did not become healthy at $HealthUrl."
+    }
+
+    Write-Host "Backend healthy."
+}
 
 try {
     $Operability = Invoke-RestMethod -Uri $OperabilityUrl -TimeoutSec 5
@@ -124,49 +192,80 @@ catch {
     Write-Warning "Could not read AUGUR operability status: $($_.Exception.Message)"
 }
 
-Write-Host "Starting AUGUR frontend on $FrontendPort..."
-$FrontendProcess = Start-Process `
-    -FilePath "npm.cmd" `
-    -ArgumentList "run","dev" `
-    -WorkingDirectory $Frontend `
-    -RedirectStandardOutput $FrontendOut `
-    -RedirectStandardError $FrontendErr `
-    -PassThru
+$FrontendListeners = @(Get-PortListeners -Port $FrontendPort)
+$ReuseFrontend = $false
 
-$FrontendProcess.Id | Set-Content (Join-Path $RunDir "frontend.pid")
+if ($FrontendListeners.Count -gt 0) {
+    $ForeignFrontendListeners = @($FrontendListeners | Where-Object { -not (Test-AugurProcess $_) })
 
-$FrontendReady = $false
-
-for ($Attempt = 1; $Attempt -le 20; $Attempt++) {
-    Start-Sleep -Milliseconds 500
-
-    $FrontendProcess.Refresh()
-
-    if ($FrontendProcess.HasExited) {
-        Write-Host ""
-        Write-Host "AUGUR frontend failed to start." -ForegroundColor Red
-
-        if (Test-Path $FrontendErr) {
-            Get-Content $FrontendErr -Tail 80
-        }
-
-        throw "AUGUR frontend exited with code $($FrontendProcess.ExitCode)."
+    if ($ForeignFrontendListeners.Count -gt 0) {
+        Show-PortConflict -Port $FrontendPort -Listeners $ForeignFrontendListeners
+        throw "Cannot start AUGUR while port $FrontendPort is owned by another project or process."
     }
 
     try {
-        $Response = Invoke-WebRequest -Uri $FrontendUrl -TimeoutSec 2 -UseBasicParsing
-        if ($Response.StatusCode -eq 200) {
-            $FrontendReady = $true
-            break
+        $ExistingFrontend = Invoke-WebRequest -Uri $FrontendUrl -TimeoutSec 2 -UseBasicParsing
+        if ($ExistingFrontend.StatusCode -eq 200) {
+            $ReuseFrontend = $true
+            Write-Host "AUGUR frontend already running on $FrontendPort. Reusing it." -ForegroundColor Green
         }
     }
     catch {
-        # Vite may still be starting.
+        # Listener belongs to AUGUR but is not serving the frontend.
+    }
+
+    if (-not $ReuseFrontend) {
+        throw "A stale AUGUR frontend is listening on port $FrontendPort but is not responding. Run .\stop-augur.ps1, then start AUGUR again."
     }
 }
 
-if (-not $FrontendReady) {
-    throw "AUGUR frontend did not become ready at $FrontendUrl."
+if (-not $ReuseFrontend) {
+    Remove-Item $FrontendOut,$FrontendErr -Force -ErrorAction SilentlyContinue
+
+    Write-Host "Starting AUGUR frontend on $FrontendPort..."
+    $FrontendProcess = Start-Process `
+        -FilePath "npm.cmd" `
+        -ArgumentList "run","dev" `
+        -WorkingDirectory $Frontend `
+        -RedirectStandardOutput $FrontendOut `
+        -RedirectStandardError $FrontendErr `
+        -PassThru
+
+    $FrontendProcess.Id | Set-Content (Join-Path $RunDir "frontend.pid")
+
+    $FrontendReady = $false
+
+    for ($Attempt = 1; $Attempt -le 20; $Attempt++) {
+        Start-Sleep -Milliseconds 500
+
+        $FrontendProcess.Refresh()
+
+        if ($FrontendProcess.HasExited) {
+            Write-Host ""
+            Write-Host "AUGUR frontend failed to start." -ForegroundColor Red
+
+            if (Test-Path $FrontendErr) {
+                Get-Content $FrontendErr -Tail 80
+            }
+
+            throw "AUGUR frontend exited with code $($FrontendProcess.ExitCode)."
+        }
+
+        try {
+            $Response = Invoke-WebRequest -Uri $FrontendUrl -TimeoutSec 2 -UseBasicParsing
+            if ($Response.StatusCode -eq 200) {
+                $FrontendReady = $true
+                break
+            }
+        }
+        catch {
+            # Vite may still be starting.
+        }
+    }
+
+    if (-not $FrontendReady) {
+        throw "AUGUR frontend did not become ready at $FrontendUrl."
+    }
 }
 
 Write-Host ""
