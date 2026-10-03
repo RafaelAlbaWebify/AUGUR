@@ -115,6 +115,7 @@ type OverviewPageProps = {
   onCompareCountryChange: (slot: number, iso3: string) => void
   onOpenOutlook: () => void
   onOpenCompare: () => void
+  onOpenIndicators: () => void
   onOpenDimension: (dimension: string) => void
   formatValue: (value: number, unit: string) => string
   dimensionLabels: Record<string, string>
@@ -186,6 +187,7 @@ export default function OverviewPage({
   overviewSeries,
   assessment,
   onCountryChange,
+  onOpenIndicators,
   onOpenDimension,
   formatValue,
   dimensionLabels,
@@ -327,15 +329,19 @@ export default function OverviewPage({
             {!recentChanges.length && <span className="radarEmpty">No directional one-year changes available.</span>}
           </div>
 
+          <button type="button" className="viewAllChanges" onClick={onOpenIndicators}>
+            View all changes →
+          </button>
+
           <div className="signalSplit">
             <div>
-              <strong>Improving signals</strong>
+              <strong>Strengths / improving evidence</strong>
               {improvingSignals.length
                 ? improvingSignals.map((item) => <span key={item.indicator_id}>+ {item.name}</span>)
                 : <span>None currently classified</span>}
             </div>
             <div>
-              <strong>Key pressures</strong>
+              <strong>Key risks / deteriorating evidence</strong>
               {pressureSignals.length
                 ? pressureSignals.map((item) => <span key={item.indicator_id}>− {item.name}</span>)
                 : <span>None currently classified</span>}
