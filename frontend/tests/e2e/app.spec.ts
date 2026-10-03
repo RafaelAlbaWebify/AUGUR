@@ -412,7 +412,7 @@ test('Indicators route exposes drill-down evidence without overstating provenanc
 test('Overview dimension cards drill into persistent dimension routes', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
-  await page.locator('.countryMetricCard').first().click()
+  await page.locator('.countryMetricCard').filter({ hasText: 'Labour market' }).click()
 
   await expect(page).toHaveURL(/\/country\/ESP\/dimension\/productive_capacity$/)
   await expect(page.getByRole('region', { name: 'Dimension detail' })).toBeVisible()
@@ -797,7 +797,7 @@ test('Country Radar renders the approved evidence composition', async ({ page })
   await expect(page.getByTestId('world-map')).toBeVisible()
   await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
   await expect(page.getByText('Latest one-year movements')).toBeVisible()
-  await expect(page.locator('.countryMetricCard')).toHaveCount(1)
+  await expect(page.locator('.countryMetricCard')).toHaveCount(10)
 
   const overflow = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
@@ -868,7 +868,7 @@ test('Country Radar keeps country context and evidence cards visible', async ({ 
   await expect(page.locator('.worldMapLegend .flagIcon')).toHaveCount(3)
   await expect(page.locator('.topbarCountry .flagIcon')).toHaveCount(1)
   await expect(page.locator('.countryIdentityCard')).toBeVisible()
-  await expect(page.locator('.countryMetricCard')).toHaveCount(1)
+  await expect(page.locator('.countryMetricCard')).toHaveCount(10)
   await expect(page.getByText('No single composite score.')).toBeVisible()
 })
 
