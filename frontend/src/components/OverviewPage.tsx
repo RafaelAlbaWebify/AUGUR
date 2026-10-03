@@ -131,6 +131,13 @@ export default function OverviewPage({
       }
     : null
 
+  const hasScenarioSpread = preview
+    ? (
+        Math.abs(preview.optimistic - preview.baseline) > 1e-9 ||
+        Math.abs(preview.stress - preview.baseline) > 1e-9
+      )
+    : false
+
 
   return (
     <section className="overviewPageV2" aria-label="Country overview">
@@ -190,20 +197,30 @@ export default function OverviewPage({
             {preview ? (
               <div className="overviewScenarioPreview">
                 <p>{preview.name}</p>
-                {[
-                  ['Baseline', preview.baseline, 'official'],
-                  ['Improvement', preview.optimistic, 'AUGUR model'],
-                  ['Stress', preview.stress, 'AUGUR model'],
-                ].map(([label, value, provenance]) => {
-                  const numericValue = value as number
-                  return (
-                    <div className="overviewScenarioRow evidenceOnly" key={label as string}>
-                      <span>{label}</span>
-                      <small>{provenance}</small>
-                      <strong>{formatValue(numericValue, preview.unit)}</strong>
+                <div className="overviewScenarioRow evidenceOnly">
+                  <span>Baseline</span>
+                  <small>official</small>
+                  <strong>{formatValue(preview.baseline, preview.unit)}</strong>
+                </div>
+
+                {hasScenarioSpread ? (
+                  <>
+                    <div className="overviewScenarioRow evidenceOnly">
+                      <span>Improvement</span>
+                      <small>AUGUR model</small>
+                      <strong>{formatValue(preview.optimistic, preview.unit)}</strong>
                     </div>
-                  )
-                })}
+                    <div className="overviewScenarioRow evidenceOnly">
+                      <span>Stress</span>
+                      <small>AUGUR model</small>
+                      <strong>{formatValue(preview.stress, preview.unit)}</strong>
+                    </div>
+                  </>
+                ) : (
+                  <div className="overviewScenarioNote">
+                    No directional AUGUR envelope applied to this contextual indicator.
+                  </div>
+                )}
               </div>
             ) : (
               <div className="overviewRailEmpty">Scenario evidence loading…</div>
