@@ -85,6 +85,9 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert "development_case_count" in body["ttv_calibration"]
     assert "holdout_case_count" in body["ttv_calibration"]
     assert body["ttv_calibration"]["protocol_document"] == "docs/TTV_CALIBRATION_PROTOCOL.md"
+    assert "protocol_readiness" in body["ttv_calibration"]
+    assert body["ttv_calibration"]["protocol_readiness"]["ready_for_holdout_collection"] is False
+    assert "start_event_definition" in body["ttv_calibration"]["protocol_readiness"]["blockers"]
     assert "ready_for_versioning" in body["ttv_temporal_validation"]
     assert "gates" in body["ttv_temporal_validation"]
     assert "country_analysis_ready" in body
