@@ -664,8 +664,8 @@ test('Overview exposes selectable official NUTS 2 regions', async ({ page }) => 
 
   await expect(page.getByTestId('regional-map')).toBeVisible()
   await page.getByRole('button', { name: 'Regions' }).click()
-  await expect(page.getByRole('button', { name: 'Galicia' })).toBeVisible()
-  await page.getByRole('button', { name: 'Galicia' }).click()
+  await expect(page.getByTestId('regional-map').getByRole('button', { name: 'Galicia' })).toBeVisible()
+  await page.getByTestId('regional-map').getByRole('button', { name: 'Galicia' }).click()
 
   await expect(page.getByText('Galicia · ES11')).toBeVisible()
   await expect(page.getByText('Geography: Eurostat GISCO · NUTS 2024 · level 2 · EPSG:4326')).toBeVisible()
@@ -1104,7 +1104,7 @@ test('Country Radar renders the approved evidence composition', async ({ page })
   await page.goto('/country/ESP/overview')
 
   await expect(page.getByRole('region', { name: 'Country overview' })).toBeVisible()
-  await expect(page.getByTestId('world-map')).toBeVisible()
+  await expect(page.getByTestId('regional-map')).toBeVisible()
   await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
   await expect(page.getByText('Largest measured movements')).toBeVisible()
   await expect(page.locator('.countryMetricCard')).toHaveCount(10)
@@ -1175,8 +1175,8 @@ test('Country Radar panels do not overlap at 1920x1080', async ({ page }) => {
 test('Country Radar keeps country context and evidence cards visible', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
-  await expect(page.locator('.worldMapLegend .flagIcon')).toHaveCount(3)
   await expect(page.locator('.topbarCountry .flagIcon')).toHaveCount(1)
+  await expect(page.getByTestId('regional-map')).toBeVisible()
   await expect(page.locator('.countryIdentityCard')).toBeVisible()
   await expect(page.locator('.countryMetricCard')).toHaveCount(10)
   await expect(page.getByText('No single composite score.')).toBeVisible()
@@ -1416,7 +1416,7 @@ test('responsive Country Radar preserves core panels', async ({ page }) => {
     await page.setViewportSize(viewport)
     await page.goto('/country/ESP/overview')
 
-    await expect(page.getByTestId('world-map')).toBeVisible()
+    await expect(page.getByTestId('regional-map')).toBeVisible()
     await expect(page.locator('.countryIdentityCard')).toBeVisible()
     await expect(page.locator('.recentChangesPanel')).toBeVisible()
     await expect(page.locator('.countryMetricGrid')).toBeVisible()
