@@ -37,6 +37,7 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     assert result["externally_calibrated"] is False
     assert result["interval_coverage_pct"] is None
     assert result["stage_metrics"] == {}
+    assert result["sample_role_metrics"] == {}
 
 
 def test_calibration_metrics_are_descriptive_only(
@@ -79,6 +80,10 @@ def test_calibration_metrics_are_descriptive_only(
     assert result["interval_coverage_pct"] == 50.0
     assert result["mean_absolute_midpoint_error_weeks"] == 5.0
     assert result["mean_signed_midpoint_error_weeks"] == -5.0
+    assert result["sample_role_metrics"]["development"]["case_count"] == 2
+    assert result["sample_role_metrics"]["development"]["interval_coverage_pct"] == 50.0
+    assert result["sample_role_metrics"]["holdout"]["case_count"] == 0
+    assert result["sample_role_metrics"]["holdout"]["interval_coverage_pct"] is None
     assert result["externally_calibrated"] is False
 
 
@@ -269,3 +274,41 @@ def test_calibration_protocol_readiness_lists_unresolved_requirements():
     ]
     assert result["requirements"]["protocol_version"]["ready"] is False
     assert result["requirements"]["start_event_definition"]["version"] is None
+
+
+def test_sample_role_metrics_keep_development_and_holdout_separate(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    module.upsert_calibration_case(
+        {
+            "case_id": "dev-role-001",
+            "country_iso3": "ESP",
+            "employment_mode": "remote",
+            "engine_version": "ttv-temporal-evidence-v1",
+            "composition": "critical_path_v1",
+            "candidate_weeks_min": 4,
+            "candidate_weeks_max": 8,
+            "observed_weeks": 6,
+            "sample_role": "development",
+        }
+    )
+
+    result = module.calibration_status()
+
+    assert result["development_case_count"] == 1
+    assert result["holdout_case_count"] == 0
+    assert result["sample_role_metrics"]["development"] == {
+        "case_count": 1,
+        "interval_coverage_pct": 100.0,
+        "mean_absolute_midpoint_error_weeks": 0.0,
+        "mean_signed_midpoint_error_weeks": 0.0,
+    }
+    assert result["sample_role_metrics"]["holdout"] == {
+        "case_count": 0,
+        "interval_coverage_pct": None,
+        "mean_absolute_midpoint_error_weeks": None,
+        "mean_signed_midpoint_error_weeks": None,
+    }
