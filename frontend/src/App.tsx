@@ -603,6 +603,7 @@ export default function App() {
           countries={countries}
           selectedCountry={selectedCountry}
           selectedCountryName={selectedCountryMeta?.name ?? selectedCountry}
+          selectedCountryIso2={selectedCountryMeta?.iso2 ?? ''}
           currentIndicators={enrichedIndicators}
           assessment={assessment}
           scenarios={scenarios}
