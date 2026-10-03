@@ -89,6 +89,15 @@ def main() -> int:
     )
     print(f"protocol_state: {calibration['protocol_state']}")
     print(f"protocol_version: {calibration['protocol_version']}")
+    protocol_readiness = calibration["protocol_readiness"]
+    print(
+        "ready_for_holdout_collection: "
+        f"{protocol_readiness['ready_for_holdout_collection']}"
+    )
+    if protocol_readiness["blockers"]:
+        print("protocol_blockers:")
+        for blocker in protocol_readiness["blockers"]:
+            print(f"  - {blocker}")
     print(f"case_count: {calibration['case_count']}")
     print(f"country_count: {calibration['country_count']}")
     print(
