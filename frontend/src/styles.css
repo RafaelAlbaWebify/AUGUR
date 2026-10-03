@@ -3948,3 +3948,297 @@ body:has(.shell.detailsOpen) {
   font-size: 11px;
   line-height: 1.35;
 }
+
+
+/* Secondary views fidelity pass: Indicators, Outlook and Compare */
+.indicatorEvidencePage,
+.view-outlook,
+.view-compare {
+  color: var(--augur-text);
+}
+
+.indicatorEvidencePage {
+  padding-top: 14px;
+}
+
+.indicatorEvidenceHero,
+.dimensionDetailSummary,
+.indicatorEvidenceDimension .metricCard,
+.view-outlook .trajectoryCard,
+.view-outlook .scenarioCard,
+.view-compare .comparePanel:not(.compact),
+.view-compare .comparisonTableWrap {
+  border-color: var(--augur-border);
+  background: linear-gradient(180deg, rgba(12, 29, 42, .92), rgba(8, 21, 31, .94));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.018),
+    0 10px 26px rgba(0,0,0,.12);
+}
+
+.indicatorEvidenceHero {
+  padding: 13px 15px;
+  margin-bottom: 0;
+}
+
+.indicatorEvidenceHero .label,
+.indicatorEvidenceDimension .label,
+.view-outlook .label,
+.view-compare .label {
+  color: #7890a2;
+}
+
+.indicatorEvidenceHero h3,
+.indicatorEvidenceDimension .dimensionHeader h3,
+.view-outlook .dimensionHeader h3,
+.view-compare .comparePanelHeader strong {
+  color: #f2f7fa;
+}
+
+.indicatorEvidenceHeroMeta > span,
+.indicatorEvidenceDimension .dimensionHeader > span,
+.view-outlook .dimensionHeader > span,
+.view-compare .comparePanelHeader > span {
+  color: #768b9b;
+}
+
+.dimensionDetailSummary {
+  padding: 11px 13px;
+}
+
+.dimensionDetailSummary > div {
+  padding: 7px 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 9px;
+  background: rgba(8, 22, 33, .62);
+}
+
+.dimensionDetailSummary span {
+  color: #70889a;
+}
+
+.dimensionDetailSummary strong {
+  color: #e7f0f5;
+  font-size: 12px;
+}
+
+.dimensionDetailSummary p {
+  display: flex;
+  align-items: center;
+  color: #849aaa;
+}
+
+.indicatorEvidenceDimension {
+  padding-top: 17px;
+}
+
+.indicatorEvidenceDimension .dimensionHeader {
+  margin-bottom: 10px;
+}
+
+.indicatorEvidenceDimension .indicatorGrid {
+  gap: 10px;
+}
+
+.indicatorEvidenceDimension .metricCard {
+  min-height: 0;
+  padding: 13px 14px;
+}
+
+.indicatorEvidenceDimension .metricTop {
+  color: #9aafbd;
+  font-size: 11px;
+}
+
+.indicatorEvidenceDimension .metricYear {
+  color: #70879a;
+}
+
+.indicatorEvidenceDimension .metricValue {
+  margin-top: 14px;
+  font-size: clamp(24px, 2vw, 32px);
+  color: #f1f7fa;
+}
+
+.indicatorEvidenceDimension .trendBlock {
+  margin-top: 11px;
+  padding-top: 9px;
+  border-color: var(--augur-border-soft);
+}
+
+.indicatorEvidenceDimension .trendState {
+  font-size: 11px;
+}
+
+.indicatorEvidenceDimension .trendState small {
+  color: #748a9b;
+  font-size: 8px;
+}
+
+.indicatorEvidenceDimension .trendChanges {
+  margin-top: 8px;
+  color: #71889a;
+  font-size: 9px;
+}
+
+.indicatorEvidenceDimension .sourceQuality {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-color: var(--augur-border-soft);
+  gap: 10px;
+}
+
+.indicatorEvidenceDimension .sourceQuality strong {
+  color: #c3d1da;
+  font-size: 10px;
+}
+
+.indicatorEvidenceDimension .sourceQuality span {
+  color: #71889a;
+  font-size: 9px;
+}
+
+.indicatorEvidenceDimension .metricFooter {
+  padding-top: 9px;
+  color: #61798b;
+  font-size: 8px;
+  border-color: var(--augur-border-soft);
+}
+
+.view-outlook .trajectorySection,
+.view-outlook .scenarioSection {
+  padding-top: 18px;
+}
+
+.view-outlook .trajectorySection + .scenarioSection {
+  padding-top: 22px;
+}
+
+.view-outlook .dimensionHeader {
+  margin-bottom: 10px;
+}
+
+.view-outlook .trajectoryGrid {
+  gap: 10px;
+}
+
+.view-outlook .trajectoryCard,
+.view-outlook .scenarioCard {
+  padding: 14px;
+}
+
+.view-outlook .trajectoryYear {
+  font-size: 28px;
+  color: #f1f6f9;
+}
+
+.view-outlook .trajectorySources,
+.view-outlook .uncertaintyBadge {
+  color: #738a9b;
+  font-size: 9px;
+}
+
+.view-outlook .trajectoryIndicators,
+.view-outlook .scenarioRows {
+  margin-top: 13px;
+  gap: 10px;
+}
+
+.view-outlook .trajectoryRow,
+.view-outlook .scenarioRow {
+  padding-top: 10px;
+  border-color: var(--augur-border-soft);
+}
+
+.view-outlook .trajectoryRow span,
+.view-outlook .scenarioName {
+  color: #b8c8d3;
+  font-size: 11px;
+}
+
+.view-outlook .trajectoryRow strong,
+.view-outlook .scenarioValues strong {
+  color: #edf5fa;
+}
+
+.view-outlook .trajectoryRow small,
+.view-outlook .scenarioValues small,
+.view-outlook .scenarioAssumption {
+  color: #72899a;
+}
+
+.view-outlook .scenarioValues {
+  gap: 8px;
+}
+
+.view-outlook .scenarioValues > span {
+  padding: 9px 10px;
+  border-color: var(--augur-border-soft);
+  background: rgba(8, 22, 33, .62);
+}
+
+.view-outlook .scenarioNoAdjustment {
+  color: #839aaa;
+}
+
+.view-compare .comparePanel:not(.compact) {
+  margin-top: 16px;
+  padding: 15px;
+}
+
+.view-compare .comparePanel:not(.compact) .compareSelectors {
+  max-width: 720px;
+  margin-top: 11px;
+  margin-bottom: 12px;
+}
+
+.view-compare .compareSelectorSlot {
+  border-color: var(--augur-border-soft);
+  background: rgba(8, 22, 33, .62);
+}
+
+.view-compare .comparisonTableWrap {
+  border-radius: 12px;
+}
+
+.view-compare .comparisonTable {
+  background: transparent;
+}
+
+.view-compare .comparisonTable th,
+.view-compare .comparisonTable td {
+  padding: 11px 14px;
+  border-color: var(--augur-border-soft);
+}
+
+.view-compare .comparisonTable th {
+  color: #7890a2;
+  background: rgba(7, 19, 29, .58);
+}
+
+.view-compare .comparisonTable td {
+  color: #dce8ef;
+}
+
+.view-compare .comparisonTable tbody tr:hover {
+  background: rgba(103, 183, 255, .025);
+}
+
+.view-compare .comparisonTable td small {
+  color: #71889a;
+}
+
+@media (max-width: 1100px) {
+  .indicatorEvidenceDimension .indicatorGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .view-outlook .trajectoryGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .indicatorEvidenceDimension .indicatorGrid {
+    grid-template-columns: 1fr;
+  }
+}
