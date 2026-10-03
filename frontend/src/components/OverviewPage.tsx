@@ -246,29 +246,28 @@ export default function OverviewPage({
       </header>
 
       <div className="countryRadarHero">
-        <section className="countryIdentityCard">
-          <div
-            className="countryHeroVisual"
-            style={{
-              backgroundImage: `linear-gradient(180deg, rgba(4,12,19,.04), rgba(4,12,19,.86)), url(${visual.heroImage})`,
-              backgroundPosition: visual.focalPoint,
-            }}
-            role="img"
-            aria-label={visual.alt}
-          >
-            <div className="countryHeroCopy">
-              <span>COUNTRY</span>
-              <h3>{selectedCountryName}</h3>
-              <strong>{selectedCountry}</strong>
-            </div>
+        <section
+          className="countryIdentityCard"
+          style={{
+            backgroundImage: `linear-gradient(180deg, rgba(2,10,16,.08) 0%, rgba(2,10,16,.18) 38%, rgba(2,10,16,.94) 100%), url(${visual.heroImage})`,
+            backgroundPosition: visual.focalPoint,
+          }}
+          role="img"
+          aria-label={visual.alt}
+        >
+          <div className="countryHeroMeta">
+            <span>{selectedCountry}</span>
+            <span>{currentIndicators.length} indicators</span>
+            <span>{directional}/{total || '—'} directional</span>
           </div>
-          <dl>
-            <div><dt>Indicators loaded</dt><dd>{currentIndicators.length}</dd></div>
-            <div><dt>Directional evidence</dt><dd>{directional} / {total || '—'}</dd></div>
-            <div><dt>Dimensions assessed</dt><dd>{Object.keys(assessment?.dimensions ?? {}).length}</dd></div>
-            <div><dt>Region focus</dt><dd>{selectedRegion ? `${selectedRegion.name} · ${selectedRegion.id}` : 'National'}</dd></div>
-          </dl>
-          <p>{visual.summary ?? 'Country evidence is active. Regional metrics appear only where verified subnational sources exist.'}</p>
+
+          <div className="countryHeroBottom">
+            {selectedRegion && (
+              <span className="countryRegionFocus">REGION · {selectedRegion.name} · {selectedRegion.id}</span>
+            )}
+            <h3>{selectedCountryName.toUpperCase()}</h3>
+            <p>{visual.summary ?? 'Country evidence is active. Regional metrics appear only where verified subnational sources exist.'}</p>
+          </div>
         </section>
 
         <section className="countryRadarMap">
