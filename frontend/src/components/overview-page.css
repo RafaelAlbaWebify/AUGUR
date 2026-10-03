@@ -755,3 +755,49 @@
 .overviewScenarioRow.evidenceOnly > strong {
   text-align: right;
 }
+
+
+.trajectorySummaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.trajectoryCountRow {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.trajectoryCountChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 7px;
+  border: 1px solid var(--augur-border);
+  border-radius: 999px;
+  background: rgba(9, 26, 38, 0.72);
+}
+
+.trajectoryCountChip strong {
+  color: #eef5fa;
+  font-size: 10px;
+}
+
+.trajectoryCountChip small {
+  color: #7f94a4;
+  font-size: 9px;
+}
+
+.overviewScenarioNote {
+  margin-top: 7px;
+  padding: 7px 8px;
+  border: 1px solid rgba(123, 151, 170, 0.18);
+  border-radius: 8px;
+  background: rgba(11, 30, 44, 0.5);
+  color: #7890a1;
+  font-size: 9px;
+  line-height: 1.35;
+}
