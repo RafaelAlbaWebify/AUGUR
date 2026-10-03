@@ -100,3 +100,21 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert isinstance(body["blockers"], list)
     assert "evidence" in body
     assert "esco" in body
+
+
+def test_overview_series_endpoint_returns_observed_history():
+    with TestClient(app) as client:
+        response = client.get("/api/countries/ESP/overview-series")
+
+    assert response.status_code == 200
+    body = response.json()
+
+    assert body["country_iso3"] == "ESP"
+    assert isinstance(body["series"], list)
+
+    for item in body["series"]:
+        assert "indicator_id" in item
+        assert "points" in item
+        assert len(item["points"]) <= 8
+        periods = [point["period"] for point in item["points"]]
+        assert periods == sorted(periods)
