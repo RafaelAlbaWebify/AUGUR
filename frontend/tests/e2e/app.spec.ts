@@ -296,25 +296,32 @@ test('refreshes evidence status when the window regains focus', async ({ page })
 })
 
 
-test('top navigation uses real routes and unmounts the previous view', async ({ page }) => {
+test('top navigation uses real routes and exposes all six product views', async ({ page }) => {
   await expect(page).toHaveURL(/\/country\/ESP\/overview$/)
   await expect(page.getByTestId('world-map')).toBeVisible()
 
+  await page.getByRole('button', { name: 'Indicators' }).click()
+  await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
+  await expect(page.getByText('2. EVIDENCE EXPLORER / Indicators')).toBeVisible()
+
   await page.getByRole('button', { name: 'Outlook' }).click()
   await expect(page).toHaveURL(/\/country\/ESP\/outlook$/)
-  await expect(page.getByText('OFFICIAL OUTLOOK')).toBeVisible()
-  await expect(page.getByText('AUGUR SCENARIOS')).toBeVisible()
+  await expect(page.getByText('3. FUTURE PATHS / Outlook')).toBeVisible()
   await expect(page.getByTestId('world-map')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page).toHaveURL(/\/compare\?countries=IRL%2CESP%2CPRT|\/compare\?countries=IRL,ESP,PRT/)
-  await expect(page.getByText('Country comparison')).toBeVisible()
-  await expect(page.getByText('OFFICIAL OUTLOOK')).toHaveCount(0)
+  await expect(page.getByText('4. DECISION MATRIX / Compare')).toBeVisible()
 
   await page.getByRole('button', { name: 'Profile' }).click()
   await expect(page).toHaveURL(/\/country\/ESP\/profile$/)
   await expect(page.getByRole('region', { name: 'Personal profile' })).toBeVisible()
-  await expect(page.getByText('Country comparison')).toHaveCount(0)
+  await expect(page.getByText('5. MY FIT / Profile')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Skills & Languages' }).click()
+  await expect(page).toHaveURL(/\/country\/ESP\/skills$/)
+  await expect(page.getByRole('region', { name: 'Skills and languages' })).toBeVisible()
+  await expect(page.getByText('6. SKILLS & LANGUAGES')).toBeVisible()
 })
 
 test('switches country without a page reload', async ({ page }) => {
@@ -374,11 +381,9 @@ test('Outlook labels modelled scenarios without implying statistical uncertainty
 
   await page.goto('/country/ESP/outlook')
 
-  await expect(page.getByText('model horizon · near · ×1')).toBeVisible()
-  await expect(page.getByText('Baseline · official')).toBeVisible()
-  await expect(page.getByText('No directional AUGUR adjustment for this contextual indicator.')).toBeVisible()
-  await expect(page.getByText('Improvement · AUGUR')).toHaveCount(0)
-  await expect(page.getByText('Stress · AUGUR')).toHaveCount(0)
+  await expect(page.getByText('No directional scenario envelope is applied.')).toBeVisible()
+  await expect(page.getByText('This indicator is contextual or no model assumptions exist for it.')).toBeVisible()
+  await expect(page.getByText('Official forecast / projection')).toBeVisible()
 })
 
 test('comparison remains neutral and aligned', async ({ page }) => {
@@ -386,7 +391,8 @@ test('comparison remains neutral and aligned', async ({ page }) => {
   await expect(page.getByRole('columnheader', { name: 'Spain' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Portugal' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Ireland' })).toBeVisible()
-  await expect(page.getByText('aligned indicators · no ranking')).toBeVisible()
+  await expect(page.getByText('Objective data')).toBeVisible()
+  await expect(page.getByText('How sensitive is the comparison?')).toBeVisible()
 })
 
 
@@ -396,17 +402,17 @@ test('Indicators route exposes drill-down evidence without overstating provenanc
 
   await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
   await expect(page.getByRole('region', { name: 'Indicators' })).toBeVisible()
-  await expect(page.getByText('Spain evidence')).toBeVisible()
+  await expect(page.getByText('2. EVIDENCE EXPLORER / Indicators')).toBeVisible()
   await expect(page.getByText('Unemployment, total (% of total labor force)', { exact: true })).toBeVisible()
-  await expect(page.getByText('high trend evidence')).toBeVisible()
-  await expect(page.getByText('2 sources')).toBeVisible()
+  await expect(page.getByLabel('Search indicators')).toBeVisible()
+  await expect(page.getByText('Indicator details')).toBeVisible()
   await expect(page.getByText('Corroborated')).toHaveCount(0)
 })
 
 test('Overview dimension cards drill into persistent dimension routes', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
-  await page.getByRole('button', { name: 'Open Productive capacity dimension' }).click()
+  await page.getByRole('button', { name: /Productive capacity/i }).click()
 
   await expect(page).toHaveURL(/\/country\/ESP\/dimension\/productive_capacity$/)
   await expect(page.getByRole('region', { name: 'Dimension detail' })).toBeVisible()
@@ -779,7 +785,7 @@ test('partial country endpoint failure keeps healthy sections visible', async ({
   await page.getByLabel('Select country').selectOption('PRT')
 
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
-  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
+  await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
   await expect(page.getByText(/Scenarios HTTP 500/)).toBeVisible()
 })
 
@@ -926,7 +932,7 @@ test('frozen-spec Overview renders the approved composition', async ({ page }) =
   await expect(page.getByRole('region', { name: 'Country overview' })).toBeVisible()
   await expect(page.getByTestId('world-map')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
-  await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
+  await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
   await expect(page.locator('.overviewInsightRail .overallSignalBalance')).toBeVisible()
   await expect(page.locator('.overviewOutlookCard')).toBeVisible()
   await expect(page.locator('.overviewCompareCard')).toBeVisible()
@@ -1434,7 +1440,7 @@ test('responsive Overview preserves every frozen core panel', async ({ page }) =
 
     await expect(page.getByTestId('world-map')).toBeVisible()
     await expect(page.getByRole('region', { name: 'Personal fit snapshot' })).toBeVisible()
-    await expect(page.getByText('KEY DIMENSIONS')).toBeVisible()
+    await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
     await expect(page.locator('.overviewInsightRail .overallSignalBalance')).toBeVisible()
     await expect(page.locator('.overviewOutlookCard')).toBeVisible()
     await expect(page.locator('.overviewCompareCard')).toBeVisible()
