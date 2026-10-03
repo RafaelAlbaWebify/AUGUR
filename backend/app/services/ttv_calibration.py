@@ -14,6 +14,10 @@ CALIBRATION_SCHEMA_VERSION = "ttv-calibration-v1"
 CALIBRATION_PROTOCOL_STATE = "draft_not_approved"
 CALIBRATION_PROTOCOL_VERSION = None
 CALIBRATION_PROTOCOL_DOCUMENT = "docs/TTV_CALIBRATION_PROTOCOL.md"
+CALIBRATION_START_EVENT_DEFINITION_VERSION = None
+CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION = None
+CALIBRATION_INCLUSION_EXCLUSION_RULES_VERSION = None
+CALIBRATION_ACCEPTANCE_CRITERIA_VERSION = None
 SUPPORTED_EMPLOYMENT_MODES = {"remote", "local"}
 SUPPORTED_SAMPLE_ROLES = {"development", "holdout"}
 SUPPORTED_COMPOSITIONS = {"critical_path_v1"}
@@ -24,6 +28,45 @@ CALIBRATION_STAGE_IDS = {
     "employment",
     "financial",
 }
+
+
+def calibration_protocol_readiness() -> dict:
+    requirements = {
+        "protocol_version": {
+            "ready": CALIBRATION_PROTOCOL_VERSION is not None,
+            "version": CALIBRATION_PROTOCOL_VERSION,
+        },
+        "start_event_definition": {
+            "ready": CALIBRATION_START_EVENT_DEFINITION_VERSION is not None,
+            "version": CALIBRATION_START_EVENT_DEFINITION_VERSION,
+        },
+        "viability_outcome_definition": {
+            "ready": CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION is not None,
+            "version": CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
+        },
+        "inclusion_exclusion_rules": {
+            "ready": CALIBRATION_INCLUSION_EXCLUSION_RULES_VERSION is not None,
+            "version": CALIBRATION_INCLUSION_EXCLUSION_RULES_VERSION,
+        },
+        "acceptance_criteria": {
+            "ready": CALIBRATION_ACCEPTANCE_CRITERIA_VERSION is not None,
+            "version": CALIBRATION_ACCEPTANCE_CRITERIA_VERSION,
+        },
+    }
+
+    blockers = [
+        requirement_id
+        for requirement_id, item in requirements.items()
+        if not item["ready"]
+    ]
+
+    return {
+        "protocol_state": CALIBRATION_PROTOCOL_STATE,
+        "protocol_document": CALIBRATION_PROTOCOL_DOCUMENT,
+        "requirements": requirements,
+        "blockers": blockers,
+        "ready_for_holdout_collection": len(blockers) == 0,
+    }
 
 
 def _as_float(value, field_name: str) -> float:
@@ -330,6 +373,7 @@ def import_calibration_csv(path: str | Path) -> dict:
 
 
 def calibration_status() -> dict:
+    protocol_readiness = calibration_protocol_readiness()
     con = sqlite3.connect(settings.sqlite_path)
     con.row_factory = sqlite3.Row
 
@@ -365,6 +409,7 @@ def calibration_status() -> dict:
                 "protocol_state": CALIBRATION_PROTOCOL_STATE,
                 "protocol_version": CALIBRATION_PROTOCOL_VERSION,
                 "protocol_document": CALIBRATION_PROTOCOL_DOCUMENT,
+                "protocol_readiness": protocol_readiness,
                 "infrastructure_ready": False,
                 "case_count": 0,
                 "country_count": 0,
@@ -489,6 +534,7 @@ def calibration_status() -> dict:
         "protocol_state": CALIBRATION_PROTOCOL_STATE,
         "protocol_version": CALIBRATION_PROTOCOL_VERSION,
         "protocol_document": CALIBRATION_PROTOCOL_DOCUMENT,
+        "protocol_readiness": protocol_readiness,
         "infrastructure_ready": True,
         "case_count": len(cases),
         "country_count": len(
