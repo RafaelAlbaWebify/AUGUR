@@ -3934,3 +3934,17 @@ body:has(.shell.detailsOpen) {
     justify-content: space-between;
   }
 }
+
+
+.scenarioValues.contextualScenario {
+  grid-template-columns: minmax(140px, 0.45fr) minmax(0, 1fr);
+}
+
+.scenarioNoAdjustment {
+  display: flex;
+  align-items: center;
+  min-height: 100%;
+  color: #7890a1;
+  font-size: 11px;
+  line-height: 1.35;
+}
