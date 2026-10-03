@@ -955,6 +955,20 @@ test('Overview country flags and fit readiness remain visible', async ({ page })
 })
 
 
+
+test('Overview distinguishes observed evidence from modelled presentation', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 })
+  await page.goto('/country/ESP/overview')
+
+  await expect(page.locator('.signalBars')).toHaveCount(0)
+  await expect(page.getByText('DIMENSION TRAJECTORIES')).toBeVisible()
+  await expect(page.getByText('Official baseline + AUGUR envelope')).toBeVisible()
+  await expect(page.getByText('Baseline')).toBeVisible()
+  await expect(page.getByText('official')).toBeVisible()
+  await expect(page.getByText('Improvement')).toBeVisible()
+  await expect(page.getByText('AUGUR model')).toHaveCount(2)
+})
+
 test('responsive shell avoids horizontal overflow across core views', async ({ page }) => {
   const cases = [
     { width: 1366, height: 768 },
