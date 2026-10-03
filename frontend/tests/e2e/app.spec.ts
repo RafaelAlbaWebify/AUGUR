@@ -1197,6 +1197,42 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
   }
 })
 
+
+
+test('secondary views keep their desktop composition at 1920x900', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 })
+
+  await page.goto('/country/ESP/profile')
+  await expect(page.locator('.profileTopGrid')).toBeVisible()
+  const profileColumns = await page.locator('.profileTopGrid').evaluate((node) => {
+    const style = getComputedStyle(node)
+    return style.gridTemplateColumns.split(' ').filter(Boolean).length
+  })
+  expect(profileColumns).toBeGreaterThanOrEqual(2)
+
+  await page.goto('/country/ESP/indicators')
+  await expect(page.locator('.indicatorEvidencePage')).toBeVisible()
+  const indicatorColumns = await page.locator('.indicatorGrid').first().evaluate((node) => {
+    const style = getComputedStyle(node)
+    return style.gridTemplateColumns.split(' ').filter(Boolean).length
+  })
+  expect(indicatorColumns).toBeGreaterThanOrEqual(3)
+
+  await page.goto('/country/ESP/outlook')
+  await expect(page.locator('.trajectorySection')).toBeVisible()
+  await expect(page.locator('.scenarioSection')).toBeVisible()
+
+  await page.goto('/compare?countries=ESP,PRT,IRL')
+  await expect(page.locator('.comparisonTableWrap')).toBeVisible()
+  await expect(page.locator('.comparisonTable')).toBeVisible()
+
+  const overflow = await page.evaluate(() => ({
+    scrollWidth: document.documentElement.scrollWidth,
+    innerWidth: window.innerWidth,
+  }))
+  expect(overflow.scrollWidth).toBeLessThanOrEqual(overflow.innerWidth + 2)
+})
+
 test('captures Overview desktop visual artifact', async ({ page }) => {
   const dimension = (
     trajectory: 'improving' | 'mixed' | 'contextual',
