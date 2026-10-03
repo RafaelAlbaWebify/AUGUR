@@ -15,6 +15,7 @@ CALIBRATION_PROTOCOL_STATE = "draft_not_approved"
 CALIBRATION_PROTOCOL_VERSION = None
 CALIBRATION_PROTOCOL_DOCUMENT = "docs/TTV_CALIBRATION_PROTOCOL.md"
 SUPPORTED_EMPLOYMENT_MODES = {"remote", "local"}
+SUPPORTED_SAMPLE_ROLES = {"development", "holdout"}
 SUPPORTED_COMPOSITIONS = {"critical_path_v1"}
 CALIBRATION_STAGE_IDS = {
     "legal",
@@ -124,6 +125,15 @@ def validate_calibration_case(case: dict) -> dict:
     employment_mode = str(case.get("employment_mode") or "").strip().lower()
     engine_version = str(case.get("engine_version") or "").strip()
     composition = str(case.get("composition") or "").strip()
+    sample_role = str(
+        case.get("sample_role") or "development"
+    ).strip().lower()
+    start_event_definition_version = str(
+        case.get("start_event_definition_version") or ""
+    ).strip() or None
+    viability_outcome_definition_version = str(
+        case.get("viability_outcome_definition_version") or ""
+    ).strip() or None
 
     if not case_id:
         raise ValueError("case_id is required")
@@ -141,6 +151,24 @@ def validate_calibration_case(case: dict) -> dict:
             "composition must be one of: "
             + ", ".join(sorted(SUPPORTED_COMPOSITIONS))
         )
+    if sample_role not in SUPPORTED_SAMPLE_ROLES:
+        raise ValueError(
+            "sample_role must be one of: "
+            + ", ".join(sorted(SUPPORTED_SAMPLE_ROLES))
+        )
+    if sample_role == "holdout" and CALIBRATION_PROTOCOL_VERSION is None:
+        raise ValueError(
+            "holdout cases require an approved calibration protocol version"
+        )
+    if sample_role == "holdout":
+        if not start_event_definition_version:
+            raise ValueError(
+                "holdout cases require start_event_definition_version"
+            )
+        if not viability_outcome_definition_version:
+            raise ValueError(
+                "holdout cases require viability_outcome_definition_version"
+            )
 
     candidate_min = _as_float(
         case.get("candidate_weeks_min"),
@@ -183,6 +211,9 @@ def validate_calibration_case(case: dict) -> dict:
         "observed_weeks": observed,
         "source_label": source_label,
         "observed_at": observed_at,
+        "sample_role": sample_role,
+        "start_event_definition_version": start_event_definition_version,
+        "viability_outcome_definition_version": viability_outcome_definition_version,
         "stage_timings": stage_timings,
     }
 
@@ -206,10 +237,13 @@ def upsert_calibration_case(case: dict) -> dict:
                 observed_weeks,
                 source_label,
                 observed_at,
+                sample_role,
+                start_event_definition_version,
+                viability_outcome_definition_version,
                 stage_timings_json,
                 imported_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 normalized["case_id"],
@@ -222,6 +256,9 @@ def upsert_calibration_case(case: dict) -> dict:
                 normalized["observed_weeks"],
                 normalized["source_label"],
                 normalized["observed_at"],
+                normalized["sample_role"],
+                normalized["start_event_definition_version"],
+                normalized["viability_outcome_definition_version"],
                 json.dumps(
                     normalized["stage_timings"],
                     sort_keys=True,
@@ -311,6 +348,9 @@ def calibration_status() -> dict:
                     observed_weeks,
                     source_label,
                     observed_at,
+                    sample_role,
+                    start_event_definition_version,
+                    viability_outcome_definition_version,
                     stage_timings_json,
                     imported_at
                 FROM ttv_calibration_cases
@@ -331,6 +371,9 @@ def calibration_status() -> dict:
                 "employment_modes": [],
                 "engine_versions": [],
                 "composition_versions": [],
+                "sample_roles": [],
+                "start_event_definition_versions": [],
+                "viability_outcome_definition_versions": [],
                 "interval_coverage_pct": None,
                 "mean_absolute_midpoint_error_weeks": None,
                 "mean_signed_midpoint_error_weeks": None,
@@ -453,6 +496,23 @@ def calibration_status() -> dict:
         ),
         "composition_versions": sorted(
             {case["composition"] for case in cases}
+        ),
+        "sample_roles": sorted(
+            {case["sample_role"] for case in cases}
+        ),
+        "start_event_definition_versions": sorted(
+            {
+                case["start_event_definition_version"]
+                for case in cases
+                if case["start_event_definition_version"]
+            }
+        ),
+        "viability_outcome_definition_versions": sorted(
+            {
+                case["viability_outcome_definition_version"]
+                for case in cases
+                if case["viability_outcome_definition_version"]
+            }
         ),
         "interval_coverage_pct": round(
             covered / len(cases) * 100.0,
