@@ -221,3 +221,18 @@ The browser suite covers routing, country switching, comparison neutrality, Prof
 ## Privacy
 
 AUGUR is local-first. Runtime databases, caches, environment files and personal profile data are excluded from version control.
+
+
+### TTV calibration development data
+
+AUGUR includes an empty development-case template at:
+
+`docs/TTV_CALIBRATION_TEMPLATE.csv`
+
+Observed development cases can be imported locally with:
+
+```powershell
+.\import-ttv-calibration.ps1 -Path ".\path\to\observed-development-cases.csv"
+```
+
+The calibration store is local and excluded from git. Importing cases does not activate the TTV external-calibration gate. Holdout cases are rejected while the calibration protocol remains unapproved.
