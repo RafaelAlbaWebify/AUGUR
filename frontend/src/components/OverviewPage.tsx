@@ -104,7 +104,6 @@ type OverviewPageProps = {
   onOpenDimension: (dimension: string) => void
   formatValue: (value: number, unit: string) => string
   dimensionLabels: Record<string, string>
-  layout: unknown
 }
 
 const DIMENSION_ORDER = [
