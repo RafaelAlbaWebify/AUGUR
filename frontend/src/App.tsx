@@ -745,20 +745,35 @@ export default function App() {
                   {items.map((item) => (
                     <div className="scenarioRow" key={`${year}-${item.indicator_id}-${item.source_id}`}>
                       <div className="scenarioName">{item.name}</div>
-                      <div className="scenarioValues">
-                        <span>
-                          <small>Baseline</small>
-                          <strong>{formatValue(item.scenarios.baseline, item.unit)}</strong>
-                        </span>
-                        <span>
-                          <small>Improvement</small>
-                          <strong>{formatValue(item.scenarios.improvement, item.unit)}</strong>
-                        </span>
-                        <span>
-                          <small>Stress</small>
-                          <strong>{formatValue(item.scenarios.stress, item.unit)}</strong>
-                        </span>
-                      </div>
+                      {(
+                        Math.abs(item.scenarios.improvement - item.scenarios.baseline) > 1e-9 ||
+                        Math.abs(item.scenarios.stress - item.scenarios.baseline) > 1e-9
+                      ) ? (
+                        <div className="scenarioValues">
+                          <span>
+                            <small>Baseline · official</small>
+                            <strong>{formatValue(item.scenarios.baseline, item.unit)}</strong>
+                          </span>
+                          <span>
+                            <small>Improvement · AUGUR</small>
+                            <strong>{formatValue(item.scenarios.improvement, item.unit)}</strong>
+                          </span>
+                          <span>
+                            <small>Stress · AUGUR</small>
+                            <strong>{formatValue(item.scenarios.stress, item.unit)}</strong>
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="scenarioValues contextualScenario">
+                          <span>
+                            <small>Baseline · official</small>
+                            <strong>{formatValue(item.scenarios.baseline, item.unit)}</strong>
+                          </span>
+                          <span className="scenarioNoAdjustment">
+                            No directional AUGUR adjustment for this contextual indicator.
+                          </span>
+                        </div>
+                      )}
                       <div className="scenarioAssumption">{item.assumption}</div>
                     </div>
                   ))}
