@@ -1456,3 +1456,159 @@
     max-height: 180px;
   }
 }
+
+
+/* Country Radar domain-card fidelity */
+.countryMetricIdentity {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 8px;
+  align-items: center;
+}
+
+.countryMetricIcon {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 999px;
+  border: 1px solid rgba(110, 156, 184, .18);
+  background: rgba(15, 63, 91, .5);
+  color: #9bd8fb;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.countryMetricIcon.good {
+  color: #76e0aa;
+  background: rgba(21, 96, 57, .32);
+}
+
+.countryMetricIcon.bad {
+  color: #ff8c92;
+  background: rgba(121, 37, 42, .34);
+}
+
+.countryMetricIcon.warn {
+  color: #f2cc68;
+  background: rgba(116, 82, 22, .34);
+}
+
+.countryMetricEvidenceRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 8px;
+  align-items: end;
+}
+
+.countryMetricSparkline {
+  min-height: 48px;
+  display: grid;
+  align-items: end;
+}
+
+.countryMetricSparkline svg {
+  width: 100%;
+  height: 44px;
+  overflow: visible;
+}
+
+.countryMetricSparkline polyline {
+  fill: none;
+  stroke: #49d5df;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.countryMetricSparkline circle {
+  fill: #6ceaf1;
+  stroke: rgba(4, 18, 28, .9);
+  stroke-width: 1;
+}
+
+.countryMetricCard.bad .countryMetricSparkline polyline {
+  stroke: #f0646c;
+}
+
+.countryMetricCard.bad .countryMetricSparkline circle {
+  fill: #ff7a81;
+}
+
+.countryMetricCard.warn .countryMetricSparkline polyline {
+  stroke: #e4bd5f;
+}
+
+.countryMetricCard.warn .countryMetricSparkline circle {
+  fill: #f0cf7a;
+}
+
+.countryMetricSparkline > span {
+  align-self: center;
+  color: #5f7889;
+  font-size: 7px;
+  text-align: right;
+}
+
+.countryMetricEvidenceBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 21px;
+  padding: 0 7px;
+  border: 1px solid rgba(73, 171, 213, .28);
+  border-radius: 999px;
+  background: rgba(9, 55, 80, .24);
+  color: #84bddc;
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.countryMetricCard {
+  min-height: 168px;
+}
+
+.countryMetricName {
+  min-height: 0;
+}
+
+.regionalCityMarker {
+  pointer-events: none;
+}
+
+.regionalCityMarker circle {
+  fill: #65d9ff;
+  stroke: #dff7ff;
+  stroke-width: 1.2;
+}
+
+.regionalCityMarker .halo {
+  fill: rgba(77, 204, 246, .12);
+  stroke: rgba(127, 223, 255, .32);
+  stroke-width: 1;
+}
+
+.regionalCityMarker text {
+  fill: #dff6ff;
+  stroke: rgba(3, 13, 21, .95);
+  stroke-width: 2.6;
+  paint-order: stroke;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+@media (max-width: 1500px) {
+  .countryMetricEvidenceRow {
+    grid-template-columns: minmax(0, 1fr) 92px;
+  }
+}
+
+@media (max-width: 760px) {
+  .countryMetricEvidenceRow {
+    grid-template-columns: 1fr;
+  }
+
+  .countryMetricSparkline {
+    max-width: 180px;
+  }
+}
