@@ -1,6 +1,6 @@
 .overviewPageV2 {
-  --ov-gap: 12px;
-  margin-top: 12px;
+  --ov-gap: 14px;
+  margin-top: 14px;
   min-width: 0;
 }
 
@@ -10,7 +10,7 @@
   gap: var(--ov-gap);
   align-items: stretch;
   min-width: 0;
-  height: 336px;
+  height: clamp(390px, 45vh, 470px);
 }
 
 
@@ -52,13 +52,24 @@
 }
 
 .overviewMapPanel .dimensionHeader {
-  margin: 0 0 8px;
-  min-height: 34px;
+  margin: 0 0 10px;
+  min-height: 42px;
 }
 
 .overviewMapPanel .dimensionHeader h3 {
-  margin-top: 2px;
-  font-size: 16px;
+  margin-top: 3px;
+  font-size: 19px;
+  line-height: 1.15;
+}
+
+.overviewMapPanel .dimensionHeader .label {
+  font-size: 10px;
+  letter-spacing: .10em;
+}
+
+.overviewMapPanel .dimensionHeader > span {
+  font-size: 10px;
+  letter-spacing: .08em;
 }
 
 .overviewMapPanel .worldMapFrame {
@@ -74,20 +85,20 @@
 
 .overviewFitPanel .fitSnapshot {
   min-height: 0 !important;
-  padding: 14px;
+  padding: 18px;
 }
 
 .overviewFitPanel .mockFitGrid {
-  margin-top: 12px;
+  margin-top: 14px;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-auto-rows: minmax(0, 1fr);
-  gap: 8px;
+  gap: 12px;
 }
 
 .overviewFitPanel .mockFitCard {
   min-height: 0;
-  grid-template-columns: 52px minmax(0, 1fr);
-  padding: 10px !important;
+  grid-template-columns: 58px minmax(0, 1fr);
+  padding: 13px 14px !important;
 }
 
 .overviewFitPanel .mockFitCard.ttv {
@@ -95,26 +106,29 @@
 }
 
 .overviewFitPanel .readinessRing {
-  width: 48px;
-  height: 48px;
+  width: 54px;
+  height: 54px;
 }
 
 .overviewFitPanel .readinessRing span {
-  font-size: 14px !important;
+  font-size: 15px !important;
 }
 
 .overviewLowerGrid {
   margin-top: var(--ov-gap);
   display: grid;
-  grid-template-columns: minmax(0, 75fr) minmax(250px, 25fr);
+  grid-template-columns: minmax(0, 74fr) minmax(280px, 26fr);
   gap: var(--ov-gap);
-  align-items: start;
+  align-items: stretch;
   min-width: 0;
 }
 
 .overviewDimensionsPanel {
   min-width: 0;
-  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 15px;
   border: 1px solid var(--augur-border);
   border-radius: 13px;
   background:
@@ -125,7 +139,7 @@
 }
 
 .overviewSectionHeader {
-  min-height: 40px;
+  min-height: 48px;
   display: flex;
   align-items: start;
   justify-content: space-between;
@@ -135,62 +149,63 @@
 .overviewSectionHeader span,
 .overviewRailHeader span {
   color: #71889a;
-  font-size: 8px;
-  letter-spacing: .09em;
+  font-size: 10px;
+  letter-spacing: .10em;
   text-transform: uppercase;
 }
 
 .overviewSectionHeader h2 {
   margin: 3px 0 0;
-  font-size: 18px;
+  font-size: 21px;
   line-height: 1.1;
 }
 
 .overviewSectionHeader small {
   margin-top: 4px;
   color: #61798a;
-  font-size: 8px;
+  font-size: 10px;
   white-space: nowrap;
 }
 
 .overviewDimensionGridV2 {
-  margin-top: 9px;
+  margin-top: 12px;
   display: grid;
+  flex: 1;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 9px;
+  gap: 11px;
   min-width: 0;
 }
 
 .overviewDimensionGridV2 .mockDimensionCard {
-  min-height: 128px;
-  padding: 11px 12px;
+  min-height: 152px;
+  padding: 14px 15px;
 }
 
 .overviewDimensionGridV2 .mockDimensionHeader span {
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .overviewDimensionGridV2 .mockDimensionHeader small {
-  padding: 3px 6px;
-  font-size: 7px;
+  padding: 4px 7px;
+  font-size: 10px;
 }
 
 .overviewDimensionGridV2 .mockDimensionStatusRow {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .overviewDimensionGridV2 .mockDimensionStatusRow > strong {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .overviewDimensionGridV2 .mockDimensionCard ul {
-  margin-top: 8px;
-  gap: 3px;
+  margin-top: 10px;
+  gap: 5px;
 }
 
 .overviewDimensionGridV2 .mockDimensionCard li {
-  font-size: 8px;
-  line-height: 1.25;
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .overviewInsightRail {
@@ -212,17 +227,18 @@
 }
 
 .overviewInsightRail .overallSignalBalance {
-  padding: 11px;
+  padding: 14px;
 }
 
 .overviewInsightRail .overallSignalBalance p {
-  margin-top: 5px;
-  font-size: 8px;
+  margin-top: 7px;
+  font-size: 10px;
+  line-height: 1.35;
 }
 
 .overviewOutlookCard,
 .overviewCompareCard {
-  padding: 11px;
+  padding: 14px;
 }
 
 .overviewRailHeader {
@@ -236,7 +252,7 @@
   display: block;
   margin-top: 3px;
   color: #eef5fa;
-  font-size: 12px;
+  font-size: 14px;
 }
 
 .overviewRailHeader button {
@@ -244,9 +260,9 @@
   border-radius: 7px;
   background: #0b1e2c;
   color: #9db2c1;
-  padding: 5px 8px;
+  padding: 6px 10px;
   font: inherit;
-  font-size: 8px;
+  font-size: 10px;
   cursor: pointer;
 }
 
@@ -256,15 +272,15 @@
 }
 
 .overviewScenarioPreview {
-  margin-top: 9px;
+  margin-top: 11px;
   display: grid;
-  gap: 7px;
+  gap: 9px;
 }
 
 .overviewScenarioPreview > p {
   margin: 0 0 1px;
   color: #6f8494;
-  font-size: 8px;
+  font-size: 10px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -272,18 +288,18 @@
 
 .overviewScenarioRow {
   display: grid;
-  grid-template-columns: 54px minmax(0, 1fr) 50px;
+  grid-template-columns: 68px minmax(0, 1fr) 58px;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
 }
 
 .overviewScenarioRow > span {
   color: #9babb7;
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .overviewScenarioRow > div {
-  height: 7px;
+  height: 8px;
   overflow: hidden;
   border-radius: 999px;
   background: #162936;
@@ -306,7 +322,7 @@
 
 .overviewScenarioRow > strong {
   color: #dfe7ed;
-  font-size: 8px;
+  font-size: 10px;
   text-align: right;
 }
 
@@ -317,7 +333,7 @@
 }
 
 .overviewCompareCard > .comparePanel {
-  margin-top: 9px;
+  margin-top: 11px;
   padding: 0;
   border: 0;
   background: transparent;
@@ -333,30 +349,30 @@
 }
 
 .overviewCompareCard .compareSelectorSlot .countryPicker {
-  min-height: 28px;
+  min-height: 32px;
 }
 
 .overviewCompareCard .compareSelectorSlot .countryPicker select {
-  height: 27px;
-  font-size: 8px;
+  height: 31px;
+  font-size: 10px;
 }
 
 .overviewCompareCard .compareBarPreview {
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
 .overviewCompareCard .compareBarRow {
-  grid-template-columns: 58px minmax(0, 1fr) 46px;
-  gap: 5px;
+  grid-template-columns: 72px minmax(0, 1fr) 50px;
+  gap: 7px;
 }
 
 .overviewCompareCard .compareBarRow > span,
 .overviewCompareCard .compareBarRow > strong {
-  font-size: 8px;
+  font-size: 10px;
 }
 
 .overviewCompareCard .compareBarTrack {
-  height: 6px;
+  height: 7px;
 }
 
 @media (min-width: 1500px) and (min-height: 900px) {
@@ -368,6 +384,47 @@
   .overviewPageV2 {
     height: calc(100vh - 92px);
     overflow: hidden;
+    display: grid;
+    grid-template-rows: auto minmax(250px, 1fr);
+  }
+
+  .overviewLowerGrid {
+    min-height: 0;
+  }
+
+  .overviewInsightRail {
+    align-content: stretch;
+    grid-template-rows: auto minmax(118px, auto) minmax(150px, 1fr);
+  }
+
+  .overviewMapPanel .worldMapLegend button {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+
+  .overviewFitPanel .mockPanelHeader .label {
+    font-size: 10px;
+  }
+
+  .overviewFitPanel .mockPanelHeader strong {
+    font-size: 16px;
+  }
+
+  .overviewFitPanel .mockPanelHeader > span {
+    font-size: 9px;
+  }
+
+  .overviewFitPanel .mockFitCard small {
+    font-size: 10px !important;
+  }
+
+  .overviewFitPanel .mockFitCard strong {
+    font-size: 14px !important;
+  }
+
+  .overviewFitPanel .mockFitCard p {
+    font-size: 10px;
+    line-height: 1.35;
   }
 }
 
