@@ -866,6 +866,43 @@ test('frozen-spec Overview renders the approved composition', async ({ page }) =
   expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight + 2)
 })
 
+test('Overview stays complete at 1920x900', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 })
+  await page.goto('/country/ESP/overview')
+
+  const layout = await page.evaluate(() => {
+    const box = (selector: string) => {
+      const node = document.querySelector(selector)
+      if (!node) return null
+      const rect = node.getBoundingClientRect()
+      return { left: rect.left, right: rect.right, top: rect.top, bottom: rect.bottom }
+    }
+
+    return {
+      map: box('.overviewMapPanel'),
+      fit: box('.overviewFitPanel'),
+      lower: box('.overviewLowerGrid'),
+      dimensions: box('.overviewDimensionsPanel'),
+      outlook: box('.overviewOutlookCard'),
+      compare: box('.overviewCompareCard'),
+      scrollHeight: document.documentElement.scrollHeight,
+      innerHeight: window.innerHeight,
+    }
+  })
+
+  for (const key of ['map', 'fit', 'lower', 'dimensions', 'outlook', 'compare'] as const) {
+    expect(layout[key]).not.toBeNull()
+  }
+
+  expect(layout.map!.bottom).toBeLessThanOrEqual(layout.lower!.top - 2)
+  expect(layout.fit!.bottom).toBeLessThanOrEqual(layout.lower!.top - 2)
+  expect(layout.dimensions!.bottom).toBeLessThanOrEqual(layout.innerHeight - 4)
+  expect(layout.outlook!.bottom).toBeLessThanOrEqual(layout.innerHeight - 4)
+  expect(layout.compare!.bottom).toBeLessThanOrEqual(layout.innerHeight - 4)
+  expect(layout.scrollHeight).toBeLessThanOrEqual(layout.innerHeight + 2)
+})
+
+
 test('Overview panels do not overlap at 1920x1080', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
@@ -1026,7 +1063,13 @@ test('captures Overview desktop visual artifact', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
   await page.screenshot({
-    path: 'test-results/overview-desktop.png',
+    path: 'test-results/overview-desktop-1080.png',
+    fullPage: false,
+  })
+
+  await page.setViewportSize({ width: 1920, height: 900 })
+  await page.screenshot({
+    path: 'test-results/overview-desktop-900.png',
     fullPage: false,
   })
 })
