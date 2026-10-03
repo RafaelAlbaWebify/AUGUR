@@ -1319,6 +1319,38 @@ test('captures Overview desktop visual artifact', async ({ page }) => {
 })
 
 
+
+
+test('captures full AUGUR UI audit set', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 })
+
+  const views = [
+    ['overview', '/country/ESP/overview'],
+    ['indicators', '/country/ESP/indicators'],
+    ['dimension-productive-capacity', '/country/ESP/dimension/productive_capacity'],
+    ['outlook', '/country/ESP/outlook'],
+    ['compare', '/compare?countries=ESP,PRT,IRL'],
+    ['profile', '/country/ESP/profile'],
+  ] as const
+
+  for (const [name, path] of views) {
+    await page.goto(path)
+    await expect(page.locator('main.shell')).toBeVisible()
+
+    await page.screenshot({
+      path: `test-results/ui-audit-${name}-1920x900.png`,
+      fullPage: false,
+    })
+
+    if (name !== 'overview') {
+      await page.screenshot({
+        path: `test-results/ui-audit-${name}-full.png`,
+        fullPage: true,
+      })
+    }
+  }
+})
+
 test('overview hero never overlaps lower dashboard row', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
