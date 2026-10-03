@@ -195,7 +195,12 @@ The command:
 
 Exit code `0` means every row resolved and the artifact is ready for human review. Exit code `2` means unresolved rows remain and production evidence is unchanged.
 
-This workflow is intentionally separate from live synchronization because the official ELA annual annex is published as a report/dashboard rather than a stable machine-readable CSV feed. citeturn613579search1turn613579search0
+This workflow is intentionally separate from live synchronization because the official ELA annual material is published as a report/annex and interactive dashboard rather than a stable machine-readable CSV feed.
+
+Official source pages:
+
+- https://www.ela.europa.eu/en/publications/labour-shortages-and-surpluses-europe-2025
+- https://www.ela.europa.eu/en/dashboard-ela-quantification-labour-shortages-and-surpluses-europe-2025
 
 ## Testing and CI
 
