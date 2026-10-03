@@ -20,6 +20,90 @@ function metric(country: string) {
   }
 }
 
+function overviewMetrics(country: string) {
+  const base = metric(country)
+  return [
+    base,
+    {
+      country_iso3: country,
+      indicator_id: 'real_gdp_per_capita',
+      name: 'Real GDP per capita',
+      dimension: 'prosperity',
+      period: 2025,
+      value: country === 'ESP' ? 32600 : country === 'PRT' ? 28300 : 61200,
+      unit: 'constant_2015_usd_per_person',
+      source_id: 'WORLD_BANK',
+    },
+    {
+      country_iso3: country,
+      indicator_id: 'housing_cost_overburden_rate',
+      name: 'Housing cost overburden rate',
+      dimension: 'housing',
+      period: 2024,
+      value: country === 'ESP' ? 8.2 : country === 'PRT' ? 6.8 : 5.1,
+      unit: 'percent',
+      source_id: 'EUROSTAT',
+    },
+    {
+      country_iso3: country,
+      indicator_id: 'life_expectancy',
+      name: 'Life expectancy at birth',
+      dimension: 'human_systems',
+      period: 2024,
+      value: country === 'ESP' ? 84.0 : country === 'PRT' ? 82.5 : 82.8,
+      unit: 'years',
+      source_id: 'UN_WPP',
+    },
+    {
+      country_iso3: country,
+      indicator_id: 'tertiary_education_25_34',
+      name: 'Tertiary education attainment (25–34)',
+      dimension: 'human_systems',
+      period: 2024,
+      value: country === 'ESP' ? 52.0 : country === 'PRT' ? 43.0 : 63.0,
+      unit: 'percent',
+      source_id: 'EUROSTAT',
+    },
+    {
+      country_iso3: country,
+      indicator_id: 'population_65_plus_share',
+      name: 'Population aged 65+',
+      dimension: 'demography',
+      period: 2025,
+      value: country === 'ESP' ? 20.4 : country === 'PRT' ? 24.1 : 15.5,
+      unit: 'percent',
+      source_id: 'UN_WPP',
+    },
+    {
+      country_iso3: country,
+      indicator_id: 'energy_import_dependency',
+      name: 'Energy import dependency',
+      dimension: 'strategic_resilience',
+      period: 2024,
+      value: country === 'ESP' ? 68.2 : country === 'PRT' ? 66.5 : 67.1,
+      unit: 'percent',
+      source_id: 'EUROSTAT',
+    },
+  ]
+}
+
+function mockTrendFor(item: ReturnType<typeof overviewMetrics>[number]) {
+  const contextual = item.indicator_id === 'population_65_plus_share'
+  const improving = item.indicator_id !== 'population_65_plus_share'
+  const lowerIsBetter = ['unemployment_rate', 'housing_cost_overburden_rate', 'energy_import_dependency'].includes(item.indicator_id)
+  return {
+    direction: contextual ? 'increase' : lowerIsBetter ? 'decrease' : 'increase',
+    interpretation: contextual ? 'neutral_or_contextual' : improving ? 'improving' : 'stable',
+    confidence: 'high',
+    slope_per_year: lowerIsBetter ? -0.2 : 0.3,
+    pct_change_1y: contextual ? 1.1 : lowerIsBetter ? -2.0 : 2.1,
+    pct_change_3y: contextual ? 3.2 : lowerIsBetter ? -5.0 : 5.2,
+    pct_change_5y: contextual ? 5.4 : lowerIsBetter ? -8.0 : 8.5,
+    years_used: 6,
+    target_status: null,
+  }
+}
+
 async function mockApi(page: Page) {
   await page.route('https://gisco-services.ec.europa.eu/**', async route => {
     await route.fulfill({
@@ -264,34 +348,94 @@ async function mockApi(page: Page) {
         }],
       }
     } else if (path.endsWith('/snapshot')) {
-      body = { country_iso3: country, observation_count: 1, indicators: [metric(country)] }
+      body = { country_iso3: country, observation_count: overviewMetrics(country).length, indicators: overviewMetrics(country) }
     } else if (path.endsWith('/overview-series')) {
       body = {
         country_iso3: country,
-        series: [{
-          indicator_id: 'unemployment_rate',
-          name: 'Unemployment, total (% of total labor force)',
-          dimension: 'productive_capacity',
-          unit: 'percent',
-          source_id: 'EUROSTAT',
-          points: [
-            { period: 2018, value: country === 'ESP' ? 15.3 : country === 'PRT' ? 7.0 : 5.8 },
-            { period: 2019, value: country === 'ESP' ? 14.1 : country === 'PRT' ? 6.6 : 5.0 },
-            { period: 2020, value: country === 'ESP' ? 15.5 : country === 'PRT' ? 7.0 : 5.8 },
-            { period: 2021, value: country === 'ESP' ? 14.8 : country === 'PRT' ? 6.6 : 6.2 },
-            { period: 2022, value: country === 'ESP' ? 12.9 : country === 'PRT' ? 6.1 : 4.5 },
-            { period: 2023, value: country === 'ESP' ? 12.2 : country === 'PRT' ? 6.5 : 4.3 },
-            { period: 2024, value: country === 'ESP' ? 11.3 : country === 'PRT' ? 6.4 : 4.4 },
-            { period: 2025, value: metric(country).value },
-          ],
-        }],
+        series: overviewMetrics(country).map((item) => ({
+          indicator_id: item.indicator_id,
+          name: item.name,
+          dimension: item.dimension,
+          unit: item.unit,
+          source_id: item.source_id,
+          points: Array.from({ length: 8 }, (_, index) => {
+            const trend = mockTrendFor(item)
+            const step = trend.direction === 'decrease' ? 0.35 : 0.35
+            const direction = trend.direction === 'decrease' ? -1 : 1
+            const reverseIndex = 7 - index
+            return {
+              period: item.period - reverseIndex,
+              value: item.value - direction * step * reverseIndex,
+            }
+          }),
+        })),
       }
     } else if (path.endsWith('/trends')) {
-      body = { country_iso3: country, indicator_count: 1, indicators: [{ ...metric(country), interpretation_policy: 'lower', target_min: null, target_max: null, trend: { direction: 'decrease', interpretation: 'improving', confidence: 'high', slope_per_year: -0.2, pct_change_1y: -2, pct_change_3y: -5, pct_change_5y: -8, years_used: 6, target_status: null } }] }
+      body = {
+        country_iso3: country,
+        indicator_count: overviewMetrics(country).length,
+        indicators: overviewMetrics(country).map((item) => ({
+          ...item,
+          interpretation_policy: ['unemployment_rate', 'housing_cost_overburden_rate', 'energy_import_dependency'].includes(item.indicator_id) ? 'lower' : item.indicator_id === 'population_65_plus_share' ? 'contextual' : 'higher',
+          target_min: null,
+          target_max: null,
+          trend: mockTrendFor(item),
+        })),
+      }
     } else if (path.endsWith('/assessment')) {
-      body = { country_iso3: country, method: 'test', dimensions: { productive_capacity: { trajectory: 'improving', confidence: 'high', indicator_count: 1, directional_indicator_count: 1, coverage: 1, improving_signals: [{ indicator_id: 'unemployment_rate', name: 'Unemployment', direction: 'decrease', confidence: 'high', pct_change_5y: -8 }], deteriorating_signals: [], stable_signals: [], contextual_signals: [] } } }
+      body = {
+        country_iso3: country,
+        method: 'test',
+        dimensions: Object.fromEntries(
+          ['productive_capacity', 'prosperity', 'housing', 'human_systems', 'demography', 'strategic_resilience'].map((dimension) => {
+            const items = overviewMetrics(country).filter((item) => item.dimension === dimension)
+            const contextual = dimension === 'demography'
+            return [dimension, {
+              trajectory: contextual ? 'contextual' : 'improving',
+              confidence: 'high',
+              indicator_count: items.length,
+              directional_indicator_count: contextual ? 0 : items.length,
+              coverage: contextual ? 0 : 1,
+              improving_signals: contextual ? [] : items.map((item) => ({
+                indicator_id: item.indicator_id,
+                name: item.name,
+                direction: mockTrendFor(item).direction,
+                confidence: 'high',
+                pct_change_5y: mockTrendFor(item).pct_change_5y,
+              })),
+              deteriorating_signals: [],
+              stable_signals: [],
+              contextual_signals: contextual ? items.map((item) => ({
+                indicator_id: item.indicator_id,
+                name: item.name,
+                direction: 'increase',
+                confidence: 'high',
+                pct_change_5y: mockTrendFor(item).pct_change_5y,
+              })) : [],
+            }]
+          }),
+        ),
+      }
     } else if (path.endsWith('/source-quality')) {
-      body = { country_iso3: country, indicators: [{ indicator_id: 'unemployment_rate', name: 'Unemployment', dimension: 'productive_capacity', unit: 'percent', source_count: 2, preferred_source_id: 'EUROSTAT', preferred_source_name: 'Eurostat', preferred_period: 2025, preferred_value: metric(country).value, freshest_period: 2025, period_spread: 0, common_period: 2025, common_period_source_count: 2, disagreement_pct: 0.5 }] }
+      body = {
+        country_iso3: country,
+        indicators: overviewMetrics(country).map((item) => ({
+          indicator_id: item.indicator_id,
+          name: item.name,
+          dimension: item.dimension,
+          unit: item.unit,
+          source_count: item.indicator_id === 'unemployment_rate' ? 2 : 1,
+          preferred_source_id: item.source_id,
+          preferred_source_name: item.source_id.replaceAll('_', ' '),
+          preferred_period: item.period,
+          preferred_value: item.value,
+          freshest_period: item.period,
+          period_spread: 0,
+          common_period: item.indicator_id === 'unemployment_rate' ? item.period : null,
+          common_period_source_count: item.indicator_id === 'unemployment_rate' ? 2 : null,
+          disagreement_pct: item.indicator_id === 'unemployment_rate' ? 0.5 : null,
+        })),
+      }
     } else if (path.endsWith('/trajectory')) {
       if (country === 'ESP') {
         body = {
