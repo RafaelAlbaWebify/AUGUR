@@ -253,3 +253,19 @@ def test_development_case_defaults_to_exploratory_sample_role(
     assert status["development_case_count"] == 1
     assert status["holdout_case_count"] == 0
     assert status["protocol_ready_for_holdout"] is False
+
+
+def test_calibration_protocol_readiness_lists_unresolved_requirements():
+    result = module.calibration_protocol_readiness()
+
+    assert result["protocol_state"] == "draft_not_approved"
+    assert result["ready_for_holdout_collection"] is False
+    assert result["blockers"] == [
+        "protocol_version",
+        "start_event_definition",
+        "viability_outcome_definition",
+        "inclusion_exclusion_rules",
+        "acceptance_criteria",
+    ]
+    assert result["requirements"]["protocol_version"]["ready"] is False
+    assert result["requirements"]["start_event_definition"]["version"] is None
