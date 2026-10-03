@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import csv
 import json
+from pathlib import Path
 
 import pytest
 
@@ -332,3 +334,36 @@ def test_expected_isco_match_is_accepted():
     assert result["resolved_count"] == 1
     assert result["unresolved_count"] == 0
     assert result["ready_for_review"] is True
+
+
+def test_reviewed_ict_source_table_matches_production_manifest():
+    root = Path(__file__).resolve().parents[1]
+    evidence_dir = root / "app" / "evidence"
+
+    manifest = json.loads(
+        (evidence_dir / "eures_lmi_2025.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    with (
+        evidence_dir
+        / "eures_shortages_surpluses_2025_ict_normalized.csv"
+    ).open(
+        "r",
+        encoding="utf-8-sig",
+        newline="",
+    ) as handle:
+        rows = list(csv.DictReader(handle))
+
+    signals = manifest["unit_group_signals"]
+
+    assert len(rows) == len(signals) == 13
+
+    for row in rows:
+        isco = row["expected_isco"]
+        assert isco in signals
+
+        signal = signals[isco]
+        assert row["occupation_label"] == signal["occupation_label"]
+        assert row["shortage_countries"].split() == signal["shortage_countries"]
+        assert row["surplus_countries"].split() == signal["surplus_countries"]
