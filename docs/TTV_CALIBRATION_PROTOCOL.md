@@ -202,3 +202,28 @@ Moving the gate to `supported` requires all of the following:
 7. documented limitations and cohort coverage.
 
 Infrastructure, sample count, or green CI alone do not satisfy the gate.
+
+
+## 12. Development-case collection workflow
+
+AUGUR includes an empty CSV template:
+
+`docs/TTV_CALIBRATION_TEMPLATE.csv`
+
+Use it only for observed cases. Do not insert synthetic or illustrative rows into the calibration store.
+
+While this protocol remains draft:
+
+- use `sample_role=development`;
+- leave holdout collection disabled;
+- record the temporal `engine_version` and `composition` that generated the candidate interval;
+- add stage-level timings only when the observed stage boundaries are genuinely known;
+- use source labels that identify the evidence source category, not a person.
+
+Import locally with:
+
+```powershell
+.\import-ttv-calibration.ps1 -Path ".\path\to\observed-development-cases.csv"
+```
+
+Imported development cases may be inspected descriptively, but they do not satisfy the external-calibration gate.
