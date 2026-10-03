@@ -332,7 +332,7 @@ export default function OverviewPage({
 
         <section className="recentChangesPanel">
           <div className="radarPanelTopline">
-            <div><span>RECENT CHANGES</span><strong>Latest one-year movements</strong></div>
+            <div><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
           </div>
           <div className="recentChangeList">
             {recentChanges.map((item) => (
