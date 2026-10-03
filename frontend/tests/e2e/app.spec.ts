@@ -952,6 +952,16 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
   }
 })
 
+test('captures Overview desktop visual artifact', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.goto('/country/ESP/overview')
+  await page.screenshot({
+    path: 'test-results/overview-desktop.png',
+    fullPage: false,
+  })
+})
+
+
 test('overview keeps last-row content inside desktop viewport', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
