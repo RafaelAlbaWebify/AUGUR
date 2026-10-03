@@ -208,6 +208,25 @@ type ComparisonResponse = {
   notes: string[]
 }
 
+type OverviewSeriesPoint = {
+  period: number
+  value: number
+}
+
+type OverviewSeriesItem = {
+  indicator_id: string
+  name: string
+  dimension: string
+  unit: string
+  source_id: string
+  points: OverviewSeriesPoint[]
+}
+
+type OverviewSeriesResponse = {
+  country_iso3: string
+  series: OverviewSeriesItem[]
+}
+
 const API_BASE = 'http://127.0.0.1:8020'
 
 const dimensionLabels: Record<string, string> = {
@@ -277,6 +296,7 @@ export default function App() {
   const [assessment, setAssessment] = useState<AssessmentResponse | null>(null)
   const [trajectory, setTrajectory] = useState<TrajectoryResponse | null>(null)
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
+  const [overviewSeries, setOverviewSeries] = useState<OverviewSeriesResponse | null>(null)
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
   const [compareCountries, setCompareCountries] = useState<string[]>(
     route.kind === 'compare' ? route.countries : ['IRL', 'ESP', 'PRT'],
@@ -450,6 +470,7 @@ export default function App() {
     setAssessment(null)
     setTrajectory(null)
     setScenarios(null)
+    setOverviewSeries(null)
 
     Promise.allSettled([
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/snapshot`, 'Snapshot', signal),
@@ -458,6 +479,7 @@ export default function App() {
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/assessment`, 'Assessment', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trajectory`, 'Trajectory', signal),
       fetchJson(`${API_BASE}/api/countries/${selectedCountry}/scenarios`, 'Scenarios', signal),
+      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/overview-series`, 'Overview series', signal),
     ]).then((results) => {
       if (signal.aborted) return
 
@@ -468,6 +490,7 @@ export default function App() {
         assessmentResult,
         trajectoryResult,
         scenariosResult,
+        overviewSeriesResult,
       ] = results
 
       const failures: string[] = []
@@ -489,6 +512,9 @@ export default function App() {
 
       if (scenariosResult.status === 'fulfilled') setScenarios(scenariosResult.value)
       else failures.push(String(scenariosResult.reason))
+
+      if (overviewSeriesResult.status === 'fulfilled') setOverviewSeries(overviewSeriesResult.value)
+      else failures.push(String(overviewSeriesResult.reason))
 
       if (failures.length) setError(failures.join(' · '))
     })
@@ -605,6 +631,7 @@ export default function App() {
           selectedCountryName={selectedCountryMeta?.name ?? selectedCountry}
           selectedCountryIso2={selectedCountryMeta?.iso2 ?? ''}
           currentIndicators={enrichedIndicators}
+          overviewSeries={overviewSeries?.series ?? []}
           assessment={assessment}
           scenarios={scenarios}
           compareCountries={compareCountries}
