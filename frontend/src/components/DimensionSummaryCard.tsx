@@ -34,23 +34,6 @@ function icon(trajectory: string) {
   return '•'
 }
 
-function signalBars(item: DimensionAssessment) {
-  const source = [
-    ...item.improving_signals,
-    ...item.deteriorating_signals,
-    ...item.stable_signals,
-  ].slice(0, 6)
-
-  if (source.length === 0) {
-    return [26, 38, 30, 44, 34, 40]
-  }
-
-  return source.map((signal, index) => {
-    const magnitude = Math.abs(signal.pct_change_5y ?? 0)
-    return Math.min(90, Math.max(24, 28 + magnitude * 3 + index * 3))
-  })
-}
-
 export default function DimensionSummaryCard({
   label,
   item,
@@ -58,7 +41,6 @@ export default function DimensionSummaryCard({
 }: DimensionSummaryCardProps) {
   const improving = item.improving_signals.map((signal) => signal.name)
   const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
-  const bars = signalBars(item)
 
   return (
     <article
@@ -82,11 +64,9 @@ export default function DimensionSummaryCard({
       <div className="mockDimensionStatusRow">
         <span className="trajectoryIcon">{icon(item.trajectory)}</span>
         <strong>{item.trajectory.replace('_', ' ')}</strong>
-        <div className="signalBars" aria-hidden="true">
-          {bars.map((height, index) => (
-            <i key={index} style={{ height: `${height}%` }} />
-          ))}
-        </div>
+        <small className="signalEvidenceCount">
+          {item.directional_indicator_count}/{item.indicator_count} directional
+        </small>
       </div>
 
       <ul>
