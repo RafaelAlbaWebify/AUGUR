@@ -735,3 +735,23 @@
     margin-top: 6px;
   }
 }
+
+
+/* Evidence-first Overview: derived displays must not imply invented magnitudes. */
+.signalEvidenceCount {
+  margin-left: auto;
+  color: #71889a;
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.overviewScenarioRow.evidenceOnly > small {
+  color: #71889a;
+  font-size: 9px;
+  text-align: left;
+}
+
+.overviewScenarioRow.evidenceOnly > strong {
+  text-align: right;
+}
