@@ -112,6 +112,17 @@ def main() -> int:
         "externally_calibrated: "
         f"{calibration['externally_calibrated']}"
     )
+    if calibration.get("sample_role_metrics"):
+        print("sample_role_metrics:")
+        for role, metrics in calibration["sample_role_metrics"].items():
+            print(
+                f"  {role}: "
+                f"cases={metrics['case_count']} "
+                f"coverage={metrics['interval_coverage_pct']}% "
+                f"mae={metrics['mean_absolute_midpoint_error_weeks']}w "
+                f"bias={metrics['mean_signed_midpoint_error_weeks']}w"
+            )
+
     if calibration.get("stage_metrics"):
         print("stage_metrics:")
         for stage_id, metrics in calibration["stage_metrics"].items():
