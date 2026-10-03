@@ -231,3 +231,50 @@ def test_review_artifact_is_written_without_mutating_manifest(tmp_path):
 
     assert saved == output.resolve()
     assert json.loads(output.read_text(encoding="utf-8")) == result
+
+
+def test_csv_builder_parses_normalized_table_with_full_esco(
+    monkeypatch,
+    tmp_path,
+):
+    path = tmp_path / "eures.csv"
+    path.write_text(
+        "occupation_label,shortage_countries,surplus_countries\n"
+        "Systems analysts,\"IE RO\",PT\n",
+        encoding="utf-8",
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+        },
+    )
+
+    result = module.build_eures_unit_group_evidence_from_csv(
+        path,
+        source_metadata={
+            "evidence_id": "test-annex",
+            "rule_version": "test-v1",
+            "report_year": 2026,
+            "conditions_year": 2025,
+        },
+        search=lambda query, limit: [
+            _candidate(
+                "Systems analysts",
+                "2511",
+                1.0,
+                "exact_label",
+            )
+        ],
+    )
+
+    assert result["resolved_count"] == 1
+    assert result["unresolved_count"] == 0
+    assert result["ready_for_review"] is True
+    assert result["esco_version"] == "1.2.1"
+    assert result["unit_group_signals"]["2511"]["shortage_countries"] == [
+        "IE",
+        "RO",
+    ]
