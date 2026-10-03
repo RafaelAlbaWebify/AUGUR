@@ -21,6 +21,38 @@ function metric(country: string) {
 }
 
 async function mockApi(page: Page) {
+  await page.route('https://gisco-services.ec.europa.eu/**', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/geo+json',
+      body: JSON.stringify({
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES11', NAME_LATN: 'Galicia', NUTS_NAME: 'Galicia', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-9.3, 41.8], [-6.7, 41.8], [-6.7, 43.8], [-9.3, 43.8], [-9.3, 41.8]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'ES12', NAME_LATN: 'Principado de Asturias', NUTS_NAME: 'Principado de Asturias', CNTR_CODE: 'ES', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-7.2, 42.8], [-4.5, 42.8], [-4.5, 43.7], [-7.2, 43.7], [-7.2, 42.8]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'PT11', NAME_LATN: 'Norte', NUTS_NAME: 'Norte', CNTR_CODE: 'PT', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-9, 40.8], [-6.2, 40.8], [-6.2, 42.2], [-9, 42.2], [-9, 40.8]]] },
+          },
+          {
+            type: 'Feature',
+            properties: { NUTS_ID: 'IE04', NAME_LATN: 'Northern and Western', NUTS_NAME: 'Northern and Western', CNTR_CODE: 'IE', LEVL_CODE: 2 },
+            geometry: { type: 'Polygon', coordinates: [[[-10.7, 52.8], [-7.3, 52.8], [-7.3, 55.4], [-10.7, 55.4], [-10.7, 52.8]]] },
+          },
+        ],
+      }),
+    })
+  })
+
   await page.route('http://127.0.0.1:8020/api/**', async route => {
     const url = new URL(route.request().url())
     const path = url.pathname
@@ -460,6 +492,23 @@ test('top navigation uses real routes and exposes all six product views', async 
   await expect(page).toHaveURL(/\/country\/ESP\/skills$/)
   await expect(page.getByRole('region', { name: 'Skills and languages' })).toBeVisible()
   await expect(page.getByText('6. SKILLS & LANGUAGES')).toBeVisible()
+})
+
+test('Overview exposes selectable official NUTS 2 regions', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  await expect(page.getByTestId('regional-map')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Galicia' })).toBeVisible()
+  await page.getByRole('button', { name: 'Galicia' }).click()
+
+  await expect(page.getByText('Galicia · ES11')).toBeVisible()
+  await expect(page.getByText('Geography: Eurostat GISCO · NUTS 2024 · level 2 · EPSG:4326')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Countries' }).click()
+  await expect(page.getByTestId('world-map')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Regions' }).click()
+  await expect(page.getByTestId('regional-map')).toBeVisible()
 })
 
 test('switches country without a page reload', async ({ page }) => {
