@@ -106,15 +106,18 @@ type OverviewPageProps = {
   dimensionLabels: Record<string, string>
 }
 
-const DIMENSION_ORDER = [
-  'prosperity',
-  'productive_capacity',
-  'housing',
-  'human_systems',
-  'demography',
-  'fiscal',
-  'strategic_resilience',
-]
+const RADAR_DOMAINS = [
+  { id: 'economy', label: 'Economy', dimension: 'prosperity', indicators: ['real_gdp_per_capita', 'real_gdp_growth', 'household_price_level_index'] },
+  { id: 'labour', label: 'Labour market', dimension: 'productive_capacity', indicators: ['employment_rate_20_64', 'unemployment_rate', 'imf_unemployment_rate'] },
+  { id: 'housing', label: 'Housing', dimension: 'housing', indicators: ['housing_cost_overburden_rate', 'real_house_price_index', 'rent_price_index'] },
+  { id: 'healthcare', label: 'Healthcare', dimension: 'human_systems', indicators: ['life_expectancy'] },
+  { id: 'safety', label: 'Safety', dimension: null, indicators: [] },
+  { id: 'environment', label: 'Environment', dimension: null, indicators: [] },
+  { id: 'infrastructure', label: 'Infrastructure', dimension: null, indicators: [] },
+  { id: 'education', label: 'Education', dimension: 'human_systems', indicators: ['tertiary_education_25_34'] },
+  { id: 'demography', label: 'Demography', dimension: 'demography', indicators: ['population_65_plus_share', 'fertility_rate', 'median_age'] },
+  { id: 'resilience', label: 'Resilience', dimension: 'strategic_resilience', indicators: ['energy_import_dependency', 'public_debt_gdp'] },
+] as const
 
 function changeLabel(value: number | null | undefined) {
   if (value == null) return '—'
@@ -161,12 +164,18 @@ export default function OverviewPage({
     .flatMap((item) => item.deteriorating_signals)
     .slice(0, 3)
 
-  const representative = DIMENSION_ORDER.map((dimension) => {
-    const candidates = currentIndicators.filter((item) => item.dimension === dimension)
-    const preferred = candidates.find((item) => item.trend?.interpretation === 'improving' || item.trend?.interpretation === 'deteriorating')
-      ?? candidates[0]
-    return preferred ? { dimension, item: preferred } : null
-  }).filter((entry): entry is { dimension: string; item: Indicator } => Boolean(entry))
+  const representative = RADAR_DOMAINS.map((domain) => {
+    const preferred = domain.indicators
+      .map((indicatorId) => currentIndicators.find((item) => item.indicator_id === indicatorId))
+      .find(Boolean)
+      ?? (domain.dimension ? currentIndicators.find((item) => item.dimension === domain.dimension) : undefined)
+
+    return {
+      ...domain,
+      item: preferred ?? null,
+      assessment: domain.dimension ? assessment?.dimensions?.[domain.dimension] : undefined,
+    }
+  })
 
   return (
     <section className="countryRadarPage" aria-label="Country overview">
@@ -243,32 +252,46 @@ export default function OverviewPage({
       </div>
 
       <section className="countryMetricGrid">
-        {representative.map(({ dimension, item }) => {
-          const dimensionState = assessment?.dimensions?.[dimension]
-          return (
-            <button
-              type="button"
-              key={dimension}
-              className={`countryMetricCard ${trajectoryTone(dimensionState?.trajectory)}`}
-              onClick={() => onOpenDimension(dimension)}
-            >
-              <div className="countryMetricTop">
-                <span>{dimensionLabels[dimension] ?? dimension}</span>
-                <small>{dimensionState?.trajectory?.replaceAll('_', ' ') ?? 'contextual'}</small>
-              </div>
-              <strong className="countryMetricName">{item.name}</strong>
-              <div className="countryMetricValue">{formatValue(item.value, item.unit)}</div>
-              <div className="countryMetricTrend">
-                <strong>{changeLabel(item.trend?.pct_change_1y)}</strong>
-                <span>1y · {item.trend?.confidence ?? 'evidence pending'} evidence</span>
-              </div>
-              <div className="countryMetricFooter">
-                <span>{item.source_id.replaceAll('_', ' ')}</span>
-                <span>{item.period}</span>
-              </div>
-            </button>
-          )
-        })}
+        {representative.map(({ id, label, dimension, item, assessment: dimensionState }) => (
+          <button
+            type="button"
+            key={id}
+            className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
+            onClick={() => dimension && item ? onOpenDimension(dimension) : undefined}
+            disabled={!dimension || !item}
+          >
+            <div className="countryMetricTop">
+              <span>{label}</span>
+              <small>{item ? (dimensionState?.trajectory?.replaceAll('_', ' ') ?? 'contextual') : 'evidence gap'}</small>
+            </div>
+            {item ? (
+              <>
+                <strong className="countryMetricName">{item.name}</strong>
+                <div className="countryMetricValue">{formatValue(item.value, item.unit)}</div>
+                <div className="countryMetricTrend">
+                  <strong>{changeLabel(item.trend?.pct_change_1y)}</strong>
+                  <span>1y · {item.trend?.confidence ?? 'evidence pending'} evidence</span>
+                </div>
+                <div className="countryMetricFooter">
+                  <span>{item.source_id.replaceAll('_', ' ')}</span>
+                  <span>{item.period}</span>
+                </div>
+              </>
+            ) : (
+              <>
+                <strong className="countryMetricName">No verified indicator integrated yet</strong>
+                <div className="countryMetricValue unavailableValue">—</div>
+                <div className="countryMetricTrend">
+                  <strong>Evidence unavailable</strong>
+                  <span>Shown deliberately so the coverage gap is visible.</span>
+                </div>
+                <div className="countryMetricFooter">
+                  <span>Pending source integration</span>
+                </div>
+              </>
+            )}
+          </button>
+        ))}
       </section>
 
       <section className="countryRadarFooter">
