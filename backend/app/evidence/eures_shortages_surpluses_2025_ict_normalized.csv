@@ -1,0 +1,14 @@
+expected_isco,occupation_label,shortage_countries,surplus_countries
+2511,Systems analysts,AT BE BG CY CZ IE NL RO SE SI,BE EL FI LV PT
+2512,Software developers,BE BG CY CZ DE IE IT NL NO PT RO SE SI,AT EL FI LV
+2513,Web and multimedia developers,BG CY HR NL SE SI,AT DE EL FI PT
+2514,Applications programmers,AT BE BG CY HR HU NL RO SE SI,CZ DE EL FI LV
+2519,Software and applications developers and analysts not elsewhere classified,BG CY CZ DE FI LU NL PT RO SI,AT EL FI LV
+2521,Database designers and administrators,BE BG CY CZ EL IT NL RO,AT DE DK ES FI LV
+2522,Systems administrators,AT BE BG DK EL FI HR IE LU NL,CZ FI LV
+2523,Computer network professionals,AT BE BG EL FI NL RO,FI LV
+2529,Database and network professionals not elsewhere classified,AT BG CZ DK EL IE NL PT RO SE,LV
+3511,Information and communications technology operations technicians,BE BG DK EL ES SE,AT BE DE FI RO SE SI
+3512,Information and communications technology user support technicians,BG DK EL NL RO SK,AT FI LV PT SI
+3513,Computer network and systems technicians,BG DE EL IT NL,AT CZ FI LV PT SI
+3514,Web technicians,BG EL IT,AT CZ DK LV SI SK
