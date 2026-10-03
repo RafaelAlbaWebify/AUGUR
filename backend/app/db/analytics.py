@@ -602,6 +602,69 @@ def indicator_series(country_iso3: str, indicator_id: str) -> list[dict]:
         con.close()
 
 
+def country_indicator_series(
+    country_iso3: str,
+    max_points: int = 8,
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            WITH ranked_source AS (
+                SELECT
+                    o.country_iso3,
+                    o.indicator_id,
+                    i.name,
+                    i.dimension,
+                    o.period,
+                    o.value,
+                    o.unit,
+                    o.source_id,
+                    s.priority,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY o.indicator_id, o.period
+                        ORDER BY s.priority ASC, o.source_id ASC
+                    ) AS source_rank
+                FROM observations o
+                JOIN indicators i USING (indicator_id)
+                JOIN sources s USING (source_id)
+                WHERE o.country_iso3 = ?
+                  AND o.observation_type = 'observed'
+            ),
+            preferred AS (
+                SELECT *
+                FROM ranked_source
+                WHERE source_rank = 1
+            ),
+            recent AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id
+                        ORDER BY period DESC
+                    ) AS point_rank
+                FROM preferred
+            )
+            SELECT
+                country_iso3,
+                indicator_id,
+                name,
+                dimension,
+                period,
+                value,
+                unit,
+                source_id
+            FROM recent
+            WHERE point_rank <= ?
+            ORDER BY indicator_id, period
+            """,
+            [country_iso3.upper(), max_points],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
 def indicator_source_comparison(country_iso3: str) -> list[dict]:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
