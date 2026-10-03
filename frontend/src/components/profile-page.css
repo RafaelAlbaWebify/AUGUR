@@ -950,3 +950,35 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.ttvCompact {
+  display: grid;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.ttvCompact > div {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+
+.ttvCompactEvidence {
+  padding-top: 8px;
+  border-top: 1px solid var(--profile-border);
+}
+
+.ttvCompactEvidence strong {
+  color: #9fb4c2;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+}
+
+.ttvCompactEvidence span {
+  color: #7f96a6;
+  font-size: 8px;
+  line-height: 1.45;
+}
