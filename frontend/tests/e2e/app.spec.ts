@@ -240,9 +240,147 @@ async function mockApi(page: Page) {
     } else if (path.endsWith('/source-quality')) {
       body = { country_iso3: country, indicators: [{ indicator_id: 'unemployment_rate', name: 'Unemployment', dimension: 'productive_capacity', unit: 'percent', source_count: 2, preferred_source_id: 'EUROSTAT', preferred_source_name: 'Eurostat', preferred_period: 2025, preferred_value: metric(country).value, freshest_period: 2025, period_spread: 0, common_period: 2025, common_period_source_count: 2, disagreement_pct: 0.5 }] }
     } else if (path.endsWith('/trajectory')) {
-      body = { country_iso3: country, method: 'test', notes: [], horizons: [2030, 2035, 2045].map(year => ({ year, indicator_count: 0, sources: [], indicators: [] })) }
+      if (country === 'ESP') {
+        body = {
+          country_iso3: country,
+          method: 'official_forecast_horizon_view_v1',
+          notes: [],
+          horizons: [
+            {
+              year: 2030,
+              indicator_count: 1,
+              sources: ['IMF'],
+              indicators: [{
+                country_iso3: country,
+                indicator_id: 'imf_unemployment_rate',
+                name: 'Unemployment rate (IMF WEO)',
+                dimension: 'productive_capacity',
+                period: 2030,
+                value: 8.0,
+                unit: 'percent',
+                source_id: 'IMF',
+                source_name: 'IMF',
+                dataset_id: 'WEO',
+                source_updated_at: '2026-04',
+              }],
+            },
+            {
+              year: 2035,
+              indicator_count: 1,
+              sources: ['IMF'],
+              indicators: [{
+                country_iso3: country,
+                indicator_id: 'imf_unemployment_rate',
+                name: 'Unemployment rate (IMF WEO)',
+                dimension: 'productive_capacity',
+                period: 2035,
+                value: 7.5,
+                unit: 'percent',
+                source_id: 'IMF',
+                source_name: 'IMF',
+                dataset_id: 'WEO',
+                source_updated_at: '2026-04',
+              }],
+            },
+          ],
+        }
+      } else if (country === 'PRT') {
+        body = {
+          country_iso3: country,
+          method: 'official_forecast_horizon_view_v1',
+          notes: [],
+          horizons: [{
+            year: 2030,
+            indicator_count: 1,
+            sources: ['UN_WPP'],
+            indicators: [{
+              country_iso3: country,
+              indicator_id: 'fertility_rate',
+              name: 'Fertility rate, total',
+              dimension: 'demography',
+              period: 2030,
+              value: 1.26,
+              unit: 'births_per_woman',
+              source_id: 'UN_WPP',
+              source_name: 'UN WPP',
+              dataset_id: 'WPP2024',
+              source_updated_at: '2024',
+            }],
+          }],
+        }
+      } else {
+        body = { country_iso3: country, method: 'test', notes: [], horizons: [] }
+      }
     } else if (path.endsWith('/scenarios')) {
-      body = { country_iso3: country, method: 'test', horizons: [2030, 2035, 2045], scenario_names: ['baseline', 'improvement', 'stress'], indicators: [], notes: [] }
+      if (country === 'ESP') {
+        body = {
+          country_iso3: country,
+          method: 'augur_scenario_envelope_v2',
+          horizons: [2030, 2035],
+          scenario_names: ['baseline', 'improvement', 'stress'],
+          indicators: [
+            {
+              country_iso3: country,
+              indicator_id: 'imf_unemployment_rate',
+              name: 'Unemployment rate (IMF WEO)',
+              dimension: 'productive_capacity',
+              period: 2030,
+              value: 8.0,
+              unit: 'percent',
+              source_id: 'IMF',
+              source_name: 'IMF',
+              dataset_id: 'WEO',
+              official_baseline: 8.0,
+              scenarios: { baseline: 8.0, improvement: 7.0, stress: 9.5 },
+              assumption: 'AUGUR model assumption for test.',
+              uncertainty: { multiplier: 1, level: 'near' },
+            },
+            {
+              country_iso3: country,
+              indicator_id: 'imf_unemployment_rate',
+              name: 'Unemployment rate (IMF WEO)',
+              dimension: 'productive_capacity',
+              period: 2035,
+              value: 7.5,
+              unit: 'percent',
+              source_id: 'IMF',
+              source_name: 'IMF',
+              dataset_id: 'WEO',
+              official_baseline: 7.5,
+              scenarios: { baseline: 7.5, improvement: 6.0, stress: 10.0 },
+              assumption: 'AUGUR model assumption for test.',
+              uncertainty: { multiplier: 1.5, level: 'medium' },
+            },
+          ],
+          notes: [],
+        }
+      } else if (country === 'PRT') {
+        body = {
+          country_iso3: country,
+          method: 'augur_scenario_envelope_v2',
+          horizons: [2030],
+          scenario_names: ['baseline', 'improvement', 'stress'],
+          indicators: [{
+            country_iso3: country,
+            indicator_id: 'fertility_rate',
+            name: 'Fertility rate, total',
+            dimension: 'demography',
+            period: 2030,
+            value: 1.26,
+            unit: 'births_per_woman',
+            source_id: 'UN_WPP',
+            source_name: 'UN WPP',
+            dataset_id: 'WPP2024',
+            official_baseline: 1.26,
+            scenarios: { baseline: 1.26, improvement: 1.26, stress: 1.26 },
+            assumption: 'Contextual indicator: no automatic positive/negative adjustment applied.',
+            uncertainty: { multiplier: 1, level: 'near' },
+          }],
+          notes: [],
+        }
+      } else {
+        body = { country_iso3: country, method: 'test', horizons: [], scenario_names: ['baseline', 'improvement', 'stress'], indicators: [], notes: [] }
+      }
     } else {
       body = {}
     }
@@ -337,49 +475,8 @@ test('switches country without a page reload', async ({ page }) => {
 
 
 
-test('Outlook labels modelled scenarios without implying statistical uncertainty', async ({ page }) => {
-  await page.route(
-    'http://127.0.0.1:8020/api/countries/ESP/scenarios',
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          country_iso3: 'ESP',
-          method: 'augur_scenario_envelope_v2',
-          horizons: [2030],
-          scenario_names: ['baseline', 'improvement', 'stress'],
-          indicators: [{
-            country_iso3: 'ESP',
-            indicator_id: 'fertility_rate',
-            name: 'Fertility rate, total',
-            dimension: 'demography',
-            period: 2030,
-            value: 1.26,
-            unit: 'births_per_woman',
-            source_id: 'official',
-            source_name: 'Official source',
-            dataset_id: 'test',
-            observation_type: 'forecast',
-            official_baseline: 1.26,
-            scenarios: {
-              baseline: 1.26,
-              improvement: 1.26,
-              stress: 1.26,
-            },
-            assumption: 'Contextual indicator: no automatic positive/negative adjustment applied.',
-            uncertainty: {
-              multiplier: 1,
-              level: 'near',
-            },
-          }],
-          notes: [],
-        }),
-      })
-    },
-  )
-
-  await page.goto('/country/ESP/outlook')
+test('Outlook labels contextual scenarios without implying statistical uncertainty', async ({ page }) => {
+  await page.goto('/country/PRT/outlook')
 
   await expect(page.getByText('No directional scenario envelope is applied.')).toBeVisible()
   await expect(page.getByText('This indicator is contextual or no model assumptions exist for it.')).toBeVisible()
@@ -581,7 +678,7 @@ test('structured FinancialFit blockers are visible', async ({ page }) => {
   const profile = page.getByRole('region', { name: 'Personal profile' })
 
   await expect(profile.getByText('FinancialFit incomplete')).toBeVisible()
-  await expect(profile.getByText(/current_country, monthly_net_income/i)).toBeVisible()
+  await expect(profile.getByText('Add: current_country, monthly_net_income', { exact: true })).toBeVisible()
 
   await profile.getByText('Detailed fit evidence and TTV').click()
   await expect(profile.getByText('FINANCIAL', { exact: true })).toBeVisible()
@@ -593,7 +690,7 @@ test('structured TTV blockers are visible', async ({ page }) => {
   await profile.getByText('Detailed fit evidence and TTV').click()
 
   const ttv = profile.getByRole('region', { name: 'TTV readiness' })
-  await expect(ttv.getByText('Blocked by')).toBeVisible()
+  await expect(ttv.getByText('Blocked by', { exact: true })).toBeVisible()
   await expect(ttv).not.toContainText('Waiting for evidence')
 })
 
@@ -873,158 +970,19 @@ test('Country Radar keeps country context and evidence cards visible', async ({ 
 })
 
 test('Future Paths distinguishes official baseline from AUGUR model scenarios', async ({ page }) => {
-  await page.route('http://127.0.0.1:8020/api/countries/ESP/trajectory', async route => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        country_iso3: 'ESP',
-        method: 'official_forecast_horizon_view_v1',
-        notes: [],
-        horizons: [{
-          year: 2030,
-          indicator_count: 1,
-          sources: ['IMF'],
-          indicators: [{
-            country_iso3: 'ESP',
-            indicator_id: 'imf_unemployment_rate',
-            name: 'Unemployment rate (IMF WEO)',
-            dimension: 'productive_capacity',
-            period: 2030,
-            value: 8,
-            unit: 'percent',
-            source_id: 'IMF',
-            source_name: 'IMF',
-            dataset_id: 'WEO',
-            source_updated_at: '2026-04',
-          }],
-        }, {
-          year: 2035,
-          indicator_count: 1,
-          sources: ['IMF'],
-          indicators: [{
-            country_iso3: 'ESP',
-            indicator_id: 'imf_unemployment_rate',
-            name: 'Unemployment rate (IMF WEO)',
-            dimension: 'productive_capacity',
-            period: 2035,
-            value: 7.5,
-            unit: 'percent',
-            source_id: 'IMF',
-            source_name: 'IMF',
-            dataset_id: 'WEO',
-            source_updated_at: '2026-04',
-          }],
-        }],
-      }),
-    })
-  })
-
-  await page.route('http://127.0.0.1:8020/api/countries/ESP/scenarios', async route => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        country_iso3: 'ESP',
-        method: 'augur_scenario_envelope_v2',
-        horizons: [2030, 2035],
-        scenario_names: ['baseline', 'improvement', 'stress'],
-        indicators: [2030, 2035].map((period, index) => ({
-          country_iso3: 'ESP',
-          indicator_id: 'imf_unemployment_rate',
-          name: 'Unemployment rate (IMF WEO)',
-          dimension: 'productive_capacity',
-          period,
-          value: index ? 7.5 : 8,
-          unit: 'percent',
-          source_id: 'IMF',
-          source_name: 'IMF',
-          dataset_id: 'WEO',
-          official_baseline: index ? 7.5 : 8,
-          scenarios: {
-            baseline: index ? 7.5 : 8,
-            improvement: index ? 6 : 7,
-            stress: index ? 10 : 9.5,
-          },
-          assumption: 'AUGUR model assumption for test.',
-          uncertainty: { multiplier: index ? 1.5 : 1, level: index ? 'medium' : 'near' },
-        })),
-        notes: [],
-      }),
-    })
-  })
-
   await page.goto('/country/ESP/outlook')
-  await expect(page.getByText('OFFICIAL FORECAST')).toBeVisible()
-  await expect(page.getByText('AUGUR MODEL SCENARIOS')).toBeVisible()
-  await expect(page.getByText('not official forecasts')).toBeVisible()
+
+  await expect(page.getByText('OFFICIAL FORECAST', { exact: true })).toBeVisible()
+  await expect(page.getByText('AUGUR MODEL SCENARIOS', { exact: true })).toBeVisible()
+  await expect(page.getByText('not official forecasts', { exact: true })).toBeVisible()
   await expect(page.locator('.officialLine')).toBeVisible()
   await expect(page.locator('.scenarioLine.improvement')).toBeVisible()
   await expect(page.locator('.scenarioLine.stress')).toBeVisible()
 })
 
 test('Future Paths avoids fake model envelopes for contextual indicators', async ({ page }) => {
-  await page.route('http://127.0.0.1:8020/api/countries/ESP/trajectory', async route => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        country_iso3: 'ESP',
-        method: 'official_forecast_horizon_view_v1',
-        notes: [],
-        horizons: [{
-          year: 2030,
-          indicator_count: 1,
-          sources: ['UN_WPP'],
-          indicators: [{
-            country_iso3: 'ESP',
-            indicator_id: 'fertility_rate',
-            name: 'Fertility rate, total',
-            dimension: 'demography',
-            period: 2030,
-            value: 1.26,
-            unit: 'births_per_woman',
-            source_id: 'UN_WPP',
-            source_name: 'UN WPP',
-            dataset_id: 'WPP2024',
-            source_updated_at: '2024',
-          }],
-        }],
-      }),
-    })
-  })
+  await page.goto('/country/PRT/outlook')
 
-  await page.route('http://127.0.0.1:8020/api/countries/ESP/scenarios', async route => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        country_iso3: 'ESP',
-        method: 'augur_scenario_envelope_v2',
-        horizons: [2030],
-        scenario_names: ['baseline', 'improvement', 'stress'],
-        indicators: [{
-          country_iso3: 'ESP',
-          indicator_id: 'fertility_rate',
-          name: 'Fertility rate, total',
-          dimension: 'demography',
-          period: 2030,
-          value: 1.26,
-          unit: 'births_per_woman',
-          source_id: 'UN_WPP',
-          source_name: 'UN WPP',
-          dataset_id: 'WPP2024',
-          official_baseline: 1.26,
-          scenarios: { baseline: 1.26, improvement: 1.26, stress: 1.26 },
-          assumption: 'Contextual indicator: no automatic positive/negative adjustment applied.',
-          uncertainty: { multiplier: 1, level: 'near' },
-        }],
-        notes: [],
-      }),
-    })
-  })
-
-  await page.goto('/country/ESP/outlook')
   await expect(page.getByText('No directional scenario envelope is applied.')).toBeVisible()
   await expect(page.locator('.scenarioLine.improvement')).toHaveCount(0)
   await expect(page.locator('.scenarioLine.stress')).toHaveCount(0)
