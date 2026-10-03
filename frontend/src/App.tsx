@@ -640,6 +640,7 @@ export default function App() {
           onCompareCountryChange={updateCompareCountry}
           onOpenOutlook={() => navigateView('outlook')}
           onOpenCompare={() => navigateView('compare')}
+          onOpenIndicators={() => navigateView('indicators')}
           onOpenDimension={(dimension) => navigate(dimensionRoute(selectedCountry, dimension))}
           formatValue={formatValue}
           dimensionLabels={dimensionLabels}
