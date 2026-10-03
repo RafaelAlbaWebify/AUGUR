@@ -160,6 +160,27 @@ const DOMAIN_ICONS: Record<string, string> = {
   resilience: '⬟',
 }
 
+function selectedSetBand(
+  comparison: ComparisonResponse | null,
+  indicatorId: string,
+  selectedCountry: string,
+) {
+  const row = comparison?.indicators.find((item) => item.indicator_id === indicatorId)
+  if (!row) return null
+
+  const entries = Object.entries(row.countries)
+    .filter(([, item]) => typeof item?.value === 'number')
+    .sort((a, b) => a[1].value - b[1].value)
+
+  if (entries.length < 2) return null
+
+  const index = entries.findIndex(([iso3]) => iso3 === selectedCountry)
+  if (index < 0) return null
+  if (index === 0) return 'Low in selected set'
+  if (index === entries.length - 1) return 'High in selected set'
+  return 'Mid in selected set'
+}
+
 function sparklinePoints(points: Array<{ period: number; value: number }>) {
   if (points.length < 2) return ''
   const width = 112
@@ -185,6 +206,7 @@ export default function OverviewPage({
   currentIndicators,
   overviewSeries,
   assessment,
+  comparison,
   onCountryChange,
   onOpenIndicators,
   onOpenDimension,
@@ -393,8 +415,8 @@ export default function OverviewPage({
                 </div>
 
                 <div className="countryMetricFooter">
-                  <span className="countryMetricEvidenceBadge">
-                    {item.trend?.confidence ? `${item.trend.confidence} evidence` : 'evidence pending'}
+                  <span className="countryMetricPeerBadge">
+                    {selectedSetBand(comparison, item.indicator_id, selectedCountry) ?? 'Peer reference pending'}
                   </span>
                   <span>{item.source_id.replaceAll('_', ' ')} · {item.period}</span>
                 </div>
