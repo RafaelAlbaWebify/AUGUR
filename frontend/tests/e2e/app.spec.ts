@@ -397,13 +397,13 @@ test('comparison remains neutral and aligned', async ({ page }) => {
 
 
 test('Indicators route exposes drill-down evidence without overstating provenance', async ({ page }) => {
-  await page.goto('/country/ESP/overview')
-  await page.getByRole('button', { name: 'Indicators' }).click()
+  await page.goto('/country/ESP/indicators')
 
   await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
   await expect(page.getByRole('region', { name: 'Indicators' })).toBeVisible()
   await expect(page.getByText('2. EVIDENCE EXPLORER / Indicators')).toBeVisible()
-  await expect(page.getByText('Unemployment, total (% of total labor force)', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Unemployment, total (% of total labor force)' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Unemployment, total (% of total labor force)' })).toBeVisible()
   await expect(page.getByLabel('Search indicators')).toBeVisible()
   await expect(page.getByText('Indicator details')).toBeVisible()
   await expect(page.getByText('Corroborated')).toHaveCount(0)
@@ -412,23 +412,20 @@ test('Indicators route exposes drill-down evidence without overstating provenanc
 test('Overview dimension cards drill into persistent dimension routes', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
-  await page.getByRole('button', { name: /Productive capacity/i }).click()
+  await page.locator('.countryMetricCard').first().click()
 
   await expect(page).toHaveURL(/\/country\/ESP\/dimension\/productive_capacity$/)
   await expect(page.getByRole('region', { name: 'Dimension detail' })).toBeVisible()
   await expect(page.getByText('Productive capacity · Spain')).toBeVisible()
-  await expect(page.getByText('Unemployment, total (% of total labor force)', { exact: true })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Unemployment, total (% of total labor force)' })).toBeVisible()
   await expect(page.getByText('Directional coverage')).toBeVisible()
 
   await page.reload()
-
   await expect(page).toHaveURL(/\/country\/ESP\/dimension\/productive_capacity$/)
-  await expect(page.getByRole('region', { name: 'Dimension detail' })).toBeVisible()
 
   await page.getByRole('button', { name: 'All indicators' }).click()
   await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
 })
-
 
 test('world view renders country geometry and drives selection', async ({ page }) => {
   await expect(page.getByText('WORLD VIEW')).toBeVisible()
@@ -448,23 +445,16 @@ test('world view renders country geometry and drives selection', async ({ page }
 
 
 test('personal profile remains separate and can be saved locally', async ({ page }) => {
-  await page.getByRole('button', { name: 'Profile' }).click()
+  await page.goto('/country/ESP/profile')
   const profile = page.getByRole('region', { name: 'Personal profile' })
-  await expect(profile.getByText('stored locally · never changes country facts')).toBeVisible()
+
+  await expect(profile.getByText('5. MY FIT / Profile')).toBeVisible()
   await expect(profile.getByRole('region', { name: 'Profile completion' })).toBeVisible()
   await expect(profile.getByText('0 / 4 input sets ready')).toBeVisible()
   await expect(profile.getByRole('region', { name: 'Personal-fit evidence' })).toBeVisible()
-  await expect(profile.getByRole('region', { name: 'Fit outputs' })).toBeVisible()
-  await expect(profile.getByRole('region', { name: 'TTV readiness' })).toBeVisible()
-  await expect(profile.getByText('PERSONAL-FIT EVIDENCE · ESP')).toBeVisible()
-  await expect(profile.getByText('FIT OUTPUTS · ESP')).toBeVisible()
-  await expect(profile.getByText('LegalFit', { exact: true }).first()).toBeVisible()
-  await expect(profile.getByText('LanguageFit', { exact: true }).first()).toBeVisible()
-  await expect(profile.getByText('CareerFit', { exact: true }).first()).toBeVisible()
-  await expect(profile.getByText('FinancialFit', { exact: true }).first()).toBeVisible()
-  await expect(profile.getByText('TTV READINESS · ESP')).toBeVisible()
-  await expect(profile.getByText('Time estimate unavailable')).toBeVisible()
+  await expect(profile.getByText('Completion measures required inputs only. It is not a country-fit score.')).toBeVisible()
 
+  await profile.getByRole('button', { name: 'Edit' }).click()
   await profile.getByLabel('Profession').fill('Systems engineer')
   await profile.getByLabel('Household size').fill('2')
   await profile.getByRole('button', { name: 'Save profile' }).click()
@@ -472,278 +462,190 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await expect(profile.getByText('Saved locally')).toBeVisible()
 })
 
-
 test('profile marks future financial inputs that do not affect current FinancialFit', async ({ page }) => {
   await page.goto('/country/ESP/profile')
-
   const profile = page.getByRole('region', { name: 'Personal profile' })
+  await profile.getByRole('button', { name: 'Edit' }).click()
+
   await expect(profile.getByText('Stored for future household-budget modelling; not used in current FinancialFit.')).toBeVisible()
   await expect(profile.getByText('Stored for future transition-cost/runway modelling; not used in current FinancialFit.')).toBeVisible()
 })
 
-
 test('profile architecture keeps completion evidence outputs and TTV distinct', async ({ page }) => {
   await page.goto('/country/ESP/profile')
-
   const profile = page.getByRole('region', { name: 'Personal profile' })
-  await expect(profile.getByRole('region', { name: 'Profile inputs' })).toBeVisible()
+
+  await expect(profile.getByText('Your profile', { exact: true })).toBeVisible()
   await expect(profile.getByRole('region', { name: 'Profile completion' })).toBeVisible()
+  await expect(profile.getByText('Key gaps and actions')).toBeVisible()
   await expect(profile.getByRole('region', { name: 'Personal-fit evidence' })).toBeVisible()
-  await expect(profile.getByRole('region', { name: 'Fit outputs' })).toBeVisible()
+  await expect(profile.getByText('Completion measures required inputs only. It is not a country-fit score.')).toBeVisible()
+
+  await profile.getByText('Detailed fit evidence and TTV').click()
   await expect(profile.getByRole('region', { name: 'TTV readiness' })).toBeVisible()
-
-  await expect(profile.getByText('Completion only confirms that required profile inputs exist. It is not a country-fit score.')).toBeVisible()
-  await expect(profile.getByText('Time-to-viability requires both viable dependencies and a validated temporal evidence model. Dependency readiness alone never creates a duration.')).toBeVisible()
 })
 
-
-test('latest EURES annex provenance is visible for unit-level CareerFit', async ({ page }) => {
-  await page.route(
-    'http://127.0.0.1:8020/api/countries/ESP/career-fit',
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          target_country_iso3: 'ESP',
-          status: 'evidence_available',
-          occupation: {
-            status: 'mapped',
-            occupation_group: 'information_communications_technicians',
-            matched_terms: [],
-            mapping_method: 'esco_isco_submajor',
-            isco_submajor: '35',
-          },
-          market_signal: 'not_classified_as_shortage_or_surplus',
-          market_signal_scope: 'isco_unit_group',
-          market_signal_isco: '3512',
-          vacancy_demand_evidence: null,
-          occupation_match: {
-            status: 'matched',
-            threshold: 0.72,
-            selected: {
-              preferred_label: 'ICT user support technician',
-              match_score: 0.91,
-              match_method: 'token_overlap',
-              source_mode: 'full',
-              dataset_version: '1.2.1',
-            },
-            candidates: [],
-          },
-          skill_match: {
-            status: 'matched',
-            dataset_mode: 'full',
-            dataset_version: '1.2.1',
-            matched_skills: [],
-            missing_skills: [],
-            coverage: 1,
-          },
-          skill_evidence_complete: true,
-          market_evidence_complete: true,
-          evidence_complete: true,
-          profile_skill_coverage_complete: true,
-          market_signal_supports_viability: false,
-          viability_evidence_ready: false,
+test('latest EURES annex provenance is visible in Skills and Languages', async ({ page }) => {
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/career-fit', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        target_country_iso3: 'ESP',
+        status: 'evidence_available',
+        market_signal: 'not_classified_as_shortage_or_surplus',
+        market_signal_scope: 'isco_unit_group',
+        market_signal_isco: '3512',
+        vacancy_demand_evidence: null,
+        occupation_match: {
+          status: 'matched',
+          selected: { preferred_label: 'ICT user support technician', match_score: 0.91, isco_group: '3512' },
+          candidates: [],
+          threshold: 0.72,
+        },
+        skill_match: {
+          status: 'matched',
+          dataset_mode: 'full',
+          dataset_version: '1.2.1',
+          matched_skills: [],
+          missing_skills: [],
+          coverage: 1,
+        },
+        source: {
+          label: 'EURES Report on labour shortages and surpluses 2025 — Annex',
+          evidence_id: 'eures_shortages_surpluses_2025_annex',
           rule_version: 'EURES_SHORTAGES_SURPLUSES_2025_ANNEX',
-          source: {
-            label: 'EURES Report on labour shortages and surpluses 2025 — Annex',
-            url: 'https://www.ela.europa.eu/en/publications/labour-shortages-and-surpluses-europe-2025',
-            evidence_id: 'eures_shortages_surpluses_2025_annex',
-            rule_version: 'EURES_SHORTAGES_SURPLUSES_2025_ANNEX',
-            report_year: 2026,
-            conditions_year: 2025,
-            report_url: 'https://www.ela.europa.eu/sites/default/files/2026-06/annex-labour-shortages-report-ela-2025.pdf',
-            scope: 'isco_unit_group',
-          },
-          notes: [],
-        }),
-      })
-    },
-  )
+          report_year: 2026,
+          conditions_year: 2025,
+          scope: 'isco_unit_group',
+        },
+      }),
+    })
+  })
 
-  await page.goto('/country/ESP/profile')
-
-  const profile = page.getByRole('region', { name: 'Personal profile' })
-  await expect(
-    profile.getByText(
-      'EURES 2026 · 2025 conditions · not classified as shortage or surplus · ISCO 3512 unit · eures_shortages_surpluses_2025_annex',
-    ),
-  ).toBeVisible()
+  await page.goto('/country/ESP/skills')
+  await expect(page.getByText(/not classified as shortage or surplus · ISCO 3512/i)).toBeVisible()
+  await expect(page.getByText(/EURES Report on labour shortages and surpluses 2025 — Annex · 2025 conditions · eures_shortages_surpluses_2025_annex/i)).toBeVisible()
 })
 
-
-test('vacancy rate remains contextual in Profile', async ({ page }) => {
-  await page.goto('/country/ESP/profile')
-
-  const profile = page.getByRole('region', { name: 'Personal profile' })
-  await expect(
-    profile.getByText(
-      'Eurostat 2026-Q2 · ISCO OC3 vacancy rate 3.4% · context only',
-    ),
-  ).toBeVisible()
+test('vacancy rate remains contextual in Skills and Languages', async ({ page }) => {
+  await page.goto('/country/ESP/skills')
+  await expect(page.getByText('Eurostat 2026-Q2 · ISCO OC3 vacancy rate 3.4% · context only')).toBeVisible()
 })
 
-
-test('versioned EURES market evidence is visible in CareerFit', async ({ page }) => {
-  await page.goto('/country/ESP/profile')
-
-  const profile = page.getByRole('region', { name: 'Personal profile' })
-  await expect(
-    profile.getByText(
-      'EURES 2025 · 2024 conditions · signal unavailable · eures_country_lmi_2024_conditions',
-    ),
-  ).toBeVisible()
+test('versioned EURES market evidence is visible in Skills and Languages', async ({ page }) => {
+  await page.goto('/country/ESP/skills')
+  await expect(page.getByText(/EURES Labour Market Information: Spain · 2024 conditions · eures_country_lmi_2024_conditions/i)).toBeVisible()
 })
-
-
-
 
 test('FinancialFit partial evidence is not shown as complete or empty', async ({ page }) => {
-  await page.route(
-    'http://127.0.0.1:8020/api/countries/ESP/financial-fit',
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          target_country_iso3: 'ESP',
-          status: 'local_income_reference_available',
-          reason: 'occupation_specific_net_income_not_modelled',
-          evidence_state: 'partial',
-          evidence_complete: false,
-          blockers: ['occupation_specific_net_income', 'household_budget'],
-          portable_income_analysis: null,
-          local_income_reference: {
-            occupation_label: 'ICT support technician',
-            occupation_match_score: 0.9,
-            isco_group: '3512',
-            ses_isco_major_group: 'OC3',
-            gross_monthly_mean_eur: 3200,
-            period: 2022,
-            source_id: 'EUROSTAT',
-            dataset_id: 'earn_ses_main',
-          },
-          national_net_earnings_reference: null,
-          notes: [],
-        }),
-      })
-    },
-  )
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/financial-fit', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        target_country_iso3: 'ESP',
+        status: 'local_income_reference_available',
+        reason: 'occupation_specific_net_income_not_modelled',
+        evidence_state: 'partial',
+        evidence_complete: false,
+        blockers: ['occupation_specific_net_income', 'household_budget'],
+        portable_income_analysis: null,
+        local_income_reference: {
+          occupation_label: 'ICT support technician',
+          occupation_match_score: 0.9,
+          isco_group: '3512',
+          ses_isco_major_group: 'OC3',
+          gross_monthly_mean_eur: 3200,
+          period: 2022,
+          source_id: 'EUROSTAT',
+          dataset_id: 'earn_ses_main',
+        },
+        national_net_earnings_reference: null,
+        notes: [],
+      }),
+    })
+  })
 
   await page.goto('/country/ESP/profile')
-
   const evidence = page.getByRole('region', { name: 'Personal-fit evidence' })
-  const financialCard = evidence.locator('.evidenceStatusCard').filter({ hasText: 'FinancialFit' })
+  const financialCard = evidence.locator('.evidenceStatusCard').filter({ hasText: 'Financial' })
   await expect(financialCard.getByText('partial', { exact: true })).toBeVisible()
 
-  const outputs = page.getByRole('region', { name: 'Fit outputs' })
-  await expect(outputs).toContainText('occupation specific net income')
-  await expect(outputs).toContainText('household budget')
+  await page.getByText('Detailed fit evidence and TTV').click()
+  await expect(page.getByText(/occupation specific net income · household budget/i)).toBeVisible()
 })
 
 test('structured FinancialFit blockers are visible', async ({ page }) => {
   await page.goto('/country/ESP/profile')
-
   const profile = page.getByRole('region', { name: 'Personal profile' })
-  await expect(profile.getByText('FINANCIAL', { exact: true })).toBeVisible()
-  await expect(profile.getByText('monthly net income', { exact: true })).toBeVisible()
-})
 
+  await expect(profile.getByText('FinancialFit incomplete')).toBeVisible()
+  await expect(profile.getByText(/current_country, monthly_net_income/i)).toBeVisible()
+
+  await profile.getByText('Detailed fit evidence and TTV').click()
+  await expect(profile.getByText('FINANCIAL', { exact: true })).toBeVisible()
+})
 
 test('structured TTV blockers are visible', async ({ page }) => {
   await page.goto('/country/ESP/profile')
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+  await profile.getByText('Detailed fit evidence and TTV').click()
 
-  const ttv = page.getByRole('region', { name: 'TTV readiness' })
+  const ttv = profile.getByRole('region', { name: 'TTV readiness' })
   await expect(ttv.getByText('Blocked by')).toBeVisible()
-  await expect(ttv.locator('.ttvBlockedReason span')).not.toHaveText('Waiting for evidence')
+  await expect(ttv).not.toContainText('Waiting for evidence')
 })
-
 
 test('candidate TTV range shows critical-path composition', async ({ page }) => {
-  await page.route(
-    'http://127.0.0.1:8020/api/countries/ESP/ttv',
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          target_country_iso3: 'ESP',
-          method: 'ttv_dependency_graph_v1',
-          stage_order: ['legal_fit', 'language_fit', 'career_fit', 'financial_fit'],
-          stages: {
-            legal_fit: { ready: true, status: 'eu_free_movement_framework', evidence_state: 'implemented' },
-            language_fit: { ready: true, status: 'work_ready_heuristic', evidence_state: 'implemented' },
-            career_fit: { ready: true, status: 'shortage', evidence_state: 'implemented' },
-            financial_fit: { ready: true, status: 'portable_income_comparable', evidence_state: 'implemented' },
-          },
-          blocked_by: [],
-          blocker_details: [],
-          dependency_ready: true,
-          temporal_evidence_state: 'not_implemented',
-          temporal_model_version: null,
-          temporal_evidence_ready: true,
-          temporal_evidence: {
-            engine_version: 'ttv-temporal-evidence-v1',
-            calendar_ready: true,
-            unavailable_stages: [],
-            candidate_range: {
-              weeks_min: 10,
-              weeks_max: 25,
-              composition: 'critical_path_v1',
-              stage_groups: {
-                preparation_parallel: ['legal', 'language', 'skills'],
-                employment_after_preparation: ['employment'],
-                financial_after_employment: ['financial'],
-              },
-            },
-            stages: {
-              legal: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
-              language: { status: 'available', weeks_min: 10, weeks_max: 25, reason: 'test' },
-              skills: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
-              employment: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
-              financial: { status: 'available', weeks_min: 0, weeks_max: 0, reason: 'ready' },
-            },
-          },
-          candidate_time_range: {
-            weeks_min: 10,
-            weeks_max: 25,
-            composition: 'critical_path_v1',
-            stage_groups: {
-              preparation_parallel: ['legal', 'language', 'skills'],
-              employment_after_preparation: ['employment'],
-              financial_after_employment: ['financial'],
-            },
-          },
-          estimate_status: 'temporal_model_missing',
-          ready_for_time_estimate: false,
-          time_estimate: null,
-          notes: [],
-        }),
-      })
-    },
-  )
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/ttv', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        target_country_iso3: 'ESP',
+        method: 'ttv_dependency_graph_v1',
+        stages: {},
+        blocked_by: [],
+        blocker_details: [],
+        dependency_ready: true,
+        temporal_evidence_state: 'candidate',
+        temporal_model_version: null,
+        temporal_evidence_ready: true,
+        temporal_evidence: {
+          calendar_ready: true,
+          stages: { language: { status: 'available', guided_hours_min: 100, guided_hours_max: 250, weekly_study_hours: 10 } },
+        },
+        candidate_time_range: {
+          weeks_min: 10,
+          weeks_max: 25,
+          composition: 'critical_path_v1',
+          stage_groups: {},
+        },
+        estimate_status: 'temporal_model_missing',
+        ready_for_time_estimate: false,
+        time_estimate: null,
+      }),
+    })
+  })
 
   await page.goto('/country/ESP/profile')
-
+  await page.getByText('Detailed fit evidence and TTV').click()
   const ttv = page.getByRole('region', { name: 'TTV readiness' })
-  await expect(
-    ttv.getByText(
-      '10–25 weeks · critical path: preparation parallel → employment → financial · not an AUGUR estimate',
-    ),
-  ).toBeVisible()
+  await expect(ttv.getByText('Temporal evidence · candidate only')).toBeVisible()
+  await expect(ttv.getByText(/10–25 weeks · critical path: preparation parallel → employment → financial · not an AUGUR estimate/)).toBeVisible()
   await expect(ttv.getByText('Estimate available')).toHaveCount(0)
 })
-
 
 test('candidate temporal evidence remains explicitly non-estimate', async ({ page }) => {
   await page.goto('/country/ESP/profile')
+  await page.getByText('Detailed fit evidence and TTV').click()
 
   const ttv = page.getByRole('region', { name: 'TTV readiness' })
-  await expect(ttv.getByText('Temporal evidence · candidate only')).toBeVisible()
+  await expect(ttv.getByText('Language planning evidence')).toBeVisible()
   await expect(ttv.getByText('Language: 100–250 guided hours · add study hours/week for calendar conversion')).toBeVisible()
   await expect(ttv.getByText('Estimate available')).toHaveCount(0)
 })
-
 
 test('map zoom controls change and reset the view', async ({ page }) => {
   const map = page.getByTestId('world-map')
@@ -760,8 +662,9 @@ test('map zoom controls change and reset the view', async ({ page }) => {
 
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
-  await page.getByRole('button', { name: 'Profile' }).click()
+  await page.goto('/country/ESP/profile')
   const profile = page.getByRole('region', { name: 'Personal profile' })
+  await profile.getByRole('button', { name: 'Edit' }).click()
   const profession = profile.getByLabel('Profession')
   const selector = page.getByLabel('Select country')
 
@@ -771,7 +674,6 @@ test('unsaved profile edits survive target-country switching', async ({ page }) 
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
   await expect(profession).toHaveValue('Unsaved draft role')
 })
-
 
 test('partial country endpoint failure keeps healthy sections visible', async ({ page }) => {
   await page.route('**/api/countries/PRT/scenarios', async route => {
@@ -960,120 +862,172 @@ test('Country Radar panels do not overlap at 1920x1080', async ({ page }) => {
   expect(overlaps(boxes[1]!, boxes[2]!)).toBe(false)
 })
 
-test('Overview country flags and fit readiness remain visible', async ({ page }) => {
+test('Country Radar keeps country context and evidence cards visible', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
   await expect(page.locator('.worldMapLegend .flagIcon')).toHaveCount(3)
   await expect(page.locator('.topbarCountry .flagIcon')).toHaveCount(1)
-  await expect(page.locator('.readinessRing')).toHaveCount(5)
-  await expect(page.locator('.compareBarTrack')).toHaveCount(3)
+  await expect(page.locator('.countryIdentityCard')).toBeVisible()
+  await expect(page.locator('.countryMetricCard')).toHaveCount(1)
+  await expect(page.getByText('No single composite score.')).toBeVisible()
 })
 
-
-
-test('Overview distinguishes official baseline from AUGUR model envelope', async ({ page }) => {
-  await page.route(
-    'http://127.0.0.1:8020/api/countries/ESP/scenarios',
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          country_iso3: 'ESP',
-          method: 'test',
-          horizons: [2030],
-          scenario_names: ['baseline', 'improvement', 'stress'],
+test('Future Paths distinguishes official baseline from AUGUR model scenarios', async ({ page }) => {
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/trajectory', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        method: 'official_forecast_horizon_view_v1',
+        notes: [],
+        horizons: [{
+          year: 2030,
+          indicator_count: 1,
+          sources: ['IMF'],
           indicators: [{
-            name: 'Fertility rate, total',
-            unit: 'births_per_woman',
-            scenarios: {
-              baseline: 1.26,
-              improvement: 1.42,
-              stress: 1.08,
-            },
+            country_iso3: 'ESP',
+            indicator_id: 'imf_unemployment_rate',
+            name: 'Unemployment rate (IMF WEO)',
+            dimension: 'productive_capacity',
+            period: 2030,
+            value: 8,
+            unit: 'percent',
+            source_id: 'IMF',
+            source_name: 'IMF',
+            dataset_id: 'WEO',
+            source_updated_at: '2026-04',
           }],
-          notes: [],
-        }),
-      })
-    },
-  )
+        }, {
+          year: 2035,
+          indicator_count: 1,
+          sources: ['IMF'],
+          indicators: [{
+            country_iso3: 'ESP',
+            indicator_id: 'imf_unemployment_rate',
+            name: 'Unemployment rate (IMF WEO)',
+            dimension: 'productive_capacity',
+            period: 2035,
+            value: 7.5,
+            unit: 'percent',
+            source_id: 'IMF',
+            source_name: 'IMF',
+            dataset_id: 'WEO',
+            source_updated_at: '2026-04',
+          }],
+        }],
+      }),
+    })
+  })
 
-  await page.setViewportSize({ width: 1920, height: 900 })
-  await page.goto('/country/ESP/overview')
-
-  await expect(page.locator('.signalBars')).toHaveCount(0)
-  await expect(page.getByText('DIMENSION TRAJECTORIES')).toBeVisible()
-  await expect(page.getByText('Official baseline + AUGUR envelope')).toBeVisible()
-  await expect(page.getByText('Baseline', { exact: true })).toBeVisible()
-  await expect(page.getByText('official')).toBeVisible()
-  await expect(page.getByText('Improvement')).toBeVisible()
-  await expect(page.getByText('Stress')).toBeVisible()
-  await expect(page.getByText('AUGUR model')).toHaveCount(2)
-})
-
-
-
-test('Overview explains contextual evidence and avoids duplicate model envelopes', async ({ page }) => {
-  await page.route(
-    'http://127.0.0.1:8020/api/countries/ESP/assessment',
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/scenarios', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        method: 'augur_scenario_envelope_v2',
+        horizons: [2030, 2035],
+        scenario_names: ['baseline', 'improvement', 'stress'],
+        indicators: [2030, 2035].map((period, index) => ({
           country_iso3: 'ESP',
-          method: 'test',
-          dimensions: {
-            demography: {
-              trajectory: 'contextual',
-              confidence: 'high',
-              indicator_count: 5,
-              directional_indicator_count: 0,
-              coverage: 0,
-              improving_signals: [],
-              deteriorating_signals: [],
-              stable_signals: [],
-              contextual_signals: [],
-            },
+          indicator_id: 'imf_unemployment_rate',
+          name: 'Unemployment rate (IMF WEO)',
+          dimension: 'productive_capacity',
+          period,
+          value: index ? 7.5 : 8,
+          unit: 'percent',
+          source_id: 'IMF',
+          source_name: 'IMF',
+          dataset_id: 'WEO',
+          official_baseline: index ? 7.5 : 8,
+          scenarios: {
+            baseline: index ? 7.5 : 8,
+            improvement: index ? 6 : 7,
+            stress: index ? 10 : 9.5,
           },
-        }),
-      })
-    },
-  )
+          assumption: 'AUGUR model assumption for test.',
+          uncertainty: { multiplier: index ? 1.5 : 1, level: index ? 'medium' : 'near' },
+        })),
+        notes: [],
+      }),
+    })
+  })
 
-  await page.route(
-    'http://127.0.0.1:8020/api/countries/ESP/scenarios',
-    async route => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          country_iso3: 'ESP',
-          method: 'test',
-          horizons: [2030],
-          scenario_names: ['baseline', 'improvement', 'stress'],
+  await page.goto('/country/ESP/outlook')
+  await expect(page.getByText('OFFICIAL FORECAST')).toBeVisible()
+  await expect(page.getByText('AUGUR MODEL SCENARIOS')).toBeVisible()
+  await expect(page.getByText('not official forecasts')).toBeVisible()
+  await expect(page.locator('.officialLine')).toBeVisible()
+  await expect(page.locator('.scenarioLine.improvement')).toBeVisible()
+  await expect(page.locator('.scenarioLine.stress')).toBeVisible()
+})
+
+test('Future Paths avoids fake model envelopes for contextual indicators', async ({ page }) => {
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/trajectory', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        method: 'official_forecast_horizon_view_v1',
+        notes: [],
+        horizons: [{
+          year: 2030,
+          indicator_count: 1,
+          sources: ['UN_WPP'],
           indicators: [{
+            country_iso3: 'ESP',
+            indicator_id: 'fertility_rate',
             name: 'Fertility rate, total',
+            dimension: 'demography',
+            period: 2030,
+            value: 1.26,
             unit: 'births_per_woman',
-            scenarios: {
-              baseline: 1.26,
-              improvement: 1.26,
-              stress: 1.26,
-            },
+            source_id: 'UN_WPP',
+            source_name: 'UN WPP',
+            dataset_id: 'WPP2024',
+            source_updated_at: '2024',
           }],
-          notes: [],
-        }),
-      })
-    },
-  )
+        }],
+      }),
+    })
+  })
 
-  await page.goto('/country/ESP/overview')
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/scenarios', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        method: 'augur_scenario_envelope_v2',
+        horizons: [2030],
+        scenario_names: ['baseline', 'improvement', 'stress'],
+        indicators: [{
+          country_iso3: 'ESP',
+          indicator_id: 'fertility_rate',
+          name: 'Fertility rate, total',
+          dimension: 'demography',
+          period: 2030,
+          value: 1.26,
+          unit: 'births_per_woman',
+          source_id: 'UN_WPP',
+          source_name: 'UN WPP',
+          dataset_id: 'WPP2024',
+          official_baseline: 1.26,
+          scenarios: { baseline: 1.26, improvement: 1.26, stress: 1.26 },
+          assumption: 'Contextual indicator: no automatic positive/negative adjustment applied.',
+          uncertainty: { multiplier: 1, level: 'near' },
+        }],
+        notes: [],
+      }),
+    })
+  })
 
-  await expect(page.getByText('contextual evidence')).toBeVisible()
-  await expect(page.getByText('5 indicators · none directional')).toBeVisible()
-  await expect(page.getByText('No directional AUGUR envelope applied to this contextual indicator.')).toBeVisible()
-  await expect(page.getByText('Improvement', { exact: true })).toHaveCount(0)
-  await expect(page.getByText('Stress', { exact: true })).toHaveCount(0)
+  await page.goto('/country/ESP/outlook')
+  await expect(page.getByText('No directional scenario envelope is applied.')).toBeVisible()
+  await expect(page.locator('.scenarioLine.improvement')).toHaveCount(0)
+  await expect(page.locator('.scenarioLine.stress')).toHaveCount(0)
 })
 
 test('responsive shell avoids horizontal overflow across core views', async ({ page }) => {
@@ -1092,6 +1046,7 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
       '/country/ESP/dimension/productive_capacity',
       '/country/ESP/outlook',
       '/country/ESP/profile',
+      '/country/ESP/skills',
       '/compare?countries=ESP,PRT,IRL',
     ]) {
       await page.goto(path)
