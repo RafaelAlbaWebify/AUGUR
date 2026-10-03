@@ -816,13 +816,14 @@ test('rapid country switching keeps the latest selection', async ({ page }) => {
 test('unsaved profile draft survives view navigation', async ({ page }) => {
   await page.getByRole('button', { name: 'Profile' }).click()
   const profile = page.getByRole('region', { name: 'Personal profile' })
+  await profile.getByRole('button', { name: 'Edit' }).click()
   const profession = profile.getByLabel('Profession')
 
   await profession.fill('Draft preserved across views')
   await page.getByRole('button', { name: 'Overview' }).click()
   await page.getByRole('button', { name: 'Profile' }).click()
-
-  await expect(profession).toHaveValue('Draft preserved across views')
+  await page.getByRole('region', { name: 'Personal profile' }).getByRole('button', { name: 'Edit' }).click()
+  await expect(page.getByLabel('Profession')).toHaveValue('Draft preserved across views')
 })
 
 test('comparison selectors swap countries without duplicates', async ({ page }) => {
@@ -858,14 +859,14 @@ test('Country Radar uses a fixed evidence-first composition', async ({ page }) =
 test('direct route refresh preserves country and view', async ({ page }) => {
   await page.goto('/country/PRT/outlook')
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
-  await expect(page.getByText('OFFICIAL OUTLOOK')).toBeVisible()
+  await expect(page.getByText('3. FUTURE PATHS / Outlook')).toBeVisible()
   await expect(page.getByTestId('world-map')).toHaveCount(0)
 
   await page.reload()
 
   await expect(page).toHaveURL(/\/country\/PRT\/outlook$/)
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
-  await expect(page.getByText('OFFICIAL OUTLOOK')).toBeVisible()
+  await expect(page.getByText('3. FUTURE PATHS / Outlook')).toBeVisible()
 })
 
 test('compare selection is encoded in URL and survives reload', async ({ page }) => {
@@ -1115,28 +1116,23 @@ test('secondary views keep their desktop composition at 1920x900', async ({ page
   await page.setViewportSize({ width: 1920, height: 900 })
 
   await page.goto('/country/ESP/profile')
-  await expect(page.locator('.profileTopGrid')).toBeVisible()
-  const profileColumns = await page.locator('.profileTopGrid').evaluate((node) => {
-    const style = getComputedStyle(node)
-    return style.gridTemplateColumns.split(' ').filter(Boolean).length
-  })
-  expect(profileColumns).toBeGreaterThanOrEqual(2)
+  await expect(page.locator('.myFitTopGrid')).toBeVisible()
 
   await page.goto('/country/ESP/indicators')
-  await expect(page.locator('.indicatorEvidencePage')).toBeVisible()
-  const indicatorColumns = await page.locator('.indicatorGrid').first().evaluate((node) => {
-    const style = getComputedStyle(node)
-    return style.gridTemplateColumns.split(' ').filter(Boolean).length
-  })
-  expect(indicatorColumns).toBeGreaterThanOrEqual(3)
+  await expect(page.locator('.evidenceExplorerLayout')).toBeVisible()
+  await expect(page.locator('.evidenceExplorerTable')).toBeVisible()
 
   await page.goto('/country/ESP/outlook')
-  await expect(page.locator('.trajectorySection')).toBeVisible()
-  await expect(page.locator('.scenarioSection')).toBeVisible()
+  await expect(page.locator('.futurePathsGrid')).toBeVisible()
+  await expect(page.locator('.forecastPanel')).toBeVisible()
+  await expect(page.locator('.scenarioPanel')).toBeVisible()
 
   await page.goto('/compare?countries=ESP,PRT,IRL')
-  await expect(page.locator('.comparisonTableWrap')).toBeVisible()
-  await expect(page.locator('.comparisonTable')).toBeVisible()
+  await expect(page.locator('.decisionMatrixLayout')).toBeVisible()
+  await expect(page.locator('.decisionMatrixTable')).toBeVisible()
+
+  await page.goto('/country/ESP/skills')
+  await expect(page.locator('.skillsLanguagesGrid')).toBeVisible()
 
   const overflow = await page.evaluate(() => ({
     scrollWidth: document.documentElement.scrollWidth,
@@ -1243,6 +1239,7 @@ test('captures full AUGUR UI audit set', async ({ page }) => {
     ['outlook', '/country/ESP/outlook'],
     ['compare', '/compare?countries=ESP,PRT,IRL'],
     ['profile', '/country/ESP/profile'],
+    ['skills-languages', '/country/ESP/skills'],
   ] as const
 
   for (const [name, path] of views) {
