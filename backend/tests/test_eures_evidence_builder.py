@@ -278,3 +278,57 @@ def test_csv_builder_parses_normalized_table_with_full_esco(
         "IE",
         "RO",
     ]
+
+
+def test_expected_isco_mismatch_requires_review():
+    result = module.build_eures_unit_group_evidence(
+        [
+            {
+                "occupation_label": "Systems analysts",
+                "expected_isco": "2522",
+                "shortage_countries": "IE",
+                "surplus_countries": "PT",
+            }
+        ],
+        source_metadata={"evidence_id": "test"},
+        search=lambda query, limit: [
+            _candidate(
+                "Systems analysts",
+                "2511",
+                1.0,
+                "exact_label",
+            )
+        ],
+    )
+
+    assert result["resolved_count"] == 0
+    assert result["unresolved_count"] == 1
+    assert result["unresolved"][0]["reason"] == "expected_isco_mismatch"
+    assert result["unresolved"][0]["expected_isco"] == "2522"
+    assert result["unresolved"][0]["resolved_isco"] == "2511"
+
+
+def test_expected_isco_match_is_accepted():
+    result = module.build_eures_unit_group_evidence(
+        [
+            {
+                "occupation_label": "Systems analysts",
+                "expected_isco": "2511",
+                "shortage_countries": "IE",
+                "surplus_countries": "PT",
+            }
+        ],
+        source_metadata={"evidence_id": "test"},
+        search=lambda query, limit: [
+            _candidate(
+                "Systems analysts",
+                "2511",
+                1.0,
+                "exact_label",
+            )
+        ],
+    )
+
+    assert result["resolved_count"] == 1
+    assert result["unresolved_count"] == 0
+    assert result["ready_for_review"] is True
