@@ -544,7 +544,25 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               <span>YOUR PROFILE</span>
               <h3>Inputs used for personal-fit analysis</h3>
             </div>
-            <span>{status === 'saved' ? 'Saved locally' : status === 'saving' ? 'Saving…' : status === 'error' ? 'Save unavailable' : 'Local draft'}</span>
+            <span
+              className={`profileStatusBadge ${
+                status === 'saved'
+                  ? 'saved'
+                  : status === 'saving'
+                  ? 'saving'
+                  : status === 'error'
+                  ? 'error'
+                  : 'draft'
+              }`}
+            >
+              {status === 'saved'
+                ? 'Saved locally'
+                : status === 'saving'
+                ? 'Saving…'
+                : status === 'error'
+                ? 'Save unavailable'
+                : 'Local draft'}
+            </span>
           </div>
 
           <div className="profileFieldGroup">
