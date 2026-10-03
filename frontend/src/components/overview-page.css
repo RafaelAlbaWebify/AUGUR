@@ -1807,3 +1807,143 @@
   color: #7995a7;
   font-size: 8px;
 }
+
+
+/* Compact desktop composition so the full 5×2 radar remains visible at 1920×900. */
+@media (min-width: 1400px) and (max-height: 940px) {
+  .countryRadarPage {
+    gap: 9px;
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+
+  .countryRadarHeader > div > span {
+    font-size: 20px;
+  }
+
+  .countryRadarHeader h2 {
+    font-size: 12px;
+  }
+
+  .countryIdentityCard,
+  .countryRadarMap,
+  .recentChangesPanel {
+    min-height: 306px;
+    max-height: 306px;
+  }
+
+  .countryHeroBottom {
+    padding: 18px 14px 13px;
+  }
+
+  .countryHeroBottom h3 {
+    font-size: 24px;
+  }
+
+  .countryHeroBottom p {
+    font-size: 8px;
+    line-height: 1.4;
+  }
+
+  .regionalMapView {
+    min-height: 255px;
+  }
+
+  .regionalMapCanvas,
+  .regionalMapCanvas svg {
+    min-height: 255px;
+    height: 255px;
+  }
+
+  .regionalRegionList {
+    max-height: 42px;
+  }
+
+  .recentChangeList article {
+    padding: 6px 10px;
+  }
+
+  .recentChangeList strong {
+    font-size: 8px;
+  }
+
+  .recentChangeList small,
+  .signalSplit span {
+    font-size: 7px;
+  }
+
+  .signalSplit {
+    padding: 7px 10px 8px;
+    gap: 6px;
+  }
+
+  .signalSplit > div {
+    padding: 7px;
+  }
+
+  .countryMetricGrid {
+    gap: 6px;
+  }
+
+  .countryMetricCard {
+    min-height: 130px;
+    max-height: 130px;
+    padding: 8px 9px;
+    gap: 5px;
+  }
+
+  .countryMetricIcon {
+    width: 27px;
+    height: 27px;
+    font-size: 13px;
+  }
+
+  .countryMetricIdentity {
+    grid-template-columns: 29px minmax(0, 1fr);
+    gap: 6px;
+  }
+
+  .countryMetricName {
+    font-size: 7px;
+    line-height: 1.25;
+  }
+
+  .countryMetricValue {
+    font-size: 16px;
+  }
+
+  .countryMetricTrend strong {
+    font-size: 9px;
+  }
+
+  .countryMetricTrend span {
+    font-size: 6px;
+  }
+
+  .countryMetricEvidenceRow {
+    grid-template-columns: minmax(0, 1fr) 84px;
+  }
+
+  .countryMetricSparkline {
+    min-height: 36px;
+  }
+
+  .countryMetricSparkline svg {
+    height: 34px;
+  }
+
+  .countryMetricFooter {
+    padding-top: 4px;
+    font-size: 6px;
+  }
+
+  .countryMetricPeerBadge {
+    min-height: 18px;
+    padding: 0 6px;
+    font-size: 6px;
+  }
+
+  .countryRadarFooter {
+    padding: 7px 10px;
+  }
+}
