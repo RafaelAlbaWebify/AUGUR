@@ -30,6 +30,15 @@ type Indicator = {
   trend?: Trend
 }
 
+type OverviewSeriesItem = {
+  indicator_id: string
+  name: string
+  dimension: string
+  unit: string
+  source_id: string
+  points: Array<{ period: number; value: number }>
+}
+
 type Signal = {
   indicator_id: string
   name: string
@@ -97,6 +106,7 @@ type OverviewPageProps = {
   selectedCountryName: string
   selectedCountryIso2: string
   currentIndicators: Indicator[]
+  overviewSeries: OverviewSeriesItem[]
   assessment: AssessmentResponse | null
   scenarios: ScenarioResponse | null
   compareCountries: string[]
@@ -136,12 +146,44 @@ function trajectoryTone(value?: string) {
   return 'neutral'
 }
 
+
+const DOMAIN_ICONS: Record<string, string> = {
+  economy: '€',
+  labour: '◉',
+  housing: '⌂',
+  healthcare: '✚',
+  safety: '◇',
+  environment: '●',
+  infrastructure: '▦',
+  education: '◆',
+  demography: '◌',
+  resilience: '⬟',
+}
+
+function sparklinePoints(points: Array<{ period: number; value: number }>) {
+  if (points.length < 2) return ''
+  const width = 112
+  const height = 42
+  const pad = 3
+  const values = points.map((point) => point.value)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = Math.max(1e-9, max - min)
+
+  return points.map((point, index) => {
+    const x = pad + (index / (points.length - 1)) * (width - pad * 2)
+    const y = pad + (1 - ((point.value - min) / range)) * (height - pad * 2)
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  }).join(' ')
+}
+
 export default function OverviewPage({
   countries,
   selectedCountry,
   selectedCountryName,
   selectedCountryIso2,
   currentIndicators,
+  overviewSeries,
   assessment,
   onCountryChange,
   onOpenDimension,
@@ -177,6 +219,8 @@ export default function OverviewPage({
   const pressureSignals = Object.values(assessment?.dimensions ?? {})
     .flatMap((item) => item.deteriorating_signals)
     .slice(0, 3)
+
+  const seriesById = new Map(overviewSeries.map((item) => [item.indicator_id, item]))
 
   const representative = RADAR_DOMAINS.map((domain) => {
     const preferred = domain.indicators
@@ -224,7 +268,7 @@ export default function OverviewPage({
             <div><dt>Dimensions assessed</dt><dd>{Object.keys(assessment?.dimensions ?? {}).length}</dd></div>
             <div><dt>Region focus</dt><dd>{selectedRegion ? `${selectedRegion.name} · ${selectedRegion.id}` : 'National'}</dd></div>
           </dl>
-          <p>Country evidence is active. Regional selection is available now; regional metrics will appear only where verified subnational sources exist.</p>
+          <p>{visual.summary ?? 'Country evidence is active. Regional metrics appear only where verified subnational sources exist.'}</p>
         </section>
 
         <section className="countryRadarMap">
@@ -315,15 +359,42 @@ export default function OverviewPage({
             </div>
             {item ? (
               <>
-                <strong className="countryMetricName">{item.name}</strong>
-                <div className="countryMetricValue">{formatValue(item.value, item.unit)}</div>
-                <div className="countryMetricTrend">
-                  <strong>{changeLabel(item.trend?.pct_change_1y)}</strong>
-                  <span>1y · {item.trend?.confidence ?? 'evidence pending'} evidence</span>
+                <div className="countryMetricIdentity">
+                  <span className={`countryMetricIcon ${trajectoryTone(dimensionState?.trajectory)}`}>
+                    {DOMAIN_ICONS[id] ?? '•'}
+                  </span>
+                  <strong className="countryMetricName">{item.name}</strong>
                 </div>
+
+                <div className="countryMetricEvidenceRow">
+                  <div>
+                    <div className="countryMetricValue">{formatValue(item.value, item.unit)}</div>
+                    <div className="countryMetricTrend">
+                      <strong>{changeLabel(item.trend?.pct_change_1y)}</strong>
+                      <span>vs. previous year</span>
+                    </div>
+                  </div>
+
+                  <div className="countryMetricSparkline" aria-label={`${item.name} recent history`}>
+                    {seriesById.get(item.indicator_id)?.points?.length && seriesById.get(item.indicator_id)!.points.length >= 2 ? (
+                      <svg viewBox="0 0 112 42" role="img">
+                        <polyline points={sparklinePoints(seriesById.get(item.indicator_id)!.points)} />
+                        {seriesById.get(item.indicator_id)!.points.map((point, pointIndex, allPoints) => {
+                          const coordinates = sparklinePoints(allPoints).split(' ')[pointIndex]?.split(',') ?? ['0', '0']
+                          return <circle key={point.period} cx={coordinates[0]} cy={coordinates[1]} r={pointIndex === allPoints.length - 1 ? 2.8 : 1.6} />
+                        })}
+                      </svg>
+                    ) : (
+                      <span>history unavailable</span>
+                    )}
+                  </div>
+                </div>
+
                 <div className="countryMetricFooter">
-                  <span>{item.source_id.replaceAll('_', ' ')}</span>
-                  <span>{item.period}</span>
+                  <span className="countryMetricEvidenceBadge">
+                    {item.trend?.confidence ? `${item.trend.confidence} evidence` : 'evidence pending'}
+                  </span>
+                  <span>{item.source_id.replaceAll('_', ' ')} · {item.period}</span>
                 </div>
               </>
             ) : (
