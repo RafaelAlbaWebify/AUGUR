@@ -969,6 +969,71 @@ test('Overview distinguishes observed evidence from modelled presentation', asyn
   await expect(page.getByText('AUGUR model')).toHaveCount(2)
 })
 
+
+
+test('Overview explains contextual evidence and avoids duplicate model envelopes', async ({ page }) => {
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/assessment',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          country_iso3: 'ESP',
+          method: 'test',
+          dimensions: {
+            demography: {
+              trajectory: 'contextual',
+              confidence: 'high',
+              indicator_count: 5,
+              directional_indicator_count: 0,
+              coverage: 0,
+              improving_signals: [],
+              deteriorating_signals: [],
+              stable_signals: [],
+              contextual_signals: [],
+            },
+          },
+        }),
+      })
+    },
+  )
+
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/scenarios',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          country_iso3: 'ESP',
+          method: 'test',
+          horizons: [2030],
+          scenario_names: ['baseline', 'improvement', 'stress'],
+          indicators: [{
+            name: 'Fertility rate, total',
+            unit: 'births_per_woman',
+            scenarios: {
+              baseline: 1.26,
+              improvement: 1.26,
+              stress: 1.26,
+            },
+          }],
+          notes: [],
+        }),
+      })
+    },
+  )
+
+  await page.goto('/country/ESP/overview')
+
+  await expect(page.getByText('contextual evidence')).toBeVisible()
+  await expect(page.getByText('5 indicators · none directional')).toBeVisible()
+  await expect(page.getByText('No directional AUGUR envelope applied to this contextual indicator.')).toBeVisible()
+  await expect(page.getByText('Improvement', { exact: true })).toHaveCount(0)
+  await expect(page.getByText('Stress', { exact: true })).toHaveCount(0)
+})
+
 test('responsive shell avoids horizontal overflow across core views', async ({ page }) => {
   const cases = [
     { width: 1366, height: 768 },
