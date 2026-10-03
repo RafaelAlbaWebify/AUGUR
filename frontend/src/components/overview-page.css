@@ -1996,3 +1996,35 @@
     height: 38px;
   }
 }
+
+
+/* Photo-ready local hero asset. */
+.countryHeroImage,
+.countryHeroOverlay {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.countryHeroImage {
+  z-index: 0;
+  object-fit: cover;
+}
+
+.countryHeroOverlay {
+  z-index: 1;
+  background: linear-gradient(
+    180deg,
+    rgba(2,10,16,.08) 0%,
+    rgba(2,10,16,.18) 38%,
+    rgba(2,10,16,.94) 100%
+  );
+  pointer-events: none;
+}
+
+.countryHeroMeta,
+.countryHeroBottom {
+  position: relative;
+  z-index: 2;
+}
