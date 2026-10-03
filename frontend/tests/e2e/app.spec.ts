@@ -328,6 +328,59 @@ test('switches country without a page reload', async ({ page }) => {
   await expect(selector).toHaveValue('IRL')
 })
 
+
+
+test('Outlook labels modelled scenarios without implying statistical uncertainty', async ({ page }) => {
+  await page.route(
+    'http://127.0.0.1:8020/api/countries/ESP/scenarios',
+    async route => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          country_iso3: 'ESP',
+          method: 'augur_scenario_envelope_v2',
+          horizons: [2030],
+          scenario_names: ['baseline', 'improvement', 'stress'],
+          indicators: [{
+            country_iso3: 'ESP',
+            indicator_id: 'fertility_rate',
+            name: 'Fertility rate, total',
+            dimension: 'demography',
+            period: 2030,
+            value: 1.26,
+            unit: 'births_per_woman',
+            source_id: 'official',
+            source_name: 'Official source',
+            dataset_id: 'test',
+            observation_type: 'forecast',
+            official_baseline: 1.26,
+            scenarios: {
+              baseline: 1.26,
+              improvement: 1.26,
+              stress: 1.26,
+            },
+            assumption: 'Contextual indicator: no automatic positive/negative adjustment applied.',
+            uncertainty: {
+              multiplier: 1,
+              level: 'near',
+            },
+          }],
+          notes: [],
+        }),
+      })
+    },
+  )
+
+  await page.goto('/country/ESP/outlook')
+
+  await expect(page.getByText('model horizon · near · ×1')).toBeVisible()
+  await expect(page.getByText('Baseline · official')).toBeVisible()
+  await expect(page.getByText('No directional AUGUR adjustment for this contextual indicator.')).toBeVisible()
+  await expect(page.getByText('Improvement · AUGUR')).toHaveCount(0)
+  await expect(page.getByText('Stress · AUGUR')).toHaveCount(0)
+})
+
 test('comparison remains neutral and aligned', async ({ page }) => {
   await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page.getByRole('columnheader', { name: 'Spain' })).toBeVisible()
