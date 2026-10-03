@@ -337,7 +337,7 @@ test('comparison remains neutral and aligned', async ({ page }) => {
 })
 
 
-test('Indicators route exposes drill-down evidence', async ({ page }) => {
+test('Indicators route exposes drill-down evidence without overstating provenance', async ({ page }) => {
   await page.goto('/country/ESP/overview')
   await page.getByRole('button', { name: 'Indicators' }).click()
 
@@ -345,6 +345,9 @@ test('Indicators route exposes drill-down evidence', async ({ page }) => {
   await expect(page.getByRole('region', { name: 'Indicators' })).toBeVisible()
   await expect(page.getByText('Spain evidence')).toBeVisible()
   await expect(page.getByText('Unemployment, total (% of total labor force)', { exact: true })).toBeVisible()
+  await expect(page.getByText('high trend evidence')).toBeVisible()
+  await expect(page.getByText('2 sources')).toBeVisible()
+  await expect(page.getByText('Corroborated')).toHaveCount(0)
 })
 
 test('Overview dimension cards drill into persistent dimension routes', async ({ page }) => {
@@ -356,6 +359,7 @@ test('Overview dimension cards drill into persistent dimension routes', async ({
   await expect(page.getByRole('region', { name: 'Dimension detail' })).toBeVisible()
   await expect(page.getByText('Productive capacity · Spain')).toBeVisible()
   await expect(page.getByText('Unemployment, total (% of total labor force)', { exact: true })).toBeVisible()
+  await expect(page.getByText('Directional coverage')).toBeVisible()
 
   await page.reload()
 
