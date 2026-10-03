@@ -5323,3 +5323,30 @@ body:has(.shell.detailsOpen) {
     grid-column: 1 / -1;
   }
 }
+
+
+/* Six-view navigation responsive shell */
+@media (max-width: 1100px) and (min-width: 701px) {
+  .dashboardTopbar {
+    grid-template-columns: 230px minmax(190px, 1fr) auto;
+    grid-template-areas:
+      "brand country meta"
+      "nav nav nav";
+    row-gap: 8px;
+  }
+
+  .brandCompact { grid-area: brand; }
+  .topbarCountry { grid-area: country; }
+  .topbarNav {
+    grid-area: nav;
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+  .topbarMeta { grid-area: meta; }
+
+  .topbarNav button {
+    padding: 7px 10px;
+    white-space: nowrap;
+  }
+}
