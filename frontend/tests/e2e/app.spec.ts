@@ -1032,6 +1032,33 @@ test('captures Overview desktop visual artifact', async ({ page }) => {
 })
 
 
+test('overview hero never overlaps lower dashboard row', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.goto('/country/ESP/overview')
+
+  const fit = page.locator('.overviewFitPanel')
+  const lower = page.locator('.overviewLowerGrid')
+  const map = page.locator('.overviewMapPanel')
+
+  const [fitBox, lowerBox, mapBox] = await Promise.all([
+    fit.boundingBox(),
+    lower.boundingBox(),
+    map.boundingBox(),
+  ])
+
+  expect(fitBox).not.toBeNull()
+  expect(lowerBox).not.toBeNull()
+  expect(mapBox).not.toBeNull()
+
+  expect((fitBox?.y ?? 0) + (fitBox?.height ?? 0)).toBeLessThanOrEqual(
+    (lowerBox?.y ?? 0) - 2,
+  )
+  expect((mapBox?.y ?? 0) + (mapBox?.height ?? 0)).toBeLessThanOrEqual(
+    (lowerBox?.y ?? 0) - 2,
+  )
+})
+
+
 test('overview keeps last-row content inside desktop viewport', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 })
   await page.goto('/country/ESP/overview')
