@@ -328,6 +328,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [status, setStatus] = useState<'loading' | 'ready' | 'saving' | 'saved' | 'error'>(
     () => profileDraftCache ? 'ready' : 'loading',
   )
+  const [editMode, setEditMode] = useState(false)
   const [readiness, setReadiness] = useState<ReadinessResponse | null>(null)
   const [financialFit, setFinancialFit] = useState<FinancialFitResponse | null>(null)
   const [legalFit, setLegalFit] = useState<LegalFitResponse | null>(null)
@@ -523,193 +524,70 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     },
   ]
 
+  const priorityOptions = [
+    ['healthcare', 'Good healthcare'],
+    ['safety', 'Safe environment'],
+    ['climate', 'Mild climate'],
+    ['housing', 'Reasonable housing costs'],
+    ['career', 'Career opportunities'],
+    ['mobility', 'EU mobility'],
+  ] as const
+
+  function togglePriority(key: string) {
+    const preferences = { ...profile.preferences }
+    const storageKey = `priority_${key}`
+    if (preferences[storageKey] === true) delete preferences[storageKey]
+    else preferences[storageKey] = true
+    setProfile({ ...profile, preferences })
+  }
+
+  const gaps = completionItems.filter(([, item]) => !item.ready)
+  const studyHours = typeof profile.preferences.language_study_hours_per_week === 'number'
+    ? profile.preferences.language_study_hours_per_week
+    : null
+
   return (
-    <section className="profilePageV2" aria-label="Personal profile">
-      <header className="profilePageHeader">
+    <section className="profilePageV3" aria-label="Personal profile">
+      <header className="myFitHeader">
         <div>
-          <span>PROFILE</span>
-          <h2>Your information</h2>
-          <p>Stored locally · never changes country facts</p>
+          <span>5. MY FIT / Profile</span>
+          <h2>Your profile, gaps and actionable recommendations</h2>
         </div>
-        <div className="profileTargetBadge">
-          <span>Evaluating</span>
-          <strong>{targetCountry}</strong>
-        </div>
+        <p>Build your profile to improve personal-fit evidence for {targetCountry}.</p>
       </header>
 
-      <div className="profileTopGrid">
-        <section className="profileEditorCard" aria-label="Profile inputs">
-          <div className="profileSectionHeading">
-            <div>
-              <span>YOUR PROFILE</span>
-              <h3>Inputs used for personal-fit analysis</h3>
-            </div>
-            <span
-              className={`profileStatusBadge ${
-                status === 'saved'
-                  ? 'saved'
-                  : status === 'saving'
-                  ? 'saving'
-                  : status === 'error'
-                  ? 'error'
-                  : 'draft'
-              }`}
-            >
-              {status === 'saved'
-                ? 'Saved locally'
-                : status === 'saving'
-                ? 'Saving…'
-                : status === 'error'
-                ? 'Save unavailable'
-                : 'Local draft'}
-            </span>
-          </div>
-
-          <div className="profileFieldGroup">
-            <h4>Personal</h4>
-            <div className="profileGrid profileGridPersonal">
-              <label>
-                <span>Age</span>
-                <input
-                  type="number"
-                  min={16}
-                  max={100}
-                  value={profile.age ?? ''}
-                  onChange={(event) => setProfile({ ...profile, age: event.target.value ? Number(event.target.value) : null })}
-                />
-              </label>
-              <label>
-                <span>Current country (ISO3)</span>
-                <input
-                  maxLength={3}
-                  value={profile.current_country ?? ''}
-                  placeholder="e.g. ESP"
-                  onChange={(event) => setProfile({ ...profile, current_country: event.target.value })}
-                />
-              </label>
-              <label>
-                <span>Citizenships</span>
-                <input value={citizenshipsText} placeholder="e.g. ESP, IRL" onChange={(event) => setCitizenshipsText(event.target.value)} />
-              </label>
-            </div>
-          </div>
-
-          <div className="profileFieldGroup">
-            <h4>Career</h4>
-            <div className="profileGrid profileGridCareer">
-              <label>
-                <span>Profession</span>
-                <input
-                  value={profile.profession ?? ''}
-                  placeholder="e.g. Systems engineer"
-                  onChange={(event) => setProfile({ ...profile, profession: event.target.value || null })}
-                />
-              </label>
-              <label>
-                <span>Skills</span>
-                <input value={skillsText} placeholder="e.g. Windows, Azure, Python, SQL" onChange={(event) => setSkillsText(event.target.value)} />
-              </label>
-            </div>
-          </div>
-
-          <div className="profileFieldGroup">
-            <h4>Languages</h4>
-            <div className="profileGrid profileGridLanguages">
-              <label>
-                <span>Languages · optional CEFR</span>
-                <input value={languagesText} placeholder="e.g. Spanish:C2, English:B2" onChange={(event) => setLanguagesText(event.target.value)} />
-              </label>
-              <label>
-                <span>Language study hours / week · TTV</span>
-                <input
-                  type="number"
-                  min={1}
-                  max={80}
-                  step={1}
-                  value={
-                    typeof profile.preferences.language_study_hours_per_week === 'number'
-                      ? profile.preferences.language_study_hours_per_week
-                      : ''
-                  }
-                  placeholder="e.g. 10"
-                  onChange={(event) => {
-                    const preferences = { ...profile.preferences }
-                    if (event.target.value) {
-                      preferences.language_study_hours_per_week = Number(event.target.value)
-                    } else {
-                      delete preferences.language_study_hours_per_week
-                    }
-                    setProfile({ ...profile, preferences })
-                  }}
-                />
-              </label>
-            </div>
-          </div>
-
-          <div className="profileFieldGroup">
-            <h4>Financial / household</h4>
-            <div className="profileGrid profileGridFinancial">
-              <label>
-                <span>Household size</span>
-                <small className="profileFieldNote">Stored for future household-budget modelling; not used in current FinancialFit.</small>
-                <input
-                  type="number"
-                  min={1}
-                  max={20}
-                  value={profile.household_size}
-                  onChange={(event) => setProfile({ ...profile, household_size: Number(event.target.value) || 1 })}
-                />
-              </label>
-              <label>
-                <span>Monthly net income</span>
-                <input
-                  type="number"
-                  min={0}
-                  value={profile.monthly_net_income ?? ''}
-                  onChange={(event) => setProfile({ ...profile, monthly_net_income: event.target.value ? Number(event.target.value) : null })}
-                />
-              </label>
-              <label>
-                <span>Liquid savings</span>
-                <small className="profileFieldNote">Stored for future transition-cost/runway modelling; not used in current FinancialFit.</small>
-                <input
-                  type="number"
-                  min={0}
-                  value={profile.liquid_savings ?? ''}
-                  onChange={(event) => setProfile({ ...profile, liquid_savings: event.target.value ? Number(event.target.value) : null })}
-                />
-              </label>
-              <label className="profileCheckbox">
-                <input
-                  type="checkbox"
-                  checked={profile.remote_work}
-                  onChange={(event) => setProfile({ ...profile, remote_work: event.target.checked })}
-                />
-                <span>Remote work is viable</span>
-              </label>
-            </div>
-          </div>
-
-          <div className="profileSaveRow">
-            <button type="button" onClick={save} disabled={status === 'saving'}>
-              {status === 'saving' ? 'Saving…' : 'Save profile'}
+      <div className="myFitTopGrid">
+        <section className="myFitCard profileSummaryCard">
+          <div className="myFitCardHeader">
+            <h3>Your profile</h3>
+            <button type="button" onClick={() => setEditMode((value) => !value)}>
+              {editMode ? 'Close edit' : 'Edit'}
             </button>
           </div>
+          <dl className="profileSummaryList">
+            <div><dt>Age</dt><dd>{profile.age ?? 'Not set'}</dd></div>
+            <div><dt>Current country</dt><dd>{profile.current_country ?? 'Not set'}</dd></div>
+            <div><dt>Citizenships</dt><dd>{profile.citizenships.length ? profile.citizenships.join(', ') : 'Not set'}</dd></div>
+            <div><dt>Profession</dt><dd>{profile.profession ?? 'Not set'}</dd></div>
+            <div><dt>Key skills</dt><dd>{profile.skills.length ? profile.skills.join(', ') : 'Not set'}</dd></div>
+            <div><dt>Languages</dt><dd>{profile.languages.length ? profile.languages.map((item) => item.cefr ? `${item.language} (${item.cefr})` : item.language).join(', ') : 'Not set'}</dd></div>
+            <div><dt>Study hours / week</dt><dd>{studyHours ?? 'Not set'}</dd></div>
+            <div><dt>Monthly net income</dt><dd>{profile.monthly_net_income == null ? 'Not set' : `€${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(profile.monthly_net_income)}`}</dd></div>
+          </dl>
+          <span className={`profileStatusBadge ${status === 'saved' ? 'saved' : status === 'error' ? 'error' : 'draft'}`}>
+            {status === 'saved' ? 'Saved locally' : status === 'error' ? 'Save unavailable' : 'Local draft'}
+          </span>
         </section>
 
-        <aside className="profileCompletionCard" role="region" aria-label="Profile completion">
-          <div className="profileSectionHeading">
-            <div>
-              <span>PROFILE COMPLETION</span>
-              <h3>{readiness ? `${readiness.ready_module_count} / ${readiness.module_count} input sets ready` : 'Checking inputs…'}</h3>
-            </div>
+        <section className="myFitCard" role="region" aria-label="Profile completion">
+          <div className="myFitCardHeader">
+            <h3>Profile completion</h3>
+            <strong>{readiness ? `${readiness.ready_module_count} / ${readiness.module_count} input sets ready` : 'Checking…'}</strong>
           </div>
-
           <div className="completionMeter" aria-hidden="true">
             <i style={{ width: readiness && readiness.module_count ? `${(readiness.ready_module_count / readiness.module_count) * 100}%` : '0%' }} />
           </div>
-
-          <div className="completionList">
+          <div className="completionList compactCompletionList">
             {completionItems.map(([moduleId, item]) => (
               <div className={item.ready ? 'complete' : 'incomplete'} key={moduleId}>
                 <span>{item.ready ? '✓' : '○'}</span>
@@ -720,255 +598,170 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               </div>
             ))}
           </div>
+          <p>Completion measures required inputs only. It is not a country-fit score.</p>
+        </section>
 
-          <p>Completion only confirms that required profile inputs exist. It is not a country-fit score.</p>
-        </aside>
+        <section className="myFitCard keyActionsCard">
+          <div className="myFitCardHeader">
+            <h3>Key gaps and actions</h3>
+            <span>{gaps.length ? `${gaps.length} open` : 'Ready'}</span>
+          </div>
+          <div className="keyActionList">
+            {gaps.map(([moduleId, item]) => (
+              <article key={moduleId}>
+                <div>
+                  <strong>{item.label} incomplete</strong>
+                  <span>Add: {item.missing_fields.join(', ')}</span>
+                </div>
+                <button type="button" onClick={() => setEditMode(true)}>Add</button>
+              </article>
+            ))}
+            {!gaps.length && (
+              <article className="actionComplete">
+                <div>
+                  <strong>Core inputs complete</strong>
+                  <span>Review evidence quality and remaining country-specific blockers below.</span>
+                </div>
+              </article>
+            )}
+          </div>
+        </section>
       </div>
 
-      <section className="profileEvidenceSection" aria-label="Personal-fit evidence">
-        <div className="profileSectionHeading">
-          <div>
-            <span>PERSONAL-FIT EVIDENCE · {targetCountry}</span>
-            <h3>Evidence availability</h3>
+      {editMode && (
+        <section className="profileEditorCard myFitEditor" aria-label="Profile inputs">
+          <div className="profileSectionHeading">
+            <div><span>EDIT PROFILE</span><h3>Inputs used for personal-fit analysis</h3></div>
           </div>
-          <small>complete · partial · incomplete</small>
-        </div>
 
-        <div className="evidenceStatusGrid">
-          {evidenceItems.map((item) => (
-            <article className={`evidenceStatusCard ${item.state}`} key={item.id}>
-              <span className="evidenceStateMark">{item.state === 'complete' ? '●' : item.state === 'partial' ? '◐' : '○'}</span>
-              <strong>{item.label}</strong>
-              <span>{item.state}</span>
-              <small>{item.detail}</small>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="fitOutputsSection" aria-label="Fit outputs">
-        <div className="profileSectionHeading">
-          <div>
-            <span>FIT OUTPUTS · {targetCountry}</span>
-            <h3>What AUGUR can currently conclude</h3>
+          <div className="profileFieldGroup">
+            <h4>Personal</h4>
+            <div className="profileGrid profileGridPersonal">
+              <label><span>Age</span><input type="number" min={16} max={100} value={profile.age ?? ''} onChange={(event) => setProfile({ ...profile, age: event.target.value ? Number(event.target.value) : null })} /></label>
+              <label><span>Current country (ISO3)</span><input maxLength={3} value={profile.current_country ?? ''} placeholder="e.g. ESP" onChange={(event) => setProfile({ ...profile, current_country: event.target.value })} /></label>
+              <label><span>Citizenships</span><input value={citizenshipsText} placeholder="e.g. ESP, IRL" onChange={(event) => setCitizenshipsText(event.target.value)} /></label>
+            </div>
           </div>
-        </div>
 
+          <div className="profileFieldGroup">
+            <h4>Career</h4>
+            <div className="profileGrid profileGridCareer">
+              <label><span>Profession</span><input value={profile.profession ?? ''} placeholder="e.g. Systems engineer" onChange={(event) => setProfile({ ...profile, profession: event.target.value || null })} /></label>
+              <label><span>Skills</span><input value={skillsText} placeholder="e.g. Windows, Azure, Python, SQL" onChange={(event) => setSkillsText(event.target.value)} /></label>
+            </div>
+          </div>
+
+          <div className="profileFieldGroup">
+            <h4>Languages</h4>
+            <div className="profileGrid profileGridLanguages">
+              <label><span>Languages · optional CEFR</span><input value={languagesText} placeholder="e.g. Spanish:C2, English:B2" onChange={(event) => setLanguagesText(event.target.value)} /></label>
+              <label>
+                <span>Language study hours / week</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={80}
+                  value={studyHours ?? ''}
+                  onChange={(event) => {
+                    const preferences = { ...profile.preferences }
+                    if (event.target.value) preferences.language_study_hours_per_week = Number(event.target.value)
+                    else delete preferences.language_study_hours_per_week
+                    setProfile({ ...profile, preferences })
+                  }}
+                />
+              </label>
+            </div>
+          </div>
+
+          <div className="profileFieldGroup">
+            <h4>Financial / household</h4>
+            <div className="profileGrid profileGridFinancial">
+              <label><span>Household size</span><input type="number" min={1} max={20} value={profile.household_size} onChange={(event) => setProfile({ ...profile, household_size: Number(event.target.value) || 1 })} /></label>
+              <label><span>Monthly net income</span><input type="number" min={0} value={profile.monthly_net_income ?? ''} onChange={(event) => setProfile({ ...profile, monthly_net_income: event.target.value ? Number(event.target.value) : null })} /></label>
+              <label><span>Liquid savings</span><input type="number" min={0} value={profile.liquid_savings ?? ''} onChange={(event) => setProfile({ ...profile, liquid_savings: event.target.value ? Number(event.target.value) : null })} /></label>
+              <label className="profileCheckbox"><input type="checkbox" checked={profile.remote_work} onChange={(event) => setProfile({ ...profile, remote_work: event.target.checked })} /><span>Remote work is viable</span></label>
+            </div>
+          </div>
+
+          <div className="profileSaveRow">
+            <button type="button" onClick={save} disabled={status === 'saving'}>{status === 'saving' ? 'Saving…' : 'Save profile'}</button>
+          </div>
+        </section>
+      )}
+
+      <div className="myFitSecondGrid">
+        <section className="myFitCard prioritiesCard">
+          <div className="myFitCardHeader"><h3>Your priorities</h3><span>Used only when explicit</span></div>
+          <p>Select what matters most to you. These preferences are stored locally; they do not alter objective country evidence.</p>
+          <div className="priorityChipGrid">
+            {priorityOptions.map(([key, label]) => {
+              const active = profile.preferences[`priority_${key}`] === true
+              return (
+                <button type="button" className={active ? 'active' : ''} key={key} onClick={() => togglePriority(key)}>
+                  {label}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        <section className="myFitCard profileEvidenceCard" aria-label="Personal-fit evidence">
+          <div className="myFitCardHeader">
+            <h3>Profile evidence</h3>
+            <span>{targetCountry}</span>
+          </div>
+          <p>What evidence is available for the current personal-fit modules.</p>
+          <div className="evidenceStatusGrid">
+            {evidenceItems.map((item) => (
+              <article className={`evidenceStatusCard ${item.state}`} key={item.id}>
+                <span className="evidenceStateMark">{item.state === 'complete' ? '●' : item.state === 'partial' ? '◐' : '○'}</span>
+                <strong>{item.label.replace('Fit', '')}</strong>
+                <span>{item.state}</span>
+                <small>{item.detail}</small>
+              </article>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <details className="myFitDetails">
+        <summary>Detailed fit evidence and TTV</summary>
         <div className="fitOutputGrid">
           <article className="fitOutputCard">
             <div className="fitOutputHeader"><span>LEGAL</span><strong>{legalFit?.status?.replaceAll('_', ' ') ?? 'loading'}</strong></div>
             <dl>
-              <div><dt>Result</dt><dd>{legalFit?.status === 'eu_free_movement_framework' ? 'EU free-movement framework' : legalFit?.status === 'domestic' ? 'Domestic case' : 'Not yet conclusive'}</dd></div>
-              <div><dt>Why</dt><dd>{legalFit?.work_permit_required === false ? 'Work permit not required under the identified framework.' : 'Profile or country-specific rules still limit the conclusion.'}</dd></div>
-              <div><dt>Limitation</dt><dd>Long-stay conditions and national registration formalities may still apply.</dd></div>
+              <div><dt>Framework</dt><dd>{legalFit?.framework?.replaceAll('_', ' ') ?? 'Not conclusive'}</dd></div>
+              <div><dt>Work permit</dt><dd>{legalFit?.work_permit_required === false ? 'Not required under identified framework' : 'Not established'}</dd></div>
             </dl>
           </article>
-
           <article className="fitOutputCard">
             <div className="fitOutputHeader"><span>LANGUAGE</span><strong>{languageFit?.status?.replaceAll('_', ' ') ?? 'loading'}</strong></div>
             <dl>
-              <div><dt>Result</dt><dd>{languageFit ? (languageFit.work_ready ? `Meets AUGUR ${languageFit.work_ready_threshold}+ heuristic` : `Below AUGUR ${languageFit.work_ready_threshold} heuristic`) : 'Loading evidence'}</dd></div>
-              <div><dt>Why</dt><dd>{languageFit?.target_languages?.length ? `Target: ${languageFit.target_languages.join(' · ')}` : 'Target-language evidence unavailable.'}</dd></div>
-              <div>
-                <dt>Evidence</dt>
-                <dd>
-                  {languageFit?.occupation_language_evidence?.status === 'occupation_language_evidence_available'
-                    ? `ESCO ${languageFit.occupation_language_evidence.dataset_version ?? ''} · ${languageFit.occupation_language_evidence.occupation_label} · ${languageFit.occupation_language_evidence.essential_skill_count} essential / ${languageFit.occupation_language_evidence.optional_skill_count} optional language skills`
-                    : languageFit?.occupation_language_evidence
-                    ? `ESCO occupation-language evidence: ${languageFit.occupation_language_evidence.status.replaceAll('_', ' ')}`
-                    : 'ESCO occupation-language evidence not evaluated.'}
-                </dd>
-              </div>
-              <div><dt>Limitation</dt><dd>B2 is an AUGUR employment heuristic, not a legal requirement; ESCO relations do not encode CEFR level.</dd></div>
+              <div><dt>Targets</dt><dd>{languageFit?.target_languages?.join(' · ') || 'Unavailable'}</dd></div>
+              <div><dt>Work-ready heuristic</dt><dd>{languageFit?.work_ready ? 'Met' : 'Not met / incomplete'}</dd></div>
             </dl>
           </article>
-
           <article className="fitOutputCard">
             <div className="fitOutputHeader"><span>CAREER</span><strong>{careerFit?.status?.replaceAll('_', ' ') ?? 'loading'}</strong></div>
             <dl>
-              <div><dt>Result</dt><dd>{careerFit?.market_signal?.replaceAll('_', ' ') ?? 'No conclusive market signal'}</dd></div>
-              <div>
-                <dt>Why</dt>
-                <dd>
-                  {careerFit?.occupation_match?.selected
-                    ? `ESCO: ${careerFit.occupation_match.selected.preferred_label} · ${careerFit.occupation.isco_submajor ? `ISCO ${careerFit.occupation.isco_submajor} · ` : ''}${Math.round(careerFit.occupation_match.selected.match_score * 100)}% label match`
-                    : careerFit?.occupation.occupation_group
-                    ? `Occupation group: ${careerFit.occupation.occupation_group.replaceAll('_', ' ')} · no confident ESCO occupation match`
-                    : 'Occupation not yet mapped.'}
-                </dd>
-              </div>
-              <div>
-                <dt>Market evidence</dt>
-                <dd>
-                  {careerFit?.source
-                    ? `EURES ${careerFit.source.report_year ?? careerFit.rule_version} · ${careerFit.source.conditions_year ? `${careerFit.source.conditions_year} conditions · ` : ''}${careerFit.market_signal?.replaceAll('_', ' ') ?? 'signal unavailable'}${careerFit.market_signal_isco ? ` · ISCO ${careerFit.market_signal_isco} ${careerFit.market_signal_scope === 'isco_unit_group' ? 'unit' : 'broad'}` : ''}${careerFit.source.evidence_id ? ` · ${careerFit.source.evidence_id}` : ''}`
-                    : 'EURES market evidence unavailable.'}
-                </dd>
-              </div>
-              <div>
-                <dt>Skill evidence</dt>
-                <dd>
-                  {careerFit?.skill_match.dataset_mode
-                    ? `ESCO ${careerFit.skill_match.dataset_mode} · ${careerFit.skill_match.coverage == null ? 'coverage unavailable' : `${Math.round(careerFit.skill_match.coverage * 100)}% essential-skill coverage`}`
-                    : 'ESCO skill evidence not evaluated.'}
-                </dd>
-              </div>
-              <div>
-                <dt>Demand context</dt>
-                <dd>
-                  {careerFit?.vacancy_demand_evidence?.status === 'available'
-                    ? `Eurostat ${careerFit.vacancy_demand_evidence.period} · ISCO ${careerFit.vacancy_demand_evidence.isco_major} vacancy rate ${careerFit.vacancy_demand_evidence.vacancy_rate_pct?.toFixed(1)}% · context only`
-                    : careerFit?.vacancy_demand_evidence
-                    ? `Eurostat vacancy-rate context: ${careerFit.vacancy_demand_evidence.status.replaceAll('_', ' ')}`
-                    : 'Eurostat vacancy-rate context not evaluated.'}
-                </dd>
-              </div>
-              <div>
-                <dt>TTV gate</dt>
-                <dd>
-                  {careerFit?.viability_evidence_ready
-                    ? 'Supportive shortage signal + complete declared essential-skill coverage'
-                    : careerFit?.evidence_complete
-                    ? `Blocked · ${careerFit.profile_skill_coverage_complete ? 'essential skills covered' : 'essential skill coverage incomplete'} · ${careerFit.market_signal_supports_viability ? 'supportive market signal' : 'market signal not supportive'}`
-                    : 'Blocked · career evidence incomplete'}
-                </dd>
-              </div>
-              <div><dt>Limitation</dt><dd>{careerFit?.evidence_complete ? 'AUGUR only treats declared essential-skill coverage as present; undeclared skills are not inferred.' : 'Evidence remains partial until a confident ESCO occupation match and full skill dataset are available.'}</dd></div>
+              <div><dt>Market signal</dt><dd>{careerFit?.market_signal?.replaceAll('_', ' ') ?? 'Unavailable'}</dd></div>
+              <div><dt>Skill coverage</dt><dd>{careerFit?.skill_match.coverage == null ? 'Unavailable' : `${Math.round(careerFit.skill_match.coverage * 100)}%`}</dd></div>
             </dl>
           </article>
-
           <article className="fitOutputCard">
             <div className="fitOutputHeader"><span>FINANCIAL</span><strong>{financialFit?.status?.replaceAll('_', ' ') ?? 'loading'}</strong></div>
             <dl>
-              <div>
-                <dt>Result</dt>
-                <dd>
-                  {financialFit?.portable_income_analysis
-                    ? `${financialFit.portable_income_analysis.purchasing_power_change_pct > 0 ? '+' : ''}${financialFit.portable_income_analysis.purchasing_power_change_pct.toFixed(1)}% purchasing-power change`
-                    : financialFit?.local_income_reference
-                    ? `€${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(financialFit.local_income_reference.gross_monthly_mean_eur)} gross/month reference`
-                    : 'Not yet conclusive'}
-                </dd>
-              </div>
-              <div>
-                <dt>Why</dt>
-                <dd>
-                  {financialFit?.portable_income_analysis
-                    ? `Relative cost factor ×${financialFit.portable_income_analysis.relative_cost_factor.toFixed(2)}`
-                    : financialFit?.local_income_reference
-                    ? `Eurostat SES ${financialFit.local_income_reference.period} · ${financialFit.local_income_reference.occupation_label} · ${financialFit.local_income_reference.ses_isco_major_group}`
-                    : 'Portable or local-income evidence unavailable.'}
-                </dd>
-              </div>
-              <div>
-                <dt>Blockers</dt>
-                <dd>
-                  {!financialFit
-                    ? 'Loading financial evidence.'
-                    : financialFit.blockers?.length
-                    ? financialFit.blockers.map((item) => item.replaceAll('_', ' ')).join(' · ')
-                    : financialFit.evidence_complete
-                    ? 'No unresolved financial evidence blockers.'
-                    : 'Financial evidence remains incomplete; no explicit blocker list was returned.'}
-                </dd>
-              </div>
-              <div>
-                <dt>Limitation</dt>
-                <dd>
-                  {financialFit?.local_income_reference
-                    ? financialFit.national_net_earnings_reference
-                      ? `Gross occupation reference + €${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(financialFit.national_net_earnings_reference.monthly_net_equivalent_eur)} net/month national average-worker benchmark; occupation-specific net pay is not inferred.`
-                      : 'Structural mean gross earnings only; occupation-specific net pay, taxes, location and household budget are not yet modelled.'
-                    : 'Local-income and household assumptions may require additional evidence.'}
-                </dd>
-              </div>
+              <div><dt>Evidence</dt><dd>{financialFit?.evidence_state?.replaceAll('_', ' ') ?? 'Unavailable'}</dd></div>
+              <div><dt>Blockers</dt><dd>{financialFit?.blockers?.length ? financialFit.blockers.join(' · ').replaceAll('_', ' ') : 'None returned'}</dd></div>
             </dl>
           </article>
         </div>
-      </section>
-
-      <section className="ttvReadinessSection" aria-label="TTV readiness">
-        <div className="profileSectionHeading">
-          <div>
-            <span>TTV READINESS · {targetCountry}</span>
-            <h3>Dependency path</h3>
-          </div>
-          <strong>
-            {ttv?.ready_for_time_estimate
-              ? 'Estimate available'
-              : ttv?.dependency_ready
-              ? 'Dependencies ready · temporal model missing'
-              : 'Time estimate unavailable'}
-          </strong>
+        <div className="ttvCompact">
+          <strong>TTV</strong>
+          <span>{ttv?.ready_for_time_estimate ? 'Estimate available' : ttv?.dependency_ready ? 'Dependencies ready · temporal model incomplete' : 'Blocked by incomplete dependencies'}</span>
         </div>
-
-        <div className="ttvDependencyPath">
-          {(ttv?.stage_order ?? ['legal_fit', 'language_fit', 'career_fit', 'financial_fit']).map((stageId, index, stages) => {
-            const stage = ttv?.stages?.[stageId]
-            return (
-              <div className="ttvStageWrap" key={stageId}>
-                <div className={`ttvStage ${stage?.ready ? 'ready' : 'blocked'}`}>
-                  <span>{stage?.ready ? '✓' : '○'}</span>
-                  <strong>{stageId.replace('_fit', 'Fit').replace('_', ' ')}</strong>
-                  <small>{stage?.evidence_state?.replaceAll('_', ' ') ?? 'checking'}</small>
-                </div>
-                {index < stages.length - 1 && <span className="ttvConnector">→</span>}
-              </div>
-            )
-          })}
-          <span className="ttvConnector">→</span>
-          <div className={`ttvStage final ${ttv?.ready_for_time_estimate ? 'ready' : 'blocked'}`}>
-            <span>{ttv?.ready_for_time_estimate ? '✓' : '○'}</span>
-            <strong>TTV</strong>
-            <small>{ttv?.ready_for_time_estimate ? 'ready' : 'blocked'}</small>
-          </div>
-        </div>
-
-        {!ttv?.ready_for_time_estimate && (
-          <div className="ttvBlockedReason">
-            <strong>{ttv?.dependency_ready ? 'Timing model' : 'Blocked by'}</strong>
-            <span>
-              {ttv?.dependency_ready
-                ? `Temporal evidence: ${ttv.temporal_evidence_state?.replaceAll('_', ' ') ?? 'not implemented'}`
-                : ttv?.blocker_details?.length
-                ? ttv.blocker_details
-                    .map((item) => `${item.stage_id.replaceAll('_', ' ')} · ${(item.reason ?? item.status).replaceAll('_', ' ')} · ${item.evidence_state.replaceAll('_', ' ')}`)
-                    .join(' | ')
-                : ttv?.blocked_by?.length
-                ? ttv.blocked_by.map((item) => item.replaceAll('_', ' ')).join(' · ')
-                : 'Waiting for evidence'}
-            </span>
-          </div>
-        )}
-
-        {ttv?.temporal_evidence && (
-          <div className="ttvTemporalEvidence">
-            <strong>Temporal evidence · candidate only</strong>
-            {ttv.candidate_time_range ? (
-              <span>
-                {ttv.candidate_time_range.weeks_min}–{ttv.candidate_time_range.weeks_max} weeks · {ttv.candidate_time_range.composition === 'critical_path_v1' ? 'critical path: preparation parallel → employment → financial' : ttv.candidate_time_range.composition.replaceAll('_', ' ')} · not an AUGUR estimate
-              </span>
-            ) : (
-              <span>
-                Missing calendar evidence: {ttv.temporal_evidence.unavailable_stages.join(' · ') || 'none'}
-              </span>
-            )}
-            {ttv.temporal_evidence.stages.language?.guided_hours_min != null && (
-              <small>
-                Language: {ttv.temporal_evidence.stages.language.guided_hours_min}–{ttv.temporal_evidence.stages.language.guided_hours_max} guided hours
-                {ttv.temporal_evidence.stages.language.weekly_study_hours
-                  ? ` · ${ttv.temporal_evidence.stages.language.weekly_study_hours} h/week`
-                  : ' · add study hours/week for calendar conversion'}
-              </small>
-            )}
-          </div>
-        )}
-
-        <p>
-          Time-to-viability requires both viable dependencies and a validated temporal evidence model.
-          Dependency readiness alone never creates a duration.
-        </p>
-      </section>
+      </details>
     </section>
   )
 }
+
