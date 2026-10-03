@@ -32,6 +32,12 @@ def main() -> int:
     print(f"schema_version: {result['schema_version']}")
     print(f"imported_count: {result['imported_count']}")
     print(f"case_count: {status['case_count']}")
+    print(f"development_case_count: {status['development_case_count']}")
+    print(f"holdout_case_count: {status['holdout_case_count']}")
+    print(
+        "protocol_ready_for_holdout: "
+        f"{status['protocol_ready_for_holdout']}"
+    )
     print(f"country_count: {status['country_count']}")
     print(
         "interval_coverage_pct: "
