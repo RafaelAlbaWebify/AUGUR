@@ -660,3 +660,293 @@
     grid-column: auto;
   }
 }
+
+
+/* My Fit dashboard */
+.profilePageV3 {
+  display: grid;
+  gap: 14px;
+  padding: 18px 22px 28px;
+  color: #dce8ef;
+}
+
+.myFitHeader {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.myFitHeader > div > span {
+  display: block;
+  color: #f3f8fb;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.myFitHeader h2 {
+  margin: 4px 0 0;
+  color: #96acc0;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.myFitHeader p {
+  margin: 0;
+  color: #849aaa;
+  font-size: 10px;
+}
+
+.myFitTopGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr) minmax(0, 1fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.myFitSecondGrid {
+  display: grid;
+  grid-template-columns: minmax(300px, .72fr) minmax(0, 1.7fr);
+  gap: 12px;
+}
+
+.myFitCard {
+  border: 1px solid var(--profile-border);
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(8, 21, 33, .96), rgba(5, 14, 23, .96));
+  padding: 14px;
+  box-shadow: 0 14px 28px rgba(0,0,0,.16);
+}
+
+.myFitCardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 11px;
+}
+
+.myFitCardHeader h3 {
+  margin: 0;
+  color: #eff6fa;
+  font-size: 15px;
+}
+
+.myFitCardHeader > strong,
+.myFitCardHeader > span {
+  color: #7f98aa;
+  font-size: 9px;
+}
+
+.myFitCardHeader button,
+.keyActionList button {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid rgba(71, 160, 219, .35);
+  border-radius: 7px;
+  background: rgba(11, 73, 110, .26);
+  color: #79caff;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.profileSummaryList {
+  margin: 0;
+  display: grid;
+  gap: 0;
+}
+
+.profileSummaryList > div {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  gap: 9px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--profile-border);
+}
+
+.profileSummaryList dt {
+  color: #7e96a7;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.profileSummaryList dd {
+  margin: 0;
+  color: #d7e4eb;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+.profileSummaryCard .profileStatusBadge {
+  margin-top: 10px;
+}
+
+.compactCompletionList {
+  gap: 6px;
+}
+
+.compactCompletionList > div {
+  padding: 7px 8px;
+}
+
+.keyActionList {
+  display: grid;
+  gap: 7px;
+}
+
+.keyActionList article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 9px;
+  border: 1px solid var(--profile-border);
+  border-radius: 9px;
+  background: rgba(7, 18, 29, .58);
+}
+
+.keyActionList article > div {
+  display: grid;
+  gap: 3px;
+}
+
+.keyActionList strong {
+  color: #e4edf2;
+  font-size: 9px;
+}
+
+.keyActionList span {
+  color: #7f96a6;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.keyActionList .actionComplete {
+  grid-template-columns: 1fr;
+  border-color: rgba(65, 156, 104, .28);
+}
+
+.myFitEditor {
+  padding: 15px;
+}
+
+.prioritiesCard > p,
+.profileEvidenceCard > p {
+  margin: 0 0 10px;
+  color: #7f96a6;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.priorityChipGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.priorityChipGrid button {
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--profile-border);
+  border-radius: 9px;
+  background: rgba(6, 17, 27, .58);
+  color: #9eb2c0;
+  font-size: 9px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.priorityChipGrid button.active {
+  border-color: rgba(66, 171, 234, .55);
+  background: rgba(12, 82, 124, .27);
+  color: #e5f4ff;
+}
+
+.profileEvidenceCard .evidenceStatusGrid {
+  margin-top: 0;
+}
+
+.myFitDetails {
+  border: 1px solid var(--profile-border);
+  border-radius: 12px;
+  background: rgba(7, 18, 29, .72);
+  overflow: hidden;
+}
+
+.myFitDetails summary {
+  padding: 11px 13px;
+  color: #a9bcc8;
+  font-size: 9px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.myFitDetails[open] summary {
+  border-bottom: 1px solid var(--profile-border);
+}
+
+.myFitDetails .fitOutputGrid {
+  padding: 12px;
+}
+
+.ttvCompact {
+  margin: 0 12px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px;
+  border: 1px solid var(--profile-border);
+  border-radius: 9px;
+  background: rgba(6, 17, 27, .56);
+}
+
+.ttvCompact strong {
+  color: #e8f1f6;
+  font-size: 9px;
+}
+
+.ttvCompact span {
+  color: #7f96a6;
+  font-size: 8px;
+}
+
+@media (max-width: 1180px) {
+  .myFitTopGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .keyActionsCard {
+    grid-column: 1 / -1;
+  }
+
+  .myFitSecondGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .profilePageV3 {
+    padding: 14px;
+  }
+
+  .myFitHeader,
+  .myFitTopGrid,
+  .myFitSecondGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .myFitHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .keyActionsCard {
+    grid-column: auto;
+  }
+
+  .priorityChipGrid {
+    grid-template-columns: 1fr;
+  }
+}
