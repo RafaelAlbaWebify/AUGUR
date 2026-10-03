@@ -14,6 +14,12 @@ AUGUR currently reports these calibration-protocol blockers through `/api/operab
 
 Until every blocker is cleared, holdout collection remains disabled by code.
 
+Draft observable start/outcome definitions are tracked separately in:
+
+`docs/TTV_OUTCOME_DEFINITIONS_DRAFT.md`
+
+That draft is explanatory only; it does not assign definition versions or clear any blocker.
+
 This document defines the data and evaluation process required before AUGUR can claim that a Time-to-Viability model has been externally calibrated.
 
 It does **not** activate `TEMPORAL_MODEL_VERSION`.
