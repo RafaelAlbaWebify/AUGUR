@@ -30,6 +30,10 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     assert result["protocol_version"] is None
     assert result["protocol_document"] == "docs/TTV_CALIBRATION_PROTOCOL.md"
     assert result["case_count"] == 0
+    assert result["development_case_count"] == 0
+    assert result["holdout_case_count"] == 0
+    assert result["protocol_ready_for_holdout"] is False
+    assert result["sample_roles"] == []
     assert result["externally_calibrated"] is False
     assert result["interval_coverage_pct"] is None
     assert result["stage_metrics"] == {}
@@ -197,3 +201,55 @@ def test_stage_level_calibration_rejects_partial_timing_payload():
 
     with pytest.raises(ValueError, match="requires candidate min/max and observed weeks"):
         module.validate_calibration_case(case)
+
+
+def test_holdout_case_rejected_until_protocol_is_approved():
+    case = {
+        "case_id": "holdout-001",
+        "country_iso3": "ESP",
+        "employment_mode": "local",
+        "engine_version": "ttv-temporal-evidence-v1",
+        "composition": "critical_path_v1",
+        "candidate_weeks_min": 8,
+        "candidate_weeks_max": 18,
+        "observed_weeks": 12,
+        "sample_role": "holdout",
+        "start_event_definition_version": "start-v1",
+        "viability_outcome_definition_version": "outcome-v1",
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="approved calibration protocol version",
+    ):
+        module.validate_calibration_case(case)
+
+
+def test_development_case_defaults_to_exploratory_sample_role(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    saved = module.upsert_calibration_case(
+        {
+            "case_id": "dev-001",
+            "country_iso3": "IRL",
+            "employment_mode": "remote",
+            "engine_version": "ttv-temporal-evidence-v1",
+            "composition": "critical_path_v1",
+            "candidate_weeks_min": 4,
+            "candidate_weeks_max": 8,
+            "observed_weeks": 6,
+        }
+    )
+
+    status = module.calibration_status()
+
+    assert saved["sample_role"] == "development"
+    assert saved["start_event_definition_version"] is None
+    assert saved["viability_outcome_definition_version"] is None
+    assert status["sample_roles"] == ["development"]
+    assert status["development_case_count"] == 1
+    assert status["holdout_case_count"] == 0
+    assert status["protocol_ready_for_holdout"] is False
