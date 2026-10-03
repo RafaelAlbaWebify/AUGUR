@@ -174,7 +174,13 @@ Prerequisites:
 occupation_label,shortage_countries,surplus_countries
 ```
 
-Country lists use two-letter EURES country codes separated by spaces, commas, semicolons or pipes.
+Country lists use two-letter EURES country codes separated by spaces, commas, semicolons or pipes. An optional `expected_isco` column pins a previously reviewed ISCO-08 unit-group mapping; if the live ESCO resolver returns a different code, the row is rejected for review.
+
+The currently reviewed ICT subset is versioned at:
+
+`backend/app/evidence/eures_shortages_surpluses_2025_ict_normalized.csv`
+
+CI checks that this reviewed table and the production manifest remain identical for those 13 unit groups.
 
 For the current 2025 EURES annex:
 
