@@ -736,8 +736,8 @@ export default function App() {
                   <div className="trajectoryYear">{year}</div>
                   <div className="uncertaintyBadge">
                     {items[0]
-                      ? `${items[0].uncertainty.level} uncertainty · ×${items[0].uncertainty.multiplier}`
-                      : 'uncertainty unavailable'}
+                      ? `model horizon · ${items[0].uncertainty.level} · ×${items[0].uncertainty.multiplier}`
+                      : 'model horizon unavailable'}
                   </div>
                 </div>
 
