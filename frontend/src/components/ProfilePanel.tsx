@@ -583,13 +583,13 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <input
                   maxLength={3}
                   value={profile.current_country ?? ''}
-                  placeholder="ESP"
+                  placeholder="e.g. ESP"
                   onChange={(event) => setProfile({ ...profile, current_country: event.target.value })}
                 />
               </label>
               <label>
                 <span>Citizenships</span>
-                <input value={citizenshipsText} placeholder="ESP, IRL" onChange={(event) => setCitizenshipsText(event.target.value)} />
+                <input value={citizenshipsText} placeholder="e.g. ESP, IRL" onChange={(event) => setCitizenshipsText(event.target.value)} />
               </label>
             </div>
           </div>
@@ -601,13 +601,13 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <span>Profession</span>
                 <input
                   value={profile.profession ?? ''}
-                  placeholder="Systems engineer"
+                  placeholder="e.g. Systems engineer"
                   onChange={(event) => setProfile({ ...profile, profession: event.target.value || null })}
                 />
               </label>
               <label>
                 <span>Skills</span>
-                <input value={skillsText} placeholder="Windows, Azure, Python, SQL" onChange={(event) => setSkillsText(event.target.value)} />
+                <input value={skillsText} placeholder="e.g. Windows, Azure, Python, SQL" onChange={(event) => setSkillsText(event.target.value)} />
               </label>
             </div>
           </div>
@@ -617,7 +617,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             <div className="profileGrid profileGridLanguages">
               <label>
                 <span>Languages · optional CEFR</span>
-                <input value={languagesText} placeholder="Spanish:C2, English:B2" onChange={(event) => setLanguagesText(event.target.value)} />
+                <input value={languagesText} placeholder="e.g. Spanish:C2, English:B2" onChange={(event) => setLanguagesText(event.target.value)} />
               </label>
               <label>
                 <span>Language study hours / week · TTV</span>
