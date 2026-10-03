@@ -372,6 +372,49 @@ def import_calibration_csv(path: str | Path) -> dict:
     }
 
 
+def _case_interval_metrics(cases: list[dict]) -> dict:
+    if not cases:
+        return {
+            "case_count": 0,
+            "interval_coverage_pct": None,
+            "mean_absolute_midpoint_error_weeks": None,
+            "mean_signed_midpoint_error_weeks": None,
+        }
+
+    covered = 0
+    absolute_errors = []
+    signed_errors = []
+
+    for case in cases:
+        lower = float(case["candidate_weeks_min"])
+        upper = float(case["candidate_weeks_max"])
+        observed = float(case["observed_weeks"])
+        midpoint = (lower + upper) / 2.0
+
+        if lower <= observed <= upper:
+            covered += 1
+
+        signed_error = midpoint - observed
+        signed_errors.append(signed_error)
+        absolute_errors.append(abs(signed_error))
+
+    return {
+        "case_count": len(cases),
+        "interval_coverage_pct": round(
+            covered / len(cases) * 100.0,
+            2,
+        ),
+        "mean_absolute_midpoint_error_weeks": round(
+            sum(absolute_errors) / len(absolute_errors),
+            2,
+        ),
+        "mean_signed_midpoint_error_weeks": round(
+            sum(signed_errors) / len(signed_errors),
+            2,
+        ),
+    }
+
+
 def calibration_status() -> dict:
     protocol_readiness = calibration_protocol_readiness()
     con = sqlite3.connect(settings.sqlite_path)
@@ -426,6 +469,7 @@ def calibration_status() -> dict:
                 "mean_absolute_midpoint_error_weeks": None,
                 "mean_signed_midpoint_error_weeks": None,
                 "stage_metrics": {},
+                "sample_role_metrics": {},
                 "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
@@ -481,6 +525,17 @@ def calibration_status() -> dict:
         signed_error = midpoint - observed
         signed_errors.append(signed_error)
         absolute_errors.append(abs(signed_error))
+
+    sample_role_metrics = {
+        role: _case_interval_metrics(
+            [
+                case
+                for case in cases
+                if case["sample_role"] == role
+            ]
+        )
+        for role in sorted(SUPPORTED_SAMPLE_ROLES)
+    }
 
     stage_metrics = {}
     for stage_id in sorted(CALIBRATION_STAGE_IDS):
@@ -592,6 +647,7 @@ def calibration_status() -> dict:
             2,
         ),
         "stage_metrics": stage_metrics,
+        "sample_role_metrics": sample_role_metrics,
         "externally_calibrated": False,
         "notes": [
             "Metrics describe observed calibration cases only.",
