@@ -58,14 +58,34 @@ type FuturePathsPageProps = {
   formatValue: (value: number, unit: string) => string
 }
 
-function pointsFor(values: Array<{ year: number; value: number }>, width = 520, height = 230) {
+type ChartBounds = {
+  minYear: number
+  maxYear: number
+  minValue: number
+  maxValue: number
+}
+
+function boundsFor(series: Array<Array<{ year: number; value: number }>>): ChartBounds | null {
+  const values = series.flat()
+  if (!values.length) return null
+  return {
+    minYear: Math.min(...values.map((item) => item.year)),
+    maxYear: Math.max(...values.map((item) => item.year)),
+    minValue: Math.min(...values.map((item) => item.value)),
+    maxValue: Math.max(...values.map((item) => item.value)),
+  }
+}
+
+function pointsFor(
+  values: Array<{ year: number; value: number }>,
+  bounds?: ChartBounds | null,
+  width = 520,
+  height = 230,
+) {
   if (!values.length) return ''
-  const years = values.map((item) => item.year)
-  const nums = values.map((item) => item.value)
-  const minYear = Math.min(...years)
-  const maxYear = Math.max(...years)
-  const minValue = Math.min(...nums)
-  const maxValue = Math.max(...nums)
+  const ownBounds = bounds ?? boundsFor([values])
+  if (!ownBounds) return ''
+  const { minYear, maxYear, minValue, maxValue } = ownBounds
   const rangeYear = Math.max(1, maxYear - minYear)
   const rangeValue = Math.max(1e-9, maxValue - minValue)
 
@@ -125,6 +145,7 @@ export default function FuturePathsPage({
   const baselinePoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.baseline }))
   const improvementPoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.improvement }))
   const stressPoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.stress }))
+  const scenarioBounds = boundsFor([baselinePoints, improvementPoints, stressPoints])
 
   const sourceNames = [...new Set(official.map((item) => item.source_name))]
   const latestUpdate = official.map((item) => item.source_updated_at).filter(Boolean).at(-1)
@@ -215,9 +236,9 @@ export default function FuturePathsPage({
               <svg viewBox="0 0 520 230" role="img" aria-label="AUGUR scenario paths">
                 <line x1="26" y1="210" x2="494" y2="210" />
                 <line x1="26" y1="20" x2="26" y2="210" />
-                <polyline className="scenarioLine improvement" points={pointsFor(improvementPoints)} />
-                <polyline className="scenarioLine baseline" points={pointsFor(baselinePoints)} />
-                <polyline className="scenarioLine stress" points={pointsFor(stressPoints)} />
+                <polyline className="scenarioLine improvement" points={pointsFor(improvementPoints, scenarioBounds)} />
+                <polyline className="scenarioLine baseline" points={pointsFor(baselinePoints, scenarioBounds)} />
+                <polyline className="scenarioLine stress" points={pointsFor(stressPoints, scenarioBounds)} />
               </svg>
               <div className="scenarioLegend">
                 <span className="improvement">Improvement</span>
