@@ -1183,3 +1183,46 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Ten-domain Country Radar, matching the product decision model. */
+.countryMetricGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.countryMetricCard:disabled {
+  cursor: default;
+  opacity: .72;
+}
+
+.countryMetricCard.unavailable {
+  border-style: dashed;
+  background: rgba(7, 18, 28, .72);
+}
+
+.countryMetricCard.unavailable .countryMetricTop small,
+.countryMetricCard.unavailable .countryMetricTrend strong {
+  color: #8aa0af;
+}
+
+.countryMetricCard.unavailable .unavailableValue {
+  color: #668091;
+}
+
+@media (max-width: 1500px) {
+  .countryMetricGrid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 1180px) {
+  .countryMetricGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .countryMetricGrid {
+    grid-template-columns: 1fr;
+  }
+}
