@@ -5,7 +5,24 @@ $RunDir = Join-Path $Root ".run"
 
 $ReservedPorts = @(8020, 5190)
 
-function Stop-ProcessTree {
+function Get-ProcessInfo {
+    param([int]$ProcessId)
+
+    return Get-CimInstance Win32_Process -Filter "ProcessId = $ProcessId" -ErrorAction SilentlyContinue
+}
+
+function Test-AugurProcess {
+    param([int]$ProcessId)
+
+    $process = Get-ProcessInfo -ProcessId $ProcessId
+    return (
+        $null -ne $process -and
+        $process.CommandLine -and
+        $process.CommandLine -like "*$Root*"
+    )
+}
+
+function Stop-AugurProcessTree {
     param(
         [int]$ProcessId,
         [string]$Name
@@ -15,11 +32,15 @@ function Stop-ProcessTree {
         return
     }
 
-    $Process = Get-Process -Id $ProcessId -ErrorAction SilentlyContinue
-    if ($null -ne $Process) {
-        & taskkill.exe /PID $ProcessId /T /F | Out-Null
-        Write-Host "Stopped AUGUR $Name process tree ($ProcessId)."
+    if (-not (Test-AugurProcess -ProcessId $ProcessId)) {
+        $process = Get-ProcessInfo -ProcessId $ProcessId
+        $processName = if ($process) { $process.Name } else { "unknown" }
+        Write-Warning "PID $ProcessId ($processName) does not belong to this AUGUR checkout. It was not terminated."
+        return
     }
+
+    & taskkill.exe /PID $ProcessId /T /F | Out-Null
+    Write-Host "Stopped AUGUR $Name process tree ($ProcessId)."
 }
 
 foreach ($Name in @("frontend", "backend")) {
@@ -29,7 +50,7 @@ foreach ($Name in @("frontend", "backend")) {
         $ProcessId = Get-Content $PidFile | Select-Object -First 1
 
         if ($ProcessId) {
-            Stop-ProcessTree -ProcessId ([int]$ProcessId) -Name $Name
+            Stop-AugurProcessTree -ProcessId ([int]$ProcessId) -Name $Name
         }
 
         Remove-Item $PidFile -Force
@@ -40,30 +61,23 @@ foreach ($Port in $ReservedPorts) {
     $Connections = Get-NetTCPConnection -LocalPort $Port -State Listen -ErrorAction SilentlyContinue
 
     foreach ($Connection in $Connections) {
-        $OwnerPid = $Connection.OwningProcess
+        $OwnerPid = [int]$Connection.OwningProcess
 
         if (-not $OwnerPid) {
             continue
         }
 
-        $CimProcess = Get-CimInstance Win32_Process -Filter "ProcessId = $OwnerPid" -ErrorAction SilentlyContinue
-        $CommandLine = $CimProcess.CommandLine
-        $ExecutableName = $CimProcess.Name
+        $process = Get-ProcessInfo -ProcessId $OwnerPid
+        $processName = if ($process) { $process.Name } else { "unknown" }
 
-        $LooksLikeAugur = (
-            ($CommandLine -and $CommandLine -like "*$Root*") -or
-            ($Port -eq 5190 -and $ExecutableName -eq "node.exe") -or
-            ($Port -eq 8020 -and $ExecutableName -match "python")
-        )
-
-        if ($LooksLikeAugur) {
+        if (Test-AugurProcess -ProcessId $OwnerPid) {
             & taskkill.exe /PID $OwnerPid /T /F | Out-Null
             Write-Host "Stopped stale AUGUR listener on port $Port (PID $OwnerPid)."
         }
         else {
             Write-Warning (
-                "Port $Port is still in use by PID $OwnerPid ($ExecutableName), " +
-                "but it does not look like AUGUR. It was not terminated."
+                "Port $Port is still in use by PID $OwnerPid ($processName), " +
+                "but it does not belong to this AUGUR checkout. It was not terminated."
             )
         }
     }
