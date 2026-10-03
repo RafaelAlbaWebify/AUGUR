@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import WorldMap from './WorldMap'
 import RegionalMap from './RegionalMap'
 import { countryVisual } from '../lib/countryVisuals'
 import './overview-page.css'
@@ -192,7 +191,7 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
-  const [mapMode, setMapMode] = useState<'country' | 'regions'>('regions')
+  const [mapMode, setMapMode] = useState<'map' | 'regions'>('map')
   const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => {
@@ -276,7 +275,7 @@ export default function OverviewPage({
           <div className="radarPanelTopline mapPanelHeader">
             <div>
               <span>MAP</span>
-              <strong>{mapMode === 'regions' ? 'Selectable NUTS 2 regions' : 'Registered country coverage'}</strong>
+              <strong>{mapMode === 'regions' ? 'Region directory' : 'Selectable NUTS 2 map'}</strong>
             </div>
             <div className="mapModeToggle" role="group" aria-label="Map layer">
               <button
@@ -296,19 +295,16 @@ export default function OverviewPage({
             </div>
           </div>
 
-          {mapMode === 'regions' && selectedCountryIso2 ? (
+          {selectedCountryIso2 ? (
             <RegionalMap
               countryIso2={selectedCountryIso2}
               selectedRegion={selectedRegion?.id ?? null}
               onSelectRegion={(id, name) => setSelectedRegion({ id, name })}
               cities={visual.cities}
+              showRegionList={mapMode === 'regions'}
             />
           ) : (
-            <WorldMap
-              countries={countries}
-              selectedCountry={selectedCountry}
-              onSelectCountry={onCountryChange}
-            />
+            <div className="regionalMapState error">Regional map unavailable for this country.</div>
           )}
         </section>
 
