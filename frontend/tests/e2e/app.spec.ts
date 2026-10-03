@@ -952,6 +952,52 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
   }
 })
 
+test('overview keeps last-row content inside desktop viewport', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 })
+  await page.goto('/country/ESP/overview')
+
+  const viewportHeight = await page.evaluate(() => window.innerHeight)
+
+  const cards = page.locator('.overviewDimensionGridV2 .mockDimensionCard')
+  const lastCard = cards.last()
+  const compareCard = page.locator('.overviewCompareCard')
+
+  const [lastBox, compareBox] = await Promise.all([
+    lastCard.boundingBox(),
+    compareCard.boundingBox(),
+  ])
+
+  expect(lastBox).not.toBeNull()
+  expect(compareBox).not.toBeNull()
+
+  expect((lastBox?.y ?? 0) + (lastBox?.height ?? 0)).toBeLessThanOrEqual(
+    viewportHeight - 4,
+  )
+  expect((compareBox?.y ?? 0) + (compareBox?.height ?? 0)).toBeLessThanOrEqual(
+    viewportHeight - 4,
+  )
+
+  const clipped = await page.evaluate(() => {
+    const selectors = [
+      '.overviewDimensionGridV2 .mockDimensionCard',
+      '.overviewCompareCard',
+      '.overviewOutlookCard',
+      '.overallSignalBalance',
+    ]
+    return selectors.flatMap(selector =>
+      Array.from(document.querySelectorAll<HTMLElement>(selector))
+        .filter(el => {
+          const rect = el.getBoundingClientRect()
+          return rect.bottom > window.innerHeight || rect.right > window.innerWidth
+        })
+        .map(el => selector),
+    )
+  })
+
+  expect(clipped).toEqual([])
+})
+
+
 test('responsive Overview preserves every frozen core panel', async ({ page }) => {
   for (const viewport of [
     { width: 1366, height: 768 },
