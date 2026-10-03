@@ -12,10 +12,17 @@ type RegionFeature = {
   geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon | null
 }
 
+type CityMarker = {
+  name: string
+  lon: number
+  lat: number
+}
+
 type RegionalMapProps = {
   countryIso2: string
   selectedRegion: string | null
   onSelectRegion: (regionId: string, regionName: string) => void
+  cities?: CityMarker[]
 }
 
 type Bounds = {
@@ -46,13 +53,7 @@ function computeBounds(features: RegionFeature[]): Bounds | null {
   }
 }
 
-function pathFor(
-  geometry: RegionFeature['geometry'],
-  bounds: Bounds,
-  width: number,
-  height: number,
-) {
-  if (!geometry) return ''
+function projector(bounds: Bounds, width: number, height: number) {
   const pad = 18
   const lonRange = Math.max(0.001, bounds.maxLon - bounds.minLon)
   const latRange = Math.max(0.001, bounds.maxLat - bounds.minLat)
@@ -65,12 +66,20 @@ function pathFor(
   const offsetX = (width - projectedWidth) / 2
   const offsetY = (height - projectedHeight) / 2
 
-  function project([lon, lat]: number[]) {
-    return [
-      offsetX + (lon - bounds.minLon) * scale,
-      height - (offsetY + (lat - bounds.minLat) * scale),
-    ]
-  }
+  return ([lon, lat]: number[]) => [
+    offsetX + (lon - bounds.minLon) * scale,
+    height - (offsetY + (lat - bounds.minLat) * scale),
+  ] as const
+}
+
+function pathFor(
+  geometry: RegionFeature['geometry'],
+  bounds: Bounds,
+  width: number,
+  height: number,
+) {
+  if (!geometry) return ''
+  const project = projector(bounds, width, height)
 
   function ringPath(ring: number[][]) {
     return ring.map((coordinate, index) => {
@@ -92,6 +101,7 @@ export default function RegionalMap({
   countryIso2,
   selectedRegion,
   onSelectRegion,
+  cities = [],
 }: RegionalMapProps) {
   const [features, setFeatures] = useState<RegionFeature[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -182,6 +192,17 @@ export default function RegionalMap({
                   }
                 }}
               />
+            )
+          })}
+
+          {cities.map((city) => {
+            const [cx, cy] = projector(bounds, 520, 320)([city.lon, city.lat])
+            return (
+              <g className="regionalCityMarker" key={city.name} transform={`translate(${cx} ${cy})`}>
+                <circle r="4.5" />
+                <circle r="8.5" className="halo" />
+                <text x="10" y="3">{city.name}</text>
+              </g>
             )
           })}
         </svg>
