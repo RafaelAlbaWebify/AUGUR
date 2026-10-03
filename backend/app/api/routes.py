@@ -9,6 +9,7 @@ from app.db.analytics import (
     indicator_source_comparison,
     source_quality_summary,
     official_forecasts,
+    country_indicator_series,
 )
 from app.services.country import country_snapshot, list_countries
 from app.services.trends import country_trends
@@ -93,6 +94,42 @@ def assessment(country_iso3: str):
         raise HTTPException(status_code=404, detail="Country is not registered")
 
     return country_assessment(country_iso3)
+
+
+@router.get("/countries/{country_iso3}/overview-series")
+def overview_series(country_iso3: str):
+    country_iso3 = country_iso3.upper()
+    registry = {country["iso3"] for country in list_countries()}
+
+    if country_iso3 not in registry:
+        raise HTTPException(status_code=404, detail="Country is not registered")
+
+    rows = country_indicator_series(country_iso3, max_points=8)
+
+    grouped: dict[str, dict] = {}
+    for row in rows:
+        item = grouped.setdefault(
+            row["indicator_id"],
+            {
+                "indicator_id": row["indicator_id"],
+                "name": row["name"],
+                "dimension": row["dimension"],
+                "unit": row["unit"],
+                "source_id": row["source_id"],
+                "points": [],
+            },
+        )
+        item["points"].append(
+            {
+                "period": row["period"],
+                "value": row["value"],
+            }
+        )
+
+    return {
+        "country_iso3": country_iso3,
+        "series": list(grouped.values()),
+    }
 
 
 @router.get("/countries/{country_iso3}/sources")
