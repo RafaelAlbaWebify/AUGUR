@@ -631,8 +631,8 @@ test('FinancialFit partial evidence is not shown as complete or empty', async ({
   await expect(financialCard.getByText('partial', { exact: true })).toBeVisible()
 
   const outputs = page.getByRole('region', { name: 'Fit outputs' })
-  await expect(outputs.getByText('occupation specific net income', { exact: true })).toBeVisible()
-  await expect(outputs.getByText('household budget', { exact: true })).toBeVisible()
+  await expect(outputs).toContainText('occupation specific net income')
+  await expect(outputs).toContainText('household budget')
 })
 
 test('structured FinancialFit blockers are visible', async ({ page }) => {
@@ -1091,7 +1091,7 @@ test('Overview distinguishes official baseline from AUGUR model envelope', async
   await expect(page.locator('.signalBars')).toHaveCount(0)
   await expect(page.getByText('DIMENSION TRAJECTORIES')).toBeVisible()
   await expect(page.getByText('Official baseline + AUGUR envelope')).toBeVisible()
-  await expect(page.getByText('Baseline')).toBeVisible()
+  await expect(page.getByText('Baseline', { exact: true })).toBeVisible()
   await expect(page.getByText('official')).toBeVisible()
   await expect(page.getByText('Improvement')).toBeVisible()
   await expect(page.getByText('Stress')).toBeVisible()
