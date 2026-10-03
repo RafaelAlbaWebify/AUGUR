@@ -244,6 +244,7 @@ def build_eures_unit_group_evidence_from_csv(
     source_metadata: dict,
     threshold: float = DEFAULT_MATCH_THRESHOLD,
     min_margin: float = DEFAULT_MIN_MARGIN,
+    search: Callable[[str, int], list[dict]] | None = None,
 ) -> dict:
     status = esco_status()
     if status["mode"] != "full":
@@ -278,6 +279,7 @@ def build_eures_unit_group_evidence_from_csv(
     result = build_eures_unit_group_evidence(
         rows,
         source_metadata=source_metadata,
+        search=search or search_occupations,
         threshold=threshold,
         min_margin=min_margin,
     )
