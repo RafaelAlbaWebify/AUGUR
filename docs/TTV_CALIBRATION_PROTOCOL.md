@@ -2,6 +2,18 @@
 
 Status: **draft / not approved**
 
+## Current executable blockers
+
+AUGUR currently reports these calibration-protocol blockers through `/api/operability` and `check-operability.ps1`:
+
+- protocol version not approved;
+- start-event definition not frozen;
+- viability-outcome definition not frozen;
+- inclusion/exclusion rules not frozen;
+- acceptance criteria not frozen.
+
+Until every blocker is cleared, holdout collection remains disabled by code.
+
 This document defines the data and evaluation process required before AUGUR can claim that a Time-to-Viability model has been externally calibrated.
 
 It does **not** activate `TEMPORAL_MODEL_VERSION`.
