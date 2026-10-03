@@ -81,7 +81,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: overview-desktop
-          path: frontend/test-results/overview-desktop.png
+          path: frontend/test-results/overview-desktop-*.png
           if-no-files-found: warn
 
 
