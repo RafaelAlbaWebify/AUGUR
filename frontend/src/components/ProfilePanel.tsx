@@ -567,7 +567,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
           <div className="profileFieldGroup">
             <h4>Personal</h4>
-            <div className="profileGrid">
+            <div className="profileGrid profileGridPersonal">
               <label>
                 <span>Age</span>
                 <input
@@ -587,7 +587,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                   onChange={(event) => setProfile({ ...profile, current_country: event.target.value })}
                 />
               </label>
-              <label className="profileWide">
+              <label>
                 <span>Citizenships</span>
                 <input value={citizenshipsText} placeholder="ESP, IRL" onChange={(event) => setCitizenshipsText(event.target.value)} />
               </label>
@@ -596,7 +596,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
           <div className="profileFieldGroup">
             <h4>Career</h4>
-            <div className="profileGrid">
+            <div className="profileGrid profileGridCareer">
               <label>
                 <span>Profession</span>
                 <input
@@ -605,7 +605,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                   onChange={(event) => setProfile({ ...profile, profession: event.target.value || null })}
                 />
               </label>
-              <label className="profileWide">
+              <label>
                 <span>Skills</span>
                 <input value={skillsText} placeholder="Windows, Azure, Python, SQL" onChange={(event) => setSkillsText(event.target.value)} />
               </label>
@@ -614,8 +614,8 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
           <div className="profileFieldGroup">
             <h4>Languages</h4>
-            <div className="profileGrid">
-              <label className="profileWide">
+            <div className="profileGrid profileGridLanguages">
+              <label>
                 <span>Languages · optional CEFR</span>
                 <input value={languagesText} placeholder="Spanish:C2, English:B2" onChange={(event) => setLanguagesText(event.target.value)} />
               </label>
@@ -648,7 +648,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
           <div className="profileFieldGroup">
             <h4>Financial / household</h4>
-            <div className="profileGrid">
+            <div className="profileGrid profileGridFinancial">
               <label>
                 <span>Household size</span>
                 <small className="profileFieldNote">Stored for future household-budget modelling; not used in current FinancialFit.</small>
