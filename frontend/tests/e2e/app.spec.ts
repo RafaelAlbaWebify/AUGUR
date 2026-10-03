@@ -489,7 +489,7 @@ test('refreshes evidence status when the window regains focus', async ({ page })
 
 test('top navigation uses real routes and exposes all six product views', async ({ page }) => {
   await expect(page).toHaveURL(/\/country\/ESP\/overview$/)
-  await expect(page.getByTestId('world-map')).toBeVisible()
+  await expect(page.getByTestId('regional-map')).toBeVisible()
 
   await page.getByRole('button', { name: 'Indicators' }).click()
   await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
@@ -498,7 +498,7 @@ test('top navigation uses real routes and exposes all six product views', async 
   await page.getByRole('button', { name: 'Outlook' }).click()
   await expect(page).toHaveURL(/\/country\/ESP\/outlook$/)
   await expect(page.getByText('3. FUTURE PATHS / Outlook')).toBeVisible()
-  await expect(page.getByTestId('world-map')).toHaveCount(0)
+  await expect(page.getByTestId('regional-map')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page).toHaveURL(/\/compare\?countries=IRL%2CESP%2CPRT|\/compare\?countries=IRL,ESP,PRT/)
@@ -519,6 +519,7 @@ test('Overview exposes selectable official NUTS 2 regions', async ({ page }) => 
   await page.goto('/country/ESP/overview')
 
   await expect(page.getByTestId('regional-map')).toBeVisible()
+  await page.getByRole('button', { name: 'Regions' }).click()
   await expect(page.getByRole('button', { name: 'Galicia' })).toBeVisible()
   await page.getByRole('button', { name: 'Galicia' }).click()
 
@@ -526,9 +527,6 @@ test('Overview exposes selectable official NUTS 2 regions', async ({ page }) => 
   await expect(page.getByText('Geography: Eurostat GISCO · NUTS 2024 · level 2 · EPSG:4326')).toBeVisible()
 
   await page.getByRole('button', { name: 'Map', exact: true }).click()
-  await expect(page.getByTestId('world-map')).toBeVisible()
-
-  await page.getByRole('button', { name: 'Regions' }).click()
   await expect(page.getByTestId('regional-map')).toBeVisible()
 })
 
@@ -594,22 +592,14 @@ test('Overview dimension cards drill into persistent dimension routes', async ({
   await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
 })
 
-test('world view renders country geometry and drives selection', async ({ page }) => {
-  await expect(page.getByText('WORLD VIEW')).toBeVisible()
+test('regional map renders selected-country geometry and city anchors', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
 
-  const map = page.getByTestId('world-map')
+  const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
-
-  const portugalShape = map.locator('[data-country="PRT"]')
-  await expect(portugalShape).toHaveCount(1)
-  await expect(portugalShape).toBeVisible()
-
-  await portugalShape.click()
-
-  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
-  await expect(page).toHaveURL(/\/country\/PRT\/overview$/)
+  await expect(map.getByRole('button', { name: 'Galicia' })).toBeVisible()
+  await expect(map.locator('.regionalCityMarker')).toHaveCount(4)
 })
-
 
 test('personal profile remains separate and can be saved locally', async ({ page }) => {
   await page.goto('/country/ESP/profile')
@@ -814,19 +804,19 @@ test('candidate temporal evidence remains explicitly non-estimate', async ({ pag
   await expect(ttv.getByText('Estimate available')).toHaveCount(0)
 })
 
-test('map zoom controls change and reset the view', async ({ page }) => {
-  const map = page.getByTestId('world-map')
-  await expect(map).toBeVisible()
+test('regional directory toggles without replacing the map', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
 
-  const initialViewBox = await map.getAttribute('viewBox')
+  await expect(page.getByTestId('regional-map')).toBeVisible()
+  await expect(page.locator('.regionalRegionList')).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Zoom in' }).click()
-  await expect.poll(async () => map.getAttribute('viewBox')).not.toBe(initialViewBox)
+  await page.getByRole('button', { name: 'Regions' }).click()
+  await expect(page.getByTestId('regional-map')).toBeVisible()
+  await expect(page.locator('.regionalRegionList')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Reset map' }).click()
-  await expect(map).toHaveAttribute('viewBox', initialViewBox ?? '0 0 1000 500')
+  await page.getByRole('button', { name: 'Map', exact: true }).click()
+  await expect(page.locator('.regionalRegionList')).toHaveCount(0)
 })
-
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
   await page.goto('/country/ESP/profile')
@@ -972,7 +962,7 @@ test('Country Radar renders the approved evidence composition', async ({ page })
   await expect(page.getByRole('region', { name: 'Country overview' })).toBeVisible()
   await expect(page.getByTestId('world-map')).toBeVisible()
   await expect(page.getByText('1. COUNTRY RADAR / Overview')).toBeVisible()
-  await expect(page.getByText('Latest one-year movements')).toBeVisible()
+  await expect(page.getByText('Largest measured movements')).toBeVisible()
   await expect(page.locator('.countryMetricCard')).toHaveCount(10)
 
   const overflow = await page.evaluate(() => ({
