@@ -399,6 +399,12 @@ def calibration_status() -> dict:
             "employment_modes": [],
             "engine_versions": [],
             "composition_versions": [],
+            "sample_roles": [],
+            "start_event_definition_versions": [],
+            "viability_outcome_definition_versions": [],
+            "development_case_count": 0,
+            "holdout_case_count": 0,
+            "protocol_ready_for_holdout": CALIBRATION_PROTOCOL_VERSION is not None,
             "interval_coverage_pct": None,
             "mean_absolute_midpoint_error_weeks": None,
             "mean_signed_midpoint_error_weeks": None,
@@ -514,6 +520,15 @@ def calibration_status() -> dict:
                 if case["viability_outcome_definition_version"]
             }
         ),
+        "development_case_count": sum(
+            1 for case in cases
+            if case["sample_role"] == "development"
+        ),
+        "holdout_case_count": sum(
+            1 for case in cases
+            if case["sample_role"] == "holdout"
+        ),
+        "protocol_ready_for_holdout": CALIBRATION_PROTOCOL_VERSION is not None,
         "interval_coverage_pct": round(
             covered / len(cases) * 100.0,
             2,
