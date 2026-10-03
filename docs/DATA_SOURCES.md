@@ -215,6 +215,12 @@ Broad evidence is useful context, but it does **not** count as complete CareerFi
 
 The more specific layer is transcribed from the official **Report on labour shortages and surpluses 2025 — Annex**, published in 2026 and describing 2025 conditions.
 
+The reviewed normalized source table for the currently implemented ICT subset is:
+
+`backend/app/evidence/eures_shortages_surpluses_2025_ict_normalized.csv`
+
+It records the annex occupation label, verified ISCO mapping and shortage/surplus country lists separately from the production manifest. CI checks both artifacts for drift.
+
 Current verified unit-group coverage includes 13 ICT ISCO-08 groups:
 
 - 2511, 2512, 2513, 2514, 2519;
