@@ -1,4 +1,7 @@
+import { useEffect, useState } from 'react'
 import WorldMap from './WorldMap'
+import RegionalMap from './RegionalMap'
+import { countryVisual } from '../lib/countryVisuals'
 import './overview-page.css'
 
 type Country = {
@@ -92,6 +95,7 @@ type OverviewPageProps = {
   countries: Country[]
   selectedCountry: string
   selectedCountryName: string
+  selectedCountryIso2: string
   currentIndicators: Indicator[]
   assessment: AssessmentResponse | null
   scenarios: ScenarioResponse | null
@@ -136,6 +140,7 @@ export default function OverviewPage({
   countries,
   selectedCountry,
   selectedCountryName,
+  selectedCountryIso2,
   currentIndicators,
   assessment,
   onCountryChange,
@@ -143,6 +148,15 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
+  const [mapMode, setMapMode] = useState<'country' | 'regions'>('regions')
+  const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string } | null>(null)
+
+  useEffect(() => {
+    setSelectedRegion(null)
+  }, [selectedCountry])
+
+  const visual = countryVisual(selectedCountry)
+
   const directional = Object.values(assessment?.dimensions ?? {}).reduce(
     (sum, item) => sum + item.directional_indicator_count,
     0,
@@ -189,32 +203,67 @@ export default function OverviewPage({
 
       <div className="countryRadarHero">
         <section className="countryIdentityCard">
-          <div>
-            <span>COUNTRY</span>
-            <h3>{selectedCountryName}</h3>
-            <strong>{selectedCountry}</strong>
+          <div
+            className="countryHeroVisual"
+            style={{
+              backgroundImage: `linear-gradient(180deg, rgba(4,12,19,.04), rgba(4,12,19,.86)), url(${visual.heroImage})`,
+              backgroundPosition: visual.focalPoint,
+            }}
+            role="img"
+            aria-label={visual.alt}
+          >
+            <div className="countryHeroCopy">
+              <span>COUNTRY</span>
+              <h3>{selectedCountryName}</h3>
+              <strong>{selectedCountry}</strong>
+            </div>
           </div>
           <dl>
             <div><dt>Indicators loaded</dt><dd>{currentIndicators.length}</dd></div>
             <div><dt>Directional evidence</dt><dd>{directional} / {total || '—'}</dd></div>
             <div><dt>Dimensions assessed</dt><dd>{Object.keys(assessment?.dimensions ?? {}).length}</dd></div>
+            <div><dt>Region focus</dt><dd>{selectedRegion ? `${selectedRegion.name} · ${selectedRegion.id}` : 'National'}</dd></div>
           </dl>
-          <p>Country-level evidence. Regional/city insight appears only when a verified subnational source is available.</p>
+          <p>Country evidence is active. Regional selection is available now; regional metrics will appear only where verified subnational sources exist.</p>
         </section>
 
         <section className="countryRadarMap">
-          <div className="radarPanelTopline">
+          <div className="radarPanelTopline mapPanelHeader">
             <div>
               <span>MAP</span>
-              <strong>Registered country coverage</strong>
+              <strong>{mapMode === 'regions' ? 'Selectable NUTS 2 regions' : 'Registered country coverage'}</strong>
             </div>
-            <span>Regional layer not yet implemented</span>
+            <div className="mapModeToggle" role="group" aria-label="Map layer">
+              <button
+                type="button"
+                className={mapMode === 'country' ? 'active' : ''}
+                onClick={() => setMapMode('country')}
+              >
+                Countries
+              </button>
+              <button
+                type="button"
+                className={mapMode === 'regions' ? 'active' : ''}
+                onClick={() => setMapMode('regions')}
+              >
+                Regions
+              </button>
+            </div>
           </div>
-          <WorldMap
-            countries={countries}
-            selectedCountry={selectedCountry}
-            onSelectCountry={onCountryChange}
-          />
+
+          {mapMode === 'regions' && selectedCountryIso2 ? (
+            <RegionalMap
+              countryIso2={selectedCountryIso2}
+              selectedRegion={selectedRegion?.id ?? null}
+              onSelectRegion={(id, name) => setSelectedRegion({ id, name })}
+            />
+          ) : (
+            <WorldMap
+              countries={countries}
+              selectedCountry={selectedCountry}
+              onSelectCountry={onCountryChange}
+            />
+          )}
         </section>
 
         <section className="recentChangesPanel">
