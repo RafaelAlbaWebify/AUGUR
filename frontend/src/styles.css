@@ -4531,3 +4531,336 @@ body:has(.shell.detailsOpen) {
     grid-template-columns: repeat(2, 1fr);
   }
 }
+
+
+/* Evidence Explorer */
+.evidenceExplorerPage {
+  display: grid;
+  gap: 13px;
+  padding: 18px 22px 28px;
+}
+
+.evidenceExplorerHeader {
+  align-items: center;
+}
+
+.secondaryAction {
+  min-height: 34px;
+  padding: 0 11px;
+  border: 1px solid var(--augur-border);
+  border-radius: 8px;
+  background: rgba(8, 22, 33, .76);
+  color: #9db1bf;
+  cursor: pointer;
+}
+
+.dimensionEvidenceStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, .45fr)) minmax(260px, 1.6fr);
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--augur-border);
+  border-radius: 11px;
+  background: rgba(8, 22, 33, .76);
+}
+
+.dimensionEvidenceStrip > div {
+  display: grid;
+  gap: 4px;
+  padding: 8px 10px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .5);
+}
+
+.dimensionEvidenceStrip span,
+.indicatorDetailList dt {
+  color: #70889a;
+  font-size: 8px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.dimensionEvidenceStrip strong {
+  color: #e7f0f5;
+  font-size: 10px;
+  text-transform: capitalize;
+}
+
+.dimensionEvidenceStrip p {
+  margin: 0;
+  align-self: center;
+  color: #7f96a6;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.evidenceExplorerLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.95fr) minmax(300px, .7fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.evidenceTablePanel,
+.indicatorDetailsPanel {
+  border: 1px solid var(--augur-border);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(9, 24, 36, .95), rgba(6, 17, 27, .96));
+  overflow: hidden;
+}
+
+.evidenceFilters {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.3fr) repeat(3, minmax(135px, .7fr));
+  gap: 8px;
+  padding: 10px;
+  border-bottom: 1px solid var(--augur-border-soft);
+}
+
+.evidenceFilters input,
+.evidenceFilters select {
+  min-width: 0;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--augur-border);
+  border-radius: 8px;
+  background: rgba(3, 11, 18, .92);
+  color: #dce7ed;
+  font-size: 9px;
+  outline: none;
+}
+
+.evidenceTableWrap {
+  overflow: auto;
+  max-height: calc(100vh - 235px);
+}
+
+.evidenceExplorerTable {
+  width: 100%;
+  min-width: 1050px;
+  border-collapse: collapse;
+  font-size: 9px;
+}
+
+.evidenceExplorerTable th,
+.evidenceExplorerTable td {
+  padding: 9px 10px;
+  border-bottom: 1px solid var(--augur-border-soft);
+  text-align: left;
+  vertical-align: middle;
+}
+
+.evidenceExplorerTable th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  color: #7f96a6;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  background: #091b28;
+}
+
+.evidenceExplorerTable tbody tr {
+  cursor: pointer;
+  transition: background .12s ease;
+}
+
+.evidenceExplorerTable tbody tr:hover,
+.evidenceExplorerTable tbody tr.selected {
+  background: rgba(52, 126, 173, .09);
+}
+
+.evidenceExplorerTable td {
+  color: #aebfca;
+}
+
+.evidenceExplorerTable td > strong {
+  color: #edf5fa;
+}
+
+.evidenceExplorerTable td small {
+  display: block;
+  margin-top: 2px;
+  color: #60798a;
+  font-size: 7px;
+}
+
+.indicatorRowButton {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: #e7f0f5;
+  font: inherit;
+  font-weight: 700;
+  text-align: left;
+  cursor: pointer;
+}
+
+.indicatorRowButton:hover {
+  color: #7acbff;
+}
+
+.positiveRaw {
+  color: #69d6a4 !important;
+}
+
+.negativeRaw {
+  color: #ed8b8b !important;
+}
+
+.trendPill {
+  display: inline-flex;
+  min-height: 22px;
+  align-items: center;
+  padding: 0 7px;
+  border-radius: 999px;
+  border: 1px solid var(--augur-border);
+  color: #8ea5b5;
+  font-size: 8px;
+  white-space: nowrap;
+}
+
+.trendPill.improving,
+.trendPill.within_target {
+  color: #70dda9;
+  border-color: rgba(71, 176, 116, .3);
+}
+
+.trendPill.deteriorating {
+  color: #ef9696;
+  border-color: rgba(187, 76, 76, .3);
+}
+
+.detailsTabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 8px;
+  gap: 5px;
+  border-bottom: 1px solid var(--augur-border-soft);
+}
+
+.detailsTabs button {
+  min-height: 32px;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: #8198a8;
+  font-size: 9px;
+  cursor: pointer;
+}
+
+.detailsTabs button.active {
+  color: #eef7fb;
+  border-color: rgba(65, 168, 229, .42);
+  background: rgba(14, 89, 135, .38);
+}
+
+.indicatorDetailsBody {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+}
+
+.detailDomain {
+  color: #7290a4;
+  font-size: 8px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.indicatorDetailsBody h3 {
+  margin: 0;
+  color: #eff6fa;
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+.detailValue {
+  margin-top: 4px;
+  color: #f4f9fc;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.indicatorDetailsBody > small {
+  color: #758d9f;
+  font-size: 9px;
+}
+
+.detailChangeGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 7px;
+}
+
+.detailChangeGrid > div {
+  display: grid;
+  gap: 4px;
+  padding: 8px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .52);
+}
+
+.detailChangeGrid span {
+  color: #6f8798;
+  font-size: 8px;
+}
+
+.detailChangeGrid strong {
+  color: #dce8ef;
+  font-size: 10px;
+}
+
+.indicatorDetailList {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid var(--augur-border-soft);
+}
+
+.indicatorDetailList > div {
+  display: grid;
+  grid-template-columns: 105px minmax(0, 1fr);
+  gap: 9px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--augur-border-soft);
+}
+
+.indicatorDetailList dd {
+  margin: 0;
+  color: #c3d1da;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+
+.provenanceBody p {
+  margin: 2px 0 0;
+  color: #758d9e;
+  font-size: 9px;
+  line-height: 1.5;
+}
+
+@media (max-width: 1180px) {
+  .evidenceExplorerLayout {
+    grid-template-columns: 1fr;
+  }
+
+  .indicatorDetailsPanel {
+    order: -1;
+  }
+
+  .evidenceFilters {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dimensionEvidenceStrip {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .dimensionEvidenceStrip p {
+    grid-column: 1 / -1;
+  }
+}
