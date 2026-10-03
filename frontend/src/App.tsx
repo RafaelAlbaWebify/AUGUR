@@ -5,6 +5,7 @@ import CountrySelect from './components/CountrySelect'
 import OverviewPage from './components/OverviewPage'
 import IndicatorsPage from './components/IndicatorsPage'
 import LayoutControls, { type DashboardLayout } from './components/LayoutControls'
+import SkillsLanguagesPage from './components/SkillsLanguagesPage'
 import { countryRoute, compareRoute, dimensionRoute, useAugurRoute, type CountryView } from './lib/routing'
 
 type Country = {
@@ -566,6 +567,7 @@ export default function App() {
             ['outlook', 'Outlook'],
             ['compare', 'Compare'],
             ['profile', 'Profile'],
+            ['skills', 'Skills & Languages'],
           ].map(([id, label]) => (
             <button
               key={id}
@@ -660,9 +662,15 @@ export default function App() {
       )}
 
       {activeView === 'profile' && (
-      <div>
         <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
-      </div>
+      )}
+
+      {activeView === 'skills' && (
+        <SkillsLanguagesPage
+          apiBase={API_BASE}
+          targetCountry={selectedCountry}
+          countryName={selectedCountryMeta?.name ?? selectedCountry}
+        />
       )}
 
       {(activeView === 'indicators' || activeView === 'dimension') && (
