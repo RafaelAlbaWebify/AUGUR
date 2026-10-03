@@ -131,14 +131,6 @@ export default function OverviewPage({
       }
     : null
 
-  const maxScenario = preview
-    ? Math.max(
-        Math.abs(preview.optimistic),
-        Math.abs(preview.baseline),
-        Math.abs(preview.stress),
-        1,
-      )
-    : 1
 
   return (
     <section className="overviewPageV2" aria-label="Country overview">
@@ -190,7 +182,7 @@ export default function OverviewPage({
             <div className="overviewRailHeader">
               <div>
                 <span>OUTLOOK</span>
-                <strong>Official horizons</strong>
+                <strong>Official baseline + AUGUR envelope</strong>
               </div>
               <button type="button" onClick={onOpenOutlook}>Open</button>
             </div>
@@ -199,16 +191,15 @@ export default function OverviewPage({
               <div className="overviewScenarioPreview">
                 <p>{preview.name}</p>
                 {[
-                  ['Optimistic', preview.optimistic, 'optimistic'],
-                  ['Baseline', preview.baseline, 'baseline'],
-                  ['Stress', preview.stress, 'stress'],
-                ].map(([label, value, tone]) => {
+                  ['Baseline', preview.baseline, 'official'],
+                  ['Improvement', preview.optimistic, 'AUGUR model'],
+                  ['Stress', preview.stress, 'AUGUR model'],
+                ].map(([label, value, provenance]) => {
                   const numericValue = value as number
-                  const width = Math.max(10, (Math.abs(numericValue) / maxScenario) * 100)
                   return (
-                    <div className={`overviewScenarioRow ${tone}`} key={label as string}>
+                    <div className="overviewScenarioRow evidenceOnly" key={label as string}>
                       <span>{label}</span>
-                      <div><i style={{ width: `${width}%` }} /></div>
+                      <small>{provenance}</small>
                       <strong>{formatValue(numericValue, preview.unit)}</strong>
                     </div>
                   )
