@@ -502,6 +502,7 @@ def calibration_status() -> dict:
             "mean_absolute_midpoint_error_weeks": None,
             "mean_signed_midpoint_error_weeks": None,
             "stage_metrics": {},
+            "sample_role_metrics": {},
             "externally_calibrated": False,
             "notes": [
                 "Calibration infrastructure is available but contains no observed cases.",
