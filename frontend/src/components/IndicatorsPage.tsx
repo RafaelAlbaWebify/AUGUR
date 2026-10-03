@@ -36,6 +36,7 @@ type DimensionAssessment = {
   trajectory: string
   confidence: string
   indicator_count: number
+  directional_indicator_count: number
   coverage: number
   evidence_status?: string
   evidence_note?: string | null
@@ -77,6 +78,15 @@ function trendLabel(trend?: Trend) {
   if (trend.interpretation === 'within_target') return 'Within target'
   if (trend.direction === 'stable') return 'Stable'
   return 'Contextual'
+}
+
+function trendEvidenceLabel(trend?: Trend) {
+  if (!trend) return 'evidence pending'
+
+  const interpreted = ['improving', 'deteriorating', 'within_target'].includes(trend.interpretation)
+    || trend.direction === 'stable'
+
+  return interpreted ? `${trend.confidence} trend evidence` : 'contextual evidence'
 }
 
 function changeLabel(value: number | null | undefined) {
@@ -136,11 +146,19 @@ export default function IndicatorsPage({
             <strong>{assessment[dimension].trajectory.replaceAll('_', ' ')}</strong>
           </div>
           <div>
-            <span>Confidence</span>
-            <strong>{assessment[dimension].confidence}</strong>
+            <span>
+              {assessment[dimension].directional_indicator_count > 0
+                ? 'Trend evidence'
+                : 'Evidence type'}
+            </span>
+            <strong>
+              {assessment[dimension].directional_indicator_count > 0
+                ? assessment[dimension].confidence
+                : 'contextual'}
+            </strong>
           </div>
           <div>
-            <span>Coverage</span>
+            <span>Directional coverage</span>
             <strong>{Math.round(assessment[dimension].coverage * 100)}%</strong>
           </div>
           <p>
@@ -189,7 +207,7 @@ export default function IndicatorsPage({
                       <div className={`trendState ${indicator.trend?.interpretation ?? ''}`}>
                         <span className="trendArrow">{trendSymbol(indicator.trend?.direction)}</span>
                         <span>{trendLabel(indicator.trend)}</span>
-                        <small>{indicator.trend?.confidence ?? '—'} confidence</small>
+                        <small>{trendEvidenceLabel(indicator.trend)}</small>
                       </div>
 
                       {indicator.interpretation_policy === 'target_range' && (
@@ -213,9 +231,7 @@ export default function IndicatorsPage({
                       </div>
                       <div>
                         <strong>
-                          {quality?.source_count === 2
-                            ? 'Corroborated'
-                            : quality?.source_count && quality.source_count > 2
+                          {quality?.source_count && quality.source_count > 1
                             ? `${quality.source_count} sources`
                             : 'Single source'}
                         </strong>
