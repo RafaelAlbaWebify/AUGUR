@@ -1612,3 +1612,139 @@
     max-width: 180px;
   }
 }
+
+
+/* Overview fidelity: hero proportions and image card */
+.countryRadarHero {
+  grid-template-columns: minmax(300px, .95fr) minmax(520px, 1.25fr) minmax(360px, 1.12fr);
+}
+
+.countryIdentityCard {
+  position: relative;
+  min-height: 390px;
+  padding: 0;
+  background-size: cover;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.countryHeroMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 12px;
+}
+
+.countryHeroMeta span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border: 1px solid rgba(217, 239, 251, .18);
+  border-radius: 999px;
+  background: rgba(3, 14, 22, .48);
+  backdrop-filter: blur(5px);
+  color: #d3eaf7;
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.countryHeroBottom {
+  display: grid;
+  gap: 7px;
+  padding: 24px 16px 16px;
+}
+
+.countryHeroBottom h3 {
+  margin: 0;
+  color: #fff;
+  font-size: 28px;
+  line-height: 1;
+  text-shadow: 0 2px 18px rgba(0,0,0,.5);
+}
+
+.countryHeroBottom p {
+  margin: 0;
+  max-width: 34ch;
+  color: #e0edf4;
+  font-size: 10px;
+  line-height: 1.5;
+  text-shadow: 0 1px 10px rgba(0,0,0,.72);
+}
+
+.countryRegionFocus {
+  justify-self: start;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: rgba(15, 104, 155, .62);
+  color: #dff6ff;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+
+.countryRadarMap {
+  min-height: 390px;
+}
+
+.regionalMapView {
+  grid-template-columns: 1fr;
+  min-height: 338px;
+}
+
+.regionalMapCanvas {
+  min-height: 290px;
+  border-right: 0;
+}
+
+.regionalMapCanvas svg {
+  min-height: 290px;
+}
+
+.regionalRegionList {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(118px, max-content);
+  grid-template-columns: none;
+  max-height: none;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 5px 7px;
+  border-top: 1px solid var(--augur-border-soft);
+}
+
+.regionalRegionList button {
+  min-height: 30px;
+  border-bottom: 0;
+  border-right: 1px solid var(--augur-border-soft);
+}
+
+.regionalMapSource {
+  padding: 5px 9px;
+}
+
+.recentChangesPanel {
+  min-height: 390px;
+}
+
+@media (max-width: 1450px) {
+  .countryRadarHero {
+    grid-template-columns: minmax(280px, .9fr) minmax(460px, 1.2fr) minmax(330px, 1fr);
+  }
+}
+
+@media (max-width: 1180px) {
+  .countryRadarHero {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .countryIdentityCard,
+  .countryRadarMap {
+    min-height: 360px;
+  }
+}
