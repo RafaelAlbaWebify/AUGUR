@@ -1947,3 +1947,52 @@
     padding: 7px 10px;
   }
 }
+
+
+/* Consolidated mockup-fidelity refinements. */
+.mapModeToggle {
+  display: inline-flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  width: max-content;
+  white-space: nowrap;
+}
+
+.mapModeToggle button {
+  flex: 0 0 auto;
+}
+
+@media (min-width: 1400px) and (max-height: 940px) {
+  .countryMetricCard {
+    min-height: 138px;
+    max-height: 138px;
+  }
+
+  .countryMetricTop > span {
+    font-size: 9px;
+  }
+
+  .countryMetricTop small {
+    font-size: 7px;
+  }
+
+  .countryMetricName {
+    font-size: 8px;
+  }
+
+  .countryMetricValue {
+    font-size: 17px;
+  }
+
+  .countryMetricTrend strong {
+    font-size: 10px;
+  }
+
+  .countryMetricEvidenceRow {
+    grid-template-columns: minmax(0, 1fr) 90px;
+  }
+
+  .countryMetricSparkline svg {
+    height: 38px;
+  }
+}
