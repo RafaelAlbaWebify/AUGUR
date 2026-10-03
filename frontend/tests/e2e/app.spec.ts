@@ -265,6 +265,27 @@ async function mockApi(page: Page) {
       }
     } else if (path.endsWith('/snapshot')) {
       body = { country_iso3: country, observation_count: 1, indicators: [metric(country)] }
+    } else if (path.endsWith('/overview-series')) {
+      body = {
+        country_iso3: country,
+        series: [{
+          indicator_id: 'unemployment_rate',
+          name: 'Unemployment, total (% of total labor force)',
+          dimension: 'productive_capacity',
+          unit: 'percent',
+          source_id: 'EUROSTAT',
+          points: [
+            { period: 2018, value: country === 'ESP' ? 15.3 : country === 'PRT' ? 7.0 : 5.8 },
+            { period: 2019, value: country === 'ESP' ? 14.1 : country === 'PRT' ? 6.6 : 5.0 },
+            { period: 2020, value: country === 'ESP' ? 15.5 : country === 'PRT' ? 7.0 : 5.8 },
+            { period: 2021, value: country === 'ESP' ? 14.8 : country === 'PRT' ? 6.6 : 6.2 },
+            { period: 2022, value: country === 'ESP' ? 12.9 : country === 'PRT' ? 6.1 : 4.5 },
+            { period: 2023, value: country === 'ESP' ? 12.2 : country === 'PRT' ? 6.5 : 4.3 },
+            { period: 2024, value: country === 'ESP' ? 11.3 : country === 'PRT' ? 6.4 : 4.4 },
+            { period: 2025, value: metric(country).value },
+          ],
+        }],
+      }
     } else if (path.endsWith('/trends')) {
       body = { country_iso3: country, indicator_count: 1, indicators: [{ ...metric(country), interpretation_policy: 'lower', target_min: null, target_max: null, trend: { direction: 'decrease', interpretation: 'improving', confidence: 'high', slope_per_year: -0.2, pct_change_1y: -2, pct_change_3y: -5, pct_change_5y: -8, years_used: 6, target_status: null } }] }
     } else if (path.endsWith('/assessment')) {
@@ -504,7 +525,7 @@ test('Overview exposes selectable official NUTS 2 regions', async ({ page }) => 
   await expect(page.getByText('Galicia · ES11')).toBeVisible()
   await expect(page.getByText('Geography: Eurostat GISCO · NUTS 2024 · level 2 · EPSG:4326')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Countries' }).click()
+  await page.getByRole('button', { name: 'Map', exact: true }).click()
   await expect(page.getByTestId('world-map')).toBeVisible()
 
   await page.getByRole('button', { name: 'Regions' }).click()
@@ -890,6 +911,15 @@ test('comparison selectors swap countries without duplicates', async ({ page }) 
   await expect(first).toHaveValue('ESP')
   await expect(second).toHaveValue('IRL')
   await expect(third).toHaveValue('PRT')
+})
+
+test('Country Radar domain cards use observed history for sparklines', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  const labourCard = page.locator('.countryMetricCard').filter({ hasText: 'Labour market' })
+  await expect(labourCard.locator('.countryMetricSparkline svg')).toBeVisible()
+  await expect(labourCard.locator('.countryMetricSparkline polyline')).toHaveAttribute('points', /,/)
+  await expect(labourCard.getByText('EUROSTAT · 2025')).toBeVisible()
 })
 
 test('Country Radar uses a fixed evidence-first composition', async ({ page }) => {
