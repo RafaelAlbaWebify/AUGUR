@@ -384,32 +384,99 @@
   .shell.view-overview {
     height: 100vh;
     overflow: hidden;
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    align-content: stretch;
+  }
+
+  .shell.view-overview > .dashboardTopbar {
+    min-height: 72px;
   }
 
   .overviewPageV2 {
-    height: calc(100vh - 104px);
+    height: auto;
+    min-height: 0;
     overflow: hidden;
     display: grid;
-    grid-template-rows: minmax(0, 58fr) minmax(0, 42fr);
+    grid-template-rows: minmax(0, 52fr) minmax(0, 48fr);
     gap: var(--ov-gap);
     margin-top: 12px;
+    padding-bottom: 8px;
+    box-sizing: border-box;
   }
 
-  .overviewHeroGrid {
-    height: 100%;
+  .overviewHeroGrid,
+  .overviewLowerGrid,
+  .overviewMapPanel,
+  .overviewFitPanel,
+  .overviewDimensionsPanel,
+  .overviewInsightRail,
+  .overviewMapPanel .worldMapSection,
+  .overviewFitPanel .fitSnapshot {
     min-height: 0;
+    box-sizing: border-box;
+  }
+
+  .overviewHeroGrid,
+  .overviewLowerGrid {
+    height: 100%;
   }
 
   .overviewLowerGrid {
-    height: 100%;
-    min-height: 0;
     margin-top: 0;
+  }
+
+  .overviewMapPanel,
+  .overviewFitPanel {
+    overflow: hidden;
+  }
+
+  .overviewFitPanel .fitSnapshot {
+    height: 100%;
+    overflow: hidden;
+    padding: 14px;
+  }
+
+  .overviewFitPanel .mockFitGrid {
+    flex: 1;
+    min-height: 0;
+    margin-top: 10px;
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  .overviewFitPanel .mockFitCard {
+    min-height: 0;
+    height: 100%;
+    overflow: hidden;
+    padding: 10px 12px !important;
+    grid-template-columns: 50px minmax(0, 1fr);
+  }
+
+  .overviewFitPanel .readinessRing {
+    width: 48px;
+    height: 48px;
+  }
+
+  .overviewFitPanel .mockFitCard small {
+    font-size: 9px !important;
+  }
+
+  .overviewFitPanel .mockFitCard strong {
+    font-size: 13px !important;
+  }
+
+  .overviewFitPanel .mockFitCard p {
+    font-size: 9px;
+    line-height: 1.25;
   }
 
   .overviewDimensionsPanel,
   .overviewInsightRail {
     height: 100%;
     min-height: 0;
+    overflow: hidden;
   }
 
   .overviewDimensionGridV2 {
@@ -424,11 +491,18 @@
 
   .overviewInsightRail {
     align-content: stretch;
-    grid-template-rows: minmax(82px, .7fr) minmax(128px, 1fr) minmax(156px, 1.25fr);
+    grid-template-rows: minmax(72px, .65fr) minmax(118px, 1fr) minmax(150px, 1.35fr);
+  }
+
+  .overviewInsightRail .overallSignalBalance,
+  .overviewOutlookCard,
+  .overviewCompareCard {
+    min-height: 0;
+    overflow: hidden;
+    box-sizing: border-box;
   }
 
   .shell.view-overview .dashboardTopbar {
-    min-height: 72px;
     grid-template-columns: 245px 225px minmax(340px, auto) 1fr;
     gap: 16px;
     padding: 10px 14px;
@@ -473,28 +547,15 @@
   }
 
   .overviewFitPanel .mockPanelHeader .label {
-    font-size: 10px;
-  }
-
-  .overviewFitPanel .mockPanelHeader strong {
-    font-size: 16px;
-  }
-
-  .overviewFitPanel .mockPanelHeader > span {
     font-size: 9px;
   }
 
-  .overviewFitPanel .mockFitCard small {
-    font-size: 10px !important;
+  .overviewFitPanel .mockPanelHeader strong {
+    font-size: 15px;
   }
 
-  .overviewFitPanel .mockFitCard strong {
-    font-size: 14px !important;
-  }
-
-  .overviewFitPanel .mockFitCard p {
-    font-size: 10px;
-    line-height: 1.35;
+  .overviewFitPanel .mockPanelHeader > span {
+    font-size: 8px;
   }
 }
 
