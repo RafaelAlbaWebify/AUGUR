@@ -10,37 +10,34 @@ export default function OverallSignalBalance({
   dimensions,
 }: OverallSignalBalanceProps) {
   const values = Object.values(dimensions ?? {})
-  const improving = values.filter((item) => item.trajectory === 'improving').length
-  const mixed = values.filter((item) => item.trajectory === 'mixed').length
-  const contextual = values.filter((item) =>
-    ['contextual', 'limited_evidence', 'stable'].includes(item.trajectory),
-  ).length
-  const deteriorating = values.filter((item) => item.trajectory === 'deteriorating').length
-
-  let label = 'Balanced'
-  let tone = 'neutral'
-
-  if (improving > deteriorating + mixed) {
-    label = 'Improving tilt'
-    tone = 'positive'
-  } else if (deteriorating > improving) {
-    label = 'Pressure tilt'
-    tone = 'negative'
-  } else if (mixed > 0) {
-    label = 'Mixed'
-    tone = 'warning'
+  const counts = {
+    improving: values.filter((item) => item.trajectory === 'improving').length,
+    deteriorating: values.filter((item) => item.trajectory === 'deteriorating').length,
+    mixed: values.filter((item) => item.trajectory === 'mixed').length,
+    stable: values.filter((item) => item.trajectory === 'stable').length,
+    contextual: values.filter((item) => item.trajectory === 'contextual').length,
+    limited: values.filter((item) => item.trajectory === 'limited_evidence').length,
   }
+
+  const summary = [
+    ['improving', counts.improving],
+    ['deteriorating', counts.deteriorating],
+    ['mixed', counts.mixed],
+    ['stable', counts.stable],
+    ['contextual', counts.contextual],
+    ['limited evidence', counts.limited],
+  ]
+    .filter(([, count]) => Number(count) > 0)
+    .map(([label, count]) => `${count} ${label}`)
+    .join(' · ')
 
   return (
     <section className="overallSignalBalance">
       <div>
-        <span>OVERALL SIGNAL BALANCE</span>
-        <strong className={tone}>{label}</strong>
+        <span>DIMENSION TRAJECTORIES</span>
+        <strong>{values.length ? `${values.length} assessed` : 'Loading…'}</strong>
       </div>
-      <p>
-        {improving} improving · {mixed} mixed · {contextual} contextual
-        {deteriorating ? ` · ${deteriorating} deteriorating` : ''}
-      </p>
+      <p>{summary || 'No trajectory evidence available yet.'}</p>
     </section>
   )
 }
