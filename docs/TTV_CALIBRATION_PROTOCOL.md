@@ -41,11 +41,30 @@ Required:
 - candidate maximum weeks;
 - observed weeks.
 
+Calibration-control metadata:
+
+- `sample_role`: `development` or `holdout` (defaults to `development`);
+- `start_event_definition_version`;
+- `viability_outcome_definition_version`.
+
 Optional:
 
 - source/provenance label;
 - observation date;
 - stage-level timings.
+
+### Sample role and protocol lock
+
+Development cases may be collected while the protocol is still a draft. They remain exploratory.
+
+Holdout cases are different. AUGUR rejects a `sample_role=holdout` import while `CALIBRATION_PROTOCOL_VERSION` is unset.
+
+A holdout case will also require:
+
+- a frozen start-event definition version;
+- a frozen viability-outcome definition version.
+
+This lock is enforced by the calibration importer, not only by documentation.
 
 The calibration store does not contain the full personal profile.
 
