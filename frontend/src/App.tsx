@@ -647,6 +647,7 @@ export default function App() {
           countries={countries}
           selectedCountry={selectedCountry}
           selectedCountryName={selectedCountryMeta?.name ?? selectedCountry}
+          currentIndicators={enrichedIndicators}
           assessment={assessment}
           scenarios={scenarios}
           compareCountries={compareCountries}
