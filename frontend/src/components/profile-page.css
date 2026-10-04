@@ -1139,3 +1139,130 @@
     padding: 6px 8px;
   }
 }
+
+
+/* My Fit decision-readiness distinction */
+.myFitDecisionReadiness {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px;
+  border: 1px solid var(--profile-border);
+  border-radius: 11px;
+  background: rgba(7, 20, 31, .72);
+}
+
+.myFitDecisionReadiness > div:first-child {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 7px 8px;
+}
+
+.myFitDecisionReadiness > div:first-child span {
+  color: #6f8899;
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+
+.myFitDecisionReadiness > div:first-child strong {
+  color: #e8f2f7;
+  font-size: 12px;
+}
+
+.myFitDecisionModules {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.myFitDecisionModules article {
+  display: grid;
+  gap: 3px;
+  padding: 8px 9px;
+  border: 1px solid var(--profile-border);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .5);
+}
+
+.myFitDecisionModules article > span {
+  color: #6f8798;
+  font-size: 7px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.myFitDecisionModules article strong {
+  color: #dce8ee;
+  font-size: 8px;
+  line-height: 1.35;
+}
+
+.myFitDecisionModules article small {
+  color: #7e94a3;
+  font-size: 7px;
+  text-transform: capitalize;
+}
+
+.myFitDecisionModules article.complete {
+  border-color: rgba(64, 159, 105, .28);
+}
+
+.myFitDecisionModules article.partial {
+  border-color: rgba(194, 151, 58, .28);
+}
+
+.myFitDecisionModules article.incomplete {
+  border-color: rgba(112, 137, 153, .22);
+}
+
+.myFitDecisionReadiness > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #6d8596;
+  font-size: 8px;
+}
+
+.keyActionList article em {
+  display: block;
+  margin-top: 3px;
+  color: #77b9dc;
+  font-size: 7px;
+  font-style: normal;
+}
+
+.evidenceConstraint {
+  display: grid;
+  gap: 2px;
+  padding-top: 7px;
+  border-top: 1px solid var(--profile-border);
+}
+
+.evidenceConstraint span {
+  color: #667e8e;
+  font-size: 6px;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+
+.evidenceConstraint strong {
+  color: #9fb6c4;
+  font-size: 7px;
+  text-transform: capitalize;
+}
+
+@media (max-width: 1180px) {
+  .myFitDecisionReadiness {
+    grid-template-columns: 1fr;
+  }
+
+  .myFitDecisionModules {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .myFitDecisionModules {
+    grid-template-columns: 1fr;
+  }
+}
