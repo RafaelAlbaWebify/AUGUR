@@ -916,6 +916,28 @@ test('My Fit priorities are explicit and evidence cards expose next actions', as
   await expect(evidence.getByText('Add profession, skills')).toBeVisible()
 })
 
+test('Profile separates missing inputs from external evidence constraints', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  const readiness = page.getByRole('region', { name: 'Personal-fit decision readiness' })
+  await expect(readiness).toBeVisible()
+  await expect(readiness.getByText(/Readiness is not a country score/i)).toBeVisible()
+  await expect(readiness.getByText('Work / residence feasibility')).toBeVisible()
+  await expect(readiness.getByText('Career viability')).toBeVisible()
+  await expect(readiness.getByText('Language viability')).toBeVisible()
+  await expect(readiness.getByText('Purchasing-power viability')).toBeVisible()
+  await expect(readiness.getByText('profile input')).toHaveCount(4)
+})
+
+test('Profile key actions state which decision each missing input unlocks', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+
+  await expect(page.getByText('Unlocks work / residence feasibility')).toBeVisible()
+  await expect(page.getByText('Unlocks career viability')).toBeVisible()
+  await expect(page.getByText('Unlocks language viability')).toBeVisible()
+  await expect(page.getByText('Unlocks purchasing-power viability')).toBeVisible()
+})
+
 test('profile marks future financial inputs that do not affect current FinancialFit', async ({ page }) => {
   await page.goto('/country/ESP/profile')
   const profile = page.getByRole('region', { name: 'Personal profile' })
