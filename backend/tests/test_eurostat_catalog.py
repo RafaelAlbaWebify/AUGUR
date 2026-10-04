@@ -1,5 +1,5 @@
 from app.catalog import INDICATORS
-from app.ingestion.eurostat import EUROSTAT_SERIES
+from app.ingestion.eurostat import EUROSTAT_JOB_VACANCY_RATES, EUROSTAT_SERIES
 
 
 def test_new_eu_dimensions_have_exact_eurostat_series():
@@ -110,3 +110,10 @@ def test_aic_material_welfare_indicator_uses_current_ppp_dataset():
     assert indicator["dimension"] == "prosperity"
     assert indicator["interpretation_policy"] == "higher"
     assert "household material welfare" in indicator["comparability_note"]
+
+
+def test_experimental_vacancy_source_has_explicit_country_coverage():
+    assert EUROSTAT_JOB_VACANCY_RATES["dataset_id"] == "jvs_a_isco3_r1"
+    assert EUROSTAT_JOB_VACANCY_RATES["filters"]["freq"] == "A"
+    assert EUROSTAT_JOB_VACANCY_RATES["supported_iso3"] == {"ESP", "PRT"}
+    assert "IRL" not in EUROSTAT_JOB_VACANCY_RATES["supported_iso3"]
