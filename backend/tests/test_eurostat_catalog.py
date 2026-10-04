@@ -117,3 +117,20 @@ def test_experimental_vacancy_source_has_explicit_country_coverage():
     assert EUROSTAT_JOB_VACANCY_RATES["filters"]["freq"] == "A"
     assert EUROSTAT_JOB_VACANCY_RATES["supported_iso3"] == {"ESP", "PRT"}
     assert "IRL" not in EUROSTAT_JOB_VACANCY_RATES["supported_iso3"]
+
+
+def test_unmet_medical_needs_uses_eu_silc_access_measure():
+    by_series = {item["indicator_id"]: item for item in EUROSTAT_SERIES}
+    by_indicator = {item["indicator_id"]: item for item in INDICATORS}
+
+    series = by_series["unmet_medical_needs"]
+    assert series["dataset_id"] == "hlth_silc_08b"
+    assert series["filters"]["unit"] == "PC"
+    assert series["filters"]["reason"] == "TXP_TFAR_WLIST"
+    assert series["filters"]["rskpovth"] == "TOTAL"
+    assert series["filters"]["sex"] == "T"
+    assert series["filters"]["age"] == "Y_GE16"
+
+    indicator = by_indicator["unmet_medical_needs"]
+    assert indicator["dimension"] == "human_systems"
+    assert indicator["interpretation_policy"] == "lower"
