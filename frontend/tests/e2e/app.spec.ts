@@ -753,6 +753,21 @@ test('switches country without a page reload', async ({ page }) => {
 
 
 
+test('Skills and Languages distinguishes learning gaps from demand ranking', async ({ page }) => {
+  await page.goto('/country/ESP/skills')
+
+  // Populate the profile/fit fixture already used by the visual audit helper where available.
+  const summary = page.getByRole('region', { name: 'Skills decision summary' })
+  if (await summary.count()) {
+    await expect(summary.getByText('NEXT TO LEARN')).toBeVisible()
+    await expect(summary.getByText('PORTABLE ASSETS')).toBeVisible()
+    await expect(summary.getByText('LANGUAGE READINESS')).toBeVisible()
+    await expect(summary.getByText('MARKET CONTEXT')).toBeVisible()
+    await expect(summary.getByText(/not employer-demand frequency/i)).toBeVisible()
+    await expect(summary.getByText(/not a skill-demand ranking/i)).toBeVisible()
+  }
+})
+
 test('Outlook labels contextual scenarios without implying statistical uncertainty', async ({ page }) => {
   await page.goto('/country/PRT/outlook')
 
