@@ -121,7 +121,7 @@ type OverviewPageProps = {
 }
 
 const RADAR_DOMAINS = [
-  { id: 'economy', label: 'Economy', dimension: 'prosperity', indicators: ['real_gdp_per_capita', 'real_gdp_growth', 'household_price_level_index'] },
+  { id: 'economy', label: 'Economy', dimension: 'prosperity', indicators: ['actual_individual_consumption_index', 'real_gdp_per_capita', 'real_gdp_growth', 'household_price_level_index'] },
   { id: 'labour', label: 'Labour market', dimension: 'productive_capacity', indicators: ['employment_rate_20_64', 'unemployment_rate', 'imf_unemployment_rate'] },
   { id: 'housing', label: 'Housing', dimension: 'housing', indicators: ['housing_cost_overburden_rate', 'real_house_price_index', 'rent_price_index'] },
   { id: 'healthcare', label: 'Healthcare', dimension: 'human_systems', indicators: ['life_expectancy'] },
