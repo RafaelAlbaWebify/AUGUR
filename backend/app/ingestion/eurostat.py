@@ -609,6 +609,34 @@ class EurostatAdapter:
                 f"received dimensions={dimension_ids}"
             )
 
+        isco_dimension_id = next(
+            (
+                dimension_id
+                for dimension_id in dimension_ids
+                if "isco" in str(dimension_id).lower()
+            ),
+            None,
+        )
+        if isco_dimension_id is None:
+            isco_dimension_id = next(
+                (
+                    dimension_id
+                    for dimension_id in dimension_ids
+                    if "occupation" in str(
+                        dimensions.get(dimension_id, {}).get("label", "")
+                    ).lower()
+                    or "international standard classification of occupations" in str(
+                        dimensions.get(dimension_id, {}).get("label", "")
+                    ).lower()
+                ),
+                None,
+            )
+        if isco_dimension_id is None:
+            raise ValueError(
+                "Eurostat vacancy-rate payload has no ISCO dimension; "
+                f"received dimensions={dimension_ids}"
+            )
+
         nace_codes = set(
             self._ordered_codes(dimensions[nace_dimension_id])
         )
@@ -663,7 +691,7 @@ class EurostatAdapter:
             }
 
             period = labels.get("time")
-            isco08 = str(labels.get("isco08") or "")
+            isco08 = str(labels.get(isco_dimension_id) or "")
             row_nace = labels.get(nace_dimension_id)
 
             if not period:
@@ -692,22 +720,7 @@ class EurostatAdapter:
             )
 
         if not rows:
-            isco_dimension_id = next(
-                (
-                    dimension_id
-                    for dimension_id in dimension_ids
-                    if "isco" in str(dimension_id).lower()
-                    or "occupation" in str(
-                        dimensions.get(dimension_id, {}).get("label", "")
-                    ).lower()
-                ),
-                None,
-            )
-            isco_codes = (
-                self._ordered_codes(dimensions[isco_dimension_id])[:12]
-                if isco_dimension_id
-                else []
-            )
+            isco_codes = self._ordered_codes(dimensions[isco_dimension_id])[:12]
             nace_sample = (
                 self._ordered_codes(dimensions[nace_dimension_id])[:12]
                 if nace_dimension_id
