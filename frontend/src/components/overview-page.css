@@ -2567,3 +2567,14 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+
+.leafletAugurMap .clickableCountryBoundary {
+  cursor: pointer;
+}
+
+.leafletAugurMap .clickableCountryBoundary:hover {
+  stroke: #dff7ff;
+  stroke-width: 2.5;
+  fill-opacity: .14;
+}
