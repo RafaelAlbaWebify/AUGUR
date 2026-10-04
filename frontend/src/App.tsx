@@ -663,6 +663,7 @@ export default function App() {
         <IndicatorsPage
           countryName={selectedCountryMeta?.name ?? selectedCountry}
           indicators={enrichedIndicators}
+          overviewSeries={overviewSeries?.series ?? []}
           sourceQuality={sourceQuality?.indicators ?? []}
           assessment={assessment?.dimensions}
           dimension={route.kind === 'dimension' ? route.dimension : null}
