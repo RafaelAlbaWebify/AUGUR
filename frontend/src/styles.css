@@ -6271,3 +6271,79 @@ body:has(.shell.detailsOpen) {
     padding: 6px 7px;
   }
 }
+
+
+/* Skills & Languages action synthesis */
+.skillsDecisionSummary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+  padding: 8px;
+  border-bottom: 1px solid var(--augur-border-soft);
+  background: rgba(7, 20, 31, .46);
+}
+
+.skillsDecisionSummary article {
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  min-height: 98px;
+  padding: 8px 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .56);
+}
+
+.skillsDecisionSummary article > span {
+  color: #6d8798;
+  font-size: 7px;
+  letter-spacing: .07em;
+}
+
+.skillsDecisionSummary article strong {
+  color: #e6f0f5;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.skillsDecisionSummary article p {
+  margin: 0;
+  color: #88a0b0;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.skillsDecisionSummary article small {
+  margin-top: auto;
+  color: #5f7889;
+  font-size: 6px;
+  line-height: 1.35;
+}
+
+.skillsDecisionSummary .nextFocus {
+  border-color: rgba(201, 154, 55, .28);
+}
+
+.skillsDecisionSummary .portableAssets {
+  border-color: rgba(68, 168, 112, .26);
+}
+
+.skillsDecisionSummary .languageLeverage {
+  border-color: rgba(70, 143, 184, .26);
+}
+
+.skillsDecisionSummary .marketContext {
+  border-color: rgba(101, 129, 148, .24);
+}
+
+@media (max-width: 1180px) {
+  .skillsDecisionSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .skillsDecisionSummary {
+    grid-template-columns: 1fr;
+  }
+}
