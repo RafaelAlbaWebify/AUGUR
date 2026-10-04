@@ -484,6 +484,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const evidenceItems = [
     {
       id: 'legal',
+      readinessKey: 'legal_fit',
       label: 'LegalFit',
       state: !legalFit || legalFit.status === 'insufficient_profile'
         ? 'incomplete'
@@ -494,6 +495,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     },
     {
       id: 'language',
+      readinessKey: 'language_fit',
       label: 'LanguageFit',
       state: !languageFit || languageFit.status === 'target_language_missing'
         ? 'incomplete'
@@ -502,6 +504,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     },
     {
       id: 'career',
+      readinessKey: 'career_fit',
       label: 'CareerFit',
       state: !careerFit || careerFit.status === 'profession_missing'
         ? 'incomplete'
@@ -512,6 +515,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     },
     {
       id: 'financial',
+      readinessKey: 'financial_fit',
       label: 'FinancialFit',
       state: !financialFit
         ? 'incomplete'
@@ -525,12 +529,12 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   ]
 
   const priorityOptions = [
-    ['healthcare', 'Good healthcare'],
-    ['safety', 'Safe environment'],
-    ['climate', 'Mild climate'],
-    ['housing', 'Reasonable housing costs'],
-    ['career', 'Career opportunities'],
-    ['mobility', 'EU mobility'],
+    { key: 'healthcare', label: 'Good healthcare', icon: '✚', description: 'Access, outcomes and system quality' },
+    { key: 'safety', label: 'Safe environment', icon: '◇', description: 'Objective and perceived safety' },
+    { key: 'climate', label: 'Mild climate', icon: '☼', description: 'Climate comfort and exposure' },
+    { key: 'housing', label: 'Reasonable housing costs', icon: '⌂', description: 'Affordability relative to income' },
+    { key: 'career', label: 'Career opportunities', icon: '↗', description: 'Demand, skills and earnings' },
+    { key: 'mobility', label: 'EU mobility', icon: '↔', description: 'Legal access and ease of movement' },
   ] as const
 
   function togglePriority(key: string) {
@@ -545,6 +549,16 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const studyHours = typeof profile.preferences.language_study_hours_per_week === 'number'
     ? profile.preferences.language_study_hours_per_week
     : null
+  const selectedPriorityCount = priorityOptions.filter(
+    (item) => profile.preferences[`priority_${item.key}`] === true,
+  ).length
+
+  const gapPurpose: Record<string, string> = {
+    legal_fit: 'work and residence evidence',
+    career_fit: 'occupation and skill evidence',
+    language_fit: 'language viability evidence',
+    financial_fit: 'income and purchasing-power evidence',
+  }
 
   return (
     <section className="profilePageV3" aria-label="Personal profile">
@@ -607,11 +621,13 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
             <span>{gaps.length ? `${gaps.length} open` : 'Ready'}</span>
           </div>
           <div className="keyActionList">
-            {gaps.map(([moduleId, item]) => (
+            {gaps.map(([moduleId, item], index) => (
               <article key={moduleId}>
+                <span className="keyActionIndex">{index + 1}</span>
                 <div>
                   <strong>{item.label} incomplete</strong>
                   <span>Add: {item.missing_fields.join(', ')}</span>
+                  <small>Required for {gapPurpose[moduleId] ?? 'personal-fit evidence'}.</small>
                 </div>
                 <button type="button" onClick={() => setEditMode(true)}>Add</button>
               </article>
@@ -691,14 +707,28 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
 
       <div className="myFitSecondGrid">
         <section className="myFitCard prioritiesCard">
-          <div className="myFitCardHeader"><h3>Your priorities</h3><span>Used only when explicit</span></div>
+          <div className="myFitCardHeader">
+            <h3>Your priorities</h3>
+            <span>{selectedPriorityCount} selected · used only when explicit</span>
+          </div>
           <p>Select what matters most to you. These preferences are stored locally; they do not alter objective country evidence.</p>
           <div className="priorityChipGrid">
-            {priorityOptions.map(([key, label]) => {
-              const active = profile.preferences[`priority_${key}`] === true
+            {priorityOptions.map((item) => {
+              const active = profile.preferences[`priority_${item.key}`] === true
               return (
-                <button type="button" className={active ? 'active' : ''} key={key} onClick={() => togglePriority(key)}>
-                  {label}
+                <button
+                  type="button"
+                  className={active ? 'active' : ''}
+                  key={item.key}
+                  aria-pressed={active}
+                  onClick={() => togglePriority(item.key)}
+                >
+                  <span className="priorityIcon">{item.icon}</span>
+                  <span className="priorityCopy">
+                    <strong>{item.label}</strong>
+                    <small>{item.description}</small>
+                  </span>
+                  <span className="priorityState">{active ? 'Selected' : 'Off'}</span>
                 </button>
               )
             })}
@@ -718,6 +748,18 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <strong>{item.label.replace('Fit', '')}</strong>
                 <span>{item.state}</span>
                 <small>{item.detail}</small>
+                <div className="evidenceNextAction">
+                  <span>Next action</span>
+                  <strong>
+                    {readiness?.modules?.[item.readinessKey]?.ready
+                      ? 'Core inputs ready'
+                      : readiness?.modules?.[item.readinessKey]?.missing_fields?.length
+                      ? `Add ${readiness.modules[item.readinessKey].missing_fields.join(', ')}`
+                      : item.state === 'partial'
+                      ? 'Review remaining evidence blockers'
+                      : 'Review module evidence'}
+                  </strong>
+                </div>
               </article>
             ))}
           </div>
