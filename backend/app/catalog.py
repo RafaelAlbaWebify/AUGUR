@@ -77,6 +77,18 @@ SOURCES = [
 
 INDICATORS = [
     {
+        "indicator_id": "unmet_medical_needs",
+        "source_indicator": "EUROSTAT:HLTH_SILC_08B:TXP_TFAR_WLIST",
+        "name": "Unmet medical examination or treatment needs",
+        "dimension": "human_systems",
+        "unit": "percent",
+        "interpretation_policy": "lower",
+        "target_min": None,
+        "target_max": None,
+        "methodology_note": "Share of people aged 16 years or over who needed medical examination or treatment but did not receive it because it was too expensive, too far away or subject to a long waiting list.",
+        "comparability_note": "Self-reported access barrier from EU-SILC. It measures unmet need among people reporting a need for care and should complement, not replace, health-outcome indicators such as life expectancy.",
+    },
+    {
         "indicator_id": "actual_individual_consumption_index",
         "source_indicator": "EUROSTAT:PRC_PPP_IND_1:A01",
         "name": "Actual individual consumption per capita",
