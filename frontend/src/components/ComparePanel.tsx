@@ -104,6 +104,39 @@ export default function ComparePanel({
     return [...groups.entries()].map(([dimensionId, items]) => ({ dimensionId, items }))
   }, [visibleIndicators])
 
+  const countrySummaries = useMemo(() => {
+    return selected.map((iso3) => {
+      let higher = 0
+      let mid = 0
+      let lower = 0
+      let aligned = 0
+      let covered = 0
+
+      for (const item of visibleIndicators) {
+        if (!item.countries[iso3]) continue
+        covered += 1
+        const position = selectedSetPosition(item, iso3, selected)
+        if (!position) continue
+        if (position.label === 'High') higher += 1
+        else if (position.label === 'Low') lower += 1
+        else if (position.label === 'Mid') mid += 1
+        else aligned += 1
+      }
+
+      return { iso3, covered, higher, mid, lower, aligned }
+    })
+  }, [visibleIndicators, selected])
+
+  const domainCoverage = useMemo(() => {
+    return groupedIndicators.map((group) => ({
+      dimensionId: group.dimensionId,
+      indicatorCount: group.items.length,
+      completeCount: group.items.filter((item) =>
+        selected.every((iso3) => Boolean(item.countries[iso3]))
+      ).length,
+    }))
+  }, [groupedIndicators, selected])
+
   const descriptiveInsights = useMemo(() => {
     return visibleIndicators
       .map((item) => {
@@ -225,6 +258,56 @@ export default function ComparePanel({
               compact
             />
           ))}
+        </div>
+      </section>
+
+      <section className="decisionSummaryStrip" aria-label="Comparison summary">
+        {countrySummaries.map((summary) => {
+          const country = countries.find((item) => item.iso3 === summary.iso3)
+          return (
+            <article key={summary.iso3}>
+              <div className="decisionSummaryCountry">
+                <FlagIcon iso3={summary.iso3} />
+                <div>
+                  <strong>{country?.name ?? summary.iso3}</strong>
+                  <span>{summary.covered}/{visibleIndicators.length || 0} comparable indicators</span>
+                </div>
+              </div>
+              <div className="decisionSummaryPositions">
+                <span><b>{summary.higher}</b> higher values</span>
+                <span><b>{summary.mid}</b> mid</span>
+                <span><b>{summary.lower}</b> lower values</span>
+                {summary.aligned > 0 && <span><b>{summary.aligned}</b> aligned</span>}
+              </div>
+            </article>
+          )
+        })}
+        <p>
+          Higher/lower describes numerical position only. It is not automatically better/worse; interpretation depends on the indicator.
+        </p>
+      </section>
+
+      <section className="decisionDomainCoverage" aria-label="Domain evidence coverage">
+        <div className="panelHeading">
+          <div><span>EVIDENCE COVERAGE</span><h3>Comparable data by domain</h3></div>
+        </div>
+        <div className="decisionCoverageGrid">
+          {domainCoverage.map((item) => {
+            const pct = item.indicatorCount
+              ? (item.completeCount / item.indicatorCount) * 100
+              : 0
+            return (
+              <article key={item.dimensionId}>
+                <div>
+                  <strong>{dimensionLabels[item.dimensionId] ?? item.dimensionId}</strong>
+                  <span>{item.completeCount}/{item.indicatorCount} fully comparable</span>
+                </div>
+                <div className="decisionCoverageTrack">
+                  <i style={{ width: `${pct}%` }} />
+                </div>
+              </article>
+            )
+          })}
         </div>
       </section>
 
