@@ -76,6 +76,20 @@ EUROSTAT_EARNINGS = {
 
 EUROSTAT_SERIES = [
     {
+        "indicator_id": "unmet_medical_needs",
+        "dataset_id": "hlth_silc_08b",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "unit": "PC",
+            "reason": "TXP_TFAR_WLIST",
+            "rskpovth": "TOTAL",
+            "sex": "T",
+            "age": "Y_GE16",
+        },
+        "unit": "percent",
+    },
+    {
         "indicator_id": "actual_individual_consumption_index",
         "dataset_id": "prc_ppp_ind_1",
         "filters": {
