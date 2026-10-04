@@ -593,8 +593,20 @@ class EurostatAdapter:
             None,
         )
         if nace_dimension_id is None:
+            nace_dimension_id = next(
+                (
+                    dimension_id
+                    for dimension_id in dimension_ids
+                    if "nace" in str(
+                        dimensions.get(dimension_id, {}).get("label", "")
+                    ).lower()
+                ),
+                None,
+            )
+        if nace_dimension_id is None:
             raise ValueError(
-                "Eurostat vacancy-rate payload has no NACE dimension"
+                "Eurostat vacancy-rate payload has no NACE dimension; "
+                f"received dimensions={dimension_ids}"
             )
 
         nace_codes = set(
