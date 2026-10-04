@@ -213,7 +213,6 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
-  const [mapMode, setMapMode] = useState<'map' | 'regions'>('map')
   const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string } | null>(null)
 
   useEffect(() => {
@@ -302,24 +301,9 @@ export default function OverviewPage({
           <div className="radarPanelTopline mapPanelHeader">
             <div>
               <span>MAP</span>
-              <strong>{mapMode === 'regions' ? 'Region directory' : 'Selectable NUTS 2 map'}</strong>
+              <strong>Explore from Europe to NUTS 2 regions</strong>
             </div>
-            <div className="mapModeToggle" role="group" aria-label="Map layer">
-              <button
-                type="button"
-                className={mapMode === 'map' ? 'active' : ''}
-                onClick={() => setMapMode('map')}
-              >
-                Map
-              </button>
-              <button
-                type="button"
-                className={mapMode === 'regions' ? 'active' : ''}
-                onClick={() => setMapMode('regions')}
-              >
-                Regions
-              </button>
-            </div>
+            <span className="mapInteractionHint">Scroll to zoom · drag to pan</span>
           </div>
 
           {selectedCountryIso2 ? (
@@ -328,7 +312,6 @@ export default function OverviewPage({
               selectedRegion={selectedRegion?.id ?? null}
               onSelectRegion={(id, name) => setSelectedRegion({ id, name })}
               cities={visual.cities}
-              showRegionList={mapMode === 'regions'}
             />
           ) : (
             <div className="regionalMapState error">Regional map unavailable for this country.</div>
