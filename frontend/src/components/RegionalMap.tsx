@@ -2,29 +2,23 @@ import { useEffect, useRef, useState } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
-type RegionFeature = {
-  type: 'Feature'
-  properties?: {
-    NUTS_ID?: string
-    NUTS_NAME?: string
-    NAME_LATN?: string
-    CNTR_CODE?: string
-    LEVL_CODE?: number
-  }
-  geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon | null
+type MapProperties = {
+  NUTS_ID?: string
+  NUTS_NAME?: string
+  NAME_LATN?: string
+  CNTR_CODE?: string
+  LEVL_CODE?: number
 }
 
-type CountryFeature = {
-  type: 'Feature'
-  properties?: {
-    NUTS_ID?: string
-    NUTS_NAME?: string
-    NAME_LATN?: string
-    CNTR_CODE?: string
-    LEVL_CODE?: number
-  }
-  geometry: GeoJSON.Polygon | GeoJSON.MultiPolygon | null
-}
+type RegionFeature = GeoJSON.Feature<
+  GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  MapProperties
+>
+
+type CountryFeature = GeoJSON.Feature<
+  GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  MapProperties
+>
 
 type CityMarker = {
   name: string
@@ -80,6 +74,7 @@ export default function RegionalMap({
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
+  const selectableCountryKey = selectableCountryIso2.join(',')
 
   useEffect(() => {
     onSelectCountryRef.current = onSelectCountry
@@ -163,12 +158,12 @@ export default function RegionalMap({
 
         const countryCollection: GeoJSON.FeatureCollection = {
           type: 'FeatureCollection',
-          features: countries as GeoJSON.Feature[],
+          features: countries,
         }
 
         const regionCollection: GeoJSON.FeatureCollection = {
           type: 'FeatureCollection',
-          features: regions as GeoJSON.Feature[],
+          features: regions,
         }
 
         const selectableCountries = new Set(selectableCountryIso2)
@@ -320,7 +315,7 @@ export default function RegionalMap({
       controller.abort()
       if (progressiveHandler) map.off('zoomend', progressiveHandler)
     }
-  }, [countryIso2, selectableCountryIso2])
+  }, [countryIso2, selectableCountryKey])
 
   useEffect(() => {
     const layer = regionLayerRef.current
