@@ -62,11 +62,16 @@ export default function RegionalMap({
 }: RegionalMapProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
+  const onSelectRegionRef = useRef(onSelectRegion)
   const countryLayerRef = useRef<L.GeoJSON | null>(null)
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
+
+  useEffect(() => {
+    onSelectRegionRef.current = onSelectRegion
+  }, [onSelectRegion])
 
   useEffect(() => {
     if (!hostRef.current || mapRef.current) return
@@ -177,7 +182,7 @@ export default function RegionalMap({
               direction: 'top',
               className: 'augurMapTooltip',
             })
-            layer.on('click', () => onSelectRegion(id, name))
+            layer.on('click', () => onSelectRegionRef.current(id, name))
           },
         })
 
@@ -227,7 +232,26 @@ export default function RegionalMap({
       })
 
     return () => controller.abort()
-  }, [countryIso2, cities, onSelectRegion, selectedRegion])
+  }, [countryIso2])
+
+  useEffect(() => {
+    const layer = regionLayerRef.current
+    if (!layer) return
+
+    layer.setStyle((feature) => {
+      const region = feature as RegionFeature | undefined
+      const id = region?.properties?.NUTS_ID ?? ''
+      const selected = id === selectedRegion
+      return {
+        className: selected ? 'nuts2Boundary selectedNuts2Boundary' : 'nuts2Boundary',
+        color: selected ? '#d9f4ff' : '#61bce4',
+        weight: selected ? 2.4 : 1.25,
+        opacity: 0.95,
+        fillColor: selected ? '#1fb6e8' : '#2085ad',
+        fillOpacity: selected ? 0.35 : 0.10,
+      }
+    })
+  }, [selectedRegion])
 
   const zoomToCountry = () => {
     const map = mapRef.current
