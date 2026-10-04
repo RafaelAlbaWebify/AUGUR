@@ -304,7 +304,7 @@ export default function RegionalMap({
       </div>
 
       <small className="regionalMapSource">
-        Base map: OpenStreetMap · boundaries: Eurostat GISCO NUTS 2024 · regions appear from zoom {REGIONS_VISIBLE_ZOOM}
+        Base map: OpenStreetMap · boundaries: Eurostat GISCO NUTS 2024 · © EuroGeographics · regions appear from zoom {REGIONS_VISIBLE_ZOOM}
       </small>
 
       {status === 'loading' && <div className="regionalMapLoading">Loading geographic layers…</div>}
