@@ -95,3 +95,18 @@ def test_infrastructure_baseline_uses_official_household_connectivity_series():
     indicator = by_indicator["household_internet_access"]
     assert indicator["dimension"] == "infrastructure"
     assert indicator["interpretation_policy"] == "higher"
+
+
+def test_aic_material_welfare_indicator_uses_current_ppp_dataset():
+    by_series = {item["indicator_id"]: item for item in EUROSTAT_SERIES}
+    by_indicator = {item["indicator_id"]: item for item in INDICATORS}
+
+    series = by_series["actual_individual_consumption_index"]
+    assert series["dataset_id"] == "prc_ppp_ind_1"
+    assert series["filters"]["indic_ppp"] == "VI_PPS_EU27_2020_HAB"
+    assert series["filters"]["ppp_cat18"] == "A01"
+
+    indicator = by_indicator["actual_individual_consumption_index"]
+    assert indicator["dimension"] == "prosperity"
+    assert indicator["interpretation_policy"] == "higher"
+    assert "household material welfare" in indicator["comparability_note"]
