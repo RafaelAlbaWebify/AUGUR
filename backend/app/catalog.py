@@ -77,6 +77,26 @@ SOURCES = [
 
 INDICATORS = [
     {
+        "indicator_id": "intentional_homicide_rate",
+        "source_indicator": "EUROSTAT:CRIM_OFF_CAT:ICCS0101",
+        "name": "Police-recorded intentional homicides",
+        "dimension": "safety",
+        "unit": "per_100k_people",
+        "interpretation_policy": "lower",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
+        "indicator_id": "pm25_premature_death_rate",
+        "source_indicator": "EUROSTAT:SDG_11_52",
+        "name": "Premature deaths attributable to PM2.5 exposure",
+        "dimension": "environment",
+        "unit": "per_100k_people",
+        "interpretation_policy": "lower",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
         "indicator_id": "household_price_level_index",
         "source_indicator": "EUROSTAT:PRC_PPP_IND",
         "name": "Household consumption price level index",
