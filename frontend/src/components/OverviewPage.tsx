@@ -236,6 +236,7 @@ function sparklinePoints(points: Array<{ period: number; value: number }>) {
 }
 
 export default function OverviewPage({
+  apiBase,
   countries,
   selectedCountry,
   selectedCountryName,
