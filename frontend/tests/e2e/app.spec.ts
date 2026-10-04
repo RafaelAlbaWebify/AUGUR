@@ -775,19 +775,21 @@ test('top navigation uses real routes and exposes all six product views', async 
   await expect(page.getByText('6. SKILLS & LANGUAGES')).toBeVisible()
 })
 
-test('Overview exposes selectable official NUTS 2 regions', async ({ page }) => {
+test('Overview reveals official NUTS 2 regions progressively with zoom', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
-  await expect(page.getByTestId('regional-map')).toBeVisible()
-  await page.getByRole('button', { name: 'Regions' }).click()
-  await expect(page.getByTestId('regional-map').getByRole('button', { name: 'Galicia' })).toBeVisible()
-  await page.getByTestId('regional-map').getByRole('button', { name: 'Galicia' }).click()
+  const map = page.getByTestId('regional-map')
+  await expect(map).toBeVisible()
+  await expect(map.locator('.leaflet-control-zoom-in')).toBeVisible()
+  await expect(page.getByText('Zoom in to reveal NUTS 2 regions')).toBeVisible()
 
-  await expect(page.getByText('Galicia · ES11')).toBeVisible()
-  await expect(page.getByText('Geography: Eurostat GISCO · NUTS 2024 · level 2 · EPSG:4326')).toBeVisible()
+  await page.getByRole('button', { name: 'Focus country' }).click()
+  await map.locator('.leaflet-control-zoom-in').click()
+  await map.locator('.leaflet-control-zoom-in').click()
 
-  await page.getByRole('button', { name: 'Map', exact: true }).click()
-  await expect(page.getByTestId('regional-map')).toBeVisible()
+  await expect(page.getByText('NUTS 2 regions visible')).toBeVisible()
+  await expect(map.locator('.nuts2Boundary').first()).toBeVisible()
+  await expect(page.getByText(/Base map: OpenStreetMap · boundaries: Eurostat GISCO NUTS 2024/)).toBeVisible()
 })
 
 test('switches country without a page reload', async ({ page }) => {
@@ -1030,13 +1032,15 @@ test('Dimension Detail separates supporting opposing and contextual evidence', a
   await expect(page.locator('.dimensionSignalLane.contextual')).toBeVisible()
 })
 
-test('regional map renders selected-country geometry and city anchors', async ({ page }) => {
+test('regional map renders country context and progressive geographic controls', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
   const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
-  await expect(map.getByRole('button', { name: 'Galicia' })).toBeVisible()
-  await expect(map.locator('.regionalCityMarker')).toHaveCount(4)
+  expect(await map.locator('.countryBoundary').count()).toBeGreaterThan(0)
+  await expect(map.locator('.selectedCountryBoundary')).toHaveCount(1)
+  await expect(page.getByRole('button', { name: 'Europe' })).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Focus country' })).toBeVisible()
 })
 
 test('Decision Matrix summarizes numerical position without implying winners', async ({ page }) => {
@@ -1303,18 +1307,18 @@ test('candidate temporal evidence remains explicitly non-estimate', async ({ pag
   await expect(ttv.getByText('Estimate available')).toHaveCount(0)
 })
 
-test('regional directory toggles without replacing the map', async ({ page }) => {
+test('map starts broad and exposes regional detail only after zooming in', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
-  await expect(page.getByTestId('regional-map')).toBeVisible()
-  await expect(page.locator('.regionalRegionList')).toHaveCount(0)
+  const map = page.getByTestId('regional-map')
+  await expect(map).toBeVisible()
+  await expect(map.locator('.nuts2Boundary')).toHaveCount(0)
 
-  await page.getByRole('button', { name: 'Regions' }).click()
-  await expect(page.getByTestId('regional-map')).toBeVisible()
-  await expect(page.locator('.regionalRegionList')).toBeVisible()
+  await page.getByRole('button', { name: 'Focus country' }).click()
+  await map.locator('.leaflet-control-zoom-in').click()
+  await map.locator('.leaflet-control-zoom-in').click()
 
-  await page.getByRole('button', { name: 'Map', exact: true }).click()
-  await expect(page.locator('.regionalRegionList')).toHaveCount(0)
+  await expect(map.locator('.nuts2Boundary').first()).toBeVisible()
 })
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
