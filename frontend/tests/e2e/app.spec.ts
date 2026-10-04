@@ -1379,6 +1379,19 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
 
 
 
+test('Skills and Languages replaces empty tables with evidence-aware onboarding', async ({ page }) => {
+  await page.goto('/country/ESP/skills')
+
+  const onboarding = page.getByRole('region', { name: 'Skills profile onboarding' })
+  await expect(onboarding).toBeVisible()
+  await expect(onboarding.getByText('Add your profession to unlock occupation-level evidence')).toBeVisible()
+  await expect(onboarding.getByText('Profession', { exact: true })).toBeVisible()
+  await expect(onboarding.getByText('Skills', { exact: true })).toBeVisible()
+  await expect(onboarding.getByText('Languages', { exact: true })).toBeVisible()
+  await expect(onboarding.getByText(/Cedefop occupation demand/i)).toBeVisible()
+  await expect(page.locator('.skillsDemandTable')).toHaveCount(0)
+})
+
 test('secondary views keep their desktop composition at 1920x900', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 900 })
 
