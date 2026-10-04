@@ -69,6 +69,8 @@ type Indicator = {
   interpretation_policy?: string
   target_min?: number | null
   target_max?: number | null
+  methodology_note?: string | null
+  comparability_note?: string | null
   sourceQuality?: SourceQualityItem
 }
 
@@ -541,6 +543,8 @@ export default function App() {
         interpretation_policy: trendItem?.interpretation_policy,
         target_min: trendItem?.target_min,
         target_max: trendItem?.target_max,
+        methodology_note: trendItem?.methodology_note,
+        comparability_note: trendItem?.comparability_note,
       }
     })
   }, [snapshot, trends])
