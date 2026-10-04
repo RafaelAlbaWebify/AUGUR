@@ -1490,7 +1490,7 @@ test('captures Skills and Languages populated visual fixture', async ({ page }) 
   await page.setViewportSize({ width: 1920, height: 900 })
   await page.goto('/country/ESP/skills')
   await expect(page.locator('.skillsDemandTable')).toBeVisible()
-  await expect(page.getByText('ICT user support technician')).toBeVisible()
+  await expect(page.getByText('ICT user support technician', { exact: true })).toBeVisible()
 
   await page.screenshot({
     path: 'test-results/ui-audit-skills-languages-populated-1920x900.png',
