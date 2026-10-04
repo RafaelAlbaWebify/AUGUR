@@ -106,7 +106,7 @@ EUROSTAT_SERIES = [
             "freq": "A",
         },
         "label_contains": {
-            "unit": "100 000",
+            "unit": "Rate",
         },
         "unit": "per_100k_people",
     },
