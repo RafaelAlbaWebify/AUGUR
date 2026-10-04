@@ -77,6 +77,17 @@ EUROSTAT_EARNINGS = {
 
 EUROSTAT_SERIES = [
     {
+        "indicator_id": "household_internet_access",
+        "dataset_id": "tin00134",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "unit": "PC_HH",
+            "hhtyp": "TOTAL",
+        },
+        "unit": "percent",
+    },
+    {
         "indicator_id": "intentional_homicide_rate",
         "dataset_id": "crim_off_cat",
         "filters": {
