@@ -81,3 +81,17 @@ def test_safety_and_environment_interpret_lower_values_as_better():
 
     assert by_indicator["pm25_premature_death_rate"]["dimension"] == "environment"
     assert by_indicator["pm25_premature_death_rate"]["interpretation_policy"] == "lower"
+
+
+def test_infrastructure_baseline_uses_official_household_connectivity_series():
+    by_series = {item["indicator_id"]: item for item in EUROSTAT_SERIES}
+    by_indicator = {item["indicator_id"]: item for item in INDICATORS}
+
+    series = by_series["household_internet_access"]
+    assert series["dataset_id"] == "tin00134"
+    assert series["filters"]["unit"] == "PC_HH"
+    assert series["filters"]["hhtyp"] == "TOTAL"
+
+    indicator = by_indicator["household_internet_access"]
+    assert indicator["dimension"] == "infrastructure"
+    assert indicator["interpretation_policy"] == "higher"
