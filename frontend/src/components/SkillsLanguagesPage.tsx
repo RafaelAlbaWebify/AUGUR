@@ -223,6 +223,55 @@ export default function SkillsLanguagesPage({
             </section>
           ) : (
             <>
+              <section className="skillsDecisionSummary" aria-label="Skills decision summary">
+                <article className="nextFocus">
+                  <span>NEXT TO LEARN</span>
+                  <strong>{missing.length ? `${missing.length} occupation-skill gaps` : 'No ESCO skill gaps identified'}</strong>
+                  <p>
+                    {missing.length
+                      ? missing.slice(0, 3).join(' · ')
+                      : 'Current declared/matched skills cover the occupation evidence AUGUR has loaded.'}
+                  </p>
+                  <small>ESCO occupation relationship · not employer-demand frequency</small>
+                </article>
+
+                <article className="portableAssets">
+                  <span>PORTABLE ASSETS</span>
+                  <strong>{matched.length} matched occupation skills</strong>
+                  <p>
+                    {matched.length
+                      ? matched.slice(0, 3).join(' · ')
+                      : 'No matched occupation skills resolved yet.'}
+                  </p>
+                  <small>Transferability means occupation relevance, not guaranteed hiring demand</small>
+                </article>
+
+                <article className="languageLeverage">
+                  <span>LANGUAGE READINESS</span>
+                  <strong>
+                    {(language?.matches ?? []).filter((item) => item.meets_work_ready_heuristic).length}
+                    /{(language?.matches ?? []).length || 0} target languages at heuristic
+                  </strong>
+                  <p>
+                    {(language?.matches ?? []).length
+                      ? (language?.matches ?? []).map((item) => `${item.language}: ${item.declared_cefr ?? languageLevel(profile, item.language)}`).join(' · ')
+                      : 'No target-language evidence resolved.'}
+                  </p>
+                  <small>AUGUR work-ready heuristic · not a legal requirement</small>
+                </article>
+
+                <article className="marketContext">
+                  <span>MARKET CONTEXT</span>
+                  <strong>{career?.market_signal?.replaceAll('_', ' ') ?? 'Unavailable'}</strong>
+                  <p>
+                    {demandEvidenceAvailable
+                      ? `Vacancy context ${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}`
+                      : 'No verified vacancy context loaded.'}
+                  </p>
+                  <small>Context only · not a skill-demand ranking</small>
+                </article>
+              </section>
+
               <div className="segmentedTabs" role="tablist" aria-label="Skills views">
                 {[
                   ['demand', 'Skills in demand'],
