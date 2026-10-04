@@ -35,7 +35,7 @@ type CityMarker = {
 type RegionalMapProps = {
   countryIso2: string
   selectedRegion: string | null
-  onSelectRegion: (regionId: string, regionName: string) => void
+  onSelectRegion: (regionId: string, regionName: string, level: number) => void
   cities?: CityMarker[]
 }
 
@@ -168,11 +168,11 @@ export default function RegionalMap({
             const selected = id === selectedRegion
             return {
               className: selected ? 'nuts2Boundary selectedNuts2Boundary' : 'nuts2Boundary',
-              color: selected ? '#d9f4ff' : '#61bce4',
-              weight: selected ? 2.4 : 1.25,
-              opacity: 0.95,
-              fillColor: selected ? '#1fb6e8' : '#2085ad',
-              fillOpacity: selected ? 0.35 : 0.10,
+              color: selected ? '#ffffff' : '#75d4ff',
+              weight: selected ? 3.6 : 1.8,
+              opacity: selected ? 1 : 0.92,
+              fillColor: selected ? '#13b9ed' : '#2085ad',
+              fillOpacity: selected ? 0.30 : 0.08,
             }
           },
           onEachFeature: (feature, layer) => {
@@ -184,7 +184,13 @@ export default function RegionalMap({
               direction: 'top',
               className: 'augurMapTooltip',
             })
-            layer.on('click', () => onSelectRegionRef.current(id, name))
+            layer.on('click', () => {
+              onSelectRegionRef.current(id, name, 2)
+              const bounds = (layer as L.Polygon).getBounds()
+              if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [34, 34], maxZoom: 7 })
+              }
+            })
           },
         })
 
@@ -249,11 +255,11 @@ export default function RegionalMap({
       const selected = id === selectedRegion
       return {
         className: selected ? 'nuts2Boundary selectedNuts2Boundary' : 'nuts2Boundary',
-        color: selected ? '#d9f4ff' : '#61bce4',
-        weight: selected ? 2.4 : 1.25,
-        opacity: 0.95,
-        fillColor: selected ? '#1fb6e8' : '#2085ad',
-        fillOpacity: selected ? 0.35 : 0.10,
+        color: selected ? '#ffffff' : '#75d4ff',
+        weight: selected ? 3.6 : 1.8,
+        opacity: selected ? 1 : 0.92,
+        fillColor: selected ? '#13b9ed' : '#2085ad',
+        fillOpacity: selected ? 0.30 : 0.08,
       }
     })
   }, [selectedRegion])
