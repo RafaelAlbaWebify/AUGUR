@@ -5720,3 +5720,46 @@ body:has(.shell.detailsOpen) {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Outlook forecast/model distinction */
+.forecastBoundary {
+  stroke: rgba(156, 190, 210, .36) !important;
+  stroke-width: 1 !important;
+  stroke-dasharray: 4 4;
+}
+
+.forecastBoundaryLabel,
+.forecastYearLabel {
+  fill: #6d8798;
+  font-size: 8px;
+  font-weight: 600;
+}
+
+.currentPoint {
+  fill: #ffffff;
+  stroke: #59b9ef;
+  stroke-width: 2.2;
+}
+
+.scenarioModelBadge {
+  display: grid;
+  gap: 2px;
+  justify-items: end;
+  padding: 5px 8px;
+  border: 1px solid rgba(200, 153, 67, .3);
+  border-radius: 8px;
+  background: rgba(88, 58, 12, .2);
+}
+
+.scenarioModelBadge strong {
+  color: #e8c46d;
+  font-size: 7px;
+  letter-spacing: .08em;
+}
+
+.scenarioModelBadge span {
+  color: #9d8652;
+  font-size: 7px;
+  text-transform: lowercase;
+}
