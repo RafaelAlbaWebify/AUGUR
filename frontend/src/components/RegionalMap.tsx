@@ -264,7 +264,7 @@ export default function RegionalMap({
     if (!map || !countryLayer) return
 
     const selectedLayers = countryLayer.getLayers().filter((layer) => {
-      const feature = (layer as L.GeoJSON).feature as CountryFeature | undefined
+      const feature = (layer as L.Layer & { feature?: CountryFeature }).feature
       return feature?.properties?.CNTR_CODE === countryIso2
     })
 
