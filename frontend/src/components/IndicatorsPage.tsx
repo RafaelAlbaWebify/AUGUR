@@ -24,6 +24,8 @@ type Indicator = {
   interpretation_policy?: string
   target_min?: number | null
   target_max?: number | null
+  methodology_note?: string | null
+  comparability_note?: string | null
 }
 
 type SourceQualityItem = {
@@ -420,6 +422,22 @@ export default function IndicatorsPage({
                 <div><dt>Disagreement</dt><dd>{selectedQuality?.disagreement_pct == null ? 'Not measurable' : `${selectedQuality.disagreement_pct.toFixed(2)}%`}</dd></div>
                 <div><dt>Indicator ID</dt><dd>{selected.indicator_id}</dd></div>
               </dl>
+              {(selected.methodology_note || selected.comparability_note) && (
+                <section className="methodologyNotes" aria-label="Methodology and comparability notes">
+                  {selected.methodology_note && (
+                    <div>
+                      <span>Methodology</span>
+                      <p>{selected.methodology_note}</p>
+                    </div>
+                  )}
+                  {selected.comparability_note && (
+                    <div>
+                      <span>Comparability</span>
+                      <p>{selected.comparability_note}</p>
+                    </div>
+                  )}
+                </section>
+              )}
               <p>Quality is descriptive evidence metadata. AUGUR does not treat source count alone as corroboration.</p>
             </div>
           ) : (
