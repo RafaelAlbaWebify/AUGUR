@@ -98,6 +98,29 @@ type ComparisonResponse = {
   indicators: ComparisonIndicator[]
 }
 
+type RegionalIndicator = {
+  indicator_id: string
+  name: string
+  status: 'available' | 'unavailable'
+  period?: number
+  value?: number
+  unit?: string
+  dataset_id: string
+  source_id: string
+  reason?: string
+}
+
+type RegionalEvidenceResponse = {
+  geo_code: string
+  geo_level: string
+  source: string
+  indicator_count: number
+  available_count: number
+  complete: boolean
+  indicators: RegionalIndicator[]
+  notes: string[]
+}
+
 type OverviewPageProps = {
   apiBase: string
   countries: Country[]
@@ -137,6 +160,20 @@ function changeLabel(value: number | null | undefined) {
   if (value == null) return '—'
   const sign = value > 0 ? '+' : ''
   return `${sign}${value.toFixed(1)}%`
+}
+
+function formatRegionalValue(value: number, unit?: string) {
+  if (unit === 'percent') return `${value.toFixed(1)}%`
+  if (unit === 'persons') return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)
+  if (unit === 'people_per_km2') return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} /km²`
+  if (unit === 'eur_per_person') {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'EUR',
+      maximumFractionDigits: 0,
+    }).format(value)
+  }
+  return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
 function trajectoryTone(value?: string) {
@@ -213,11 +250,46 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
-  const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string } | null>(null)
+  const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string; level: number } | null>(null)
+  const [regionalEvidence, setRegionalEvidence] = useState<RegionalEvidenceResponse | null>(null)
+  const [regionalEvidenceState, setRegionalEvidenceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
 
   useEffect(() => {
     setSelectedRegion(null)
+    setRegionalEvidence(null)
+    setRegionalEvidenceState('idle')
   }, [selectedCountry])
+
+  useEffect(() => {
+    if (!selectedRegion) {
+      setRegionalEvidence(null)
+      setRegionalEvidenceState('idle')
+      return
+    }
+
+    const controller = new AbortController()
+    setRegionalEvidenceState('loading')
+
+    fetch(`${apiBase}/api/regions/${selectedRegion.id}/evidence`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`Regional evidence HTTP ${response.status}`)
+        return response.json() as Promise<RegionalEvidenceResponse>
+      })
+      .then((payload) => {
+        if (controller.signal.aborted) return
+        setRegionalEvidence(payload)
+        setRegionalEvidenceState('ready')
+      })
+      .catch((error) => {
+        if ((error as Error).name === 'AbortError') return
+        setRegionalEvidence(null)
+        setRegionalEvidenceState('error')
+      })
+
+    return () => controller.abort()
+  }, [apiBase, selectedRegion])
 
   const visual = countryVisual(selectedCountry)
 
@@ -310,7 +382,7 @@ export default function OverviewPage({
             <RegionalMap
               countryIso2={selectedCountryIso2}
               selectedRegion={selectedRegion?.id ?? null}
-              onSelectRegion={(id, name) => setSelectedRegion({ id, name })}
+              onSelectRegion={(id, name, level) => setSelectedRegion({ id, name, level })}
               cities={visual.cities}
             />
           ) : (
@@ -357,12 +429,58 @@ export default function OverviewPage({
       </div>
 
       {selectedRegion && (
-        <div className="regionalFocusNotice">
-          <strong>{selectedRegion.name} selected</strong>
-          <span>
-            Map focus is regional · domain cards remain national evidence until a verified regional series is available.
-          </span>
-        </div>
+        <section className="regionalEvidencePanel" aria-label="Selected region evidence">
+          <header className="regionalEvidenceHeader">
+            <div>
+              <span>NUTS {selectedRegion.level} · {selectedRegion.id}</span>
+              <h3>{selectedRegion.name}</h3>
+            </div>
+            <strong>
+              {regionalEvidenceState === 'loading'
+                ? 'Loading Eurostat regional evidence…'
+                : regionalEvidenceState === 'error'
+                  ? 'Regional evidence unavailable'
+                  : regionalEvidence
+                    ? `${regionalEvidence.available_count}/${regionalEvidence.indicator_count} series available`
+                    : 'Region selected'}
+            </strong>
+          </header>
+
+          {regionalEvidenceState === 'ready' && regionalEvidence && (
+            <>
+              <div className="regionalEvidenceGrid">
+                {regionalEvidence.indicators.map((indicator) => (
+                  <article
+                    key={indicator.indicator_id}
+                    className={`regionalEvidenceCard ${indicator.status}`}
+                  >
+                    <span>{indicator.name}</span>
+                    {indicator.status === 'available' && indicator.value != null ? (
+                      <>
+                        <strong>{formatRegionalValue(indicator.value, indicator.unit)}</strong>
+                        <small>{indicator.period} · Eurostat · {indicator.dataset_id}</small>
+                      </>
+                    ) : (
+                      <>
+                        <strong>—</strong>
+                        <small>No comparable observation for this region</small>
+                      </>
+                    )}
+                  </article>
+                ))}
+              </div>
+              <p className="regionalEvidenceNote">
+                Regional evidence is separate from the national Country Radar. The NUTS code is comparison-ready, including comparisons with regions in other AUGUR countries at the same geographic level.
+              </p>
+            </>
+          )}
+
+          {regionalEvidenceState === 'error' && (
+            <p className="regionalEvidenceNote">
+              The geographic selection is valid, but Eurostat regional statistics could not be loaded. National evidence remains unchanged.
+            </p>
+          )}
+        </section>
       )}
 
       <section className="countryMetricGrid">
