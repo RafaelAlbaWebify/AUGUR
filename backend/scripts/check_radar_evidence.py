@@ -9,7 +9,7 @@ RADAR_INDICATORS = [
     ("economy", "actual_individual_consumption_index"),
     ("labour", "unemployment_rate"),
     ("housing", "housing_cost_overburden_rate"),
-    ("healthcare", "life_expectancy"),
+    ("healthcare", "unmet_medical_needs"),
     ("safety", "intentional_homicide_rate"),
     ("environment", "pm25_premature_death_rate"),
     ("infrastructure", "household_internet_access"),
