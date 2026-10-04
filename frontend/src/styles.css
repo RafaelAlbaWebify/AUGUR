@@ -6114,3 +6114,160 @@ body:has(.shell.detailsOpen) {
     padding: 6px 7px;
   }
 }
+
+
+/* Decision Matrix trade-off summary */
+.decisionSummaryStrip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 9px;
+  border: 1px solid var(--augur-border);
+  border-radius: 11px;
+  background: rgba(7, 20, 31, .72);
+}
+
+.decisionSummaryStrip > article {
+  display: grid;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 9px;
+  background: rgba(5, 16, 25, .52);
+}
+
+.decisionSummaryStrip > p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #738b9b;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.decisionSummaryCountry {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.decisionSummaryCountry > div {
+  display: grid;
+  gap: 2px;
+}
+
+.decisionSummaryCountry strong {
+  color: #edf5fa;
+  font-size: 10px;
+}
+
+.decisionSummaryCountry span {
+  color: #6f8797;
+  font-size: 7px;
+}
+
+.decisionSummaryPositions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.decisionSummaryPositions span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-height: 20px;
+  padding: 0 6px;
+  border: 1px solid rgba(91, 139, 167, .22);
+  border-radius: 999px;
+  color: #87a4b5;
+  background: rgba(14, 48, 68, .2);
+  font-size: 6px;
+  text-transform: uppercase;
+  letter-spacing: .03em;
+}
+
+.decisionSummaryPositions b {
+  color: #dcecf5;
+  font-size: 8px;
+}
+
+.decisionDomainCoverage {
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid var(--augur-border);
+  border-radius: 11px;
+  background: rgba(7, 20, 31, .68);
+}
+
+.decisionCoverageGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.decisionCoverageGrid article {
+  display: grid;
+  gap: 6px;
+  padding: 7px 8px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .5);
+}
+
+.decisionCoverageGrid article > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.decisionCoverageGrid strong {
+  color: #dce9f0;
+  font-size: 8px;
+}
+
+.decisionCoverageGrid span {
+  color: #6f8797;
+  font-size: 7px;
+}
+
+.decisionCoverageTrack {
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(83, 110, 128, .14);
+}
+
+.decisionCoverageTrack i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(52, 133, 181, .6), rgba(75, 209, 224, .9));
+}
+
+@media (max-width: 1180px) {
+  .decisionSummaryStrip {
+    grid-template-columns: 1fr;
+  }
+
+  .decisionCoverageGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1400px) and (max-height: 940px) {
+  .decisionSummaryStrip {
+    padding: 7px;
+  }
+
+  .decisionSummaryStrip > article {
+    padding: 7px 8px;
+  }
+
+  .decisionDomainCoverage {
+    padding: 8px;
+  }
+
+  .decisionCoverageGrid article {
+    padding: 6px 7px;
+  }
+}
