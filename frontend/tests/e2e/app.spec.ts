@@ -774,6 +774,31 @@ test('Indicators route exposes drill-down evidence without overstating provenanc
   await expect(page.getByText('Corroborated')).toHaveCount(0)
 })
 
+test('Indicators keeps raw changes neutral and shows observed history', async ({ page }) => {
+  await page.goto('/country/ESP/indicators')
+
+  const row = page.locator('.evidenceExplorerTable tbody tr').filter({ hasText: 'Unemployment, total' }).first()
+  await expect(row.locator('.rawChange')).toHaveCount(3)
+  await expect(row.locator('.positiveRaw')).toHaveCount(0)
+  await expect(row.locator('.negativeRaw')).toHaveCount(0)
+
+  const history = page.getByRole('region', { name: 'Observed indicator history' })
+  await expect(history).toBeVisible()
+  await expect(history.locator('polyline')).toBeVisible()
+  await expect(history.getByText(/8 points · EUROSTAT/i)).toBeVisible()
+  await expect(page.getByText('Trend evidence confidence')).toBeVisible()
+})
+
+test('Indicators summary distinguishes descriptive changes from directional interpretation', async ({ page }) => {
+  await page.goto('/country/ESP/indicators')
+
+  const summary = page.getByRole('region', { name: 'Indicator evidence summary' })
+  await expect(summary).toBeVisible()
+  await expect(summary.getByText('Indicators shown')).toBeVisible()
+  await expect(summary.getByText('Directional signals')).toBeVisible()
+  await expect(summary.getByText(/Raw percentage changes are descriptive/i)).toBeVisible()
+})
+
 test('Overview dimension cards drill into persistent dimension routes', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
