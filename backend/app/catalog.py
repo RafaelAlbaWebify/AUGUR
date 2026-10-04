@@ -77,6 +77,16 @@ SOURCES = [
 
 INDICATORS = [
     {
+        "indicator_id": "household_internet_access",
+        "source_indicator": "EUROSTAT:TIN00134",
+        "name": "Households with internet access",
+        "dimension": "infrastructure",
+        "unit": "percent",
+        "interpretation_policy": "higher",
+        "target_min": None,
+        "target_max": None,
+    },
+    {
         "indicator_id": "intentional_homicide_rate",
         "source_indicator": "EUROSTAT:CRIM_OFF_CAT:ICCS0101",
         "name": "Police-recorded intentional homicides",
