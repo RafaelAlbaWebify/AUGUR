@@ -76,6 +76,36 @@ function overviewMetrics(country: string) {
     },
     {
       country_iso3: country,
+      indicator_id: 'intentional_homicide_rate',
+      name: 'Police-recorded intentional homicides',
+      dimension: 'safety',
+      period: 2024,
+      value: country === 'ESP' ? 0.72 : country === 'PRT' ? 0.68 : 0.69,
+      unit: 'per_100k_people',
+      source_id: 'EUROSTAT',
+    },
+    {
+      country_iso3: country,
+      indicator_id: 'pm25_premature_death_rate',
+      name: 'Premature deaths attributable to PM2.5 exposure',
+      dimension: 'environment',
+      period: 2023,
+      value: country === 'ESP' ? 28 : country === 'PRT' ? 21 : 6,
+      unit: 'per_100k_people',
+      source_id: 'EUROSTAT',
+    },
+    {
+      country_iso3: country,
+      indicator_id: 'household_internet_access',
+      name: 'Households with internet access',
+      dimension: 'infrastructure',
+      period: 2025,
+      value: country === 'ESP' ? 97.43 : country === 'PRT' ? 91.08 : 95.51,
+      unit: 'percent',
+      source_id: 'EUROSTAT',
+    },
+    {
+      country_iso3: country,
       indicator_id: 'tertiary_education_25_34',
       name: 'Tertiary education attainment (25–34)',
       dimension: 'human_systems',
@@ -463,7 +493,7 @@ async function mockApi(page: Page) {
         country_iso3: country,
         method: 'test',
         dimensions: Object.fromEntries(
-          ['productive_capacity', 'prosperity', 'housing', 'human_systems', 'demography', 'strategic_resilience'].map((dimension) => {
+          ['productive_capacity', 'prosperity', 'housing', 'human_systems', 'safety', 'environment', 'infrastructure', 'demography', 'strategic_resilience'].map((dimension) => {
             const items = overviewMetrics(country).filter((item) => item.dimension === dimension)
             const contextual = dimension === 'demography'
             return [dimension, {
