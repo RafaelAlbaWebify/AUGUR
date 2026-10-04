@@ -941,7 +941,7 @@ test('Profile separates missing inputs from external evidence constraints', asyn
   await expect(readiness.getByText('Career viability')).toBeVisible()
   await expect(readiness.getByText('Language viability')).toBeVisible()
   await expect(readiness.getByText('Purchasing-power viability')).toBeVisible()
-  await expect(readiness.getByText('profile input')).toHaveCount(4)
+  await expect(readiness.getByText('profile input', { exact: true })).toHaveCount(4)
 })
 
 test('Profile key actions state which decision each missing input unlocks', async ({ page }) => {
