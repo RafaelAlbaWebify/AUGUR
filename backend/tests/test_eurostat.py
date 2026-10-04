@@ -171,51 +171,50 @@ def test_eurostat_job_transition_normalization_keeps_all_age_classes():
     }
 
 
-def test_eurostat_job_vacancy_normalization_keeps_major_isco_and_aggregate_nace():
+def test_eurostat_job_vacancy_normalization_keeps_isco3_jvr_rows():
     payload = {
-        "id": [
-            "geo",
-            "s_adj",
-            "nace_r21",
-            "sizeclas",
-            "isco08",
-            "indic_em",
-            "time",
-        ],
-        "size": [1, 1, 2, 1, 4, 1, 1],
+        "id": ["geo", "isco08", "indic_em", "time"],
+        "size": [1, 4, 2, 2],
         "dimension": {
             "geo": {"category": {"index": {"ES": 0}}},
-            "s_adj": {"category": {"index": {"SA": 0}}},
-            "nace_r21": {
-                "category": {
-                    "index": {"B-T": 0, "J": 1},
-                }
-            },
-            "sizeclas": {"category": {"index": {"TOTAL": 0}}},
             "isco08": {
                 "category": {
                     "index": {
                         "TOTAL": 0,
-                        "OC2": 1,
-                        "OC3": 2,
-                        "OC1-3": 3,
+                        "OC251": 1,
+                        "OC351": 2,
+                        "OC999": 3,
                     },
                 }
             },
-            "indic_em": {"category": {"index": {"JVR": 0}}},
-            "time": {"category": {"index": {"2026-Q2": 0}}},
+            "indic_em": {
+                "category": {
+                    "index": {
+                        "JVR": 0,
+                        "JOBVAC": 1,
+                    },
+                }
+            },
+            "time": {
+                "category": {
+                    "index": {
+                        "2023": 0,
+                        "2024": 1,
+                    },
+                }
+            },
         },
         "value": [
-            2.0,
-            3.5,
-            2.8,
-            3.1,
-            1.9,
-            4.2,
-            3.8,
-            4.0,
+            2.0, 2.1,
+            5.1, 5.4,
+            4.2, 4.6,
+            3.3, 3.5,
+            100.0, 101.0,
+            200.0, 201.0,
+            300.0, 301.0,
+            400.0, 401.0,
         ],
-        "updated": "2026-09-15",
+        "updated": "2025-12-10",
     }
 
     adapter = EurostatAdapter(client=None)
@@ -224,144 +223,52 @@ def test_eurostat_job_vacancy_normalization_keeps_major_isco_and_aggregate_nace(
     finally:
         adapter.close()
 
-    assert len(rows) == 2
-    assert {row["isco08"] for row in rows} == {"OC2", "OC3"}
-    assert {row["nace_scope"] for row in rows} == {"B-T"}
-    assert {row["period"] for row in rows} == {"2026-Q2"}
-    assert {row["dataset_id"] for row in rows} == {"jvs_q_isco_r21"}
-    assert {row["vacancy_rate_pct"] for row in rows} == {3.5, 2.8}
+    assert len(rows) == 6
+    assert {row["isco08"] for row in rows} == {"OC251", "OC351", "OC999"}
+    assert {row["period"] for row in rows} == {"2023", "2024"}
+    assert {row["dataset_id"] for row in rows} == {"jvs_a_isco3_r1"}
+    assert {row["nace_scope"] for row in rows} == {None}
+    assert all(row["vacancy_rate_pct"] < 10 for row in rows)
 
 
-def test_eurostat_job_vacancy_detects_renamed_nace_dimension():
+def test_eurostat_job_vacancy_detects_renamed_isco_dimension_by_label():
     payload = {
-        "id": ["geo", "nace_rev21", "isco08", "time"],
-        "size": [1, 1, 2, 1],
+        "id": ["geo", "occupation", "time"],
+        "size": [1, 1, 1],
         "dimension": {
-            "geo": {"category": {"index": {"ES": 0}}},
-            "nace_rev21": {"category": {"index": {"B-T": 0}}},
-            "isco08": {"category": {"index": {"OC2": 0, "OC3": 1}}},
-            "time": {"category": {"index": {"2026-Q2": 0}}},
-        },
-        "value": [3.5, 2.8],
-        "updated": "2026-09-15",
-    }
-
-    adapter = EurostatAdapter(client=None)
-    try:
-        rows = adapter.normalize_job_vacancy_rates("ESP", payload)
-    finally:
-        adapter.close()
-
-    assert len(rows) == 2
-    assert {row["isco08"] for row in rows} == {"OC2", "OC3"}
-    assert {row["nace_scope"] for row in rows} == {"B-T"}
-
-
-def test_eurostat_job_vacancy_detects_renamed_isco_dimension():
-    payload = {
-        "id": ["geo", "activity", "occupation", "time"],
-        "size": [1, 1, 2, 1],
-        "dimension": {
-            "geo": {"category": {"index": {"ES": 0}}},
-            "activity": {
-                "label": "NACE Rev. 2.1",
-                "category": {"index": {"B-T": 0}},
-            },
+            "geo": {"category": {"index": {"PT": 0}}},
             "occupation": {
                 "label": "International Standard Classification of Occupations 2008 (ISCO-08)",
-                "category": {"index": {"OC2": 0, "OC3": 1}},
+                "category": {"index": {"OC351": 0}},
             },
-            "time": {"category": {"index": {"2026-Q2": 0}}},
+            "time": {"category": {"index": {"2024": 0}}},
         },
-        "value": [3.5, 2.8],
-        "updated": "2026-09-15",
+        "value": [4.6],
+        "updated": "2025-12-10",
     }
 
     adapter = EurostatAdapter(client=None)
     try:
-        rows = adapter.normalize_job_vacancy_rates("ESP", payload)
-    finally:
-        adapter.close()
-
-    assert len(rows) == 2
-    assert {row["isco08"] for row in rows} == {"OC2", "OC3"}
-    assert {row["nace_scope"] for row in rows} == {"B-T"}
-
-
-def test_eurostat_job_vacancy_detects_nace_by_dimension_label():
-    payload = {
-        "id": ["geo", "activity", "isco08", "time"],
-        "size": [1, 1, 1, 1],
-        "dimension": {
-            "geo": {"category": {"index": {"ES": 0}}},
-            "activity": {
-                "label": "Statistical classification of economic activities in the European Community (NACE Rev. 2.1)",
-                "category": {"index": {"B-T": 0}},
-            },
-            "isco08": {"category": {"index": {"OC3": 0}}},
-            "time": {"category": {"index": {"2026-Q2": 0}}},
-        },
-        "value": [2.8],
-        "updated": "2026-09-15",
-    }
-
-    adapter = EurostatAdapter(client=None)
-    try:
-        rows = adapter.normalize_job_vacancy_rates("ESP", payload)
+        rows = adapter.normalize_job_vacancy_rates("PRT", payload)
     finally:
         adapter.close()
 
     assert len(rows) == 1
-    assert rows[0]["isco08"] == "OC3"
-    assert rows[0]["nace_scope"] == "B-T"
+    assert rows[0]["isco08"] == "OC351"
+    assert rows[0]["vacancy_rate_pct"] == 4.6
 
 
-def test_eurostat_job_vacancy_normalization_refuses_unknown_aggregate_scope():
+def test_eurostat_job_vacancy_empty_result_reports_isco3_diagnostics():
     payload = {
-        "id": [
-            "geo",
-            "nace_r21",
-            "isco08",
-            "time",
-        ],
-        "size": [1, 1, 1, 1],
+        "id": ["geo", "isco08", "time"],
+        "size": [1, 2, 1],
         "dimension": {
             "geo": {"category": {"index": {"ES": 0}}},
-            "nace_r21": {"category": {"index": {"J": 0}}},
-            "isco08": {"category": {"index": {"OC2": 0}}},
-            "time": {"category": {"index": {"2026-Q2": 0}}},
-        },
-        "value": [3.5],
-        "updated": "2026-09-15",
-    }
-
-    adapter = EurostatAdapter(client=None)
-    try:
-        try:
-            adapter.normalize_job_vacancy_rates("ESP", payload)
-        except ValueError as exc:
-            assert "aggregate NACE scope" in str(exc)
-        else:
-            raise AssertionError("expected aggregate NACE scope validation")
-    finally:
-        adapter.close()
-
-
-def test_eurostat_job_vacancy_empty_result_reports_dimension_diagnostics():
-    payload = {
-        "id": ["geo", "activity", "isco08", "time"],
-        "size": [1, 1, 2, 1],
-        "dimension": {
-            "geo": {"category": {"index": {"ES": 0}}},
-            "activity": {
-                "label": "NACE Rev. 2.1",
-                "category": {"index": {"B-T": 0}},
-            },
-            "isco08": {"category": {"index": {"TOTAL": 0, "OC1-3": 1}}},
-            "time": {"category": {"index": {"2026-Q2": 0}}},
+            "isco08": {"category": {"index": {"TOTAL": 0, "OC1": 1}}},
+            "time": {"category": {"index": {"2024": 0}}},
         },
         "value": [2.0, 3.0],
-        "updated": "2026-09-15",
+        "updated": "2025-12-10",
     }
 
     adapter = EurostatAdapter(client=None)
@@ -370,12 +277,11 @@ def test_eurostat_job_vacancy_empty_result_reports_dimension_diagnostics():
             adapter.normalize_job_vacancy_rates("ESP", payload)
         except ValueError as exc:
             message = str(exc)
-            assert "produced no major-group rows" in message
+            assert "no ISCO-3 JVR rows" in message
             assert "isco_codes" in message
-            assert "OC1-3" in message
-            assert "nace_dimension=activity" in message
+            assert "OC1" in message
         else:
-            raise AssertionError("expected empty vacancy result to fail")
+            raise AssertionError("expected empty ISCO-3 result to fail")
     finally:
         adapter.close()
 
