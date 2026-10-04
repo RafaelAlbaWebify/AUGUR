@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { Fragment, useMemo, useState } from 'react'
 import CountrySelect from './CountrySelect'
 import FlagIcon from './FlagIcon'
 
@@ -44,6 +44,31 @@ const PREVIEW_INDICATORS = [
   'household_price_level_index',
 ]
 
+
+function selectedSetPosition(
+  item: ComparisonIndicator,
+  iso3: string,
+  selected: string[],
+) {
+  const entries = selected
+    .map((country) => ({ iso3: country, value: item.countries[country]?.value }))
+    .filter((entry): entry is { iso3: string; value: number } => typeof entry.value === 'number')
+
+  if (entries.length < 2) return null
+  const values = entries.map((entry) => entry.value)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const current = entries.find((entry) => entry.iso3 === iso3)
+  if (!current) return null
+  if (Math.abs(max - min) < 1e-9) return { label: 'Aligned', position: 50 }
+
+  const sorted = [...entries].sort((a, b) => a.value - b.value)
+  const rank = sorted.findIndex((entry) => entry.iso3 === iso3)
+  const label = rank === 0 ? 'Low' : rank === sorted.length - 1 ? 'High' : 'Mid'
+  const position = ((current.value - min) / (max - min)) * 100
+  return { label, position }
+}
+
 export default function ComparePanel({
   countries,
   selected,
@@ -69,8 +94,18 @@ export default function ComparePanel({
     [allIndicators],
   )
 
+  const groupedIndicators = useMemo(() => {
+    const groups = new Map<string, ComparisonIndicator[]>()
+    for (const item of visibleIndicators) {
+      const bucket = groups.get(item.dimension) ?? []
+      bucket.push(item)
+      groups.set(item.dimension, bucket)
+    }
+    return [...groups.entries()].map(([dimensionId, items]) => ({ dimensionId, items }))
+  }, [visibleIndicators])
+
   const descriptiveInsights = useMemo(() => {
-    return allIndicators
+    return visibleIndicators
       .map((item) => {
         const entries = selected
           .map((iso3) => ({ iso3, value: item.countries[iso3] }))
@@ -79,17 +114,20 @@ export default function ComparePanel({
         const max = [...entries].sort((a, b) => b.value.value - a.value.value)[0]
         const min = [...entries].sort((a, b) => a.value.value - b.value.value)[0]
         const spread = Math.abs(max.value.value - min.value.value)
+        const denominator = Math.max(Math.abs(max.value.value), Math.abs(min.value.value), 1e-9)
+        const relativeSpreadPct = (spread / denominator) * 100
         return {
           indicator: item,
           max,
           min,
           spread,
+          relativeSpreadPct,
         }
       })
       .filter(Boolean)
-      .sort((a, b) => (b?.spread ?? 0) - (a?.spread ?? 0))
+      .sort((a, b) => (b?.relativeSpreadPct ?? 0) - (a?.relativeSpreadPct ?? 0))
       .slice(0, 3)
-  }, [allIndicators, selected])
+  }, [visibleIndicators, selected])
 
   if (compact) {
     return (
@@ -211,28 +249,46 @@ export default function ComparePanel({
                 </tr>
               </thead>
               <tbody>
-                {visibleIndicators.map((item) => (
-                  <tr key={item.indicator_id}>
-                    <td>
-                      <span className="matrixDomain">{dimensionLabels[item.dimension] ?? item.dimension}</span>
-                      <strong>{item.name}</strong>
-                    </td>
-                    {selected.map((iso3) => {
-                      const value = item.countries[iso3]
-                      return (
-                        <td key={iso3}>
-                          {value ? (
-                            <>
-                              <strong>{formatValue(value.value, item.unit)}</strong>
-                              <small>{value.period} · {value.source_id.replaceAll('_', ' ')}</small>
-                            </>
-                          ) : (
-                            <span className="comparisonMissing">No evidence</span>
-                          )}
+                {groupedIndicators.map((group) => (
+                  <Fragment key={group.dimensionId}>
+                    <tr className="matrixDomainRow">
+                      <td colSpan={selected.length + 1}>
+                        {dimensionLabels[group.dimensionId] ?? group.dimensionId}
+                      </td>
+                    </tr>
+                    {group.items.map((item) => (
+                      <tr key={item.indicator_id}>
+                        <td>
+                          <strong>{item.name}</strong>
+                          <small className="matrixIndicatorNote">descriptive comparison · no winner implied</small>
                         </td>
-                      )
-                    })}
-                  </tr>
+                        {selected.map((iso3) => {
+                          const value = item.countries[iso3]
+                          const position = selectedSetPosition(item, iso3, selected)
+                          return (
+                            <td key={iso3}>
+                              {value ? (
+                                <div className="matrixValueCell">
+                                  <div className="matrixValueTop">
+                                    <strong>{formatValue(value.value, item.unit)}</strong>
+                                    {position && <span className="matrixPositionBadge">{position.label}</span>}
+                                  </div>
+                                  {position && (
+                                    <div className="matrixPositionTrack" aria-label={`${position.label} within selected set`}>
+                                      <i style={{ width: `${Math.max(4, position.position)}%` }} />
+                                    </div>
+                                  )}
+                                  <small>{value.period} · {value.source_id.replaceAll('_', ' ')}</small>
+                                </div>
+                              ) : (
+                                <span className="comparisonMissing">No evidence</span>
+                              )}
+                            </td>
+                          )
+                        })}
+                      </tr>
+                    ))}
+                  </Fragment>
                 ))}
               </tbody>
             </table>
@@ -242,7 +298,7 @@ export default function ComparePanel({
         <aside className="decisionInsightsRail">
           <section>
             <div className="panelHeading">
-              <div><span>INSIGHTS</span><h3>Largest measured differences</h3></div>
+              <div><span>INSIGHTS</span><h3>Largest relative spreads</h3></div>
             </div>
             <div className="decisionInsightList">
               {descriptiveInsights.map((entry) => {
@@ -251,17 +307,25 @@ export default function ComparePanel({
                 const minCountry = countries.find((country) => country.iso3 === entry.min.iso3)
                 return (
                   <article key={entry.indicator.indicator_id}>
-                    <strong>{entry.indicator.name}</strong>
+                    <div className="relativeSpreadHeading">
+                      <strong>{entry.indicator.name}</strong>
+                      <span>{entry.relativeSpreadPct.toFixed(1)}% relative spread</span>
+                    </div>
                     <span>
-                      Highest measured value: {maxCountry?.name ?? entry.max.iso3} · {formatValue(entry.max.value.value, entry.indicator.unit)}
+                      High value: {maxCountry?.name ?? entry.max.iso3} · {formatValue(entry.max.value.value, entry.indicator.unit)}
                     </span>
                     <small>
-                      Lowest measured value: {minCountry?.name ?? entry.min.iso3} · {formatValue(entry.min.value.value, entry.indicator.unit)}
+                      Low value: {minCountry?.name ?? entry.min.iso3} · {formatValue(entry.min.value.value, entry.indicator.unit)}
                     </small>
                   </article>
                 )
               })}
               {descriptiveInsights.length === 0 && <span>No comparable evidence loaded.</span>}
+              {descriptiveInsights.length > 0 && (
+                <p className="relativeSpreadNote">
+                  Relative spread normalizes each indicator by the largest absolute value in the selected set. It is descriptive, not a quality score.
+                </p>
+              )}
             </div>
           </section>
 
