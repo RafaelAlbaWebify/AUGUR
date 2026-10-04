@@ -58,3 +58,26 @@ def test_housing_market_pressure_indicators_are_directional():
 
     assert by_indicator["rent_price_index"]["dimension"] == "housing"
     assert by_indicator["rent_price_index"]["interpretation_policy"] == "lower"
+
+
+def test_safety_and_environment_series_are_registered_from_official_eu_sources():
+    by_indicator = {item["indicator_id"]: item for item in EUROSTAT_SERIES}
+
+    safety = by_indicator["intentional_homicide_rate"]
+    assert safety["dataset_id"] == "crim_off_cat"
+    assert safety["filters"]["iccs"] == "ICCS0101"
+    assert safety["filters"]["unit"] == "P_HTHAB"
+
+    environment = by_indicator["pm25_premature_death_rate"]
+    assert environment["dataset_id"] == "sdg_11_52"
+    assert environment["label_contains"]["unit"] == "100 000"
+
+
+def test_safety_and_environment_interpret_lower_values_as_better():
+    by_indicator = {item["indicator_id"]: item for item in INDICATORS}
+
+    assert by_indicator["intentional_homicide_rate"]["dimension"] == "safety"
+    assert by_indicator["intentional_homicide_rate"]["interpretation_policy"] == "lower"
+
+    assert by_indicator["pm25_premature_death_rate"]["dimension"] == "environment"
+    assert by_indicator["pm25_premature_death_rate"]["interpretation_policy"] == "lower"
