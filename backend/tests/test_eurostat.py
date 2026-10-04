@@ -316,6 +316,39 @@ def test_eurostat_job_vacancy_normalization_refuses_unknown_aggregate_scope():
         adapter.close()
 
 
+def test_eurostat_job_vacancy_empty_result_reports_dimension_diagnostics():
+    payload = {
+        "id": ["geo", "activity", "isco08", "time"],
+        "size": [1, 1, 2, 1],
+        "dimension": {
+            "geo": {"category": {"index": {"ES": 0}}},
+            "activity": {
+                "label": "NACE Rev. 2.1",
+                "category": {"index": {"B-T": 0}},
+            },
+            "isco08": {"category": {"index": {"TOTAL": 0, "OC1-3": 1}}},
+            "time": {"category": {"index": {"2026-Q2": 0}}},
+        },
+        "value": [2.0, 3.0],
+        "updated": "2026-09-15",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        try:
+            adapter.normalize_job_vacancy_rates("ESP", payload)
+        except ValueError as exc:
+            message = str(exc)
+            assert "produced no major-group rows" in message
+            assert "isco_codes" in message
+            assert "OC1-3" in message
+            assert "nace_dimension=activity" in message
+        else:
+            raise AssertionError("expected empty vacancy result to fail")
+    finally:
+        adapter.close()
+
+
 def test_eurostat_normalization_can_select_rate_unit_by_human_label():
     payload = {
         "id": ["geo", "unit", "time"],
