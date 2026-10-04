@@ -817,6 +817,18 @@ test('Overview dimension cards drill into persistent dimension routes', async ({
   await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
 })
 
+test('Dimension Detail separates supporting opposing and contextual evidence', async ({ page }) => {
+  await page.goto('/country/ESP/dimension/productive_capacity')
+
+  await expect(page.getByText('SYNTHESIS')).toBeVisible()
+  await expect(page.getByText('Improving evidence')).toBeVisible()
+  await expect(page.getByText('Deteriorating evidence')).toBeVisible()
+  await expect(page.getByText('Stable / contextual evidence')).toBeVisible()
+  await expect(page.locator('.dimensionSignalLane.supporting')).toBeVisible()
+  await expect(page.locator('.dimensionSignalLane.opposing')).toBeVisible()
+  await expect(page.locator('.dimensionSignalLane.contextual')).toBeVisible()
+})
+
 test('regional map renders selected-country geometry and city anchors', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
