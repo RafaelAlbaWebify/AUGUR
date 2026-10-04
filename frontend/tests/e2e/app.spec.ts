@@ -1492,6 +1492,13 @@ test('captures Skills and Languages populated visual fixture', async ({ page }) 
   await expect(page.locator('.skillsDemandTable')).toBeVisible()
   await expect(page.getByText('ICT user support technician', { exact: true })).toBeVisible()
 
+  const coverage = page.getByRole('region', { name: 'Demand evidence coverage' })
+  await expect(coverage).toBeVisible()
+  await expect(coverage.getByText('Future shortage pressure')).toBeVisible()
+  await expect(coverage.getByText(/Cedefop CLSSI 2026/i)).toBeVisible()
+  await expect(coverage.getByText(/Cedefop STAS/i)).toBeVisible()
+  await expect(coverage.getByText(/Skills-OVATE detailed OJA evidence/i)).toBeVisible()
+
   await page.screenshot({
     path: 'test-results/ui-audit-skills-languages-populated-1920x900.png',
     fullPage: false,
