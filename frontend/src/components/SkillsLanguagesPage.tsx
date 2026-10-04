@@ -283,6 +283,47 @@ export default function SkillsLanguagesPage({
                 <div><span>Vacancy context</span><strong>{demandEvidenceAvailable ? `${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}` : 'Unavailable'}</strong></div>
                 <div><span>Skill coverage</span><strong>{career?.skill_match?.coverage == null ? 'Unavailable' : `${Math.round(career.skill_match.coverage * 100)}% essential skills`}</strong></div>
               </div>
+
+              <section className="demandEvidenceCoverage" aria-label="Demand evidence coverage">
+                <div className="panelHeading">
+                  <div>
+                    <span>DEMAND EVIDENCE COVERAGE</span>
+                    <h3>What is measured vs. still pending</h3>
+                  </div>
+                </div>
+                <div className="demandCoverageGrid">
+                  <article className="active">
+                    <span>ACTIVE</span>
+                    <strong>Current shortage / surplus</strong>
+                    <small>EURES / ELA occupation evidence</small>
+                  </article>
+                  <article className="active">
+                    <span>ACTIVE</span>
+                    <strong>Vacancy context</strong>
+                    <small>Eurostat experimental JVR by occupation group</small>
+                  </article>
+                  <article className="active">
+                    <span>ACTIVE</span>
+                    <strong>Occupation-skill relationships</strong>
+                    <small>ESCO taxonomy · not demand frequency</small>
+                  </article>
+                  <article className="planned">
+                    <span>PLANNED</span>
+                    <strong>Future shortage pressure</strong>
+                    <small>Cedefop CLSSI 2026 · country / occupation to 2035</small>
+                  </article>
+                  <article className="planned">
+                    <span>PLANNED</span>
+                    <strong>Short-term occupation outlook</strong>
+                    <small>Cedefop STAS · twice-yearly employment projection</small>
+                  </article>
+                  <article className="restricted">
+                    <span>ACCESS NEEDED</span>
+                    <strong>Skill demand shares / trends</strong>
+                    <small>Cedefop Skills-OVATE detailed OJA evidence</small>
+                  </article>
+                </div>
+              </section>
             </>
           )}
         </section>
