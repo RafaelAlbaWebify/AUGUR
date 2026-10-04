@@ -77,6 +77,17 @@ EUROSTAT_EARNINGS = {
 
 EUROSTAT_SERIES = [
     {
+        "indicator_id": "actual_individual_consumption_index",
+        "dataset_id": "prc_ppp_ind_1",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "indic_ppp": "VI_PPS_EU27_2020_HAB",
+            "ppp_cat18": "A01",
+        },
+        "unit": "index_eu27_2020_100",
+    },
+    {
         "indicator_id": "household_internet_access",
         "dataset_id": "tin00134",
         "filters": {
