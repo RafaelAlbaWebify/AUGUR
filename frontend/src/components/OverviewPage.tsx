@@ -127,7 +127,7 @@ const RADAR_DOMAINS = [
   { id: 'healthcare', label: 'Healthcare', dimension: 'human_systems', indicators: ['life_expectancy'] },
   { id: 'safety', label: 'Safety', dimension: 'safety', indicators: ['intentional_homicide_rate'] },
   { id: 'environment', label: 'Environment', dimension: 'environment', indicators: ['pm25_premature_death_rate'] },
-  { id: 'infrastructure', label: 'Infrastructure', dimension: null, indicators: [] },
+  { id: 'infrastructure', label: 'Infrastructure', dimension: 'infrastructure', indicators: ['household_internet_access'] },
   { id: 'education', label: 'Education', dimension: 'human_systems', indicators: ['tertiary_education_25_34'] },
   { id: 'demography', label: 'Demography', dimension: 'demography', indicators: ['population_65_plus_share', 'fertility_rate', 'median_age'] },
   { id: 'resilience', label: 'Resilience', dimension: 'strategic_resilience', indicators: ['energy_import_dependency', 'public_debt_gdp'] },
