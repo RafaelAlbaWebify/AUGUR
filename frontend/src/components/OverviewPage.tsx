@@ -383,6 +383,13 @@ export default function OverviewPage({
             <RegionalMap
               countryIso2={selectedCountryIso2}
               selectedRegion={selectedRegion?.id ?? null}
+              selectableCountryIso2={countries.flatMap((country) => country.iso2 ? [country.iso2] : [])}
+              onSelectCountry={(iso2) => {
+                const country = countries.find((item) => item.iso2 === iso2)
+                if (country && country.iso3 !== selectedCountry) {
+                  onCountryChange(country.iso3)
+                }
+              }}
               onSelectRegion={(id, name, level) => setSelectedRegion({ id, name, level })}
               cities={visual.cities}
             />
