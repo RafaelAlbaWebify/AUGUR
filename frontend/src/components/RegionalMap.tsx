@@ -114,7 +114,9 @@ export default function RegionalMap({
     if (!map) return
 
     const controller = new AbortController()
+    let progressiveHandler: (() => void) | null = null
     setStatus('loading')
+    map.setView(EUROPE_VIEW, 3)
 
     countryLayerRef.current?.remove()
     regionLayerRef.current?.remove()
@@ -220,18 +222,21 @@ export default function RegionalMap({
           }
         }
 
+        progressiveHandler = applyProgressiveLayers
         map.on('zoomend', applyProgressiveLayers)
         applyProgressiveLayers()
         setStatus('ready')
 
-        return () => map.off('zoomend', applyProgressiveLayers)
       })
       .catch((error) => {
         if ((error as Error).name === 'AbortError') return
         setStatus('error')
       })
 
-    return () => controller.abort()
+    return () => {
+      controller.abort()
+      if (progressiveHandler) map.off('zoomend', progressiveHandler)
+    }
   }, [countryIso2])
 
   useEffect(() => {
