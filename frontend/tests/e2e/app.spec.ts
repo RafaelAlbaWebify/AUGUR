@@ -26,6 +26,16 @@ function overviewMetrics(country: string) {
     base,
     {
       country_iso3: country,
+      indicator_id: 'actual_individual_consumption_index',
+      name: 'Actual individual consumption per capita',
+      dimension: 'prosperity',
+      period: 2025,
+      value: country === 'ESP' ? 91 : country === 'PRT' ? 87 : 100,
+      unit: 'index_eu27_2020_100',
+      source_id: 'EUROSTAT',
+    },
+    {
+      country_iso3: country,
       indicator_id: 'real_gdp_per_capita',
       name: 'Real GDP per capita',
       dimension: 'prosperity',
