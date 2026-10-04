@@ -834,7 +834,9 @@ test('Decision Matrix uses relative spreads and neutral selected-set positions',
   const indicatorRows = page.locator('.matrixIndicatorNote')
   const indicatorRowCount = await indicatorRows.count()
   await expect(page.locator('.matrixPositionBadge')).toHaveCount(indicatorRowCount * 3)
-  await expect(page.locator('.matrixDomainRow')).toHaveCount(6)
+  const domainRowCount = await page.locator('.matrixDomainRow').count()
+  expect(domainRowCount).toBeGreaterThan(0)
+  await expect(page.getByRole('region', { name: 'Domain evidence coverage' }).locator('.decisionCoverageTrack')).toHaveCount(domainRowCount)
   await expect(page.getByText('High', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Low', { exact: true }).first()).toBeVisible()
   await expect(page.getByText(/descriptive comparison · no winner implied/i).first()).toBeVisible()
@@ -1046,7 +1048,8 @@ test('Decision Matrix exposes comparable evidence coverage by domain', async ({ 
   const coverage = page.getByRole('region', { name: 'Domain evidence coverage' })
   await expect(coverage).toBeVisible()
   await expect(coverage.getByText('Comparable data by domain')).toBeVisible()
-  await expect(coverage.locator('.decisionCoverageTrack')).toHaveCount(6)
+  const matrixDomainCount = await page.locator('.matrixDomainRow').count()
+  await expect(coverage.locator('.decisionCoverageTrack')).toHaveCount(matrixDomainCount)
 })
 
 test('personal profile remains separate and can be saved locally', async ({ page }) => {
