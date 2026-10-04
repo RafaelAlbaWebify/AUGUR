@@ -232,6 +232,31 @@ def test_eurostat_job_vacancy_normalization_keeps_major_isco_and_aggregate_nace(
     assert {row["vacancy_rate_pct"] for row in rows} == {3.5, 2.8}
 
 
+def test_eurostat_job_vacancy_detects_renamed_nace_dimension():
+    payload = {
+        "id": ["geo", "nace_rev21", "isco08", "time"],
+        "size": [1, 1, 2, 1],
+        "dimension": {
+            "geo": {"category": {"index": {"ES": 0}}},
+            "nace_rev21": {"category": {"index": {"B-T": 0}}},
+            "isco08": {"category": {"index": {"OC2": 0, "OC3": 1}}},
+            "time": {"category": {"index": {"2026-Q2": 0}}},
+        },
+        "value": [3.5, 2.8],
+        "updated": "2026-09-15",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize_job_vacancy_rates("ESP", payload)
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["isco08"] for row in rows} == {"OC2", "OC3"}
+    assert {row["nace_scope"] for row in rows} == {"B-T"}
+
+
 def test_eurostat_job_vacancy_normalization_refuses_unknown_aggregate_scope():
     payload = {
         "id": [
