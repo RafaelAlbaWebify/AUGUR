@@ -916,44 +916,55 @@ class EurostatAdapter:
             print(f"   failed: {type(exc).__name__}: {exc}")
 
         job_vacancy_detail = None
-        try:
-            print(
-                f"[job-vacancy] vacancy rate by ISCO major group "
-                f"({EUROSTAT_JOB_VACANCY_RATES['dataset_id']})"
-            )
-            payload = self.fetch_dataset(
-                EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
-                {
-                    key: (geo if value == "__GEO__" else value)
-                    for key, value in EUROSTAT_JOB_VACANCY_RATES["filters"].items()
-                },
-            )
-            vacancy_rows = self.normalize_job_vacancy_rates(
-                country_iso3,
-                payload,
-            )
-            if not vacancy_rows:
-                raise ValueError(
-                    "Eurostat vacancy-rate payload produced no usable observations"
-                )
-            inserted = upsert_labour_job_vacancy_rates(vacancy_rows)
-            total_rows += inserted
+        if country_iso3.upper() not in EUROSTAT_JOB_VACANCY_RATES["supported_iso3"]:
             job_vacancy_detail = {
                 "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
-                "rows": inserted,
-                "source_updated_at": payload.get("updated"),
+                "rows": 0,
+                "status": "source_coverage_unavailable",
+                "method": EUROSTAT_JOB_VACANCY_RATES["method"],
             }
-            print(f"   ok: {inserted} vacancy-rate rows")
-        except Exception as exc:
-            failures.append(
-                {
-                    "indicator_id": "job_vacancy_rate_by_isco",
-                    "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
-                    "error_type": type(exc).__name__,
-                    "error": str(exc),
-                }
+            print(
+                "[job-vacancy] source coverage unavailable for "
+                f"{country_iso3.upper()} in "
+                f"{EUROSTAT_JOB_VACANCY_RATES['dataset_id']}"
             )
-            print(f"   failed: {type(exc).__name__}: {exc}")
+        else:
+            try:
+                print(
+                    f"[job-vacancy] vacancy rate by ISCO 3-digit occupation "
+                    f"({EUROSTAT_JOB_VACANCY_RATES['dataset_id']})"
+                )
+                payload = self.fetch_dataset(
+                    EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
+                    {
+                        key: (geo if value == "__GEO__" else value)
+                        for key, value in EUROSTAT_JOB_VACANCY_RATES["filters"].items()
+                    },
+                )
+                vacancy_rows = self.normalize_job_vacancy_rates(
+                    country_iso3,
+                    payload,
+                )
+                inserted = upsert_labour_job_vacancy_rates(vacancy_rows)
+                total_rows += inserted
+                job_vacancy_detail = {
+                    "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
+                    "rows": inserted,
+                    "source_updated_at": payload.get("updated"),
+                    "status": "available",
+                    "method": EUROSTAT_JOB_VACANCY_RATES["method"],
+                }
+                print(f"   ok: {inserted} vacancy-rate rows")
+            except Exception as exc:
+                failures.append(
+                    {
+                        "indicator_id": "job_vacancy_rate_by_isco",
+                        "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
+                        "error_type": type(exc).__name__,
+                        "error": str(exc),
+                    }
+                )
+                print(f"   failed: {type(exc).__name__}: {exc}")
 
         job_transition_detail = None
         try:
