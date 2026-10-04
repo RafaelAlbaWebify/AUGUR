@@ -170,102 +170,122 @@ export default function SkillsLanguagesPage({
 
       <div className="skillsLanguagesGrid">
         <section className="skillsDemandPanel">
-          <div className="segmentedTabs" role="tablist" aria-label="Skills views">
-            {[
-              ['demand', 'Skills in demand'],
-              ['rising', 'Rising skills'],
-              ['gaps', 'My gaps'],
-              ['portable', 'Portable skills'],
-              ['languages', 'Language demand'],
-            ].map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                className={tab === id ? 'active' : ''}
-                onClick={() => setTab(id as typeof tab)}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
+          {!profileReadyForSkills ? (
+            <section className="skillsOnboardingState" aria-label="Skills profile onboarding">
+              <div className="skillsOnboardingHero">
+                <span>PROFILE INPUT REQUIRED</span>
+                <h3>Add your profession to unlock occupation-level evidence</h3>
+                <p>
+                  AUGUR needs a target occupation before it can match ESCO skills, interpret shortage/surplus evidence,
+                  or connect future occupational demand. No skill-demand percentages are inferred from an empty profile.
+                </p>
+              </div>
 
-          {tab === 'rising' ? (
-            <div className="evidenceUnavailable">
-              <strong>Rising-skill trends are not available yet.</strong>
-              <span>AUGUR needs time-series job-posting evidence such as Cedefop Skills-OVATE before it can calculate demand growth honestly.</span>
-            </div>
-          ) : tab === 'languages' ? (
-            <div className="evidenceUnavailable">
-              <strong>Job-posting language demand is not available yet.</strong>
-              <span>Current LanguageFit uses declared CEFR, target-country labour-market language and ESCO occupation-language evidence; it does not yet count language requirements in live postings.</span>
-            </div>
+              <div className="skillsUnlockGrid">
+                <article>
+                  <span>1</span>
+                  <div><strong>Profession</strong><small>Resolves an ESCO / ISCO occupation.</small></div>
+                  <b>{profileReadyForSkills ? 'ready' : 'required'}</b>
+                </article>
+                <article>
+                  <span>2</span>
+                  <div><strong>Skills</strong><small>Separates matched skills from gaps.</small></div>
+                  <b>{hasDeclaredSkills ? 'ready' : 'recommended'}</b>
+                </article>
+                <article>
+                  <span>3</span>
+                  <div><strong>Languages</strong><small>Enables CEFR and occupation-language checks.</small></div>
+                  <b>{hasLanguages ? 'ready' : 'recommended'}</b>
+                </article>
+              </div>
+
+              <div className="skillsUnlockEvidence">
+                <div>
+                  <span>AVAILABLE NOW</span>
+                  <strong>Country vacancy context</strong>
+                  <small>{demandEvidenceAvailable ? `${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}` : 'No verified vacancy context loaded'}</small>
+                </div>
+                <div>
+                  <span>UNLOCKS NEXT</span>
+                  <strong>ESCO occupation + skill matching</strong>
+                  <small>Official taxonomy evidence, not employer-demand frequency.</small>
+                </div>
+                <div>
+                  <span>FUTURE DATA LAYER</span>
+                  <strong>Cedefop occupation demand</strong>
+                  <small>Public OJA shortage + short-term forecast datasets are the next ingestion target.</small>
+                </div>
+              </div>
+
+              <p className="skillsOnboardingFooter">
+                Missing profile fields: {profileGaps.join(', ') || 'none'} · Edit them in My Fit / Profile.
+              </p>
+            </section>
           ) : (
-            <div className="skillsTableWrap">
-              <table className="skillsDemandTable">
-                <thead>
-                  <tr>
-                    <th>Skill</th>
-                    <th>Demand</th>
-                    <th>Trend</th>
-                    <th>Evidence</th>
-                    <th>Your profile</th>
-                    <th>Match</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {visibleSkills.map((skill) => {
-                    const declared = (profile?.skills ?? []).some((item) => item.toLowerCase() === skill.toLowerCase())
-                    const essentialMatch = matched.some((item) => item.toLowerCase() === skill.toLowerCase())
-                    const gap = missing.some((item) => item.toLowerCase() === skill.toLowerCase())
-                    return (
-                      <tr key={skill}>
-                        <td><strong>{skill}</strong></td>
-                        <td>{liveSkillDemandAvailable ? 'Available' : 'Not yet measured'}</td>
-                        <td>—</td>
-                        <td>{essentialMatch || gap ? 'ESCO occupation evidence' : 'Declared profile skill'}</td>
-                        <td>{declared ? 'Declared' : 'Not declared'}</td>
-                        <td>
-                          <span className={essentialMatch ? 'evidenceChip good' : gap ? 'evidenceChip warn' : 'evidenceChip neutral'}>
-                            {essentialMatch ? 'Matched' : gap ? 'Gap' : 'Context'}
-                          </span>
-                        </td>
-                      </tr>
-                    )
-                  })}
-                  {visibleSkills.length === 0 && (
-                    <tr>
-                      <td colSpan={6}>No skill evidence available for this view.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+            <>
+              <div className="segmentedTabs" role="tablist" aria-label="Skills views">
+                {[
+                  ['demand', 'Skills in demand'],
+                  ['rising', 'Rising skills'],
+                  ['gaps', 'My gaps'],
+                  ['portable', 'Portable skills'],
+                  ['languages', 'Language demand'],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    className={tab === id ? 'active' : ''}
+                    onClick={() => setTab(id as typeof tab)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              {tab === 'rising' ? (
+                <div className="evidenceUnavailable">
+                  <strong>Rising-skill trends are not available yet.</strong>
+                  <span>AUGUR needs time-series job-posting evidence such as Cedefop Skills-OVATE before it can calculate demand growth honestly.</span>
+                </div>
+              ) : tab === 'languages' ? (
+                <div className="evidenceUnavailable">
+                  <strong>Job-posting language demand is not available yet.</strong>
+                  <span>Current LanguageFit uses declared CEFR, target-country labour-market language and ESCO occupation-language evidence; it does not yet count language requirements in live postings.</span>
+                </div>
+              ) : (
+                <div className="skillsTableWrap">
+                  <table className="skillsDemandTable">
+                    <thead><tr><th>Skill</th><th>Demand</th><th>Trend</th><th>Evidence</th><th>Your profile</th><th>Match</th></tr></thead>
+                    <tbody>
+                      {visibleSkills.map((skill) => {
+                        const declared = (profile?.skills ?? []).some((item) => item.toLowerCase() === skill.toLowerCase())
+                        const essentialMatch = matched.some((item) => item.toLowerCase() === skill.toLowerCase())
+                        const gap = missing.some((item) => item.toLowerCase() === skill.toLowerCase())
+                        return (
+                          <tr key={skill}>
+                            <td><strong>{skill}</strong></td>
+                            <td>{liveSkillDemandAvailable ? 'Available' : 'Not yet measured'}</td>
+                            <td>—</td>
+                            <td>{essentialMatch || gap ? 'ESCO occupation evidence' : 'Declared profile skill'}</td>
+                            <td>{declared ? 'Declared' : 'Not declared'}</td>
+                            <td><span className={essentialMatch ? 'evidenceChip good' : gap ? 'evidenceChip warn' : 'evidenceChip neutral'}>{essentialMatch ? 'Matched' : gap ? 'Gap' : 'Context'}</span></td>
+                          </tr>
+                        )
+                      })}
+                      {visibleSkills.length === 0 && <tr><td colSpan={6}>No skill evidence available for this view.</td></tr>}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+
+              <div className="skillsEvidenceFooter">
+                <div><span>Occupation market signal</span><strong>{career?.market_signal?.replaceAll('_', ' ') ?? 'Unavailable'}</strong></div>
+                <div><span>Vacancy context</span><strong>{demandEvidenceAvailable ? `${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}` : 'Unavailable'}</strong></div>
+                <div><span>Skill coverage</span><strong>{career?.skill_match?.coverage == null ? 'Unavailable' : `${Math.round(career.skill_match.coverage * 100)}% essential skills`}</strong></div>
+              </div>
+            </>
           )}
-
-          <div className="skillsEvidenceFooter">
-            <div>
-              <span>Occupation market signal</span>
-              <strong>{career?.market_signal?.replaceAll('_', ' ') ?? 'Unavailable'}</strong>
-            </div>
-            <div>
-              <span>Vacancy context</span>
-              <strong>
-                {demandEvidenceAvailable
-                  ? `${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}`
-                  : 'Unavailable'}
-              </strong>
-            </div>
-            <div>
-              <span>Skill coverage</span>
-              <strong>
-                {career?.skill_match?.coverage == null
-                  ? 'Unavailable'
-                  : `${Math.round(career.skill_match.coverage * 100)}% essential skills`}
-              </strong>
-            </div>
-          </div>
         </section>
-
         <aside className="languageDemandPanel">
           <section>
             <div className="panelHeading">
