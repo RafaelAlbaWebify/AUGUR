@@ -5880,3 +5880,158 @@ body:has(.shell.detailsOpen) {
     padding: 7px 8px;
   }
 }
+
+
+/* Skills & Languages evidence-aware onboarding */
+.skillsOnboardingState {
+  display: grid;
+  gap: 16px;
+  min-height: 420px;
+  padding: 24px;
+  align-content: center;
+}
+
+.skillsOnboardingHero {
+  display: grid;
+  gap: 7px;
+  max-width: 720px;
+}
+
+.skillsOnboardingHero > span {
+  color: #68c8f1;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .11em;
+}
+
+.skillsOnboardingHero h3 {
+  margin: 0;
+  color: #f2f7fa;
+  font-size: 22px;
+  line-height: 1.12;
+}
+
+.skillsOnboardingHero p {
+  margin: 0;
+  max-width: 75ch;
+  color: #8198a8;
+  font-size: 10px;
+  line-height: 1.55;
+}
+
+.skillsUnlockGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.skillsUnlockGrid article {
+  display: grid;
+  grid-template-columns: 26px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 10px;
+  background: rgba(5, 16, 25, .5);
+}
+
+.skillsUnlockGrid article > span {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  background: rgba(25, 95, 132, .28);
+  color: #82d6ff;
+  font-size: 8px;
+  font-weight: 900;
+}
+
+.skillsUnlockGrid article > div {
+  display: grid;
+  gap: 3px;
+}
+
+.skillsUnlockGrid strong {
+  color: #dfeaf0;
+  font-size: 9px;
+}
+
+.skillsUnlockGrid small {
+  color: #6e8798;
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+.skillsUnlockGrid b {
+  color: #8aa2b2;
+  font-size: 7px;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+}
+
+.skillsUnlockEvidence {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.skillsUnlockEvidence > div {
+  display: grid;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 9px;
+  background: rgba(8, 26, 39, .55);
+}
+
+.skillsUnlockEvidence span {
+  color: #6d8799;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .07em;
+}
+
+.skillsUnlockEvidence strong {
+  color: #d6e5ed;
+  font-size: 9px;
+}
+
+.skillsUnlockEvidence small {
+  color: #6c8495;
+  font-size: 7px;
+  line-height: 1.4;
+}
+
+.skillsOnboardingFooter {
+  margin: 0;
+  padding-top: 10px;
+  border-top: 1px solid var(--augur-border-soft);
+  color: #718a9b;
+  font-size: 8px;
+}
+
+@media (max-width: 980px) {
+  .skillsUnlockGrid,
+  .skillsUnlockEvidence {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1400px) and (max-height: 940px) {
+  .skillsOnboardingState {
+    min-height: 330px;
+    padding: 18px;
+    gap: 12px;
+  }
+
+  .skillsOnboardingHero h3 {
+    font-size: 19px;
+  }
+
+  .skillsUnlockGrid article,
+  .skillsUnlockEvidence > div {
+    padding: 8px;
+  }
+}
