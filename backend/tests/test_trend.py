@@ -62,3 +62,38 @@ def test_target_range_requires_bounds():
         assert "target_min" in str(exc)
     else:
         raise AssertionError("Expected ValueError")
+
+
+def test_country_trends_exposes_catalog_methodology_notes(monkeypatch):
+    import app.services.trends as trends_service
+
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_registry",
+        lambda: [{
+            "indicator_id": "intentional_homicide_rate",
+            "name": "Police-recorded intentional homicides",
+            "dimension": "safety",
+            "unit": "per_100k_people",
+            "interpretation_policy": "lower",
+            "target_min": None,
+            "target_max": None,
+        }],
+    )
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_series",
+        lambda _country, _indicator: [
+            {"period": 2020, "value": 0.8, "source_id": "EUROSTAT"},
+            {"period": 2021, "value": 0.7, "source_id": "EUROSTAT"},
+            {"period": 2022, "value": 0.7, "source_id": "EUROSTAT"},
+            {"period": 2023, "value": 0.6, "source_id": "EUROSTAT"},
+            {"period": 2024, "value": 0.6, "source_id": "EUROSTAT"},
+        ],
+    )
+
+    result = trends_service.country_trends("ESP")
+    indicator = result["indicators"][0]
+
+    assert "Police-recorded intentional homicide" in indicator["methodology_note"]
+    assert "recording practices" in indicator["comparability_note"]
