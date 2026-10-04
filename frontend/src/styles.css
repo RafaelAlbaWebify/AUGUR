@@ -6035,3 +6035,82 @@ body:has(.shell.detailsOpen) {
     padding: 8px;
   }
 }
+
+
+/* Skills & Languages demand-evidence coverage */
+.demandEvidenceCoverage {
+  display: grid;
+  gap: 9px;
+  margin: 10px;
+  padding: 11px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 10px;
+  background: rgba(5, 16, 25, .48);
+}
+
+.demandCoverageGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.demandCoverageGrid article {
+  display: grid;
+  gap: 3px;
+  padding: 8px 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(7, 20, 31, .62);
+}
+
+.demandCoverageGrid article > span {
+  font-size: 6px;
+  font-weight: 900;
+  letter-spacing: .07em;
+}
+
+.demandCoverageGrid article strong {
+  color: #dce8ef;
+  font-size: 8px;
+}
+
+.demandCoverageGrid article small {
+  color: #6f8798;
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+.demandCoverageGrid article.active > span {
+  color: #72dca8;
+}
+
+.demandCoverageGrid article.planned > span {
+  color: #dfbd67;
+}
+
+.demandCoverageGrid article.restricted > span {
+  color: #8fa7b7;
+}
+
+@media (max-width: 1050px) {
+  .demandCoverageGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .demandCoverageGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 1400px) and (max-height: 940px) {
+  .demandEvidenceCoverage {
+    margin: 8px;
+    padding: 9px;
+  }
+
+  .demandCoverageGrid article {
+    padding: 6px 7px;
+  }
+}
