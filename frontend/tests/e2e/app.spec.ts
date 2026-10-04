@@ -36,6 +36,16 @@ function overviewMetrics(country: string) {
     },
     {
       country_iso3: country,
+      indicator_id: 'imf_unemployment_rate',
+      name: 'Unemployment rate (IMF WEO)',
+      dimension: 'productive_capacity',
+      period: 2025,
+      value: country === 'ESP' ? 10.2 : country === 'PRT' ? 6.3 : 4.4,
+      unit: 'percent',
+      source_id: 'IMF',
+    },
+    {
+      country_iso3: country,
       indicator_id: 'housing_cost_overburden_rate',
       name: 'Housing cost overburden rate',
       dimension: 'housing',
@@ -90,7 +100,7 @@ function overviewMetrics(country: string) {
 function mockTrendFor(item: ReturnType<typeof overviewMetrics>[number]) {
   const contextual = item.indicator_id === 'population_65_plus_share'
   const improving = item.indicator_id !== 'population_65_plus_share'
-  const lowerIsBetter = ['unemployment_rate', 'housing_cost_overburden_rate', 'energy_import_dependency'].includes(item.indicator_id)
+  const lowerIsBetter = ['unemployment_rate', 'imf_unemployment_rate', 'housing_cost_overburden_rate', 'energy_import_dependency'].includes(item.indicator_id)
   return {
     direction: contextual ? 'increase' : lowerIsBetter ? 'decrease' : 'increase',
     interpretation: contextual ? 'neutral_or_contextual' : improving ? 'improving' : 'stable',
@@ -820,7 +830,7 @@ test('Overview dimension cards drill into persistent dimension routes', async ({
 test('Dimension Detail separates supporting opposing and contextual evidence', async ({ page }) => {
   await page.goto('/country/ESP/dimension/productive_capacity')
 
-  await expect(page.getByText('SYNTHESIS')).toBeVisible()
+  await expect(page.getByText('SYNTHESIS', { exact: true })).toBeVisible()
   await expect(page.getByText('Improving evidence')).toBeVisible()
   await expect(page.getByText('Deteriorating evidence')).toBeVisible()
   await expect(page.getByText('Stable / contextual evidence')).toBeVisible()
@@ -1280,7 +1290,7 @@ test('Future Paths distinguishes official baseline from AUGUR model scenarios', 
 
   await expect(page.getByText('OFFICIAL FORECAST', { exact: true })).toBeVisible()
   await expect(page.getByText('AUGUR MODEL SCENARIOS', { exact: true })).toBeVisible()
-  await expect(page.getByText('not official forecasts', { exact: true })).toBeVisible()
+  await expect(page.getByText('not probabilistic', { exact: true })).toBeVisible()
   await expect(page.locator('.officialLine')).toBeVisible()
   await expect(page.locator('.scenarioLine.improvement')).toBeVisible()
   await expect(page.locator('.scenarioLine.stress')).toBeVisible()
