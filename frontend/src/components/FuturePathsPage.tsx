@@ -76,6 +76,20 @@ function boundsFor(series: Array<Array<{ year: number; value: number }>>): Chart
   }
 }
 
+function pointFor(
+  item: { year: number; value: number },
+  bounds: ChartBounds,
+  width = 520,
+  height = 230,
+) {
+  const rangeYear = Math.max(1, bounds.maxYear - bounds.minYear)
+  const rangeValue = Math.max(1e-9, bounds.maxValue - bounds.minValue)
+  return {
+    x: 26 + ((item.year - bounds.minYear) / rangeYear) * (width - 52),
+    y: 20 + (1 - ((item.value - bounds.minValue) / rangeValue)) * (height - 40),
+  }
+}
+
 function pointsFor(
   values: Array<{ year: number; value: number }>,
   bounds?: ChartBounds | null,
@@ -85,14 +99,10 @@ function pointsFor(
   if (!values.length) return ''
   const ownBounds = bounds ?? boundsFor([values])
   if (!ownBounds) return ''
-  const { minYear, maxYear, minValue, maxValue } = ownBounds
-  const rangeYear = Math.max(1, maxYear - minYear)
-  const rangeValue = Math.max(1e-9, maxValue - minValue)
 
   return values.map((item) => {
-    const x = 26 + ((item.year - minYear) / rangeYear) * (width - 52)
-    const y = 20 + (1 - ((item.value - minValue) / rangeValue)) * (height - 40)
-    return `${x.toFixed(1)},${y.toFixed(1)}`
+    const point = pointFor(item, ownBounds, width, height)
+    return `${point.x.toFixed(1)},${point.y.toFixed(1)}`
   }).join(' ')
 }
 
@@ -142,6 +152,7 @@ export default function FuturePathsPage({
     ...(current ? [{ year: current.period, value: current.value }] : []),
     ...official.map((item) => ({ year: item.period, value: item.value })),
   ]
+  const officialBounds = boundsFor([officialWithCurrent])
   const baselinePoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.baseline }))
   const improvementPoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.improvement }))
   const stressPoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.stress }))
@@ -196,11 +207,33 @@ export default function FuturePathsPage({
               <svg viewBox="0 0 520 230" role="img" aria-label="Official forecast path">
                 <line x1="26" y1="210" x2="494" y2="210" />
                 <line x1="26" y1="20" x2="26" y2="210" />
-                <polyline className="officialLine" points={pointsFor(officialWithCurrent)} />
-                {officialWithCurrent.map((item) => {
-                  const pts = pointsFor(officialWithCurrent).split(' ')
-                  const [x, y] = pts[officialWithCurrent.indexOf(item)].split(',')
-                  return <circle key={item.year} cx={x} cy={y} r="4" className="officialPoint" />
+                {current && officialBounds && (
+                  <>
+                    <line
+                      className="forecastBoundary"
+                      x1={pointFor({ year: current.period, value: current.value }, officialBounds).x}
+                      y1="20"
+                      x2={pointFor({ year: current.period, value: current.value }, officialBounds).x}
+                      y2="210"
+                    />
+                    <text
+                      className="forecastBoundaryLabel"
+                      x={pointFor({ year: current.period, value: current.value }, officialBounds).x + 6}
+                      y="34"
+                    >
+                      forecast →
+                    </text>
+                  </>
+                )}
+                <polyline className="officialLine" points={pointsFor(officialWithCurrent, officialBounds)} />
+                {officialBounds && officialWithCurrent.map((item, index) => {
+                  const point = pointFor(item, officialBounds)
+                  return (
+                    <g key={item.year}>
+                      <circle cx={point.x} cy={point.y} r="4" className={index === 0 && current ? 'currentPoint' : 'officialPoint'} />
+                      <text className="forecastYearLabel" x={point.x} y="224" textAnchor="middle">{item.year}</text>
+                    </g>
+                  )
                 })}
               </svg>
               <div className="chartLegend">
@@ -228,7 +261,10 @@ export default function FuturePathsPage({
               <span>AUGUR MODEL SCENARIOS</span>
               <h3>Illustrative alternative paths</h3>
             </div>
-            <small>not official forecasts</small>
+            <div className="scenarioModelBadge">
+              <strong>MODELLED</strong>
+              <span>not probabilistic</span>
+            </div>
           </div>
 
           {scenarioRows.length && hasScenarios ? (
@@ -239,6 +275,10 @@ export default function FuturePathsPage({
                 <polyline className="scenarioLine improvement" points={pointsFor(improvementPoints, scenarioBounds)} />
                 <polyline className="scenarioLine baseline" points={pointsFor(baselinePoints, scenarioBounds)} />
                 <polyline className="scenarioLine stress" points={pointsFor(stressPoints, scenarioBounds)} />
+                {scenarioBounds && baselinePoints.map((item) => {
+                  const point = pointFor(item, scenarioBounds)
+                  return <text key={item.year} className="forecastYearLabel" x={point.x} y="224" textAnchor="middle">{item.year}</text>
+                })}
               </svg>
               <div className="scenarioLegend">
                 <span className="improvement">Improvement</span>
