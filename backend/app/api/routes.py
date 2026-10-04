@@ -25,6 +25,7 @@ from app.services.career_fit import career_fit
 from app.esco_store import esco_status
 from app.services.ttv import ttv_status
 from app.services.operability import operability_status
+from app.services.regional_evidence import regional_evidence, regional_comparison, geographic_level
 
 router = APIRouter()
 
@@ -236,6 +237,73 @@ def compare(
 
     return country_comparison(requested)
 
+
+
+
+@router.get("/regions/{geo_code}/evidence")
+def region_evidence_get(geo_code: str):
+    geo_code = geo_code.strip().upper()
+    supported_iso2 = {country["iso2"] for country in list_countries()}
+
+    if geographic_level(geo_code) not in {"nuts2", "nuts3"}:
+        raise HTTPException(
+            status_code=400,
+            detail="Regional evidence currently supports NUTS 2 and NUTS 3 codes",
+        )
+
+    if geo_code[:2] not in supported_iso2:
+        raise HTTPException(
+            status_code=404,
+            detail="Region is outside AUGUR's registered countries",
+        )
+
+    return regional_evidence(geo_code)
+
+
+@router.get("/regions/compare")
+def regions_compare_get(
+    regions: str = Query(
+        ...,
+        description="Comma-separated NUTS 2 or NUTS 3 codes",
+    )
+):
+    requested = [
+        value.strip().upper()
+        for value in regions.split(",")
+        if value.strip()
+    ]
+
+    if len(requested) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="At least two regions are required for comparison",
+        )
+
+    if len(requested) > 5:
+        raise HTTPException(
+            status_code=400,
+            detail="A maximum of five regions can be compared at once",
+        )
+
+    levels = {geographic_level(code) for code in requested}
+    if "unknown" in levels:
+        raise HTTPException(
+            status_code=400,
+            detail="Only NUTS 2 and NUTS 3 region codes are supported",
+        )
+
+    supported_iso2 = {country["iso2"] for country in list_countries()}
+    unsupported = [
+        code for code in requested
+        if code[:2] not in supported_iso2
+    ]
+    if unsupported:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Regions are outside AUGUR's registered countries: {', '.join(unsupported)}",
+        )
+
+    return regional_comparison(requested)
 
 
 @router.get("/profile", response_model=PersonalProfileResponse)
