@@ -1301,7 +1301,7 @@ test('Future Paths marks the forecast boundary and model status', async ({ page 
 
   await expect(page.getByText('MODELLED')).toBeVisible()
   await expect(page.getByText('not probabilistic')).toBeVisible()
-  await expect(page.locator('.forecastBoundary')).toBeVisible()
+  await expect(page.locator('.forecastBoundary')).toHaveCount(1)
   await expect(page.getByText('forecast →')).toBeVisible()
   await expect(page.locator('.forecastYearLabel')).toHaveCount(5)
 })
