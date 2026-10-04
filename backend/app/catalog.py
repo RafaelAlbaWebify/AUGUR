@@ -77,6 +77,18 @@ SOURCES = [
 
 INDICATORS = [
     {
+        "indicator_id": "actual_individual_consumption_index",
+        "source_indicator": "EUROSTAT:PRC_PPP_IND_1:A01",
+        "name": "Actual individual consumption per capita",
+        "dimension": "prosperity",
+        "unit": "index_eu27_2020_100",
+        "interpretation_policy": "higher",
+        "target_min": None,
+        "target_max": None,
+        "methodology_note": "Actual individual consumption per capita expressed as a purchasing-power-adjusted volume index with EU27_2020=100.",
+        "comparability_note": "Eurostat considers AIC better adapted than GDP to describe household material welfare. PPP-based indices indicate relative order of magnitude and should not be treated as an exact country ranking.",
+    },
+    {
         "indicator_id": "household_internet_access",
         "source_indicator": "EUROSTAT:TIN00134",
         "name": "Households with internet access",
