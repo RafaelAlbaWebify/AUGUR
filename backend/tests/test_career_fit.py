@@ -166,13 +166,13 @@ def _mock_full_esco_career(
         lambda country_iso3, isco08: (
             {
                 "country_iso3": country_iso3,
-                "period": "2026-Q2",
+                "period": "2024",
                 "isco08": isco08,
                 "vacancy_rate_pct": vacancy_rate,
-                "nace_scope": "B-T",
+                "nace_scope": None,
                 "source_id": "EUROSTAT",
-                "dataset_id": "jvs_q_isco_r21",
-                "source_updated_at": "2026-09-15",
+                "dataset_id": "jvs_a_isco3_r1",
+                "source_updated_at": "2025-12-10",
             }
             if vacancy_rate is not None
             else None
@@ -433,8 +433,11 @@ def test_vacancy_rate_context_does_not_override_market_gate(monkeypatch):
     demand = result["vacancy_demand_evidence"]
     assert demand["status"] == "available"
     assert demand["isco_major"] == "OC3"
+    assert demand["isco_3digit"] == "OC351"
+    assert demand["granularity"] == "isco_3digit"
     assert demand["vacancy_rate_pct"] == 8.7
-    assert demand["period"] == "2026-Q2"
+    assert demand["period"] == "2024"
+    assert demand["dataset_id"] == "jvs_a_isco3_r1"
     assert demand["role"] == "context_only"
 
     assert result["market_signal"] == "not_classified_as_shortage_or_surplus"
@@ -569,3 +572,40 @@ def test_mixed_unit_group_signal_is_not_supportive(monkeypatch):
     assert result["market_evidence_complete"] is True
     assert result["market_signal_supports_viability"] is False
     assert result["viability_evidence_ready"] is False
+
+
+def test_vacancy_rate_prefers_isco3_before_major_fallback(monkeypatch):
+    requested = []
+
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_job_vacancy_rate",
+        lambda country_iso3, isco08: (
+            requested.append(isco08)
+            or ({
+                "country_iso3": country_iso3,
+                "period": "2024",
+                "isco08": isco08,
+                "vacancy_rate_pct": 4.6,
+                "nace_scope": None,
+                "source_id": "EUROSTAT",
+                "dataset_id": "jvs_a_isco3_r1",
+                "source_updated_at": "2025-12-10",
+            } if isco08 == "OC351" else None)
+        ),
+    )
+
+    evidence = career_fit_module.occupation_vacancy_demand_evidence(
+        "ESP",
+        {
+            "selected": {
+                "isco_group": "3512",
+                "code": "3512",
+            }
+        },
+    )
+
+    assert requested == ["OC351"]
+    assert evidence["status"] == "available"
+    assert evidence["isco_3digit"] == "OC351"
+    assert evidence["granularity"] == "isco_3digit"
