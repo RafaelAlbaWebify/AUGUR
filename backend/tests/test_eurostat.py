@@ -274,7 +274,7 @@ def test_eurostat_normalization_can_select_rate_unit_by_human_label():
                     "index": {"NR": 0, "RATE": 1},
                     "label": {
                         "NR": "Number",
-                        "RATE": "Rate per 100 000 people",
+                        "RATE": "Rate",
                     },
                 }
             },
@@ -287,7 +287,7 @@ def test_eurostat_normalization_can_select_rate_unit_by_human_label():
         "indicator_id": "pm25_premature_death_rate",
         "dataset_id": "sdg_11_52",
         "filters": {"geo": "__GEO__", "freq": "A"},
-        "label_contains": {"unit": "100 000"},
+        "label_contains": {"unit": "Rate"},
         "unit": "per_100k_people",
     }
 
