@@ -229,7 +229,7 @@ export default function SkillsLanguagesPage({
                   ['rising', 'Rising skills'],
                   ['gaps', 'My gaps'],
                   ['portable', 'Portable skills'],
-                  ['languages', 'Language demand'],
+                  ['languages', 'Job-ad language demand'],
                 ].map(([id, label]) => (
                   <button
                     key={id}
@@ -290,8 +290,8 @@ export default function SkillsLanguagesPage({
           <section>
             <div className="panelHeading">
               <div>
-                <span>LANGUAGE DEMAND</span>
-                <h3>Current evidence</h3>
+                <span>LANGUAGE FIT</span>
+                <h3>Declared + target evidence</h3>
               </div>
             </div>
 
