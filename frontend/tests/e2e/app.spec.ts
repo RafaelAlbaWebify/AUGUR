@@ -811,6 +811,116 @@ test('Indicators route exposes drill-down evidence without overstating provenanc
   await expect(page.getByText('Corroborated')).toHaveCount(0)
 })
 
+test('Indicator provenance exposes methodology and comparability caveats', async ({ page }) => {
+  const safety = {
+    country_iso3: 'ESP',
+    indicator_id: 'intentional_homicide_rate',
+    name: 'Police-recorded intentional homicides',
+    dimension: 'safety',
+    period: 2024,
+    value: 0.6,
+    unit: 'per_100k_people',
+    source_id: 'EUROSTAT',
+  }
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/snapshot', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ country_iso3: 'ESP', observation_count: 1, indicators: [safety] }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/trends', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        indicator_count: 1,
+        indicators: [{
+          ...safety,
+          interpretation_policy: 'lower',
+          target_min: null,
+          target_max: null,
+          methodology_note: 'Police-recorded intentional homicide rate per 100,000 inhabitants.',
+          comparability_note: 'Cross-country comparisons can be affected by differences in criminal law, reporting and police recording practices.',
+          trend: {
+            direction: 'decrease',
+            interpretation: 'improving',
+            confidence: 'high',
+            slope_per_year: -0.02,
+            pct_change_1y: -2.0,
+            pct_change_3y: -5.0,
+            pct_change_5y: -8.0,
+            years_used: 6,
+            target_status: null,
+          },
+        }],
+      }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/source-quality', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        indicators: [{
+          indicator_id: safety.indicator_id,
+          name: safety.name,
+          dimension: safety.dimension,
+          unit: safety.unit,
+          source_count: 1,
+          preferred_source_id: 'EUROSTAT',
+          preferred_source_name: 'Eurostat',
+          preferred_period: 2024,
+          preferred_value: 0.6,
+          freshest_period: 2024,
+          period_spread: 0,
+          common_period: null,
+          common_period_source_count: null,
+          disagreement_pct: null,
+        }],
+      }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/overview-series', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        series: [{
+          indicator_id: safety.indicator_id,
+          name: safety.name,
+          dimension: safety.dimension,
+          unit: safety.unit,
+          source_id: 'EUROSTAT',
+          points: [
+            { period: 2020, value: 0.8 },
+            { period: 2021, value: 0.7 },
+            { period: 2022, value: 0.7 },
+            { period: 2023, value: 0.6 },
+            { period: 2024, value: 0.6 },
+          ],
+        }],
+      }),
+    })
+  })
+
+  await page.goto('/country/ESP/indicators')
+  await page.getByRole('button', { name: 'Provenance' }).click()
+
+  const notes = page.getByRole('region', { name: 'Methodology and comparability notes' })
+  await expect(notes.getByText('Methodology', { exact: true })).toBeVisible()
+  await expect(notes.getByText(/Police-recorded intentional homicide rate/i)).toBeVisible()
+  await expect(notes.getByText('Comparability', { exact: true })).toBeVisible()
+  await expect(notes.getByText(/recording practices/i)).toBeVisible()
+})
+
 test('Indicators keeps raw changes neutral and shows observed history', async ({ page }) => {
   await page.goto('/country/ESP/indicators')
 
