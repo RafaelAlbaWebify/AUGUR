@@ -584,12 +584,13 @@ class EurostatAdapter:
             for dimension_id in dimension_ids
         ]
 
-        nace_dimension_id = (
-            "nace_r21"
-            if "nace_r21" in dimension_ids
-            else "nace_r2"
-            if "nace_r2" in dimension_ids
-            else None
+        nace_dimension_id = next(
+            (
+                dimension_id
+                for dimension_id in dimension_ids
+                if str(dimension_id).lower().startswith("nace")
+            ),
+            None,
         )
         if nace_dimension_id is None:
             raise ValueError(
