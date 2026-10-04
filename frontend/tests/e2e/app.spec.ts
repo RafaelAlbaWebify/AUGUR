@@ -166,6 +166,34 @@ function mockTrendFor(item: ReturnType<typeof overviewMetrics>[number]) {
 
 async function mockApi(page: Page) {
   await page.route('https://gisco-services.ec.europa.eu/**', async route => {
+    if (route.request().url().includes('LEVL_0')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/geo+json',
+        body: JSON.stringify({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: { NUTS_ID: 'ES', NAME_LATN: 'Spain', NUTS_NAME: 'Spain', CNTR_CODE: 'ES', LEVL_CODE: 0 },
+              geometry: { type: 'Polygon', coordinates: [[[-9.5, 36.0], [3.4, 36.0], [3.4, 43.9], [-9.5, 43.9], [-9.5, 36.0]]] },
+            },
+            {
+              type: 'Feature',
+              properties: { NUTS_ID: 'PT', NAME_LATN: 'Portugal', NUTS_NAME: 'Portugal', CNTR_CODE: 'PT', LEVL_CODE: 0 },
+              geometry: { type: 'Polygon', coordinates: [[[-9.6, 36.8], [-6.1, 36.8], [-6.1, 42.2], [-9.6, 42.2], [-9.6, 36.8]]] },
+            },
+            {
+              type: 'Feature',
+              properties: { NUTS_ID: 'IE', NAME_LATN: 'Ireland', NUTS_NAME: 'Ireland', CNTR_CODE: 'IE', LEVL_CODE: 0 },
+              geometry: { type: 'Polygon', coordinates: [[[-10.8, 51.3], [-5.3, 51.3], [-5.3, 55.5], [-10.8, 55.5], [-10.8, 51.3]]] },
+            },
+          ],
+        }),
+      })
+      return
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/geo+json',
@@ -258,7 +286,25 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (path.endsWith('/career-fit')) {
+    if (/^\/api\/regions\/[A-Z0-9]+\/evidence$/.test(path)) {
+      const geoCode = path.split('/')[3]
+      body = {
+        geo_code: geoCode,
+        geo_level: 'nuts2',
+        source: 'Eurostat regional statistics',
+        indicator_count: 5,
+        available_count: 5,
+        complete: true,
+        indicators: [
+          { indicator_id: 'regional_population', name: 'Population', status: 'available', period: 2024, value: 2700000, unit: 'persons', dataset_id: 'demo_r_pjangrp3', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_population_density', name: 'Population density', status: 'available', period: 2024, value: 91.4, unit: 'people_per_km2', dataset_id: 'demo_r_d3dens', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_gdp_per_capita', name: 'GDP per capita', status: 'available', period: 2024, value: 28900, unit: 'eur_per_person', dataset_id: 'nama_10r_3gdp', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_employment_rate', name: 'Employment rate, ages 20–64', status: 'available', period: 2024, value: 71.2, unit: 'percent', dataset_id: 'lfst_r_lfe2emprt', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_unemployment_rate', name: 'Unemployment rate, ages 20–64', status: 'available', period: 2024, value: 8.3, unit: 'percent', dataset_id: 'lfst_r_lfu3rt', source_id: 'EUROSTAT' },
+        ],
+        notes: [],
+      }
+    } else if (path.endsWith('/career-fit')) {
       body = {
         target_country_iso3: country,
         status: 'profession_missing',
@@ -775,7 +821,7 @@ test('top navigation uses real routes and exposes all six product views', async 
   await expect(page.getByText('6. SKILLS & LANGUAGES')).toBeVisible()
 })
 
-test('Overview reveals official NUTS 2 regions progressively with zoom', async ({ page }) => {
+test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
   const map = page.getByTestId('regional-map')
@@ -784,11 +830,16 @@ test('Overview reveals official NUTS 2 regions progressively with zoom', async (
   await expect(page.getByText('Zoom in to reveal NUTS 2 regions')).toBeVisible()
 
   await page.getByRole('button', { name: 'Focus country' }).click()
-  await map.locator('.leaflet-control-zoom-in').click()
-  await map.locator('.leaflet-control-zoom-in').click()
 
   await expect(page.getByText('NUTS 2 regions visible')).toBeVisible()
-  await expect(map.locator('.nuts2Boundary').first()).toBeVisible()
+  const galicia = map.getByRole('button', { name: 'Galicia · ES11' })
+  await expect(galicia).toBeVisible()
+  await galicia.click()
+
+  await expect(page.getByText('REGION · Galicia · ES11')).toBeVisible()
+  const regionalEvidence = page.getByRole('region', { name: 'Selected region evidence' })
+  await expect(regionalEvidence.getByText('NUTS 2 · ES11')).toBeVisible()
+  await expect(regionalEvidence.getByText('GDP per capita')).toBeVisible()
   await expect(page.getByText(/Base map: OpenStreetMap · boundaries: Eurostat GISCO NUTS 2024/)).toBeVisible()
 })
 
@@ -1032,15 +1083,20 @@ test('Dimension Detail separates supporting opposing and contextual evidence', a
   await expect(page.locator('.dimensionSignalLane.contextual')).toBeVisible()
 })
 
-test('regional map renders country context and progressive geographic controls', async ({ page }) => {
+test('regional map renders clickable country context and geographic controls', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
   const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
   expect(await map.locator('.countryBoundary').count()).toBeGreaterThan(0)
-  await expect(map.locator('.selectedCountryBoundary')).toHaveCount(1)
+  expect(await map.locator('.selectedCountryBoundary').count()).toBeGreaterThan(0)
+  await expect(map.getByRole('button', { name: 'Spain country' })).toBeVisible()
+  await expect(map.getByRole('button', { name: 'Portugal country' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Europe' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Focus country' })).toBeVisible()
+
+  await map.getByRole('button', { name: 'Portugal country' }).click()
+  await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
 test('Decision Matrix summarizes numerical position without implying winners', async ({ page }) => {
@@ -1307,7 +1363,7 @@ test('candidate temporal evidence remains explicitly non-estimate', async ({ pag
   await expect(ttv.getByText('Estimate available')).toHaveCount(0)
 })
 
-test('map starts broad and exposes regional detail only after zooming in', async ({ page }) => {
+test('map starts broad and exposes regional detail when country is focused', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
   const map = page.getByTestId('regional-map')
@@ -1315,9 +1371,8 @@ test('map starts broad and exposes regional detail only after zooming in', async
   await expect(map.locator('.nuts2Boundary')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Focus country' }).click()
-  await map.locator('.leaflet-control-zoom-in').click()
-  await map.locator('.leaflet-control-zoom-in').click()
 
+  await expect(map.getByRole('button', { name: 'Galicia · ES11' })).toBeVisible()
   await expect(map.locator('.nuts2Boundary').first()).toBeVisible()
 })
 
