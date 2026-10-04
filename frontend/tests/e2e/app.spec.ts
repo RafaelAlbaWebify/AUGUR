@@ -1286,6 +1286,16 @@ test('Future Paths distinguishes official baseline from AUGUR model scenarios', 
   await expect(page.locator('.scenarioLine.stress')).toBeVisible()
 })
 
+test('Future Paths marks the forecast boundary and model status', async ({ page }) => {
+  await page.goto('/country/ESP/outlook')
+
+  await expect(page.getByText('MODELLED')).toBeVisible()
+  await expect(page.getByText('not probabilistic')).toBeVisible()
+  await expect(page.locator('.forecastBoundary')).toBeVisible()
+  await expect(page.getByText('forecast →')).toBeVisible()
+  await expect(page.locator('.forecastYearLabel')).toHaveCount(5)
+})
+
 test('Future Paths avoids fake model envelopes for contextual indicators', async ({ page }) => {
   await page.goto('/country/PRT/outlook')
 
