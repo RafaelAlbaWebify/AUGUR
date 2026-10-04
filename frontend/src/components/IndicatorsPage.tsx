@@ -36,6 +36,14 @@ type SourceQualityItem = {
   disagreement_pct: number | null
 }
 
+type Signal = {
+  indicator_id: string
+  name: string
+  direction: string
+  confidence: string
+  pct_change_5y: number | null
+}
+
 type DimensionAssessment = {
   trajectory: string
   confidence: string
@@ -44,6 +52,10 @@ type DimensionAssessment = {
   coverage: number
   evidence_status?: string
   evidence_note?: string | null
+  improving_signals?: Signal[]
+  deteriorating_signals?: Signal[]
+  stable_signals?: Signal[]
+  contextual_signals?: Signal[]
 }
 
 type OverviewSeriesItem = {
@@ -190,6 +202,67 @@ export default function IndicatorsPage({
           <div><span>Directional signals</span><strong>{directionalCount}</strong></div>
           <div><span>Sources represented</span><strong>{new Set(rows.map((item) => qualityById.get(item.indicator_id)?.preferred_source_name ?? item.source_id)).size}</strong></div>
           <p>Raw percentage changes are descriptive. Directional interpretation is shown separately in the Trend column.</p>
+        </section>
+      )}
+
+      {dimension && assessment?.[dimension] && (
+        <section className="dimensionSynthesis">
+          <div className="dimensionSynthesisHeader">
+            <div>
+              <span>SYNTHESIS</span>
+              <h3>{dimensionLabels[dimension] ?? dimension}</h3>
+            </div>
+            <strong className={`dimensionTrajectoryBadge ${assessment[dimension].trajectory}`}>
+              {assessment[dimension].trajectory.replaceAll('_', ' ')}
+            </strong>
+          </div>
+
+          <div className="dimensionSignalLanes">
+            <section className="dimensionSignalLane supporting">
+              <div><span>SUPPORTING</span><strong>Improving evidence</strong></div>
+              {(assessment[dimension].improving_signals ?? []).length ? (
+                (assessment[dimension].improving_signals ?? []).map((signal) => (
+                  <article key={signal.indicator_id}>
+                    <strong>{signal.name}</strong>
+                    <span>{signal.pct_change_5y == null ? '5y change unavailable' : `${changeLabel(signal.pct_change_5y)} over 5y`}</span>
+                    <small>{signal.confidence} trend evidence</small>
+                  </article>
+                ))
+              ) : (
+                <p>No improving directional signals.</p>
+              )}
+            </section>
+
+            <section className="dimensionSignalLane opposing">
+              <div><span>OPPOSING</span><strong>Deteriorating evidence</strong></div>
+              {(assessment[dimension].deteriorating_signals ?? []).length ? (
+                (assessment[dimension].deteriorating_signals ?? []).map((signal) => (
+                  <article key={signal.indicator_id}>
+                    <strong>{signal.name}</strong>
+                    <span>{signal.pct_change_5y == null ? '5y change unavailable' : `${changeLabel(signal.pct_change_5y)} over 5y`}</span>
+                    <small>{signal.confidence} trend evidence</small>
+                  </article>
+                ))
+              ) : (
+                <p>No deteriorating directional signals.</p>
+              )}
+            </section>
+
+            <section className="dimensionSignalLane contextual">
+              <div><span>CONTEXT</span><strong>Stable / contextual evidence</strong></div>
+              {[...(assessment[dimension].stable_signals ?? []), ...(assessment[dimension].contextual_signals ?? [])].length ? (
+                [...(assessment[dimension].stable_signals ?? []), ...(assessment[dimension].contextual_signals ?? [])].map((signal) => (
+                  <article key={signal.indicator_id}>
+                    <strong>{signal.name}</strong>
+                    <span>{signal.direction.replaceAll('_', ' ')}</span>
+                    <small>{signal.confidence} evidence depth</small>
+                  </article>
+                ))
+              ) : (
+                <p>No stable/contextual signals.</p>
+              )}
+            </section>
+          </div>
         </section>
       )}
 
