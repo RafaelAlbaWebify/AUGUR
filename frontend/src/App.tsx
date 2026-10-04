@@ -235,6 +235,9 @@ const dimensionLabels: Record<string, string> = {
   demography: 'Demography',
   human_systems: 'Human systems',
   housing: 'Housing',
+  safety: 'Safety',
+  environment: 'Environment',
+  infrastructure: 'Infrastructure',
   fiscal: 'Fiscal sustainability',
   strategic_resilience: 'Strategic resilience',
 }
@@ -242,6 +245,7 @@ const dimensionLabels: Record<string, string> = {
 function formatValue(value: number, unit: string) {
   if (unit === 'percent' || unit === 'percent_gdp') return `${value.toFixed(1)}%`
   if (unit === 'persons') return new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)
+  if (unit === 'per_100k_people') return `${value.toFixed(1)} /100k`
   if (unit === 'births_per_woman') return value.toFixed(2)
   if (unit === 'years') return `${value.toFixed(1)} years`
   if (unit === 'constant_2015_usd_per_person') {
