@@ -878,6 +878,22 @@ test('personal profile remains separate and can be saved locally', async ({ page
   await expect(profile.getByText('Saved locally')).toBeVisible()
 })
 
+test('My Fit priorities are explicit and evidence cards expose next actions', async ({ page }) => {
+  await page.goto('/country/ESP/profile')
+  const profile = page.getByRole('region', { name: 'Personal profile' })
+
+  const healthcare = profile.getByRole('button', { name: /Good healthcare/i })
+  await expect(healthcare).toHaveAttribute('aria-pressed', 'false')
+  await healthcare.click()
+  await expect(healthcare).toHaveAttribute('aria-pressed', 'true')
+  await expect(profile.getByText('1 selected · used only when explicit')).toBeVisible()
+
+  const evidence = profile.getByRole('region', { name: 'Personal-fit evidence' })
+  await expect(evidence.getByText('Next action').first()).toBeVisible()
+  await expect(evidence.getByText('Add current_country, citizenships')).toBeVisible()
+  await expect(evidence.getByText('Add profession, skills')).toBeVisible()
+})
+
 test('profile marks future financial inputs that do not affect current FinancialFit', async ({ page }) => {
   await page.goto('/country/ESP/profile')
   const profile = page.getByRole('region', { name: 'Personal profile' })
