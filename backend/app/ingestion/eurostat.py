@@ -19,17 +19,16 @@ BASE_URL = "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0/data"
 SOURCE_ID = "EUROSTAT"
 
 EUROSTAT_JOB_VACANCY_RATES = {
-    "dataset_id": "jvs_q_isco_r21",
+    "dataset_id": "jvs_a_isco3_r1",
     "filters": {
         "geo": "__GEO__",
-        "freq": "Q",
-        "indic_em": "JVR",
-        "sizeclas": "TOTAL",
-        "s_adj": "SA",
+        "freq": "A",
     },
     "unit": "percent",
-    "nace_aggregate_candidates": ["B-T", "B-S", "A-S", "TOTAL"],
+    "supported_iso3": {"ESP", "PRT"},
+    "method": "experimental_oja_jvs_lfs_isco3_country",
 }
+
 
 
 EUROSTAT_JOB_TRANSITIONS = {
@@ -595,31 +594,6 @@ class EurostatAdapter:
             for dimension_id in dimension_ids
         ]
 
-        nace_dimension_id = next(
-            (
-                dimension_id
-                for dimension_id in dimension_ids
-                if str(dimension_id).lower().startswith("nace")
-            ),
-            None,
-        )
-        if nace_dimension_id is None:
-            nace_dimension_id = next(
-                (
-                    dimension_id
-                    for dimension_id in dimension_ids
-                    if "nace" in str(
-                        dimensions.get(dimension_id, {}).get("label", "")
-                    ).lower()
-                ),
-                None,
-            )
-        if nace_dimension_id is None:
-            raise ValueError(
-                "Eurostat vacancy-rate payload has no NACE dimension; "
-                f"received dimensions={dimension_ids}"
-            )
-
         isco_dimension_id = next(
             (
                 dimension_id
@@ -644,27 +618,18 @@ class EurostatAdapter:
             )
         if isco_dimension_id is None:
             raise ValueError(
-                "Eurostat vacancy-rate payload has no ISCO dimension; "
+                "Eurostat experimental vacancy payload has no ISCO dimension; "
                 f"received dimensions={dimension_ids}"
             )
 
-        nace_codes = set(
-            self._ordered_codes(dimensions[nace_dimension_id])
-        )
-        nace_scope = next(
+        indicator_dimension_id = next(
             (
-                code
-                for code in EUROSTAT_JOB_VACANCY_RATES[
-                    "nace_aggregate_candidates"
-                ]
-                if code in nace_codes
+                dimension_id
+                for dimension_id in dimension_ids
+                if str(dimension_id).lower() == "indic_em"
             ),
             None,
         )
-        if nace_scope is None:
-            raise ValueError(
-                "Eurostat vacancy-rate payload has no supported aggregate NACE scope"
-            )
 
         retrieved_at = datetime.now(timezone.utc)
         rows: list[dict] = []
@@ -703,16 +668,20 @@ class EurostatAdapter:
 
             period = labels.get("time")
             isco08 = str(labels.get(isco_dimension_id) or "")
-            row_nace = labels.get(nace_dimension_id)
+            employment_indicator = (
+                str(labels.get(indicator_dimension_id) or "")
+                if indicator_dimension_id
+                else "JVR"
+            )
 
             if not period:
                 continue
-            if row_nace != nace_scope:
+            if indicator_dimension_id and employment_indicator != "JVR":
                 continue
             if (
-                len(isco08) != 3
+                len(isco08) != 5
                 or not isco08.startswith("OC")
-                or not isco08[-1].isdigit()
+                or not isco08[2:].isdigit()
             ):
                 continue
 
@@ -722,7 +691,7 @@ class EurostatAdapter:
                     "period": str(period),
                     "isco08": isco08,
                     "vacancy_rate_pct": float(value),
-                    "nace_scope": nace_scope,
+                    "nace_scope": None,
                     "source_id": SOURCE_ID,
                     "dataset_id": EUROSTAT_JOB_VACANCY_RATES["dataset_id"],
                     "retrieved_at": retrieved_at,
@@ -731,19 +700,19 @@ class EurostatAdapter:
             )
 
         if not rows:
-            isco_codes = self._ordered_codes(dimensions[isco_dimension_id])[:12]
-            nace_sample = (
-                self._ordered_codes(dimensions[nace_dimension_id])[:12]
-                if nace_dimension_id
+            isco_codes = self._ordered_codes(dimensions[isco_dimension_id])[:20]
+            indicator_codes = (
+                self._ordered_codes(dimensions[indicator_dimension_id])[:20]
+                if indicator_dimension_id
                 else []
             )
             raise ValueError(
-                "Eurostat vacancy-rate payload produced no major-group rows; "
+                "Eurostat experimental vacancy payload produced no ISCO-3 JVR rows; "
                 f"dimensions={dimension_ids}; "
-                f"nace_dimension={nace_dimension_id}; "
-                f"nace_codes={nace_sample}; "
                 f"isco_dimension={isco_dimension_id}; "
-                f"isco_codes={isco_codes}"
+                f"isco_codes={isco_codes}; "
+                f"indicator_dimension={indicator_dimension_id}; "
+                f"indicator_codes={indicator_codes}"
             )
 
         return rows
