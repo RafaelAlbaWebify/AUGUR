@@ -1,9 +1,11 @@
 from app.db.analytics import indicator_series, indicator_registry
+from app.catalog import INDICATORS
 from app.engines.trend import calculate_trend
 
 
 def country_trends(country_iso3: str) -> dict:
     indicators = indicator_registry()
+    catalog_by_id = {item['indicator_id']: item for item in INDICATORS}
     results = []
 
     for indicator in indicators:
@@ -33,6 +35,8 @@ def country_trends(country_iso3: str) -> dict:
                 "interpretation_policy": indicator["interpretation_policy"],
                 "target_min": indicator.get("target_min"),
                 "target_max": indicator.get("target_max"),
+                "methodology_note": catalog_by_id.get(indicator["indicator_id"], {}).get("methodology_note"),
+                "comparability_note": catalog_by_id.get(indicator["indicator_id"], {}).get("comparability_note"),
                 "trend": {
                     "direction": trend.direction,
                     "interpretation": trend.interpretation,
