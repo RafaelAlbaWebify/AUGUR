@@ -130,6 +130,17 @@ export default function SkillsLanguagesPage({
 
   const demandEvidenceAvailable = career?.vacancy_demand_evidence?.status === 'available'
   const liveSkillDemandAvailable = false
+  const profileReadyForSkills = Boolean(
+    (profile?.profession && profile.profession.trim()) ||
+    career?.occupation_match?.selected?.preferred_label,
+  )
+  const hasDeclaredSkills = Boolean(profile?.skills?.length)
+  const hasLanguages = Boolean(profile?.languages?.length)
+  const profileGaps = [
+    !profileReadyForSkills ? 'profession' : null,
+    !hasDeclaredSkills ? 'skills' : null,
+    !hasLanguages ? 'languages' : null,
+  ].filter((item): item is string => Boolean(item))
 
   return (
     <section className="skillsLanguagesPage" aria-label="Skills and languages">
