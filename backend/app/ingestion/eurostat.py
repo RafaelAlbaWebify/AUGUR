@@ -77,6 +77,29 @@ EUROSTAT_EARNINGS = {
 
 EUROSTAT_SERIES = [
     {
+        "indicator_id": "intentional_homicide_rate",
+        "dataset_id": "crim_off_cat",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+            "iccs": "ICCS0101",
+            "unit": "P_HTHAB",
+        },
+        "unit": "per_100k_people",
+    },
+    {
+        "indicator_id": "pm25_premature_death_rate",
+        "dataset_id": "sdg_11_52",
+        "filters": {
+            "geo": "__GEO__",
+            "freq": "A",
+        },
+        "label_contains": {
+            "unit": "100 000",
+        },
+        "unit": "per_100k_people",
+    },
+    {
         "indicator_id": "real_house_price_index",
         "dataset_id": "tipsho10",
         "filters": {
@@ -292,6 +315,29 @@ class EurostatAdapter:
 
         raise ValueError("Unsupported Eurostat category index")
 
+    @staticmethod
+    def _category_labels(dimension: dict) -> dict[str, str]:
+        labels = dimension.get("category", {}).get("label", {})
+        return labels if isinstance(labels, dict) else {}
+
+    def _labels_match_config(
+        self,
+        config: dict,
+        labels: dict[str, str],
+        dimensions: dict,
+    ) -> bool:
+        requirements = config.get("label_contains") or {}
+        for dimension_id, required_text in requirements.items():
+            code = labels.get(dimension_id)
+            if code is None:
+                return False
+            human_label = self._category_labels(
+                dimensions.get(dimension_id, {})
+            ).get(code, code)
+            if required_text.casefold() not in str(human_label).casefold():
+                return False
+        return True
+
     def normalize(self, country_iso3: str, config: dict, payload: dict) -> list[dict]:
         dimension_ids = payload["id"]
         dimension_sizes = payload["size"]
@@ -337,6 +383,9 @@ class EurostatAdapter:
                 dimension_id: dimension_codes[index][coordinates[index]]
                 for index, dimension_id in enumerate(dimension_ids)
             }
+
+            if not self._labels_match_config(config, labels, dimensions):
+                continue
 
             time_code = labels.get("time")
             if not time_code or not str(time_code).isdigit():
