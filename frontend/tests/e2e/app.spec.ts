@@ -860,6 +860,27 @@ test('regional map renders selected-country geometry and city anchors', async ({
   await expect(map.locator('.regionalCityMarker')).toHaveCount(4)
 })
 
+test('Decision Matrix summarizes numerical position without implying winners', async ({ page }) => {
+  await page.goto('/compare?countries=ESP,PRT,IRL')
+
+  const summary = page.getByRole('region', { name: 'Comparison summary' })
+  await expect(summary).toBeVisible()
+  await expect(summary.getByText('Spain')).toBeVisible()
+  await expect(summary.getByText('Portugal')).toBeVisible()
+  await expect(summary.getByText('Ireland')).toBeVisible()
+  await expect(summary.getByText(/Higher\/lower describes numerical position only/i)).toBeVisible()
+  await expect(page.getByText(/winner implied/i)).toHaveCount(0)
+})
+
+test('Decision Matrix exposes comparable evidence coverage by domain', async ({ page }) => {
+  await page.goto('/compare?countries=ESP,PRT,IRL')
+
+  const coverage = page.getByRole('region', { name: 'Domain evidence coverage' })
+  await expect(coverage).toBeVisible()
+  await expect(coverage.getByText('Comparable data by domain')).toBeVisible()
+  await expect(coverage.locator('.decisionCoverageTrack')).toHaveCount(6)
+})
+
 test('personal profile remains separate and can be saved locally', async ({ page }) => {
   await page.goto('/country/ESP/profile')
   const profile = page.getByRole('region', { name: 'Personal profile' })
