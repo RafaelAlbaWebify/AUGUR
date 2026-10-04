@@ -70,7 +70,7 @@ def test_safety_and_environment_series_are_registered_from_official_eu_sources()
 
     environment = by_indicator["pm25_premature_death_rate"]
     assert environment["dataset_id"] == "sdg_11_52"
-    assert environment["label_contains"]["unit"] == "100 000"
+    assert environment["label_contains"]["unit"] == "Rate"
 
 
 def test_safety_and_environment_interpret_lower_values_as_better():
