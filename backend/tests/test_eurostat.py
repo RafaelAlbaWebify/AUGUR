@@ -257,6 +257,37 @@ def test_eurostat_job_vacancy_detects_renamed_nace_dimension():
     assert {row["nace_scope"] for row in rows} == {"B-T"}
 
 
+def test_eurostat_job_vacancy_detects_renamed_isco_dimension():
+    payload = {
+        "id": ["geo", "activity", "occupation", "time"],
+        "size": [1, 1, 2, 1],
+        "dimension": {
+            "geo": {"category": {"index": {"ES": 0}}},
+            "activity": {
+                "label": "NACE Rev. 2.1",
+                "category": {"index": {"B-T": 0}},
+            },
+            "occupation": {
+                "label": "International Standard Classification of Occupations 2008 (ISCO-08)",
+                "category": {"index": {"OC2": 0, "OC3": 1}},
+            },
+            "time": {"category": {"index": {"2026-Q2": 0}}},
+        },
+        "value": [3.5, 2.8],
+        "updated": "2026-09-15",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize_job_vacancy_rates("ESP", payload)
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["isco08"] for row in rows} == {"OC2", "OC3"}
+    assert {row["nace_scope"] for row in rows} == {"B-T"}
+
+
 def test_eurostat_job_vacancy_detects_nace_by_dimension_label():
     payload = {
         "id": ["geo", "activity", "isco08", "time"],
