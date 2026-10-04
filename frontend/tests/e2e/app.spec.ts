@@ -801,9 +801,9 @@ test('Decision Matrix uses relative spreads and neutral selected-set positions',
 
   await expect(page.getByText('Largest relative spreads')).toBeVisible()
   await expect(page.getByText(/descriptive, not a quality score/i)).toBeVisible()
-  const matrixRows = page.locator('.matrixIndicatorRow')
-  const matrixRowCount = await matrixRows.count()
-  await expect(page.locator('.matrixPositionBadge')).toHaveCount(matrixRowCount * 3)
+  const indicatorRows = page.locator('.matrixIndicatorNote')
+  const indicatorRowCount = await indicatorRows.count()
+  await expect(page.locator('.matrixPositionBadge')).toHaveCount(indicatorRowCount * 3)
   await expect(page.locator('.matrixDomainRow')).toHaveCount(6)
   await expect(page.getByText('High', { exact: true }).first()).toBeVisible()
   await expect(page.getByText('Low', { exact: true }).first()).toBeVisible()
