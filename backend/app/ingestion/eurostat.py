@@ -691,6 +691,37 @@ class EurostatAdapter:
                 }
             )
 
+        if not rows:
+            isco_dimension_id = next(
+                (
+                    dimension_id
+                    for dimension_id in dimension_ids
+                    if "isco" in str(dimension_id).lower()
+                    or "occupation" in str(
+                        dimensions.get(dimension_id, {}).get("label", "")
+                    ).lower()
+                ),
+                None,
+            )
+            isco_codes = (
+                self._ordered_codes(dimensions[isco_dimension_id])[:12]
+                if isco_dimension_id
+                else []
+            )
+            nace_sample = (
+                self._ordered_codes(dimensions[nace_dimension_id])[:12]
+                if nace_dimension_id
+                else []
+            )
+            raise ValueError(
+                "Eurostat vacancy-rate payload produced no major-group rows; "
+                f"dimensions={dimension_ids}; "
+                f"nace_dimension={nace_dimension_id}; "
+                f"nace_codes={nace_sample}; "
+                f"isco_dimension={isco_dimension_id}; "
+                f"isco_codes={isco_codes}"
+            )
+
         return rows
 
     def normalize_job_transitions(
@@ -908,6 +939,10 @@ class EurostatAdapter:
                 country_iso3,
                 payload,
             )
+            if not vacancy_rows:
+                raise ValueError(
+                    "Eurostat vacancy-rate payload produced no usable observations"
+                )
             inserted = upsert_labour_job_vacancy_rates(vacancy_rows)
             total_rows += inserted
             job_vacancy_detail = {
