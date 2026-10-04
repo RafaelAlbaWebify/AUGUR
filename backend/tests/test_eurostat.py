@@ -261,3 +261,42 @@ def test_eurostat_job_vacancy_normalization_refuses_unknown_aggregate_scope():
             raise AssertionError("expected aggregate NACE scope validation")
     finally:
         adapter.close()
+
+
+def test_eurostat_normalization_can_select_rate_unit_by_human_label():
+    payload = {
+        "id": ["geo", "unit", "time"],
+        "size": [1, 2, 2],
+        "dimension": {
+            "geo": {"category": {"index": {"ES": 0}}},
+            "unit": {
+                "category": {
+                    "index": {"NR": 0, "RATE": 1},
+                    "label": {
+                        "NR": "Number",
+                        "RATE": "Rate per 100 000 people",
+                    },
+                }
+            },
+            "time": {"category": {"index": {"2022": 0, "2023": 1}}},
+        },
+        "value": [12000.0, 11000.0, 24.0, 21.0],
+        "updated": "2026-09-01",
+    }
+    config = {
+        "indicator_id": "pm25_premature_death_rate",
+        "dataset_id": "sdg_11_52",
+        "filters": {"geo": "__GEO__", "freq": "A"},
+        "label_contains": {"unit": "100 000"},
+        "unit": "per_100k_people",
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize("ESP", config, payload)
+    finally:
+        adapter.close()
+
+    assert [row["value"] for row in rows] == [24.0, 21.0]
+    assert [row["period"] for row in rows] == [2022, 2023]
+    assert {row["unit"] for row in rows} == {"per_100k_people"}
