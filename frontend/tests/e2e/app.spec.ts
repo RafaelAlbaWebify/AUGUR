@@ -1392,6 +1392,112 @@ test('Skills and Languages replaces empty tables with evidence-aware onboarding'
   await expect(page.locator('.skillsDemandTable')).toHaveCount(0)
 })
 
+test('captures Skills and Languages populated visual fixture', async ({ page }) => {
+  await page.route('http://127.0.0.1:8020/api/profile', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        profile_id: 'visual-skills',
+        age: 50,
+        current_country: 'ESP',
+        citizenships: ['ESP'],
+        profession: 'Systems engineer',
+        skills: ['Windows', 'Azure', 'Python', 'SQL', 'PowerShell'],
+        languages: [
+          { language: 'Spanish', cefr: 'C2' },
+          { language: 'English', cefr: 'B2' },
+        ],
+        household_size: 2,
+        monthly_net_income: 1650,
+        liquid_savings: null,
+        remote_work: false,
+        preferences: {},
+      }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/career-fit', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        target_country_iso3: 'ESP',
+        status: 'evidence_available',
+        market_signal: 'not_classified_as_shortage_or_surplus',
+        market_signal_scope: 'isco_unit_group',
+        market_signal_isco: '3512',
+        vacancy_demand_evidence: {
+          status: 'available',
+          vacancy_rate_pct: 3.4,
+          period: '2026-Q2',
+          source_id: 'EUROSTAT',
+          granularity: 'isco_major',
+          isco_major: '3',
+        },
+        occupation_match: {
+          status: 'matched',
+          selected: {
+            preferred_label: 'ICT user support technician',
+            match_score: 0.91,
+            isco_group: '3512',
+            code: '3512',
+          },
+        },
+        skill_match: {
+          dataset_mode: 'full',
+          dataset_version: 'ESCO 1.2.1',
+          occupation_label: 'ICT user support technician',
+          matched_skills: ['Windows', 'Azure', 'SQL', 'PowerShell'],
+          missing_skills: ['network troubleshooting', 'ICT security policies'],
+          coverage: 0.67,
+          evidence_complete: true,
+        },
+        source: {
+          label: 'EURES Report on labour shortages and surpluses 2025 — Annex',
+          evidence_id: 'eures_shortages_surpluses_2025_annex',
+          conditions_year: 2025,
+          scope: 'isco_unit_group',
+        },
+      }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/language-fit', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        target_country_iso3: 'ESP',
+        status: 'evidence_available',
+        target_languages: ['Spanish', 'English'],
+        matches: [
+          { language: 'Spanish', declared_cefr: 'C2', meets_work_ready_heuristic: true },
+          { language: 'English', declared_cefr: 'B2', meets_work_ready_heuristic: true },
+        ],
+        work_ready_threshold: 'B2',
+        work_ready: true,
+        occupation_language_evidence: {
+          status: 'available',
+          occupation_label: 'ICT user support technician',
+          essential_skill_count: 1,
+          optional_skill_count: 1,
+        },
+      }),
+    })
+  })
+
+  await page.setViewportSize({ width: 1920, height: 900 })
+  await page.goto('/country/ESP/skills')
+  await expect(page.locator('.skillsDemandTable')).toBeVisible()
+  await expect(page.getByText('ICT user support technician')).toBeVisible()
+
+  await page.screenshot({
+    path: 'test-results/ui-audit-skills-languages-populated-1920x900.png',
+    fullPage: false,
+  })
+})
+
 test('secondary views keep their desktop composition at 1920x900', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 900 })
 
