@@ -869,7 +869,8 @@ test('Decision Matrix summarizes numerical position without implying winners', a
   await expect(summary.getByText('Portugal')).toBeVisible()
   await expect(summary.getByText('Ireland')).toBeVisible()
   await expect(summary.getByText(/Higher\/lower describes numerical position only/i)).toBeVisible()
-  await expect(page.getByText(/winner implied/i)).toHaveCount(0)
+  await expect(page.locator('.matrixIndicatorNote').first()).toContainText('no winner implied')
+  await expect(page.getByText(/best country/i)).toHaveCount(0)
 })
 
 test('Decision Matrix exposes comparable evidence coverage by domain', async ({ page }) => {
