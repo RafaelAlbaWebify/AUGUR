@@ -781,6 +781,10 @@ class EurostatAdapter:
                     {key: (geo if value == "__GEO__" else value) for key, value in config["filters"].items()},
                 )
                 rows = self.normalize(country_iso3, config, payload)
+                if not rows:
+                    raise ValueError(
+                        "Eurostat returned no observations matching the configured filters"
+                    )
                 inserted = upsert_observations(rows)
                 total_rows += inserted
 
