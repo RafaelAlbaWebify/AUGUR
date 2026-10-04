@@ -771,6 +771,18 @@ test('comparison remains neutral and aligned', async ({ page }) => {
 })
 
 
+test('Decision Matrix uses relative spreads and neutral selected-set positions', async ({ page }) => {
+  await page.goto('/compare?countries=ESP,PRT,IRL')
+
+  await expect(page.getByText('Largest relative spreads')).toBeVisible()
+  await expect(page.getByText(/descriptive, not a quality score/i)).toBeVisible()
+  await expect(page.locator('.matrixPositionBadge')).toHaveCount(24)
+  await expect(page.locator('.matrixDomainRow')).toHaveCount(6)
+  await expect(page.getByText('High', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('Low', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText(/descriptive comparison · no winner implied/i).first()).toBeVisible()
+})
+
 test('Indicators route exposes drill-down evidence without overstating provenance', async ({ page }) => {
   await page.goto('/country/ESP/indicators')
 
