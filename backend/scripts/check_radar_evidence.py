@@ -6,9 +6,16 @@ from app.db.analytics import latest_observations
 
 
 RADAR_INDICATORS = [
+    ("economy", "real_gdp_per_capita"),
+    ("labour", "unemployment_rate"),
+    ("housing", "housing_cost_overburden_rate"),
+    ("healthcare", "life_expectancy"),
     ("safety", "intentional_homicide_rate"),
     ("environment", "pm25_premature_death_rate"),
     ("infrastructure", "household_internet_access"),
+    ("education", "tertiary_education_25_34"),
+    ("demography", "population_65_plus_share"),
+    ("resilience", "energy_import_dependency"),
 ]
 
 
@@ -53,7 +60,7 @@ def radar_evidence_status() -> tuple[list[dict], bool]:
 def main() -> int:
     rows, complete = radar_evidence_status()
 
-    print("AUGUR COUNTRY RADAR EVIDENCE CHECK")
+    print("AUGUR COUNTRY RADAR · 10-DOMAIN EVIDENCE CHECK")
     print("=" * 72)
 
     for row in rows:
