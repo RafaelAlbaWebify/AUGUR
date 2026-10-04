@@ -492,6 +492,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         ? 'partial'
         : 'complete',
       detail: legalFit?.status?.replaceAll('_', ' ') ?? 'loading',
+      decision: 'Work / residence feasibility',
+      constraint: readiness?.modules?.legal_fit?.ready
+        ? (legalFit?.status === 'country_specific_rules_required' ? 'country evidence' : 'resolved evidence')
+        : 'profile input',
     },
     {
       id: 'language',
@@ -501,6 +505,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         ? 'incomplete'
         : 'complete',
       detail: languageFit?.status?.replaceAll('_', ' ') ?? 'loading',
+      decision: 'Language viability',
+      constraint: readiness?.modules?.language_fit?.ready
+        ? (languageFit?.status === 'target_language_missing' ? 'target-country evidence' : 'resolved evidence')
+        : 'profile input',
     },
     {
       id: 'career',
@@ -512,6 +520,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         ? 'complete'
         : 'partial',
       detail: careerFit?.status?.replaceAll('_', ' ') ?? 'loading',
+      decision: 'Career viability',
+      constraint: readiness?.modules?.career_fit?.ready
+        ? (careerFit?.evidence_complete ? 'resolved evidence' : 'market evidence')
+        : 'profile input',
     },
     {
       id: 'financial',
@@ -525,6 +537,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         ? 'partial'
         : 'incomplete',
       detail: financialFit?.status?.replaceAll('_', ' ') ?? 'loading',
+      decision: 'Purchasing-power viability',
+      constraint: readiness?.modules?.financial_fit?.ready
+        ? (financialFit?.evidence_complete ? 'resolved evidence' : 'financial evidence')
+        : 'profile input',
     },
   ]
 
@@ -560,6 +576,13 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     financial_fit: 'income and purchasing-power evidence',
   }
 
+  const gapDecision: Record<string, string> = {
+    legal_fit: 'Unlocks work / residence feasibility',
+    career_fit: 'Unlocks career viability',
+    language_fit: 'Unlocks language viability',
+    financial_fit: 'Unlocks purchasing-power viability',
+  }
+
   return (
     <section className="profilePageV3" aria-label="Personal profile">
       <header className="myFitHeader">
@@ -569,6 +592,23 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         </div>
         <p>Build your profile to improve personal-fit evidence for {targetCountry}.</p>
       </header>
+
+      <section className="myFitDecisionReadiness" aria-label="Personal-fit decision readiness">
+        <div>
+          <span>DECISION READINESS</span>
+          <strong>{readiness ? `${readiness.ready_module_count}/${readiness.module_count} profile modules ready` : 'Checking profile inputs…'}</strong>
+        </div>
+        <div className="myFitDecisionModules">
+          {evidenceItems.map((item) => (
+            <article className={item.state} key={item.id}>
+              <span>{item.label.replace('Fit', '')}</span>
+              <strong>{item.decision}</strong>
+              <small>{item.constraint}</small>
+            </article>
+          ))}
+        </div>
+        <p>Readiness is not a country score. It separates missing profile inputs from unresolved external evidence.</p>
+      </section>
 
       <div className="myFitTopGrid">
         <section className="myFitCard profileSummaryCard">
@@ -628,6 +668,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                   <strong>{item.label} incomplete</strong>
                   <span>Add: {item.missing_fields.join(', ')}</span>
                   <small>Required for {gapPurpose[moduleId] ?? 'personal-fit evidence'}.</small>
+                  <em>{gapDecision[moduleId] ?? 'Unlocks personal-fit analysis'}</em>
                 </div>
                 <button type="button" onClick={() => setEditMode(true)}>Add</button>
               </article>
@@ -748,6 +789,10 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                 <strong>{item.label.replace('Fit', '')}</strong>
                 <span>{item.state}</span>
                 <small>{item.detail}</small>
+                <div className="evidenceConstraint">
+                  <span>Current constraint</span>
+                  <strong>{item.constraint}</strong>
+                </div>
                 <div className="evidenceNextAction">
                   <span>Next action</span>
                   <strong>
