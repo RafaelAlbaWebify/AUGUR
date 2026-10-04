@@ -2441,3 +2441,129 @@
     min-height: 320px !important;
   }
 }
+
+
+/* Selected-region analytical layer */
+.leafletAugurMap .nuts2Boundary {
+  cursor: pointer;
+}
+
+.leafletAugurMap .nuts2Boundary:hover {
+  stroke: #ffffff;
+  stroke-width: 3px;
+  fill-opacity: .18;
+}
+
+.leafletAugurMap .selectedNuts2Boundary {
+  filter: drop-shadow(0 0 5px rgba(66, 214, 255, .78));
+}
+
+.regionalEvidencePanel {
+  display: grid;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid rgba(72, 170, 215, .34);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(8, 34, 49, .96), rgba(5, 20, 31, .98));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.025),
+    0 10px 28px rgba(0,0,0,.14);
+}
+
+.regionalEvidenceHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.regionalEvidenceHeader > div {
+  display: grid;
+  gap: 3px;
+}
+
+.regionalEvidenceHeader span {
+  color: #78a5bc;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.regionalEvidenceHeader h3 {
+  margin: 0;
+  color: #f1f9fc;
+  font-size: 20px;
+  line-height: 1.15;
+}
+
+.regionalEvidenceHeader > strong {
+  color: #8ecae5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.regionalEvidenceGrid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.regionalEvidenceCard {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 10px 11px;
+  border: 1px solid rgba(91, 143, 169, .22);
+  border-radius: 9px;
+  background: rgba(3, 17, 26, .56);
+}
+
+.regionalEvidenceCard > span {
+  min-height: 30px;
+  color: #91a9b7;
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1.35;
+}
+
+.regionalEvidenceCard > strong {
+  color: #eff8fb;
+  font-size: 18px;
+  line-height: 1.1;
+}
+
+.regionalEvidenceCard > small {
+  color: #698596;
+  font-size: 9px;
+  line-height: 1.35;
+}
+
+.regionalEvidenceCard.unavailable {
+  border-style: dashed;
+  opacity: .72;
+}
+
+.regionalEvidenceNote {
+  margin: 0;
+  color: #7895a6;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+@media (max-width: 1180px) {
+  .regionalEvidenceGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .regionalEvidenceHeader {
+    flex-direction: column;
+  }
+
+  .regionalEvidenceGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
