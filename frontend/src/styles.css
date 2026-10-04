@@ -5350,3 +5350,156 @@ body:has(.shell.detailsOpen) {
     white-space: nowrap;
   }
 }
+
+
+/* Evidence Explorer integrity + history */
+.evidenceExplorerSummary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(110px, .4fr)) minmax(280px, 1.8fr);
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid var(--augur-border);
+  border-radius: 10px;
+  background: rgba(8, 22, 33, .72);
+}
+
+.evidenceExplorerSummary > div {
+  display: grid;
+  gap: 3px;
+  padding: 7px 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .52);
+}
+
+.evidenceExplorerSummary span,
+.indicatorHistoryHeader span {
+  color: #718a9b;
+  font-size: 8px;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+
+.evidenceExplorerSummary strong {
+  color: #edf5fa;
+  font-size: 16px;
+}
+
+.evidenceExplorerSummary p {
+  margin: 0;
+  align-self: center;
+  color: #7d95a6;
+  font-size: 9px;
+  line-height: 1.45;
+}
+
+.rawChange {
+  color: #b8c7d1 !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.indicatorHistoryPanel {
+  display: grid;
+  gap: 7px;
+  padding: 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 9px;
+  background: rgba(4, 15, 23, .54);
+}
+
+.indicatorHistoryHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.indicatorHistoryHeader small {
+  color: #6f8798;
+  font-size: 7px;
+}
+
+.indicatorHistoryPanel svg {
+  width: 100%;
+  height: 104px;
+  overflow: visible;
+}
+
+.indicatorHistoryPanel polyline {
+  fill: none;
+  stroke: #55d8e4;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.indicatorHistoryPanel circle {
+  fill: #74eaf1;
+  stroke: rgba(4, 16, 25, .96);
+  stroke-width: 1.1;
+}
+
+.indicatorHistoryAxis {
+  display: flex;
+  justify-content: space-between;
+  color: #668091;
+  font-size: 7px;
+}
+
+.indicatorHistoryEmpty {
+  min-height: 72px;
+  display: grid;
+  place-items: center;
+  color: #60798b;
+  font-size: 8px;
+  text-align: center;
+}
+
+@media (max-width: 1180px) {
+  .evidenceExplorerSummary {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .evidenceExplorerSummary p {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (min-width: 1400px) and (max-height: 940px) {
+  .evidenceExplorerPage {
+    gap: 9px;
+    padding: 12px 18px 18px;
+  }
+
+  .evidenceExplorerSummary {
+    padding: 7px 8px;
+  }
+
+  .evidenceExplorerLayout {
+    grid-template-columns: minmax(0, 2.1fr) minmax(290px, .68fr);
+    gap: 9px;
+  }
+
+  .evidenceFilters {
+    padding: 8px;
+  }
+
+  .evidenceFilters input,
+  .evidenceFilters select {
+    min-height: 30px;
+  }
+
+  .evidenceExplorerTable th,
+  .evidenceExplorerTable td {
+    padding: 7px 8px;
+  }
+
+  .indicatorDetailsBody {
+    gap: 8px;
+    padding: 11px;
+  }
+
+  .indicatorHistoryPanel svg {
+    height: 82px;
+  }
+}
