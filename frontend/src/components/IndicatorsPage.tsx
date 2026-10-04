@@ -46,9 +46,19 @@ type DimensionAssessment = {
   evidence_note?: string | null
 }
 
+type OverviewSeriesItem = {
+  indicator_id: string
+  name: string
+  dimension: string
+  unit: string
+  source_id: string
+  points: Array<{ period: number; value: number }>
+}
+
 type IndicatorsPageProps = {
   countryName: string
   indicators: Indicator[]
+  overviewSeries: OverviewSeriesItem[]
   sourceQuality: SourceQualityItem[]
   assessment?: Record<string, DimensionAssessment>
   dimension?: string | null
@@ -84,9 +94,28 @@ function qualityTone(label: string) {
   return label === 'High' ? 'good' : label === 'Medium' ? 'warn' : 'neutral'
 }
 
+
+function sparklinePoints(points: Array<{ period: number; value: number }>) {
+  if (points.length < 2) return ''
+  const width = 300
+  const height = 100
+  const pad = 8
+  const values = points.map((point) => point.value)
+  const min = Math.min(...values)
+  const max = Math.max(...values)
+  const range = Math.max(1e-9, max - min)
+
+  return points.map((point, index) => {
+    const x = pad + (index / (points.length - 1)) * (width - pad * 2)
+    const y = pad + (1 - ((point.value - min) / range)) * (height - pad * 2)
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  }).join(' ')
+}
+
 export default function IndicatorsPage({
   countryName,
   indicators,
+  overviewSeries,
   sourceQuality,
   assessment,
   dimension,
@@ -132,6 +161,12 @@ export default function IndicatorsPage({
     ?? indicators[0]
   const selectedQuality = selected ? qualityById.get(selected.indicator_id) : undefined
   const selectedQualityLabel = selected ? qualityLabel(selectedQuality, selected.trend) : 'Limited'
+  const selectedSeries = selected
+    ? overviewSeries.find((item) => item.indicator_id === selected.indicator_id)
+    : undefined
+  const directionalCount = rows.filter((item) =>
+    ['improving', 'deteriorating', 'within_target'].includes(item.trend?.interpretation ?? '')
+  ).length
 
   return (
     <section className="evidenceExplorerPage" aria-label={dimension ? 'Dimension detail' : 'Indicators'}>
@@ -148,6 +183,15 @@ export default function IndicatorsPage({
           <button className="secondaryAction" type="button" onClick={onBackToIndicators}>All indicators</button>
         )}
       </div>
+
+      {!dimension && (
+        <section className="evidenceExplorerSummary" aria-label="Indicator evidence summary">
+          <div><span>Indicators shown</span><strong>{rows.length}</strong></div>
+          <div><span>Directional signals</span><strong>{directionalCount}</strong></div>
+          <div><span>Sources represented</span><strong>{new Set(rows.map((item) => qualityById.get(item.indicator_id)?.preferred_source_name ?? item.source_id)).size}</strong></div>
+          <p>Raw percentage changes are descriptive. Directional interpretation is shown separately in the Trend column.</p>
+        </section>
+      )}
 
       {dimension && assessment?.[dimension] && (
         <section className="dimensionEvidenceStrip">
@@ -224,9 +268,9 @@ export default function IndicatorsPage({
                       </td>
                       <td>{dimensionLabels[item.dimension] ?? item.dimension}</td>
                       <td><strong>{formatValue(item.value, item.unit)}</strong><small>{item.period}</small></td>
-                      <td className={(item.trend?.pct_change_1y ?? 0) >= 0 ? 'positiveRaw' : 'negativeRaw'}>{changeLabel(item.trend?.pct_change_1y)}</td>
-                      <td className={(item.trend?.pct_change_3y ?? 0) >= 0 ? 'positiveRaw' : 'negativeRaw'}>{changeLabel(item.trend?.pct_change_3y)}</td>
-                      <td className={(item.trend?.pct_change_5y ?? 0) >= 0 ? 'positiveRaw' : 'negativeRaw'}>{changeLabel(item.trend?.pct_change_5y)}</td>
+                      <td className="rawChange">{changeLabel(item.trend?.pct_change_1y)}</td>
+                      <td className="rawChange">{changeLabel(item.trend?.pct_change_3y)}</td>
+                      <td className="rawChange">{changeLabel(item.trend?.pct_change_5y)}</td>
                       <td><span className={`trendPill ${item.trend?.interpretation ?? 'context'}`}>{trendLabel(item.trend)}</span></td>
                       <td>{q?.preferred_source_name ?? item.source_id.replaceAll('_', ' ')}</td>
                       <td>{q?.preferred_period ?? item.period}</td>
@@ -255,6 +299,30 @@ export default function IndicatorsPage({
               <div className="detailValue">{formatValue(selected.value, selected.unit)}</div>
               <small>{selected.period}</small>
 
+              <section className="indicatorHistoryPanel" aria-label="Observed indicator history">
+                <div className="indicatorHistoryHeader">
+                  <span>Observed history</span>
+                  <small>{selectedSeries?.points.length ?? 0} points · {selectedSeries?.source_id.replaceAll('_', ' ') ?? 'source unavailable'}</small>
+                </div>
+                {selectedSeries?.points && selectedSeries.points.length >= 2 ? (
+                  <>
+                    <svg viewBox="0 0 300 100" role="img" aria-label={`${selected.name} observed history`}>
+                      <polyline points={sparklinePoints(selectedSeries.points)} />
+                      {selectedSeries.points.map((point, index, allPoints) => {
+                        const [cx, cy] = sparklinePoints(allPoints).split(' ')[index].split(',')
+                        return <circle key={point.period} cx={cx} cy={cy} r={index === allPoints.length - 1 ? 3.4 : 2} />
+                      })}
+                    </svg>
+                    <div className="indicatorHistoryAxis">
+                      <span>{selectedSeries.points[0].period}</span>
+                      <span>{selectedSeries.points[selectedSeries.points.length - 1].period}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="indicatorHistoryEmpty">Observed history unavailable for this indicator.</div>
+                )}
+              </section>
+
               <div className="detailChangeGrid">
                 <div><span>1 year</span><strong>{changeLabel(selected.trend?.pct_change_1y)}</strong></div>
                 <div><span>3 years</span><strong>{changeLabel(selected.trend?.pct_change_3y)}</strong></div>
@@ -263,7 +331,7 @@ export default function IndicatorsPage({
 
               <dl className="indicatorDetailList">
                 <div><dt>Trend</dt><dd>{trendLabel(selected.trend)}</dd></div>
-                <div><dt>Evidence depth</dt><dd>{selected.trend?.confidence ?? 'pending'}</dd></div>
+                <div><dt>Trend evidence confidence</dt><dd>{selected.trend?.confidence ?? 'pending'}</dd></div>
                 <div><dt>Policy</dt><dd>{selected.interpretation_policy?.replaceAll('_', ' ') ?? 'contextual'}</dd></div>
                 <div><dt>Evidence quality</dt><dd><span className={`evidenceChip ${qualityTone(selectedQualityLabel)}`}>{selectedQualityLabel}</span></dd></div>
               </dl>
