@@ -6347,3 +6347,33 @@ body:has(.shell.detailsOpen) {
     grid-template-columns: 1fr;
   }
 }
+
+
+.methodologyNotes {
+  display: grid;
+  gap: 7px;
+  padding: 8px 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .52);
+}
+
+.methodologyNotes > div {
+  display: grid;
+  gap: 3px;
+}
+
+.methodologyNotes span {
+  color: #6f8798;
+  font-size: 7px;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.methodologyNotes p {
+  margin: 0;
+  color: #9aafbc;
+  font-size: 8px;
+  line-height: 1.45;
+}
