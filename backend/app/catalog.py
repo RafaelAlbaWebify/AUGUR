@@ -85,6 +85,8 @@ INDICATORS = [
         "interpretation_policy": "higher",
         "target_min": None,
         "target_max": None,
+        "methodology_note": "Share of households with internet access at home.",
+        "comparability_note": "Useful as a digital-access baseline, but it does not measure connection speed, VHCN/FTTP coverage, reliability or transport infrastructure.",
     },
     {
         "indicator_id": "intentional_homicide_rate",
@@ -95,6 +97,8 @@ INDICATORS = [
         "interpretation_policy": "lower",
         "target_min": None,
         "target_max": None,
+        "methodology_note": "Police-recorded intentional homicide rate per 100,000 inhabitants.",
+        "comparability_note": "Cross-country comparisons can be affected by differences in criminal law, reporting and police recording practices.",
     },
     {
         "indicator_id": "pm25_premature_death_rate",
@@ -105,6 +109,8 @@ INDICATORS = [
         "interpretation_policy": "lower",
         "target_min": None,
         "target_max": None,
+        "methodology_note": "Modelled premature mortality attributable to long-term PM2.5 exposure above the WHO guideline, expressed per 100,000 people.",
+        "comparability_note": "This is a modelled health-burden indicator supplied through the EEA/Eurostat SDG framework, not a direct count of observed deaths.",
     },
     {
         "indicator_id": "household_price_level_index",
