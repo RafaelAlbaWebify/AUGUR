@@ -66,6 +66,16 @@ function overviewMetrics(country: string) {
     },
     {
       country_iso3: country,
+      indicator_id: 'unmet_medical_needs',
+      name: 'Unmet medical examination or treatment needs',
+      dimension: 'human_systems',
+      period: 2025,
+      value: country === 'ESP' ? 2.4 : country === 'PRT' ? 3.9 : 4.7,
+      unit: 'percent',
+      source_id: 'EUROSTAT',
+    },
+    {
+      country_iso3: country,
       indicator_id: 'life_expectancy',
       name: 'Life expectancy at birth',
       dimension: 'human_systems',
@@ -140,7 +150,7 @@ function overviewMetrics(country: string) {
 function mockTrendFor(item: ReturnType<typeof overviewMetrics>[number]) {
   const contextual = item.indicator_id === 'population_65_plus_share'
   const improving = item.indicator_id !== 'population_65_plus_share'
-  const lowerIsBetter = ['unemployment_rate', 'imf_unemployment_rate', 'housing_cost_overburden_rate', 'intentional_homicide_rate', 'pm25_premature_death_rate', 'energy_import_dependency'].includes(item.indicator_id)
+  const lowerIsBetter = ['unemployment_rate', 'imf_unemployment_rate', 'housing_cost_overburden_rate', 'unmet_medical_needs', 'intentional_homicide_rate', 'pm25_premature_death_rate', 'energy_import_dependency'].includes(item.indicator_id)
   return {
     direction: contextual ? 'increase' : lowerIsBetter ? 'decrease' : 'increase',
     interpretation: contextual ? 'neutral_or_contextual' : improving ? 'improving' : 'stable',
