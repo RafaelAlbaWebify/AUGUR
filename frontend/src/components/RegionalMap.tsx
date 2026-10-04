@@ -35,6 +35,8 @@ type CityMarker = {
 type RegionalMapProps = {
   countryIso2: string
   selectedRegion: string | null
+  selectableCountryIso2?: string[]
+  onSelectCountry?: (countryIso2: string) => void
   onSelectRegion: (regionId: string, regionName: string, level: number) => void
   cities?: CityMarker[]
 }
@@ -47,6 +49,13 @@ const CITIES_VISIBLE_ZOOM = 6
 
 const EUROPE_VIEW: L.LatLngExpression = [50.5, 8.5]
 
+function countryName(feature: CountryFeature) {
+  return feature.properties?.NAME_LATN
+    ?? feature.properties?.NUTS_NAME
+    ?? feature.properties?.CNTR_CODE
+    ?? 'Country'
+}
+
 function regionName(feature: RegionFeature) {
   return feature.properties?.NAME_LATN
     ?? feature.properties?.NUTS_NAME
@@ -57,17 +66,24 @@ function regionName(feature: RegionFeature) {
 export default function RegionalMap({
   countryIso2,
   selectedRegion,
+  selectableCountryIso2 = [],
+  onSelectCountry,
   onSelectRegion,
   cities = [],
 }: RegionalMapProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
+  const onSelectCountryRef = useRef(onSelectCountry)
   const onSelectRegionRef = useRef(onSelectRegion)
   const countryLayerRef = useRef<L.GeoJSON | null>(null)
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
+
+  useEffect(() => {
+    onSelectCountryRef.current = onSelectCountry
+  }, [onSelectCountry])
 
   useEffect(() => {
     onSelectRegionRef.current = onSelectRegion
@@ -145,12 +161,30 @@ export default function RegionalMap({
             && Number(feature.properties?.LEVL_CODE ?? 2) === 2
           )
 
-        const countryLayer = L.geoJSON(countries as GeoJSON.FeatureCollection, {
+        const countryCollection: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features: countries as GeoJSON.Feature[],
+        }
+
+        const regionCollection: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features: regions as GeoJSON.Feature[],
+        }
+
+        const selectableCountries = new Set(selectableCountryIso2)
+
+        const countryLayer = L.geoJSON(countryCollection, {
           style: (feature) => {
             const country = feature as CountryFeature | undefined
-            const active = country?.properties?.CNTR_CODE === countryIso2
+            const code = country?.properties?.CNTR_CODE ?? ''
+            const active = code === countryIso2
+            const selectable = selectableCountries.has(code)
             return {
-              className: active ? 'countryBoundary selectedCountryBoundary' : 'countryBoundary',
+              className: [
+                'countryBoundary',
+                active ? 'selectedCountryBoundary' : '',
+                selectable ? 'clickableCountryBoundary' : '',
+              ].filter(Boolean).join(' '),
               color: active ? '#31a8d8' : '#71818c',
               weight: active ? 2 : 1,
               opacity: active ? 0.95 : 0.55,
@@ -158,10 +192,38 @@ export default function RegionalMap({
               fillOpacity: active ? 0.16 : 0.04,
             }
           },
-          interactive: false,
+          onEachFeature: (feature, layer) => {
+            const country = feature as CountryFeature
+            const code = country.properties?.CNTR_CODE ?? ''
+            const name = countryName(country)
+
+            if (!selectableCountries.has(code)) return
+
+            layer.bindTooltip(`${name} · ${code}`, {
+              sticky: true,
+              direction: 'top',
+              className: 'augurMapTooltip',
+            })
+
+            const selectCountry = () => onSelectCountryRef.current?.(code)
+            layer.on('click', selectCountry)
+            layer.on('add', () => {
+              const element = (layer as L.Path).getElement()
+              if (!element) return
+              element.setAttribute('role', 'button')
+              element.setAttribute('aria-label', `${name} country`)
+              element.setAttribute('tabindex', '0')
+              element.addEventListener('keydown', (event: KeyboardEvent) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  selectCountry()
+                }
+              })
+            })
+          },
         }).addTo(map)
 
-        const regionLayer = L.geoJSON(regions as GeoJSON.FeatureCollection, {
+        const regionLayer = L.geoJSON(regionCollection, {
           style: (feature) => {
             const region = feature as RegionFeature | undefined
             const id = region?.properties?.NUTS_ID ?? ''
@@ -184,12 +246,27 @@ export default function RegionalMap({
               direction: 'top',
               className: 'augurMapTooltip',
             })
-            layer.on('click', () => {
+            const selectRegion = () => {
               onSelectRegionRef.current(id, name, 2)
               const bounds = (layer as L.Polygon).getBounds()
               if (bounds.isValid()) {
                 map.fitBounds(bounds, { padding: [34, 34], maxZoom: 7 })
               }
+            }
+
+            layer.on('click', selectRegion)
+            layer.on('add', () => {
+              const element = (layer as L.Path).getElement()
+              if (!element) return
+              element.setAttribute('role', 'button')
+              element.setAttribute('aria-label', `${name} · ${id}`)
+              element.setAttribute('tabindex', '0')
+              element.addEventListener('keydown', (event: KeyboardEvent) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  selectRegion()
+                }
+              })
             })
           },
         })
@@ -243,7 +320,7 @@ export default function RegionalMap({
       controller.abort()
       if (progressiveHandler) map.off('zoomend', progressiveHandler)
     }
-  }, [countryIso2])
+  }, [countryIso2, selectableCountryIso2])
 
   useEffect(() => {
     const layer = regionLayerRef.current
@@ -277,7 +354,10 @@ export default function RegionalMap({
     if (!selectedLayers.length) return
 
     const group = L.featureGroup(selectedLayers as L.Layer[])
-    map.fitBounds(group.getBounds(), { padding: [24, 24], maxZoom: 5 })
+    map.fitBounds(group.getBounds(), { padding: [24, 24], maxZoom: 6 })
+    if (map.getZoom() < REGIONS_VISIBLE_ZOOM) {
+      map.setZoom(REGIONS_VISIBLE_ZOOM)
+    }
   }
 
   const resetToEurope = () => {
