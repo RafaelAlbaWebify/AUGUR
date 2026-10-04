@@ -397,32 +397,54 @@ def occupation_vacancy_demand_evidence(
         return None
 
     isco_major = f"OC{digits[0]}"
-    row = latest_labour_job_vacancy_rate(
-        target_country_iso3,
-        isco_major,
+    isco_3digit = f"OC{digits[:3]}" if len(digits) >= 3 else None
+
+    row = (
+        latest_labour_job_vacancy_rate(
+            target_country_iso3,
+            isco_3digit,
+        )
+        if isco_3digit
+        else None
     )
+    granularity = "isco_3digit"
+
+    if row is None:
+        row = latest_labour_job_vacancy_rate(
+            target_country_iso3,
+            isco_major,
+        )
+        granularity = "isco_major_group"
+
     if row is None:
         return {
             "status": "evidence_missing",
             "isco_major": isco_major,
-            "granularity": "isco_major_group",
+            "isco_3digit": isco_3digit,
+            "granularity": (
+                "isco_3digit"
+                if isco_3digit
+                else "isco_major_group"
+            ),
             "role": "context_only",
         }
 
     return {
         "status": "available",
         "isco_major": isco_major,
+        "isco_3digit": isco_3digit,
         "vacancy_rate_pct": row["vacancy_rate_pct"],
         "period": row["period"],
         "nace_scope": row.get("nace_scope"),
         "source_id": row["source_id"],
         "dataset_id": row["dataset_id"],
         "source_updated_at": row.get("source_updated_at"),
-        "granularity": "isco_major_group",
+        "granularity": granularity,
         "role": "context_only",
         "notes": [
             "Vacancy rate is unmet-demand context, not a job-finding probability.",
-            "ISCO major-group vacancy evidence is broader than the resolved occupation.",
+            "ISCO 3-digit vacancy evidence is preferred when Eurostat publishes it for the target country.",
+            "Experimental occupation vacancy evidence uses online job advertisements and can be biased toward occupations more often advertised online.",
             "This evidence does not change CareerFit completeness or TTV timing.",
         ],
     }
