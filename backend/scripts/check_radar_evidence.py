@@ -6,7 +6,7 @@ from app.db.analytics import latest_observations
 
 
 RADAR_INDICATORS = [
-    ("economy", "real_gdp_per_capita"),
+    ("economy", "actual_individual_consumption_index"),
     ("labour", "unemployment_rate"),
     ("housing", "housing_cost_overburden_rate"),
     ("healthcare", "life_expectancy"),
