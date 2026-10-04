@@ -5582,3 +5582,141 @@ body:has(.shell.detailsOpen) {
     max-height: calc(100vh - 100px);
   }
 }
+
+
+/* Dimension Detail synthesis */
+.dimensionSynthesis {
+  display: grid;
+  gap: 10px;
+  padding: 11px;
+  border: 1px solid var(--augur-border);
+  border-radius: 11px;
+  background: linear-gradient(180deg, rgba(8, 22, 33, .9), rgba(6, 17, 27, .92));
+}
+
+.dimensionSynthesisHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dimensionSynthesisHeader > div {
+  display: grid;
+  gap: 3px;
+}
+
+.dimensionSynthesisHeader span {
+  color: #6f8899;
+  font-size: 8px;
+  letter-spacing: .08em;
+}
+
+.dimensionSynthesisHeader h3 {
+  margin: 0;
+  color: #edf5fa;
+  font-size: 16px;
+}
+
+.dimensionTrajectoryBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 0 9px;
+  border: 1px solid var(--augur-border);
+  border-radius: 999px;
+  color: #a9bdca;
+  font-size: 8px;
+  text-transform: capitalize;
+}
+
+.dimensionTrajectoryBadge.improving {
+  color: #73dea9;
+  border-color: rgba(72, 176, 117, .35);
+  background: rgba(18, 91, 52, .18);
+}
+
+.dimensionTrajectoryBadge.deteriorating {
+  color: #ef9595;
+  border-color: rgba(190, 76, 76, .34);
+  background: rgba(102, 28, 32, .18);
+}
+
+.dimensionTrajectoryBadge.mixed {
+  color: #edc967;
+  border-color: rgba(192, 153, 51, .32);
+  background: rgba(101, 71, 15, .18);
+}
+
+.dimensionSignalLanes {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.dimensionSignalLane {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-height: 126px;
+  padding: 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 9px;
+  background: rgba(5, 16, 25, .5);
+}
+
+.dimensionSignalLane > div {
+  display: grid;
+  gap: 2px;
+  margin-bottom: 2px;
+}
+
+.dimensionSignalLane > div > span {
+  color: #6d8495;
+  font-size: 7px;
+  letter-spacing: .08em;
+}
+
+.dimensionSignalLane > div > strong {
+  color: #dce7ed;
+  font-size: 9px;
+}
+
+.dimensionSignalLane article {
+  display: grid;
+  gap: 2px;
+  padding: 6px 7px;
+  border-radius: 7px;
+  background: rgba(7, 20, 31, .62);
+}
+
+.dimensionSignalLane article strong {
+  color: #edf5fa;
+  font-size: 8px;
+}
+
+.dimensionSignalLane article span,
+.dimensionSignalLane article small,
+.dimensionSignalLane p {
+  color: #7690a1;
+  font-size: 7px;
+  line-height: 1.35;
+}
+
+.dimensionSignalLane.supporting {
+  border-color: rgba(70, 169, 111, .22);
+}
+
+.dimensionSignalLane.opposing {
+  border-color: rgba(190, 76, 76, .22);
+}
+
+.dimensionSignalLane.contextual {
+  border-color: rgba(104, 137, 159, .22);
+}
+
+@media (max-width: 1000px) {
+  .dimensionSignalLanes {
+    grid-template-columns: 1fr;
+  }
+}
