@@ -167,6 +167,34 @@ function mockTrendFor(item: ReturnType<typeof overviewMetrics>[number]) {
 
 async function mockApi(page: Page) {
   await page.route('https://gisco-services.ec.europa.eu/**', async route => {
+    if (route.request().url().includes('URAU_LB_2024_4326_CITIES')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/geo+json',
+        body: JSON.stringify({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: { URAU_CODE: 'ES001C', URAU_NAME: 'Madrid', NAME_LATN: 'Madrid' },
+              geometry: { type: 'Point', coordinates: [-3.7038, 40.4168] },
+            },
+            {
+              type: 'Feature',
+              properties: { URAU_CODE: 'PT001C', URAU_NAME: 'Lisboa', NAME_LATN: 'Lisboa' },
+              geometry: { type: 'Point', coordinates: [-9.1393, 38.7223] },
+            },
+            {
+              type: 'Feature',
+              properties: { URAU_CODE: 'IE001C', URAU_NAME: 'Dublin', NAME_LATN: 'Dublin' },
+              geometry: { type: 'Point', coordinates: [-6.2603, 53.3498] },
+            },
+          ],
+        }),
+      })
+      return
+    }
+
     if (route.request().url().includes('LEVL_0')) {
       await route.fulfill({
         status: 200,
@@ -287,7 +315,22 @@ async function mockApi(page: Page) {
     const country = path.match(/\/countries\/(ESP|PRT|IRL)\//)?.[1] ?? 'ESP'
     let body: unknown
 
-    if (/^\/api\/regions\/[A-Z0-9]+\/evidence$/.test(path)) {
+    if (/^\/api\/cities\/[A-Z0-9]+\/evidence$/.test(path)) {
+      const cityCode = path.split('/')[3]
+      body = {
+        city_code: cityCode,
+        geo_level: 'city',
+        source: 'Eurostat City Statistics / Urban Audit',
+        minimum_population_scope: 50000,
+        indicator_count: 1,
+        available_count: 1,
+        complete: true,
+        indicators: [
+          { indicator_id: 'city_population', name: 'Population', status: 'available', period: 2025, value: 3420000, unit: 'persons', dataset_id: 'urb_cpop1', source_id: 'EUROSTAT' },
+        ],
+        notes: [],
+      }
+    } else if (/^\/api\/regions\/[A-Z0-9]+\/evidence$/.test(path)) {
       const geoCode = path.split('/')[3]
       body = {
         geo_code: geoCode,
@@ -847,10 +890,11 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   )
 
   await expect(page.getByText('REGION · Galicia · ES11')).toBeVisible()
-  const regionalEvidence = page.getByRole('region', { name: 'Selected region evidence' })
-  await expect(regionalEvidence.getByText('NUTS 2 · ES11')).toBeVisible()
-  await expect(regionalEvidence.getByText('GDP per capita')).toBeVisible()
-  await expect(page.getByText(/Base map: OpenStreetMap · boundaries: Eurostat GISCO NUTS 2024/)).toBeVisible()
+  const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
+  await expect(geographicEvidence.getByText('Galicia')).toBeVisible()
+  await expect(geographicEvidence.getByText('GDP per capita')).toBeVisible()
+  await expect(page.locator('.regionalEvidencePanel')).toHaveCount(0)
+  await expect(page.getByText(/Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 \+ Urban Audit 2024/)).toBeVisible()
 })
 
 test('switches country without a page reload', async ({ page }) => {
@@ -1390,6 +1434,34 @@ test('map starts broad and exposes regional detail when country is focused', asy
   await page.getByRole('button', { name: 'Focus country' }).click()
 
   await expect.poll(async () => map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
+})
+
+
+
+test('map exposes selectable Urban Audit cities only at high zoom', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  const map = page.getByTestId('regional-map')
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
+  await page.getByRole('button', { name: 'Focus country' }).click()
+
+  await expect(map.locator('.urbanAuditCity')).toHaveCount(0)
+
+  const zoomIn = map.locator('.leaflet-control-zoom-in')
+  await zoomIn.click()
+  await zoomIn.click()
+  await zoomIn.click()
+  await zoomIn.click()
+
+  const madrid = map.locator('.urbanAuditCity').first()
+  await expect(madrid).toBeVisible()
+  await madrid.click()
+
+  await expect(page.getByText('CITY · Madrid · ES001C')).toBeVisible()
+  const cityEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
+  await expect(cityEvidence.getByText('Eurostat Urban Audit')).toBeVisible()
+  await expect(cityEvidence.getByText('3,420,000')).toBeVisible()
+  await expect(cityEvidence.getByText(/threshold ≥50,000 inhabitants/)).toBeVisible()
 })
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
