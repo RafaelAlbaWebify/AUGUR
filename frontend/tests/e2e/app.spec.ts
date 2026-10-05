@@ -870,6 +870,7 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
 
   await clickMapAtLatLng(page, 42.8, -8.0)
 
+  await expect(map).toHaveAttribute('data-map-last-hit', 'region:ES11')
   await expect(page.getByText('REGION · Galicia · ES11')).toBeVisible()
   const regionalEvidence = page.getByRole('region', { name: 'Selected region evidence' })
   await expect(regionalEvidence.getByText('NUTS 2 · ES11')).toBeVisible()
@@ -1128,7 +1129,8 @@ test('regional map renders clickable country context and geographic controls', a
   await expect(page.getByRole('button', { name: 'Europe' })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Focus country' })).toBeEnabled()
 
-  await clickMapAtLatLng(page, 39.6, -8.0, 50.5, 8.5, 3)
+  await clickMapAtLatLng(page, 39.6, -8.0)
+  await expect(map).toHaveAttribute('data-map-last-hit', 'country:PT')
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
