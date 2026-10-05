@@ -329,14 +329,31 @@ export default function RegionalMap({
 
     if (!selectedLayers.length) return
 
-    const group = L.featureGroup(selectedLayers as L.Layer[])
-    map.fitBounds(group.getBounds(), { padding: [24, 24], maxZoom: 6 })
-    if (map.getZoom() < REGIONS_VISIBLE_ZOOM) {
-      map.setZoom(REGIONS_VISIBLE_ZOOM)
-    }
     if (!map.hasLayer(regionLayer)) {
       regionLayer.addTo(map)
     }
+
+    const redrawRegions = () => {
+      map.invalidateSize()
+      regionLayer.eachLayer((layer) => {
+        if (layer instanceof L.Path) layer.redraw()
+      })
+    }
+
+    map.once('moveend', redrawRegions)
+
+    const group = L.featureGroup(selectedLayers as L.Layer[])
+    map.fitBounds(group.getBounds(), {
+      padding: [24, 24],
+      maxZoom: 6,
+      animate: false,
+    })
+
+    if (map.getZoom() < REGIONS_VISIBLE_ZOOM) {
+      map.setZoom(REGIONS_VISIBLE_ZOOM, { animate: false })
+    }
+
+    requestAnimationFrame(redrawRegions)
   }
 
   const resetToEurope = () => {
