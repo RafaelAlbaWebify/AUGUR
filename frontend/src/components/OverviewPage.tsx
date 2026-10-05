@@ -425,9 +425,9 @@ export default function OverviewPage({
           <div className="radarPanelTopline mapPanelHeader">
             <div>
               <span>MAP</span>
-              <strong>Explore from Europe to NUTS 2 regions</strong>
+              <strong>Explore countries, NUTS 2 regions and Urban Audit cities</strong>
             </div>
-            <span className="mapInteractionHint">Scroll to zoom · drag to pan</span>
+            <span className="mapInteractionHint">Scroll to zoom · drag to pan · cities at high zoom</span>
           </div>
 
           {selectedCountryIso2 ? (
@@ -578,7 +578,8 @@ export default function OverviewPage({
           </div>
         </section>
 
-        )}      </div>
+        )}
+      </div>
 
       <section className="countryMetricGrid">
         {representative.map(({ id, label, dimension, item, assessment: dimensionState }) => (
