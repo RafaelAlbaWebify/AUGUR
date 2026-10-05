@@ -1448,10 +1448,13 @@ test('map exposes selectable Urban Audit cities only at high zoom', async ({ pag
   await expect(map.locator('.urbanAuditCity')).toHaveCount(0)
 
   const zoomIn = map.locator('.leaflet-control-zoom-in')
-  await zoomIn.click()
-  await zoomIn.click()
-  await zoomIn.click()
-  await zoomIn.click()
+  for (let step = 0; step < 10; step += 1) {
+    const currentZoom = Number(await map.getAttribute('data-map-zoom') ?? '0')
+    if (currentZoom >= 7.5) break
+    await zoomIn.click()
+  }
+
+  await expect.poll(async () => Number(await map.getAttribute('data-map-zoom') ?? '0')).toBeGreaterThanOrEqual(7.5)
 
   const madrid = map.locator('.urbanAuditCity').first()
   await expect(madrid).toBeVisible()
