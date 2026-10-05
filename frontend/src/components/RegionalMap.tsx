@@ -127,6 +127,7 @@ export default function RegionalMap({
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
   const [center, setCenter] = useState({ lat: 50.5, lng: 8.5 })
+  const [lastHit, setLastHit] = useState('none')
   const selectableCountryKey = selectableCountryIso2.join(',')
 
   useEffect(() => {
@@ -171,9 +172,7 @@ export default function RegionalMap({
     map.on('zoomend', syncViewState)
     map.on('moveend', syncViewState)
 
-    const handleMapClick = (event: L.LeafletMouseEvent) => {
-      const { lat, lng } = event.latlng
-
+    const resolveSelectionAt = (lat: number, lng: number) => {
       if (map.getZoom() >= REGIONS_VISIBLE_ZOOM) {
         const region = regionFeaturesRef.current.find((feature) =>
           featureContainsPoint(feature, lng, lat)
@@ -182,6 +181,7 @@ export default function RegionalMap({
         if (region) {
           const id = region.properties?.NUTS_ID ?? ''
           const name = regionName(region)
+          setLastHit(`region:${id}`)
           onSelectRegionRef.current(id, name, 2)
 
           const bounds = L.geoJSON(region).getBounds()
@@ -198,7 +198,25 @@ export default function RegionalMap({
       )
 
       const code = country?.properties?.CNTR_CODE
-      if (code) onSelectCountryRef.current?.(code)
+      if (code) {
+        setLastHit(`country:${code}`)
+        onSelectCountryRef.current?.(code)
+        return
+      }
+
+      setLastHit('none')
+    }
+
+    const handleMapClick = (event: L.LeafletMouseEvent) => {
+      resolveSelectionAt(event.latlng.lat, event.latlng.lng)
+    }
+
+    const handleContainerClick = (event: MouseEvent) => {
+      const target = event.target as Element | null
+      if (target?.closest('.leaflet-control')) return
+
+      const latlng = map.mouseEventToLatLng(event)
+      resolveSelectionAt(latlng.lat, latlng.lng)
     }
 
     const handleMapMouseMove = (event: L.LeafletMouseEvent) => {
@@ -215,6 +233,7 @@ export default function RegionalMap({
 
     map.on('click', handleMapClick)
     map.on('mousemove', handleMapMouseMove)
+    map.getContainer().addEventListener('click', handleContainerClick, true)
     mapRef.current = map
 
     const resizeObserver = new ResizeObserver(() => map.invalidateSize())
@@ -224,6 +243,7 @@ export default function RegionalMap({
       resizeObserver.disconnect()
       map.off('click', handleMapClick)
       map.off('mousemove', handleMapMouseMove)
+      map.getContainer().removeEventListener('click', handleContainerClick, true)
       map.off('zoomend', syncViewState)
       map.off('moveend', syncViewState)
       map.remove()
@@ -238,6 +258,7 @@ export default function RegionalMap({
     const controller = new AbortController()
     let progressiveHandler: (() => void) | null = null
     setStatus('loading')
+    setLastHit('none')
     map.getContainer().style.cursor = ''
     map.setView(EUROPE_VIEW, 3)
 
@@ -438,6 +459,7 @@ export default function RegionalMap({
         data-map-zoom={zoom.toFixed(1)}
         data-map-center-lat={center.lat.toFixed(6)}
         data-map-center-lng={center.lng.toFixed(6)}
+        data-map-last-hit={lastHit}
         aria-label="Interactive map with progressive regional detail"
       />
 
