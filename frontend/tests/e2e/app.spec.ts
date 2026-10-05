@@ -837,6 +837,7 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await expect.poll(async () => map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
 
   const galicia = map.locator('.nuts2Boundary').first()
+  await expect.poll(async () => galicia.getAttribute('d')).not.toBe('M0 0')
   await expect(galicia).toBeVisible()
   const galiciaBox = await galicia.boundingBox()
   if (!galiciaBox) throw new Error('Galicia boundary is not rendered')
