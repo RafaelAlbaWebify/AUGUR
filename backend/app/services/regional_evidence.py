@@ -1,6 +1,12 @@
 from __future__ import annotations
 
+from time import monotonic
+
 from app.ingestion.eurostat import EurostatAdapter
+
+
+CACHE_TTL_SECONDS = 15 * 60
+_REGIONAL_CACHE: dict[str, tuple[float, dict]] = {}
 
 
 REGIONAL_INDICATORS = [
@@ -133,6 +139,12 @@ def regional_evidence(
     adapter: EurostatAdapter | None = None,
 ) -> dict:
     code = geo_code.strip().upper()
+
+    if adapter is None:
+        cached = _REGIONAL_CACHE.get(code)
+        if cached and monotonic() - cached[0] < CACHE_TTL_SECONDS:
+            return cached[1]
+
     owns_adapter = adapter is None
     active_adapter = adapter or EurostatAdapter(timeout_seconds=20.0, max_retries=2)
 
@@ -150,7 +162,7 @@ def regional_evidence(
         if indicator["status"] == "available"
     )
 
-    return {
+    result = {
         "geo_code": code,
         "geo_level": geographic_level(code),
         "source": "Eurostat regional statistics",
@@ -164,6 +176,11 @@ def regional_evidence(
             "The geographic code is stable comparison context and can be compared across countries at the same NUTS level.",
         ],
     }
+
+    if adapter is None:
+        _REGIONAL_CACHE[code] = (monotonic(), result)
+
+    return result
 
 
 def regional_comparison(
