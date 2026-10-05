@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from time import monotonic
 
+from app.db.analytics import latest_subnational_observations, upsert_subnational_observations
 from app.ingestion.eurostat import EurostatAdapter
 
 
@@ -21,13 +23,51 @@ CITY_POPULATION = {
 }
 
 
+
+
+def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
+    match = next((row for row in rows if row["indicator_id"] == CITY_POPULATION["indicator_id"]), None)
+    if not match:
+        return None
+
+    return {
+        "city_code": code,
+        "geo_level": "city",
+        "source": "AUGUR local store · Eurostat City Statistics / Urban Audit",
+        "storage": "duckdb",
+        "minimum_population_scope": 50000,
+        "indicator_count": 1,
+        "available_count": 1,
+        "complete": True,
+        "indicators": [{
+            "indicator_id": CITY_POPULATION["indicator_id"],
+            "name": CITY_POPULATION["name"],
+            "status": "available",
+            "period": match["period"],
+            "value": match["value"],
+            "unit": match["unit"],
+            "dataset_id": match["dataset_id"],
+            "source_id": match["source_id"],
+            "source_updated_at": match.get("source_updated_at"),
+        }],
+        "notes": [
+            "City evidence is served from AUGUR's local analytical store when available.",
+            "Eurostat Urban Audit city collection covers cities with at least 50,000 inhabitants.",
+        ],
+    }
+
 def city_evidence(
     city_code: str,
     adapter: EurostatAdapter | None = None,
+    force_refresh: bool = False,
 ) -> dict:
     code = city_code.strip().upper()
 
-    if adapter is None:
+    if adapter is None and not force_refresh:
+        local = _city_result_from_local(code, latest_subnational_observations(code))
+        if local:
+            return local
+
         cached = _CITY_CACHE.get(code)
         if cached and monotonic() - cached[0] < CACHE_TTL_SECONDS:
             return cached[1]
@@ -116,6 +156,23 @@ def city_evidence(
     }
 
     if adapter is None:
+        rows_to_store = [
+            {
+                "geo_code": code,
+                "geo_level": "city",
+                "indicator_id": item["indicator_id"],
+                "period": item["period"],
+                "value": item["value"],
+                "unit": item.get("unit"),
+                "source_id": item["source_id"],
+                "dataset_id": item["dataset_id"],
+                "retrieved_at": datetime.now(timezone.utc),
+                "source_updated_at": item.get("source_updated_at"),
+            }
+            for item in indicators
+            if item["status"] == "available"
+        ]
+        upsert_subnational_observations(rows_to_store)
         _CITY_CACHE[code] = (monotonic(), result)
 
     return result
