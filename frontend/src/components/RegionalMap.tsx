@@ -207,10 +207,6 @@ export default function RegionalMap({
       setLastHit('none')
     }
 
-    const handleMapClick = (event: L.LeafletMouseEvent) => {
-      resolveSelectionAt(event.latlng.lat, event.latlng.lng)
-    }
-
     const handleContainerClick = (event: MouseEvent) => {
       const target = event.target as Element | null
       if (target?.closest('.leaflet-control')) return
@@ -231,7 +227,6 @@ export default function RegionalMap({
       map.getContainer().style.cursor = overRegion || overCountry ? 'pointer' : ''
     }
 
-    map.on('click', handleMapClick)
     map.on('mousemove', handleMapMouseMove)
     map.getContainer().addEventListener('click', handleContainerClick, true)
     mapRef.current = map
@@ -241,7 +236,6 @@ export default function RegionalMap({
 
     return () => {
       resizeObserver.disconnect()
-      map.off('click', handleMapClick)
       map.off('mousemove', handleMapMouseMove)
       map.getContainer().removeEventListener('click', handleContainerClick, true)
       map.off('zoomend', syncViewState)
