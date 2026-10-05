@@ -893,6 +893,12 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
   await expect(geographicEvidence.getByText('Galicia')).toBeVisible()
   await expect(geographicEvidence.getByText('GDP per capita')).toBeVisible()
+
+  const regionalCards = page.getByRole('region', { name: 'Regional metric cards' })
+  await expect(regionalCards).toBeVisible()
+  await expect(regionalCards.getByText('Population density')).toBeVisible()
+  await expect(regionalCards.getByText('GDP per capita')).toBeVisible()
+  await expect(page.getByRole('region', { name: 'Country metric cards' })).toHaveCount(0)
   await expect(page.locator('.regionalEvidencePanel')).toHaveCount(0)
   await expect(page.getByText(/Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 \+ Urban Audit 2024/)).toBeVisible()
 })
