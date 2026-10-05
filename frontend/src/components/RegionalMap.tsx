@@ -208,9 +208,10 @@ export default function RegionalMap({
               element.setAttribute('role', 'button')
               element.setAttribute('aria-label', `${name} country`)
               element.setAttribute('tabindex', '0')
-              element.addEventListener('keydown', (event: KeyboardEvent) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
+              element.addEventListener('keydown', (event: Event) => {
+                const keyboardEvent = event as KeyboardEvent
+                if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+                  keyboardEvent.preventDefault()
                   selectCountry()
                 }
               })
@@ -256,9 +257,10 @@ export default function RegionalMap({
               element.setAttribute('role', 'button')
               element.setAttribute('aria-label', `${name} · ${id}`)
               element.setAttribute('tabindex', '0')
-              element.addEventListener('keydown', (event: KeyboardEvent) => {
-                if (event.key === 'Enter' || event.key === ' ') {
-                  event.preventDefault()
+              element.addEventListener('keydown', (event: Event) => {
+                const keyboardEvent = event as KeyboardEvent
+                if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
+                  keyboardEvent.preventDefault()
                   selectRegion()
                 }
               })
