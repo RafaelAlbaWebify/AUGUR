@@ -118,6 +118,7 @@ export default function RegionalMap({
   const mapRef = useRef<L.Map | null>(null)
   const onSelectCountryRef = useRef(onSelectCountry)
   const onSelectRegionRef = useRef(onSelectRegion)
+  const selectableCountryIso2Ref = useRef(selectableCountryIso2)
   const countryLayerRef = useRef<L.GeoJSON | null>(null)
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
@@ -125,11 +126,16 @@ export default function RegionalMap({
   const regionFeaturesRef = useRef<RegionFeature[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
+  const [center, setCenter] = useState({ lat: 50.5, lng: 8.5 })
   const selectableCountryKey = selectableCountryIso2.join(',')
 
   useEffect(() => {
     onSelectCountryRef.current = onSelectCountry
   }, [onSelectCountry])
+
+  useEffect(() => {
+    selectableCountryIso2Ref.current = selectableCountryIso2
+  }, [selectableCountryKey])
 
   useEffect(() => {
     onSelectRegionRef.current = onSelectRegion
@@ -157,7 +163,13 @@ export default function RegionalMap({
     }).addTo(map)
 
     map.attributionControl.setPrefix('Leaflet')
-    map.on('zoomend', () => setZoom(map.getZoom()))
+    const syncViewState = () => {
+      const currentCenter = map.getCenter()
+      setZoom(map.getZoom())
+      setCenter({ lat: currentCenter.lat, lng: currentCenter.lng })
+    }
+    map.on('zoomend', syncViewState)
+    map.on('moveend', syncViewState)
 
     const handleMapClick = (event: L.LeafletMouseEvent) => {
       const { lat, lng } = event.latlng
@@ -181,7 +193,7 @@ export default function RegionalMap({
       }
 
       const country = countryFeaturesRef.current.find((feature) =>
-        selectableCountryIso2.includes(feature.properties?.CNTR_CODE ?? '')
+        selectableCountryIso2Ref.current.includes(feature.properties?.CNTR_CODE ?? '')
         && featureContainsPoint(feature, lng, lat)
       )
 
@@ -194,7 +206,7 @@ export default function RegionalMap({
       const overRegion = map.getZoom() >= REGIONS_VISIBLE_ZOOM
         && regionFeaturesRef.current.some((feature) => featureContainsPoint(feature, lng, lat))
       const overCountry = countryFeaturesRef.current.some((feature) =>
-        selectableCountryIso2.includes(feature.properties?.CNTR_CODE ?? '')
+        selectableCountryIso2Ref.current.includes(feature.properties?.CNTR_CODE ?? '')
         && featureContainsPoint(feature, lng, lat)
       )
 
@@ -212,6 +224,8 @@ export default function RegionalMap({
       resizeObserver.disconnect()
       map.off('click', handleMapClick)
       map.off('mousemove', handleMapMouseMove)
+      map.off('zoomend', syncViewState)
+      map.off('moveend', syncViewState)
       map.remove()
       mapRef.current = null
     }
@@ -224,6 +238,7 @@ export default function RegionalMap({
     const controller = new AbortController()
     let progressiveHandler: (() => void) | null = null
     setStatus('loading')
+    map.getContainer().style.cursor = ''
     map.setView(EUROPE_VIEW, 3)
 
     countryLayerRef.current?.remove()
@@ -346,6 +361,8 @@ export default function RegionalMap({
         map.on('zoomend', applyProgressiveLayers)
         applyProgressiveLayers()
         setStatus('ready')
+        map.invalidateSize()
+        map.fire('moveend')
 
       })
       .catch((error) => {
@@ -381,7 +398,8 @@ export default function RegionalMap({
   const zoomToCountry = () => {
     const map = mapRef.current
     const countryLayer = countryLayerRef.current
-    if (!map || !countryLayer) return
+    const regionLayer = regionLayerRef.current
+    if (status !== 'ready' || !map || !countryLayer || !regionLayer) return
 
     const selectedLayers = countryLayer.getLayers().filter((layer) => {
       const feature = (layer as L.Layer & { feature?: CountryFeature }).feature
@@ -395,9 +413,13 @@ export default function RegionalMap({
     if (map.getZoom() < REGIONS_VISIBLE_ZOOM) {
       map.setZoom(REGIONS_VISIBLE_ZOOM)
     }
+    if (!map.hasLayer(regionLayer)) {
+      regionLayer.addTo(map)
+    }
   }
 
   const resetToEurope = () => {
+    if (status !== 'ready') return
     mapRef.current?.setView(EUROPE_VIEW, 3)
   }
 
@@ -412,12 +434,16 @@ export default function RegionalMap({
         ref={hostRef}
         className="regionalMapCanvas leafletAugurMap"
         data-testid="regional-map"
+        data-map-status={status}
+        data-map-zoom={zoom.toFixed(1)}
+        data-map-center-lat={center.lat.toFixed(6)}
+        data-map-center-lng={center.lng.toFixed(6)}
         aria-label="Interactive map with progressive regional detail"
       />
 
       <div className="regionalMapActions">
-        <button type="button" onClick={resetToEurope}>Europe</button>
-        <button type="button" onClick={zoomToCountry}>Focus country</button>
+        <button type="button" onClick={resetToEurope} disabled={status !== 'ready'}>Europe</button>
+        <button type="button" onClick={zoomToCountry} disabled={status !== 'ready'}>Focus country</button>
       </div>
 
       <small className="regionalMapSource">
