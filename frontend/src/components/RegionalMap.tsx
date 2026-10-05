@@ -391,8 +391,8 @@ export default function RegionalMap({
       if (!(item instanceof L.CircleMarker)) return
       const marker = item as L.CircleMarker & { augurCityCode?: string }
       const selected = marker.augurCityCode === selectedCity
+      marker.setRadius(selected ? 7 : 5)
       marker.setStyle({
-        radius: selected ? 7 : 5,
         color: selected ? '#ffffff' : '#7de3ff',
         weight: selected ? 2.5 : 1.5,
         fillColor: selected ? '#16c7f2' : '#1a95b8',
