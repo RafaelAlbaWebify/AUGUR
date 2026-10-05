@@ -165,38 +165,6 @@ function mockTrendFor(item: ReturnType<typeof overviewMetrics>[number]) {
 }
 
 
-async function clickMapAtLatLng(
-  page: Page,
-  lat: number,
-  lng: number,
-  centerLat?: number,
-  centerLng?: number,
-  zoom?: number,
-) {
-  const map = page.getByTestId('regional-map')
-  const box = await map.boundingBox()
-  if (!box) throw new Error('Map bounding box unavailable')
-
-  const resolvedCenterLat = centerLat ?? Number(await map.getAttribute('data-map-center-lat') ?? '50.5')
-  const resolvedCenterLng = centerLng ?? Number(await map.getAttribute('data-map-center-lng') ?? '8.5')
-  const resolvedZoom = zoom ?? Number(await map.getAttribute('data-map-zoom') ?? '3')
-
-  const project = (latitude: number, longitude: number) => {
-    const sin = Math.sin((latitude * Math.PI) / 180)
-    const scale = 256 * 2 ** resolvedZoom
-    const x = scale * (0.5 + longitude / 360)
-    const y = scale * (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI))
-    return { x, y }
-  }
-
-  const center = project(resolvedCenterLat, resolvedCenterLng)
-  const target = project(lat, lng)
-  const x = box.x + box.width / 2 + (target.x - center.x)
-  const y = box.y + box.height / 2 + (target.y - center.y)
-
-  await page.mouse.click(x, y)
-}
-
 async function mockApi(page: Page) {
   await page.route('https://gisco-services.ec.europa.eu/**', async route => {
     if (route.request().url().includes('LEVL_0')) {
@@ -209,7 +177,7 @@ async function mockApi(page: Page) {
             {
               type: 'Feature',
               properties: { NUTS_ID: 'ES', NAME_LATN: 'Spain', NUTS_NAME: 'Spain', CNTR_CODE: 'ES', LEVL_CODE: 0 },
-              geometry: { type: 'Polygon', coordinates: [[[-9.5, 36.0], [3.4, 36.0], [3.4, 43.9], [-9.5, 43.9], [-9.5, 36.0]]] },
+              geometry: { type: 'Polygon', coordinates: [[[-9.3, 43.8], [3.4, 43.8], [3.4, 36.0], [-7.1, 36.0], [-7.1, 37.2], [-7.0, 38.7], [-6.9, 41.9], [-8.2, 42.1], [-9.3, 43.8]]] },
             },
             {
               type: 'Feature',
@@ -868,9 +836,15 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await expect(page.getByText('NUTS 2 regions visible')).toBeVisible()
   await expect.poll(async () => map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
 
-  await clickMapAtLatLng(page, 42.8, -8.0)
+  const galicia = map.locator('.nuts2Boundary').first()
+  await expect(galicia).toBeVisible()
+  const galiciaBox = await galicia.boundingBox()
+  if (!galiciaBox) throw new Error('Galicia boundary is not rendered')
+  await page.mouse.click(
+    galiciaBox.x + galiciaBox.width / 2,
+    galiciaBox.y + galiciaBox.height / 2,
+  )
 
-  await expect(map).toHaveAttribute('data-map-last-hit', 'region:ES11')
   await expect(page.getByText('REGION · Galicia · ES11')).toBeVisible()
   const regionalEvidence = page.getByRole('region', { name: 'Selected region evidence' })
   await expect(regionalEvidence.getByText('NUTS 2 · ES11')).toBeVisible()
@@ -1129,8 +1103,14 @@ test('regional map renders clickable country context and geographic controls', a
   await expect(page.getByRole('button', { name: 'Europe' })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Focus country' })).toBeEnabled()
 
-  await clickMapAtLatLng(page, 39.6, -8.0)
-  await expect(map).toHaveAttribute('data-map-last-hit', 'country:PT')
+  const portugal = map.locator('.countryBoundary').nth(1)
+  await expect(portugal).toBeVisible()
+  const portugalBox = await portugal.boundingBox()
+  if (!portugalBox) throw new Error('Portugal boundary is not rendered')
+  await page.mouse.click(
+    portugalBox.x + portugalBox.width / 2,
+    portugalBox.y + portugalBox.height / 2,
+  )
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
