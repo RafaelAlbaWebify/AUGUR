@@ -2578,3 +2578,24 @@
   stroke-width: 2.5;
   fill-opacity: .14;
 }
+
+
+/* Leaflet owns the SVG overlay geometry and transforms.
+   Legacy static-map rules must never size Leaflet SVG panes. */
+.leafletAugurMap .leaflet-overlay-pane > svg,
+.leafletAugurMap .leaflet-zoom-animated {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  max-height: none !important;
+}
+
+.leafletAugurMap .leaflet-overlay-pane {
+  pointer-events: auto;
+}
+
+.leafletAugurMap path.leaflet-interactive {
+  pointer-events: auto;
+}
