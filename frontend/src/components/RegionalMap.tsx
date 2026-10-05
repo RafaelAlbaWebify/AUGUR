@@ -450,7 +450,13 @@ export default function RegionalMap({
     <section className="regionalMapView" aria-label="Interactive geographic map">
       <div className="mapZoomHint">
         <span>Zoom {zoom.toFixed(1)}</span>
-        <strong>{zoom >= REGIONS_VISIBLE_ZOOM ? 'NUTS 2 regions visible' : 'Zoom in to reveal NUTS 2 regions'}</strong>
+        <strong>
+          {zoom >= CITIES_VISIBLE_ZOOM
+            ? 'Urban Audit cities visible'
+            : zoom >= REGIONS_VISIBLE_ZOOM
+              ? 'NUTS 2 regions visible · zoom in for cities'
+              : 'Zoom in to reveal NUTS 2 regions'}
+        </strong>
       </div>
 
       <div
