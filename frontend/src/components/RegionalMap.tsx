@@ -308,6 +308,8 @@ export default function RegionalMap({
               className: selected ? 'urbanAuditCity selectedUrbanAuditCity' : 'urbanAuditCity',
             })
 
+            ;(marker as L.CircleMarker & { augurCityCode?: string }).augurCityCode = code
+
             marker.bindTooltip(`${name} · ${code}`, {
               sticky: true,
               direction: 'top',
@@ -380,6 +382,24 @@ export default function RegionalMap({
       }
     })
   }, [selectedRegion])
+
+  useEffect(() => {
+    const layer = cityLayerRef.current
+    if (!layer) return
+
+    layer.eachLayer((item) => {
+      if (!(item instanceof L.CircleMarker)) return
+      const marker = item as L.CircleMarker & { augurCityCode?: string }
+      const selected = marker.augurCityCode === selectedCity
+      marker.setStyle({
+        radius: selected ? 7 : 5,
+        color: selected ? '#ffffff' : '#7de3ff',
+        weight: selected ? 2.5 : 1.5,
+        fillColor: selected ? '#16c7f2' : '#1a95b8',
+        fillOpacity: selected ? 0.96 : 0.82,
+      })
+    })
+  }, [selectedCity])
 
   const zoomToCountry = () => {
     const map = mapRef.current
