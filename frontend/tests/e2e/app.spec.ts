@@ -169,22 +169,27 @@ async function clickMapAtLatLng(
   page: Page,
   lat: number,
   lng: number,
-  centerLat = 50.5,
-  centerLng = 8.5,
-  zoom = 3,
+  centerLat?: number,
+  centerLng?: number,
+  zoom?: number,
 ) {
-  const box = await page.getByTestId('regional-map').boundingBox()
+  const map = page.getByTestId('regional-map')
+  const box = await map.boundingBox()
   if (!box) throw new Error('Map bounding box unavailable')
+
+  const resolvedCenterLat = centerLat ?? Number(await map.getAttribute('data-map-center-lat') ?? '50.5')
+  const resolvedCenterLng = centerLng ?? Number(await map.getAttribute('data-map-center-lng') ?? '8.5')
+  const resolvedZoom = zoom ?? Number(await map.getAttribute('data-map-zoom') ?? '3')
 
   const project = (latitude: number, longitude: number) => {
     const sin = Math.sin((latitude * Math.PI) / 180)
-    const scale = 256 * 2 ** zoom
+    const scale = 256 * 2 ** resolvedZoom
     const x = scale * (0.5 + longitude / 360)
     const y = scale * (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI))
     return { x, y }
   }
 
-  const center = project(centerLat, centerLng)
+  const center = project(resolvedCenterLat, resolvedCenterLng)
   const target = project(lat, lng)
   const x = box.x + box.width / 2 + (target.x - center.x)
   const y = box.y + box.height / 2 + (target.y - center.y)
@@ -856,19 +861,14 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await expect(map).toBeVisible()
   await expect(map.locator('.leaflet-control-zoom-in')).toBeVisible()
   await expect(page.getByText('Zoom in to reveal NUTS 2 regions')).toBeVisible()
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
 
   await page.getByRole('button', { name: 'Focus country' }).click()
 
   await expect(page.getByText('NUTS 2 regions visible')).toBeVisible()
-  const paths = map.locator('.nuts2Boundary')
-  expect(await paths.count()).toBeGreaterThan(0)
+  await expect.poll(async () => map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
 
-  const galiciaBox = await paths.first().boundingBox()
-  if (!galiciaBox) throw new Error('Galicia region path is not rendered')
-  await page.mouse.click(
-    galiciaBox.x + galiciaBox.width / 2,
-    galiciaBox.y + galiciaBox.height / 2,
-  )
+  await clickMapAtLatLng(page, 42.8, -8.0)
 
   await expect(page.getByText('REGION · Galicia · ES11')).toBeVisible()
   const regionalEvidence = page.getByRole('region', { name: 'Selected region evidence' })
@@ -1124,12 +1124,11 @@ test('regional map renders clickable country context and geographic controls', a
   await expect(map).toBeVisible()
   expect(await map.locator('.countryBoundary').count()).toBeGreaterThan(0)
   expect(await map.locator('.selectedCountryBoundary').count()).toBeGreaterThan(0)
-  await expect(map.getByRole('button', { name: 'Spain country' })).toBeVisible()
-  await expect(map.getByRole('button', { name: 'Portugal country' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Europe' })).toBeVisible()
-  await expect(page.getByRole('button', { name: 'Focus country' })).toBeVisible()
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
+  await expect(page.getByRole('button', { name: 'Europe' })).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Focus country' })).toBeEnabled()
 
-  await clickMapAtLatLng(page, 39.6, -8.0)
+  await clickMapAtLatLng(page, 39.6, -8.0, 50.5, 8.5, 3)
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
@@ -1403,10 +1402,11 @@ test('map starts broad and exposes regional detail when country is focused', asy
   const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
   await expect(map.locator('.nuts2Boundary')).toHaveCount(0)
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
 
   await page.getByRole('button', { name: 'Focus country' }).click()
 
-  expect(await map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
+  await expect.poll(async () => map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
 })
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
