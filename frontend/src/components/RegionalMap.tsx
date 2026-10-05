@@ -69,7 +69,6 @@ export default function RegionalMap({
   const mapRef = useRef<L.Map | null>(null)
   const onSelectCountryRef = useRef(onSelectCountry)
   const onSelectRegionRef = useRef(onSelectRegion)
-  const selectableCountryIso2Ref = useRef(selectableCountryIso2)
   const countryLayerRef = useRef<L.GeoJSON | null>(null)
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
@@ -80,10 +79,6 @@ export default function RegionalMap({
   useEffect(() => {
     onSelectCountryRef.current = onSelectCountry
   }, [onSelectCountry])
-
-  useEffect(() => {
-    selectableCountryIso2Ref.current = selectableCountryIso2
-  }, [selectableCountryKey])
 
   useEffect(() => {
     onSelectRegionRef.current = onSelectRegion
