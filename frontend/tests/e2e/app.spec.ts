@@ -1722,14 +1722,12 @@ test('Future Paths avoids fake model envelopes for contextual indicators', async
   await expect(page.locator('.scenarioLine.stress')).toHaveCount(0)
 })
 
-test('responsive shell avoids horizontal overflow across core views', async ({ page }) => {
-  const cases = [
-    { width: 1366, height: 768 },
-    { width: 1024, height: 768 },
-    { width: 390, height: 844 },
-  ]
-
-  for (const viewport of cases) {
+for (const viewport of [
+  { width: 1366, height: 768 },
+  { width: 1024, height: 768 },
+  { width: 390, height: 844 },
+]) {
+  test(`responsive shell avoids horizontal overflow at ${viewport.width}x${viewport.height}`, async ({ page }) => {
     await page.setViewportSize(viewport)
 
     for (const path of [
@@ -1754,8 +1752,8 @@ test('responsive shell avoids horizontal overflow across core views', async ({ p
         `horizontal overflow at ${viewport.width}x${viewport.height} on ${path}`,
       ).toBeLessThanOrEqual(overflow.innerWidth + 2)
     }
-  }
-})
+  })
+}
 
 
 
