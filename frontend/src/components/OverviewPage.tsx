@@ -121,6 +121,18 @@ type RegionalEvidenceResponse = {
   notes: string[]
 }
 
+type CityEvidenceResponse = {
+  city_code: string
+  geo_level: string
+  source: string
+  minimum_population_scope: number
+  indicator_count: number
+  available_count: number
+  complete: boolean
+  indicators: RegionalIndicator[]
+  notes?: string[]
+}
+
 type OverviewPageProps = {
   apiBase: string
   countries: Country[]
@@ -252,13 +264,19 @@ export default function OverviewPage({
   dimensionLabels,
 }: OverviewPageProps) {
   const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string; level: number } | null>(null)
+  const [selectedCity, setSelectedCity] = useState<{ code: string; name: string } | null>(null)
   const [regionalEvidence, setRegionalEvidence] = useState<RegionalEvidenceResponse | null>(null)
   const [regionalEvidenceState, setRegionalEvidenceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [cityEvidence, setCityEvidence] = useState<CityEvidenceResponse | null>(null)
+  const [cityEvidenceState, setCityEvidenceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
 
   useEffect(() => {
     setSelectedRegion(null)
+    setSelectedCity(null)
     setRegionalEvidence(null)
     setRegionalEvidenceState('idle')
+    setCityEvidence(null)
+    setCityEvidenceState('idle')
   }, [selectedCountry])
 
   useEffect(() => {
@@ -291,6 +309,37 @@ export default function OverviewPage({
 
     return () => controller.abort()
   }, [apiBase, selectedRegion])
+
+  useEffect(() => {
+    if (!selectedCity) {
+      setCityEvidence(null)
+      setCityEvidenceState('idle')
+      return
+    }
+
+    const controller = new AbortController()
+    setCityEvidenceState('loading')
+
+    fetch(`${apiBase}/api/cities/${selectedCity.code}/evidence`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (!response.ok) throw new Error(`City evidence HTTP ${response.status}`)
+        return response.json() as Promise<CityEvidenceResponse>
+      })
+      .then((payload) => {
+        if (controller.signal.aborted) return
+        setCityEvidence(payload)
+        setCityEvidenceState('ready')
+      })
+      .catch((error) => {
+        if ((error as Error).name === 'AbortError') return
+        setCityEvidence(null)
+        setCityEvidenceState('error')
+      })
+
+    return () => controller.abort()
+  }, [apiBase, selectedCity])
 
   const visual = countryVisual(selectedCountry)
 
@@ -362,9 +411,11 @@ export default function OverviewPage({
           </div>
 
           <div className="countryHeroBottom">
-            {selectedRegion && (
+            {selectedCity ? (
+              <span className="countryRegionFocus">CITY · {selectedCity.name} · {selectedCity.code}</span>
+            ) : selectedRegion ? (
               <span className="countryRegionFocus">REGION · {selectedRegion.name} · {selectedRegion.id}</span>
-            )}
+            ) : null}
             <h3>{selectedCountryName.toUpperCase()}</h3>
             <p>{visual.summary ?? 'Country evidence is active. Regional metrics appear only where verified subnational sources exist.'}</p>
           </div>
@@ -383,6 +434,7 @@ export default function OverviewPage({
             <RegionalMap
               countryIso2={selectedCountryIso2}
               selectedRegion={selectedRegion?.id ?? null}
+              selectedCity={selectedCity?.code ?? null}
               selectableCountryIso2={countries.flatMap((country) => country.iso2 ? [country.iso2] : [])}
               onSelectCountry={(iso2) => {
                 const country = countries.find((item) => item.iso2 === iso2)
@@ -390,14 +442,105 @@ export default function OverviewPage({
                   onCountryChange(country.iso3)
                 }
               }}
-              onSelectRegion={(id, name, level) => setSelectedRegion({ id, name, level })}
-              cities={visual.cities}
+              onSelectRegion={(id, name, level) => {
+                setSelectedCity(null)
+                setSelectedRegion({ id, name, level })
+              }}
+              onSelectCity={(code, name) => {
+                setSelectedRegion(null)
+                setSelectedCity({ code, name })
+              }}
             />
           ) : (
             <div className="regionalMapState error">Regional map unavailable for this country.</div>
           )}
         </section>
 
+        {(selectedRegion || selectedCity) ? (
+          <section className="recentChangesPanel geographicEvidencePanel" aria-label="Selected geographic evidence">
+            <div className="radarPanelTopline">
+              <div>
+                <span>{selectedCity ? 'CITY EVIDENCE' : `NUTS ${selectedRegion?.level} EVIDENCE`}</span>
+                <strong>{selectedCity?.name ?? selectedRegion?.name}</strong>
+              </div>
+              <span className="mapInteractionHint">
+                {selectedCity?.code ?? selectedRegion?.id}
+              </span>
+            </div>
+
+            {selectedCity ? (
+              <div className="geoEvidenceCompact">
+                <div className="geoEvidenceStatus">
+                  <span>Eurostat Urban Audit</span>
+                  <strong>
+                    {cityEvidenceState === 'loading'
+                      ? 'Loading city evidence…'
+                      : cityEvidenceState === 'error'
+                        ? 'City evidence unavailable'
+                        : cityEvidence
+                          ? `${cityEvidence.available_count}/${cityEvidence.indicator_count} series available`
+                          : 'City selected'}
+                  </strong>
+                </div>
+                {cityEvidenceState === 'ready' && cityEvidence?.indicators.map((indicator) => (
+                  <article key={indicator.indicator_id} className="geoEvidenceMetric">
+                    <span>{indicator.name}</span>
+                    <strong>
+                      {indicator.status === 'available' && indicator.value != null
+                        ? formatRegionalValue(indicator.value, indicator.unit)
+                        : '—'}
+                    </strong>
+                    <small>
+                      {indicator.status === 'available'
+                        ? `${indicator.period} · Eurostat · ${indicator.dataset_id}`
+                        : 'No comparable city observation'}
+                    </small>
+                  </article>
+                ))}
+                <p className="geoEvidenceScope">
+                  Urban Audit cities · official collection threshold ≥50,000 inhabitants.
+                </p>
+              </div>
+            ) : (
+              <div className="geoEvidenceCompact">
+                <div className="geoEvidenceStatus">
+                  <span>Eurostat regional statistics</span>
+                  <strong>
+                    {regionalEvidenceState === 'loading'
+                      ? 'Loading regional evidence…'
+                      : regionalEvidenceState === 'error'
+                        ? 'Regional evidence unavailable'
+                        : regionalEvidence
+                          ? `${regionalEvidence.available_count}/${regionalEvidence.indicator_count} series available`
+                          : 'Region selected'}
+                  </strong>
+                </div>
+                {regionalEvidenceState === 'ready' && regionalEvidence && (
+                  <div className="geoEvidenceMetricGrid">
+                    {regionalEvidence.indicators.map((indicator) => (
+                      <article key={indicator.indicator_id} className="geoEvidenceMetric">
+                        <span>{indicator.name}</span>
+                        <strong>
+                          {indicator.status === 'available' && indicator.value != null
+                            ? formatRegionalValue(indicator.value, indicator.unit)
+                            : '—'}
+                        </strong>
+                        <small>
+                          {indicator.status === 'available'
+                            ? `${indicator.period} · ${indicator.dataset_id}`
+                            : 'No comparable observation'}
+                        </small>
+                      </article>
+                    ))}
+                  </div>
+                )}
+                <p className="geoEvidenceScope">
+                  Regional evidence stays separate from the national Country Radar.
+                </p>
+              </div>
+            )}
+          </section>
+        ) : (
         <section className="recentChangesPanel">
           <div className="radarPanelTopline">
             <div><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
@@ -434,62 +577,8 @@ export default function OverviewPage({
             </div>
           </div>
         </section>
-      </div>
 
-      {selectedRegion && (
-        <section className="regionalEvidencePanel" aria-label="Selected region evidence">
-          <header className="regionalEvidenceHeader">
-            <div>
-              <span>NUTS {selectedRegion.level} · {selectedRegion.id}</span>
-              <h3>{selectedRegion.name}</h3>
-            </div>
-            <strong>
-              {regionalEvidenceState === 'loading'
-                ? 'Loading Eurostat regional evidence…'
-                : regionalEvidenceState === 'error'
-                  ? 'Regional evidence unavailable'
-                  : regionalEvidence
-                    ? `${regionalEvidence.available_count}/${regionalEvidence.indicator_count} series available`
-                    : 'Region selected'}
-            </strong>
-          </header>
-
-          {regionalEvidenceState === 'ready' && regionalEvidence && (
-            <>
-              <div className="regionalEvidenceGrid">
-                {regionalEvidence.indicators.map((indicator) => (
-                  <article
-                    key={indicator.indicator_id}
-                    className={`regionalEvidenceCard ${indicator.status}`}
-                  >
-                    <span>{indicator.name}</span>
-                    {indicator.status === 'available' && indicator.value != null ? (
-                      <>
-                        <strong>{formatRegionalValue(indicator.value, indicator.unit)}</strong>
-                        <small>{indicator.period} · Eurostat · {indicator.dataset_id}</small>
-                      </>
-                    ) : (
-                      <>
-                        <strong>—</strong>
-                        <small>No comparable observation for this region</small>
-                      </>
-                    )}
-                  </article>
-                ))}
-              </div>
-              <p className="regionalEvidenceNote">
-                Regional evidence is separate from the national Country Radar. The NUTS code is comparison-ready, including comparisons with regions in other AUGUR countries at the same geographic level.
-              </p>
-            </>
-          )}
-
-          {regionalEvidenceState === 'error' && (
-            <p className="regionalEvidenceNote">
-              The geographic selection is valid, but Eurostat regional statistics could not be loaded. National evidence remains unchanged.
-            </p>
-          )}
-        </section>
-      )}
+        )}      </div>
 
       <section className="countryMetricGrid">
         {representative.map(({ id, label, dimension, item, assessment: dimensionState }) => (
