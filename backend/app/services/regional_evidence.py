@@ -41,7 +41,6 @@ REGIONAL_INDICATORS = [
         "filters": {
             "freq": "A",
             "unit": "EUR_HAB",
-            "na_item": "B1GQ",
         },
         "unit": "eur_per_person",
     },
