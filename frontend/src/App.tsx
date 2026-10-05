@@ -229,6 +229,20 @@ type OverviewSeriesResponse = {
   series: OverviewSeriesItem[]
 }
 
+
+type CountryDataBundle = {
+  snapshot?: Snapshot
+  trends?: TrendsResponse
+  sourceQuality?: SourceQualityResponse
+  assessment?: AssessmentResponse
+  trajectory?: TrajectoryResponse
+  scenarios?: ScenarioResponse
+  overviewSeries?: OverviewSeriesResponse
+}
+
+const countryDataCache = new Map<string, CountryDataBundle>()
+const comparisonCache = new Map<string, ComparisonResponse>()
+
 const API_BASE = 'http://127.0.0.1:8020'
 
 const dimensionLabels: Record<string, string> = {
@@ -407,6 +421,12 @@ export default function App() {
     const controller = new AbortController()
     const signal = controller.signal
     const query = compareCountries.join(',')
+    const cached = comparisonCache.get(query)
+
+    if (cached) {
+      setComparison(cached)
+      return () => controller.abort()
+    }
 
     fetchJson(
       `${API_BASE}/api/compare?countries=${query}`,
@@ -414,7 +434,10 @@ export default function App() {
       signal,
     )
       .then((data) => {
-        if (!signal.aborted) setComparison(data)
+        if (signal.aborted) return
+        const typed = data as ComparisonResponse
+        comparisonCache.set(query, typed)
+        setComparison(typed)
       })
       .catch((err) => {
         if ((err as Error).name !== 'AbortError') {
@@ -466,67 +489,99 @@ export default function App() {
   }
 
   useEffect(() => {
+    if (activeView === 'compare') return
+
     const controller = new AbortController()
     const signal = controller.signal
+    const cached = countryDataCache.get(selectedCountry) ?? {}
 
     setError(null)
-    setSnapshot(null)
-    setTrends(null)
-    setSourceQuality(null)
-    setAssessment(null)
-    setTrajectory(null)
-    setScenarios(null)
-    setOverviewSeries(null)
 
-    Promise.allSettled([
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/snapshot`, 'Snapshot', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trends`, 'Trends', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/source-quality`, 'Source quality', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/assessment`, 'Assessment', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/trajectory`, 'Trajectory', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/scenarios`, 'Scenarios', signal),
-      fetchJson(`${API_BASE}/api/countries/${selectedCountry}/overview-series`, 'Overview series', signal),
-    ]).then((results) => {
+    const needsOverview = activeView === 'overview'
+    const needsIndicators = activeView === 'indicators' || activeView === 'dimension'
+    const needsOutlook = activeView === 'outlook'
+
+    const requiredKeys: Array<keyof CountryDataBundle> = ['snapshot']
+    if (needsOverview) requiredKeys.push('trends', 'assessment', 'scenarios', 'overviewSeries')
+    if (needsIndicators) requiredKeys.push('trends', 'sourceQuality', 'assessment', 'overviewSeries')
+    if (needsOutlook) requiredKeys.push('trends', 'trajectory', 'scenarios')
+
+    const setters: Record<keyof CountryDataBundle, (value: any) => void> = {
+      snapshot: setSnapshot,
+      trends: setTrends,
+      sourceQuality: setSourceQuality,
+      assessment: setAssessment,
+      trajectory: setTrajectory,
+      scenarios: setScenarios,
+      overviewSeries: setOverviewSeries,
+    }
+
+    const labels: Record<keyof CountryDataBundle, string> = {
+      snapshot: 'Snapshot',
+      trends: 'Trends',
+      sourceQuality: 'Source quality',
+      assessment: 'Assessment',
+      trajectory: 'Trajectory',
+      scenarios: 'Scenarios',
+      overviewSeries: 'Overview series',
+    }
+
+    const paths: Record<keyof CountryDataBundle, string> = {
+      snapshot: 'snapshot',
+      trends: 'trends',
+      sourceQuality: 'source-quality',
+      assessment: 'assessment',
+      trajectory: 'trajectory',
+      scenarios: 'scenarios',
+      overviewSeries: 'overview-series',
+    }
+
+    for (const key of requiredKeys) {
+      const cachedValue = cached[key]
+      if (cachedValue) {
+        setters[key](cachedValue)
+      } else {
+        setters[key](null)
+      }
+    }
+
+    const missing = requiredKeys.filter((key) => !cached[key])
+    if (!missing.length) {
+      return () => controller.abort()
+    }
+
+    Promise.allSettled(
+      missing.map((key) =>
+        fetchJson(
+          `${API_BASE}/api/countries/${selectedCountry}/${paths[key]}`,
+          labels[key],
+          signal,
+        ).then((value) => ({ key, value })),
+      ),
+    ).then((results) => {
       if (signal.aborted) return
 
-      const [
-        snapshotResult,
-        trendsResult,
-        sourceQualityResult,
-        assessmentResult,
-        trajectoryResult,
-        scenariosResult,
-        overviewSeriesResult,
-      ] = results
-
+      const nextBundle: CountryDataBundle = {
+        ...(countryDataCache.get(selectedCountry) ?? {}),
+      }
       const failures: string[] = []
 
-      if (snapshotResult.status === 'fulfilled') setSnapshot(snapshotResult.value)
-      else failures.push(String(snapshotResult.reason))
+      for (const result of results) {
+        if (result.status === 'fulfilled') {
+          const { key, value } = result.value
+          ;(nextBundle as Record<string, unknown>)[key] = value
+          setters[key](value)
+        } else {
+          failures.push(String(result.reason))
+        }
+      }
 
-      if (trendsResult.status === 'fulfilled') setTrends(trendsResult.value)
-      else failures.push(String(trendsResult.reason))
-
-      if (sourceQualityResult.status === 'fulfilled') setSourceQuality(sourceQualityResult.value)
-      else failures.push(String(sourceQualityResult.reason))
-
-      if (assessmentResult.status === 'fulfilled') setAssessment(assessmentResult.value)
-      else failures.push(String(assessmentResult.reason))
-
-      if (trajectoryResult.status === 'fulfilled') setTrajectory(trajectoryResult.value)
-      else failures.push(String(trajectoryResult.reason))
-
-      if (scenariosResult.status === 'fulfilled') setScenarios(scenariosResult.value)
-      else failures.push(String(scenariosResult.reason))
-
-      if (overviewSeriesResult.status === 'fulfilled') setOverviewSeries(overviewSeriesResult.value)
-      else failures.push(String(overviewSeriesResult.reason))
-
+      countryDataCache.set(selectedCountry, nextBundle)
       if (failures.length) setError(failures.join(' · '))
     })
 
     return () => controller.abort()
-  }, [selectedCountry])
+  }, [selectedCountry, activeView])
 
   const selectedCountryMeta = countries.find((country) => country.iso3 === selectedCountry)
 
