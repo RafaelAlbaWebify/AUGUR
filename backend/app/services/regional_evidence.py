@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from time import monotonic
 
+from app.db.analytics import latest_subnational_observations, upsert_subnational_observations
 from app.ingestion.eurostat import EurostatAdapter
 
 
@@ -79,6 +81,55 @@ def geographic_level(geo_code: str) -> str:
     return "unknown"
 
 
+
+
+def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
+    if not rows:
+        return None
+
+    by_id = {row["indicator_id"]: row for row in rows}
+    indicators = []
+    for config in REGIONAL_INDICATORS:
+        row = by_id.get(config["indicator_id"])
+        if row:
+            indicators.append({
+                "indicator_id": config["indicator_id"],
+                "name": config["name"],
+                "status": "available",
+                "period": row["period"],
+                "value": row["value"],
+                "unit": row["unit"],
+                "dataset_id": row["dataset_id"],
+                "source_id": row["source_id"],
+                "source_updated_at": row.get("source_updated_at"),
+            })
+        else:
+            indicators.append({
+                "indicator_id": config["indicator_id"],
+                "name": config["name"],
+                "status": "unavailable",
+                "dataset_id": config["dataset_id"],
+                "source_id": "EUROSTAT",
+                "reason": "not_cached",
+            })
+
+    available_count = sum(1 for item in indicators if item["status"] == "available")
+    return {
+        "geo_code": code,
+        "geo_level": geographic_level(code),
+        "source": "AUGUR local store · Eurostat regional statistics",
+        "storage": "duckdb",
+        "indicator_count": len(indicators),
+        "available_count": available_count,
+        "complete": available_count == len(indicators),
+        "indicators": indicators,
+        "notes": [
+            "Regional evidence is served from AUGUR's local analytical store when available.",
+            "Coverage varies by indicator and region; unavailable series remain explicit.",
+            "The geographic code is stable comparison context and can be compared across countries at the same NUTS level.",
+        ],
+    }
+
 def _latest_regional_indicator(
     adapter: EurostatAdapter,
     geo_code: str,
@@ -137,10 +188,15 @@ def _latest_regional_indicator(
 def regional_evidence(
     geo_code: str,
     adapter: EurostatAdapter | None = None,
+    force_refresh: bool = False,
 ) -> dict:
     code = geo_code.strip().upper()
 
-    if adapter is None:
+    if adapter is None and not force_refresh:
+        local = _regional_result_from_local(code, latest_subnational_observations(code))
+        if local:
+            return local
+
         cached = _REGIONAL_CACHE.get(code)
         if cached and monotonic() - cached[0] < CACHE_TTL_SECONDS:
             return cached[1]
@@ -178,6 +234,23 @@ def regional_evidence(
     }
 
     if adapter is None:
+        rows_to_store = [
+            {
+                "geo_code": code,
+                "geo_level": geographic_level(code),
+                "indicator_id": item["indicator_id"],
+                "period": item["period"],
+                "value": item["value"],
+                "unit": item.get("unit"),
+                "source_id": item["source_id"],
+                "dataset_id": item["dataset_id"],
+                "retrieved_at": datetime.now(timezone.utc),
+                "source_updated_at": item.get("source_updated_at"),
+            }
+            for item in indicators
+            if item["status"] == "available"
+        ]
+        upsert_subnational_observations(rows_to_store)
         _REGIONAL_CACHE[code] = (monotonic(), result)
 
     return result
