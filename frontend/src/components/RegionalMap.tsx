@@ -42,6 +42,27 @@ const GISCO_URBAN_AUDIT_CITY_URL = 'https://gisco-services.ec.europa.eu/distribu
 const REGIONS_VISIBLE_ZOOM = 5.5
 const CITIES_VISIBLE_ZOOM = 7.5
 
+
+const geoJsonCache = new Map<string, Promise<GeoJSON.FeatureCollection>>()
+
+function loadGeoJson(url: string) {
+  const cached = geoJsonCache.get(url)
+  if (cached) return cached
+
+  const request = fetch(url)
+    .then((response) => {
+      if (!response.ok) throw new Error(`GISCO HTTP ${response.status}: ${url}`)
+      return response.json() as Promise<GeoJSON.FeatureCollection>
+    })
+    .catch((error) => {
+      geoJsonCache.delete(url)
+      throw error
+    })
+
+  geoJsonCache.set(url, request)
+  return request
+}
+
 const EUROPE_VIEW: L.LatLngExpression = [50.5, 8.5]
 
 function countryName(feature: CountryFeature) {
@@ -165,7 +186,7 @@ export default function RegionalMap({
     const map = mapRef.current
     if (!map) return
 
-    const controller = new AbortController()
+    let cancelled = false
     let progressiveHandler: (() => void) | null = null
     setStatus('loading')
     map.getContainer().style.cursor = ''
@@ -179,21 +200,12 @@ export default function RegionalMap({
     cityLayerRef.current = null
 
     Promise.all([
-      fetch(GISCO_NUTS0_URL, { signal: controller.signal }).then((response) => {
-        if (!response.ok) throw new Error(`GISCO NUTS0 HTTP ${response.status}`)
-        return response.json() as Promise<GeoJSON.FeatureCollection>
-      }),
-      fetch(GISCO_NUTS2_URL, { signal: controller.signal }).then((response) => {
-        if (!response.ok) throw new Error(`GISCO NUTS2 HTTP ${response.status}`)
-        return response.json() as Promise<GeoJSON.FeatureCollection>
-      }),
-      fetch(GISCO_URBAN_AUDIT_CITY_URL, { signal: controller.signal }).then((response) => {
-        if (!response.ok) throw new Error(`GISCO Urban Audit cities HTTP ${response.status}`)
-        return response.json() as Promise<GeoJSON.FeatureCollection>
-      }),
+      loadGeoJson(GISCO_NUTS0_URL),
+      loadGeoJson(GISCO_NUTS2_URL),
+      loadGeoJson(GISCO_URBAN_AUDIT_CITY_URL),
     ])
       .then(([countriesData, regionsData, citiesData]) => {
-        if (controller.signal.aborted) return
+        if (cancelled) return
 
         const countries = countriesData.features as CountryFeature[]
         const regions = (regionsData.features as RegionFeature[])
@@ -354,12 +366,12 @@ export default function RegionalMap({
 
       })
       .catch((error) => {
-        if ((error as Error).name === 'AbortError') return
+        if (cancelled) return
         setStatus('error')
       })
 
     return () => {
-      controller.abort()
+      cancelled = true
       if (progressiveHandler) map.off('zoomend', progressiveHandler)
     }
   }, [countryIso2, selectableCountryKey])
