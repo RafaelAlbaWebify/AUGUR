@@ -57,6 +57,55 @@ function regionName(feature: RegionFeature) {
     ?? 'Region'
 }
 
+function pointInRing(lng: number, lat: number, ring: GeoJSON.Position[]) {
+  let inside = false
+
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0]
+    const yi = ring[i][1]
+    const xj = ring[j][0]
+    const yj = ring[j][1]
+
+    const intersects =
+      ((yi > lat) !== (yj > lat))
+      && (lng < ((xj - xi) * (lat - yi)) / ((yj - yi) || Number.EPSILON) + xi)
+
+    if (intersects) inside = !inside
+  }
+
+  return inside
+}
+
+function pointInPolygon(
+  lng: number,
+  lat: number,
+  polygon: GeoJSON.Position[][],
+) {
+  if (!polygon.length || !pointInRing(lng, lat, polygon[0])) return false
+
+  for (let holeIndex = 1; holeIndex < polygon.length; holeIndex += 1) {
+    if (pointInRing(lng, lat, polygon[holeIndex])) return false
+  }
+
+  return true
+}
+
+function featureContainsPoint(
+  feature: CountryFeature | RegionFeature,
+  lng: number,
+  lat: number,
+) {
+  if (!feature.geometry) return false
+
+  if (feature.geometry.type === 'Polygon') {
+    return pointInPolygon(lng, lat, feature.geometry.coordinates)
+  }
+
+  return feature.geometry.coordinates.some((polygon) =>
+    pointInPolygon(lng, lat, polygon)
+  )
+}
+
 export default function RegionalMap({
   countryIso2,
   selectedRegion,
@@ -72,6 +121,8 @@ export default function RegionalMap({
   const countryLayerRef = useRef<L.GeoJSON | null>(null)
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
+  const countryFeaturesRef = useRef<CountryFeature[]>([])
+  const regionFeaturesRef = useRef<RegionFeature[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
   const selectableCountryKey = selectableCountryIso2.join(',')
@@ -108,6 +159,50 @@ export default function RegionalMap({
     map.attributionControl.setPrefix('Leaflet')
     map.on('zoomend', () => setZoom(map.getZoom()))
 
+    const handleMapClick = (event: L.LeafletMouseEvent) => {
+      const { lat, lng } = event.latlng
+
+      if (map.getZoom() >= REGIONS_VISIBLE_ZOOM) {
+        const region = regionFeaturesRef.current.find((feature) =>
+          featureContainsPoint(feature, lng, lat)
+        )
+
+        if (region) {
+          const id = region.properties?.NUTS_ID ?? ''
+          const name = regionName(region)
+          onSelectRegionRef.current(id, name, 2)
+
+          const bounds = L.geoJSON(region).getBounds()
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, { padding: [34, 34], maxZoom: 7 })
+          }
+          return
+        }
+      }
+
+      const country = countryFeaturesRef.current.find((feature) =>
+        selectableCountryIso2.includes(feature.properties?.CNTR_CODE ?? '')
+        && featureContainsPoint(feature, lng, lat)
+      )
+
+      const code = country?.properties?.CNTR_CODE
+      if (code) onSelectCountryRef.current?.(code)
+    }
+
+    const handleMapMouseMove = (event: L.LeafletMouseEvent) => {
+      const { lat, lng } = event.latlng
+      const overRegion = map.getZoom() >= REGIONS_VISIBLE_ZOOM
+        && regionFeaturesRef.current.some((feature) => featureContainsPoint(feature, lng, lat))
+      const overCountry = countryFeaturesRef.current.some((feature) =>
+        selectableCountryIso2.includes(feature.properties?.CNTR_CODE ?? '')
+        && featureContainsPoint(feature, lng, lat)
+      )
+
+      map.getContainer().style.cursor = overRegion || overCountry ? 'pointer' : ''
+    }
+
+    map.on('click', handleMapClick)
+    map.on('mousemove', handleMapMouseMove)
     mapRef.current = map
 
     const resizeObserver = new ResizeObserver(() => map.invalidateSize())
@@ -115,6 +210,8 @@ export default function RegionalMap({
 
     return () => {
       resizeObserver.disconnect()
+      map.off('click', handleMapClick)
+      map.off('mousemove', handleMapMouseMove)
       map.remove()
       mapRef.current = null
     }
@@ -135,6 +232,8 @@ export default function RegionalMap({
     countryLayerRef.current = null
     regionLayerRef.current = null
     cityLayerRef.current = null
+    countryFeaturesRef.current = []
+    regionFeaturesRef.current = []
 
     Promise.all([
       fetch(GISCO_NUTS0_URL, { signal: controller.signal }).then((response) => {
@@ -167,6 +266,8 @@ export default function RegionalMap({
         }
 
         const selectableCountries = new Set(selectableCountryIso2)
+        countryFeaturesRef.current = countries
+        regionFeaturesRef.current = regions
 
         const countryLayer = L.geoJSON(countryCollection, {
           style: (feature) => {
@@ -187,36 +288,7 @@ export default function RegionalMap({
               fillOpacity: active ? 0.16 : 0.04,
             }
           },
-          onEachFeature: (feature, layer) => {
-            const country = feature as CountryFeature
-            const code = country.properties?.CNTR_CODE ?? ''
-            const name = countryName(country)
-
-            if (!selectableCountries.has(code)) return
-
-            layer.bindTooltip(`${name} · ${code}`, {
-              sticky: true,
-              direction: 'top',
-              className: 'augurMapTooltip',
-            })
-
-            const selectCountry = () => onSelectCountryRef.current?.(code)
-            layer.on('click', selectCountry)
-            layer.on('add', () => {
-              const element = (layer as L.Path).getElement()
-              if (!element) return
-              element.setAttribute('role', 'button')
-              element.setAttribute('aria-label', `${name} country`)
-              element.setAttribute('tabindex', '0')
-              element.addEventListener('keydown', (event: Event) => {
-                const keyboardEvent = event as KeyboardEvent
-                if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
-                  keyboardEvent.preventDefault()
-                  selectCountry()
-                }
-              })
-            })
-          },
+          interactive: false,
         }).addTo(map)
 
         const regionLayer = L.geoJSON(regionCollection, {
@@ -233,39 +305,7 @@ export default function RegionalMap({
               fillOpacity: selected ? 0.30 : 0.08,
             }
           },
-          onEachFeature: (feature, layer) => {
-            const region = feature as RegionFeature
-            const id = region.properties?.NUTS_ID ?? ''
-            const name = regionName(region)
-            layer.bindTooltip(`${name} · ${id}`, {
-              sticky: true,
-              direction: 'top',
-              className: 'augurMapTooltip',
-            })
-            const selectRegion = () => {
-              onSelectRegionRef.current(id, name, 2)
-              const bounds = (layer as L.Polygon).getBounds()
-              if (bounds.isValid()) {
-                map.fitBounds(bounds, { padding: [34, 34], maxZoom: 7 })
-              }
-            }
-
-            layer.on('click', selectRegion)
-            layer.on('add', () => {
-              const element = (layer as L.Path).getElement()
-              if (!element) return
-              element.setAttribute('role', 'button')
-              element.setAttribute('aria-label', `${name} · ${id}`)
-              element.setAttribute('tabindex', '0')
-              element.addEventListener('keydown', (event: Event) => {
-                const keyboardEvent = event as KeyboardEvent
-                if (keyboardEvent.key === 'Enter' || keyboardEvent.key === ' ') {
-                  keyboardEvent.preventDefault()
-                  selectRegion()
-                }
-              })
-            })
-          },
+          interactive: false,
         })
 
         const cityLayer = L.layerGroup(
