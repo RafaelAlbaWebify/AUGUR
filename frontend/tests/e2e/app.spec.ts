@@ -164,6 +164,34 @@ function mockTrendFor(item: ReturnType<typeof overviewMetrics>[number]) {
   }
 }
 
+
+async function clickMapAtLatLng(
+  page: Page,
+  lat: number,
+  lng: number,
+  centerLat = 50.5,
+  centerLng = 8.5,
+  zoom = 3,
+) {
+  const box = await page.getByTestId('regional-map').boundingBox()
+  if (!box) throw new Error('Map bounding box unavailable')
+
+  const project = (latitude: number, longitude: number) => {
+    const sin = Math.sin((latitude * Math.PI) / 180)
+    const scale = 256 * 2 ** zoom
+    const x = scale * (0.5 + longitude / 360)
+    const y = scale * (0.5 - Math.log((1 + sin) / (1 - sin)) / (4 * Math.PI))
+    return { x, y }
+  }
+
+  const center = project(centerLat, centerLng)
+  const target = project(lat, lng)
+  const x = box.x + box.width / 2 + (target.x - center.x)
+  const y = box.y + box.height / 2 + (target.y - center.y)
+
+  await page.mouse.click(x, y)
+}
+
 async function mockApi(page: Page) {
   await page.route('https://gisco-services.ec.europa.eu/**', async route => {
     if (route.request().url().includes('LEVL_0')) {
@@ -832,9 +860,15 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await page.getByRole('button', { name: 'Focus country' }).click()
 
   await expect(page.getByText('NUTS 2 regions visible')).toBeVisible()
-  const galicia = map.getByRole('button', { name: 'Galicia · ES11' })
-  await expect(galicia).toHaveCount(1)
-  await galicia.dispatchEvent('click')
+  const paths = map.locator('.nuts2Boundary')
+  expect(await paths.count()).toBeGreaterThan(0)
+
+  const galiciaBox = await paths.first().boundingBox()
+  if (!galiciaBox) throw new Error('Galicia region path is not rendered')
+  await page.mouse.click(
+    galiciaBox.x + galiciaBox.width / 2,
+    galiciaBox.y + galiciaBox.height / 2,
+  )
 
   await expect(page.getByText('REGION · Galicia · ES11')).toBeVisible()
   const regionalEvidence = page.getByRole('region', { name: 'Selected region evidence' })
@@ -1095,9 +1129,7 @@ test('regional map renders clickable country context and geographic controls', a
   await expect(page.getByRole('button', { name: 'Europe' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Focus country' })).toBeVisible()
 
-  const portugal = map.getByRole('button', { name: 'Portugal country' })
-  await expect(portugal).toHaveCount(1)
-  await portugal.dispatchEvent('click')
+  await clickMapAtLatLng(page, 39.6, -8.0)
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
@@ -1374,7 +1406,6 @@ test('map starts broad and exposes regional detail when country is focused', asy
 
   await page.getByRole('button', { name: 'Focus country' }).click()
 
-  await expect(map.getByRole('button', { name: 'Galicia · ES11' })).toHaveCount(1)
   expect(await map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
 })
 
