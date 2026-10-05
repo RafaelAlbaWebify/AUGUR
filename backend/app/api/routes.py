@@ -10,6 +10,7 @@ from app.db.analytics import (
     source_quality_summary,
     official_forecasts,
     country_indicator_series,
+    subnational_storage_status,
 )
 from app.services.country import country_snapshot, list_countries
 from app.services.trends import country_trends
@@ -239,6 +240,15 @@ def compare(
     return country_comparison(requested)
 
 
+
+
+@router.get("/subnational/status")
+def subnational_status_get():
+    return {
+        **subnational_storage_status(),
+        "model_countries": ["ESP", "IRL"],
+        "storage": "duckdb",
+    }
 
 
 @router.get("/cities/{city_code}/evidence")
