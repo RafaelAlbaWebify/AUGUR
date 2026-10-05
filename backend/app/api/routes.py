@@ -26,6 +26,7 @@ from app.esco_store import esco_status
 from app.services.ttv import ttv_status
 from app.services.operability import operability_status
 from app.services.regional_evidence import regional_evidence, regional_comparison, geographic_level
+from app.services.city_evidence import city_evidence
 
 router = APIRouter()
 
@@ -238,6 +239,26 @@ def compare(
     return country_comparison(requested)
 
 
+
+
+@router.get("/cities/{city_code}/evidence")
+def city_evidence_get(city_code: str):
+    city_code = city_code.strip().upper()
+    supported_iso2 = {country["iso2"] for country in list_countries()}
+
+    if len(city_code) != 6 or not city_code.endswith("C"):
+        raise HTTPException(
+            status_code=400,
+            detail="City code must be an Urban Audit city code such as ES001C",
+        )
+
+    if city_code[:2] not in supported_iso2:
+        raise HTTPException(
+            status_code=404,
+            detail="City is outside AUGUR's registered countries",
+        )
+
+    return city_evidence(city_code)
 
 
 @router.get("/regions/{geo_code}/evidence")
