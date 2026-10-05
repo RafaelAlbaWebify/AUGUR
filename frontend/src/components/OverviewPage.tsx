@@ -581,75 +581,144 @@ export default function OverviewPage({
         )}
       </div>
 
-      <section className="countryMetricGrid">
-        {representative.map(({ id, label, dimension, item, assessment: dimensionState }) => (
-          <button
-            type="button"
-            key={id}
-            className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
-            onClick={() => item ? onOpenDimension(item.dimension) : undefined}
-            disabled={!item}
-          >
-            <div className="countryMetricTop">
-              <span>{label}</span>
-              <small>{item ? (dimensionState?.trajectory?.replaceAll('_', ' ') ?? 'contextual') : 'evidence gap'}</small>
-            </div>
-            {item ? (
-              <>
-                <div className="countryMetricIdentity">
-                  <span className={`countryMetricIcon ${trajectoryTone(dimensionState?.trajectory)}`}>
-                    {DOMAIN_ICONS[id] ?? '•'}
-                  </span>
-                  <strong className="countryMetricName">{item.name}</strong>
+      {selectedRegion ? (
+        <section className="countryMetricGrid regionalMetricGrid" aria-label="Regional metric cards">
+          {(regionalEvidenceState === 'ready' && regionalEvidence
+            ? regionalEvidence.indicators
+            : []
+          ).map((indicator) => (
+            <article
+              key={indicator.indicator_id}
+              className={`countryMetricCard regionalMetricCard ${indicator.status === 'available' ? 'neutral' : 'unavailable'}`}
+            >
+              <div className="countryMetricTop">
+                <span>{selectedRegion.name}</span>
+                <small>NUTS {selectedRegion.level}</small>
+              </div>
+
+              <div className="countryMetricIdentity">
+                <span className="countryMetricIcon neutral">•</span>
+                <strong className="countryMetricName">{indicator.name}</strong>
+              </div>
+
+              <div className="countryMetricEvidenceRow">
+                <div>
+                  <div className="countryMetricValue">
+                    {indicator.status === 'available' && indicator.value != null
+                      ? formatRegionalValue(indicator.value, indicator.unit)
+                      : '—'}
+                  </div>
+                  <div className="countryMetricTrend">
+                    <strong>{indicator.period ?? '—'}</strong>
+                    <span>{indicator.status === 'available' ? 'latest regional observation' : 'regional evidence unavailable'}</span>
+                  </div>
                 </div>
 
-                <div className="countryMetricEvidenceRow">
-                  <div>
-                    <div className="countryMetricValue">{formatValue(item.value, item.unit)}</div>
-                    <div className="countryMetricTrend">
-                      <strong>{changeLabel(item.trend?.pct_change_1y)}</strong>
-                      <span>vs. previous year</span>
+                <div className="countryMetricSparkline">
+                  <span>regional history not yet integrated</span>
+                </div>
+              </div>
+
+              <div className="countryMetricFooter">
+                <span className="countryMetricPeerBadge">
+                  {indicator.status === 'available' ? 'Regional evidence' : 'Coverage gap'}
+                </span>
+                <span>{indicator.source_id.replaceAll('_', ' ')} · {indicator.dataset_id}</span>
+              </div>
+            </article>
+          ))}
+
+          {regionalEvidenceState === 'loading' && (
+            <article className="countryMetricCard regionalMetricCard unavailable">
+              <div className="countryMetricTop">
+                <span>{selectedRegion.name}</span>
+                <small>NUTS {selectedRegion.level}</small>
+              </div>
+              <strong className="countryMetricName">Loading regional evidence…</strong>
+            </article>
+          )}
+
+          {regionalEvidenceState === 'error' && (
+            <article className="countryMetricCard regionalMetricCard unavailable">
+              <div className="countryMetricTop">
+                <span>{selectedRegion.name}</span>
+                <small>NUTS {selectedRegion.level}</small>
+              </div>
+              <strong className="countryMetricName">Regional evidence unavailable</strong>
+            </article>
+          )}
+        </section>
+      ) : (
+        <section className="countryMetricGrid" aria-label="Country metric cards">
+          {representative.map(({ id, label, dimension, item, assessment: dimensionState }) => (
+            <button
+              type="button"
+              key={id}
+              className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
+              onClick={() => item ? onOpenDimension(item.dimension) : undefined}
+              disabled={!item}
+            >
+              <div className="countryMetricTop">
+                <span>{label}</span>
+                <small>{item ? (dimensionState?.trajectory?.replaceAll('_', ' ') ?? 'contextual') : 'evidence gap'}</small>
+              </div>
+              {item ? (
+                <>
+                  <div className="countryMetricIdentity">
+                    <span className={`countryMetricIcon ${trajectoryTone(dimensionState?.trajectory)}`}>
+                      {DOMAIN_ICONS[id] ?? '•'}
+                    </span>
+                    <strong className="countryMetricName">{item.name}</strong>
+                  </div>
+
+                  <div className="countryMetricEvidenceRow">
+                    <div>
+                      <div className="countryMetricValue">{formatValue(item.value, item.unit)}</div>
+                      <div className="countryMetricTrend">
+                        <strong>{changeLabel(item.trend?.pct_change_1y)}</strong>
+                        <span>vs. previous year</span>
+                      </div>
+                    </div>
+
+                    <div className="countryMetricSparkline" aria-label={`${item.name} recent history`}>
+                      {seriesById.get(item.indicator_id)?.points?.length && seriesById.get(item.indicator_id)!.points.length >= 2 ? (
+                        <svg viewBox="0 0 112 42" role="img">
+                          <polyline points={sparklinePoints(seriesById.get(item.indicator_id)!.points)} />
+                          {seriesById.get(item.indicator_id)!.points.map((point, pointIndex, allPoints) => {
+                            const coordinates = sparklinePoints(allPoints).split(' ')[pointIndex]?.split(',') ?? ['0', '0']
+                            return <circle key={point.period} cx={coordinates[0]} cy={coordinates[1]} r={pointIndex === allPoints.length - 1 ? 2.8 : 1.6} />
+                          })}
+                        </svg>
+                      ) : (
+                        <span>history unavailable</span>
+                      )}
                     </div>
                   </div>
 
-                  <div className="countryMetricSparkline" aria-label={`${item.name} recent history`}>
-                    {seriesById.get(item.indicator_id)?.points?.length && seriesById.get(item.indicator_id)!.points.length >= 2 ? (
-                      <svg viewBox="0 0 112 42" role="img">
-                        <polyline points={sparklinePoints(seriesById.get(item.indicator_id)!.points)} />
-                        {seriesById.get(item.indicator_id)!.points.map((point, pointIndex, allPoints) => {
-                          const coordinates = sparklinePoints(allPoints).split(' ')[pointIndex]?.split(',') ?? ['0', '0']
-                          return <circle key={point.period} cx={coordinates[0]} cy={coordinates[1]} r={pointIndex === allPoints.length - 1 ? 2.8 : 1.6} />
-                        })}
-                      </svg>
-                    ) : (
-                      <span>history unavailable</span>
-                    )}
+                  <div className="countryMetricFooter">
+                    <span className="countryMetricPeerBadge">
+                      {selectedSetBand(comparison, item.indicator_id, selectedCountry) ?? 'Peer reference pending'}
+                    </span>
+                    <span>{item.source_id.replaceAll('_', ' ')} · {item.period}</span>
                   </div>
-                </div>
-
-                <div className="countryMetricFooter">
-                  <span className="countryMetricPeerBadge">
-                    {selectedSetBand(comparison, item.indicator_id, selectedCountry) ?? 'Peer reference pending'}
-                  </span>
-                  <span>{item.source_id.replaceAll('_', ' ')} · {item.period}</span>
-                </div>
-              </>
-            ) : (
-              <>
-                <strong className="countryMetricName">No verified indicator integrated yet</strong>
-                <div className="countryMetricValue unavailableValue">—</div>
-                <div className="countryMetricTrend">
-                  <strong>Evidence unavailable</strong>
-                  <span>Shown deliberately so the coverage gap is visible.</span>
-                </div>
-                <div className="countryMetricFooter">
-                  <span>Pending source integration</span>
-                </div>
-              </>
-            )}
-          </button>
-        ))}
-      </section>
+                </>
+              ) : (
+                <>
+                  <strong className="countryMetricName">No verified indicator integrated yet</strong>
+                  <div className="countryMetricValue unavailableValue">—</div>
+                  <div className="countryMetricTrend">
+                    <strong>Evidence unavailable</strong>
+                    <span>Shown deliberately so the coverage gap is visible.</span>
+                  </div>
+                  <div className="countryMetricFooter">
+                    <span>Pending source integration</span>
+                  </div>
+                </>
+              )}
+            </button>
+          ))}
+        </section>
+      )}
 
       <section className="countryRadarFooter">
         <div>
