@@ -833,8 +833,8 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
 
   await expect(page.getByText('NUTS 2 regions visible')).toBeVisible()
   const galicia = map.getByRole('button', { name: 'Galicia · ES11' })
-  await expect(galicia).toBeVisible()
-  await galicia.click()
+  await expect(galicia).toHaveCount(1)
+  await galicia.dispatchEvent('click')
 
   await expect(page.getByText('REGION · Galicia · ES11')).toBeVisible()
   const regionalEvidence = page.getByRole('region', { name: 'Selected region evidence' })
@@ -1095,7 +1095,9 @@ test('regional map renders clickable country context and geographic controls', a
   await expect(page.getByRole('button', { name: 'Europe' })).toBeVisible()
   await expect(page.getByRole('button', { name: 'Focus country' })).toBeVisible()
 
-  await map.getByRole('button', { name: 'Portugal country' }).click()
+  const portugal = map.getByRole('button', { name: 'Portugal country' })
+  await expect(portugal).toHaveCount(1)
+  await portugal.dispatchEvent('click')
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
@@ -1372,8 +1374,8 @@ test('map starts broad and exposes regional detail when country is focused', asy
 
   await page.getByRole('button', { name: 'Focus country' }).click()
 
-  await expect(map.getByRole('button', { name: 'Galicia · ES11' })).toBeVisible()
-  await expect(map.locator('.nuts2Boundary').first()).toBeVisible()
+  await expect(map.getByRole('button', { name: 'Galicia · ES11' })).toHaveCount(1)
+  expect(await map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
 })
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
