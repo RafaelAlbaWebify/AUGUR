@@ -20,26 +20,27 @@ type CountryFeature = GeoJSON.Feature<
   MapProperties
 >
 
-type CityMarker = {
-  name: string
-  lon: number
-  lat: number
-}
+type CityFeature = GeoJSON.Feature<
+  GeoJSON.Point,
+  Record<string, unknown>
+>
 
 type RegionalMapProps = {
   countryIso2: string
   selectedRegion: string | null
+  selectedCity: string | null
   selectableCountryIso2?: string[]
   onSelectCountry?: (countryIso2: string) => void
   onSelectRegion: (regionId: string, regionName: string, level: number) => void
-  cities?: CityMarker[]
+  onSelectCity: (cityCode: string, cityName: string) => void
 }
 
 const GISCO_BASE = 'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson'
 const GISCO_NUTS0_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_0.geojson`
 const GISCO_NUTS2_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_2.geojson`
+const GISCO_URBAN_AUDIT_CITY_URL = 'https://gisco-services.ec.europa.eu/distribution/v2/urau/geojson/URAU_LB_2024_4326_CITIES.geojson'
 const REGIONS_VISIBLE_ZOOM = 5.5
-const CITIES_VISIBLE_ZOOM = 6
+const CITIES_VISIBLE_ZOOM = 7.5
 
 const EUROPE_VIEW: L.LatLngExpression = [50.5, 8.5]
 
@@ -57,18 +58,52 @@ function regionName(feature: RegionFeature) {
     ?? 'Region'
 }
 
+function cityCode(feature: CityFeature) {
+  const props = feature.properties ?? {}
+  const candidates = [
+    props.URAU_CODE,
+    props.URAU_ID,
+    props.CITY_CODE,
+    props.CODE,
+    feature.id,
+  ]
+
+  return candidates
+    .map((value) => typeof value === 'string' ? value.toUpperCase() : '')
+    .find((value) => /^[A-Z]{2}\d{3}C$/.test(value))
+    ?? ''
+}
+
+function cityName(feature: CityFeature) {
+  const props = feature.properties ?? {}
+  const candidates = [
+    props.NAME_LATN,
+    props.URAU_NAME,
+    props.CITY_NAME,
+    props.NAME,
+    props.LABEL,
+  ]
+
+  return candidates.find((value) => typeof value === 'string' && value.trim())
+    ?.toString()
+    ?? cityCode(feature)
+    ?? 'City'
+}
+
 export default function RegionalMap({
   countryIso2,
   selectedRegion,
+  selectedCity,
   selectableCountryIso2 = [],
   onSelectCountry,
   onSelectRegion,
-  cities = [],
+  onSelectCity,
 }: RegionalMapProps) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const onSelectCountryRef = useRef(onSelectCountry)
   const onSelectRegionRef = useRef(onSelectRegion)
+  const onSelectCityRef = useRef(onSelectCity)
   const countryLayerRef = useRef<L.GeoJSON | null>(null)
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
@@ -83,6 +118,10 @@ export default function RegionalMap({
   useEffect(() => {
     onSelectRegionRef.current = onSelectRegion
   }, [onSelectRegion])
+
+  useEffect(() => {
+    onSelectCityRef.current = onSelectCity
+  }, [onSelectCity])
 
   useEffect(() => {
     if (!hostRef.current || mapRef.current) return
@@ -148,8 +187,12 @@ export default function RegionalMap({
         if (!response.ok) throw new Error(`GISCO NUTS2 HTTP ${response.status}`)
         return response.json() as Promise<GeoJSON.FeatureCollection>
       }),
+      fetch(GISCO_URBAN_AUDIT_CITY_URL, { signal: controller.signal }).then((response) => {
+        if (!response.ok) throw new Error(`GISCO Urban Audit cities HTTP ${response.status}`)
+        return response.json() as Promise<GeoJSON.FeatureCollection>
+      }),
     ])
-      .then(([countriesData, regionsData]) => {
+      .then(([countriesData, regionsData, citiesData]) => {
         if (controller.signal.aborted) return
 
         const countries = countriesData.features as CountryFeature[]
@@ -170,6 +213,11 @@ export default function RegionalMap({
         }
 
         const selectableCountries = new Set(selectableCountryIso2)
+        const cityFeatures = (citiesData.features as CityFeature[])
+          .filter((feature) => {
+            const code = cityCode(feature)
+            return code.startsWith(countryIso2) && code.endsWith('C')
+          })
 
         const countryLayer = L.geoJSON(countryCollection, {
           style: (feature) => {
@@ -245,17 +293,34 @@ export default function RegionalMap({
         })
 
         const cityLayer = L.layerGroup(
-          cities.map((city) =>
-            L.marker([city.lat, city.lon], {
-              interactive: false,
-              icon: L.divIcon({
-                className: 'regionalCityMarker leafletCityMarker',
-                html: `<span class="cityDot"></span><span class="cityLabel">${city.name}</span>`,
-                iconSize: [90, 24],
-                iconAnchor: [6, 12],
-              }),
+          cityFeatures.map((feature) => {
+            const [lon, lat] = feature.geometry.coordinates
+            const code = cityCode(feature)
+            const name = cityName(feature)
+            const selected = code === selectedCity
+
+            const marker = L.circleMarker([lat, lon], {
+              radius: selected ? 7 : 5,
+              color: selected ? '#ffffff' : '#7de3ff',
+              weight: selected ? 2.5 : 1.5,
+              fillColor: selected ? '#16c7f2' : '#1a95b8',
+              fillOpacity: selected ? 0.96 : 0.82,
+              className: selected ? 'urbanAuditCity selectedUrbanAuditCity' : 'urbanAuditCity',
             })
-          ),
+
+            marker.bindTooltip(`${name} · ${code}`, {
+              sticky: true,
+              direction: 'top',
+              className: 'augurMapTooltip',
+            })
+
+            marker.on('click', () => {
+              onSelectCityRef.current(code, name)
+              map.setView([lat, lon], Math.max(map.getZoom(), 9), { animate: false })
+            })
+
+            return marker
+          }),
         )
 
         countryLayerRef.current = countryLayer
@@ -383,7 +448,7 @@ export default function RegionalMap({
       </div>
 
       <small className="regionalMapSource">
-        Base map: OpenStreetMap · boundaries: Eurostat GISCO NUTS 2024 · © EuroGeographics · regions appear from zoom {REGIONS_VISIBLE_ZOOM}
+        Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 + Urban Audit 2024 · © EuroGeographics · regions from zoom {REGIONS_VISIBLE_ZOOM} · official Urban Audit cities from zoom {CITIES_VISIBLE_ZOOM}
       </small>
 
       {status === 'loading' && <div className="regionalMapLoading">Loading geographic layers…</div>}
