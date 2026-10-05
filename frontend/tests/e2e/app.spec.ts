@@ -1148,9 +1148,9 @@ test('regional map renders clickable country context and geographic controls', a
 
   const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
-  expect(await map.locator('.countryBoundary').count()).toBeGreaterThan(0)
-  expect(await map.locator('.selectedCountryBoundary').count()).toBeGreaterThan(0)
   await expect(map).toHaveAttribute('data-map-status', 'ready')
+  await expect.poll(async () => map.locator('.countryBoundary').count()).toBeGreaterThan(0)
+  await expect.poll(async () => map.locator('.selectedCountryBoundary').count()).toBeGreaterThan(0)
   await expect(page.getByRole('button', { name: 'Europe' })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Focus country' })).toBeEnabled()
 
