@@ -60,3 +60,17 @@ def test_regional_comparison_keeps_region_codes_separate():
     assert result["indicator_count"] == len(REGIONAL_INDICATORS)
     for indicator in result["indicators"]:
         assert set(indicator["regions"]) == {"ES11", "PT11"}
+
+
+
+def test_regional_gdp_query_uses_dataset_dimensions_only():
+    gdp = next(
+        item for item in REGIONAL_INDICATORS
+        if item["indicator_id"] == "regional_gdp_per_capita"
+    )
+
+    assert gdp["dataset_id"] == "nama_10r_3gdp"
+    assert gdp["filters"] == {
+        "freq": "A",
+        "unit": "EUR_HAB",
+    }
