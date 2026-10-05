@@ -42,6 +42,14 @@ if (-not $SkipSync) {
         Write-Warning "Evidence refresh completed with partial provider failures."
         Write-Host "The operability check below will identify the remaining blockers."
     }
+
+    $SubnationalCode = Invoke-Step "Synchronize ESP/IRL subnational evidence" {
+        & (Join-Path $Root "sync-subnational.ps1")
+    } -AllowedExitCodes @(0, 2)
+
+    if ($SubnationalCode -eq 2) {
+        Write-Warning "Subnational refresh completed with incomplete regional coverage."
+    }
 }
 else {
     Write-Host ""
