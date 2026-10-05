@@ -106,6 +106,20 @@ CREATE TABLE IF NOT EXISTS labour_job_transitions (
         country_iso3, period, age_group, duration_group, source_id
     )
 );
+
+CREATE TABLE IF NOT EXISTS subnational_observations (
+    geo_code VARCHAR NOT NULL,
+    geo_level VARCHAR NOT NULL,
+    indicator_id VARCHAR NOT NULL,
+    period INTEGER NOT NULL,
+    value DOUBLE NOT NULL,
+    unit VARCHAR,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (geo_code, indicator_id, period, source_id)
+);
 """
 
 
@@ -1083,6 +1097,94 @@ def analytical_evidence_status() -> dict:
                 }
                 for country_iso3 in sorted(observations)
             ]
+        }
+    finally:
+        con.close()
+
+
+def upsert_subnational_observations(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO subnational_observations
+            (
+                geo_code, geo_level, indicator_id, period, value, unit,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["geo_code"].upper(),
+                    row["geo_level"],
+                    row["indicator_id"],
+                    row["period"],
+                    row["value"],
+                    row.get("unit"),
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_subnational_observations(geo_code: str) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id
+                        ORDER BY period DESC, source_id ASC
+                    ) AS rn
+                FROM subnational_observations
+                WHERE geo_code = ?
+            )
+            SELECT
+                geo_code, geo_level, indicator_id, period, value, unit,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY indicator_id
+            """,
+            [geo_code.upper()],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def subnational_storage_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        row = con.execute(
+            """
+            SELECT
+                COUNT(*) AS observation_count,
+                COUNT(DISTINCT geo_code) AS geography_count,
+                COUNT(DISTINCT CASE WHEN geo_level = 'nuts2' THEN geo_code END) AS nuts2_count,
+                COUNT(DISTINCT CASE WHEN geo_level = 'city' THEN geo_code END) AS city_count
+            FROM subnational_observations
+            """
+        ).fetchone()
+        return {
+            "observation_count": int(row[0]),
+            "geography_count": int(row[1]),
+            "nuts2_count": int(row[2]),
+            "city_count": int(row[3]),
         }
     finally:
         con.close()
