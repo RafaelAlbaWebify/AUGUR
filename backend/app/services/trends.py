@@ -5,6 +5,7 @@ from app.catalog import (
     MATERIAL_CHANGE_RULE_VERSION,
 )
 from app.engines.trend import calculate_trend
+from app.services.peer_reference import indicator_peer_reference
 
 
 def country_trends(country_iso3: str) -> dict:
@@ -33,6 +34,10 @@ def country_trends(country_iso3: str) -> dict:
         )
 
         latest = series[-1]
+        peer_reference = indicator_peer_reference(
+            indicator["indicator_id"],
+            country_iso3,
+        )
 
         results.append(
             {
@@ -49,6 +54,7 @@ def country_trends(country_iso3: str) -> dict:
                 "target_max": indicator.get("target_max"),
                 "methodology_note": catalog_item.get("methodology_note"),
                 "comparability_note": catalog_item.get("comparability_note"),
+                "peer_reference": peer_reference,
                 "material_change_rule": {
                     "version": MATERIAL_CHANGE_RULE_VERSION,
                     "mode": trend.material_change_mode,
