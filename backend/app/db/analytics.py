@@ -92,6 +92,19 @@ CREATE TABLE IF NOT EXISTS labour_job_vacancy_rates (
     PRIMARY KEY (country_iso3, period, isco08, source_id)
 );
 
+CREATE TABLE IF NOT EXISTS labour_oja_imbalance_eu27 (
+    isco08 VARCHAR NOT NULL,
+    major_group_label VARCHAR,
+    occupation_label VARCHAR NOT NULL,
+    score DOUBLE NOT NULL,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    release_version VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (isco08, source_id, release_version)
+);
+
 CREATE TABLE IF NOT EXISTS labour_occupation_outlook (
     country_iso3 VARCHAR NOT NULL,
     period INTEGER NOT NULL,
@@ -457,6 +470,119 @@ def latest_labour_job_vacancy_rate(
 
 
 
+
+
+
+def upsert_labour_oja_imbalance_eu27(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO labour_oja_imbalance_eu27
+            (
+                isco08, major_group_label, occupation_label, score,
+                source_id, dataset_id, release_version, retrieved_at,
+                source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["isco08"],
+                    row.get("major_group_label"),
+                    row["occupation_label"],
+                    row["score"],
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["release_version"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_labour_oja_imbalance_eu27(isco08: str) -> dict | None:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'labour_oja_imbalance_eu27'
+            """
+        ).fetchone()[0]
+        if not table_exists:
+            return None
+
+        result = con.execute(
+            """
+            SELECT
+                isco08, major_group_label, occupation_label, score,
+                source_id, dataset_id, release_version, retrieved_at,
+                source_updated_at
+            FROM labour_oja_imbalance_eu27
+            WHERE isco08 = ?
+            ORDER BY release_version DESC
+            LIMIT 1
+            """,
+            [str(isco08)],
+        )
+        row = result.fetchone()
+        if row is None:
+            return None
+        columns = [column[0] for column in result.description]
+        return dict(zip(columns, row))
+    finally:
+        con.close()
+
+
+def labour_oja_imbalance_eu27_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'labour_oja_imbalance_eu27'
+            """
+        ).fetchone()[0]
+        if not table_exists:
+            return {
+                "available": False,
+                "row_count": 0,
+                "release_versions": [],
+                "latest_retrieved_at": None,
+                "geographic_scope": "EU27",
+            }
+
+        row = con.execute(
+            """
+            SELECT COUNT(*), MAX(retrieved_at)
+            FROM labour_oja_imbalance_eu27
+            """
+        ).fetchone()
+        releases = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT release_version FROM labour_oja_imbalance_eu27 ORDER BY release_version"
+            ).fetchall()
+        ]
+        return {
+            "available": bool(row[0]),
+            "row_count": row[0],
+            "release_versions": releases,
+            "latest_retrieved_at": row[1],
+            "geographic_scope": "EU27",
+        }
+    finally:
+        con.close()
 
 def upsert_labour_occupation_outlook(rows: list[dict]) -> int:
     if not rows:
