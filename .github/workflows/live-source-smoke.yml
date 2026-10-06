@@ -71,3 +71,9 @@ jobs:
 
       - name: Probe verified PM2.5 for Oviedo
         run: python -m scripts.probe_eea_pm25_city --city Oviedo --country ES --year 2024
+
+      - name: Inspect one verified PM2.5 parquet
+        run: python -m scripts.inspect_eea_pm25_parquet
+
+      - name: Inspect EEA to Urban Audit city mapping
+        run: python -m scripts.inspect_eea_gisco_city_mapping
