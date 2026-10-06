@@ -466,8 +466,16 @@ Current implementation status:
    - 36 NUTS2 regions loaded, including Galicia and Principado de Asturias;
    - regional sector-employment ingestion via `lfst_r_lfe2en2` is implemented to describe economic structure by NACE;
    - regional sector composition remains context, not occupation-specific vacancy evidence.
-5. language requirements extracted from OJAs.
-6. occupation/skill demand trend.
+5. **language requirements extracted from OJAs — SOURCE-ACCESS-GATED**
+   - Skills-OVATE exposes language-related OJA analytics interactively, but detailed data access is organised through Eurostat's Microdata access portal;
+   - AUGUR does not scrape Tableau or infer language-demand shares from ESCO;
+   - the public Cedefop 2026 OJA imbalance CSV contains only a combined EU27 occupation score, so its non-native-language component cannot be decomposed into a country language-demand percentage;
+   - CareerFit now returns a structured `source_access_gated` state rather than a null/zero placeholder.
+6. **occupation/skill demand trend — PARTIAL / ACTIVE**
+   - occupation short-term trend is active through Cedefop STAS 2026–2027 employment outlook, exposed as contextual occupation trend by ISCO 2-digit with ISCO 1-digit fallback;
+   - STAS growth direction is explicitly labelled as employment outlook, not OJA demand growth or statistical significance;
+   - detailed skill-demand shares and skill time series remain source-access-gated behind Skills-OVATE / Eurostat microdata;
+   - ESCO relationships remain taxonomy evidence and are never substituted for employer-demand frequency.
 7. **housing affordability vs income — ACTIVE / EXPANDING**
    - NUTS2 disposable household income per inhabitant in PPS integrated from `nama_10r_2hhinc`;
    - NUTS2 housing-cost overburden integrated from `ilc_lvho07_r`;
