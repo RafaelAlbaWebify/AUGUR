@@ -312,6 +312,19 @@ function formatLanguages(languages: LanguageSkill[]) {
     .join(', ')
 }
 
+const DECISION_WEIGHT_DIMENSIONS = [
+  ['human_systems', 'Human systems'],
+  ['prosperity', 'Prosperity'],
+  ['infrastructure', 'Infrastructure'],
+  ['safety', 'Safety'],
+  ['environment', 'Environment'],
+  ['housing', 'Housing'],
+  ['strategic_resilience', 'Strategic resilience'],
+  ['demography', 'Demography'],
+  ['productive_capacity', 'Productive capacity'],
+  ['fiscal', 'Fiscal sustainability'],
+] as const
+
 export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelProps) {
   const [profile, setProfile] = useState<PersonalProfile>(
     () => profileDraftCache?.profile ?? EMPTY_PROFILE,
@@ -568,6 +581,9 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const selectedPriorityCount = priorityOptions.filter(
     (item) => profile.preferences[`priority_${item.key}`] === true,
   ).length
+  const selectedDecisionWeightCount = DECISION_WEIGHT_DIMENSIONS.filter(
+    ([dimension]) => typeof profile.preferences[`decision_weight_${dimension}`] === 'number',
+  ).length
 
   const gapPurpose: Record<string, string> = {
     legal_fit: 'work and residence evidence',
@@ -774,6 +790,50 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               )
             })}
           </div>
+        </section>
+
+        <section className="myFitCard decisionWeightsCard" aria-label="Decision weights">
+          <div className="myFitCardHeader">
+            <h3>Decision weights</h3>
+            <span>{selectedDecisionWeightCount}/10 explicit</span>
+          </div>
+          <p>
+            Optional P2 weights for personalized comparison. Blank means no personal weight is set;
+            0 excludes a dimension; 5 gives the highest relative priority. Objective evidence is unchanged.
+          </p>
+          <div className="decisionWeightGrid">
+            {DECISION_WEIGHT_DIMENSIONS.map(([dimension, label]) => {
+              const key = `decision_weight_${dimension}`
+              const raw = profile.preferences[key]
+              const value = typeof raw === 'number' ? String(raw) : ''
+              return (
+                <label key={dimension}>
+                  <span>{label}</span>
+                  <select
+                    aria-label={`${label} decision weight`}
+                    value={value}
+                    onChange={(event) => {
+                      const preferences = { ...profile.preferences }
+                      if (event.target.value === '') delete preferences[key]
+                      else preferences[key] = Number(event.target.value)
+                      setProfile({ ...profile, preferences })
+                    }}
+                  >
+                    <option value="">Not set</option>
+                    <option value="0">0 · exclude</option>
+                    <option value="1">1 · low</option>
+                    <option value="2">2</option>
+                    <option value="3">3 · medium</option>
+                    <option value="4">4</option>
+                    <option value="5">5 · highest</option>
+                  </select>
+                </label>
+              )
+            })}
+          </div>
+          <small>
+            Save profile to persist these weights. AUGUR normalizes only interpretable indicators and deduplicates semantic constructs before weighting.
+          </small>
         </section>
 
         <section className="myFitCard profileEvidenceCard" aria-label="Personal-fit evidence">
