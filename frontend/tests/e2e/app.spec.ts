@@ -551,6 +551,28 @@ async function mockApi(page: Page) {
       }
     } else if (path === '/api/countries') {
       body = { countries }
+    } else if (path === '/api/compare/personalized') {
+      const requested = (url.searchParams.get('countries') ?? 'IRL,ESP,PRT').split(',')
+      body = {
+        status: 'weights_missing',
+        countries: requested,
+        weights: {
+          explicit: {},
+          scale: [0, 5],
+          missing_means: 'not_selected_for_personal_weighting',
+        },
+        normalization: {
+          version: 'augur_selected_set_utility_v1',
+          scope: 'selected_country_set',
+          utility_range: [0, 1],
+          contextual_indicators_excluded: true,
+          semantic_construct_version: 'augur_semantic_constructs_v1',
+          notes: [],
+        },
+        indicators: [],
+        constructs: [],
+        dimensions: [],
+      }
     } else if (path === '/api/compare') {
       const requested = (url.searchParams.get('countries') ?? 'IRL,ESP,PRT').split(',')
       body = {
@@ -962,6 +984,15 @@ test('Skills and Languages distinguishes learning gaps from demand ranking', asy
     await expect(summary.getByText(/not employer-demand frequency/i)).toBeVisible()
     await expect(summary.getByText(/not a skill-demand ranking/i)).toBeVisible()
   }
+})
+
+test('Decision Matrix keeps personal weighting explicit when no weights are saved', async ({ page }) => {
+  await page.goto('/compare?countries=ESP,PRT,IRL')
+  await page.getByRole('button', { name: 'My priorities' }).click()
+
+  await expect(page.getByText(/No explicit P2 decision weights are saved yet/i)).toBeVisible()
+  await expect(page.getByText(/objective evidence below remains unchanged/i)).toBeVisible()
+  await expect(page.getByText(/No overall ranking/i)).toHaveCount(0)
 })
 
 test('Outlook labels contextual scenarios without implying statistical uncertainty', async ({ page }) => {
