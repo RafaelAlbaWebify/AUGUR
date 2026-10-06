@@ -3,7 +3,10 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-from app.db.analytics import latest_labour_job_vacancy_rate
+from app.db.analytics import (
+    latest_labour_job_vacancy_rate,
+    latest_labour_occupation_outlook,
+)
 from app.models.profile import PersonalProfileResponse
 from app.services.esco_match import match_profile_skills
 from app.esco_store import search_occupations
@@ -469,6 +472,67 @@ def occupation_vacancy_demand_evidence(
     }
 
 
+
+
+def occupation_outlook_evidence(
+    target_country_iso3: str,
+    occupation_match: dict,
+) -> dict | None:
+    selected = occupation_match.get("selected")
+    if not selected:
+        return None
+
+    raw_isco = str(selected.get("isco_group") or selected.get("code") or "")
+    digits = "".join(character for character in raw_isco if character.isdigit())
+    if not digits:
+        return None
+
+    candidates = []
+    if len(digits) >= 2:
+        candidates.append((digits[:2], "isco_2digit"))
+    candidates.append((digits[:1], "isco_1digit"))
+
+    for isco_code, granularity in candidates:
+        rows = latest_labour_occupation_outlook(
+            target_country_iso3,
+            isco_code,
+        )
+        if not rows:
+            continue
+
+        return {
+            "status": "available",
+            "source_id": rows[0]["source_id"],
+            "dataset_id": rows[0]["dataset_id"],
+            "release_version": rows[0]["release_version"],
+            "isco08": isco_code,
+            "granularity": granularity,
+            "occupation_label": rows[0].get("occupation_label"),
+            "scenario": rows[0]["scenario"],
+            "horizons": [
+                {
+                    "period": row["period"],
+                    "employment_level_thousands": row.get("employment_level_thousands"),
+                    "employment_growth_pct": row.get("employment_growth_pct"),
+                }
+                for row in rows
+            ],
+            "role": "context_only",
+            "notes": [
+                "Cedefop STAS is a short-term occupation outlook, not a job-finding probability.",
+                "ISCO 2-digit evidence is preferred; ISCO 1-digit is a fallback.",
+                "STAS outlook does not change CareerFit completeness or TTV timing.",
+            ],
+        }
+
+    return {
+        "status": "evidence_missing",
+        "dataset_id": "CEDEFOP_STAS",
+        "isco_2digit": digits[:2] if len(digits) >= 2 else None,
+        "isco_1digit": digits[:1],
+        "role": "context_only",
+    }
+
 def career_fit(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -485,6 +549,10 @@ def career_fit(
         target,
         occupation_match,
     )
+    occupation_outlook = occupation_outlook_evidence(
+        target,
+        occupation_match,
+    )
 
     if evidence is None:
         return {
@@ -496,6 +564,7 @@ def career_fit(
             "source": None,
             "occupation_match": occupation_match,
             "vacancy_demand_evidence": vacancy_demand_evidence,
+            "occupation_outlook_evidence": occupation_outlook,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
@@ -522,6 +591,7 @@ def career_fit(
             "rule_version": BROAD_EVIDENCE_METADATA["rule_version"],
             "source": market_signal_source(evidence, None),
             "occupation_match": occupation_match,
+            "occupation_outlook_evidence": occupation_outlook,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
@@ -613,6 +683,7 @@ def career_fit(
         "source": market_source,
         "occupation_match": occupation_match,
         "vacancy_demand_evidence": vacancy_demand_evidence,
+        "occupation_outlook_evidence": occupation_outlook,
         "skill_match": skill_match,
         "skill_evidence_complete": skill_evidence_complete,
         "market_evidence_complete": market_evidence_complete,
@@ -624,6 +695,7 @@ def career_fit(
             "EURES shortage/surplus groups are broad labour-market signals, not guarantees of job availability.",
             f"Market signal source: {market_source['evidence_id']} · {market_source['conditions_year']} conditions · {market_source['scope']}.",
             "Eurostat vacancy-rate evidence is contextual demand evidence at ISCO major-group level and does not change the shortage/surplus gate.",
+            "Cedefop STAS provides short-term occupation outlook context and does not change the shortage/surplus gate or TTV timing.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
             "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
             "Verified unit-group evidence takes precedence over broad occupational-group signals when both exist.",
