@@ -28,11 +28,36 @@ type ComparisonResponse = {
   indicators: ComparisonIndicator[]
 }
 
+type PersonalizedComparison = {
+  status: 'ready' | 'weights_missing'
+  weights: {
+    explicit: Record<string, number>
+    scale: [number, number]
+    missing_means: string
+  }
+  normalization: {
+    version: string
+    scope: string
+    utility_range: [number, number]
+    contextual_indicators_excluded: boolean
+    semantic_construct_version: string
+    notes: string[]
+  }
+  dimensions: Array<{
+    dimension: string
+    explicit_weight?: number | null
+    utility: Record<string, number>
+    construct_count: number
+    method: string
+  }>
+}
+
 type ComparePanelProps = {
   countries: Country[]
   selected: string[]
   onChange: (slot: number, iso3: string) => void
   comparison: ComparisonResponse | null
+  personalized: PersonalizedComparison | null
   formatValue: (value: number, unit: string) => string
   dimensionLabels: Record<string, string>
   compact?: boolean
@@ -74,6 +99,7 @@ export default function ComparePanel({
   selected,
   onChange,
   comparison,
+  personalized,
   formatValue,
   dimensionLabels,
   compact = false,
@@ -312,9 +338,49 @@ export default function ComparePanel({
       </section>
 
       {mode === 'priorities' && (
-        <div className="comparisonNotice">
-          Personal weighting is not yet implemented. The matrix below remains objective; AUGUR will not simulate a personalized ranking until weights, normalization and sensitivity analysis are explicit.
-        </div>
+        personalized?.status === 'ready' ? (
+          <section className="personalizedComparisonPanel" aria-label="Personalized dimension utilities">
+            <div className="panelHeading">
+              <div>
+                <span>MY PRIORITIES · P2</span>
+                <h3>Weighted dimensions, normalized transparently</h3>
+              </div>
+              <small>{personalized.normalization.version}</small>
+            </div>
+            <p>
+              Utility is 0–1 within the selected country set. Raw evidence is unchanged.
+              No overall ranking is produced at this stage.
+            </p>
+            <div className="personalizedDimensionGrid">
+              {personalized.dimensions
+                .filter((item) => typeof item.explicit_weight === 'number')
+                .map((item) => (
+                  <article key={item.dimension}>
+                    <header>
+                      <strong>{dimensionLabels[item.dimension] ?? item.dimension}</strong>
+                      <span>weight {item.explicit_weight}/5</span>
+                    </header>
+                    <div>
+                      {selected.map((iso3) => (
+                        <span key={iso3}>
+                          <b>{countries.find((country) => country.iso3 === iso3)?.name ?? iso3}</b>
+                          {item.utility[iso3] == null ? '—' : item.utility[iso3].toFixed(2)}
+                        </span>
+                      ))}
+                    </div>
+                    <small>{item.construct_count} semantic constructs</small>
+                  </article>
+                ))}
+            </div>
+            <small>
+              Contextual indicators are excluded from utility normalization; duplicate source series are collapsed by semantic construct.
+            </small>
+          </section>
+        ) : (
+          <div className="comparisonNotice">
+            No explicit P2 decision weights are saved yet. Set 0–5 dimension weights in Profile; objective evidence below remains unchanged.
+          </div>
+        )
       )}
 
       <div className="decisionMatrixLayout">
