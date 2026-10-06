@@ -574,6 +574,31 @@ def test_mixed_unit_group_signal_is_not_supportive(monkeypatch):
     assert result["viability_evidence_ready"] is False
 
 
+def test_vacancy_source_coverage_unavailable_is_distinct_from_missing_evidence(monkeypatch):
+    _mock_full_esco_career(
+        monkeypatch,
+        coverage=1.0,
+        isco_group="2522",
+        vacancy_rate=None,
+    )
+
+    evidence = career_fit_module.occupation_vacancy_demand_evidence(
+        "IRL",
+        {
+            "selected": {
+                "isco_group": "2522",
+                "code": "2522",
+            }
+        },
+    )
+
+    assert evidence["status"] == "source_coverage_unavailable"
+    assert evidence["dataset_id"] == "jvs_a_isco3_r1"
+    assert evidence["supported_countries"] == ["ESP", "PRT"]
+    assert evidence["isco_3digit"] == "OC252"
+    assert "zero vacancy demand" in evidence["notes"][1]
+
+
 def test_vacancy_rate_prefers_isco3_before_major_fallback(monkeypatch):
     requested = []
 
