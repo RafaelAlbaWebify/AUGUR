@@ -1266,3 +1266,31 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.decisionWeightGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.decisionWeightGrid label {
+  display: grid;
+  gap: 6px;
+}
+
+.decisionWeightGrid label > span {
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.decisionWeightGrid select {
+  width: 100%;
+}
+
+@media (max-width: 720px) {
+  .decisionWeightGrid {
+    grid-template-columns: 1fr;
+  }
+}
