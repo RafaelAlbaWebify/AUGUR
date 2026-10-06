@@ -92,6 +92,25 @@ CREATE TABLE IF NOT EXISTS labour_job_vacancy_rates (
     PRIMARY KEY (country_iso3, period, isco08, source_id)
 );
 
+CREATE TABLE IF NOT EXISTS labour_occupation_outlook (
+    country_iso3 VARCHAR NOT NULL,
+    period INTEGER NOT NULL,
+    isco08 VARCHAR NOT NULL,
+    isco_level INTEGER NOT NULL,
+    occupation_label VARCHAR,
+    scenario VARCHAR NOT NULL,
+    employment_level_thousands DOUBLE,
+    employment_growth_pct DOUBLE,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    release_version VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (
+        country_iso3, period, isco08, scenario, source_id, release_version
+    )
+);
+
 CREATE TABLE IF NOT EXISTS labour_job_transitions (
     country_iso3 VARCHAR NOT NULL,
     period INTEGER NOT NULL,
@@ -436,6 +455,76 @@ def latest_labour_job_vacancy_rate(
     finally:
         con.close()
 
+
+
+
+def upsert_labour_occupation_outlook(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO labour_occupation_outlook
+            (
+                country_iso3, period, isco08, isco_level, occupation_label,
+                scenario, employment_level_thousands, employment_growth_pct,
+                source_id, dataset_id, release_version, retrieved_at,
+                source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["country_iso3"],
+                    row["period"],
+                    row["isco08"],
+                    row["isco_level"],
+                    row.get("occupation_label"),
+                    row["scenario"],
+                    row.get("employment_level_thousands"),
+                    row.get("employment_growth_pct"),
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["release_version"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_labour_occupation_outlook(
+    country_iso3: str,
+    isco08: str,
+    scenario: str = "Aligned_forecast_Ameco",
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT
+                country_iso3, period, isco08, isco_level, occupation_label,
+                scenario, employment_level_thousands, employment_growth_pct,
+                source_id, dataset_id, release_version, retrieved_at,
+                source_updated_at
+            FROM labour_occupation_outlook
+            WHERE country_iso3 = ?
+              AND isco08 = ?
+              AND scenario = ?
+            ORDER BY period, release_version DESC
+            """,
+            [country_iso3.upper(), str(isco08), scenario],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
 
 def upsert_labour_job_transitions(rows: list[dict]) -> int:
     if not rows:
