@@ -6,6 +6,7 @@ from pathlib import Path
 from app.db.analytics import (
     latest_labour_job_vacancy_rate,
     latest_labour_occupation_outlook,
+    latest_labour_oja_imbalance_eu27,
 )
 from app.models.profile import PersonalProfileResponse
 from app.services.esco_match import match_profile_skills
@@ -474,6 +475,49 @@ def occupation_vacancy_demand_evidence(
 
 
 
+
+
+def eu27_oja_imbalance_evidence(
+    occupation_match: dict,
+) -> dict | None:
+    selected = occupation_match.get("selected")
+    if not selected:
+        return None
+
+    raw_isco = str(selected.get("isco_group") or selected.get("code") or "")
+    digits = "".join(character for character in raw_isco if character.isdigit())
+    if len(digits) < 4:
+        return None
+
+    isco_unit = digits[:4]
+    row = latest_labour_oja_imbalance_eu27(isco_unit)
+    if row is None:
+        return {
+            "status": "evidence_missing",
+            "isco08": isco_unit,
+            "geographic_scope": "EU27",
+            "dataset_id": "CEDEFOP_OJA_IMBALANCE",
+            "role": "context_only",
+        }
+
+    return {
+        "status": "available",
+        "isco08": row["isco08"],
+        "occupation_label": row["occupation_label"],
+        "score": row["score"],
+        "source_id": row["source_id"],
+        "dataset_id": row["dataset_id"],
+        "release_version": row["release_version"],
+        "geographic_scope": "EU27",
+        "role": "context_only",
+        "notes": [
+            "The published score is a single EU27-level exploratory recruitment-pressure signal.",
+            "Higher values indicate stronger signals of potential occupational shortage in online job advertisements.",
+            "The score is not country-specific and is not a hiring probability.",
+            "This evidence does not change CareerFit completeness, market gates or TTV timing.",
+        ],
+    }
+
 def occupation_outlook_evidence(
     target_country_iso3: str,
     occupation_match: dict,
@@ -553,6 +597,9 @@ def career_fit(
         target,
         occupation_match,
     )
+    eu27_oja_imbalance = eu27_oja_imbalance_evidence(
+        occupation_match,
+    )
 
     if evidence is None:
         return {
@@ -565,6 +612,7 @@ def career_fit(
             "occupation_match": occupation_match,
             "vacancy_demand_evidence": vacancy_demand_evidence,
             "occupation_outlook_evidence": occupation_outlook,
+            "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
@@ -684,6 +732,7 @@ def career_fit(
         "occupation_match": occupation_match,
         "vacancy_demand_evidence": vacancy_demand_evidence,
         "occupation_outlook_evidence": occupation_outlook,
+        "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
         "skill_match": skill_match,
         "skill_evidence_complete": skill_evidence_complete,
         "market_evidence_complete": market_evidence_complete,
@@ -696,6 +745,7 @@ def career_fit(
             f"Market signal source: {market_source['evidence_id']} · {market_source['conditions_year']} conditions · {market_source['scope']}.",
             "Eurostat vacancy-rate evidence is contextual demand evidence at ISCO major-group level and does not change the shortage/surplus gate.",
             "Cedefop STAS provides short-term occupation outlook context and does not change the shortage/surplus gate or TTV timing.",
+            "Cedefop OJA imbalance provides an exploratory EU27-level ISCO-4 recruitment-pressure context and does not change country-specific market gates or TTV timing.",
             "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
             "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
             "Verified unit-group evidence takes precedence over broad occupational-group signals when both exist.",
