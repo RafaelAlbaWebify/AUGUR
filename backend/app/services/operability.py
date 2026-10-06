@@ -7,6 +7,7 @@ from app.db.analytics import (
     labour_occupation_outlook_status,
     labour_oja_imbalance_eu27_status,
     subnational_evidence_status,
+    regional_sector_employment_status,
 )
 from app.esco_store import esco_status
 from app.providers import providers_for_country
@@ -52,6 +53,7 @@ def operability_status() -> dict:
     occupation_outlook = labour_occupation_outlook_status()
     oja_imbalance = labour_oja_imbalance_eu27_status()
     subnational = subnational_evidence_status()
+    regional_sector = regional_sector_employment_status()
     countries = evidence["countries"]
 
     provider_coverage = {}
@@ -209,6 +211,7 @@ def operability_status() -> dict:
         "occupation_outlook_evidence": occupation_outlook,
         "eu27_oja_imbalance_evidence": oja_imbalance,
         "subnational_evidence": subnational,
+        "regional_sector_evidence": regional_sector,
         "provider_coverage": provider_coverage,
         "blockers": blockers,
         "evidence": evidence,
@@ -223,6 +226,7 @@ def operability_status() -> dict:
             "Cedefop STAS occupation outlook is auxiliary forward-looking labour evidence and does not by itself change TTV or full-product readiness.",
             "Cedefop OJA imbalance is exploratory EU27-level occupation context and does not count as country-specific coverage or TTV evidence.",
             "NUTS2 labour evidence is regional context and does not imply occupation-specific regional demand unless the source explicitly supports it.",
+            "NUTS2 sector-employment evidence describes regional economic structure, not vacancies or hiring probability.",
             "TTV calibration metrics are descriptive until an external calibration protocol and acceptance criteria are approved.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
