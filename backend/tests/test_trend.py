@@ -124,3 +124,73 @@ def test_short_but_consistent_series_has_low_depth_not_high_depth():
     assert result.evidence_depth == "low"
     assert result.trend_certainty == "high"
     assert result.linear_fit_r2 == 1.0
+
+
+def test_absolute_material_threshold_can_hold_small_rate_change_stable():
+    result = calculate_trend(
+        [(2020, 10.0), (2025, 10.3)],
+        "lower",
+        material_change_mode="absolute",
+        material_change_threshold=0.5,
+    )
+
+    assert result.material_change_value == 0.3000000000000007
+    assert result.direction == "stable"
+    assert result.interpretation == "neutral_or_contextual"
+
+
+def test_absolute_material_threshold_marks_larger_rate_change():
+    result = calculate_trend(
+        [(2020, 10.0), (2025, 10.7)],
+        "lower",
+        material_change_mode="absolute",
+        material_change_threshold=0.5,
+    )
+
+    assert result.direction == "increase"
+    assert result.interpretation == "deteriorating"
+
+
+def test_relative_material_threshold_remains_available_for_scale_indicators():
+    result = calculate_trend(
+        [(2020, 100.0), (2025, 100.4)],
+        "higher",
+        material_change_mode="relative_pct",
+        material_change_threshold=0.5,
+    )
+
+    assert result.direction == "stable"
+    assert result.material_change_mode == "relative_pct"
+
+
+def test_country_trends_exposes_material_change_rule(monkeypatch):
+    import app.services.trends as trends_service
+
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_registry",
+        lambda: [{
+            "indicator_id": "unemployment_rate",
+            "name": "Unemployment rate",
+            "dimension": "productive_capacity",
+            "unit": "percent",
+            "interpretation_policy": "lower",
+            "target_min": None,
+            "target_max": None,
+        }],
+    )
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_series",
+        lambda _country, _indicator: [
+            {"period": 2020, "value": 10.0, "source_id": "EUROSTAT"},
+            {"period": 2025, "value": 10.3, "source_id": "EUROSTAT"},
+        ],
+    )
+
+    result = trends_service.country_trends("ESP")
+    indicator = result["indicators"][0]
+
+    assert indicator["material_change_rule"]["mode"] == "absolute"
+    assert indicator["material_change_rule"]["threshold"] == 0.5
+    assert indicator["trend"]["direction"] == "stable"
