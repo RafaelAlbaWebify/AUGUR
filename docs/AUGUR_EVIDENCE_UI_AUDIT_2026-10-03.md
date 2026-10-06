@@ -478,7 +478,13 @@ Current implementation status:
    - NUTS2 available hospital beds per 100,000 integrated from `hlth_rs_bdsrg2`;
    - Portugal currently has no NUTS2 unmet-needs observations in this source, so AUGUR leaves the regional value unavailable rather than copying the national figure;
    - unmet needs and bed capacity remain separate signals and are not combined into a synthetic healthcare score.
-9. environment/air quality.
+9. **environment/air quality — ACTIVE / EXPANDING**
+   - observed city PM2.5 is integrated from validated EEA E1a measurements via the official Parquet download API;
+   - EEA city names are mapped to Urban Audit/GISCO city codes by normalized exact matching, with only the official "(greater city)" qualifier ignored; ambiguous matches are rejected;
+   - annual city PM2.5 requires at least 75% calendar-year coverage per sampling point, uses validated/verified observations only, and averages eligible sampling-point annual means;
+   - the 2024 Oviedo live-source validation produced 9.0111 µg/m³ from two eligible hourly sampling points; one daily stream was excluded for insufficient coverage;
+   - city PM2.5 is labelled observed monitoring evidence and is not treated as population-weighted exposure or NUTS2 environmental evidence;
+   - EEA burden-of-disease data for countries/NUTS/cities is a separate future environmental-health extension, not merged into the concentration signal.
 10. safety and access-to-services.
 
 Important P1 boundary:
