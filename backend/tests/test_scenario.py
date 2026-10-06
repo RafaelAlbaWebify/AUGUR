@@ -1,4 +1,5 @@
 from app.engines.scenario import build_scenario_value, horizon_uncertainty
+from app.services.scenarios import country_scenarios
 
 
 def test_horizon_uncertainty_scales_outward():
@@ -53,3 +54,25 @@ def test_life_expectancy_envelope_widens():
     assert near.improvement == 85.8
     assert long.improvement == 87.0
     assert long.stress == 83.0
+
+
+def test_country_scenarios_declares_experimental_model_status(monkeypatch):
+    import app.services.scenarios as scenarios_service
+
+    monkeypatch.setattr(
+        scenarios_service,
+        "future_trajectory",
+        lambda _country, _horizons: [],
+    )
+
+    result = country_scenarios("ESP")
+
+    assert result["model_status"] == {
+        "state": "experimental",
+        "calibrated": False,
+        "backtested": False,
+        "probabilistic": False,
+        "eligible_for_decision_ranking": False,
+        "version": None,
+        "reason": "scenario_envelope_not_empirically_calibrated_or_backtested",
+    }
