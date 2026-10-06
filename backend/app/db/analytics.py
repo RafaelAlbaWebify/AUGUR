@@ -139,6 +139,21 @@ CREATE TABLE IF NOT EXISTS labour_job_transitions (
     )
 );
 
+CREATE TABLE IF NOT EXISTS regional_sector_employment (
+    geo_code VARCHAR NOT NULL,
+    geo_name VARCHAR,
+    geo_level VARCHAR NOT NULL,
+    period INTEGER NOT NULL,
+    nace_code VARCHAR NOT NULL,
+    nace_label VARCHAR,
+    employment_thousands DOUBLE NOT NULL,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (geo_code, period, nace_code, source_id)
+);
+
 CREATE TABLE IF NOT EXISTS subnational_observations (
     geo_code VARCHAR NOT NULL,
     geo_name VARCHAR,
@@ -868,6 +883,138 @@ def subnational_evidence_status() -> dict:
             "country_prefixes": countries,
             "indicator_ids": indicators,
             "latest_retrieved_at": row[2],
+            "geo_level": "NUTS2",
+        }
+    finally:
+        con.close()
+
+
+
+def upsert_regional_sector_employment(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO regional_sector_employment
+            (
+                geo_code, geo_name, geo_level, period, nace_code, nace_label,
+                employment_thousands, source_id, dataset_id, retrieved_at,
+                source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["geo_code"],
+                    row.get("geo_name"),
+                    row["geo_level"],
+                    row["period"],
+                    row["nace_code"],
+                    row.get("nace_label"),
+                    row["employment_thousands"],
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_regional_sector_employment(country_iso2: str) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY geo_code, nace_code
+                        ORDER BY period DESC
+                    ) AS rn
+                FROM regional_sector_employment
+                WHERE geo_level = 'NUTS2'
+                  AND geo_code LIKE ?
+            )
+            SELECT
+                geo_code, geo_name, geo_level, period, nace_code, nace_label,
+                employment_thousands, source_id, dataset_id, retrieved_at,
+                source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY geo_code, nace_code
+            """,
+            [f"{country_iso2.upper()}%"],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def regional_sector_employment_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'regional_sector_employment'
+            """
+        ).fetchone()[0]
+
+        if not table_exists:
+            return {
+                "available": False,
+                "row_count": 0,
+                "region_count": 0,
+                "country_prefixes": [],
+                "nace_code_count": 0,
+                "latest_period": None,
+                "latest_retrieved_at": None,
+                "geo_level": "NUTS2",
+            }
+
+        row = con.execute(
+            """
+            SELECT
+                COUNT(*),
+                COUNT(DISTINCT geo_code),
+                COUNT(DISTINCT nace_code),
+                MAX(period),
+                MAX(retrieved_at)
+            FROM regional_sector_employment
+            WHERE geo_level = 'NUTS2'
+            """
+        ).fetchone()
+
+        countries = [
+            value[0]
+            for value in con.execute(
+                """
+                SELECT DISTINCT SUBSTR(geo_code, 1, 2)
+                FROM regional_sector_employment
+                WHERE geo_level = 'NUTS2'
+                ORDER BY 1
+                """
+            ).fetchall()
+        ]
+
+        return {
+            "available": bool(row[0]),
+            "row_count": row[0],
+            "region_count": row[1],
+            "country_prefixes": countries,
+            "nace_code_count": row[2],
+            "latest_period": row[3],
+            "latest_retrieved_at": row[4],
             "geo_level": "NUTS2",
         }
     finally:
