@@ -137,3 +137,36 @@ def test_regional_evidence_exposes_sector_structure(monkeypatch):
         if item["nace_code"] == "J"
     )
     assert ict["employment_share_pct"] == 10.0
+
+
+def test_regional_comparison_includes_sector_structure(monkeypatch):
+    def fake_region(code, adapter=None):
+        share = 8.0 if code == "ES11" else 5.0
+        return {
+            "geo_code": code,
+            "geo_level": "nuts2",
+            "indicators": [],
+            "sector_structure": {
+                "status": "available",
+                "top_sectors": [
+                    {
+                        "nace_code": "J",
+                        "nace_label": "Information and communication",
+                        "period": 2025,
+                        "employment_thousands": 20.0,
+                        "employment_share_pct": share,
+                    }
+                ],
+            },
+        }
+
+    monkeypatch.setattr(regional_module, "regional_evidence", fake_region)
+
+    result = regional_comparison(["ES11", "ES12"])
+
+    assert result["sector_comparison"]["status"] == "available"
+    sector = result["sector_comparison"]["sectors"][0]
+    assert sector["nace_code"] == "J"
+    assert sector["regions"]["ES11"]["employment_share_pct"] == 8.0
+    assert sector["regions"]["ES12"]["employment_share_pct"] == 5.0
+    assert result["sector_comparison"]["role"] == "regional_employment_structure_only"
