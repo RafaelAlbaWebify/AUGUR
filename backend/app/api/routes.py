@@ -18,6 +18,7 @@ from app.services.assessment import country_assessment
 from app.services.trajectory import country_future_trajectory
 from app.services.scenarios import country_scenarios
 from app.services.compare import country_comparison
+from app.services.personalized_compare import personalized_normalization
 from app.services.profile_readiness import profile_readiness
 from app.services.financial_fit import financial_fit
 from app.services.legal_fit import legal_fit
@@ -240,6 +241,42 @@ def compare(
     return country_comparison(requested)
 
 
+
+
+@router.get("/compare/personalized")
+def compare_personalized(
+    countries: str = Query(
+        "ESP,PRT,IRL",
+        description="Comma-separated ISO3 country codes",
+    )
+):
+    requested = [
+        value.strip().upper()
+        for value in countries.split(",")
+        if value.strip()
+    ]
+
+    if len(requested) < 2:
+        raise HTTPException(
+            status_code=400,
+            detail="At least two countries are required for personalized comparison",
+        )
+
+    if len(requested) > 5:
+        raise HTTPException(
+            status_code=400,
+            detail="A maximum of five countries can be compared at once",
+        )
+
+    registry = {country["iso3"] for country in list_countries()}
+    unknown = [code for code in requested if code not in registry]
+    if unknown:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Countries are not registered: {', '.join(unknown)}",
+        )
+
+    return personalized_normalization(requested)
 
 
 @router.get("/subnational/status")
