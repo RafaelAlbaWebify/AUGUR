@@ -28,13 +28,19 @@ HEADER_ALIASES = {
         "geo",
         "geography",
     },
+    "country_code": {
+        "country code",
+        "country_code",
+        "geo code",
+    },
     "isco": {
         "isco",
         "isco code",
         "isco08",
         "isco 08",
         "occupation code",
-        "occupation",
+        "oc code",
+        "oc_code",
     },
     "year": {
         "year",
@@ -268,8 +274,28 @@ def workbook_preview(path: Path, max_rows: int = 40) -> list[dict]:
         ]
 
 
-def detect_table_schema(rows: list[list[object]]) -> dict:
+def _year_columns(row: list[object]) -> dict[int, int]:
+    years: dict[int, int] = {}
+    for index, value in enumerate(row):
+        text = str(value or "").strip()
+        if re.fullmatch(r"20\\d{2}", text):
+            years[int(text)] = index
+    return years
+
+
+def detect_table_schema(
+    rows: list[list[object]],
+    sheet_name: str | None = None,
+) -> dict:
     best: dict | None = None
+    sheet = (sheet_name or "").lower()
+    metric_from_sheet = (
+        "growth_pct"
+        if sheet.endswith("_%")
+        else "employment_level_thousands"
+        if sheet.startswith("ameco_")
+        else None
+    )
 
     for row_index, row in enumerate(rows):
         normalised = [_normalise_header(value) for value in row]
@@ -279,28 +305,43 @@ def detect_table_schema(rows: list[list[object]]) -> dict:
             for index, header in enumerate(normalised):
                 if not header:
                     continue
-                if header in aliases or any(
-                    alias in header
-                    for alias in aliases
-                    if len(alias) >= 8
-                ):
+                if header in aliases:
                     matches[field] = index
                     break
 
-        score = len(matches)
+        years = _year_columns(row)
+        has_country = "country" in matches or "country_code" in matches
+        has_isco = "isco" in matches
+        has_years = bool(years)
+
+        # STAS August 2026 uses wide year columns (2026, 2027) rather than
+        # a single long-format year field.
+        core_fields_present = has_country and has_isco and (
+            "year" in matches or has_years
+        )
+        metric_present = (
+            any(field in matches for field in ("growth_pct", "absolute_change"))
+            or (metric_from_sheet is not None and has_years)
+        )
+
+        score = (
+            (2 if has_country else 0)
+            + (2 if has_isco else 0)
+            + (2 if has_years else 0)
+            + (1 if "year" in matches else 0)
+            + (1 if metric_present else 0)
+            + len(matches)
+        )
+
         candidate = {
             "header_row_index": row_index,
             "headers": [str(value or "") for value in row],
             "matches": matches,
+            "year_columns": years,
+            "metric_kind": metric_from_sheet,
             "score": score,
-            "core_fields_present": all(
-                field in matches
-                for field in ("country", "isco", "year")
-            ),
-            "metric_present": any(
-                field in matches
-                for field in ("growth_pct", "absolute_change")
-            ),
+            "core_fields_present": core_fields_present,
+            "metric_present": metric_present,
         }
 
         if best is None or candidate["score"] > best["score"]:
@@ -312,6 +353,8 @@ def detect_table_schema(rows: list[list[object]]) -> dict:
             "header_row_index": None,
             "headers": [],
             "matches": {},
+            "year_columns": {},
+            "metric_kind": metric_from_sheet,
             "score": 0,
             "core_fields_present": False,
             "metric_present": False,
@@ -319,7 +362,7 @@ def detect_table_schema(rows: list[list[object]]) -> dict:
 
     if best["core_fields_present"] and best["metric_present"]:
         best["status"] = "recognised"
-    elif best["score"] >= 2:
+    elif best["score"] >= 4:
         best["status"] = "partial"
     else:
         best["status"] = "unrecognised"
@@ -331,7 +374,7 @@ def inspect_workbook(path: Path, max_rows: int = 40) -> dict:
     diagnostics = []
 
     for sheet in sheets:
-        schema = detect_table_schema(sheet["rows"])
+        schema = detect_table_schema(sheet["rows"], sheet["sheet"])
         diagnostics.append(
             {
                 "sheet": sheet["sheet"],
