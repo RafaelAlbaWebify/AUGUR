@@ -395,3 +395,44 @@ def world_bank_indicators() -> list[dict]:
         for indicator in INDICATORS
         if ":" not in indicator["source_indicator"]
     ]
+
+
+# AUGUR heuristic v1 material-change rules.
+#
+# These thresholds prevent small numerical movements from being presented as
+# meaningful country trajectories. They are explicit product heuristics, not
+# statistical significance thresholds, and should be empirically calibrated
+# as AUGUR accumulates validation evidence.
+MATERIAL_CHANGE_RULES = {
+    "unmet_medical_needs": {"mode": "absolute", "threshold": 0.5},
+    "actual_individual_consumption_index": {"mode": "absolute", "threshold": 2.0},
+    "household_internet_access": {"mode": "absolute", "threshold": 1.0},
+    "intentional_homicide_rate": {"mode": "absolute", "threshold": 0.1},
+    "pm25_premature_death_rate": {"mode": "absolute", "threshold": 2.0},
+    "household_price_level_index": {"mode": "absolute", "threshold": 2.0},
+    "real_house_price_index": {"mode": "absolute", "threshold": 3.0},
+    "rent_price_index": {"mode": "absolute", "threshold": 2.0},
+    "housing_cost_overburden_rate": {"mode": "absolute", "threshold": 0.5},
+    "tertiary_education_25_34": {"mode": "absolute", "threshold": 1.0},
+    "energy_import_dependency": {"mode": "absolute", "threshold": 2.0},
+    "median_age": {"mode": "absolute", "threshold": 0.2},
+    "life_expectancy": {"mode": "absolute", "threshold": 0.2},
+    "real_gdp_growth": {"mode": "absolute", "threshold": 0.5},
+    "imf_inflation_average": {"mode": "absolute", "threshold": 0.5},
+    "imf_unemployment_rate": {"mode": "absolute", "threshold": 0.5},
+    "gdp_per_hour_worked": {"mode": "relative_pct", "threshold": 1.0},
+    "population_total": {"mode": "relative_pct", "threshold": 0.5},
+    "real_gdp": {"mode": "relative_pct", "threshold": 1.0},
+    "real_gdp_per_capita": {"mode": "relative_pct", "threshold": 1.0},
+    "unemployment_rate": {"mode": "absolute", "threshold": 0.5},
+    "employment_population_ratio": {"mode": "absolute", "threshold": 0.5},
+    "employment_rate_20_64": {"mode": "absolute", "threshold": 0.5},
+    "inflation_cpi": {"mode": "absolute", "threshold": 0.5},
+    "inflation_hicp": {"mode": "absolute", "threshold": 0.5},
+    "fertility_rate": {"mode": "absolute", "threshold": 0.05},
+    "population_65_plus_share": {"mode": "absolute", "threshold": 0.5},
+    "net_migration": {"mode": "relative_pct", "threshold": 10.0},
+    "public_debt_gdp": {"mode": "absolute", "threshold": 2.0},
+}
+
+MATERIAL_CHANGE_RULE_VERSION = "augur_material_change_v1"
