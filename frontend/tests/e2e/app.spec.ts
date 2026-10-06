@@ -320,13 +320,14 @@ async function mockApi(page: Page) {
       body = {
         city_code: cityCode,
         geo_level: 'city',
-        source: 'Eurostat City Statistics / Urban Audit',
+        source: 'AUGUR local store · Eurostat Urban Audit + EEA air quality',
         minimum_population_scope: 50000,
-        indicator_count: 1,
-        available_count: 1,
+        indicator_count: 2,
+        available_count: 2,
         complete: true,
         indicators: [
           { indicator_id: 'city_population', name: 'Population', status: 'available', period: 2025, value: 3420000, unit: 'persons', dataset_id: 'urb_cpop1', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_pm25_annual_mean_observed', name: 'Observed annual mean PM2.5', status: 'available', period: 2024, value: 9.0111, unit: 'ug_m3', dataset_id: 'EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS', source_id: 'EEA' },
         ],
         notes: [],
       }
@@ -1545,9 +1546,10 @@ test('map exposes selectable Urban Audit cities only at high zoom', async ({ pag
 
   await expect(page.getByText('CITY · Madrid · ES001C')).toBeVisible()
   const cityEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
-  await expect(cityEvidence.getByText('Eurostat Urban Audit')).toBeVisible()
+  await expect(cityEvidence.getByText('Urban Audit + EEA')).toBeVisible()
   await expect(cityEvidence.getByText('3,420,000')).toBeVisible()
-  await expect(cityEvidence.getByText(/threshold ≥50,000 inhabitants/)).toBeVisible()
+  await expect(cityEvidence.getByText('9.0 µg/m³')).toBeVisible()
+  await expect(cityEvidence.getByText(/observed air quality from validated EEA/i)).toBeVisible()
 })
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
