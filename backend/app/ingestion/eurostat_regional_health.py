@@ -1,7 +1,32 @@
 from __future__ import annotations
 
 from app.ingestion.eurostat import EurostatAdapter
+from app.ingestion.eurostat_regional_labour import normalize_subnational
 
+
+REGIONAL_HEALTH_SERIES = [
+    {
+        "indicator_id": "regional_unmet_medical_needs",
+        "dataset_id": "hlth_silc_08_r",
+        "filters": {
+            "freq": "A",
+            "reason": "TXP_TFAR_WLIST",
+            "unit": "PC",
+            "geoLevel": "nuts2",
+        },
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "regional_hospital_beds_per_100k",
+        "dataset_id": "hlth_rs_bdsrg2",
+        "filters": {
+            "freq": "A",
+            "unit": "P_HTHAB",
+            "geoLevel": "nuts2",
+        },
+        "unit": "per_100k_people",
+    },
+]
 
 DATASETS = [
     {
@@ -103,3 +128,36 @@ def inspect_regional_health_sources(adapter: EurostatAdapter) -> dict:
             for item in results
         ),
     }
+
+
+def fetch_regional_health_evidence(
+    adapter: EurostatAdapter,
+) -> tuple[list[dict], list[dict]]:
+    rows: list[dict] = []
+    diagnostics: list[dict] = []
+
+    for config in REGIONAL_HEALTH_SERIES:
+        payload = adapter.fetch_dataset(
+            config["dataset_id"],
+            config["filters"],
+        )
+        normalized = normalize_subnational(
+            adapter,
+            config,
+            payload,
+        )
+        rows.extend(normalized)
+        diagnostics.append({
+            "indicator_id": config["indicator_id"],
+            "dataset_id": config["dataset_id"],
+            "row_count": len(normalized),
+            "regions": sorted({row["geo_code"] for row in normalized}),
+            "country_prefixes": sorted({row["geo_code"][:2] for row in normalized}),
+            "latest_period": max(
+                (row["period"] for row in normalized),
+                default=None,
+            ),
+            "updated": payload.get("updated"),
+        })
+
+    return rows, diagnostics
