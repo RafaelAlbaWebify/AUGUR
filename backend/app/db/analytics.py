@@ -537,6 +537,72 @@ def latest_labour_occupation_outlook(
     finally:
         con.close()
 
+def labour_occupation_outlook_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'labour_occupation_outlook'
+            """
+        ).fetchone()[0]
+
+        if not table_exists:
+            return {
+                "available": False,
+                "row_count": 0,
+                "country_count": 0,
+                "countries": [],
+                "periods": [],
+                "isco_levels": [],
+                "release_versions": [],
+                "latest_retrieved_at": None,
+            }
+
+        row = con.execute(
+            """
+            SELECT
+                COUNT(*) AS row_count,
+                COUNT(DISTINCT country_iso3) AS country_count,
+                MAX(retrieved_at) AS latest_retrieved_at
+            FROM labour_occupation_outlook
+            """
+        ).fetchone()
+        countries = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT country_iso3 FROM labour_occupation_outlook ORDER BY country_iso3"
+            ).fetchall()
+        ]
+        periods = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT period FROM labour_occupation_outlook ORDER BY period"
+            ).fetchall()
+        ]
+        isco_levels = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT isco_level FROM labour_occupation_outlook ORDER BY isco_level"
+            ).fetchall()
+        ]
+        releases = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT release_version FROM labour_occupation_outlook ORDER BY release_version"
+            ).fetchall()
+        ]
+        return {
+            "available": bool(row[0]),
+            "row_count": row[0],
+            "country_count": row[1],
+            "countries": countries,
+            "periods": periods,
+            "isco_levels": isco_levels,
+            "release_versions": releases,
+            "latest_retrieved_at": row[2],
+        }
+    finally:
+        con.close()
+
+
 def upsert_labour_job_transitions(rows: list[dict]) -> int:
     if not rows:
         return 0
