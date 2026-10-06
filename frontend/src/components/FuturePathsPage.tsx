@@ -44,10 +44,21 @@ type ScenarioIndicator = TrajectoryIndicator & {
   }
 }
 
+type ScenarioModelStatus = {
+  state: string
+  calibrated: boolean
+  backtested: boolean
+  probabilistic: boolean
+  eligible_for_decision_ranking: boolean
+  version: string | null
+  reason: string
+}
+
 type ScenarioResponse = {
   horizons: number[]
   indicators: ScenarioIndicator[]
   notes: string[]
+  model_status?: ScenarioModelStatus
 }
 
 type FuturePathsPageProps = {
@@ -164,6 +175,7 @@ export default function FuturePathsPage({
     Math.abs(item.scenarios.improvement - item.scenarios.baseline) > 1e-9 ||
     Math.abs(item.scenarios.stress - item.scenarios.baseline) > 1e-9
   )
+  const scenarioStatus = scenarios?.model_status
 
   return (
     <section className="futurePathsPage" aria-label="Outlook">
@@ -262,8 +274,12 @@ export default function FuturePathsPage({
               <h3>Illustrative alternative paths</h3>
             </div>
             <div className="scenarioModelBadge">
-              <strong>MODELLED</strong>
-              <span>not probabilistic</span>
+              <strong>{scenarioStatus?.state?.toUpperCase() ?? 'EXPERIMENTAL'}</strong>
+              <span>
+                {scenarioStatus
+                  ? `calibrated: ${scenarioStatus.calibrated ? 'yes' : 'no'} · backtested: ${scenarioStatus.backtested ? 'yes' : 'no'}`
+                  : 'not probabilistic'}
+              </span>
             </div>
           </div>
 
@@ -310,7 +326,7 @@ export default function FuturePathsPage({
 
       <section className="futureEvidenceFooter">
         <p>
-          Official forecast values are displayed as source evidence. AUGUR scenarios are separate model assumptions and must not be read as official probabilities.
+          Official forecast values are displayed as source evidence. AUGUR scenarios are separate model assumptions and must not be read as official probabilities.${scenarioStatus && !scenarioStatus.eligible_for_decision_ranking ? ' They are not eligible for decision ranking.' : ''}
         </p>
         <div><span>Evidence</span><strong>{official.length ? 'Official forecast available' : 'Limited'}</strong></div>
         <div><span>Source</span><strong>{sourceNames.join(' · ') || '—'}</strong></div>
