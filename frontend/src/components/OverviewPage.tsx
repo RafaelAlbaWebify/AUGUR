@@ -217,6 +217,9 @@ function formatRegionalValue(value: number, unit?: string) {
       maximumFractionDigits: 0,
     }).format(value)
   }
+  if (unit === 'pps_per_person') {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)} PPS/person`
+  }
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
