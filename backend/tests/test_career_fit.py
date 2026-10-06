@@ -777,3 +777,84 @@ def test_eu27_oja_imbalance_is_context_only(monkeypatch):
     assert evidence["geographic_scope"] == "EU27"
     assert evidence["role"] == "context_only"
     assert "not country-specific" in evidence["notes"][2]
+
+
+def test_stas_outlook_exposes_structured_occupation_trend(monkeypatch):
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_occupation_outlook",
+        lambda country_iso3, isco08, scenario="Aligned_forecast_Ameco": [
+            {
+                "country_iso3": country_iso3,
+                "period": 2026,
+                "isco08": "25",
+                "isco_level": 2,
+                "occupation_label": "ICT professionals",
+                "scenario": scenario,
+                "employment_level_thousands": 400.0,
+                "employment_growth_pct": -0.5,
+                "source_id": "CEDEFOP",
+                "dataset_id": "CEDEFOP_STAS",
+                "release_version": "2026-08",
+                "retrieved_at": None,
+                "source_updated_at": "2026-08",
+            },
+            {
+                "country_iso3": country_iso3,
+                "period": 2027,
+                "isco08": "25",
+                "isco_level": 2,
+                "occupation_label": "ICT professionals",
+                "scenario": scenario,
+                "employment_level_thousands": 410.0,
+                "employment_growth_pct": 2.5,
+                "source_id": "CEDEFOP",
+                "dataset_id": "CEDEFOP_STAS",
+                "release_version": "2026-08",
+                "retrieved_at": None,
+                "source_updated_at": "2026-08",
+            },
+        ] if isco08 == "25" else [],
+    )
+
+    outlook = career_fit_module.occupation_outlook_evidence(
+        "ESP",
+        {"selected": {"isco_group": "2522", "code": "2522"}},
+    )
+    trend = career_fit_module.occupation_outlook_trend_evidence(outlook)
+
+    assert trend["status"] == "available"
+    assert trend["evidence_type"] == "short_term_employment_outlook"
+    assert trend["latest_period"] == 2027
+    assert trend["latest_growth_pct"] == 2.5
+    assert trend["direction"] == "positive_growth"
+    assert trend["role"] == "context_only"
+    assert "not online-job-ad demand growth" in trend["notes"][0]
+
+
+def test_oja_skill_and_language_detail_are_explicitly_access_gated():
+    skills = career_fit_module.skill_demand_trend_evidence()
+    languages = career_fit_module.language_oja_requirements_evidence()
+
+    assert skills["status"] == "source_access_gated"
+    assert skills["reproducible_public_ingestion"] is False
+    assert skills["dataset_id"] == "CEDEFOP_SKILLS_OVATE"
+
+    assert languages["status"] == "source_access_gated"
+    assert languages["reproducible_public_ingestion"] is False
+    assert languages["dataset_id"] == "CEDEFOP_SKILLS_OVATE"
+    assert "Microdata" in languages["access_path"]
+
+
+def test_career_fit_keeps_gated_oja_status_when_profession_is_unmapped(monkeypatch):
+    _disable_esco_lookup(monkeypatch)
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        profession="Specialist role xyz",
+    )
+
+    result = career_fit(profile, "IRL")
+
+    assert result["status"] == "occupation_unmapped"
+    assert result["skill_demand_trend_evidence"]["status"] == "source_access_gated"
+    assert result["language_oja_requirements_evidence"]["status"] == "source_access_gated"
