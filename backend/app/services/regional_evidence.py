@@ -17,6 +17,27 @@ _REGIONAL_CACHE: dict[str, tuple[float, dict]] = {}
 
 REGIONAL_INDICATORS = [
     {
+        "indicator_id": "regional_unmet_medical_needs",
+        "name": "Unmet medical examination needs",
+        "dataset_id": "hlth_silc_08_r",
+        "filters": {
+            "freq": "A",
+            "reason": "TXP_TFAR_WLIST",
+            "unit": "PC",
+        },
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "regional_hospital_beds_per_100k",
+        "name": "Available hospital beds",
+        "dataset_id": "hlth_rs_bdsrg2",
+        "filters": {
+            "freq": "A",
+            "unit": "P_HTHAB",
+        },
+        "unit": "per_100k_people",
+    },
+    {
         "indicator_id": "regional_disposable_income_pps_per_capita",
         "name": "Disposable household income per inhabitant (PPS)",
         "dataset_id": "nama_10r_2hhinc",
