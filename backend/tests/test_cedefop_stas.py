@@ -73,3 +73,11 @@ def test_detects_stas_level_sheet_from_sheet_name():
     assert result["status"] == "recognised"
     assert result["metric_kind"] == "employment_level_thousands"
     assert result["metric_present"] is True
+
+
+def test_detects_wide_year_columns():
+    from app.ingestion.cedefop_stas import _year_columns
+
+    result = _year_columns(["scenario", "country", "2026", "2027"])
+
+    assert result == {2026: 2, 2027: 3}
