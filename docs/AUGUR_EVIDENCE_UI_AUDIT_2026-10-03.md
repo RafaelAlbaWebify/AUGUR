@@ -485,7 +485,14 @@ Current implementation status:
    - the 2024 Oviedo live-source validation produced 9.0111 µg/m³ from two eligible hourly sampling points; one daily stream was excluded for insufficient coverage;
    - city PM2.5 is labelled observed monitoring evidence and is not treated as population-weighted exposure or NUTS2 environmental evidence;
    - EEA burden-of-disease data for countries/NUTS/cities is a separate future environmental-health extension, not merged into the concentration signal.
-10. safety and access-to-services.
+10. **safety and access-to-services — ACTIVE / EXPANDING**
+   - NUTS2 household internet access is integrated from Eurostat `isoc_r_iacc_h` as access/connectivity context;
+   - NUTS2 air-passenger throughput is integrated from `tran_r_avpa_nm` using passengers carried in thousand passengers, as regional connectivity context rather than a universal quality-of-life score;
+   - NUTS3 police-recorded intentional homicide and robbery rates are exposed separately from `crim_gen_reg` in per-100,000 units;
+   - NUTS3 crime is never silently copied or aggregated to NUTS2, and categories are not collapsed into a synthetic crime score;
+   - live validation confirmed reproducible values for ES120, PT170 and IE061; source periods remain explicit, including Portugal's older latest observation where applicable;
+   - cross-country crime comparisons retain explicit caveats for differences in law, reporting behaviour and police-recording practices;
+   - a dedicated NUTS3 sync command exists for the local DuckDB store, while the lightweight live smoke probes only a small representative set to avoid unnecessary source load.
 
 Important P1 boundary:
 - Skills-OVATE detailed skill-demand shares remain unavailable through a stable reproducible public API/download workflow;
