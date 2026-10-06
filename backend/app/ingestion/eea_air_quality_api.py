@@ -54,10 +54,28 @@ def inspect_modern_eea_api(
                         }
                         for parameter in operation.get("parameters", [])
                     ],
+                    "request_body": operation.get("requestBody"),
                 }
                 for method, operation in operations.items()
                 if method.lower() in {"get", "post"}
             }
+
+    schemas = payload.get("components", {}).get("schemas", {})
+    referenced_schema_names = set()
+    for operations in interesting.values():
+        for operation in operations.values():
+            request_body = operation.get("request_body") or {}
+            for media in (request_body.get("content") or {}).values():
+                schema = media.get("schema") or {}
+                ref = schema.get("$ref")
+                if isinstance(ref, str) and ref.startswith("#/components/schemas/"):
+                    referenced_schema_names.add(ref.rsplit("/", 1)[-1])
+
+    referenced_schemas = {
+        name: schemas.get(name)
+        for name in sorted(referenced_schema_names)
+        if name in schemas
+    }
 
     return {
         "status": "available" if paths else "empty",
@@ -66,5 +84,6 @@ def inspect_modern_eea_api(
         "api_version": payload.get("info", {}).get("version"),
         "path_count": len(paths),
         "interesting_paths": interesting,
+        "referenced_request_schemas": referenced_schemas,
         "ready_for_endpoint_design": bool(interesting),
     }
