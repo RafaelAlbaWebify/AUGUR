@@ -473,7 +473,11 @@ Current implementation status:
    - NUTS2 housing-cost overburden integrated from `ilc_lvho07_r`;
    - overburden is already defined relative to disposable household income (>40% housing-cost threshold), so AUGUR does not derive a redundant synthetic ratio;
    - regional periods remain explicit when income and housing series have different latest years.
-8. healthcare access.
+8. **healthcare access — ACTIVE / EXPANDING**
+   - NUTS2 unmet medical examination needs integrated from `hlth_silc_08_r` where regional reporting exists;
+   - NUTS2 available hospital beds per 100,000 integrated from `hlth_rs_bdsrg2`;
+   - Portugal currently has no NUTS2 unmet-needs observations in this source, so AUGUR leaves the regional value unavailable rather than copying the national figure;
+   - unmet needs and bed capacity remain separate signals and are not combined into a synthetic healthcare score.
 9. environment/air quality.
 10. safety and access-to-services.
 
