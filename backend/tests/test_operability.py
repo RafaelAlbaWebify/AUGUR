@@ -921,3 +921,97 @@ def test_operability_exposes_eu27_oja_imbalance_status(monkeypatch):
     assert result["eu27_oja_imbalance_evidence"]["row_count"] == 308
     assert result["eu27_oja_imbalance_evidence"]["geographic_scope"] == "EU27"
     assert result["eu27_oja_imbalance_evidence"]["release_versions"] == ["2026-05"]
+
+
+def test_operability_exposes_subnational_evidence_status(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "labour_occupation_outlook_status",
+        lambda: {
+            "available": True,
+            "row_count": 282,
+            "country_count": 3,
+            "countries": ["ESP", "IRL", "PRT"],
+            "periods": [2026, 2027],
+            "isco_levels": [1, 2],
+            "release_versions": ["2026-08"],
+            "latest_retrieved_at": datetime.now(timezone.utc),
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "labour_oja_imbalance_eu27_status",
+        lambda: {
+            "available": True,
+            "row_count": 308,
+            "release_versions": ["2026-05"],
+            "latest_retrieved_at": datetime.now(timezone.utc),
+            "geographic_scope": "EU27",
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "subnational_evidence_status",
+        lambda: {
+            "available": True,
+            "row_count": 150,
+            "region_count": 25,
+            "country_prefixes": ["ES", "IE", "PT"],
+            "indicator_ids": [
+                "regional_employment_rate",
+                "regional_unemployment_rate",
+            ],
+            "latest_retrieved_at": datetime.now(timezone.utc),
+            "geo_level": "NUTS2",
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {
+            "countries": [
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["subnational_evidence"]["available"] is True
+    assert result["subnational_evidence"]["country_prefixes"] == ["ES", "IE", "PT"]
+    assert result["subnational_evidence"]["geo_level"] == "NUTS2"
