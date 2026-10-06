@@ -959,6 +959,52 @@ def latest_regional_sector_employment(country_iso2: str) -> list[dict]:
         con.close()
 
 
+def latest_regional_sector_employment_for_geo(
+    geo_code: str,
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'regional_sector_employment'
+            """
+        ).fetchone()[0]
+        if not table_exists:
+            return []
+
+        result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY nace_code
+                        ORDER BY period DESC
+                    ) AS rn
+                FROM regional_sector_employment
+                WHERE geo_code = ?
+                  AND geo_level = 'NUTS2'
+            )
+            SELECT
+                geo_code, geo_name, geo_level, period, nace_code, nace_label,
+                employment_thousands, source_id, dataset_id, retrieved_at,
+                source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY
+                CASE WHEN nace_code = 'TOTAL' THEN 0 ELSE 1 END,
+                employment_thousands DESC,
+                nace_code
+            """,
+            [geo_code.upper()],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
 def regional_sector_employment_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
