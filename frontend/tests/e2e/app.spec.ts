@@ -346,6 +346,19 @@ async function mockApi(page: Page) {
           { indicator_id: 'regional_employment_rate', name: 'Employment rate, ages 20–64', status: 'available', period: 2024, value: 71.2, unit: 'percent', dataset_id: 'lfst_r_lfe2emprt', source_id: 'EUROSTAT' },
           { indicator_id: 'regional_unemployment_rate', name: 'Unemployment rate, ages 20–64', status: 'available', period: 2024, value: 8.3, unit: 'percent', dataset_id: 'lfst_r_lfu3rt', source_id: 'EUROSTAT' },
         ],
+        sector_structure: {
+          status: 'available',
+          dataset_id: 'lfst_r_lfe2en2',
+          source_id: 'EUROSTAT',
+          period: 2025,
+          total_employment_thousands: 1000,
+          sector_count: 2,
+          top_sectors: [
+            { nace_code: 'C', nace_label: 'Manufacturing', period: 2025, employment_thousands: 180, employment_share_pct: 18.0 },
+            { nace_code: 'J', nace_label: 'Information and communication', period: 2025, employment_thousands: 70, employment_share_pct: 7.0 },
+          ],
+          notes: [],
+        },
         notes: [],
       }
     } else if (path.endsWith('/career-fit')) {
@@ -2132,3 +2145,22 @@ test('mobile My Fit keeps summary, completion, actions and evidence reachable', 
   await expect(profile.getByRole('region', { name: 'Personal-fit evidence' })).toBeVisible()
 })
 
+
+
+test('regional sector context appears for selected NUTS2 region', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  await page.getByRole('button', { name: 'Focus country' }).click()
+  const map = page.getByTestId('regional-map')
+  await expect(map).toBeVisible()
+
+  await page.evaluate(() => {
+    const paths = Array.from(document.querySelectorAll('.leafletAugurMap .nuts2Boundary'))
+    const target = paths[0] as SVGPathElement | undefined
+    target?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  })
+
+  await expect(page.getByText('Regional employment structure')).toBeVisible()
+  await expect(page.getByText('J · Information and communication')).toBeVisible()
+  await expect(page.getByText('7.0%')).toBeVisible()
+})
