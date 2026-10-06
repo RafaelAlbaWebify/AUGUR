@@ -44,6 +44,8 @@ SOURCES = [
         "organisation": "United Nations DESA Population Division",
         "base_url": "https://population.un.org/wpp",
         "priority": 1,
+        "augur_suitability_grade": "A-",
+        "augur_suitability_basis": "official_global_demographic_projection",
     },
     {
         "source_id": "IMF",
@@ -51,6 +53,9 @@ SOURCES = [
         "organisation": "International Monetary Fund",
         "base_url": "https://www.imf.org/external/datamapper/api/v2",
         "priority": 1,
+        "augur_suitability_grade": "A-",
+        "augur_suitability_basis": "authoritative_macro_forecast_and_history",
+
     },
     {
         "source_id": "OECD",
@@ -58,6 +63,9 @@ SOURCES = [
         "organisation": "Organisation for Economic Co-operation and Development",
         "base_url": "https://sdmx.oecd.org/public/rest",
         "priority": 1,
+        "augur_suitability_grade": "A",
+        "augur_suitability_basis": "harmonised_international_methodology",
+
     },
     {
         "source_id": "EUROSTAT",
@@ -65,6 +73,9 @@ SOURCES = [
         "organisation": "European Commission / Eurostat",
         "base_url": "https://ec.europa.eu/eurostat/api/dissemination/statistics/1.0",
         "priority": 1,
+        "augur_suitability_grade": "A",
+        "augur_suitability_basis": "harmonised_official_eu_statistics",
+
     },
     {
         "source_id": "WORLD_BANK",
@@ -72,6 +83,9 @@ SOURCES = [
         "organisation": "World Bank",
         "base_url": "https://api.worldbank.org/v2",
         "priority": 2,
+        "augur_suitability_grade": "A-",
+        "augur_suitability_basis": "broad_official_global_development_series",
+
     },
 ]
 
