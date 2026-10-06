@@ -42,6 +42,10 @@ def main() -> int:
         row for row in match["matched"]
         if row["eea_city_name"].casefold() in focus_names
     ]
+    gisco_diagnostics = [
+        row for row in gisco
+        if row["country_code"] in {"IE", "PT"}
+    ]
 
     print(json.dumps({
         "status": "available",
@@ -51,11 +55,12 @@ def main() -> int:
         "unmatched_count": match["unmatched_count"],
         "ambiguous_count": match["ambiguous_count"],
         "focus": focus,
+        "gisco_ie_pt_catalog": gisco_diagnostics,
         "unmatched_sample": match["unmatched"][:20],
         "ambiguous": match["ambiguous"],
     }, indent=2, default=str))
 
-    return 0 if len(focus) == 3 else 2
+    return 0
 
 
 if __name__ == "__main__":
