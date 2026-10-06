@@ -3,9 +3,18 @@ type Signal = {
   pct_change_5y: number | null
 }
 
+type EvidenceReliability = {
+  source_ids: string[]
+  augur_suitability_grades: string[]
+  latest_observation_period: number | null
+  oldest_observation_period: number | null
+  freshness_counts: Record<string, number>
+}
+
 type DimensionAssessment = {
   trajectory: string
   confidence: string
+  evidence_reliability?: EvidenceReliability
   indicator_count: number
   directional_indicator_count: number
   improving_signals: Signal[]
@@ -41,6 +50,11 @@ export default function DimensionSummaryCard({
 }: DimensionSummaryCardProps) {
   const improving = item.improving_signals.map((signal) => signal.name)
   const deteriorating = item.deteriorating_signals.map((signal) => signal.name)
+  const reliability = item.evidence_reliability
+  const qualityLabel = reliability?.augur_suitability_grades?.length
+    ? reliability.augur_suitability_grades.join('/')
+    : null
+  const laggedCount = (reliability?.freshness_counts?.lagged ?? 0) + (reliability?.freshness_counts?.older ?? 0)
 
   return (
     <article
@@ -59,9 +73,11 @@ export default function DimensionSummaryCard({
       <div className="mockDimensionHeader">
         <span>{label}</span>
         <small>
-          {item.directional_indicator_count > 0
-            ? `${item.confidence} trend evidence`
-            : 'contextual evidence'}
+          {qualityLabel
+            ? `${qualityLabel} sources · latest ${reliability?.latest_observation_period ?? '—'}${laggedCount ? ` · ${laggedCount} lagged` : ''}`
+            : item.directional_indicator_count > 0
+              ? `${item.confidence} trend evidence`
+              : 'contextual evidence'}
         </small>
       </div>
 
