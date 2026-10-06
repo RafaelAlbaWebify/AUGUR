@@ -16,6 +16,14 @@ def normalize_city_name(value: str) -> str:
     return " ".join(text.split())
 
 
+def canonical_city_match_name(value: str) -> str:
+    normalized = normalize_city_name(value)
+    suffix = " greater city"
+    if normalized.endswith(suffix):
+        normalized = normalized[:-len(suffix)].strip()
+    return normalized
+
+
 def city_code(feature: dict) -> str | None:
     properties = feature.get("properties") or {}
     candidates = [
@@ -65,6 +73,7 @@ def gisco_city_catalog(payload: dict, country_codes: set[str] | None = None) -> 
             "country_code": country,
             "city_name": name,
             "normalized_name": normalize_city_name(name),
+            "match_name": canonical_city_match_name(name),
         })
     return rows
 
@@ -76,7 +85,11 @@ def match_eea_cities_to_gisco(
     candidates: dict[tuple[str, str], list[dict]] = defaultdict(list)
     for row in gisco_rows:
         candidates[
-            (row["country_code"], row["normalized_name"])
+            (
+                row["country_code"],
+                row.get("match_name")
+                or canonical_city_match_name(row["city_name"]),
+            )
         ].append(row)
 
     matched = []
@@ -86,7 +99,7 @@ def match_eea_cities_to_gisco(
     for eea in eea_rows:
         country = str(eea.get("countryCode") or "").upper()
         name = str(eea.get("cityName") or "").strip()
-        key = (country, normalize_city_name(name))
+        key = (country, canonical_city_match_name(name))
         options = candidates.get(key, [])
 
         if len(options) == 1:
