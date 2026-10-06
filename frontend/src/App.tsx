@@ -219,7 +219,7 @@ type PersonalizedDimension = {
 }
 
 type PersonalizedComparisonResponse = {
-  status: 'ready' | 'weights_missing'
+  status: 'ready' | 'weights_missing' | 'no_positive_weights' | 'weight_evidence_blocked'
   countries: string[]
   weights: {
     explicit: Record<string, number>
@@ -235,6 +235,30 @@ type PersonalizedComparisonResponse = {
     notes: string[]
   }
   dimensions: PersonalizedDimension[]
+  personalized: {
+    status: 'ready' | 'weights_missing' | 'no_positive_weights' | 'weight_evidence_blocked'
+    score_label?: string
+    score_range?: [number, number]
+    scores: Record<string, number>
+    positive_weights?: Record<string, number>
+    normalized_weights?: Record<string, number>
+    included_dimensions?: string[]
+    blockers?: string[]
+    coverage?: Record<string, number>
+    sensitivity?: null | {
+      method: string
+      scenario_count: number
+      weight_bounds: [number, number]
+      score_ranges: Record<string, { min: number; max: number; spread: number }>
+    }
+    pareto?: null | {
+      method: string
+      dimensions: string[]
+      frontier: string[]
+      dominated_by: Record<string, string[]>
+    }
+    notes?: string[]
+  }
 }
 
 type OverviewSeriesPoint = {
