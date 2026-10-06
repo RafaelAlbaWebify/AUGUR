@@ -1,3 +1,4 @@
+from app.services import regional_evidence as regional_module
 from app.services.regional_evidence import (
     REGIONAL_INDICATORS,
     geographic_level,
@@ -74,3 +75,65 @@ def test_regional_gdp_query_uses_dataset_dimensions_only():
         "freq": "A",
         "unit": "EUR_HAB",
     }
+
+
+def test_regional_evidence_exposes_sector_structure(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "latest_subnational_observations",
+        lambda code: [
+            {
+                "indicator_id": "regional_employment_rate",
+                "period": 2025,
+                "value": 72.0,
+                "unit": "percent",
+                "dataset_id": "lfst_r_lfe2emprt",
+                "source_id": "EUROSTAT",
+                "source_updated_at": "2026-09-10",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "latest_regional_sector_employment_for_geo",
+        lambda code: [
+            {
+                "geo_code": code,
+                "period": 2025,
+                "nace_code": "TOTAL",
+                "nace_label": "Total",
+                "employment_thousands": 400.0,
+                "source_id": "EUROSTAT",
+                "dataset_id": "lfst_r_lfe2en2",
+            },
+            {
+                "geo_code": code,
+                "period": 2025,
+                "nace_code": "J",
+                "nace_label": "Information and communication",
+                "employment_thousands": 40.0,
+                "source_id": "EUROSTAT",
+                "dataset_id": "lfst_r_lfe2en2",
+            },
+            {
+                "geo_code": code,
+                "period": 2025,
+                "nace_code": "C",
+                "nace_label": "Manufacturing",
+                "employment_thousands": 80.0,
+                "source_id": "EUROSTAT",
+                "dataset_id": "lfst_r_lfe2en2",
+            },
+        ],
+    )
+
+    result = regional_evidence("ES12")
+
+    assert result["sector_structure"]["status"] == "available"
+    assert result["sector_structure"]["period"] == 2025
+    assert result["sector_structure"]["top_sectors"][0]["nace_code"] == "C"
+    ict = next(
+        item for item in result["sector_structure"]["top_sectors"]
+        if item["nace_code"] == "J"
+    )
+    assert ict["employment_share_pct"] == 10.0
