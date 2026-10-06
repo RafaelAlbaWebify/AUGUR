@@ -43,17 +43,40 @@ def main() -> int:
     if args.input:
         workbook = args.input
         download = None
+        if not workbook.exists():
+            print(json.dumps({
+                "status": "input_file_missing",
+                "input": str(workbook),
+                "next_action": "Download the current STAS XLSX from the official Cedefop dataset page and pass its local path with --input.",
+            }, indent=2))
+            return 2
     else:
-        with httpx.Client(
-            timeout=90,
-            headers={"User-Agent": "AUGUR/0.1 Cedefop STAS evidence sync"},
-        ) as client:
-            download = download_workbook(
-                client,
-                args.output,
-                download_url=args.url,
-            )
-        workbook = args.output
+        try:
+            with httpx.Client(
+                timeout=90,
+                headers={
+                    "User-Agent": "Mozilla/5.0 AUGUR-STAS-Inspector/0.1",
+                    "Accept": "text/html,application/xhtml+xml,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,*/*",
+                    "Accept-Language": "en-US,en;q=0.9",
+                },
+            ) as client:
+                download = download_workbook(
+                    client,
+                    args.output,
+                    download_url=args.url,
+                )
+            workbook = args.output
+        except (httpx.HTTPError, RuntimeError) as exc:
+            print(json.dumps({
+                "status": "manual_download_required",
+                "dataset_page": DATASET_PAGE_URL,
+                "error": str(exc),
+                "next_action": (
+                    "Open the official STAS dataset page in a browser, download the current XLSX, "
+                    "then run .\\inspect-cedefop-stas.ps1 --input <local-xlsx-path>."
+                ),
+            }, indent=2))
+            return 2
 
     diagnostic = inspect_workbook(workbook, max_rows=args.max_rows)
     payload = {
