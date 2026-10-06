@@ -6377,3 +6377,48 @@ body:has(.shell.detailsOpen) {
   font-size: 8px;
   line-height: 1.45;
 }
+
+
+.personalizedComparisonPanel {
+  margin: 18px 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel);
+}
+
+.personalizedComparisonPanel > p {
+  margin: 8px 0 14px;
+}
+
+.personalizedDimensionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 10px;
+  margin: 12px 0;
+}
+
+.personalizedDimensionGrid article {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.personalizedDimensionGrid article header,
+.personalizedDimensionGrid article div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.personalizedDimensionGrid article div {
+  flex-direction: column;
+}
+
+.personalizedDimensionGrid article div span {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
