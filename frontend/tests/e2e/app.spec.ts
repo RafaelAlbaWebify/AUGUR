@@ -927,6 +927,10 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await expect(regionalCards.getByText('1.2%', { exact: true })).toBeVisible()
   await expect(regionalCards.getByText('Available hospital beds')).toBeVisible()
   await expect(regionalCards.getByText('315.6 /100k')).toBeVisible()
+  await expect(regionalCards.getByText('Households with internet access')).toBeVisible()
+  await expect(regionalCards.getByText('98.4%')).toBeVisible()
+  await expect(regionalCards.getByText('Air passengers carried')).toBeVisible()
+  await expect(regionalCards.getByText('1,650k passengers')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Country metric cards' })).toHaveCount(0)
   await expect(page.locator('.regionalEvidencePanel')).toHaveCount(0)
   await expect(page.getByText(/Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 \+ Urban Audit 2024/)).toBeVisible()
@@ -1894,6 +1898,30 @@ test('captures Skills and Languages populated visual fixture', async ({ page }) 
           granularity: 'isco_major',
           isco_major: '3',
         },
+        occupation_trend_evidence: {
+          status: 'available',
+          evidence_type: 'short_term_employment_outlook',
+          latest_period: 2027,
+          latest_growth_pct: 2.5,
+          direction: 'positive_growth',
+          role: 'context_only',
+        },
+        skill_demand_trend_evidence: {
+          status: 'source_access_gated',
+          source_id: 'CEDEFOP',
+          dataset_id: 'CEDEFOP_SKILLS_OVATE',
+          access_path: 'Eurostat Microdata access portal',
+          reproducible_public_ingestion: false,
+          role: 'withheld_until_reproducible_access',
+        },
+        language_oja_requirements_evidence: {
+          status: 'source_access_gated',
+          source_id: 'CEDEFOP',
+          dataset_id: 'CEDEFOP_SKILLS_OVATE',
+          access_path: 'Eurostat Microdata access portal',
+          reproducible_public_ingestion: false,
+          role: 'withheld_until_reproducible_access',
+        },
         occupation_match: {
           status: 'matched',
           selected: {
@@ -1956,7 +1984,15 @@ test('captures Skills and Languages populated visual fixture', async ({ page }) 
   await expect(coverage.getByText('Future shortage pressure')).toBeVisible()
   await expect(coverage.getByText(/Cedefop CLSSI 2026/i)).toBeVisible()
   await expect(coverage.getByText(/Cedefop STAS/i)).toBeVisible()
-  await expect(coverage.getByText(/Skills-OVATE detailed OJA evidence/i)).toBeVisible()
+  await expect(coverage.getByText(/SOURCE ACCESS GATED/i).first()).toBeVisible()
+  await expect(coverage.getByText(/Skills-OVATE detailed OJA evidence/i).first()).toBeVisible()
+
+  await page.getByRole('button', { name: 'Rising skills' }).click()
+  await expect(page.getByText(/Occupation outlook: positive growth/i)).toBeVisible()
+  await expect(page.getByText(/source access gated via Eurostat microdata/i)).toBeVisible()
+
+  await page.getByRole('button', { name: 'Job-ad language demand' }).click()
+  await expect(page.getByText(/Job-ad language demand is source-access gated/i)).toBeVisible()
 
   await page.screenshot({
     path: 'test-results/ui-audit-skills-languages-populated-1920x900.png',
