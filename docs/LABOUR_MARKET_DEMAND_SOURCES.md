@@ -127,6 +127,29 @@ Access:
 AUGUR role:
 - medium-term occupation/sector outlook once reproducible access is available.
 
+### Cedefop STAS 2026
+
+Dataset:
+- Short-term anticipation of skills trends and VET demand (STAS);
+- official Cedefop dataset;
+- short-term employment projections by occupation and Member State;
+- current methodology uses EU LFS employment, European Job Vacancy Statistics and AMECO alignment;
+- update frequency: twice per year;
+- licence: CC BY 4.0;
+- DOI: 10.2906/467749508762302.
+
+AUGUR role:
+- near-term occupation outlook at ISCO 1-digit / 2-digit;
+- complements EURES shortage/surplus and Eurostat experimental vacancy context;
+- does not provide skill-level posting frequency;
+- does not become a job-finding probability or TTV duration.
+
+Integration status:
+- official dataset page and direct XLSX workflow verified;
+- `inspect-cedefop-stas.ps1` resolves/downloads the current official workbook and inspects its schema;
+- no STAS rows are written to DuckDB until country, ISCO, year and employment-change fields are recognised unambiguously;
+- this schema gate is intentional and prevents silently importing the wrong worksheet/metric.
+
 ### Cedefop Skills-OVATE
 
 Role:
