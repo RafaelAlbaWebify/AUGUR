@@ -32,6 +32,9 @@ type CareerFit = {
     source_id?: string
     granularity?: string
     isco_major?: string
+    isco_3digit?: string
+    dataset_id?: string
+    supported_countries?: string[]
   } | null
   skill_match?: {
     dataset_mode?: string | null
@@ -129,6 +132,12 @@ export default function SkillsLanguagesPage({
     : []
 
   const demandEvidenceAvailable = career?.vacancy_demand_evidence?.status === 'available'
+  const demandCoverageUnavailable = career?.vacancy_demand_evidence?.status === 'source_coverage_unavailable'
+  const demandEvidenceLabel = demandEvidenceAvailable
+    ? `${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}`
+    : demandCoverageUnavailable
+    ? `Eurostat experimental ISCO-3 source does not cover ${countryName}`
+    : 'No verified vacancy context loaded'
   const liveSkillDemandAvailable = false
   const profileReadyForSkills = Boolean(
     (profile?.profession && profile.profession.trim()) ||
@@ -203,7 +212,7 @@ export default function SkillsLanguagesPage({
                 <div>
                   <span>AVAILABLE NOW</span>
                   <strong>Country vacancy context</strong>
-                  <small>{demandEvidenceAvailable ? `${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}` : 'No verified vacancy context loaded'}</small>
+                  <small>{demandEvidenceLabel}</small>
                 </div>
                 <div>
                   <span>UNLOCKS NEXT</span>
@@ -265,7 +274,9 @@ export default function SkillsLanguagesPage({
                   <strong>{career?.market_signal?.replaceAll('_', ' ') ?? 'Unavailable'}</strong>
                   <p>
                     {demandEvidenceAvailable
-                      ? `Vacancy context ${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}`
+                      ? `Vacancy context ${demandEvidenceLabel}`
+                      : demandCoverageUnavailable
+                      ? demandEvidenceLabel
                       : 'No verified vacancy context loaded.'}
                   </p>
                   <small>Context only · not a skill-demand ranking</small>
@@ -329,7 +340,7 @@ export default function SkillsLanguagesPage({
 
               <div className="skillsEvidenceFooter">
                 <div><span>Occupation market signal</span><strong>{career?.market_signal?.replaceAll('_', ' ') ?? 'Unavailable'}</strong></div>
-                <div><span>Vacancy context</span><strong>{demandEvidenceAvailable ? `${career?.vacancy_demand_evidence?.vacancy_rate_pct?.toFixed(1)}% · ${career?.vacancy_demand_evidence?.period}` : 'Unavailable'}</strong></div>
+                <div><span>Vacancy context</span><strong>{demandEvidenceAvailable ? demandEvidenceLabel : demandCoverageUnavailable ? 'Source coverage unavailable' : 'Unavailable'}</strong></div>
                 <div><span>Skill coverage</span><strong>{career?.skill_match?.coverage == null ? 'Unavailable' : `${Math.round(career.skill_match.coverage * 100)}% essential skills`}</strong></div>
               </div>
 
@@ -423,7 +434,11 @@ export default function SkillsLanguagesPage({
               <li>Occupation: {career?.occupation_match?.selected?.preferred_label ?? 'not confidently resolved'}.</li>
               <li>Market signal: {career?.market_signal?.replaceAll('_', ' ') ?? 'not available'}{career?.market_signal_isco ? ` · ISCO ${career.market_signal_isco}` : ''}.</li>
               <li>Market evidence: {career?.source?.label ?? 'not available'}{career?.source?.conditions_year ? ` · ${career.source.conditions_year} conditions` : ''}{career?.source?.evidence_id ? ` · ${career.source.evidence_id}` : ''}.</li>
-              <li>Vacancy context: {career?.vacancy_demand_evidence?.status === 'available' ? `Eurostat ${career.vacancy_demand_evidence.period} · ISCO ${career.vacancy_demand_evidence.isco_major ?? career.vacancy_demand_evidence.granularity ?? 'group'} vacancy rate ${career.vacancy_demand_evidence.vacancy_rate_pct?.toFixed(1)}% · context only` : 'not available'}.</li>
+              <li>Vacancy context: {career?.vacancy_demand_evidence?.status === 'available'
+                    ? `Eurostat ${career.vacancy_demand_evidence.period} · ISCO ${career.vacancy_demand_evidence.isco_3digit ?? career.vacancy_demand_evidence.isco_major ?? career.vacancy_demand_evidence.granularity ?? 'group'} vacancy rate ${career.vacancy_demand_evidence.vacancy_rate_pct?.toFixed(1)}% · context only`
+                    : career?.vacancy_demand_evidence?.status === 'source_coverage_unavailable'
+                    ? `Eurostat experimental ISCO-3 source does not cover ${countryName}; this is not zero demand`
+                    : 'not available'}.</li>
               <li>Skill evidence: {career?.skill_match?.dataset_version ?? career?.skill_match?.dataset_mode ?? 'not available'}.</li>
               <li>Live skill demand, employer counts and rising-skill trends are intentionally withheld until a job-posting evidence source is integrated.</li>
             </ul>
