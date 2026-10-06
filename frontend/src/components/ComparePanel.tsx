@@ -29,7 +29,7 @@ type ComparisonResponse = {
 }
 
 type PersonalizedComparison = {
-  status: 'ready' | 'weights_missing'
+  status: 'ready' | 'weights_missing' | 'no_positive_weights' | 'weight_evidence_blocked'
   weights: {
     explicit: Record<string, number>
     scale: [number, number]
@@ -50,6 +50,22 @@ type PersonalizedComparison = {
     construct_count: number
     method: string
   }>
+  personalized: {
+    status: 'ready' | 'weights_missing' | 'no_positive_weights' | 'weight_evidence_blocked'
+    scores: Record<string, number>
+    blockers?: string[]
+    sensitivity?: null | {
+      method: string
+      scenario_count: number
+      score_ranges: Record<string, { min: number; max: number; spread: number }>
+    }
+    pareto?: null | {
+      method: string
+      dimensions: string[]
+      frontier: string[]
+      dominated_by: Record<string, string[]>
+    }
+  }
 }
 
 type ComparePanelProps = {
@@ -349,8 +365,39 @@ export default function ComparePanel({
             </div>
             <p>
               Utility is 0–1 within the selected country set. Raw evidence is unchanged.
-              No overall ranking is produced at this stage.
+              The preference-fit index is relative to this selected set and does not declare a universal winner.
             </p>
+            <div className="personalizedScoreGrid" aria-label="Preference fit indices">
+              {selected.map((iso3) => {
+                const countryName = countries.find((country) => country.iso3 === iso3)?.name ?? iso3
+                const score = personalized.personalized.scores[iso3]
+                const range = personalized.personalized.sensitivity?.score_ranges[iso3]
+                const pareto = personalized.personalized.pareto?.frontier.includes(iso3)
+                return (
+                  <article key={iso3}>
+                    <header>
+                      <span><FlagIcon iso3={iso3} />{countryName}</span>
+                      {pareto && <b>Pareto candidate</b>}
+                    </header>
+                    <strong>{score == null ? '—' : score.toFixed(1)}</strong>
+                    <small>preference-fit index · selected-set relative</small>
+                    {range && (
+                      <span>
+                        sensitivity {range.min.toFixed(1)}–{range.max.toFixed(1)}
+                      </span>
+                    )}
+                  </article>
+                )
+              })}
+            </div>
+            {personalized.personalized.pareto && (
+              <p className="paretoSummary">
+                Pareto candidate set: {personalized.personalized.pareto.frontier
+                  .map((iso3) => countries.find((country) => country.iso3 === iso3)?.name ?? iso3)
+                  .join(' · ')}.
+                A country outside this set is dominated on all included positive-weight dimensions by at least one candidate.
+              </p>
+            )}
             <div className="personalizedDimensionGrid">
               {personalized.dimensions
                 .filter((item) => typeof item.explicit_weight === 'number')
@@ -378,7 +425,11 @@ export default function ComparePanel({
           </section>
         ) : (
           <div className="comparisonNotice">
-            No explicit P2 decision weights are saved yet. Set 0–5 dimension weights in Profile; objective evidence below remains unchanged.
+            {personalized?.status === 'weight_evidence_blocked'
+              ? `Personalized index blocked: ${personalized.personalized.blockers?.join(' · ') ?? 'weighted evidence unavailable'}. AUGUR will not impute contextual or missing utilities.`
+              : personalized?.status === 'no_positive_weights'
+              ? 'All explicit P2 weights are zero. Give at least one normalizable dimension a positive weight to activate personalized comparison.'
+              : 'No explicit P2 decision weights are saved yet. Set 0–5 dimension weights in Profile; objective evidence below remains unchanged.'}
           </div>
         )
       )}
