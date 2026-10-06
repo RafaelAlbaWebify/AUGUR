@@ -213,3 +213,46 @@ def test_country_trends_exposes_material_change_rule(monkeypatch):
     assert indicator["material_change_rule"]["mode"] == "absolute"
     assert indicator["material_change_rule"]["threshold"] == 0.5
     assert indicator["trend"]["direction"] == "stable"
+
+
+def test_country_trends_exposes_source_suitability_and_freshness(monkeypatch):
+    import app.services.trends as trends_service
+
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_registry",
+        lambda: [{
+            "indicator_id": "unemployment_rate",
+            "name": "Unemployment rate",
+            "dimension": "productive_capacity",
+            "unit": "percent",
+            "interpretation_policy": "lower",
+            "target_min": None,
+            "target_max": None,
+        }],
+    )
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_series",
+        lambda _country, _indicator: [
+            {
+                "period": trends_service.datetime.now(trends_service.timezone.utc).year - 2,
+                "value": 6.0,
+                "source_id": "EUROSTAT",
+                "retrieved_at": None,
+                "source_updated_at": None,
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_peer_reference",
+        lambda _indicator, _country: {"status": "available"},
+    )
+
+    result = trends_service.country_trends("ESP")
+    reliability = result["indicators"][0]["evidence_reliability"]
+
+    assert reliability["augur_suitability_grade"] == "A"
+    assert reliability["freshness_band"] == "lagged"
+    assert reliability["period_age_years"] == 2
