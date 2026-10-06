@@ -371,6 +371,37 @@ def regional_comparison(
             "regions": values,
         })
 
+    sector_codes = sorted({
+        sector["nace_code"]
+        for item in evidence
+        for sector in (
+            item.get("sector_structure", {}).get("top_sectors", [])
+            if item.get("sector_structure", {}).get("status") == "available"
+            else []
+        )
+    })
+    sector_rows = []
+    for nace_code in sector_codes:
+        regions = {}
+        label = nace_code
+        for item in evidence:
+            sector = next(
+                (
+                    candidate
+                    for candidate in item.get("sector_structure", {}).get("top_sectors", [])
+                    if candidate["nace_code"] == nace_code
+                ),
+                None,
+            )
+            if sector:
+                label = sector.get("nace_label") or label
+                regions[item["geo_code"]] = sector
+        sector_rows.append({
+            "nace_code": nace_code,
+            "nace_label": label,
+            "regions": regions,
+        })
+
     return {
         "regions": [
             {
@@ -381,8 +412,16 @@ def regional_comparison(
         ],
         "indicator_count": len(rows),
         "indicators": rows,
+        "sector_comparison": {
+            "status": "available" if sector_rows else "unavailable",
+            "dataset_id": "lfst_r_lfe2en2",
+            "source_id": "EUROSTAT",
+            "sectors": sector_rows,
+            "role": "regional_employment_structure_only",
+        },
         "notes": [
             "Comparison is descriptive and does not rank regions.",
             "Only like-for-like indicators and geographic levels should be interpreted directly.",
+            "Sector comparison describes employment composition, not vacancy demand or hiring probability.",
         ],
     }
