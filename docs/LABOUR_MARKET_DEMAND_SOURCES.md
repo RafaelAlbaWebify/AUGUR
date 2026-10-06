@@ -39,12 +39,27 @@ Limitations:
 
 ### Eurostat experimental vacancy evidence
 
+Dataset:
+- code: `jvs_a_isco3_r1`;
+- frequency: annual;
+- granularity: ISCO 3-digit occupation and country/NUTS 1 where available;
+- active AUGUR country coverage: Spain and Portugal;
+- Ireland: source coverage unavailable in the published experimental dataset.
+
 Role:
-- contextual occupation vacancy-rate evidence where available.
+- contextual occupation vacancy-rate evidence where available;
+- CareerFit prefers ISCO-3 evidence for the resolved occupation before any broader fallback;
+- vacancy-rate evidence remains context-only and does not override EURES/ELA shortage/surplus gates.
+
+Methodology:
+- Eurostat combines official JVS totals with EU-LFS occupied-post estimates and Online Job Advertisement shares to disaggregate vacancy rates by occupation and region;
+- the resulting occupation/region breakdown is published as experimental statistics.
 
 Limitations:
 - experimental;
 - online-ad / portal and occupational coverage bias;
+- occupations commonly advertised online, including many IT roles, can be overrepresented relative to public-sector or offline recruitment;
+- geographic coverage is incomplete and must be surfaced as source coverage, not treated as zero demand;
 - not equivalent to a personal probability of finding work.
 
 ## Planned verified sources
