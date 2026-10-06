@@ -107,6 +107,17 @@ Baseline equals the official forecast/projection.
 
 Improvement and stress are deterministic AUGUR assumptions around that baseline. They are not official forecasts.
 
+The scenario service exposes an explicit structured model status. Until empirical calibration and backtesting exist, it must report:
+
+- `state: experimental`
+- `calibrated: false`
+- `backtested: false`
+- `probabilistic: false`
+- `eligible_for_decision_ranking: false`
+- `version: null`
+
+Scenario outputs therefore cannot be used as a calibrated probability, ranking input or claim about the most likely future.
+
 Scenario envelopes widen with horizon:
 
 - 2030: near uncertainty, ×1.0
