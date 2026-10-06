@@ -807,6 +807,73 @@ def latest_labour_job_transition(
     finally:
         con.close()
 
+def subnational_evidence_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'subnational_observations'
+            """
+        ).fetchone()[0]
+
+        if not table_exists:
+            return {
+                "available": False,
+                "row_count": 0,
+                "region_count": 0,
+                "country_prefixes": [],
+                "indicator_ids": [],
+                "latest_retrieved_at": None,
+                "geo_level": "NUTS2",
+            }
+
+        row = con.execute(
+            """
+            SELECT COUNT(*), COUNT(DISTINCT geo_code), MAX(retrieved_at)
+            FROM subnational_observations
+            WHERE geo_level = 'NUTS2'
+            """
+        ).fetchone()
+
+        indicators = [
+            value[0]
+            for value in con.execute(
+                """
+                SELECT DISTINCT indicator_id
+                FROM subnational_observations
+                WHERE geo_level = 'NUTS2'
+                ORDER BY indicator_id
+                """
+            ).fetchall()
+        ]
+
+        countries = [
+            value[0]
+            for value in con.execute(
+                """
+                SELECT DISTINCT SUBSTR(geo_code, 1, 2)
+                FROM subnational_observations
+                WHERE geo_level = 'NUTS2'
+                ORDER BY 1
+                """
+            ).fetchall()
+        ]
+
+        return {
+            "available": bool(row[0]),
+            "row_count": row[0],
+            "region_count": row[1],
+            "country_prefixes": countries,
+            "indicator_ids": indicators,
+            "latest_retrieved_at": row[2],
+            "geo_level": "NUTS2",
+        }
+    finally:
+        con.close()
+
+
 def latest_observations(country_iso3: str) -> list[dict]:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
