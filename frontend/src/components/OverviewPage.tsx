@@ -124,6 +124,14 @@ type RegionalIndicator = {
   reason?: string
 }
 
+type RegionalSector = {
+  nace_code: string
+  nace_label?: string | null
+  period: number
+  employment_thousands: number
+  employment_share_pct?: number | null
+}
+
 type RegionalEvidenceResponse = {
   geo_code: string
   geo_level: string
@@ -132,6 +140,16 @@ type RegionalEvidenceResponse = {
   available_count: number
   complete: boolean
   indicators: RegionalIndicator[]
+  sector_structure?: {
+    status: string
+    dataset_id: string
+    source_id: string
+    period?: number
+    total_employment_thousands?: number | null
+    sector_count?: number
+    top_sectors?: RegionalSector[]
+    notes?: string[]
+  }
   notes: string[]
 }
 
@@ -538,6 +556,26 @@ export default function OverviewPage({
                     ))}
                   </div>
                 )}
+                {regionalEvidenceState === 'ready'
+                  && regionalEvidence?.sector_structure?.status === 'available'
+                  && regionalEvidence.sector_structure.top_sectors?.length ? (
+                  <div className="regionalSectorContext">
+                    <strong>Regional employment structure</strong>
+                    <span>Employment composition · not vacancy demand</span>
+                    <div className="regionalSectorList">
+                      {regionalEvidence.sector_structure.top_sectors.slice(0, 5).map((sector) => (
+                        <article key={sector.nace_code}>
+                          <span>{sector.nace_code} · {sector.nace_label ?? 'Sector'}</span>
+                          <strong>
+                            {sector.employment_share_pct != null
+                              ? `${sector.employment_share_pct.toFixed(1)}%`
+                              : `${sector.employment_thousands.toFixed(1)}k`}
+                          </strong>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
                 <p className="geoEvidenceScope">
                   Regional evidence stays separate from the national Country Radar.
                 </p>
