@@ -25,6 +25,21 @@ type CareerFit = {
       code?: string
     } | null
   }
+  occupation_outlook_evidence?: {
+    status?: string
+    source_id?: string
+    dataset_id?: string
+    release_version?: string
+    isco08?: string
+    granularity?: string
+    occupation_label?: string
+    horizons?: Array<{
+      period?: number
+      employment_level_thousands?: number | null
+      employment_growth_pct?: number | null
+    }>
+    role?: string
+  } | null
   vacancy_demand_evidence?: {
     status?: string
     vacancy_rate_pct?: number
@@ -139,6 +154,8 @@ export default function SkillsLanguagesPage({
     ? `Eurostat experimental ISCO-3 source does not cover ${countryName}`
     : 'No verified vacancy context loaded'
   const liveSkillDemandAvailable = false
+  const occupationOutlook = career?.occupation_outlook_evidence
+  const latestOutlook = occupationOutlook?.horizons?.at(-1)
   const profileReadyForSkills = Boolean(
     (profile?.profession && profile.profession.trim()) ||
     career?.occupation_match?.selected?.preferred_label,
@@ -372,10 +389,14 @@ export default function SkillsLanguagesPage({
                     <strong>Future shortage pressure</strong>
                     <small>Cedefop CLSSI 2026 · country / occupation to 2035</small>
                   </article>
-                  <article className="planned">
-                    <span>PLANNED</span>
+                  <article className={occupationOutlook?.status === 'available' ? 'active' : 'planned'}>
+                    <span>{occupationOutlook?.status === 'available' ? 'ACTIVE' : 'PLANNED'}</span>
                     <strong>Short-term occupation outlook</strong>
-                    <small>Cedefop STAS · twice-yearly employment projection</small>
+                    <small>
+                      {occupationOutlook?.status === 'available' && latestOutlook
+                        ? `Cedefop STAS · ${latestOutlook.period} · ${latestOutlook.employment_growth_pct == null ? 'growth unavailable' : `${latestOutlook.employment_growth_pct.toFixed(1)}% employment growth`}`
+                        : 'Cedefop STAS · twice-yearly employment projection'}
+                    </small>
                   </article>
                   <article className="restricted">
                     <span>ACCESS NEEDED</span>
