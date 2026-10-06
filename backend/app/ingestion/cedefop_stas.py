@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import html
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urljoin
 from zipfile import ZipFile
@@ -9,11 +10,16 @@ import xml.etree.ElementTree as ET
 
 import httpx
 
+from app.catalog import COUNTRIES
+
 
 DATASET_PAGE_URL = "https://www.cedefop.europa.eu/en/datasets/stas"
 SOURCE_ID = "CEDEFOP"
 DATASET_ID = "CEDEFOP_STAS"
 DOI = "10.2906/467749508762302"
+RELEASE_VERSION = "2026-08"
+SOURCE_UPDATED_AT = "2026-08"
+ISO2_TO_ISO3 = {country["iso2"]: country["iso3"] for country in COUNTRIES}
 
 _MAIN_NS = "http://schemas.openxmlformats.org/spreadsheetml/2006/main"
 _REL_NS = "http://schemas.openxmlformats.org/officeDocument/2006/relationships"
@@ -406,3 +412,132 @@ def inspect_workbook(path: Path, max_rows: int = 40) -> dict:
             "AUGUR only enables ingestion after country, ISCO, year and an employment-change metric are mapped unambiguously.",
         ],
     }
+
+
+def parse_stas_workbook(
+    path: Path,
+    release_version: str = RELEASE_VERSION,
+) -> list[dict]:
+    sheets = workbook_preview(path, max_rows=100000)
+    combined: dict[tuple, dict] = {}
+    retrieved_at = datetime.now(timezone.utc)
+
+    for sheet in sheets:
+        sheet_name = sheet["sheet"]
+        if not sheet_name.startswith("ameco_"):
+            continue
+
+        schema = detect_table_schema(sheet["rows"], sheet_name)
+        if schema["status"] != "recognised":
+            continue
+
+        header_index = schema["header_row_index"]
+        header = sheet["rows"][header_index]
+        matches = schema["matches"]
+        years = schema["year_columns"]
+        metric_kind = schema["metric_kind"]
+
+        scenario_index = next(
+            (
+                index
+                for index, value in enumerate(header)
+                if _normalise_header(value) == "scenario"
+            ),
+            None,
+        )
+        country_code_index = matches.get("country_code")
+        country_index = matches.get("country")
+        isco_index = matches["isco"]
+        occupation_index = isco_index - 1 if isco_index > 0 else None
+
+        isco_level = 2 if "_2d" in sheet_name else 1
+
+        for row in sheet["rows"][header_index + 1:]:
+            if isco_index >= len(row):
+                continue
+
+            raw_isco = row[isco_index]
+            if raw_isco in (None, ""):
+                continue
+
+            try:
+                numeric_isco = int(float(raw_isco))
+            except (TypeError, ValueError):
+                continue
+
+            isco08 = str(numeric_isco).zfill(isco_level)
+
+            iso2 = None
+            if country_code_index is not None and country_code_index < len(row):
+                iso2 = str(row[country_code_index] or "").strip().upper()
+            country_iso3 = ISO2_TO_ISO3.get(iso2 or "")
+            if not country_iso3:
+                continue
+
+            scenario = (
+                str(row[scenario_index]).strip()
+                if scenario_index is not None
+                and scenario_index < len(row)
+                and row[scenario_index] not in (None, "")
+                else "unknown"
+            )
+            occupation_label = (
+                str(row[occupation_index]).strip()
+                if occupation_index is not None
+                and occupation_index < len(row)
+                and row[occupation_index] not in (None, "")
+                else None
+            )
+
+            for year, value_index in years.items():
+                if value_index >= len(row):
+                    continue
+                raw_value = row[value_index]
+                if raw_value in (None, ""):
+                    continue
+                try:
+                    value = float(raw_value)
+                except (TypeError, ValueError):
+                    continue
+
+                key = (
+                    country_iso3,
+                    int(year),
+                    isco08,
+                    isco_level,
+                    scenario,
+                )
+                target = combined.setdefault(
+                    key,
+                    {
+                        "country_iso3": country_iso3,
+                        "period": int(year),
+                        "isco08": isco08,
+                        "isco_level": isco_level,
+                        "occupation_label": occupation_label,
+                        "scenario": scenario,
+                        "employment_level_thousands": None,
+                        "employment_growth_pct": None,
+                        "source_id": SOURCE_ID,
+                        "dataset_id": DATASET_ID,
+                        "release_version": release_version,
+                        "retrieved_at": retrieved_at,
+                        "source_updated_at": SOURCE_UPDATED_AT,
+                    },
+                )
+
+                if metric_kind == "employment_level_thousands":
+                    target["employment_level_thousands"] = value
+                elif metric_kind == "growth_pct":
+                    target["employment_growth_pct"] = value * 100.0
+
+    return sorted(
+        combined.values(),
+        key=lambda row: (
+            row["country_iso3"],
+            row["isco_level"],
+            row["isco08"],
+            row["period"],
+            row["scenario"],
+        ),
+    )
