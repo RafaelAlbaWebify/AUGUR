@@ -14,7 +14,7 @@ try {
     $Code = $LASTEXITCODE
 
     if ($Code -eq 2) {
-        Write-Warning "STAS workbook downloaded but its schema is not yet fully recognised. Paste the JSON diagnostic into the AUGUR chat."
+        Write-Warning "STAS requires a manual browser download or its schema is not yet fully recognised. Follow the JSON next_action and paste the diagnostic into the AUGUR chat."
         exit 2
     }
 
