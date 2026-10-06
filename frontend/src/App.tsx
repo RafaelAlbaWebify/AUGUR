@@ -210,6 +210,33 @@ type ComparisonResponse = {
   notes: string[]
 }
 
+type PersonalizedDimension = {
+  dimension: string
+  explicit_weight?: number | null
+  utility: Record<string, number>
+  construct_count: number
+  method: string
+}
+
+type PersonalizedComparisonResponse = {
+  status: 'ready' | 'weights_missing'
+  countries: string[]
+  weights: {
+    explicit: Record<string, number>
+    scale: [number, number]
+    missing_means: string
+  }
+  normalization: {
+    version: string
+    scope: string
+    utility_range: [number, number]
+    contextual_indicators_excluded: boolean
+    semantic_construct_version: string
+    notes: string[]
+  }
+  dimensions: PersonalizedDimension[]
+}
+
 type OverviewSeriesPoint = {
   period: number
   value: number
@@ -318,6 +345,7 @@ export default function App() {
   const [scenarios, setScenarios] = useState<ScenarioResponse | null>(null)
   const [overviewSeries, setOverviewSeries] = useState<OverviewSeriesResponse | null>(null)
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
+  const [personalizedComparison, setPersonalizedComparison] = useState<PersonalizedComparisonResponse | null>(null)
   const [compareCountries, setCompareCountries] = useState<string[]>(
     route.kind === 'compare' ? route.countries : ['IRL', 'ESP', 'PRT'],
   )
@@ -447,6 +475,32 @@ export default function App() {
 
     return () => controller.abort()
   }, [compareCountries])
+
+  useEffect(() => {
+    if (activeView !== 'compare') return
+
+    const controller = new AbortController()
+    const signal = controller.signal
+    const query = compareCountries.join(',')
+
+    fetchJson(
+      `${API_BASE}/api/compare/personalized?countries=${query}`,
+      'Personalized comparison',
+      signal,
+    )
+      .then((data) => {
+        if (signal.aborted) return
+        setPersonalizedComparison(data as PersonalizedComparisonResponse)
+      })
+      .catch((err) => {
+        if ((err as Error).name !== 'AbortError') {
+          setPersonalizedComparison(null)
+          setError(String(err))
+        }
+      })
+
+    return () => controller.abort()
+  }, [compareCountries, activeView])
 
   function updateCompareCountry(slot: number, iso3: string) {
     setCompareCountries((current) => {
@@ -753,6 +807,7 @@ export default function App() {
           selected={compareCountries}
           onChange={updateCompareCountry}
           comparison={comparison}
+          personalized={personalizedComparison}
           formatValue={formatValue}
           dimensionLabels={dimensionLabels}
         />
