@@ -1851,7 +1851,7 @@ test('Skills and Languages replaces empty tables with evidence-aware onboarding'
   await expect(onboarding.getByText('Profession', { exact: true })).toBeVisible()
   await expect(onboarding.getByText('Skills', { exact: true })).toBeVisible()
   await expect(onboarding.getByText('Languages', { exact: true })).toBeVisible()
-  await expect(onboarding.getByText(/Cedefop occupation demand/i)).toBeVisible()
+  await expect(onboarding.getByText(/Cedefop occupation outlook/i)).toBeVisible()
   await expect(page.locator('.skillsDemandTable')).toHaveCount(0)
 })
 
