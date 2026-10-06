@@ -1,7 +1,33 @@
 from __future__ import annotations
 
 from app.ingestion.eurostat import EurostatAdapter
+from app.ingestion.eurostat_regional_labour import normalize_subnational
 
+
+REGIONAL_HOUSING_SERIES = [
+    {
+        "indicator_id": "regional_disposable_income_pps_per_capita",
+        "dataset_id": "nama_10r_2hhinc",
+        "filters": {
+            "freq": "A",
+            "unit": "PPS_EU27_2020_HAB",
+            "direct": "BAL",
+            "na_item": "B6N",
+            "geoLevel": "nuts2",
+        },
+        "unit": "pps_per_person",
+    },
+    {
+        "indicator_id": "regional_housing_cost_overburden_rate",
+        "dataset_id": "ilc_lvho07_r",
+        "filters": {
+            "freq": "A",
+            "unit": "PC",
+            "geoLevel": "nuts2",
+        },
+        "unit": "percent",
+    },
+]
 
 DATASETS = [
     {
@@ -105,3 +131,35 @@ def inspect_regional_housing_sources(
             for item in results
         ),
     }
+
+
+def fetch_regional_housing_evidence(
+    adapter: EurostatAdapter,
+) -> tuple[list[dict], list[dict]]:
+    rows: list[dict] = []
+    diagnostics: list[dict] = []
+
+    for config in REGIONAL_HOUSING_SERIES:
+        payload = adapter.fetch_dataset(
+            config["dataset_id"],
+            config["filters"],
+        )
+        normalized = normalize_subnational(
+            adapter,
+            config,
+            payload,
+        )
+        rows.extend(normalized)
+        diagnostics.append({
+            "indicator_id": config["indicator_id"],
+            "dataset_id": config["dataset_id"],
+            "row_count": len(normalized),
+            "regions": sorted({row["geo_code"] for row in normalized}),
+            "latest_period": max(
+                (row["period"] for row in normalized),
+                default=None,
+            ),
+            "updated": payload.get("updated"),
+        })
+
+    return rows, diagnostics
