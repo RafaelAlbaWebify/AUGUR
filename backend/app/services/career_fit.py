@@ -738,7 +738,12 @@ def career_fit(
             "rule_version": BROAD_EVIDENCE_METADATA["rule_version"],
             "source": market_signal_source(evidence, None),
             "occupation_match": occupation_match,
+            "vacancy_demand_evidence": vacancy_demand_evidence,
             "occupation_outlook_evidence": occupation_outlook,
+            "occupation_trend_evidence": occupation_trend,
+            "skill_demand_trend_evidence": skill_demand_trend,
+            "language_oja_requirements_evidence": language_oja_requirements,
+            "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
