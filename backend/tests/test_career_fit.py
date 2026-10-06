@@ -428,7 +428,7 @@ def test_vacancy_rate_context_does_not_override_market_gate(monkeypatch):
         skills=["Windows", "networking", "ticketing", "troubleshooting"],
     )
 
-    result = career_fit(profile, "IRL")
+    result = career_fit(profile, "ESP")
 
     demand = result["vacancy_demand_evidence"]
     assert demand["status"] == "available"
@@ -446,7 +446,7 @@ def test_vacancy_rate_context_does_not_override_market_gate(monkeypatch):
     assert result["viability_evidence_ready"] is False
 
 
-def test_missing_vacancy_rate_does_not_make_complete_eures_evidence_partial(monkeypatch):
+def test_unavailable_vacancy_source_does_not_make_complete_eures_evidence_partial(monkeypatch):
     _mock_full_esco_career(
         monkeypatch,
         coverage=1.0,
@@ -462,7 +462,8 @@ def test_missing_vacancy_rate_does_not_make_complete_eures_evidence_partial(monk
 
     result = career_fit(profile, "IRL")
 
-    assert result["vacancy_demand_evidence"]["status"] == "evidence_missing"
+    assert result["vacancy_demand_evidence"]["status"] == "source_coverage_unavailable"
+    assert result["vacancy_demand_evidence"]["dataset_id"] == "jvs_a_isco3_r1"
     assert result["market_signal"] == "shortage"
     assert result["market_evidence_complete"] is True
     assert result["evidence_complete"] is True
