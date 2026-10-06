@@ -511,11 +511,37 @@ Important P1 boundary:
 - AUGUR must keep unavailable skill-share, employer-count and language-demand metrics explicitly missing rather than infer them from ESCO or aggregate OJA signals.
 
 ### P2 — personal decision engine
-1. user preference weights,
-2. transparent dimension normalisation,
-3. personalized comparison,
-4. uncertainty/sensitivity analysis,
-5. robust/Pareto choices instead of a universal “best country”.
+
+Current implementation status:
+
+1. **user preference weights — ACTIVE**
+   - explicit 0–5 weights are stored separately as `decision_weight_<dimension>`;
+   - legacy boolean priority chips are not silently converted into weights;
+   - blank means no explicit weight, zero explicitly excludes a dimension.
+2. **transparent dimension normalisation — ACTIVE**
+   - interpretable indicators use selected-set utility normalisation on a 0–1 scale;
+   - `higher`, `lower` and explicit `target_range` policies use published formulas returned with the API response;
+   - contextual indicators are excluded from utility synthesis;
+   - semantic constructs from P0.4 collapse duplicate source series before dimension aggregation;
+   - normalised utilities are relative to the selected country set and are not absolute country scores.
+3. **personalized comparison — ACTIVE**
+   - AUGUR produces a 0–100 selected-set preference-fit index only when every positive-weight dimension has comparable utility for every selected country;
+   - missing/contextual weighted evidence blocks the index instead of being imputed;
+   - the index is relative to the current selected set and explicit weight profile and is never presented as a universal country ranking.
+4. **uncertainty/sensitivity analysis — PARTIAL / ACTIVE**
+   - one-at-a-time ±1 perturbation of explicit positive weights is active, bounded to the 0–5 weight scale;
+   - per-country preference-fit score ranges are exposed;
+   - this measures preference-weight sensitivity only, not statistical uncertainty in source observations;
+   - probabilistic evidence-error propagation remains intentionally unimplemented until a defensible heterogeneous-source uncertainty model exists.
+5. **robust/Pareto choices — ACTIVE**
+   - Pareto nondominance is calculated on positive-weight, fully comparable dimensions;
+   - the UI reports a Pareto candidate set, never a universal “best country”;
+   - a country is dominated only if another is no worse on every included dimension and strictly better on at least one.
+
+P2 implementation boundary:
+- objective country evidence remains unchanged by preferences;
+- any weighted dimension without normalisable comparable evidence becomes an explicit blocker;
+- sensitivity ranges are preference-model robustness, not confidence intervals or statistical probability.
 
 ### P3 — commercial/live data if needed
 Evaluate Lightcast or equivalent only after the public-data model is working and the value of higher-frequency/granular postings has been demonstrated.
