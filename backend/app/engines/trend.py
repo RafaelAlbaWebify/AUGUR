@@ -9,6 +9,9 @@ class TrendResult:
     direction: str
     interpretation: str
     confidence: str
+    evidence_depth: str
+    trend_certainty: str
+    linear_fit_r2: float | None
     slope_per_year: float | None
     pct_change_1y: float | None
     pct_change_3y: float | None
@@ -38,6 +41,46 @@ def _linear_slope(points: list[tuple[int, float]]) -> float | None:
 
     numerator = sum((x - x_mean) * (y - y_mean) for x, y in zip(xs, ys))
     return numerator / denominator
+
+
+def _linear_fit_r2(points: list[tuple[int, float]]) -> float | None:
+    if len(points) < 3:
+        return None
+
+    xs = [float(year) for year, _ in points]
+    ys = [float(value) for _, value in points]
+    x_mean = mean(xs)
+    y_mean = mean(ys)
+
+    denominator = sum((x - x_mean) ** 2 for x in xs)
+    if denominator == 0:
+        return None
+
+    slope = sum(
+        (x - x_mean) * (y - y_mean)
+        for x, y in zip(xs, ys)
+    ) / denominator
+    intercept = y_mean - slope * x_mean
+
+    total_variance = sum((y - y_mean) ** 2 for y in ys)
+    if total_variance == 0:
+        return 1.0
+
+    residual_variance = sum(
+        (y - (intercept + slope * x)) ** 2
+        for x, y in zip(xs, ys)
+    )
+    return max(0.0, min(1.0, 1.0 - (residual_variance / total_variance)))
+
+
+def _trend_certainty(points: list[tuple[int, float]], r2: float | None) -> str:
+    if len(points) < 3 or r2 is None:
+        return "low"
+    if r2 >= 0.8:
+        return "high"
+    if r2 >= 0.5:
+        return "medium"
+    return "low"
 
 
 def _direction_from_change(change: float | None) -> str:
@@ -116,6 +159,9 @@ def calculate_trend(
             direction="unknown",
             interpretation="unknown",
             confidence="low",
+            evidence_depth="low",
+            trend_certainty="low",
+            linear_fit_r2=None,
             slope_per_year=None,
             pct_change_1y=None,
             pct_change_3y=None,
@@ -134,6 +180,7 @@ def calculate_trend(
 
     window = [(year, value) for year, value in clean if year >= current_year - 5]
     slope = _linear_slope(window)
+    linear_fit_r2 = _linear_fit_r2(window)
 
     reference_year = None
     for horizon in (5, 3, 1):
@@ -168,16 +215,23 @@ def calculate_trend(
         interpretation = "neutral_or_contextual"
 
     if len(window) >= 5 and changes[5] is not None:
-        confidence = "high"
+        evidence_depth = "high"
     elif len(window) >= 3 and changes[3] is not None:
-        confidence = "medium"
+        evidence_depth = "medium"
     else:
-        confidence = "low"
+        evidence_depth = "low"
+
+    trend_certainty = _trend_certainty(window, linear_fit_r2)
 
     return TrendResult(
         direction=direction,
         interpretation=interpretation,
-        confidence=confidence,
+        # Deprecated compatibility alias. Consumers should use evidence_depth
+        # and trend_certainty separately.
+        confidence=evidence_depth,
+        evidence_depth=evidence_depth,
+        trend_certainty=trend_certainty,
+        linear_fit_r2=linear_fit_r2,
         slope_per_year=slope,
         pct_change_1y=changes[1],
         pct_change_3y=changes[3],
