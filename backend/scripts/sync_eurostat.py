@@ -7,6 +7,7 @@ from app.db.bootstrap import initialize_datastores
 from app.ingestion.eurostat import EurostatAdapter
 from app.ingestion.eurostat_regional_labour import fetch_regional_labour
 from app.ingestion.eurostat_regional_sector import fetch_regional_sector_employment
+from app.ingestion.eurostat_regional_housing import fetch_regional_housing_evidence
 from app.db.analytics import (
     upsert_subnational_observations,
     upsert_regional_sector_employment,
@@ -57,12 +58,15 @@ def main() -> int:
         regional_summary = None
         if not args.skip_regional:
             regional_rows, regional_diagnostics = fetch_regional_labour(adapter)
+            housing_rows, housing_diagnostics = fetch_regional_housing_evidence(adapter)
             sector_rows, sector_diagnostic = fetch_regional_sector_employment(adapter)
 
             regional_summary = {
                 "labour_rows": upsert_subnational_observations(regional_rows),
+                "housing_rows": upsert_subnational_observations(housing_rows),
                 "sector_rows": upsert_regional_sector_employment(sector_rows),
                 "labour_diagnostics": regional_diagnostics,
+                "housing_diagnostics": housing_diagnostics,
                 "sector_diagnostic": sector_diagnostic,
             }
     finally:
@@ -98,6 +102,7 @@ def main() -> int:
         print(
             "Regional NUTS2: "
             f"labour_rows={regional_summary['labour_rows']} "
+            f"housing_rows={regional_summary['housing_rows']} "
             f"sector_rows={regional_summary['sector_rows']}"
         )
 
