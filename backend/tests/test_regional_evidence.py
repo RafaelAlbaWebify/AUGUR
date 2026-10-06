@@ -1,6 +1,7 @@
 from app.services import regional_evidence as regional_module
 from app.services.regional_evidence import (
     REGIONAL_INDICATORS,
+    NUTS3_SAFETY_INDICATORS,
     geographic_level,
     regional_comparison,
     regional_evidence,
@@ -170,3 +171,50 @@ def test_regional_comparison_includes_sector_structure(monkeypatch):
     assert sector["regions"]["ES11"]["employment_share_pct"] == 8.0
     assert sector["regions"]["ES12"]["employment_share_pct"] == 5.0
     assert result["sector_comparison"]["role"] == "regional_employment_structure_only"
+
+
+def test_nuts3_uses_only_safety_indicators():
+    result = regional_evidence("ES120", adapter=FakeAdapter())
+
+    assert result["geo_level"] == "nuts3"
+    assert result["indicator_count"] == len(NUTS3_SAFETY_INDICATORS)
+    assert {
+        item["indicator_id"] for item in result["indicators"]
+    } == {
+        "regional_intentional_homicide_rate",
+        "regional_robbery_rate",
+    }
+
+
+def test_access_indicator_queries_use_exact_eurostat_dimensions():
+    internet = next(
+        item for item in REGIONAL_INDICATORS
+        if item["indicator_id"] == "regional_household_internet_access"
+    )
+    air = next(
+        item for item in REGIONAL_INDICATORS
+        if item["indicator_id"] == "regional_air_passengers_thousands"
+    )
+
+    assert internet["dataset_id"] == "isoc_r_iacc_h"
+    assert internet["filters"] == {
+        "freq": "A",
+        "unit": "PC_HH",
+    }
+    assert air["dataset_id"] == "tran_r_avpa_nm"
+    assert air["filters"] == {
+        "freq": "A",
+        "tra_meas": "PAS_CRD",
+        "unit": "THS_PAS",
+    }
+
+
+def test_safety_indicators_are_rates_not_counts():
+    assert {
+        item["filters"]["unit"]
+        for item in NUTS3_SAFETY_INDICATORS
+    } == {"P_HTHAB"}
+    assert {
+        item["filters"]["iccs"]
+        for item in NUTS3_SAFETY_INDICATORS
+    } == {"ICCS0101", "ICCS0401"}
