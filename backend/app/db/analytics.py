@@ -141,6 +141,7 @@ CREATE TABLE IF NOT EXISTS labour_job_transitions (
 
 CREATE TABLE IF NOT EXISTS subnational_observations (
     geo_code VARCHAR NOT NULL,
+    geo_name VARCHAR,
     geo_level VARCHAR NOT NULL,
     indicator_id VARCHAR NOT NULL,
     period INTEGER NOT NULL,
@@ -195,6 +196,17 @@ def initialize_analytics_schema() -> None:
             row[1]
             for row in con.execute("PRAGMA table_info('indicators')").fetchall()
         }
+
+        subnational_columns = {
+            row[1]
+            for row in con.execute(
+                "PRAGMA table_info('subnational_observations')"
+            ).fetchall()
+        }
+        if "geo_name" not in subnational_columns:
+            con.execute(
+                "ALTER TABLE subnational_observations ADD COLUMN geo_name VARCHAR"
+            )
 
         if "interpretation_policy" not in existing_columns:
             con.execute("ALTER TABLE indicators ADD COLUMN interpretation_policy VARCHAR")
