@@ -41,6 +41,8 @@ def summarize_dimension(indicators: list[dict]) -> dict:
             "pct_change_5y": trend.get("pct_change_5y"),
             "target_status": trend.get("target_status"),
             "synthesis_construct": construct,
+            "source_id": indicator.get("source_id"),
+            "evidence_reliability": indicator.get("evidence_reliability") or {},
         }
 
         if interpretation == "improving":
@@ -153,6 +155,43 @@ def summarize_dimension(indicators: list[dict]) -> dict:
         if item["indicator_count"] > 1
     ]
 
+    reliability_rows = [
+        indicator.get("evidence_reliability") or {}
+        for indicator in indicators
+    ]
+    source_ids = sorted({
+        row.get("source_id")
+        for row in reliability_rows
+        if row.get("source_id")
+    })
+    suitability_grades = sorted({
+        row.get("augur_suitability_grade")
+        for row in reliability_rows
+        if row.get("augur_suitability_grade")
+    })
+    periods = [
+        int(row["observation_period"])
+        for row in reliability_rows
+        if row.get("observation_period") is not None
+    ]
+    freshness_counts = {
+        band: sum(1 for row in reliability_rows if row.get("freshness_band") == band)
+        for band in ("current", "lagged", "older")
+    }
+
+    evidence_reliability = {
+        "source_ids": source_ids,
+        "augur_suitability_grades": suitability_grades,
+        "latest_observation_period": max(periods) if periods else None,
+        "oldest_observation_period": min(periods) if periods else None,
+        "freshness_counts": freshness_counts,
+        "basis": "source_suitability_plus_observation_period_age",
+        "note": (
+            "Freshness bands describe observation age only; they do not penalize "
+            "normal publication lags or estimate statistical uncertainty."
+        ),
+    }
+
     return {
         "trajectory": trajectory,
         "confidence": confidence,
@@ -182,6 +221,7 @@ def summarize_dimension(indicators: list[dict]) -> dict:
         "duplicate_constructs": duplicate_constructs,
         "conflicting_constructs": conflicting_constructs,
         "constructs": construct_summaries,
+        "evidence_reliability": evidence_reliability,
         "improving_signals": improving,
         "deteriorating_signals": deteriorating,
         "stable_signals": stable,
