@@ -278,7 +278,7 @@ def _year_columns(row: list[object]) -> dict[int, int]:
     years: dict[int, int] = {}
     for index, value in enumerate(row):
         text = str(value or "").strip()
-        if re.fullmatch(r"20\\d{2}", text):
+        if re.fullmatch(r"20\d{2}", text):
             years[int(text)] = index
     return years
 
