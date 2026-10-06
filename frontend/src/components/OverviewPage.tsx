@@ -261,7 +261,6 @@ export default function OverviewPage({
   currentIndicators,
   overviewSeries,
   assessment,
-  comparison,
   onCountryChange,
   onOpenIndicators,
   onOpenDimension,
