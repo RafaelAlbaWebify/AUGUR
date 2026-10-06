@@ -62,56 +62,7 @@ Limitations:
 - geographic coverage is incomplete and must be surfaced as source coverage, not treated as zero demand;
 - not equivalent to a personal probability of finding work.
 
-## Planned verified sources
-
-### Cedefop — Real-time occupational shortage based on OJAs
-
-Dataset:
-- version: 2026-05;
-- licence: CC BY 4.0;
-- DOI: 10.2906/752555516245105;
-- canonical page: https://www.cedefop.europa.eu/en/datasets/oja-imbalance-occupations
-- published direct file name: `cedefop-oja-imbalance-2026-05.csv`.
-
-Methodological role:
-- exploratory EU27 occupation-level recruitment-difficulty / shortage signal;
-- combines OJA labour-demand growth, digital-skill demand change, ad duration,
-  non-native-language share and OJA-to-employment change;
-- published score is normalised 0–1.
-
-AUGUR role:
-- occupation-level demand/shortage context only;
-- must be labelled exploratory;
-- must not be used as skill-level demand share or employer count;
-- must preserve Cedefop's representativeness/classification warning.
-
-Integration status:
-- source identified;
-- not active until the CSV bytes and schema are inspected and pinned in the ingestion pipeline.
-
-### Cedefop — STAS
-
-Dataset:
-- Short-term anticipation of skills trends and VET demand;
-- updated twice per year;
-- licence: CC BY 4.0;
-- DOI: 10.2906/467749508762302;
-- canonical page: https://www.cedefop.europa.eu/en/datasets/stas
-- published Jan-2026 file name: `stas_dataset_release_jan_2026.xlsx`;
-- a newer August 2026 release is listed by Cedefop and should be preferred once its file is inspected.
-
-Methodological role:
-- short-term employment projections by occupation;
-- uses EU LFS employment, European Job Vacancy Statistics and AMECO alignment.
-
-AUGUR role:
-- short-term occupation outlook;
-- separate from OJA shortage;
-- never displayed as skill-level demand.
-
-Integration status:
-- source identified;
-- not active until the latest downloadable workbook is inspected and version-pinned.
+## Active forward-looking occupation evidence
 
 ### Cedefop Skills Forecast 2026
 
@@ -126,29 +77,6 @@ Access:
 
 AUGUR role:
 - medium-term occupation/sector outlook once reproducible access is available.
-
-### Cedefop STAS 2026
-
-Dataset:
-- Short-term anticipation of skills trends and VET demand (STAS);
-- official Cedefop dataset;
-- short-term employment projections by occupation and Member State;
-- current methodology uses EU LFS employment, European Job Vacancy Statistics and AMECO alignment;
-- update frequency: twice per year;
-- licence: CC BY 4.0;
-- DOI: 10.2906/467749508762302.
-
-AUGUR role:
-- near-term occupation outlook at ISCO 1-digit / 2-digit;
-- complements EURES shortage/surplus and Eurostat experimental vacancy context;
-- does not provide skill-level posting frequency;
-- does not become a job-finding probability or TTV duration.
-
-Integration status:
-- official dataset page and direct XLSX workflow verified;
-- `inspect-cedefop-stas.ps1` resolves/downloads the current official workbook and inspects its schema;
-- no STAS rows are written to DuckDB until country, ISCO, year and employment-change fields are recognised unambiguously;
-- this schema gate is intentional and prevents silently importing the wrong worksheet/metric.
 
 ### Cedefop Skills-OVATE
 
