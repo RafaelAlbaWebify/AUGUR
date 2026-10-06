@@ -442,6 +442,10 @@ Suggested layout:
 
 ### P1 — directly increase decision usefulness
 
+**P1 implementation status: COMPLETE WITHIN PUBLIC-DATA BOUNDARY**
+
+AUGUR now implements every P1 evidence layer that can be sourced reproducibly from the verified public-data paths currently available. Detailed Skills-OVATE skill-demand and job-ad language shares remain explicitly source-access-gated behind Eurostat microdata access; this is an external evidence-access boundary, not silently missing implementation.
+
 Current implementation status:
 
 1. **Cedefop OJA evidence — PARTIAL / ACTIVE**
