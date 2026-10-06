@@ -112,3 +112,46 @@ def test_housing_mixed_when_burden_improves_but_market_pressure_worsens():
     assert result["evidence_status"] == "sufficient"
     assert len(result["improving_signals"]) == 1
     assert len(result["deteriorating_signals"]) == 2
+
+
+def test_duplicate_indicators_count_as_one_construct_vote():
+    first = make_indicator("unemployment_rate", "improving", direction="decrease")
+    second = make_indicator("imf_unemployment_rate", "improving", direction="decrease")
+    first["synthesis_construct"] = "unemployment_rate"
+    second["synthesis_construct"] = "unemployment_rate"
+
+    result = summarize_dimension([first, second])
+
+    assert result["directional_indicator_count"] == 2
+    assert result["effective_directional_construct_count"] == 1
+    assert result["synthesis_construct_count"] == 1
+    assert result["trajectory"] == "limited_evidence"
+    assert result["evidence_status"] == "limited"
+    assert len(result["duplicate_constructs"]) == 1
+
+
+def test_conflicting_duplicate_sources_do_not_become_two_votes():
+    first = make_indicator("inflation_hicp", "improving", direction="decrease")
+    second = make_indicator("inflation_cpi", "deteriorating", direction="increase")
+    first["synthesis_construct"] = "inflation_rate"
+    second["synthesis_construct"] = "inflation_rate"
+
+    result = summarize_dimension([first, second])
+
+    assert result["effective_directional_construct_count"] == 1
+    assert result["trajectory"] == "mixed"
+    assert result["evidence_status"] == "limited"
+    assert result["conflicting_constructs"][0]["construct"] == "inflation_rate"
+
+
+def test_independent_constructs_can_still_define_dimension_trajectory():
+    first = make_indicator("employment_rate_20_64", "improving")
+    second = make_indicator("unemployment_rate", "improving", direction="decrease")
+    first["synthesis_construct"] = "employment_rate_20_64"
+    second["synthesis_construct"] = "unemployment_rate"
+
+    result = summarize_dimension([first, second])
+
+    assert result["effective_directional_construct_count"] == 2
+    assert result["trajectory"] == "improving"
+    assert result["evidence_status"] == "sufficient"
