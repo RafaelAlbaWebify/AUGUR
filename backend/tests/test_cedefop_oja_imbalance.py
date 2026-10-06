@@ -25,3 +25,23 @@ def test_partial_schema_is_not_ready():
 
     assert result["status"] == "partial"
     assert result["ready_for_parser_implementation"] is False
+
+
+def test_parse_published_oja_csv(tmp_path):
+    from app.ingestion.cedefop_oja_imbalance import parse_csv
+
+    path = tmp_path / "oja.csv"
+    path.write_text(
+        "ISCO_1,ISCO_4,Occupation,score\n"
+        "2 Professionals,2522,Systems administrators,0.625\n"
+        "3 Technicians,3512,ICT user support technicians,0.41\n",
+        encoding="utf-8",
+    )
+
+    rows = parse_csv(path)
+
+    assert len(rows) == 2
+    assert rows[0]["isco08"] == "2522"
+    assert rows[0]["occupation_label"] == "Systems administrators"
+    assert rows[0]["score"] == 0.625
+    assert rows[0]["release_version"] == "2026-05"
