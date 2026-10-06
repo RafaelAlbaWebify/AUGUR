@@ -19,9 +19,17 @@ ALIASES = {
         "isco code",
         "isco08",
         "isco 08",
+        "isco 4",
+        "isco_4",
         "occupation code",
         "oc code",
         "code",
+    },
+    "major_group": {
+        "isco 1",
+        "isco_1",
+        "isco 1 digit",
+        "major group",
     },
     "occupation_label": {
         "occupation",
@@ -105,9 +113,11 @@ def inspect_csv(path: Path, max_rows: int = 20) -> dict:
         "delimiter": delimiter,
         **schema,
         "sample_rows": sample_rows[:5],
+        "geographic_scope": "EU27",
         "notes": [
             "This inspector does not write OJA imbalance data to DuckDB.",
             "The published Cedefop score is exploratory and must remain context-only.",
+            "The released CSV contains one EU27-level score per ISCO-4 occupation; it is not country-specific evidence.",
             "AUGUR will not infer skill-demand shares, employer counts or hiring probabilities from this dataset.",
         ],
     }
