@@ -116,3 +116,51 @@ It must withhold:
 - "rising skill" rankings.
 
 Those fields should remain explicitly unavailable rather than synthesized from taxonomy data.
+
+
+## Explicit access-gated evidence
+
+### Skills-OVATE detailed skill-demand trends
+
+Status:
+- source access gated.
+
+Reason:
+- Cedefop exposes interactive Skills-OVATE dashboards and quarterly updates;
+- access to detailed data is organised through Eurostat's Microdata access portal;
+- AUGUR does not treat Tableau visualisations as a stable ingestion API and does not scrape them.
+
+AUGUR behaviour:
+- CareerFit exposes `skill_demand_trend_evidence.status = source_access_gated`;
+- ESCO occupation-skill relationships remain taxonomy evidence only;
+- no skill demand share, YoY growth or employer frequency is inferred.
+
+### Skills-OVATE language requirements in OJAs
+
+Status:
+- source access gated.
+
+Reason:
+- detailed OJA language analytics require the same microdata-access route;
+- the public 2026 Cedefop OJA imbalance CSV exposes one combined EU27 occupation score;
+- its non-native-language component is not separately published in a form AUGUR can reproducibly ingest.
+
+AUGUR behaviour:
+- CareerFit exposes `language_oja_requirements_evidence.status = source_access_gated`;
+- zero or null is never interpreted as zero employer demand;
+- declared CEFR and target-country language evidence remain separate from OJA demand.
+
+## Active occupation trend evidence
+
+### Cedefop STAS
+
+Role:
+- short-term occupation employment outlook;
+- country-specific;
+- ISCO 2-digit preferred, ISCO 1-digit fallback;
+- 2026–2027 horizons in the currently integrated release.
+
+AUGUR behaviour:
+- CareerFit exposes a structured occupation trend derived from published STAS growth values;
+- direction is sign-based only (`positive_growth`, `negative_growth`, or `zero_growth`);
+- this is explicitly employment outlook, not OJA demand growth, statistical significance or a personal hiring probability.
