@@ -7,6 +7,14 @@ SWAGGER_URL = (
     "https://eeadmz1-downloads-api-appservice.azurewebsites.net/"
     "swagger/v1/swagger.json"
 )
+API_BASE = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
+
+
+def _safe_json(response: httpx.Response):
+    try:
+        return response.json()
+    except Exception:
+        return {"raw_text": response.text[:4000]}
 
 
 def inspect_modern_eea_api(
@@ -77,6 +85,20 @@ def inspect_modern_eea_api(
         if name in schemas
     }
 
+    country_response = active.get(f"{API_BASE}/Country")
+    pollutant_response = active.get(f"{API_BASE}/Pollutant")
+
+    reference_values = {
+        "countries": {
+            "status_code": country_response.status_code,
+            "payload": _safe_json(country_response),
+        },
+        "pollutants": {
+            "status_code": pollutant_response.status_code,
+            "payload": _safe_json(pollutant_response),
+        },
+    }
+
     return {
         "status": "available" if paths else "empty",
         "swagger_url": SWAGGER_URL,
@@ -85,5 +107,10 @@ def inspect_modern_eea_api(
         "path_count": len(paths),
         "interesting_paths": interesting,
         "referenced_request_schemas": referenced_schemas,
-        "ready_for_endpoint_design": bool(interesting),
+        "reference_values": reference_values,
+        "ready_for_endpoint_design": bool(
+            interesting
+            and country_response.is_success
+            and pollutant_response.is_success
+        ),
     }
