@@ -78,6 +78,15 @@ SOURCES = [
 
     },
     {
+        "source_id": "CEDEFOP",
+        "name": "Cedefop",
+        "organisation": "European Centre for the Development of Vocational Training",
+        "base_url": "https://www.cedefop.europa.eu",
+        "priority": 1,
+        "augur_suitability_grade": "A",
+        "augur_suitability_basis": "official_eu_skills_and_labour_market_intelligence",
+    },
+    {
         "source_id": "WORLD_BANK",
         "name": "World Bank",
         "organisation": "World Bank",
