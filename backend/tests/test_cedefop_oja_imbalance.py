@@ -3,15 +3,17 @@ from app.ingestion.cedefop_oja_imbalance import detect_schema
 
 def test_detects_occupation_code_and_score():
     result = detect_schema([
-        "isco_code",
-        "occupation",
+        "ISCO_1",
+        "ISCO_4",
+        "Occupation",
         "score",
     ])
 
     assert result["status"] == "recognised"
-    assert result["matches"]["occupation_code"] == 0
-    assert result["matches"]["occupation_label"] == 1
-    assert result["matches"]["score"] == 2
+    assert result["matches"]["major_group"] == 0
+    assert result["matches"]["occupation_code"] == 1
+    assert result["matches"]["occupation_label"] == 2
+    assert result["matches"]["score"] == 3
     assert result["ready_for_parser_implementation"] is True
 
 
