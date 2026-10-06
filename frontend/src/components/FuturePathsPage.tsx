@@ -326,7 +326,8 @@ export default function FuturePathsPage({
 
       <section className="futureEvidenceFooter">
         <p>
-          Official forecast values are displayed as source evidence. AUGUR scenarios are separate model assumptions and must not be read as official probabilities.${scenarioStatus && !scenarioStatus.eligible_for_decision_ranking ? ' They are not eligible for decision ranking.' : ''}
+          Official forecast values are displayed as source evidence. AUGUR scenarios are separate model assumptions and must not be read as official probabilities.
+          {scenarioStatus && !scenarioStatus.eligible_for_decision_ranking ? ' They are not eligible for decision ranking.' : ''}
         </p>
         <div><span>Evidence</span><strong>{official.length ? 'Official forecast available' : 'Limited'}</strong></div>
         <div><span>Source</span><strong>{sourceNames.join(' · ') || '—'}</strong></div>
