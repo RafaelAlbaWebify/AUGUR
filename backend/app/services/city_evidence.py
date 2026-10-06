@@ -26,33 +26,81 @@ CITY_POPULATION = {
 
 
 def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
-    match = next((row for row in rows if row["indicator_id"] == CITY_POPULATION["indicator_id"]), None)
-    if not match:
+    by_id = {
+        row["indicator_id"]: row
+        for row in rows
+    }
+    population = by_id.get(CITY_POPULATION["indicator_id"])
+    pm25 = by_id.get("city_pm25_annual_mean_observed")
+
+    if not population and not pm25:
         return None
+
+    indicators = []
+
+    if population:
+        indicators.append({
+            "indicator_id": CITY_POPULATION["indicator_id"],
+            "name": CITY_POPULATION["name"],
+            "status": "available",
+            "period": population["period"],
+            "value": population["value"],
+            "unit": population["unit"],
+            "dataset_id": population["dataset_id"],
+            "source_id": population["source_id"],
+            "source_updated_at": population.get("source_updated_at"),
+        })
+    else:
+        indicators.append({
+            "indicator_id": CITY_POPULATION["indicator_id"],
+            "name": CITY_POPULATION["name"],
+            "status": "unavailable",
+            "dataset_id": CITY_POPULATION["dataset_id"],
+            "source_id": "EUROSTAT",
+            "reason": "not_cached",
+        })
+
+    if pm25:
+        indicators.append({
+            "indicator_id": "city_pm25_annual_mean_observed",
+            "name": "Observed annual mean PM2.5",
+            "status": "available",
+            "period": pm25["period"],
+            "value": pm25["value"],
+            "unit": pm25["unit"],
+            "dataset_id": pm25["dataset_id"],
+            "source_id": pm25["source_id"],
+            "source_updated_at": pm25.get("source_updated_at"),
+        })
+    else:
+        indicators.append({
+            "indicator_id": "city_pm25_annual_mean_observed",
+            "name": "Observed annual mean PM2.5",
+            "status": "unavailable",
+            "dataset_id": "EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS",
+            "source_id": "EEA",
+            "reason": "not_cached",
+        })
+
+    available_count = sum(
+        1 for item in indicators
+        if item["status"] == "available"
+    )
 
     return {
         "city_code": code,
         "geo_level": "city",
-        "source": "AUGUR local store · Eurostat City Statistics / Urban Audit",
+        "source": "AUGUR local store · Eurostat Urban Audit + EEA air quality",
         "storage": "duckdb",
         "minimum_population_scope": 50000,
-        "indicator_count": 1,
-        "available_count": 1,
-        "complete": True,
-        "indicators": [{
-            "indicator_id": CITY_POPULATION["indicator_id"],
-            "name": CITY_POPULATION["name"],
-            "status": "available",
-            "period": match["period"],
-            "value": match["value"],
-            "unit": match["unit"],
-            "dataset_id": match["dataset_id"],
-            "source_id": match["source_id"],
-            "source_updated_at": match.get("source_updated_at"),
-        }],
+        "indicator_count": len(indicators),
+        "available_count": available_count,
+        "complete": available_count == len(indicators),
+        "indicators": indicators,
         "notes": [
             "City evidence is served from AUGUR's local analytical store when available.",
-            "Eurostat Urban Audit city collection covers cities with at least 50,000 inhabitants.",
+            "Population uses Eurostat Urban Audit city statistics.",
+            "Observed PM2.5 uses validated EEA E1a monitoring data and is not a population-exposure model.",
         ],
     }
 
