@@ -921,7 +921,7 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await expect(regionalCards.getByText('Housing cost overburden rate')).toBeVisible()
   await expect(regionalCards.getByText('6.4%')).toBeVisible()
   await expect(regionalCards.getByText('Unmet medical examination needs')).toBeVisible()
-  await expect(regionalCards.getByText('1.2%')).toBeVisible()
+  await expect(regionalCards.getByText('1.2%', { exact: true })).toBeVisible()
   await expect(regionalCards.getByText('Available hospital beds')).toBeVisible()
   await expect(regionalCards.getByText('315.6 /100k')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Country metric cards' })).toHaveCount(0)
