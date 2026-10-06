@@ -460,10 +460,12 @@ Current implementation status:
    - periods 2026–2027;
    - ISCO 2-digit preferred, ISCO 1-digit fallback;
    - context-only for CareerFit.
-4. **Regional/NUTS geography — IN PROGRESS**
-   - Eurostat quarterly regional JVS source `jvs_q_isco_r21` identified;
-   - target granularity NUTS2 + ISCO 1-digit;
-   - schema/coverage inspector added before ingestion is activated.
+4. **Regional/NUTS geography — ACTIVE / EXPANDING**
+   - quarterly regional JVS `jvs_q_isco_r21` inspected but does not cover ES/PT/IE NUTS2 regions in 2026-Q2, so AUGUR does not infer regional occupation vacancy pressure from it;
+   - Eurostat NUTS2 employment and unemployment rates are active for ES/PT/IE;
+   - 36 NUTS2 regions loaded, including Galicia and Principado de Asturias;
+   - regional sector-employment ingestion via `lfst_r_lfe2en2` is implemented to describe economic structure by NACE;
+   - regional sector composition remains context, not occupation-specific vacancy evidence.
 5. language requirements extracted from OJAs.
 6. occupation/skill demand trend.
 7. housing affordability vs income.
