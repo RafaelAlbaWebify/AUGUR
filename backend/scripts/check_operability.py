@@ -64,6 +64,17 @@ def main() -> int:
         f"full_occupation_coverage={career_market['full_occupation_coverage']}"
     )
 
+    occupation_outlook = result["occupation_outlook_evidence"]
+    print(
+        "occupation_outlook_evidence: "
+        f"available={occupation_outlook['available']} "
+        f"rows={occupation_outlook['row_count']} "
+        f"countries={occupation_outlook['country_count']} "
+        f"periods={occupation_outlook['periods']} "
+        f"isco_levels={occupation_outlook['isco_levels']} "
+        f"releases={occupation_outlook['release_versions']}"
+    )
+
     if result["blockers"]:
         print("blockers:")
         for blocker in result["blockers"]:
