@@ -179,6 +179,12 @@ def _mock_full_esco_career(
         ),
     )
 
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_occupation_outlook",
+        lambda country_iso3, isco08, scenario="Aligned_forecast_Ameco": [],
+    )
+
     total = 4
     matched = int(total * coverage)
     monkeypatch.setattr(
