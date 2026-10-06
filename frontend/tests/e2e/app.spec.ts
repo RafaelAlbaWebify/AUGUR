@@ -361,12 +361,13 @@ async function mockApi(page: Page) {
         vacancy_demand_evidence: {
           status: 'available',
           isco_major: 'OC3',
+          isco_3digit: 'OC351',
           vacancy_rate_pct: 3.4,
-          period: '2026-Q2',
-          nace_scope: 'B-T',
+          period: '2024',
+          nace_scope: null,
           source_id: 'EUROSTAT',
-          dataset_id: 'jvs_q_isco_r21',
-          granularity: 'isco_major_group',
+          dataset_id: 'jvs_a_isco3_r1',
+          granularity: 'isco_3digit',
           role: 'context_only',
         },
         skill_match: {
@@ -1312,7 +1313,57 @@ test('latest EURES annex provenance is visible in Skills and Languages', async (
 
 test('vacancy rate remains contextual in Skills and Languages', async ({ page }) => {
   await page.goto('/country/ESP/skills')
-  await expect(page.getByText('Eurostat 2026-Q2 · ISCO OC3 vacancy rate 3.4% · context only')).toBeVisible()
+  await expect(page.getByText('Eurostat 2024 · ISCO OC351 vacancy rate 3.4% · context only')).toBeVisible()
+})
+
+test('Skills distinguishes vacancy source coverage unavailable from zero demand', async ({ page }) => {
+  await page.route('http://127.0.0.1:8020/api/countries/IRL/career-fit', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        target_country_iso3: 'IRL',
+        status: 'evidence_available',
+        market_signal: 'shortage',
+        occupation_match: {
+          selected: {
+            preferred_label: 'ICT professional',
+            match_score: 0.9,
+            isco_group: '2522',
+            code: '2522',
+          },
+        },
+        vacancy_demand_evidence: {
+          status: 'source_coverage_unavailable',
+          dataset_id: 'jvs_a_isco3_r1',
+          supported_countries: ['ESP', 'PRT'],
+          isco_major: 'OC2',
+          isco_3digit: 'OC252',
+          granularity: 'isco_3digit',
+          role: 'context_only',
+        },
+        skill_match: {
+          status: 'matched',
+          matched_skills: ['Windows'],
+          missing_skills: ['cloud platforms'],
+          coverage: 0.5,
+          evidence_complete: true,
+        },
+        evidence_complete: true,
+        source: {
+          label: 'EURES Labour Market Information: Ireland',
+          evidence_id: 'eures_country_lmi_2024_conditions',
+          conditions_year: 2024,
+          scope: 'broad_occupation_group',
+        },
+      }),
+    })
+  })
+
+  await page.goto('/country/IRL/skills')
+
+  await expect(page.getByText(/Eurostat experimental ISCO-3 source does not cover Ireland/i).first()).toBeVisible()
+  await expect(page.getByText(/this is not zero demand/i)).toBeVisible()
 })
 
 test('versioned EURES market evidence is visible in Skills and Languages', async ({ page }) => {
