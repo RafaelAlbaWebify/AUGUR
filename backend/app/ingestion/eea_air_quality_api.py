@@ -144,3 +144,47 @@ def inspect_modern_eea_api(
             and summary_response.is_success
         ),
     }
+
+
+def probe_verified_pm25_city(
+    city_name: str = "Oviedo",
+    country_code: str = "ES",
+    year: int = 2024,
+    client: httpx.Client | None = None,
+) -> dict:
+    owns_client = client is None
+    active = client or httpx.Client(
+        timeout=120,
+        follow_redirects=True,
+        headers={"User-Agent": "AUGUR/0.1 EEA PM2.5 city probe"},
+    )
+    payload = {
+        "countries": [country_code],
+        "cities": [city_name],
+        "pollutants": [PM25_URI],
+        "dataset": 2,
+        "source": "API",
+        "dateTimeStart": f"{year}-01-01T00:00:00Z",
+        "dateTimeEnd": f"{year}-12-31T23:59:59Z",
+    }
+
+    try:
+        summary = active.post(
+            f"{API_BASE}/DownloadSummary",
+            json=payload,
+        )
+        urls = active.post(
+            f"{API_BASE}/ParquetFile/urls",
+            json=payload,
+        )
+        return {
+            "status": "available" if summary.is_success and urls.is_success else "unavailable",
+            "request": payload,
+            "summary_status_code": summary.status_code,
+            "summary": _safe_json(summary),
+            "urls_status_code": urls.status_code,
+            "urls": _safe_json(urls),
+        }
+    finally:
+        if owns_client:
+            active.close()
