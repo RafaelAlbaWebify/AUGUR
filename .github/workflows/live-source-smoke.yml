@@ -7,8 +7,10 @@ on:
     paths:
       - "backend/app/ingestion/eurostat_regional_*.py"
       - "backend/app/ingestion/eea_air_quality.py"
+      - "backend/app/ingestion/eea_air_quality_api.py"
       - "backend/scripts/inspect_eurostat_regional_*.py"
       - "backend/scripts/inspect_eea_pm25.py"
+      - "backend/scripts/inspect_eea_air_quality_api.py"
       - "backend/scripts/sync_eurostat_regional_*.py"
       - ".github/workflows/live-source-smoke.yml"
   schedule:
@@ -60,5 +62,9 @@ jobs:
       - name: Sync regional healthcare evidence
         run: python -m scripts.sync_eurostat_regional_health
 
-      - name: Inspect EEA PM2.5 station coverage
+      - name: Inspect legacy EEA PM2.5 station coverage
+        continue-on-error: true
         run: python -m scripts.inspect_eea_pm25
+
+      - name: Inspect modern EEA Air Quality API
+        run: python -m scripts.inspect_eea_air_quality_api
