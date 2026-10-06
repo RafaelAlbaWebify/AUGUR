@@ -12,6 +12,7 @@ on:
       - "backend/scripts/*eea*.py"
       - "backend/scripts/inspect_*gisco*.py"
       - "backend/scripts/sync_eurostat_regional_*.py"
+      - "backend/scripts/*nuts3*.py"
       - ".github/workflows/live-source-smoke.yml"
   schedule:
     - cron: "17 6 * * 1"
@@ -64,6 +65,9 @@ jobs:
 
       - name: Inspect regional access and safety schemas
         run: python -m scripts.inspect_eurostat_regional_access_safety
+
+      - name: Probe NUTS3 context
+        run: python -m scripts.probe_eurostat_nuts3_context
 
       - name: Inspect legacy EEA PM2.5 station coverage
         continue-on-error: true
