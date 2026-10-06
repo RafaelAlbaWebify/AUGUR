@@ -136,3 +136,107 @@ def test_no_explicit_weights_keeps_normalization_but_blocks_personal_weighting()
     assert result["status"] == "weights_missing"
     assert result["dimensions"][0]["utility"]["IRL"] == 1.0
     assert "ranking" not in result
+
+
+
+def test_weighted_preference_index_keeps_tradeoff_on_pareto_frontier():
+    snapshots = {
+        "ESP": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 10.0, "ESP"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 5.0, "ESP"),
+        ],
+        "IRL": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 5.0, "IRL"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 10.0, "IRL"),
+        ],
+    }
+
+    result = build_personalized_normalization(
+        ["ESP", "IRL"],
+        snapshots,
+        {
+            "decision_weight_productive_capacity": 4,
+            "decision_weight_housing": 1,
+        },
+    )
+
+    personalized = result["personalized"]
+    assert personalized["status"] == "ready"
+    assert round(personalized["scores"]["ESP"], 6) == 20.0
+    assert round(personalized["scores"]["IRL"], 6) == 80.0
+    assert set(personalized["pareto"]["frontier"]) == {"ESP", "IRL"}
+    assert personalized["sensitivity"]["scenario_count"] > 1
+    assert personalized["sensitivity"]["score_ranges"]["ESP"]["spread"] > 0
+
+
+def test_pareto_frontier_excludes_strictly_dominated_country():
+    snapshots = {
+        "ESP": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 10.0, "ESP"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 10.0, "ESP"),
+        ],
+        "IRL": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 5.0, "IRL"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 5.0, "IRL"),
+        ],
+    }
+
+    result = build_personalized_normalization(
+        ["ESP", "IRL"],
+        snapshots,
+        {
+            "decision_weight_productive_capacity": 3,
+            "decision_weight_housing": 3,
+        },
+    )
+
+    pareto = result["personalized"]["pareto"]
+    assert pareto["frontier"] == ["IRL"]
+    assert pareto["dominated_by"]["ESP"] == ["IRL"]
+    assert pareto["dominated_by"]["IRL"] == []
+
+
+def test_contextual_weight_blocks_preference_index_instead_of_imputing():
+    snapshots = {
+        "ESP": [
+            _row("public_debt_gdp", "Debt", "fiscal", 100.0, "ESP"),
+        ],
+        "IRL": [
+            _row("public_debt_gdp", "Debt", "fiscal", 50.0, "IRL"),
+        ],
+    }
+
+    result = build_personalized_normalization(
+        ["ESP", "IRL"],
+        snapshots,
+        {"decision_weight_fiscal": 5},
+    )
+
+    personalized = result["personalized"]
+    assert result["status"] == "weight_evidence_blocked"
+    assert personalized["status"] == "weight_evidence_blocked"
+    assert personalized["scores"] == {}
+    assert personalized["pareto"] is None
+    assert personalized["blockers"] == [
+        "fiscal:no_normalizable_dimension_evidence"
+    ]
+
+
+def test_all_zero_explicit_weights_do_not_create_score():
+    snapshots = {
+        "ESP": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 10.0, "ESP"),
+        ],
+        "IRL": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 5.0, "IRL"),
+        ],
+    }
+
+    result = build_personalized_normalization(
+        ["ESP", "IRL"],
+        snapshots,
+        {"decision_weight_productive_capacity": 0},
+    )
+
+    assert result["status"] == "no_positive_weights"
+    assert result["personalized"]["scores"] == {}
