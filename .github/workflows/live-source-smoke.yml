@@ -62,6 +62,9 @@ jobs:
       - name: Sync regional healthcare evidence
         run: python -m scripts.sync_eurostat_regional_health
 
+      - name: Inspect regional access and safety schemas
+        run: python -m scripts.inspect_eurostat_regional_access_safety
+
       - name: Inspect legacy EEA PM2.5 station coverage
         continue-on-error: true
         run: python -m scripts.inspect_eea_pm25
