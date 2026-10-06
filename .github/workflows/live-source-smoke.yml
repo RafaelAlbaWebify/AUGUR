@@ -51,3 +51,6 @@ jobs:
 
       - name: Sync regional housing and income evidence
         run: python -m scripts.sync_eurostat_regional_housing
+
+      - name: Inspect regional healthcare schemas
+        run: python -m scripts.inspect_eurostat_regional_health
