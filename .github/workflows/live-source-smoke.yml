@@ -2,6 +2,13 @@ name: AUGUR Live Source Smoke
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/app/ingestion/eurostat_regional_*.py"
+      - "backend/scripts/inspect_eurostat_regional_*.py"
+      - "backend/scripts/sync_eurostat_regional_*.py"
+      - ".github/workflows/live-source-smoke.yml"
   schedule:
     - cron: "17 6 * * 1"
 
@@ -38,3 +45,6 @@ jobs:
 
       - name: Sync regional sector evidence
         run: python -m scripts.sync_eurostat_regional_sector
+
+      - name: Inspect regional housing and income schemas
+        run: python -m scripts.inspect_eurostat_regional_housing
