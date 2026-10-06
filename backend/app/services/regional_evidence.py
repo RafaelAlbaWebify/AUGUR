@@ -115,7 +115,63 @@ REGIONAL_INDICATORS = [
         },
         "unit": "percent",
     },
+    {
+        "indicator_id": "regional_household_internet_access",
+        "name": "Households with internet access",
+        "dataset_id": "isoc_r_iacc_h",
+        "filters": {
+            "freq": "A",
+            "unit": "PC_HH",
+        },
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "regional_air_passengers_thousands",
+        "name": "Air passengers carried",
+        "dataset_id": "tran_r_avpa_nm",
+        "filters": {
+            "freq": "A",
+            "tra_meas": "PAS_CRD",
+            "unit": "THS_PAS",
+        },
+        "unit": "thousand_passengers",
+    },
 ]
+
+NUTS3_SAFETY_INDICATORS = [
+    {
+        "indicator_id": "regional_intentional_homicide_rate",
+        "name": "Police-recorded intentional homicide",
+        "dataset_id": "crim_gen_reg",
+        "filters": {
+            "freq": "A",
+            "unit": "P_HTHAB",
+            "iccs": "ICCS0101",
+        },
+        "unit": "per_100k_people",
+    },
+    {
+        "indicator_id": "regional_robbery_rate",
+        "name": "Police-recorded robbery",
+        "dataset_id": "crim_gen_reg",
+        "filters": {
+            "freq": "A",
+            "unit": "P_HTHAB",
+            "iccs": "ICCS0401",
+        },
+        "unit": "per_100k_people",
+    },
+]
+
+
+
+def _indicator_configs_for_geo(code: str) -> list[dict]:
+    level = geographic_level(code)
+    if level == "nuts2":
+        return REGIONAL_INDICATORS
+    if level == "nuts3":
+        return NUTS3_SAFETY_INDICATORS
+    return []
 
 
 def geographic_level(geo_code: str) -> str:
@@ -135,7 +191,7 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
 
     by_id = {row["indicator_id"]: row for row in rows}
     indicators = []
-    for config in REGIONAL_INDICATORS:
+    for config in _indicator_configs_for_geo(code):
         row = by_id.get(config["indicator_id"])
         if row:
             indicators.append({
@@ -174,6 +230,8 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
             "Regional evidence is served from AUGUR's local analytical store when available.",
             "Coverage varies by indicator and region; unavailable series remain explicit.",
             "The geographic code is stable comparison context and can be compared across countries at the same NUTS level.",
+            "NUTS2 access indicators are descriptive connectivity context, not quality-of-life scores.",
+            "NUTS3 police-recorded crime is descriptive safety context and can be affected by legal, reporting and recording differences.",
         ],
     }
 
@@ -324,7 +382,7 @@ def regional_evidence(
     try:
         indicators = [
             _latest_regional_indicator(active_adapter, code, config)
-            for config in REGIONAL_INDICATORS
+            for config in _indicator_configs_for_geo(code)
         ]
     finally:
         if owns_adapter:
@@ -347,6 +405,8 @@ def regional_evidence(
             "Regional evidence uses the selected Eurostat geographic code directly.",
             "Coverage varies by indicator and region; unavailable series remain explicit.",
             "The geographic code is stable comparison context and can be compared across countries at the same NUTS level.",
+            "NUTS2 access indicators are descriptive connectivity context, not quality-of-life scores.",
+            "NUTS3 police-recorded crime is descriptive safety context and can be affected by legal, reporting and recording differences.",
         ],
     }
 
