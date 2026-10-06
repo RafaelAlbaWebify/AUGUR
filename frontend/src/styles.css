@@ -6422,3 +6422,46 @@ body:has(.shell.detailsOpen) {
   justify-content: space-between;
   gap: 12px;
 }
+
+
+.personalizedScoreGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.personalizedScoreGrid article {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.personalizedScoreGrid article header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.personalizedScoreGrid article header span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.personalizedScoreGrid article > strong {
+  font-size: 1.8rem;
+}
+
+.personalizedScoreGrid article header b {
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+.paretoSummary {
+  margin: 10px 0 14px;
+  font-size: 0.82rem;
+}
