@@ -1,0 +1,40 @@
+name: AUGUR Live Source Smoke
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 6 * * 1"
+
+concurrency:
+  group: augur-live-source-smoke
+  cancel-in-progress: true
+
+jobs:
+  eurostat-live:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Inspect regional JVS schema
+        run: python -m scripts.inspect_eurostat_regional_jvs --period 2026-Q2
+
+      - name: Sync regional labour evidence
+        run: python -m scripts.sync_eurostat_regional_labour
+
+      - name: Sync regional sector evidence
+        run: python -m scripts.sync_eurostat_regional_sector
