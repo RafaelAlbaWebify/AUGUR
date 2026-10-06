@@ -81,3 +81,39 @@ def test_detects_wide_year_columns():
     result = _year_columns(["scenario", "country", "2026", "2027"])
 
     assert result == {2026: 2, 2027: 3}
+
+
+def test_parse_stas_combines_levels_and_growth(monkeypatch, tmp_path):
+    from app.ingestion import cedefop_stas as stas
+
+    monkeypatch.setattr(
+        stas,
+        "workbook_preview",
+        lambda _path, max_rows=100000: [
+            {
+                "sheet": "ameco_2d",
+                "rows": [
+                    ["scenario", "country", "country_code", "oc", "oc_code", 2026, 2027],
+                    ["Aligned_forecast_Ameco", "Spain", "ES", "ICT professionals", 25, 100.0, 103.14],
+                ],
+            },
+            {
+                "sheet": "ameco_2d_%",
+                "rows": [
+                    ["scenario", "country", "country_code", "oc", "oc_code", 2026, 2027],
+                    ["Aligned_forecast_Ameco", "Spain", "ES", "ICT professionals", 25, 0.01, 0.0314],
+                ],
+            },
+        ],
+    )
+
+    rows = stas.parse_stas_workbook(tmp_path / "stas.xlsx")
+
+    assert len(rows) == 2
+    row_2027 = next(row for row in rows if row["period"] == 2027)
+    assert row_2027["country_iso3"] == "ESP"
+    assert row_2027["isco08"] == "25"
+    assert row_2027["isco_level"] == 2
+    assert row_2027["employment_level_thousands"] == 103.14
+    assert round(row_2027["employment_growth_pct"], 2) == 3.14
+    assert row_2027["release_version"] == "2026-08"
