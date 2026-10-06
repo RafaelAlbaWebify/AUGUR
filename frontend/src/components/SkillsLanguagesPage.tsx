@@ -25,6 +25,15 @@ type CareerFit = {
       code?: string
     } | null
   }
+  eu27_oja_imbalance_evidence?: {
+    status?: string
+    isco08?: string
+    occupation_label?: string
+    score?: number
+    release_version?: string
+    geographic_scope?: string
+    role?: string
+  } | null
   occupation_outlook_evidence?: {
     status?: string
     source_id?: string
@@ -156,6 +165,7 @@ export default function SkillsLanguagesPage({
   const liveSkillDemandAvailable = false
   const occupationOutlook = career?.occupation_outlook_evidence
   const latestOutlook = occupationOutlook?.horizons?.at(-1)
+  const eu27OjaImbalance = career?.eu27_oja_imbalance_evidence
   const profileReadyForSkills = Boolean(
     (profile?.profession && profile.profession.trim()) ||
     career?.occupation_match?.selected?.preferred_label,
@@ -396,6 +406,15 @@ export default function SkillsLanguagesPage({
                       {occupationOutlook?.status === 'available' && latestOutlook
                         ? `Cedefop STAS · ${latestOutlook.period} · ${latestOutlook.employment_growth_pct == null ? 'growth unavailable' : `${latestOutlook.employment_growth_pct.toFixed(1)}% employment growth`}`
                         : 'Cedefop STAS · twice-yearly employment projection'}
+                    </small>
+                  </article>
+                  <article className={eu27OjaImbalance?.status === 'available' ? 'active' : 'planned'}>
+                    <span>{eu27OjaImbalance?.status === 'available' ? 'ACTIVE · EU27' : 'PLANNED'}</span>
+                    <strong>OJA recruitment pressure</strong>
+                    <small>
+                      {eu27OjaImbalance?.status === 'available' && eu27OjaImbalance.score != null
+                        ? `Cedefop exploratory score · ${eu27OjaImbalance.score.toFixed(3)} · ISCO-4 ${eu27OjaImbalance.isco08 ?? ''}`
+                        : 'Cedefop OJA imbalance · exact ISCO-4 context'}
                     </small>
                   </article>
                   <article className="restricted">
