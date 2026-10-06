@@ -506,6 +506,17 @@ def latest_labour_occupation_outlook(
 ) -> list[dict]:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'labour_occupation_outlook'
+            """
+        ).fetchone()[0]
+
+        if not table_exists:
+            return []
+
         result = con.execute(
             """
             SELECT
