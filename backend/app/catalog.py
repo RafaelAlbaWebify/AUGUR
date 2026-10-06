@@ -436,3 +436,19 @@ MATERIAL_CHANGE_RULES = {
 }
 
 MATERIAL_CHANGE_RULE_VERSION = "augur_material_change_v1"
+
+
+# Explicit semantic constructs used for dimension synthesis.
+#
+# Multiple source series can measure the same underlying construct. They remain
+# visible as separate evidence, but they must not receive independent votes
+# when AUGUR synthesizes a dimension trajectory.
+SYNTHESIS_CONSTRUCTS = {
+    "unemployment_rate": "unemployment_rate",
+    "imf_unemployment_rate": "unemployment_rate",
+    "inflation_hicp": "inflation_rate",
+    "inflation_cpi": "inflation_rate",
+    "imf_inflation_average": "inflation_rate",
+}
+
+SYNTHESIS_CONSTRUCT_VERSION = "augur_semantic_constructs_v1"
