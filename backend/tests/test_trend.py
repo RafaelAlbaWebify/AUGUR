@@ -134,7 +134,8 @@ def test_absolute_material_threshold_can_hold_small_rate_change_stable():
         material_change_threshold=0.5,
     )
 
-    assert result.material_change_value == 0.3000000000000007
+    assert result.material_change_value is not None
+    assert abs(result.material_change_value - 0.3) < 1e-9
     assert result.direction == "stable"
     assert result.interpretation == "neutral_or_contextual"
 
