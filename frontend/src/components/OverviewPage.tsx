@@ -9,6 +9,19 @@ type Country = {
   name: string
 }
 
+type PeerReference = {
+  status: string
+  reference_group: string
+  reference_countries: string[]
+  sample_size: number
+  period: number | null
+  rank_low_to_high: number | null
+  percentile_low_to_high: number | null
+  adequacy: string
+  interpretation: string
+  note: string
+}
+
 type Trend = {
   direction: string
   interpretation: string
@@ -27,6 +40,7 @@ type Indicator = {
   unit: string
   source_id: string
   trend?: Trend
+  peer_reference?: PeerReference
 }
 
 type OverviewSeriesItem = {
@@ -209,25 +223,16 @@ const DOMAIN_ICONS: Record<string, string> = {
   resilience: '⬟',
 }
 
-function selectedSetBand(
-  comparison: ComparisonResponse | null,
-  indicatorId: string,
-  selectedCountry: string,
-) {
-  const row = comparison?.indicators.find((item) => item.indicator_id === indicatorId)
-  if (!row) return null
+function peerReferenceLabel(peer?: PeerReference) {
+  if (!peer || peer.status !== 'available' || peer.rank_low_to_high == null || peer.sample_size < 2) {
+    return 'Peer reference unavailable'
+  }
 
-  const entries = Object.entries(row.countries)
-    .filter(([, item]) => typeof item?.value === 'number')
-    .sort((a, b) => a[1].value - b[1].value)
+  const rank = Number.isInteger(peer.rank_low_to_high)
+    ? peer.rank_low_to_high.toFixed(0)
+    : peer.rank_low_to_high.toFixed(1)
 
-  if (entries.length < 2) return null
-
-  const index = entries.findIndex(([iso3]) => iso3 === selectedCountry)
-  if (index < 0) return null
-  if (index === 0) return 'Low in selected set'
-  if (index === entries.length - 1) return 'High in selected set'
-  return 'Mid in selected set'
+  return `Peer position ${rank}/${peer.sample_size} · ${peer.adequacy}`
 }
 
 function sparklinePoints(points: Array<{ period: number; value: number }>) {
@@ -697,7 +702,7 @@ export default function OverviewPage({
 
                   <div className="countryMetricFooter">
                     <span className="countryMetricPeerBadge">
-                      {selectedSetBand(comparison, item.indicator_id, selectedCountry) ?? 'Peer reference pending'}
+                      {peerReferenceLabel(item.peer_reference)}
                     </span>
                     <span>{item.source_id.replaceAll('_', ' ')} · {item.period}</span>
                   </div>
