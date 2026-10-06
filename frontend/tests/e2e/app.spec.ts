@@ -1759,7 +1759,7 @@ test('Future Paths distinguishes official baseline from AUGUR model scenarios', 
 test('Future Paths marks the forecast boundary and model status', async ({ page }) => {
   await page.goto('/country/ESP/outlook')
 
-  await expect(page.getByText('MODELLED')).toBeVisible()
+  await expect(page.getByText('EXPERIMENTAL')).toBeVisible()
   await expect(page.getByText('not probabilistic')).toBeVisible()
   await expect(page.locator('.forecastBoundary')).toHaveCount(1)
   await expect(page.getByText('forecast →')).toBeVisible()
