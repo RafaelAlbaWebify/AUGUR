@@ -995,6 +995,91 @@ test('Decision Matrix keeps personal weighting explicit when no weights are save
   await expect(page.getByText(/No overall ranking/i)).toHaveCount(0)
 })
 
+test('Decision Matrix shows preference index sensitivity and Pareto candidates', async ({ page }) => {
+  await page.route('http://127.0.0.1:8020/api/compare/personalized?*', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 'ready',
+        countries: ['ESP', 'IRL'],
+        weights: {
+          explicit: {
+            productive_capacity: 4,
+            housing: 1,
+          },
+          scale: [0, 5],
+          missing_means: 'not_selected_for_personal_weighting',
+        },
+        normalization: {
+          version: 'augur_selected_set_utility_v1',
+          scope: 'selected_country_set',
+          utility_range: [0, 1],
+          contextual_indicators_excluded: true,
+          semantic_construct_version: 'augur_semantic_constructs_v1',
+          notes: [],
+        },
+        indicators: [],
+        constructs: [],
+        dimensions: [
+          {
+            dimension: 'productive_capacity',
+            explicit_weight: 4,
+            utility: { ESP: 0, IRL: 1 },
+            construct_count: 2,
+            method: 'mean_of_available_semantic_construct_utilities',
+          },
+          {
+            dimension: 'housing',
+            explicit_weight: 1,
+            utility: { ESP: 1, IRL: 0 },
+            construct_count: 1,
+            method: 'mean_of_available_semantic_construct_utilities',
+          },
+        ],
+        personalized: {
+          status: 'ready',
+          score_label: 'selected_set_preference_fit_index',
+          score_range: [0, 100],
+          scores: { ESP: 20, IRL: 80 },
+          positive_weights: { productive_capacity: 4, housing: 1 },
+          normalized_weights: { productive_capacity: 0.8, housing: 0.2 },
+          included_dimensions: ['housing', 'productive_capacity'],
+          coverage: { ESP: 1, IRL: 1 },
+          sensitivity: {
+            method: 'one_at_a_time_weight_perturbation_plus_minus_1',
+            scenario_count: 5,
+            weight_bounds: [0, 5],
+            score_ranges: {
+              ESP: { min: 16.7, max: 25, spread: 8.3 },
+              IRL: { min: 75, max: 83.3, spread: 8.3 },
+            },
+          },
+          pareto: {
+            method: 'pareto_nondominance_on_positive_weight_dimensions',
+            dimensions: ['housing', 'productive_capacity'],
+            frontier: ['ESP', 'IRL'],
+            dominated_by: { ESP: [], IRL: [] },
+          },
+          notes: [],
+        },
+      }),
+    })
+  })
+
+  await page.goto('/compare?countries=ESP,IRL')
+  await page.getByRole('button', { name: 'My priorities' }).click()
+
+  const panel = page.getByRole('region', { name: 'Personalized dimension utilities' })
+  await expect(panel).toBeVisible()
+  await expect(panel.getByText('20.0', { exact: true })).toBeVisible()
+  await expect(panel.getByText('80.0', { exact: true })).toBeVisible()
+  await expect(panel.getByText(/sensitivity 16.7–25.0/i)).toBeVisible()
+  await expect(panel.getByText(/Pareto candidate set: Spain · Ireland/i)).toBeVisible()
+  await expect(panel.getByText(/universal winner/i)).toBeVisible()
+  await expect(page.getByText(/best country/i)).toHaveCount(0)
+})
+
 test('Outlook labels contextual scenarios without implying statistical uncertainty', async ({ page }) => {
   await page.goto('/country/PRT/outlook')
 
