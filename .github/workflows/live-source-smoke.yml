@@ -54,3 +54,6 @@ jobs:
 
       - name: Inspect regional healthcare schemas
         run: python -m scripts.inspect_eurostat_regional_health
+
+      - name: Sync regional healthcare evidence
+        run: python -m scripts.sync_eurostat_regional_health
