@@ -95,6 +95,18 @@ def main() -> int:
         f"geo_level={subnational['geo_level']}"
     )
 
+    regional_sector = result["regional_sector_evidence"]
+    print(
+        "regional_sector_evidence: "
+        f"available={regional_sector['available']} "
+        f"rows={regional_sector['row_count']} "
+        f"regions={regional_sector['region_count']} "
+        f"countries={regional_sector['country_prefixes']} "
+        f"nace_codes={regional_sector['nace_code_count']} "
+        f"latest={regional_sector['latest_period']} "
+        f"geo_level={regional_sector['geo_level']}"
+    )
+
     if result["blockers"]:
         print("blockers:")
         for blocker in result["blockers"]:
