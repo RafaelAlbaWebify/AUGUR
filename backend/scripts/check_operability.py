@@ -75,6 +75,15 @@ def main() -> int:
         f"releases={occupation_outlook['release_versions']}"
     )
 
+    oja_imbalance = result["eu27_oja_imbalance_evidence"]
+    print(
+        "eu27_oja_imbalance_evidence: "
+        f"available={oja_imbalance['available']} "
+        f"rows={oja_imbalance['row_count']} "
+        f"scope={oja_imbalance['geographic_scope']} "
+        f"releases={oja_imbalance['release_versions']}"
+    )
+
     if result["blockers"]:
         print("blockers:")
         for blocker in result["blockers"]:
