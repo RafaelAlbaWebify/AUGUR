@@ -30,6 +30,9 @@ def inspect_modern_eea_api(
         response = active.get(SWAGGER_URL)
         response.raise_for_status()
         payload = response.json()
+
+        country_response = active.get(f"{API_BASE}/Country")
+        pollutant_response = active.get(f"{API_BASE}/Pollutant")
     finally:
         if owns_client:
             active.close()
@@ -84,9 +87,6 @@ def inspect_modern_eea_api(
         for name in sorted(referenced_schema_names)
         if name in schemas
     }
-
-    country_response = active.get(f"{API_BASE}/Country")
-    pollutant_response = active.get(f"{API_BASE}/Pollutant")
 
     reference_values = {
         "countries": {
