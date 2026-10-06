@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 
@@ -121,3 +122,56 @@ def inspect_csv(path: Path, max_rows: int = 20) -> dict:
             "AUGUR will not infer skill-demand shares, employer counts or hiring probabilities from this dataset.",
         ],
     }
+
+
+def parse_csv(path: Path) -> list[dict]:
+    headers, rows, _delimiter = read_preview(path, max_rows=1000000)
+    schema = detect_schema(headers)
+    if not schema["ready_for_parser_implementation"]:
+        raise ValueError("Cedefop OJA imbalance CSV schema is not recognised.")
+
+    matches = schema["matches"]
+    code_index = matches["occupation_code"]
+    label_index = matches["occupation_label"]
+    score_index = matches["score"]
+    major_index = matches.get("major_group")
+    retrieved_at = datetime.now(timezone.utc)
+
+    parsed = []
+    for row in rows:
+        if max(code_index, label_index, score_index) >= len(row):
+            continue
+
+        code = str(row[code_index] or "").strip()
+        label = str(row[label_index] or "").strip()
+        raw_score = str(row[score_index] or "").strip()
+        if not code or not label or not raw_score:
+            continue
+        if len(code) != 4 or not code.isdigit():
+            continue
+
+        try:
+            score = float(raw_score)
+        except ValueError:
+            continue
+
+        if not 0.0 <= score <= 1.0:
+            continue
+
+        major_group_label = None
+        if major_index is not None and major_index < len(row):
+            major_group_label = str(row[major_index] or "").strip() or None
+
+        parsed.append({
+            "isco08": code,
+            "major_group_label": major_group_label,
+            "occupation_label": label,
+            "score": score,
+            "source_id": SOURCE_ID,
+            "dataset_id": DATASET_ID,
+            "release_version": RELEASE_VERSION,
+            "retrieved_at": retrieved_at,
+            "source_updated_at": RELEASE_VERSION,
+        })
+
+    return parsed
