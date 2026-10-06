@@ -49,6 +49,30 @@ type CareerFit = {
     }>
     role?: string
   } | null
+  occupation_trend_evidence?: {
+    status?: string
+    evidence_type?: string
+    latest_period?: number
+    latest_growth_pct?: number
+    direction?: string
+    role?: string
+  } | null
+  skill_demand_trend_evidence?: {
+    status?: string
+    source_id?: string
+    dataset_id?: string
+    access_path?: string
+    reproducible_public_ingestion?: boolean
+    role?: string
+  } | null
+  language_oja_requirements_evidence?: {
+    status?: string
+    source_id?: string
+    dataset_id?: string
+    access_path?: string
+    reproducible_public_ingestion?: boolean
+    role?: string
+  } | null
   vacancy_demand_evidence?: {
     status?: string
     vacancy_rate_pct?: number
@@ -164,7 +188,9 @@ export default function SkillsLanguagesPage({
     : 'No verified vacancy context loaded'
   const liveSkillDemandAvailable = false
   const occupationOutlook = career?.occupation_outlook_evidence
-  const latestOutlook = occupationOutlook?.horizons?.at(-1)
+  const occupationTrend = career?.occupation_trend_evidence
+  const skillDemandTrend = career?.skill_demand_trend_evidence
+  const languageOjaRequirements = career?.language_oja_requirements_evidence
   const eu27OjaImbalance = career?.eu27_oja_imbalance_evidence
   const profileReadyForSkills = Boolean(
     (profile?.profession && profile.profession.trim()) ||
@@ -331,13 +357,32 @@ export default function SkillsLanguagesPage({
 
               {tab === 'rising' ? (
                 <div className="evidenceUnavailable">
-                  <strong>Rising-skill trends are not available yet.</strong>
-                  <span>AUGUR needs time-series job-posting evidence such as Cedefop Skills-OVATE before it can calculate demand growth honestly.</span>
+                  <strong>
+                    {occupationTrend?.status === 'available'
+                      ? `Occupation outlook: ${occupationTrend.direction?.replaceAll('_', ' ') ?? 'available'}`
+                      : 'Short-term occupation outlook unavailable for this occupation.'}
+                  </strong>
+                  <span>
+                    {occupationTrend?.status === 'available'
+                      ? `Cedefop STAS · ${occupationTrend.latest_period} · ${occupationTrend.latest_growth_pct?.toFixed(1)}% published employment growth. This is occupation employment outlook, not OJA skill-demand growth.`
+                      : 'AUGUR has no verified short-term occupation outlook for the resolved ISCO group.'}
+                  </span>
+                  <small>
+                    Skill-demand time series: {skillDemandTrend?.status === 'source_access_gated'
+                      ? 'source access gated via Eurostat microdata'
+                      : skillDemandTrend?.status ?? 'unavailable'}.
+                  </small>
                 </div>
               ) : tab === 'languages' ? (
                 <div className="evidenceUnavailable">
-                  <strong>Job-posting language demand is not available yet.</strong>
-                  <span>Current LanguageFit uses declared CEFR, target-country labour-market language and ESCO occupation-language evidence; it does not yet count language requirements in live postings.</span>
+                  <strong>
+                    {languageOjaRequirements?.status === 'source_access_gated'
+                      ? 'Job-ad language demand is source-access gated.'
+                      : 'Job-ad language demand is unavailable.'}
+                  </strong>
+                  <span>
+                    Skills-OVATE detailed OJA data are accessed through Eurostat microdata. AUGUR does not scrape the Tableau dashboard or infer language-demand shares from ESCO.
+                  </span>
                 </div>
               ) : (
                 <div className="skillsTableWrap">
@@ -399,13 +444,13 @@ export default function SkillsLanguagesPage({
                     <strong>Future shortage pressure</strong>
                     <small>Cedefop CLSSI 2026 · country / occupation to 2035</small>
                   </article>
-                  <article className={occupationOutlook?.status === 'available' ? 'active' : 'planned'}>
-                    <span>{occupationOutlook?.status === 'available' ? 'ACTIVE' : 'PLANNED'}</span>
+                  <article className={occupationTrend?.status === 'available' ? 'active' : 'planned'}>
+                    <span>{occupationTrend?.status === 'available' ? 'ACTIVE' : 'PLANNED'}</span>
                     <strong>Short-term occupation outlook</strong>
                     <small>
-                      {occupationOutlook?.status === 'available' && latestOutlook
-                        ? `Cedefop STAS · ${latestOutlook.period} · ${latestOutlook.employment_growth_pct == null ? 'growth unavailable' : `${latestOutlook.employment_growth_pct.toFixed(1)}% employment growth`}`
-                        : 'Cedefop STAS · twice-yearly employment projection'}
+                      {occupationTrend?.status === 'available'
+                        ? `Cedefop STAS · ${occupationTrend.latest_period} · ${occupationTrend.latest_growth_pct?.toFixed(1)}% employment growth · ${occupationTrend.direction?.replaceAll('_', ' ')}`
+                        : 'Cedefop STAS · occupation outlook not available for this resolved ISCO group'}
                     </small>
                   </article>
                   <article className={eu27OjaImbalance?.status === 'available' ? 'active' : 'planned'}>
@@ -418,9 +463,14 @@ export default function SkillsLanguagesPage({
                     </small>
                   </article>
                   <article className="restricted">
-                    <span>ACCESS NEEDED</span>
+                    <span>{skillDemandTrend?.status === 'source_access_gated' ? 'SOURCE ACCESS GATED' : 'ACCESS NEEDED'}</span>
                     <strong>Skill demand shares / trends</strong>
-                    <small>Cedefop Skills-OVATE detailed OJA evidence</small>
+                    <small>Cedefop Skills-OVATE detailed OJA evidence · Eurostat microdata access</small>
+                  </article>
+                  <article className="restricted">
+                    <span>{languageOjaRequirements?.status === 'source_access_gated' ? 'SOURCE ACCESS GATED' : 'ACCESS NEEDED'}</span>
+                    <strong>Job-ad language demand</strong>
+                    <small>Cedefop Skills-OVATE detailed OJA evidence · no Tableau scraping</small>
                   </article>
                 </div>
               </section>
