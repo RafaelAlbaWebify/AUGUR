@@ -272,9 +272,9 @@ export default function SkillsLanguagesPage({
                   <small>Official taxonomy evidence, not employer-demand frequency.</small>
                 </div>
                 <div>
-                  <span>FUTURE DATA LAYER</span>
-                  <strong>Cedefop occupation demand</strong>
-                  <small>Public OJA shortage + short-term forecast datasets are the next ingestion target.</small>
+                  <span>ACTIVE + GATED DETAIL</span>
+                  <strong>Cedefop occupation outlook</strong>
+                  <small>STAS and EU27 OJA context are active; detailed skill/language OJA shares require Eurostat microdata access.</small>
                 </div>
               </div>
 
