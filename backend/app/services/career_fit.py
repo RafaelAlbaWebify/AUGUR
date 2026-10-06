@@ -577,6 +577,97 @@ def occupation_outlook_evidence(
         "role": "context_only",
     }
 
+def occupation_outlook_trend_evidence(
+    outlook: dict | None,
+) -> dict:
+    if not outlook or outlook.get("status") != "available":
+        return {
+            "status": "evidence_missing",
+            "evidence_type": "short_term_employment_outlook",
+            "role": "context_only",
+        }
+
+    horizons = [
+        item
+        for item in outlook.get("horizons", [])
+        if item.get("employment_growth_pct") is not None
+    ]
+    if not horizons:
+        return {
+            "status": "evidence_missing",
+            "evidence_type": "short_term_employment_outlook",
+            "source_id": outlook.get("source_id"),
+            "dataset_id": outlook.get("dataset_id"),
+            "role": "context_only",
+        }
+
+    latest = max(horizons, key=lambda item: item["period"])
+    growth = float(latest["employment_growth_pct"])
+    if growth > 0:
+        direction = "positive_growth"
+    elif growth < 0:
+        direction = "negative_growth"
+    else:
+        direction = "zero_growth"
+
+    return {
+        "status": "available",
+        "evidence_type": "short_term_employment_outlook",
+        "source_id": outlook.get("source_id"),
+        "dataset_id": outlook.get("dataset_id"),
+        "release_version": outlook.get("release_version"),
+        "isco08": outlook.get("isco08"),
+        "granularity": outlook.get("granularity"),
+        "scenario": outlook.get("scenario"),
+        "latest_period": latest["period"],
+        "latest_growth_pct": growth,
+        "direction": direction,
+        "horizons": horizons,
+        "role": "context_only",
+        "notes": [
+            "This is Cedefop STAS employment-outlook evidence, not online-job-ad demand growth.",
+            "The direction label reflects only the sign of the published growth value; it is not statistical significance.",
+            "The signal does not change CareerFit completeness, market gates or TTV timing.",
+        ],
+    }
+
+
+def language_oja_requirements_evidence() -> dict:
+    return {
+        "status": "source_access_gated",
+        "source_id": "CEDEFOP",
+        "dataset_id": "CEDEFOP_SKILLS_OVATE",
+        "requested_metric": "language_demand_share_in_online_job_ads",
+        "access_path": "Eurostat Microdata access portal",
+        "public_dashboard": "Skills-OVATE",
+        "reproducible_public_ingestion": False,
+        "role": "withheld_until_reproducible_access",
+        "notes": [
+            "Skills-OVATE exposes language-related OJA analytics interactively, but detailed data access is organised through Eurostat microdata access.",
+            "AUGUR does not scrape Tableau dashboards.",
+            "The public 2026 OJA imbalance score includes non-native-language change only as one combined-score component and cannot be decomposed into a country language-demand share.",
+        ],
+    }
+
+
+def skill_demand_trend_evidence() -> dict:
+    return {
+        "status": "source_access_gated",
+        "source_id": "CEDEFOP",
+        "dataset_id": "CEDEFOP_SKILLS_OVATE",
+        "requested_metric": "skill_demand_share_and_time_trend_in_online_job_ads",
+        "access_path": "Eurostat Microdata access portal",
+        "public_dashboard": "Skills-OVATE",
+        "reproducible_public_ingestion": False,
+        "role": "withheld_until_reproducible_access",
+        "notes": [
+            "Detailed Skills-OVATE skill shares and time trends are not ingested from a stable public API or download.",
+            "ESCO skill relationships are taxonomy evidence and are not substituted for employer-demand frequency.",
+            "The EU27 OJA imbalance score is a combined occupation-level signal and is not a published skill time series.",
+        ],
+    }
+
+
 def career_fit(
     profile: PersonalProfileResponse,
     target_country_iso3: str,
@@ -597,6 +688,11 @@ def career_fit(
         target,
         occupation_match,
     )
+    occupation_trend = occupation_outlook_trend_evidence(
+        occupation_outlook,
+    )
+    language_oja_requirements = language_oja_requirements_evidence()
+    skill_demand_trend = skill_demand_trend_evidence()
     eu27_oja_imbalance = eu27_oja_imbalance_evidence(
         occupation_match,
     )
@@ -612,6 +708,9 @@ def career_fit(
             "occupation_match": occupation_match,
             "vacancy_demand_evidence": vacancy_demand_evidence,
             "occupation_outlook_evidence": occupation_outlook,
+            "occupation_trend_evidence": occupation_trend,
+            "skill_demand_trend_evidence": skill_demand_trend,
+            "language_oja_requirements_evidence": language_oja_requirements,
             "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
             "skill_match": {
                 "status": "not_evaluated",
@@ -732,6 +831,9 @@ def career_fit(
         "occupation_match": occupation_match,
         "vacancy_demand_evidence": vacancy_demand_evidence,
         "occupation_outlook_evidence": occupation_outlook,
+        "occupation_trend_evidence": occupation_trend,
+        "skill_demand_trend_evidence": skill_demand_trend,
+        "language_oja_requirements_evidence": language_oja_requirements,
         "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
         "skill_match": skill_match,
         "skill_evidence_complete": skill_evidence_complete,
