@@ -337,8 +337,8 @@ async function mockApi(page: Page) {
         geo_code: geoCode,
         geo_level: 'nuts2',
         source: 'Eurostat regional statistics',
-        indicator_count: 9,
-        available_count: 9,
+        indicator_count: 11,
+        available_count: 11,
         complete: true,
         indicators: [
           { indicator_id: 'regional_population', name: 'Population', status: 'available', period: 2024, value: 2700000, unit: 'persons', dataset_id: 'demo_r_pjangrp3', source_id: 'EUROSTAT' },
@@ -350,6 +350,8 @@ async function mockApi(page: Page) {
           { indicator_id: 'regional_housing_cost_overburden_rate', name: 'Housing cost overburden rate', status: 'available', period: 2025, value: 6.4, unit: 'percent', dataset_id: 'ilc_lvho07_r', source_id: 'EUROSTAT' },
           { indicator_id: 'regional_unmet_medical_needs', name: 'Unmet medical examination needs', status: 'available', period: 2025, value: 1.2, unit: 'percent', dataset_id: 'hlth_silc_08_r', source_id: 'EUROSTAT' },
           { indicator_id: 'regional_hospital_beds_per_100k', name: 'Available hospital beds', status: 'available', period: 2024, value: 315.6, unit: 'per_100k_people', dataset_id: 'hlth_rs_bdsrg2', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_household_internet_access', name: 'Households with internet access', status: 'available', period: 2025, value: 98.4, unit: 'percent', dataset_id: 'isoc_r_iacc_h', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_air_passengers_thousands', name: 'Air passengers carried', status: 'available', period: 2024, value: 1650, unit: 'thousand_passengers', dataset_id: 'tran_r_avpa_nm', source_id: 'EUROSTAT' },
         ],
         sector_structure: {
           status: 'available',
