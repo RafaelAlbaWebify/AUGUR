@@ -78,6 +78,12 @@ def resolve_latest_download_url(
     dataset_page_url: str = DATASET_PAGE_URL,
 ) -> str:
     response = client.get(dataset_page_url, follow_redirects=True)
+    if response.status_code == 403:
+        raise RuntimeError(
+            "Cedefop blocks automated access to the STAS dataset page (HTTP 403). "
+            "Download the current official XLSX in a browser and rerun the inspector "
+            "with --input <path-to-xlsx>. AUGUR does not fall back silently to an older release."
+        )
     response.raise_for_status()
 
     body = html.unescape(response.text)
