@@ -185,6 +185,12 @@ def _mock_full_esco_career(
         lambda country_iso3, isco08, scenario="Aligned_forecast_Ameco": [],
     )
 
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_oja_imbalance_eu27",
+        lambda isco08: None,
+    )
+
     total = 4
     matched = int(total * coverage)
     monkeypatch.setattr(
@@ -742,3 +748,32 @@ def test_stas_outlook_falls_back_to_isco1(monkeypatch):
     assert evidence["status"] == "available"
     assert evidence["granularity"] == "isco_1digit"
     assert evidence["isco08"] == "2"
+
+
+def test_eu27_oja_imbalance_is_context_only(monkeypatch):
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_oja_imbalance_eu27",
+        lambda isco08: {
+            "isco08": isco08,
+            "major_group_label": "2 Professionals",
+            "occupation_label": "Systems administrators",
+            "score": 0.625,
+            "source_id": "CEDEFOP",
+            "dataset_id": "CEDEFOP_OJA_IMBALANCE",
+            "release_version": "2026-05",
+            "retrieved_at": None,
+            "source_updated_at": "2026-05",
+        },
+    )
+
+    evidence = career_fit_module.eu27_oja_imbalance_evidence(
+        {"selected": {"isco_group": "2522", "code": "2522"}}
+    )
+
+    assert evidence["status"] == "available"
+    assert evidence["isco08"] == "2522"
+    assert evidence["score"] == 0.625
+    assert evidence["geographic_scope"] == "EU27"
+    assert evidence["role"] == "context_only"
+    assert "not country-specific" in evidence["notes"][2]
