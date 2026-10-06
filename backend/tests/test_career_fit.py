@@ -635,3 +635,104 @@ def test_vacancy_rate_prefers_isco3_before_major_fallback(monkeypatch):
     assert evidence["status"] == "available"
     assert evidence["isco_3digit"] == "OC351"
     assert evidence["granularity"] == "isco_3digit"
+
+
+def test_stas_outlook_prefers_isco2_and_is_context_only(monkeypatch):
+    requested = []
+
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_occupation_outlook",
+        lambda country_iso3, isco08, scenario="Aligned_forecast_Ameco": (
+            requested.append(isco08)
+            or (
+                [
+                    {
+                        "country_iso3": country_iso3,
+                        "period": 2026,
+                        "isco08": "25",
+                        "isco_level": 2,
+                        "occupation_label": "Information and communications technology professionals",
+                        "scenario": scenario,
+                        "employment_level_thousands": 400.0,
+                        "employment_growth_pct": 1.2,
+                        "source_id": "CEDEFOP",
+                        "dataset_id": "CEDEFOP_STAS",
+                        "release_version": "2026-08",
+                        "retrieved_at": None,
+                        "source_updated_at": "2026-08",
+                    },
+                    {
+                        "country_iso3": country_iso3,
+                        "period": 2027,
+                        "isco08": "25",
+                        "isco_level": 2,
+                        "occupation_label": "Information and communications technology professionals",
+                        "scenario": scenario,
+                        "employment_level_thousands": 410.0,
+                        "employment_growth_pct": 2.5,
+                        "source_id": "CEDEFOP",
+                        "dataset_id": "CEDEFOP_STAS",
+                        "release_version": "2026-08",
+                        "retrieved_at": None,
+                        "source_updated_at": "2026-08",
+                    },
+                ]
+                if isco08 == "25"
+                else []
+            )
+        ),
+    )
+
+    evidence = career_fit_module.occupation_outlook_evidence(
+        "ESP",
+        {"selected": {"isco_group": "2522", "code": "2522"}},
+    )
+
+    assert requested == ["25"]
+    assert evidence["status"] == "available"
+    assert evidence["granularity"] == "isco_2digit"
+    assert evidence["isco08"] == "25"
+    assert evidence["horizons"][1]["period"] == 2027
+    assert evidence["horizons"][1]["employment_growth_pct"] == 2.5
+    assert evidence["role"] == "context_only"
+
+
+def test_stas_outlook_falls_back_to_isco1(monkeypatch):
+    requested = []
+
+    def fake_outlook(country_iso3, isco08, scenario="Aligned_forecast_Ameco"):
+        requested.append(isco08)
+        if isco08 == "2":
+            return [{
+                "country_iso3": country_iso3,
+                "period": 2027,
+                "isco08": "2",
+                "isco_level": 1,
+                "occupation_label": "Professionals",
+                "scenario": scenario,
+                "employment_level_thousands": 1000.0,
+                "employment_growth_pct": 1.5,
+                "source_id": "CEDEFOP",
+                "dataset_id": "CEDEFOP_STAS",
+                "release_version": "2026-08",
+                "retrieved_at": None,
+                "source_updated_at": "2026-08",
+            }]
+        return []
+
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_occupation_outlook",
+        fake_outlook,
+    )
+
+    evidence = career_fit_module.occupation_outlook_evidence(
+        "ESP",
+        {"selected": {"isco_group": "2522", "code": "2522"}},
+    )
+
+    assert requested == ["25", "2"]
+    assert evidence["status"] == "available"
+    assert evidence["granularity"] == "isco_1digit"
+    assert evidence["isco08"] == "2"
