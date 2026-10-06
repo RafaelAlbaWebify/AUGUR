@@ -134,3 +134,11 @@ def test_unmet_medical_needs_uses_eu_silc_access_measure():
     indicator = by_indicator["unmet_medical_needs"]
     assert indicator["dimension"] == "human_systems"
     assert indicator["interpretation_policy"] == "lower"
+
+
+def test_experimental_isco3_vacancy_source_has_explicit_country_coverage():
+    from app.ingestion.eurostat import EUROSTAT_JOB_VACANCY_RATES
+
+    assert EUROSTAT_JOB_VACANCY_RATES["dataset_id"] == "jvs_a_isco3_r1"
+    assert EUROSTAT_JOB_VACANCY_RATES["supported_iso3"] == {"ESP", "PRT"}
+    assert "experimental" in EUROSTAT_JOB_VACANCY_RATES["method"]
