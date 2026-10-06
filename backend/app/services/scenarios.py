@@ -46,12 +46,22 @@ def country_scenarios(
     return {
         "country_iso3": country_iso3.upper(),
         "method": "augur_scenario_envelope_v2",
+        "model_status": {
+            "state": "experimental",
+            "calibrated": False,
+            "backtested": False,
+            "probabilistic": False,
+            "eligible_for_decision_ranking": False,
+            "version": None,
+            "reason": "scenario_envelope_not_empirically_calibrated_or_backtested",
+        },
         "horizons": selected_horizons,
         "scenario_names": ["baseline", "improvement", "stress"],
         "indicators": scenario_rows,
         "notes": [
             "Baseline equals the official forecast/projection.",
             "Improvement and stress are AUGUR model assumptions, not official forecasts.",
+            "The AUGUR scenario model is experimental, uncalibrated and not backtested.",
             "Scenario envelopes widen with horizon: 2030 near, 2035 medium, 2045 long.",
             "Contextual indicators are not directionally adjusted.",
             "No composite score is produced.",
