@@ -57,6 +57,9 @@ ISCO_SUBMAJOR_TO_MARKET_GROUP = {
 
 ESCO_OCCUPATION_MATCH_THRESHOLD = 0.72
 
+EXPERIMENTAL_VACANCY_DATASET_ID = "jvs_a_isco3_r1"
+EXPERIMENTAL_VACANCY_SUPPORTED_COUNTRIES = {"ESP", "PRT"}
+
 
 def career_market_evidence_status() -> dict:
     unit_groups = EURES_EVIDENCE_METADATA.get("unit_group_signals", {})
@@ -398,6 +401,22 @@ def occupation_vacancy_demand_evidence(
 
     isco_major = f"OC{digits[0]}"
     isco_3digit = f"OC{digits[:3]}" if len(digits) >= 3 else None
+    target = target_country_iso3.upper()
+
+    if target not in EXPERIMENTAL_VACANCY_SUPPORTED_COUNTRIES:
+        return {
+            "status": "source_coverage_unavailable",
+            "dataset_id": EXPERIMENTAL_VACANCY_DATASET_ID,
+            "supported_countries": sorted(EXPERIMENTAL_VACANCY_SUPPORTED_COUNTRIES),
+            "isco_major": isco_major,
+            "isco_3digit": isco_3digit,
+            "granularity": "isco_3digit",
+            "role": "context_only",
+            "notes": [
+                "Eurostat experimental ISCO-3 vacancy evidence does not cover this target country.",
+                "Unavailable source coverage must not be interpreted as zero vacancy demand.",
+            ],
+        }
 
     row = (
         latest_labour_job_vacancy_rate(
