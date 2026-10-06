@@ -468,7 +468,11 @@ Current implementation status:
    - regional sector composition remains context, not occupation-specific vacancy evidence.
 5. language requirements extracted from OJAs.
 6. occupation/skill demand trend.
-7. housing affordability vs income.
+7. **housing affordability vs income — ACTIVE / EXPANDING**
+   - NUTS2 disposable household income per inhabitant in PPS integrated from `nama_10r_2hhinc`;
+   - NUTS2 housing-cost overburden integrated from `ilc_lvho07_r`;
+   - overburden is already defined relative to disposable household income (>40% housing-cost threshold), so AUGUR does not derive a redundant synthetic ratio;
+   - regional periods remain explicit when income and housing series have different latest years.
 8. healthcare access.
 9. environment/air quality.
 10. safety and access-to-services.
