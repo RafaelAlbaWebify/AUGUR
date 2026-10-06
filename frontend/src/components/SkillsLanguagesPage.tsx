@@ -187,7 +187,6 @@ export default function SkillsLanguagesPage({
     ? `Eurostat experimental ISCO-3 source does not cover ${countryName}`
     : 'No verified vacancy context loaded'
   const liveSkillDemandAvailable = false
-  const occupationOutlook = career?.occupation_outlook_evidence
   const occupationTrend = career?.occupation_trend_evidence
   const skillDemandTrend = career?.skill_demand_trend_evidence
   const languageOjaRequirements = career?.language_oja_requirements_evidence
