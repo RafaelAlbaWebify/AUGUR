@@ -3,7 +3,11 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from time import monotonic
 
-from app.db.analytics import latest_subnational_observations, upsert_subnational_observations
+from app.db.analytics import (
+    latest_subnational_observations,
+    upsert_subnational_observations,
+    latest_regional_sector_employment_for_geo,
+)
 from app.ingestion.eurostat import EurostatAdapter
 
 
@@ -122,10 +126,81 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
         "available_count": available_count,
         "complete": available_count == len(indicators),
         "indicators": indicators,
+        "sector_structure": _regional_sector_context(code),
         "notes": [
             "Regional evidence is served from AUGUR's local analytical store when available.",
             "Coverage varies by indicator and region; unavailable series remain explicit.",
             "The geographic code is stable comparison context and can be compared across countries at the same NUTS level.",
+        ],
+    }
+
+
+
+def _regional_sector_context(code: str) -> dict:
+    if geographic_level(code) != "nuts2":
+        return {
+            "status": "unavailable",
+            "reason": "sector_context_requires_nuts2",
+            "dataset_id": "lfst_r_lfe2en2",
+            "source_id": "EUROSTAT",
+            "sectors": [],
+        }
+
+    rows = latest_regional_sector_employment_for_geo(code)
+    if not rows:
+        return {
+            "status": "unavailable",
+            "reason": "not_cached",
+            "dataset_id": "lfst_r_lfe2en2",
+            "source_id": "EUROSTAT",
+            "sectors": [],
+        }
+
+    total_row = next(
+        (row for row in rows if row["nace_code"] == "TOTAL"),
+        None,
+    )
+    total = (
+        float(total_row["employment_thousands"])
+        if total_row and total_row.get("employment_thousands") is not None
+        else None
+    )
+
+    sector_rows = [
+        row for row in rows
+        if row["nace_code"] != "TOTAL"
+        and row.get("employment_thousands") is not None
+    ]
+    sectors = []
+    for row in sector_rows:
+        value = float(row["employment_thousands"])
+        sectors.append({
+            "nace_code": row["nace_code"],
+            "nace_label": row.get("nace_label"),
+            "period": row["period"],
+            "employment_thousands": value,
+            "employment_share_pct": (
+                round((value / total) * 100.0, 2)
+                if total and total > 0
+                else None
+            ),
+        })
+
+    return {
+        "status": "available",
+        "dataset_id": rows[0]["dataset_id"],
+        "source_id": rows[0]["source_id"],
+        "period": max(row["period"] for row in rows),
+        "total_employment_thousands": total,
+        "sector_count": len(sectors),
+        "top_sectors": sorted(
+            sectors,
+            key=lambda item: item["employment_thousands"],
+            reverse=True,
+        )[:8],
+        "notes": [
+            "Sector structure describes employment composition, not vacancies.",
+            "Employment shares use the published regional total as denominator when available.",
         ],
     }
 
