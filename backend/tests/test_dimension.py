@@ -155,3 +155,35 @@ def test_independent_constructs_can_still_define_dimension_trajectory():
     assert result["effective_directional_construct_count"] == 2
     assert result["trajectory"] == "improving"
     assert result["evidence_status"] == "sufficient"
+
+
+def test_dimension_exposes_source_quality_and_freshness_summary():
+    first = make_indicator("a", "improving")
+    second = make_indicator("b", "improving")
+    first["source_id"] = "EUROSTAT"
+    second["source_id"] = "WORLD_BANK"
+    first["evidence_reliability"] = {
+        "source_id": "EUROSTAT",
+        "augur_suitability_grade": "A",
+        "observation_period": 2025,
+        "freshness_band": "current",
+    }
+    second["evidence_reliability"] = {
+        "source_id": "WORLD_BANK",
+        "augur_suitability_grade": "A-",
+        "observation_period": 2023,
+        "freshness_band": "lagged",
+    }
+
+    result = summarize_dimension([first, second])
+    reliability = result["evidence_reliability"]
+
+    assert reliability["source_ids"] == ["EUROSTAT", "WORLD_BANK"]
+    assert reliability["augur_suitability_grades"] == ["A", "A-"]
+    assert reliability["latest_observation_period"] == 2025
+    assert reliability["oldest_observation_period"] == 2023
+    assert reliability["freshness_counts"] == {
+        "current": 1,
+        "lagged": 1,
+        "older": 0,
+    }
