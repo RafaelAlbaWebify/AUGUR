@@ -2728,3 +2728,52 @@
     font-size: 15px;
   }
 }
+
+
+.regionalSectorContext {
+  display: grid;
+  gap: 7px;
+  padding-top: 8px;
+  border-top: 1px solid rgba(91, 143, 169, .18);
+}
+
+.regionalSectorContext > strong {
+  color: #dff3fb;
+  font-size: 10px;
+}
+
+.regionalSectorContext > span {
+  color: #708d9e;
+  font-size: 8px;
+}
+
+.regionalSectorList {
+  display: grid;
+  gap: 5px;
+}
+
+.regionalSectorList article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+  padding: 5px 7px;
+  border-radius: 6px;
+  background: rgba(4, 20, 30, .56);
+}
+
+.regionalSectorList article span {
+  min-width: 0;
+  overflow: hidden;
+  color: #92aab8;
+  font-size: 8px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.regionalSectorList article strong {
+  flex: 0 0 auto;
+  color: #e8f6fb;
+  font-size: 9px;
+}
