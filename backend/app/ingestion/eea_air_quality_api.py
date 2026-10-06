@@ -8,6 +8,8 @@ SWAGGER_URL = (
     "swagger/v1/swagger.json"
 )
 API_BASE = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
+TARGET_COUNTRIES = ["ES", "PT", "IE"]
+PM25_URI = "http://dd.eionet.europa.eu/vocabulary/aq/pollutant/6001"
 
 
 def _safe_json(response: httpx.Response):
@@ -33,6 +35,23 @@ def inspect_modern_eea_api(
 
         country_response = active.get(f"{API_BASE}/Country")
         pollutant_response = active.get(f"{API_BASE}/Pollutant")
+        city_response = active.post(
+            f"{API_BASE}/City",
+            json=TARGET_COUNTRIES,
+        )
+        summary_payload = {
+            "countries": ["ES"],
+            "cities": [],
+            "pollutants": [PM25_URI],
+            "dataset": 2,
+            "source": "API",
+            "dateTimeStart": "2024-01-01T00:00:00Z",
+            "dateTimeEnd": "2024-12-31T23:59:59Z",
+        }
+        summary_response = active.post(
+            f"{API_BASE}/DownloadSummary",
+            json=summary_payload,
+        )
     finally:
         if owns_client:
             active.close()
@@ -97,6 +116,15 @@ def inspect_modern_eea_api(
             "status_code": pollutant_response.status_code,
             "payload": _safe_json(pollutant_response),
         },
+        "cities": {
+            "status_code": city_response.status_code,
+            "payload": _safe_json(city_response),
+        },
+        "verified_pm25_2024_summary": {
+            "status_code": summary_response.status_code,
+            "request": summary_payload,
+            "payload": _safe_json(summary_response),
+        },
     }
 
     return {
@@ -112,5 +140,7 @@ def inspect_modern_eea_api(
             interesting
             and country_response.is_success
             and pollutant_response.is_success
+            and city_response.is_success
+            and summary_response.is_success
         ),
     }
