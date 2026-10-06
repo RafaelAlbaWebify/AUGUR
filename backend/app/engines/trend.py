@@ -12,6 +12,9 @@ class TrendResult:
     evidence_depth: str
     trend_certainty: str
     linear_fit_r2: float | None
+    material_change_mode: str
+    material_change_threshold: float
+    material_change_value: float | None
     slope_per_year: float | None
     pct_change_1y: float | None
     pct_change_3y: float | None
@@ -83,15 +86,41 @@ def _trend_certainty(points: list[tuple[int, float]], r2: float | None) -> str:
     return "low"
 
 
-def _direction_from_change(change: float | None) -> str:
+def _material_change_value(
+    current: float,
+    reference: float | None,
+    relative_change_pct: float | None,
+    mode: str,
+) -> float | None:
+    if reference is None:
+        return None
+    if mode == "absolute":
+        return current - reference
+    if mode == "relative_pct":
+        return relative_change_pct
+    raise ValueError(f"Unsupported material-change mode: {mode}")
+
+
+def _direction_from_change(
+    change: float | None,
+    threshold: float,
+    mode: str,
+) -> str:
     if change is None:
         return "unknown"
+
     magnitude = abs(change)
-    if magnitude < 1.0:
+    if magnitude < threshold:
         return "stable"
+
+    if mode == "relative_pct":
+        strong_threshold = max(10.0, threshold * 3.0)
+    else:
+        strong_threshold = threshold * 3.0
+
     if change > 0:
-        return "strong_increase" if magnitude >= 10.0 else "increase"
-    return "strong_decrease" if magnitude >= 10.0 else "decrease"
+        return "strong_increase" if magnitude >= strong_threshold else "increase"
+    return "strong_decrease" if magnitude >= strong_threshold else "decrease"
 
 
 def _distance_to_range(value: float, target_min: float, target_max: float) -> float:
@@ -148,6 +177,8 @@ def calculate_trend(
     interpretation_policy: str,
     target_min: float | None = None,
     target_max: float | None = None,
+    material_change_mode: str = "relative_pct",
+    material_change_threshold: float = 1.0,
 ) -> TrendResult:
     clean = sorted(
         {(int(year), float(value)) for year, value in series},
@@ -162,6 +193,9 @@ def calculate_trend(
             evidence_depth="low",
             trend_certainty="low",
             linear_fit_r2=None,
+            material_change_mode=material_change_mode,
+            material_change_threshold=material_change_threshold,
+            material_change_value=None,
             slope_per_year=None,
             pct_change_1y=None,
             pct_change_3y=None,
@@ -197,7 +231,17 @@ def calculate_trend(
         else changes[1]
     )
 
-    direction = _direction_from_change(reference_change)
+    material_change_value = _material_change_value(
+        current_value,
+        reference_value,
+        reference_change,
+        material_change_mode,
+    )
+    direction = _direction_from_change(
+        material_change_value,
+        material_change_threshold,
+        material_change_mode,
+    )
     target_status = None
 
     if interpretation_policy == "target_range":
@@ -209,6 +253,12 @@ def calculate_trend(
             target_min,
             target_max,
         )
+        if (
+            interpretation in {"improving", "deteriorating"}
+            and material_change_value is not None
+            and abs(material_change_value) < material_change_threshold
+        ):
+            interpretation = "neutral_or_contextual"
     elif interpretation_policy in {"higher", "lower"}:
         interpretation = _interpret_directional(direction, interpretation_policy)
     else:
@@ -232,6 +282,9 @@ def calculate_trend(
         evidence_depth=evidence_depth,
         trend_certainty=trend_certainty,
         linear_fit_r2=linear_fit_r2,
+        material_change_mode=material_change_mode,
+        material_change_threshold=material_change_threshold,
+        material_change_value=material_change_value,
         slope_per_year=slope,
         pct_change_1y=changes[1],
         pct_change_3y=changes[3],
