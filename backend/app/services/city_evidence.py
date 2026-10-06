@@ -134,7 +134,7 @@ def _refresh_city_pm25(code: str) -> bool:
                 "source_id": result["source_id"],
                 "dataset_id": result["dataset_id"],
                 "retrieved_at": datetime.now(timezone.utc),
-                "source_updated_at": str(result["year"]),
+                "source_updated_at": None,
             }
         ])
         return True
