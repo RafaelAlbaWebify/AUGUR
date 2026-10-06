@@ -10,6 +10,9 @@ def test_higher_policy_increase_is_improving():
     assert result.direction in {"increase", "strong_increase"}
     assert result.interpretation == "improving"
     assert result.confidence == "high"
+    assert result.evidence_depth == "high"
+    assert result.trend_certainty == "high"
+    assert result.linear_fit_r2 == 1.0
     assert result.pct_change_5y == 10.0
 
 
@@ -97,3 +100,27 @@ def test_country_trends_exposes_catalog_methodology_notes(monkeypatch):
 
     assert "Police-recorded intentional homicide" in indicator["methodology_note"]
     assert "recording practices" in indicator["comparability_note"]
+
+
+def test_evidence_depth_and_trend_certainty_are_separate():
+    result = calculate_trend(
+        [(2020, 100), (2021, 140), (2022, 90), (2023, 135), (2024, 95), (2025, 110)],
+        "higher",
+    )
+
+    assert result.evidence_depth == "high"
+    assert result.confidence == "high"
+    assert result.trend_certainty == "low"
+    assert result.linear_fit_r2 is not None
+    assert result.linear_fit_r2 < 0.5
+
+
+def test_short_but_consistent_series_has_low_depth_not_high_depth():
+    result = calculate_trend(
+        [(2023, 100), (2024, 110), (2025, 120)],
+        "higher",
+    )
+
+    assert result.evidence_depth == "low"
+    assert result.trend_certainty == "high"
+    assert result.linear_fit_r2 == 1.0
