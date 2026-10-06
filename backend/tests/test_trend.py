@@ -94,6 +94,15 @@ def test_country_trends_exposes_catalog_methodology_notes(monkeypatch):
             {"period": 2024, "value": 0.6, "source_id": "EUROSTAT"},
         ],
     )
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_peer_reference",
+        lambda _indicator, _country: {
+            "status": "available",
+            "sample_size": 3,
+            "adequacy": "limited",
+        },
+    )
 
     result = trends_service.country_trends("ESP")
     indicator = result["indicators"][0]
@@ -187,6 +196,15 @@ def test_country_trends_exposes_material_change_rule(monkeypatch):
             {"period": 2020, "value": 10.0, "source_id": "EUROSTAT"},
             {"period": 2025, "value": 10.3, "source_id": "EUROSTAT"},
         ],
+    )
+    monkeypatch.setattr(
+        trends_service,
+        "indicator_peer_reference",
+        lambda _indicator, _country: {
+            "status": "available",
+            "sample_size": 3,
+            "adequacy": "limited",
+        },
     )
 
     result = trends_service.country_trends("ESP")
