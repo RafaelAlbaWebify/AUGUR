@@ -773,3 +773,72 @@ def test_operability_distinguishes_core_from_full_personal_fit_evidence(monkeypa
     assert result["personal_fit_full_evidence_ready"] is False
     assert result["analysis_ready"] is True
     assert result["career_market_evidence"]["coverage_scope"] == "partial_unit_group_coverage"
+
+
+def test_operability_exposes_occupation_outlook_status(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "labour_occupation_outlook_status",
+        lambda: {
+            "available": True,
+            "row_count": 282,
+            "country_count": 3,
+            "countries": ["ESP", "IRL", "PRT"],
+            "periods": [2026, 2027],
+            "isco_levels": [1, 2],
+            "release_versions": ["2026-08"],
+            "latest_retrieved_at": datetime.now(timezone.utc),
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {
+            "countries": [
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["occupation_outlook_evidence"]["available"] is True
+    assert result["occupation_outlook_evidence"]["row_count"] == 282
+    assert result["occupation_outlook_evidence"]["periods"] == [2026, 2027]
+    assert result["occupation_outlook_evidence"]["isco_levels"] == [1, 2]
+    assert result["occupation_outlook_evidence"]["release_versions"] == ["2026-08"]
