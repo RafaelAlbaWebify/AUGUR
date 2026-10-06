@@ -1,4 +1,5 @@
 from app.ingestion.gisco_cities import (
+    canonical_city_match_name,
     city_code,
     gisco_city_catalog,
     match_eea_cities_to_gisco,
@@ -78,3 +79,42 @@ def test_ambiguous_normalized_match_is_rejected():
 
     assert result["matched_count"] == 0
     assert result["ambiguous_count"] == 1
+
+
+def test_canonical_match_ignores_only_greater_city_suffix():
+    assert canonical_city_match_name("Dublin (greater city)") == "dublin"
+    assert canonical_city_match_name("Dublin") == "dublin"
+    assert canonical_city_match_name("Porto (greater city)") == "porto"
+
+
+def test_greater_city_variants_match_without_fuzzy_logic():
+    gisco = [
+        {
+            "city_code": "IE001C",
+            "country_code": "IE",
+            "city_name": "Dublin (greater city)",
+            "normalized_name": "dublin greater city",
+            "match_name": "dublin",
+        },
+        {
+            "city_code": "PT002C",
+            "country_code": "PT",
+            "city_name": "Porto",
+            "normalized_name": "porto",
+            "match_name": "porto",
+        },
+    ]
+    result = match_eea_cities_to_gisco(
+        gisco,
+        [
+            {"countryCode": "IE", "cityName": "Dublin"},
+            {"countryCode": "PT", "cityName": "Porto (greater city)"},
+        ],
+    )
+
+    assert result["matched_count"] == 2
+    assert result["ambiguous_count"] == 0
+    assert {row["city_code"] for row in result["matched"]} == {
+        "IE001C",
+        "PT002C",
+    }
