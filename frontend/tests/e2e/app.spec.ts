@@ -336,8 +336,8 @@ async function mockApi(page: Page) {
         geo_code: geoCode,
         geo_level: 'nuts2',
         source: 'Eurostat regional statistics',
-        indicator_count: 5,
-        available_count: 5,
+        indicator_count: 7,
+        available_count: 7,
         complete: true,
         indicators: [
           { indicator_id: 'regional_population', name: 'Population', status: 'available', period: 2024, value: 2700000, unit: 'persons', dataset_id: 'demo_r_pjangrp3', source_id: 'EUROSTAT' },
@@ -345,6 +345,8 @@ async function mockApi(page: Page) {
           { indicator_id: 'regional_gdp_per_capita', name: 'GDP per capita', status: 'available', period: 2024, value: 28900, unit: 'eur_per_person', dataset_id: 'nama_10r_3gdp', source_id: 'EUROSTAT' },
           { indicator_id: 'regional_employment_rate', name: 'Employment rate, ages 20–64', status: 'available', period: 2024, value: 71.2, unit: 'percent', dataset_id: 'lfst_r_lfe2emprt', source_id: 'EUROSTAT' },
           { indicator_id: 'regional_unemployment_rate', name: 'Unemployment rate, ages 20–64', status: 'available', period: 2024, value: 8.3, unit: 'percent', dataset_id: 'lfst_r_lfu3rt', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_disposable_income_pps_per_capita', name: 'Disposable household income per inhabitant (PPS)', status: 'available', period: 2023, value: 24500, unit: 'pps_per_person', dataset_id: 'nama_10r_2hhinc', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_housing_cost_overburden_rate', name: 'Housing cost overburden rate', status: 'available', period: 2025, value: 6.4, unit: 'percent', dataset_id: 'ilc_lvho07_r', source_id: 'EUROSTAT' },
         ],
         sector_structure: {
           status: 'available',
@@ -912,6 +914,10 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await expect(regionalCards).toBeVisible()
   await expect(regionalCards.getByText('Population density')).toBeVisible()
   await expect(regionalCards.getByText('GDP per capita')).toBeVisible()
+  await expect(regionalCards.getByText('Disposable household income per inhabitant (PPS)')).toBeVisible()
+  await expect(regionalCards.getByText('24,500 PPS/person')).toBeVisible()
+  await expect(regionalCards.getByText('Housing cost overburden rate')).toBeVisible()
+  await expect(regionalCards.getByText('6.4%')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Country metric cards' })).toHaveCount(0)
   await expect(page.locator('.regionalEvidencePanel')).toHaveCount(0)
   await expect(page.getByText(/Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 \+ Urban Audit 2024/)).toBeVisible()
