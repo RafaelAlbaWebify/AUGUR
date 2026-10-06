@@ -6,12 +6,10 @@ on:
     branches: [main]
     paths:
       - "backend/app/ingestion/eurostat_regional_*.py"
-      - "backend/app/ingestion/eea_air_quality.py"
-      - "backend/app/ingestion/eea_air_quality_api.py"
+      - "backend/app/ingestion/eea_*.py"
       - "backend/app/ingestion/gisco_cities.py"
       - "backend/scripts/inspect_eurostat_regional_*.py"
-      - "backend/scripts/inspect_eea*.py"
-      - "backend/scripts/probe_eea*.py"
+      - "backend/scripts/*eea*.py"
       - "backend/scripts/inspect_*gisco*.py"
       - "backend/scripts/sync_eurostat_regional_*.py"
       - ".github/workflows/live-source-smoke.yml"
@@ -79,3 +77,6 @@ jobs:
 
       - name: Inspect EEA to Urban Audit city mapping
         run: python -m scripts.inspect_eea_gisco_city_mapping
+
+      - name: Aggregate verified PM2.5 for Oviedo
+        run: python -m scripts.aggregate_eea_city_pm25 --city Oviedo --country ES --year 2024
