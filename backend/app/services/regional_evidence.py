@@ -17,6 +17,28 @@ _REGIONAL_CACHE: dict[str, tuple[float, dict]] = {}
 
 REGIONAL_INDICATORS = [
     {
+        "indicator_id": "regional_disposable_income_pps_per_capita",
+        "name": "Disposable household income per inhabitant (PPS)",
+        "dataset_id": "nama_10r_2hhinc",
+        "filters": {
+            "freq": "A",
+            "unit": "PPS_EU27_2020_HAB",
+            "direct": "BAL",
+            "na_item": "B6N",
+        },
+        "unit": "pps_per_person",
+    },
+    {
+        "indicator_id": "regional_housing_cost_overburden_rate",
+        "name": "Housing cost overburden rate",
+        "dataset_id": "ilc_lvho07_r",
+        "filters": {
+            "freq": "A",
+            "unit": "PC",
+        },
+        "unit": "percent",
+    },
+    {
         "indicator_id": "regional_population",
         "name": "Population",
         "dataset_id": "demo_r_pjangrp3",
