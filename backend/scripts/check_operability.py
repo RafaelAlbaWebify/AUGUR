@@ -84,6 +84,17 @@ def main() -> int:
         f"releases={oja_imbalance['release_versions']}"
     )
 
+    subnational = result["subnational_evidence"]
+    print(
+        "subnational_evidence: "
+        f"available={subnational['available']} "
+        f"rows={subnational['row_count']} "
+        f"regions={subnational['region_count']} "
+        f"countries={subnational['country_prefixes']} "
+        f"indicators={subnational['indicator_ids']} "
+        f"geo_level={subnational['geo_level']}"
+    )
+
     if result["blockers"]:
         print("blockers:")
         for blocker in result["blockers"]:
