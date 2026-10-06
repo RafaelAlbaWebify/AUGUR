@@ -441,15 +441,39 @@ Suggested layout:
 6. Keep AUGUR scenarios experimental until calibrated/backtested.
 
 ### P1 — directly increase decision usefulness
-1. Cedefop Skills-OVATE ingestion.
-2. Cedefop Skills Forecast ingestion.
-3. Regional/NUTS geography.
-4. language requirements extracted from OJAs.
-5. occupation/skill demand trend.
-6. housing affordability vs income.
-7. healthcare access.
-8. environment/air quality.
-9. safety and access-to-services.
+
+Current implementation status:
+
+1. **Cedefop OJA evidence — PARTIAL / ACTIVE**
+   - Cedefop OJA occupational-imbalance 2026-05 integrated as EU27-level exploratory ISCO-4 context;
+   - 308 occupations loaded;
+   - exact ISCO-4 only;
+   - does not substitute Skills-OVATE skill-demand shares.
+2. **Cedefop Skills Forecast — ACCESS-GATED**
+   - 2026 release verified;
+   - projections to 2035 by country, sector, occupation and education;
+   - full spreadsheet requires Cedefop request/registration and cannot be redistributed;
+   - AUGUR must not scrape the visualisation or pretend the gated dataset is reproducibly available.
+3. **Cedefop STAS — ACTIVE**
+   - August 2026 release integrated;
+   - 282 rows for ESP/IRL/PRT;
+   - periods 2026–2027;
+   - ISCO 2-digit preferred, ISCO 1-digit fallback;
+   - context-only for CareerFit.
+4. **Regional/NUTS geography — IN PROGRESS**
+   - Eurostat quarterly regional JVS source `jvs_q_isco_r21` identified;
+   - target granularity NUTS2 + ISCO 1-digit;
+   - schema/coverage inspector added before ingestion is activated.
+5. language requirements extracted from OJAs.
+6. occupation/skill demand trend.
+7. housing affordability vs income.
+8. healthcare access.
+9. environment/air quality.
+10. safety and access-to-services.
+
+Important P1 boundary:
+- Skills-OVATE detailed skill-demand shares remain unavailable through a stable reproducible public API/download workflow;
+- AUGUR must keep unavailable skill-share, employer-count and language-demand metrics explicitly missing rather than infer them from ESCO or aggregate OJA signals.
 
 ### P2 — personal decision engine
 1. user preference weights,
