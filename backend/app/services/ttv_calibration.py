@@ -32,6 +32,16 @@ CALIBRATION_STAGE_IDS = {
     "financial",
 }
 
+TTV_OUTCOME_EVIDENCE_TYPES = {
+    "official_exam",
+    "cefr_aligned_assessment",
+    "course_certificate",
+    "other_documented",
+}
+
+TTV_OUTCOME_CEFR_LEVELS = {"B2", "C1", "C2"}
+
+
 TTV_V1_CALIBRATION_SCOPE = {
     "scope_id": "ttv-estimation-scope-v1",
     "employment_modes": ["remote"],
@@ -245,12 +255,20 @@ def _normalize_calibration_context(value) -> dict:
     if scope_id:
         normalized["scope_id"] = scope_id
 
-    for field in ("current_cefr", "target_cefr"):
+    for field in ("current_cefr", "target_cefr", "achieved_cefr"):
         raw = str(value.get(field) or "").strip().upper()
         if raw:
             if raw not in allowed_cefr:
                 raise ValueError(f"{field} must be a CEFR level")
             normalized[field] = raw
+
+    outcome_evidence_type = str(
+        value.get("outcome_evidence_type") or ""
+    ).strip().lower()
+    if outcome_evidence_type:
+        if outcome_evidence_type not in TTV_OUTCOME_EVIDENCE_TYPES:
+            raise ValueError("outcome_evidence_type is not supported")
+        normalized["outcome_evidence_type"] = outcome_evidence_type
 
     weekly = value.get("weekly_study_hours")
     if weekly not in (None, ""):
@@ -957,6 +975,8 @@ def start_calibration_observation(
 def complete_calibration_observation(
     case_id: str,
     *,
+    achieved_cefr: str,
+    evidence_type: str,
     observed_at: str | None = None,
 ) -> dict:
     con = sqlite3.connect(settings.sqlite_path)
@@ -977,6 +997,18 @@ def complete_calibration_observation(
         raise ValueError("TTV calibration observation not found")
     if row["status"] != "active":
         raise ValueError("TTV calibration observation is not active")
+
+    achieved = str(achieved_cefr or "").strip().upper()
+    if achieved not in TTV_OUTCOME_CEFR_LEVELS:
+        raise ValueError(
+            "achieved_cefr must be B2, C1 or C2"
+        )
+
+    evidence = str(evidence_type or "").strip().lower()
+    if evidence not in TTV_OUTCOME_EVIDENCE_TYPES:
+        raise ValueError(
+            "evidence_type must describe documented CEFR evidence"
+        )
 
     started = _parse_utc_timestamp(row["started_at"], "started_at")
     completed = (
@@ -1023,12 +1055,16 @@ def complete_calibration_observation(
                 "weekly_study_hours": language.get("weekly_study_hours"),
                 "guided_hours_min": language.get("guided_hours_min"),
                 "guided_hours_max": language.get("guided_hours_max"),
+                "achieved_cefr": achieved,
+                "outcome_evidence_type": evidence,
             },
         }
     )
 
     completion = {
-        "outcome": "user_confirmed_b2_or_better",
+        "outcome": "documented_b2_or_better",
+        "achieved_cefr": achieved,
+        "evidence_type": evidence,
         "observed_at": completed.isoformat(),
         "observed_weeks": observed_weeks,
         "sample_role": "development",
