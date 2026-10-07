@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from typing import Any, Callable
 
 from app.catalog import country_config
+from app.db.analytics import country_record
 from app.ingestion.eurostat import EurostatAdapter
 from app.ingestion.imf import IMFAdapter
 from app.ingestion.oecd import OECDAdapter
@@ -102,7 +103,12 @@ def providers_for_country(
     country_iso3: str,
     country: dict | None = None,
 ) -> list[ProviderSpec]:
-    metadata = country if country is not None else country_config(country_iso3)
+    metadata = country
+    if metadata is None:
+        metadata = country_record(country_iso3)
+    if metadata is None:
+        metadata = country_config(country_iso3)
+
     return [
         provider
         for provider in PROVIDERS
