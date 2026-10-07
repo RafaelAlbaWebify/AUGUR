@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import argparse
 
-from app.catalog import COUNTRIES
+from app.catalog import VALIDATION_COUNTRY_ISO3
+from app.db.analytics import country_record
 from app.db.bootstrap import initialize_datastores
 from app.providers import PROVIDERS, providers_for_country
 
 
-DEFAULT_COUNTRIES = ["ESP", "PRT", "IRL"]
+DEFAULT_COUNTRIES = list(VALIDATION_COUNTRY_ISO3)
 
 
 def main() -> int:
@@ -16,16 +17,16 @@ def main() -> int:
         "--countries",
         nargs="+",
         default=DEFAULT_COUNTRIES,
-        help="ISO3 country codes. Default: ESP PRT IRL",
+        help="ISO3 country codes. Defaults to the validation set; other countries are registered dynamically from World Bank metadata.",
     )
     args = parser.parse_args()
 
-    registered = {country["iso3"] for country in COUNTRIES}
     countries = [value.upper() for value in args.countries]
-
-    unknown = [code for code in countries if code not in registered]
-    if unknown:
-        raise SystemExit(f"Unsupported countries: {', '.join(unknown)}")
+    invalid = [code for code in countries if len(code) != 3 or not code.isalpha()]
+    if invalid:
+        raise SystemExit(
+            f"Country codes must be ISO3-like alphabetic codes: {', '.join(invalid)}"
+        )
 
     initialize_datastores()
 
@@ -54,9 +55,20 @@ def main() -> int:
             print(f"AUGUR CORE SYNC · {country_iso3}")
             print("=" * 72)
 
+            country = country_record(country_iso3)
+            if country is None:
+                print("Registering country from World Bank metadata...")
+                country = adapters["WORLD_BANK"].ensure_country_registered(
+                    country_iso3
+                )
+                print(
+                    f"Registered {country['name']} "
+                    f"({country.get('iso2') or '??'}/{country['iso3']})"
+                )
+
             results = {}
 
-            for provider in providers_for_country(country_iso3):
+            for provider in providers_for_country(country_iso3, country=country):
                 print()
                 print(f"[{provider.label}]")
 
