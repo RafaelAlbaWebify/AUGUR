@@ -218,3 +218,90 @@ def test_safety_indicators_are_rates_not_counts():
         item["filters"]["iccs"]
         for item in NUTS3_SAFETY_INDICATORS
     } == {"ICCS0101", "ICCS0401"}
+
+
+def test_local_partial_region_auto_enriches_missing_indicators(monkeypatch):
+    stored = []
+    calls = {"latest": 0}
+
+    def fake_latest(code):
+        calls["latest"] += 1
+        base = [
+            {
+                "indicator_id": "regional_employment_rate",
+                "period": 2025,
+                "value": 72.0,
+                "unit": "percent",
+                "dataset_id": "lfst_r_lfe2emprt",
+                "source_id": "EUROSTAT",
+                "source_updated_at": "2026-09-10",
+            }
+        ]
+        return base + stored
+
+    class EnrichmentAdapter:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def close(self):
+            pass
+
+        def fetch_dataset(self, dataset_id, filters):
+            return {
+                "dataset_id": dataset_id,
+                "geo": filters["geo"],
+            }
+
+        def normalize(self, geo_code, config, payload):
+            return [
+                {
+                    "period": 2025,
+                    "value": 99.0,
+                    "source_updated_at": "2026-09-10",
+                }
+            ]
+
+    monkeypatch.setattr(
+        regional_module,
+        "latest_subnational_observations",
+        fake_latest,
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "EurostatAdapter",
+        EnrichmentAdapter,
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "latest_regional_sector_employment_for_geo",
+        lambda code: [],
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    result = regional_evidence("ES12")
+
+    expected_ids = {
+        item["indicator_id"]
+        for item in REGIONAL_INDICATORS
+    }
+    returned_ids = {
+        item["indicator_id"]
+        for item in result["indicators"]
+        if item["status"] == "available"
+    }
+
+    assert expected_ids == returned_ids
+    assert any(
+        row["indicator_id"] == "regional_household_internet_access"
+        for row in stored
+    )
+    assert any(
+        row["indicator_id"] == "regional_air_passengers_thousands"
+        for row in stored
+    )
+    assert calls["latest"] >= 2
