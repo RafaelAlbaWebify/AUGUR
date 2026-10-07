@@ -1,133 +1,120 @@
-# AUGUR TTV Observed Outcome Definitions — Draft
+# AUGUR TTV Observed Outcome Definitions — v1 bounded scope
 
-Status: **draft / not versioned**
+Status: **definitions frozen / calibration acceptance pending**
 
-This document translates the current TTV dependency graph into observable calibration events.
+Frozen definition IDs:
 
-It does **not** define an approved start-event version or viability-outcome version.
+- start event: `ttv-start-active-language-transition-v1`;
+- viability outcome: `ttv-outcome-b2-remote-viability-v1`;
+- inclusion/exclusion rules: `ttv-inclusion-remote-scope-v1`.
 
-## 1. Why this exists
+These definitions apply only to the bounded TTV v1 estimation scope. They do **not** approve the calibration protocol and they do **not** validate the temporal model.
 
-A calibration interval is meaningless unless every observed case measures elapsed time from the same kind of start event to the same kind of viability outcome.
+## 1. Scope
 
-AUGUR currently models these temporal stages:
+A calibration case is eligible for the future TTV v1 holdout only when all of the following are true at the start event:
 
-- legal;
-- language;
-- skills;
-- employment;
-- financial.
+- the target country has already been chosen;
+- the case uses preserved portable remote income;
+- LegalFit is already satisfied through the currently supported domestic/EU-free-movement path;
+- CareerFit has complete declared essential-skill coverage and supportive viability evidence;
+- there is no unresolved local-employment transition;
+- there is no unresolved local-financial transition;
+- the only non-zero temporal preparation stage may be language progression.
 
-The definitions below are candidate observational boundaries for those stages.
+Local-employment cases, unresolved essential-skill gaps and local financial-transition cases may still be retained as development evidence, but they cannot validate TTV v1.
 
-## 2. Candidate start event
+## 2. Frozen start event
 
-### Candidate: active-transition start
+### `ttv-start-active-language-transition-v1`
 
-The clock would start on the first calendar date when the person begins an intentional transition attempt toward the target country and at least one unresolved TTV stage becomes actively pursued.
+For a non-zero language-transition case, the clock starts on the first calendar date after the target country has been selected when the person begins an intentional CEFR progression plan toward the model target level and the weekly study intensity used by the candidate model is recorded.
 
-Examples of an observable start action include:
+The start record must include:
 
-- beginning a required language-learning plan;
-- beginning training for a required skill gap;
-- submitting a required legal/work-right application;
-- beginning a target-country local job search;
-- beginning a defined financial accumulation/transition plan.
+- target country;
+- starting CEFR level used by the candidate model;
+- planned study hours per week used by the candidate model;
+- confirmation that legal, skill and portable-income scope conditions are already satisfied.
 
-### Why this is not frozen yet
+Passive browsing, a general intention to relocate, or language study that predates selection of the target country does not by itself start the clock.
 
-Open questions:
+Cases that are already language-ready at baseline have a zero-duration language stage. They may be retained as controls, but they do not provide evidence about language-duration calibration.
 
-- whether merely deciding to relocate counts;
-- whether passive job browsing counts as active job search;
-- how to treat preparation that began before the target country was chosen;
-- how to treat a stage already underway before the AUGUR assessment;
-- whether the earliest active stage or a formal recorded plan date should control the clock.
+## 3. Frozen viability outcome
 
-Until these rules are resolved, `CALIBRATION_START_EVENT_DEFINITION_VERSION` remains unset.
+### `ttv-outcome-b2-remote-viability-v1`
 
-## 3. Candidate viability outcome
+The observed outcome occurs on the first calendar date when:
 
-### Candidate: simultaneous dependency viability
+1. the target-language criterion used by TTV v1 is evidenced at B2 or better through a CEFR-aligned assessment or other documented CEFR result; and
+2. the legal, essential-skill and preserved-portable-income conditions that made the case eligible remain satisfied.
 
-The observed outcome would occur on the first date when every dependency required by the case is simultaneously satisfied.
+The outcome is therefore a bounded **remote-transition viability** event. It is not:
 
-Current dependency interpretation:
+- the date of physical relocation;
+- the date of first local employment;
+- a prediction of immigration-processing time outside the supported legal scope;
+- a household-relocation budget completion date.
 
-### Legal
+## 4. Inclusion/exclusion rules
 
-Satisfied when the person has the legal ability required by the case to live/work in the target country, or when AUGUR's implemented framework establishes that no additional work-authorisation delay applies.
+### `ttv-inclusion-remote-scope-v1`
 
-### Language
+Include a future holdout case only if:
 
-Satisfied when the case meets the declared language-readiness criterion used by the frozen model version.
+- employment mode is `remote`;
+- engine version is `ttv-temporal-evidence-v1`;
+- composition is `critical_path_v1`;
+- the candidate range was generated before the observed outcome;
+- baseline legal, skill and portable-income scope conditions were satisfied and recorded;
+- the baseline language level and weekly study intensity used by the model were recorded;
+- the observed outcome date can be supported without synthetic precision.
 
-The current AUGUR B2 threshold is a modelling heuristic, not a legal requirement, so an approved calibration definition must state exactly how observed language readiness is evidenced.
+Exclude from the v1 holdout:
 
-### Skills
+- local-employment transitions;
+- unresolved essential-skill gaps at baseline;
+- local-financial-transition timing;
+- unsupported legal regimes;
+- cases where the target country was selected only after the measured language transition had already begun;
+- cases where the portable-income condition ceased to hold before the viability outcome;
+- cases whose start or outcome date has to be guessed or reconstructed to artificial precision.
 
-Satisfied when the case meets the essential-skill criterion used by the frozen CareerFit model version.
+If an in-scope case becomes impossible to observe because follow-up ends before the outcome, it must not be silently treated as a completed case. Censoring rules remain part of the still-pending acceptance/evaluation protocol.
 
-The current system uses declared ESCO essential-skill coverage. An approved observational definition must decide what evidence is sufficient for a retrospective case.
+## 5. Stage boundaries
 
-### Employment
+Within the bounded v1 scope:
 
-Remote mode:
+- legal: zero-duration supported prerequisite;
+- skills: zero-duration supported prerequisite;
+- employment: zero-duration because preserved remote income is required;
+- financial: zero-duration because preserved portable income is required;
+- language: zero if already work-ready; otherwise the only potentially non-zero stage.
 
-- satisfied when the existing portable-income arrangement remains viable for the target-country transition.
+The general `critical_path_v1` implementation remains:
 
-Local mode:
+`max(legal, language, skills) + employment + financial`
 
-- satisfied when the person secures the local-employment condition defined by the frozen model.
+but the bounded scope makes the non-language stages zero for holdout-eligible v1 cases.
 
-An approved definition must specify whether this means offer accepted, contract signed, first working day, or another observable event.
+## 6. What remains unfrozen
 
-### Financial
+The following are intentionally still unresolved:
 
-Satisfied when the household meets the financial-transition condition defined by the frozen model version.
+- calibration protocol version;
+- numerical acceptance criteria;
+- minimum development and holdout sample sizes;
+- treatment of censored observations in final scoring;
+- final holdout pass/fail thresholds.
 
-The local-employment financial stage is currently incomplete, so this outcome cannot yet be frozen for local cases.
+These must be frozen **before** the final holdout is evaluated.
 
-## 4. Why the viability outcome is not versioned yet
+## 7. Calibration boundary
 
-The dependency graph is clear, but several observed boundaries are not.
+Development cases may be collected under these frozen observational definitions.
 
-Unresolved items include:
+They remain exploratory and may be used to understand interval coverage, width, midpoint error and failure modes.
 
-- how language readiness is evidenced;
-- how essential skill readiness is evidenced;
-- which local-employment event counts as employment viability;
-- the still-missing local financial-transition model;
-- whether all conditions must be satisfied on the same date or whether the outcome date is the latest date on which each required condition first became satisfied without later regression.
-
-Until these rules are resolved, `CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION` remains unset.
-
-## 5. Calibration rule while definitions are draft
-
-Development cases may still be collected for exploratory analysis.
-
-They must not be described as holdout validation.
-
-A development case should record as much provenance as possible about:
-
-- the event treated as the start;
-- the event treated as the observed outcome;
-- any stage boundaries known with confidence.
-
-Synthetic dates or reconstructed precision must not be added merely to make a case fit the schema.
-
-## 6. Approval path
-
-A future versioned definition should:
-
-1. choose one start-event rule;
-2. define observable evidence for every applicable dependency;
-3. define the local-employment employment event;
-4. define the financial-transition outcome;
-5. define handling of already-in-progress stages;
-6. define handling of regression after a stage first becomes ready;
-7. receive immutable definition IDs;
-8. update the calibration service constants;
-9. be frozen before holdout collection begins.
-
-Until then, the corresponding protocol blockers are intentionally unresolved.
+No development result, green CI run, or non-zero case count activates TTV. External calibration remains the sole temporal-model validation blocker until a pre-declared holdout protocol is frozen and passed.
