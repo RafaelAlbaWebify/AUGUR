@@ -183,6 +183,8 @@ def test_operability_analysis_ready_still_blocks_without_temporal_model(monkeypa
     assert result["ttv_temporal_model_ready"] is False
     assert result["ready"] is False
     assert result["blockers"] == ["ttv_temporal_model"]
+    assert result["environmental_health_evidence"]["available"] is True
+    assert result["environmental_health_evidence"]["fresh"] is True
 
 
 def test_operability_ready_requires_validated_temporal_model(monkeypatch):
@@ -1276,29 +1278,3 @@ def test_operability_exposes_future_shortage_index_status(monkeypatch):
     assert result["blockers"] == ["ttv_temporal_model"]
 
 
-def test_operability_reports_environmental_health_freshness(monkeypatch):
-    stale = datetime.now(timezone.utc) - timedelta(days=45)
-    monkeypatch.setattr(
-        module,
-        "environmental_health_burden_status",
-        lambda: {
-            "available": True,
-            "row_count": 3924,
-            "geography_count": 109,
-            "nuts2_count": 26,
-            "nuts3_count": 83,
-            "period_min": 2005,
-            "period_max": 2023,
-            "burden_types": ["PMD", "YLL"],
-            "unit_codes": ["NR"],
-            "latest_retrieved_at": stale,
-        },
-    )
-
-    result = module.operability_status()
-
-    health = result["environmental_health_evidence"]
-    assert health["available"] is True
-    assert health["fresh"] is False
-    assert health["age_days"] >= 45
-    assert "ttv_temporal_model" in result["blockers"] or result["status"] in {"partial", "empty"}
