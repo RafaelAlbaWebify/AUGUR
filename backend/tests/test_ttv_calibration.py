@@ -110,8 +110,14 @@ def test_calibration_metrics_are_descriptive_only(
     assert result["country_count"] == 2
     assert result["employment_modes"] == ["local", "remote"]
     assert result["interval_coverage_pct"] == 50.0
+    assert result["mean_interval_width_weeks"] == 10.0
+    assert result["median_interval_width_weeks"] == 10.0
     assert result["mean_absolute_midpoint_error_weeks"] == 5.0
     assert result["mean_signed_midpoint_error_weeks"] == -5.0
+    assert result["outside_interval_count"] == 1
+    assert result["below_interval_count"] == 0
+    assert result["above_interval_count"] == 1
+    assert result["mean_miss_distance_weeks"] == 5.0
     assert result["sample_role_metrics"]["development"]["case_count"] == 2
     assert result["sample_role_metrics"]["development"]["interval_coverage_pct"] == 50.0
     assert result["sample_role_metrics"]["holdout"]["case_count"] == 0
@@ -207,14 +213,26 @@ def test_stage_level_calibration_metrics_are_reported(
     assert result["stage_metrics"]["language"] == {
         "case_count": 1,
         "interval_coverage_pct": 100.0,
+        "mean_interval_width_weeks": 10.0,
+        "median_interval_width_weeks": 10.0,
         "mean_absolute_midpoint_error_weeks": 3.0,
         "mean_signed_midpoint_error_weeks": -3.0,
+        "outside_interval_count": 0,
+        "below_interval_count": 0,
+        "above_interval_count": 0,
+        "mean_miss_distance_weeks": 0.0,
     }
     assert result["stage_metrics"]["employment"] == {
         "case_count": 1,
         "interval_coverage_pct": 0.0,
+        "mean_interval_width_weeks": 10.0,
+        "median_interval_width_weeks": 10.0,
         "mean_absolute_midpoint_error_weeks": 9.0,
         "mean_signed_midpoint_error_weeks": -9.0,
+        "outside_interval_count": 1,
+        "below_interval_count": 0,
+        "above_interval_count": 1,
+        "mean_miss_distance_weeks": 4.0,
     }
 
 
@@ -344,14 +362,26 @@ def test_sample_role_metrics_keep_development_and_holdout_separate(
     assert result["sample_role_metrics"]["development"] == {
         "case_count": 1,
         "interval_coverage_pct": 100.0,
+        "mean_interval_width_weeks": 4.0,
+        "median_interval_width_weeks": 4.0,
         "mean_absolute_midpoint_error_weeks": 0.0,
         "mean_signed_midpoint_error_weeks": 0.0,
+        "outside_interval_count": 0,
+        "below_interval_count": 0,
+        "above_interval_count": 0,
+        "mean_miss_distance_weeks": 0.0,
     }
     assert result["sample_role_metrics"]["holdout"] == {
         "case_count": 0,
         "interval_coverage_pct": None,
+        "mean_interval_width_weeks": None,
+        "median_interval_width_weeks": None,
         "mean_absolute_midpoint_error_weeks": None,
         "mean_signed_midpoint_error_weeks": None,
+        "outside_interval_count": 0,
+        "below_interval_count": 0,
+        "above_interval_count": 0,
+        "mean_miss_distance_weeks": None,
     }
 
 
