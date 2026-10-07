@@ -213,6 +213,17 @@ def _pareto_analysis(
     }
 
 
+def _score_ranks(scores: dict[str, float]) -> dict[str, int]:
+    return {
+        country: 1 + sum(
+            1
+            for other_value in scores.values()
+            if other_value > value + 1e-12
+        )
+        for country, value in scores.items()
+    }
+
+
 def _sensitivity_analysis(
     countries: list[str],
     dimension_by_id: dict[str, dict],
@@ -256,16 +267,41 @@ def _sensitivity_analysis(
             })
 
     ranges = {}
+    rank_ranges = {}
+    scenario_ranks = [
+        {
+            "id": scenario["id"],
+            "ranks": _score_ranks(scenario["scores"]),
+        }
+        for scenario in scenarios
+    ]
+
     for country in countries:
         values = [
             float(scenario["scores"][country])
             for scenario in scenarios
             if country in scenario["scores"]
         ]
+        ranks = [
+            int(scenario["ranks"][country])
+            for scenario in scenario_ranks
+            if country in scenario["ranks"]
+        ]
         ranges[country] = {
             "min": min(values),
             "max": max(values),
             "spread": max(values) - min(values),
+        }
+        rank_ranges[country] = {
+            "best_rank": min(ranks),
+            "worst_rank": max(ranks),
+            "top_scenario_count": sum(1 for rank in ranks if rank == 1),
+            "scenario_count": len(ranks),
+            "status": (
+                "rank_stable"
+                if min(ranks) == max(ranks)
+                else "preference_sensitive"
+            ),
         }
 
     return {
@@ -273,10 +309,13 @@ def _sensitivity_analysis(
         "scenario_count": len(scenarios),
         "weight_bounds": [WEIGHT_MIN, WEIGHT_MAX],
         "score_ranges": ranges,
+        "rank_ranges": rank_ranges,
+        "scenario_ranks": scenario_ranks,
         "scenarios": scenarios,
         "notes": [
             "Sensitivity varies one explicit positive weight by ±1 within the 0–5 scale while holding all others fixed.",
             "These ranges measure preference-weight sensitivity, not statistical uncertainty in the underlying evidence.",
+            "Rank ranges show only whether country ordering changes under the tested one-at-a-time ±1 weight perturbations.",
         ],
     }
 
