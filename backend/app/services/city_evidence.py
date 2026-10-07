@@ -367,62 +367,6 @@ def city_evidence(
     )
 
     result = {
-                "city_code": code,
-                "geo_level": "city",
-                "source": "Eurostat City Statistics / Urban Audit",
-                "minimum_population_scope": 50000,
-                "indicator_count": 1,
-                "available_count": 0,
-                "complete": False,
-                "indicators": [{
-                    "indicator_id": CITY_POPULATION["indicator_id"],
-                    "name": CITY_POPULATION["name"],
-                    "status": "unavailable",
-                    "dataset_id": CITY_POPULATION["dataset_id"],
-                    "source_id": "EUROSTAT",
-                    "reason": type(exc).__name__,
-                }],
-            }
-            if adapter is None:
-                _CITY_CACHE[code] = (monotonic(), result)
-            return result
-    finally:
-        if owns_adapter:
-            active_adapter.close()
-
-    if not rows:
-        indicators = [{
-            "indicator_id": CITY_POPULATION["indicator_id"],
-            "name": CITY_POPULATION["name"],
-            "status": "unavailable",
-            "dataset_id": CITY_POPULATION["dataset_id"],
-            "source_id": "EUROSTAT",
-            "reason": "no_observation",
-        }]
-        available_count = 0
-    else:
-        latest = max(rows, key=lambda row: row["period"])
-        indicators = [{
-            "indicator_id": CITY_POPULATION["indicator_id"],
-            "name": CITY_POPULATION["name"],
-            "status": "available",
-            "period": latest["period"],
-            "value": latest["value"],
-            "unit": CITY_POPULATION["unit"],
-            "dataset_id": CITY_POPULATION["dataset_id"],
-            "source_id": "EUROSTAT",
-            "source_updated_at": latest.get("source_updated_at"),
-            "history": [
-                {
-                    "period": row["period"],
-                    "value": row["value"],
-                }
-                for row in sorted(rows, key=lambda row: row["period"])[-8:]
-            ],
-        }]
-        available_count = 1
-
-    result = {
         "city_code": code,
         "geo_level": "city",
         "source": "Eurostat City Statistics / Urban Audit",
@@ -460,6 +404,7 @@ def city_evidence(
         upsert_subnational_observations(rows_to_store)
         if force_refresh:
             _refresh_city_pm25(code)
+
         combined = _city_result_from_local(
             code,
             latest_subnational_observations(code),
@@ -467,6 +412,7 @@ def city_evidence(
         if combined:
             _CITY_CACHE[code] = (monotonic(), combined)
             return combined
+
         _CITY_CACHE[code] = (monotonic(), result)
 
     return result
