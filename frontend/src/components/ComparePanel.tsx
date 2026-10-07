@@ -57,6 +57,10 @@ type PersonalizedComparison = {
     sensitivity?: null | {
       method: string
       scenario_count: number
+      total_possible_scenarios?: number
+      scenario_limit?: number
+      truncated?: boolean
+      dimension_count?: number
       score_ranges: Record<string, { min: number; max: number; spread: number }>
       rank_ranges: Record<string, {
         best_rank: number
@@ -566,8 +570,11 @@ export default function ComparePanel({
                   )
                 })}
                 <p>
-                  Tested only under one-at-a-time ±1 changes to your explicit 0–5 weights.
-                  This is preference sensitivity, not statistical uncertainty or a probability of being best.
+                  Tested across simultaneous bounded ±1 changes to your explicit 0–5 weights.
+                  {personalized.personalized.sensitivity.truncated
+                    ? ' The local scenario space was capped, so this is a partial tested neighborhood.'
+                    : ' The local scenario neighborhood was evaluated exhaustively.'}
+                  {' '}This is preference sensitivity, not statistical uncertainty or a probability of being best.
                 </p>
               </div>
             ) : (
