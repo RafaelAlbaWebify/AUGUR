@@ -368,13 +368,69 @@ def regional_evidence(
     code = geo_code.strip().upper()
 
     if adapter is None and not force_refresh:
-        local = _regional_result_from_local(code, latest_subnational_observations(code))
-        if local:
-            return local
-
         cached = _REGIONAL_CACHE.get(code)
         if cached and monotonic() - cached[0] < CACHE_TTL_SECONDS:
             return cached[1]
+
+        local_rows = latest_subnational_observations(code)
+        expected_ids = {
+            config["indicator_id"]
+            for config in _indicator_configs_for_geo(code)
+        }
+        cached_ids = {
+            row["indicator_id"]
+            for row in local_rows
+        }
+        missing_ids = expected_ids - cached_ids
+
+        if local_rows and not missing_ids:
+            local = _regional_result_from_local(code, local_rows)
+            if local:
+                _REGIONAL_CACHE[code] = (monotonic(), local)
+                return local
+
+        if local_rows and missing_ids:
+            enrichment_adapter = EurostatAdapter(
+                timeout_seconds=20.0,
+                max_retries=2,
+            )
+            try:
+                missing_results = [
+                    _latest_regional_indicator(
+                        enrichment_adapter,
+                        code,
+                        config,
+                    )
+                    for config in _indicator_configs_for_geo(code)
+                    if config["indicator_id"] in missing_ids
+                ]
+            finally:
+                enrichment_adapter.close()
+
+            rows_to_store = [
+                {
+                    "geo_code": code,
+                    "geo_level": geographic_level(code),
+                    "indicator_id": item["indicator_id"],
+                    "period": item["period"],
+                    "value": item["value"],
+                    "unit": item.get("unit"),
+                    "source_id": item["source_id"],
+                    "dataset_id": item["dataset_id"],
+                    "retrieved_at": datetime.now(timezone.utc),
+                    "source_updated_at": item.get("source_updated_at"),
+                }
+                for item in missing_results
+                if item["status"] == "available"
+            ]
+            if rows_to_store:
+                upsert_subnational_observations(rows_to_store)
+                local_rows = latest_subnational_observations(code)
+
+            local = _regional_result_from_local(code, local_rows)
+            if local:
+                _REGIONAL_CACHE[code] = (monotonic(), local)
+                return local
 
     owns_adapter = adapter is None
     active_adapter = adapter or EurostatAdapter(timeout_seconds=20.0, max_retries=2)
