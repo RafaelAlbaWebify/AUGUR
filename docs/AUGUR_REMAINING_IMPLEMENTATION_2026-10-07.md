@@ -116,6 +116,10 @@ Current state:
 
 - interactive regional selection is now local-only: it never waits for Eurostat to repair missing series;
 - interactive city selection is also local-only: missing Urban Audit / EEA data are repaired during explicit sync rather than on click;
+- city evidence now extends beyond population with Urban Audit demography, mobility and tourism metrics plus EEA PM2.5 where verified;
+- city metrics are grouped by domain in the Overview and remain explicit when Urban Audit has no observation;
+- interactive city reads use a single DuckDB connection for latest values plus history;
+- live-source smoke probes Oviedo (ES013C) and requires at least one expanded Urban Audit metric beyond population;
 - regional and city evidence are cached in backend/client for repeat selections;
 - interactive regional cards use local historical series; region selection does not fetch history from external providers;
 - explicit city refresh now owns the EEA PM2.5 network update, preventing the previous interaction-time fetch from becoming an evidence-refresh gap;
