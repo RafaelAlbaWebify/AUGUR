@@ -890,6 +890,92 @@ def subnational_evidence_status() -> dict:
 
 
 
+def subnational_evidence_by_level_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'subnational_observations'
+            """
+        ).fetchone()[0]
+
+        level_specs = {
+            "NUTS2": "nuts2",
+            "NUTS3": "nuts3",
+            "CITY": "city",
+        }
+
+        if not table_exists:
+            return {
+                key: {
+                    "available": False,
+                    "row_count": 0,
+                    "geography_count": 0,
+                    "country_prefixes": [],
+                    "indicator_ids": [],
+                    "latest_retrieved_at": None,
+                    "geo_level": key,
+                }
+                for key in level_specs
+            }
+
+        result = {}
+        for key, normalized in level_specs.items():
+            row = con.execute(
+                """
+                SELECT
+                    COUNT(*),
+                    COUNT(DISTINCT geo_code),
+                    MAX(retrieved_at)
+                FROM subnational_observations
+                WHERE LOWER(geo_level) = ?
+                """,
+                [normalized],
+            ).fetchone()
+
+            indicators = [
+                value[0]
+                for value in con.execute(
+                    """
+                    SELECT DISTINCT indicator_id
+                    FROM subnational_observations
+                    WHERE LOWER(geo_level) = ?
+                    ORDER BY indicator_id
+                    """,
+                    [normalized],
+                ).fetchall()
+            ]
+
+            countries = [
+                value[0]
+                for value in con.execute(
+                    """
+                    SELECT DISTINCT SUBSTR(geo_code, 1, 2)
+                    FROM subnational_observations
+                    WHERE LOWER(geo_level) = ?
+                    ORDER BY 1
+                    """,
+                    [normalized],
+                ).fetchall()
+            ]
+
+            result[key] = {
+                "available": bool(row[0]),
+                "row_count": row[0],
+                "geography_count": row[1],
+                "country_prefixes": countries,
+                "indicator_ids": indicators,
+                "latest_retrieved_at": row[2],
+                "geo_level": key,
+            }
+
+        return result
+    finally:
+        con.close()
+
+
 def upsert_regional_sector_employment(rows: list[dict]) -> int:
     if not rows:
         return 0
