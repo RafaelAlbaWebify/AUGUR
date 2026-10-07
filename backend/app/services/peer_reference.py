@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from app.catalog import COUNTRIES
 from app.db.analytics import indicator_series
+from app.services.country import list_countries
 
 
 def _average_rank(values: list[tuple[str, float]], target_iso3: str) -> float | None:
@@ -26,7 +26,11 @@ def build_peer_reference(
     series_by_country: dict[str, list[dict]],
 ) -> dict:
     target = target_country_iso3.upper()
-    registered = [country["iso3"] for country in COUNTRIES]
+    registered = [
+        country["iso3"]
+        for country in list_countries()
+        if country.get("analysis_status") == "available"
+    ]
 
     period_maps: dict[str, dict[int, dict]] = {}
     for iso3 in registered:
@@ -102,7 +106,8 @@ def indicator_peer_reference(
 ) -> dict:
     series_by_country = {
         country["iso3"]: indicator_series(country["iso3"], indicator_id)
-        for country in COUNTRIES
+        for country in list_countries()
+        if country.get("analysis_status") == "available"
     }
     return build_peer_reference(
         indicator_id,
