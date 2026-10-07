@@ -64,3 +64,58 @@ def test_subnational_status_counts_nuts2_nuts3_and_city_case_insensitively(
         "regional_intentional_homicide_rate",
         "regional_robbery_rate",
     ]
+
+
+def test_subnational_indicator_series_returns_recent_points_in_time_order(
+    monkeypatch,
+    tmp_path,
+):
+    path = tmp_path / "regional-history.duckdb"
+    con = duckdb.connect(str(path))
+    try:
+        con.execute(
+            """
+            CREATE TABLE subnational_observations (
+                geo_code TEXT,
+                geo_level TEXT,
+                indicator_id TEXT,
+                period INTEGER,
+                value DOUBLE,
+                unit TEXT,
+                source_id TEXT,
+                dataset_id TEXT,
+                retrieved_at TIMESTAMP,
+                source_updated_at TEXT
+            )
+            """
+        )
+        now = datetime.now(timezone.utc)
+        rows = [
+            ("ES12", "NUTS2", "regional_employment_rate", year, value, "percent", "EUROSTAT", "lfst_r_lfe2emprt", now, None)
+            for year, value in [
+                (2019, 64.0),
+                (2020, 63.0),
+                (2021, 65.0),
+                (2022, 67.0),
+                (2023, 69.0),
+                (2024, 70.5),
+                (2025, 72.0),
+            ]
+        ]
+        con.executemany(
+            "INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            rows,
+        )
+    finally:
+        con.close()
+
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+
+    series = module.subnational_indicator_series("ES12", max_points=4)
+
+    assert [row["period"] for row in series] == [2022, 2023, 2024, 2025]
+    assert [row["value"] for row in series] == [67.0, 69.0, 70.5, 72.0]
