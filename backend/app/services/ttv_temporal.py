@@ -50,8 +50,8 @@ TEMPORAL_MODEL_VALIDATION_GATES = {
         "reason": "v1_estimation_scope_requires_preserved_portable_income",
     },
     "composition_dependency_graph": {
-        "state": "experimental",
-        "reason": "explicit_stage_dependencies_not_externally_calibrated",
+        "state": "supported",
+        "reason": "v1_scope_has_parallel_preparation_with_zero_employment_and_financial_transition_stages",
     },
     "external_calibration": {
         "state": "missing",
