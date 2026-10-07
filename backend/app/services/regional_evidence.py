@@ -258,6 +258,11 @@ def _environmental_health_context(code: str) -> dict:
             "reason": "not_cached",
             "source_id": "EEA",
             "dataset_id": "EEA_PM25_PREMATURE_DEATHS_NUTS23",
+            "comparison_policy": {
+                "safe_for_direct_cross_region_comparison": False,
+                "reason": "published_as_absolute_counts",
+                "preferred_comparison_basis": "population_normalized_rate_if_officially_available",
+            },
             "metrics": [],
         }
 
@@ -280,10 +285,16 @@ def _environmental_health_context(code: str) -> dict:
         "dataset_version": rows[0]["dataset_version"],
         "geo_level": rows[0]["geo_level"],
         "period": max(row["period"] for row in rows),
+        "comparison_policy": {
+            "safe_for_direct_cross_region_comparison": False,
+            "reason": "published_as_absolute_counts",
+            "preferred_comparison_basis": "population_normalized_rate_if_officially_available",
+        },
         "metrics": metrics,
         "notes": [
             "EEA PM2.5 health burden is attributable-impact evidence, not a measurement of current ambient concentration.",
             "Published NUTS granularity, units and observation status are preserved.",
+            "Published PMD/YLL values are absolute counts; AUGUR does not use them to rank regions of different population sizes.",
             "Premature deaths and years of life lost remain separate measures and are not combined into an AUGUR score.",
         ],
     }
