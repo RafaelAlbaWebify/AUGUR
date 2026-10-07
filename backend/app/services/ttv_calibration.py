@@ -718,6 +718,8 @@ def calibration_status() -> dict:
                 "context_case_count": 0,
                 "current_cefr_levels": [],
                 "target_cefr_levels": [],
+                "achieved_cefr_levels": [],
+                "outcome_evidence_types": [],
                 "weekly_study_hours": [],
             },
             "externally_calibrated": False,
