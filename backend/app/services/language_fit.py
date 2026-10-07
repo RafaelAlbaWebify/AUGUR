@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from app.catalog import country_config
+from app.services.country import country_metadata
 from app.models.profile import PersonalProfileResponse
 from app.esco_store import esco_status, occupation_language_skill_rows
 from app.services.career_fit import resolve_esco_occupation
@@ -100,9 +100,27 @@ def language_fit(
     target_country_iso3: str,
 ) -> dict:
     target = target_country_iso3.upper()
-    country = country_config(target)
+    country = country_metadata(target)
     target_languages = country.get("labour_market_languages", [])
     occupation_evidence = occupation_language_evidence(profile)
+
+    if not target_languages:
+        return {
+            "target_country_iso3": target,
+            "status": "country_language_evidence_unavailable",
+            "target_languages": [],
+            "matches": [],
+            "work_ready_threshold": WORK_READY_THRESHOLD,
+            "work_ready": None,
+            "method": "labour_market_language_heuristic_v2",
+            "occupation_language_evidence": occupation_evidence,
+            "notes": [
+                "AUGUR has analytical country coverage but no verified labour-market language metadata for this country yet.",
+                "No target-language gap is inferred from missing country-language metadata.",
+                "ESCO occupation-language evidence remains separate from country labour-market language requirements.",
+                "No country-fit score is produced.",
+            ],
+        }
 
     declared = {
         item.language.strip().lower(): (
