@@ -147,3 +147,30 @@ The main remaining product value comes from:
 - richer regional demand only where evidence exists;
 - incremental environmental-health evidence;
 - improving explanation/decision support without pretending unavailable evidence exists.
+
+
+## Global geography coverage architecture
+
+Product scope is data-driven rather than hard-coded to the original Spain / Portugal / Ireland validation set.
+
+Implemented:
+
+- `VALIDATION_COUNTRY_ISO3` keeps ESP / PRT / IRL as the regression/readiness gate only;
+- World Bank country metadata can dynamically register real countries while excluding statistical aggregates;
+- `/api/countries` exposes countries with actual analytical evidence plus the validation set, rather than every discovered-but-empty country;
+- `/api/countries/coverage` reports registered versus analyzable country coverage;
+- global provider selection is metadata-driven: global sources apply everywhere, Eurostat only to EU members and OECD only to OECD members;
+- World Bank, IMF and UN WPP have batched multi-country ingestion paths;
+- `sync-global-baseline.ps1` and `refresh-augur.ps1 -GlobalBaseline` provide an explicit global baseline acquisition path;
+- product operability remains regression-gated on the validation set, while additional countries expand coverage without becoming global readiness blockers;
+- country map metadata includes source-provided coordinates so non-European countries do not default to an irrelevant Europe-only view;
+- `geography_registry` separates geography identity from NUTS/Urban Audit assumptions and records country, level and geography system explicitly;
+- `/api/geographies/coverage` reports provider-neutral subnational coverage by country/system/level.
+
+Architecture boundary:
+
+- NUTS 2024 and Urban Audit 2024 are European geography providers, not universal AUGUR geography models;
+- future non-European regional/city sources must register their native identifiers and hierarchy in `geography_registry` instead of encoding country identity in a code prefix;
+- discovery alone does not make a geography analyzable: at least one stored observation is required for the geography/country to be surfaced as analytical coverage;
+- missing provider-specific evidence remains explicit and must not be synthesized from unrelated levels.
+
