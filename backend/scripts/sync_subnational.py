@@ -147,6 +147,7 @@ def main() -> int:
     print("=" * 72)
     print(f"geographies={status['geography_count']}")
     print(f"nuts2={status['nuts2_count']}")
+    print(f"nuts3={status['nuts3_count']}")
     print(f"cities={status['city_count']}")
     print(f"observations={status['observation_count']}")
 
