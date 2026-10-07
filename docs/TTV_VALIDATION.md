@@ -111,38 +111,59 @@ Until then, occupation-level vacancy evidence may improve CareerFit, but it must
 
 ## External calibration infrastructure
 
-AUGUR now includes a local-only calibration store and CSV import workflow.
+AUGUR now includes a local-first calibration lifecycle rather than relying on manual CSV entry alone.
 
-This infrastructure records only the minimum fields required to compare an observed outcome with the candidate range:
+For an eligible bounded TTV v1 case, My Fit can:
+
+1. start an explicit opt-in development observation;
+2. freeze the candidate range and model context before the outcome is known;
+3. keep the active observation separate from completed calibration cases;
+4. record a user-confirmed documented B2-or-better outcome;
+5. calculate observed elapsed weeks from the stored start/outcome timestamps;
+6. create a `sample_role=development` calibration case;
+7. cancel an observation without creating calibration evidence.
+
+CSV import remains available as a compatibility/development path.
+
+The calibration store records only the minimum fields required to evaluate the candidate model:
 
 - anonymous `case_id`;
 - target country;
-- remote/local employment mode;
+- employment mode;
 - temporal evidence engine version;
 - composition version;
 - candidate range minimum and maximum;
 - observed weeks to viability;
-- optional provenance label and observation date.
+- frozen start/outcome definition versions;
+- optional stage timings;
+- bounded non-sensitive model context: scope ID, starting/target CEFR, weekly study intensity and guided-hour range.
 
-It deliberately does **not** store the full personal profile in the calibration table.
+It deliberately does **not** store or exchange the full personal profile.
 
-The current descriptive metrics are:
+The current descriptive diagnostics include:
 
+- sample and country counts;
 - candidate-interval coverage;
-- mean absolute error against the candidate-range midpoint;
+- mean and median interval width;
+- mean absolute midpoint error;
 - mean signed midpoint error;
-- sample count and country coverage.
+- count/direction of misses below or above the interval;
+- mean miss distance outside the interval;
+- the same diagnostics by sample role and available stage timing;
+- represented starting CEFR levels and study-intensity cohorts.
 
-These metrics do not constitute validation on their own.
+AUGUR also supports a versioned `ttv-development-exchange-v1` package for moving development cases between local installations. The package excludes direct identifiers, full profiles, free-text histories, local provenance labels and exact local import/observation timestamps. Imported exchange cases remain development evidence and cannot be promoted retrospectively into holdout evidence.
+
+These diagnostics and exchange mechanisms do not constitute validation on their own.
 
 The `external_calibration` gate remains `missing` until AUGUR has:
 
-1. a documented definition of the observed Time-to-Viability outcome;
-2. a representative multi-country sample;
-3. inclusion/exclusion rules;
-4. an approved calibration/evaluation protocol;
-5. acceptance criteria defined before evaluating the final holdout sample;
-6. evidence that the model performs acceptably on observations not used to design or tune it.
+1. a representative observed sample inside the frozen TTV v1 scope;
+2. a frozen calibration protocol version;
+3. acceptance criteria defined before evaluating the final holdout sample;
+4. a frozen holdout not used for model design/tuning;
+5. evidence that the model performs acceptably on that holdout;
+6. documented cohort coverage and limitations.
 
 The local calibration workflow is therefore validation infrastructure, not a shortcut to activating `TEMPORAL_MODEL_VERSION`.
 
