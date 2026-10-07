@@ -29,6 +29,63 @@ CALIBRATION_STAGE_IDS = {
     "financial",
 }
 
+TTV_V1_CALIBRATION_SCOPE = {
+    "scope_id": "ttv-estimation-scope-v1",
+    "employment_modes": ["remote"],
+    "engine_versions": ["ttv-temporal-evidence-v1"],
+    "composition_versions": ["critical_path_v1"],
+    "notes": [
+        "TTV v1 calibration is limited to the same bounded estimation scope as the candidate model.",
+        "Local-employment cases may remain useful development evidence but cannot validate the remote-only v1 holdout.",
+    ],
+}
+
+
+def calibration_case_scope_status(case: dict) -> dict:
+    blockers = []
+
+    employment_mode = str(case.get("employment_mode") or "").strip().lower()
+    engine_version = str(case.get("engine_version") or "").strip()
+    composition = str(case.get("composition") or "").strip()
+
+    if employment_mode not in TTV_V1_CALIBRATION_SCOPE["employment_modes"]:
+        blockers.append("employment_mode_outside_ttv_v1_scope")
+    if engine_version not in TTV_V1_CALIBRATION_SCOPE["engine_versions"]:
+        blockers.append("engine_version_outside_ttv_v1_scope")
+    if composition not in TTV_V1_CALIBRATION_SCOPE["composition_versions"]:
+        blockers.append("composition_outside_ttv_v1_scope")
+
+    return {
+        "scope_id": TTV_V1_CALIBRATION_SCOPE["scope_id"],
+        "eligible_for_v1_holdout": not blockers,
+        "blockers": blockers,
+    }
+
+
+def calibration_batch_preflight(cases: list[dict]) -> dict:
+    rows = []
+    for case in cases:
+        case_id = str(case.get("case_id") or "").strip() or None
+        scope = calibration_case_scope_status(case)
+        rows.append({
+            "case_id": case_id,
+            **scope,
+        })
+
+    eligible = [
+        row for row in rows
+        if row["eligible_for_v1_holdout"]
+    ]
+
+    return {
+        "scope": TTV_V1_CALIBRATION_SCOPE,
+        "case_count": len(rows),
+        "eligible_case_count": len(eligible),
+        "ineligible_case_count": len(rows) - len(eligible),
+        "all_cases_eligible": len(rows) == len(eligible),
+        "cases": rows,
+    }
+
 
 def calibration_protocol_readiness() -> dict:
     requirements = {
@@ -66,6 +123,7 @@ def calibration_protocol_readiness() -> dict:
         "requirements": requirements,
         "blockers": blockers,
         "ready_for_holdout_collection": len(blockers) == 0,
+        "holdout_scope": TTV_V1_CALIBRATION_SCOPE,
     }
 
 
@@ -211,6 +269,12 @@ def validate_calibration_case(case: dict) -> dict:
         if not viability_outcome_definition_version:
             raise ValueError(
                 "holdout cases require viability_outcome_definition_version"
+            )
+        scope = calibration_case_scope_status(case)
+        if not scope["eligible_for_v1_holdout"]:
+            raise ValueError(
+                "holdout case outside TTV v1 calibration scope: "
+                + ", ".join(scope["blockers"])
             )
 
     candidate_min = _as_float(
