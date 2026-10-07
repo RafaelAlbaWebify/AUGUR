@@ -27,6 +27,7 @@ type CityFeature = GeoJSON.Feature<
 
 type RegionalMapProps = {
   countryIso2: string
+  countryCenter?: { lat: number; lon: number } | null
   selectedRegion: string | null
   selectedCity: string | null
   selectableCountryIso2?: string[]
@@ -115,6 +116,7 @@ function cityName(feature: CityFeature) {
 
 export default function RegionalMap({
   countryIso2,
+  countryCenter = null,
   selectedRegion,
   selectedCity,
   selectableCountryIso2 = [],
@@ -133,6 +135,7 @@ export default function RegionalMap({
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
+  const [subnationalAvailable, setSubnationalAvailable] = useState(true)
   const selectableCountryKey = selectableCountryIso2.join(',')
 
   useEffect(() => {
@@ -245,6 +248,24 @@ export default function RegionalMap({
             const code = cityCode(feature)
             return code.startsWith(countryIso2) && code.endsWith('C')
           })
+
+        const hasCountryGeometry = countries.some(
+          (feature) => feature.properties?.CNTR_CODE === countryIso2,
+        )
+        const hasSubnational = (
+          regions.length > 0
+          || nuts3Regions.length > 0
+          || cityFeatures.length > 0
+        )
+        setSubnationalAvailable(hasSubnational)
+
+        if (!hasCountryGeometry && countryCenter) {
+          map.setView(
+            [countryCenter.lat, countryCenter.lon],
+            5,
+            { animate: false },
+          )
+        }
 
         const countryLayer = L.geoJSON(countryCollection, {
           style: (feature) => {
@@ -432,7 +453,12 @@ export default function RegionalMap({
       cancelled = true
       if (progressiveHandler) map.off('zoomend', progressiveHandler)
     }
-  }, [countryIso2, selectableCountryKey])
+  }, [
+    countryIso2,
+    countryCenter?.lat,
+    countryCenter?.lon,
+    selectableCountryKey,
+  ])
 
   useEffect(() => {
     const layer = regionLayerRef.current
@@ -540,13 +566,15 @@ export default function RegionalMap({
       <div className="mapZoomHint">
         <span>Zoom {zoom.toFixed(1)}</span>
         <strong>
-          {zoom >= CITIES_VISIBLE_ZOOM
-            ? 'Urban Audit cities + NUTS 3 visible'
-            : zoom >= NUTS3_VISIBLE_ZOOM
-              ? 'NUTS 3 safety context visible · zoom in for cities'
-              : zoom >= REGIONS_VISIBLE_ZOOM
-                ? 'NUTS 2 regions visible · zoom in for NUTS 3'
-                : 'Zoom in to reveal NUTS 2 regions'}
+          {!subnationalAvailable
+            ? 'No integrated subnational source for this country yet'
+            : zoom >= CITIES_VISIBLE_ZOOM
+              ? 'Urban Audit cities + NUTS 3 visible'
+              : zoom >= NUTS3_VISIBLE_ZOOM
+                ? 'NUTS 3 safety context visible · zoom in for cities'
+                : zoom >= REGIONS_VISIBLE_ZOOM
+                  ? 'NUTS 2 regions visible · zoom in for NUTS 3'
+                  : 'Zoom in to reveal available regional detail'}
         </strong>
       </div>
 
@@ -561,11 +589,29 @@ export default function RegionalMap({
 
       <div className="regionalMapActions">
         <button type="button" onClick={resetToEurope} disabled={status !== 'ready'}>Europe</button>
-        <button type="button" onClick={zoomToCountry} disabled={status !== 'ready'}>Focus country</button>
+        <button
+          type="button"
+          onClick={() => {
+            if (subnationalAvailable) {
+              zoomToCountry()
+              return
+            }
+            if (countryCenter && mapRef.current) {
+              mapRef.current.setView(
+                [countryCenter.lat, countryCenter.lon],
+                5,
+                { animate: false },
+              )
+            }
+          }}
+          disabled={status !== 'ready'}
+        >
+          Focus country
+        </button>
       </div>
 
       <small className="regionalMapSource">
-        Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 + Urban Audit 2024 · © EuroGeographics · NUTS 2 from zoom {REGIONS_VISIBLE_ZOOM} · NUTS 3 from zoom {NUTS3_VISIBLE_ZOOM} · cities from zoom {CITIES_VISIBLE_ZOOM}
+        Base map: OpenStreetMap · European subnational overlays: Eurostat GISCO NUTS 2024 + Urban Audit 2024 · © EuroGeographics
       </small>
 
       {status === 'loading' && <div className="regionalMapLoading">Loading geographic layers…</div>}
