@@ -1,24 +1,27 @@
 # AUGUR TTV Calibration Protocol — Draft
 
-Status: **draft / not approved**
+Status: **definitions frozen / acceptance criteria pending / protocol not approved**
 
 ## Current executable blockers
 
-AUGUR currently reports these calibration-protocol blockers through `/api/operability` and `check-operability.ps1`:
+AUGUR currently reports these remaining calibration-protocol blockers through `/api/operability` and `check-operability.ps1`:
 
 - protocol version not approved;
-- start-event definition not frozen;
-- viability-outcome definition not frozen;
-- inclusion/exclusion rules not frozen;
 - acceptance criteria not frozen.
+
+The following definitions are now frozen for the bounded remote-only TTV v1 scope:
+
+- start event: `ttv-start-active-language-transition-v1`;
+- viability outcome: `ttv-outcome-b2-remote-viability-v1`;
+- inclusion/exclusion rules: `ttv-inclusion-remote-scope-v1`.
 
 Until every blocker is cleared, holdout collection remains disabled by code.
 
-Draft observable start/outcome definitions are tracked separately in:
+The frozen bounded-scope observational definitions are tracked separately in:
 
 `docs/TTV_OUTCOME_DEFINITIONS_DRAFT.md`
 
-That draft is explanatory only; it does not assign definition versions or clear any blocker.
+The historical filename is retained for compatibility, but the document now contains versioned v1 definitions. Those definitions clear the start-event, outcome and inclusion/exclusion readiness requirements; they do not approve the protocol or clear external calibration.
 
 This document defines the data and evaluation process required before AUGUR can claim that a Time-to-Viability model has been externally calibrated.
 
@@ -42,9 +45,7 @@ An observed case requires an anonymised elapsed duration expressed in weeks.
 - the pre-declared start event for the case; and
 - the first date on which the case satisfies the agreed observed viability outcome.
 
-The exact start-event and viability-outcome definitions must be frozen before a calibration protocol can move from draft to approved.
-
-Until those definitions are approved, imported cases remain exploratory.
+The bounded v1 start-event and viability-outcome definitions are frozen. Imported development cases remain exploratory until acceptance criteria and the final protocol version are frozen.
 
 ## 3. Minimum case fields
 
@@ -166,7 +167,7 @@ No current metric has an approved pass/fail threshold.
 
 ## 8. Required future acceptance criteria
 
-Before a final holdout evaluation, AUGUR must define:
+Before a final holdout evaluation, AUGUR must still define and freeze:
 
 - minimum total sample size;
 - minimum useful sample size for relevant cohorts;
