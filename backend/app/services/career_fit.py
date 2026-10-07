@@ -10,6 +10,7 @@ from app.db.analytics import (
 )
 from app.models.profile import PersonalProfileResponse
 from app.services.esco_match import match_profile_skills
+from app.services.live_postings import provider_not_configured_evidence
 from app.esco_store import search_occupations
 
 
@@ -696,6 +697,7 @@ def career_fit(
     eu27_oja_imbalance = eu27_oja_imbalance_evidence(
         occupation_match,
     )
+    live_postings_evidence = provider_not_configured_evidence()
 
     if evidence is None:
         return {
@@ -712,6 +714,7 @@ def career_fit(
             "skill_demand_trend_evidence": skill_demand_trend,
             "language_oja_requirements_evidence": language_oja_requirements,
             "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
+            "live_postings_evidence": live_postings_evidence,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
@@ -744,6 +747,7 @@ def career_fit(
             "skill_demand_trend_evidence": skill_demand_trend,
             "language_oja_requirements_evidence": language_oja_requirements,
             "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
+            "live_postings_evidence": live_postings_evidence,
             "skill_match": {
                 "status": "not_evaluated",
                 "matched_skills": [],
@@ -840,6 +844,7 @@ def career_fit(
         "skill_demand_trend_evidence": skill_demand_trend,
         "language_oja_requirements_evidence": language_oja_requirements,
         "eu27_oja_imbalance_evidence": eu27_oja_imbalance,
+        "live_postings_evidence": live_postings_evidence,
         "skill_match": skill_match,
         "skill_evidence_complete": skill_evidence_complete,
         "market_evidence_complete": market_evidence_complete,
@@ -853,7 +858,7 @@ def career_fit(
             "Eurostat vacancy-rate evidence is contextual demand evidence at ISCO major-group level and does not change the shortage/surplus gate.",
             "Cedefop STAS provides short-term occupation outlook context and does not change the shortage/surplus gate or TTV timing.",
             "Cedefop OJA imbalance provides an exploratory EU27-level ISCO-4 recruitment-pressure context and does not change country-specific market gates or TTV timing.",
-            "Salary, vacancy count, seniority, location and employer-specific skill requirements are not yet included.",
+            "Live posting counts, salary, seniority, location and employer-specific skill/language requirements remain unavailable until a live-postings provider is configured.",
             "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
             "Verified unit-group evidence takes precedence over broad occupational-group signals when both exist.",
             "Broad-group EURES evidence remains descriptive but does not count as complete CareerFit evidence for TTV.",
