@@ -263,17 +263,26 @@ def test_development_case_defaults_to_exploratory_sample_role(
 def test_calibration_protocol_readiness_lists_unresolved_requirements():
     result = module.calibration_protocol_readiness()
 
-    assert result["protocol_state"] == "draft_not_approved"
+    assert result["protocol_state"] == "definitions_frozen_acceptance_pending"
     assert result["ready_for_holdout_collection"] is False
     assert result["blockers"] == [
         "protocol_version",
-        "start_event_definition",
-        "viability_outcome_definition",
-        "inclusion_exclusion_rules",
         "acceptance_criteria",
     ]
     assert result["requirements"]["protocol_version"]["ready"] is False
-    assert result["requirements"]["start_event_definition"]["version"] is None
+    assert result["requirements"]["start_event_definition"] == {
+        "ready": True,
+        "version": "ttv-start-active-language-transition-v1",
+    }
+    assert result["requirements"]["viability_outcome_definition"] == {
+        "ready": True,
+        "version": "ttv-outcome-b2-remote-viability-v1",
+    }
+    assert result["requirements"]["inclusion_exclusion_rules"] == {
+        "ready": True,
+        "version": "ttv-inclusion-remote-scope-v1",
+    }
+    assert result["requirements"]["acceptance_criteria"]["ready"] is False
 
 
 def test_sample_role_metrics_keep_development_and_holdout_separate(
