@@ -49,6 +49,30 @@ type CareerFit = {
     }>
     role?: string
   } | null
+  future_shortage_index_evidence?: {
+    status?: string
+    source_id?: string
+    dataset_id?: string
+    release_version?: string
+    horizon?: number
+    isco08?: string
+    granularity?: string
+    occupation_label?: string
+    main_occupation_group?: string | null
+    shortage_index?: number
+    component_code?: string | null
+    components?: {
+      employment_growth?: number | null
+      replacement_demand?: number | null
+      skills_imbalance?: number | null
+    }
+    scale?: {
+      minimum?: number
+      maximum?: number
+      direction?: string
+    }
+    role?: string
+  } | null
   occupation_trend_evidence?: {
     status?: string
     evidence_type?: string
@@ -197,6 +221,7 @@ export default function SkillsLanguagesPage({
     : 'No verified vacancy context loaded'
   const liveSkillDemandAvailable = false
   const occupationTrend = career?.occupation_trend_evidence
+  const futureShortage = career?.future_shortage_index_evidence
   const skillDemandTrend = career?.skill_demand_trend_evidence
   const languageOjaRequirements = career?.language_oja_requirements_evidence
   const eu27OjaImbalance = career?.eu27_oja_imbalance_evidence
@@ -463,10 +488,14 @@ export default function SkillsLanguagesPage({
                     <strong>Occupation-skill relationships</strong>
                     <small>ESCO taxonomy · not demand frequency</small>
                   </article>
-                  <article className="planned">
-                    <span>PLANNED</span>
+                  <article className={futureShortage?.status === 'available' ? 'active' : 'planned'}>
+                    <span>{futureShortage?.status === 'available' ? 'ACTIVE · 2035' : 'PLANNED'}</span>
                     <strong>Future shortage pressure</strong>
-                    <small>Cedefop CLSSI 2026 · country / occupation to 2035</small>
+                    <small>
+                      {futureShortage?.status === 'available' && futureShortage.shortage_index != null
+                        ? `Cedefop CLSSI · index ${futureShortage.shortage_index.toFixed(2)}/4 · ISCO-2 ${futureShortage.isco08 ?? ''} · growth ${futureShortage.components?.employment_growth ?? '—'} · replacement ${futureShortage.components?.replacement_demand ?? '—'} · imbalance ${futureShortage.components?.skills_imbalance ?? '—'}`
+                        : 'Cedefop CLSSI 2026 · country / occupation to 2035'}
+                    </small>
                   </article>
                   <article className={occupationTrend?.status === 'available' ? 'active' : 'planned'}>
                     <span>{occupationTrend?.status === 'available' ? 'ACTIVE' : 'PLANNED'}</span>
@@ -562,6 +591,11 @@ export default function SkillsLanguagesPage({
             <ul>
               <li>Occupation: {career?.occupation_match?.selected?.preferred_label ?? 'not confidently resolved'}.</li>
               <li>Market signal: {career?.market_signal?.replaceAll('_', ' ') ?? 'not available'}{career?.market_signal_isco ? ` · ISCO ${career.market_signal_isco}` : ''}.</li>
+              <li>
+                Future shortage: {futureShortage?.status === 'available' && futureShortage.shortage_index != null
+                  ? `CLSSI ${futureShortage.shortage_index.toFixed(2)}/4 for ISCO-2 ${futureShortage.isco08 ?? '—'} to ${futureShortage.horizon ?? 2035}`
+                  : 'not available for the resolved ISCO-2 group'}.
+              </li>
               <li>Market evidence: {career?.source?.label ?? 'not available'}{career?.source?.conditions_year ? ` · ${career.source.conditions_year} conditions` : ''}{career?.source?.evidence_id ? ` · ${career.source.evidence_id}` : ''}.</li>
               <li>Vacancy context: {career?.vacancy_demand_evidence?.status === 'available'
                     ? `Eurostat ${career.vacancy_demand_evidence.period} · ISCO ${career.vacancy_demand_evidence.isco_3digit ?? career.vacancy_demand_evidence.isco_major ?? career.vacancy_demand_evidence.granularity ?? 'group'} vacancy rate ${career.vacancy_demand_evidence.vacancy_rate_pct?.toFixed(1)}% · context only`
