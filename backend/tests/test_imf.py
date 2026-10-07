@@ -127,3 +127,30 @@ def test_imf_batch_fetches_each_series_once(monkeypatch):
     assert result["country_count"] == 2
     assert result["rows"] == 12
     assert {row["country_iso3"] for row in stored} == {"ESP", "DEU"}
+
+
+def test_imf_normalization_accepts_dataset_qualified_indicator_key():
+    payload = {
+        "values": {
+            "NGDP_RPCH@WEO": {
+                "DEU": {
+                    "2025": 0.8,
+                    "2026": 1.2,
+                }
+            }
+        }
+    }
+    config = {
+        "indicator_id": "real_gdp_growth",
+        "source_indicator": "NGDP_RPCH",
+        "unit": "percent",
+    }
+
+    adapter = IMFAdapter(client=None)
+    try:
+        rows = adapter.normalize("DEU", config, payload)
+    finally:
+        adapter.close()
+
+    assert [row["period"] for row in rows] == [2025, 2026]
+    assert [row["value"] for row in rows] == [0.8, 1.2]
