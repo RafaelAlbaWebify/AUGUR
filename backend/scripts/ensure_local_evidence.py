@@ -6,6 +6,7 @@ import httpx
 
 from app.db.bootstrap import initialize_datastores
 from app.catalog import COUNTRIES
+from app.core.config import settings
 from app.db.analytics import (
     labour_shortage_index_status,
     regional_sector_employment_status,
