@@ -143,6 +143,85 @@ class IMFAdapter:
 
         return rows
 
+    def sync_countries(self, country_iso3s: list[str]) -> dict:
+        countries = sorted({
+            code.upper()
+            for code in country_iso3s
+            if code
+        })
+        total_rows = 0
+        details = []
+        failures = []
+
+        for index, config in enumerate(SERIES, start=1):
+            print(
+                f"[{index}/{len(SERIES)}] "
+                f"{config['indicator_id']} "
+                f"({config['source_indicator']}) · "
+                f"{len(countries)} countries"
+            )
+
+            try:
+                payload = self.fetch_indicator(config["source_indicator"])
+            except Exception as exc:
+                failures.append({
+                    "indicator_id": config["indicator_id"],
+                    "source_indicator": config["source_indicator"],
+                    "country_iso3": None,
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                })
+                print(f"   failed: {type(exc).__name__}: {exc}")
+                continue
+
+            rows_to_store: list[dict] = []
+            covered = 0
+
+            for country_iso3 in countries:
+                try:
+                    rows = self.normalize(
+                        country_iso3,
+                        config,
+                        payload,
+                    )
+                    rows_to_store.extend(rows)
+                    covered += 1
+                except ValueError as exc:
+                    failures.append({
+                        "indicator_id": config["indicator_id"],
+                        "source_indicator": config["source_indicator"],
+                        "country_iso3": country_iso3,
+                        "error_type": type(exc).__name__,
+                        "error": str(exc),
+                    })
+
+            inserted = upsert_observations(rows_to_store)
+            total_rows += inserted
+            details.append({
+                "indicator_id": config["indicator_id"],
+                "source_indicator": config["source_indicator"],
+                "rows": inserted,
+                "countries_with_data": covered,
+            })
+            print(
+                f"   ok: {inserted} rows · "
+                f"{covered}/{len(countries)} countries"
+            )
+
+        return {
+            "countries": countries,
+            "country_count": len(countries),
+            "source": SOURCE_ID,
+            "vintage": "April 2026",
+            "rows": total_rows,
+            "series": details,
+            "failures": failures,
+            "complete": all(
+                detail["countries_with_data"] == len(countries)
+                for detail in details
+            ),
+        }
+
     def sync_country(self, country_iso3: str) -> dict:
         total_rows = 0
         details = []
