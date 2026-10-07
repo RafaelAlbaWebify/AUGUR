@@ -10,6 +10,7 @@ on:
       - "backend/app/services/city_evidence.py"
       - "backend/scripts/inspect_eurostat_city_evidence.py"
       - "backend/scripts/inspect_global_country_baseline.py"
+      - "backend/scripts/inspect_oecd_regional_density.py"
       - "backend/app/ingestion/world_bank.py"
       - "backend/app/ingestion/imf.py"
       - "backend/app/ingestion/un_wpp.py"
@@ -67,6 +68,9 @@ jobs:
 
       - name: Sync full global country baseline
         run: python -m scripts.sync_global_baseline
+
+      - name: Inspect OECD regional density
+        run: python -m scripts.inspect_oecd_regional_density
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
