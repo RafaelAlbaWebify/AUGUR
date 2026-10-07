@@ -144,6 +144,15 @@ def test_main_returns_partial_when_repair_cannot_restore_evidence(monkeypatch, c
     )
     monkeypatch.setattr(
         module,
+        "ensure_city_urban_audit_evidence",
+        lambda: {
+            "evidence_id": "city_urban_audit_expanded",
+            "status": "available",
+            "action": "none",
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "ensure_eea_environmental_health_evidence",
         lambda: {
             "evidence_id": "eea_environmental_health",
@@ -632,3 +641,154 @@ def test_nuts3_safety_repairs_only_missing_country_prefixes(monkeypatch):
     assert result["requested_country_prefixes"] == ["IE"]
     assert result["missing_country_prefixes_before"] == ["IE"]
     assert result["action"] == "repaired"
+
+
+def test_city_urban_audit_noops_when_expanded_metrics_exist(monkeypatch):
+    levels = {
+        "CITY": {
+            "available": True,
+            "row_count": 20,
+            "geography_count": 4,
+            "country_prefixes": ["ES", "IE", "PT"],
+            "indicator_ids": [
+                "city_population",
+                "city_median_age",
+            ],
+            "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+            "geo_level": "CITY",
+        }
+    }
+    monkeypatch.setattr(
+        module,
+        "subnational_evidence_by_level_status",
+        lambda: levels,
+    )
+
+    class UnexpectedClient:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("GISCO should not be queried when expanded city evidence exists")
+
+    monkeypatch.setattr(module.httpx, "Client", UnexpectedClient)
+
+    result = module.ensure_city_urban_audit_evidence()
+
+    assert result["status"] == "available"
+    assert result["action"] == "none"
+
+
+def test_city_urban_audit_repairs_population_only_store(monkeypatch):
+    statuses = iter([
+        {
+            "CITY": {
+                "available": True,
+                "row_count": 3,
+                "geography_count": 3,
+                "country_prefixes": ["ES", "IE", "PT"],
+                "indicator_ids": ["city_population"],
+                "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+                "geo_level": "CITY",
+            }
+        },
+        {
+            "CITY": {
+                "available": True,
+                "row_count": 12,
+                "geography_count": 3,
+                "country_prefixes": ["ES", "IE", "PT"],
+                "indicator_ids": [
+                    "city_population",
+                    "city_median_age",
+                    "city_public_transport_commute_share",
+                ],
+                "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+                "geo_level": "CITY",
+            }
+        },
+    ])
+    monkeypatch.setattr(
+        module,
+        "subnational_evidence_by_level_status",
+        lambda: next(statuses),
+    )
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "id": "ES013C",
+                        "properties": {
+                            "URAU_CODE": "ES013C",
+                            "NAME_LATN": "Oviedo",
+                        },
+                    },
+                    {
+                        "id": "PT001C",
+                        "properties": {
+                            "URAU_CODE": "PT001C",
+                            "NAME_LATN": "Lisboa",
+                        },
+                    },
+                    {
+                        "id": "IE001C",
+                        "properties": {
+                            "URAU_CODE": "IE001C",
+                            "NAME_LATN": "Dublin",
+                        },
+                    },
+                    {
+                        "id": "BG001C",
+                        "properties": {
+                            "URAU_CODE": "BG001C",
+                            "NAME_LATN": "Sofia",
+                        },
+                    },
+                ],
+            }
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, url):
+            assert url == module.CITIES_URL
+            return FakeResponse()
+
+    monkeypatch.setattr(module.httpx, "Client", FakeClient)
+
+    seen = {}
+    monkeypatch.setattr(
+        module,
+        "sync_city_evidence_codes",
+        lambda codes, refresh_pm25=False: seen.setdefault(
+            "sync",
+            {
+                "codes": list(codes),
+                "refresh_pm25": refresh_pm25,
+                "city_code_count": len(codes),
+                "cities_with_data": len(codes),
+                "rows_upserted": len(codes) * 3,
+                "pm25_refreshed": 0,
+                "dataset_failures": [],
+                "results": [],
+            },
+        ),
+    )
+
+    result = module.ensure_city_urban_audit_evidence()
+
+    assert seen["sync"]["codes"] == ["ES013C", "IE001C", "PT001C"]
+    assert seen["sync"]["refresh_pm25"] is False
+    assert result["status"] == "available"
+    assert result["action"] == "repaired"
+    assert result["city_count_requested"] == 3
