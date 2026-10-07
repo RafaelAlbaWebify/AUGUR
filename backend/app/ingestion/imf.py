@@ -98,7 +98,22 @@ class IMFAdapter:
     def normalize(self, country_iso3: str, config: dict, payload: dict) -> list[dict]:
         source_indicator = config["source_indicator"]
         values = payload.get("values", {})
-        indicator_values = values.get(source_indicator, {})
+
+        indicator_values = values.get(source_indicator)
+        if not isinstance(indicator_values, dict):
+            qualified_keys = [
+                key
+                for key in values
+                if (
+                    key == source_indicator
+                    or key.startswith(f"{source_indicator}@")
+                )
+            ]
+            if len(qualified_keys) == 1:
+                indicator_values = values[qualified_keys[0]]
+            else:
+                indicator_values = {}
+
         country_values = indicator_values.get(country_iso3.upper(), {})
 
         if not isinstance(country_values, dict):
