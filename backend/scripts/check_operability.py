@@ -126,7 +126,9 @@ def main() -> int:
             f"rows={status['row_count']} "
             f"geographies={status['geography_count']} "
             f"countries={status['country_prefixes']} "
-            f"indicators={status['indicator_ids']}"
+            f"indicators={status['indicator_ids']} "
+            f"fresh={status.get('fresh')} "
+            f"age_days={status.get('age_days')}"
         )
 
     if result["blockers"]:
