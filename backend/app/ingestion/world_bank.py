@@ -225,6 +225,192 @@ class WorldBankAdapter:
         assert last_error is not None
         raise last_error
 
+    def fetch_indicator_many(
+        self,
+        country_iso3s: list[str],
+        source_indicator: str,
+        start_year: int = 2000,
+        end_year: int = 2026,
+    ) -> tuple[dict, list[dict]]:
+        countries = sorted({
+            code.upper()
+            for code in country_iso3s
+            if code
+        })
+        if not countries:
+            return {}, []
+
+        url = (
+            f"{BASE_URL}/country/{';'.join(countries)}"
+            f"/indicator/{source_indicator}"
+        )
+        params = {
+            "format": "json",
+            "date": f"{start_year}:{end_year}",
+            "per_page": 20000,
+        }
+
+        last_error: Exception | None = None
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                response = self.client.get(url, params=params)
+                response.raise_for_status()
+                payload = response.json()
+
+                if not isinstance(payload, list) or len(payload) < 2:
+                    raise ValueError(
+                        f"Unexpected World Bank batch response for {source_indicator}"
+                    )
+
+                metadata = payload[0] or {}
+                observations = payload[1] or []
+                pages = int(metadata.get("pages") or 1)
+
+                for page in range(2, pages + 1):
+                    page_response = self.client.get(
+                        url,
+                        params={**params, "page": page},
+                    )
+                    page_response.raise_for_status()
+                    page_payload = page_response.json()
+                    if (
+                        isinstance(page_payload, list)
+                        and len(page_payload) >= 2
+                        and isinstance(page_payload[1], list)
+                    ):
+                        observations.extend(page_payload[1])
+
+                return metadata, observations
+
+            except (
+                httpx.TimeoutException,
+                httpx.TransportError,
+                httpx.HTTPStatusError,
+            ) as exc:
+                last_error = exc
+                if attempt >= self.max_retries:
+                    break
+                delay_seconds = 2 ** (attempt - 1)
+                print(
+                    f"   retry {attempt}/{self.max_retries - 1} "
+                    f"after {type(exc).__name__} "
+                    f"(waiting {delay_seconds}s)"
+                )
+                time.sleep(delay_seconds)
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError("World Bank batch request failed without an exception")
+
+    def normalize_many(
+        self,
+        country_iso3s: list[str],
+        indicator: dict,
+        metadata: dict,
+        observations: list[dict],
+    ) -> list[dict]:
+        targets = {
+            code.upper()
+            for code in country_iso3s
+        }
+        grouped: dict[str, list[dict]] = {
+            code: []
+            for code in targets
+        }
+
+        for observation in observations:
+            code = str(
+                observation.get("countryiso3code")
+                or observation.get("country", {}).get("id")
+                or ""
+            ).upper()
+            if code in grouped:
+                grouped[code].append(observation)
+
+        rows: list[dict] = []
+        for code, country_observations in grouped.items():
+            rows.extend(
+                self.normalize(
+                    code,
+                    indicator,
+                    metadata,
+                    country_observations,
+                )
+            )
+        return rows
+
+    def sync_countries(
+        self,
+        country_iso3s: list[str],
+        start_year: int = 2000,
+        end_year: int = 2026,
+    ) -> dict:
+        countries = sorted({
+            code.upper()
+            for code in country_iso3s
+            if code
+        })
+        indicators = world_bank_indicators()
+        total_rows = 0
+        details = []
+        failures = []
+
+        for index, indicator in enumerate(indicators, start=1):
+            print(
+                f"[{index}/{len(indicators)}] "
+                f"{indicator['indicator_id']} "
+                f"({indicator['source_indicator']}) · "
+                f"{len(countries)} countries"
+            )
+            try:
+                metadata, observations = self.fetch_indicator_many(
+                    countries,
+                    indicator["source_indicator"],
+                    start_year,
+                    end_year,
+                )
+                rows = self.normalize_many(
+                    countries,
+                    indicator,
+                    metadata,
+                    observations,
+                )
+                inserted = upsert_observations(rows)
+                total_rows += inserted
+                covered = len({
+                    row["country_iso3"]
+                    for row in rows
+                })
+                details.append({
+                    "indicator_id": indicator["indicator_id"],
+                    "source_indicator": indicator["source_indicator"],
+                    "rows": inserted,
+                    "countries_with_data": covered,
+                    "source_updated_at": metadata.get("lastupdated"),
+                })
+                print(
+                    f"   ok: {inserted} rows · "
+                    f"{covered}/{len(countries)} countries"
+                )
+            except Exception as exc:
+                failures.append({
+                    "indicator_id": indicator["indicator_id"],
+                    "source_indicator": indicator["source_indicator"],
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                })
+                print(f"   failed: {type(exc).__name__}: {exc}")
+
+        return {
+            "countries": countries,
+            "country_count": len(countries),
+            "source": SOURCE_ID,
+            "rows": total_rows,
+            "indicators": details,
+            "failures": failures,
+            "complete": len(failures) == 0,
+        }
+
     def normalize(
         self,
         country_iso3: str,
