@@ -115,8 +115,10 @@ Remaining:
 Current state:
 
 - interactive regional selection is now local-only: it never waits for Eurostat to repair missing series;
-- regional evidence is cached in backend and revisited regions are cached in the overview client;
+- interactive city selection is also local-only: missing Urban Audit / EEA data are repaired during explicit sync rather than on click;
+- regional and city evidence are cached in backend/client for repeat selections;
 - interactive regional cards use local historical series; region selection does not fetch history from external providers;
+- explicit city refresh now owns the EEA PM2.5 network update, preventing the previous interaction-time fetch from becoming an evidence-refresh gap;
 
 - core/subnational evidence syncs automated;
 - OJA and CLSSI repair automated;
