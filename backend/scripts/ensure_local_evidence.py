@@ -120,8 +120,6 @@ def ensure_clssi_evidence() -> dict:
             "after": before,
         }
 
-    from app.core.config import settings
-
     path = settings.data_dir / "cache" / "cedefop_clssi_2026.xlsx"
     download = download_clssi_workbook(path)
     rows = parse_clssi_workbook(path)
