@@ -296,6 +296,102 @@ def initialize_analytics_schema() -> None:
         con.close()
 
 
+def upsert_country(country: dict) -> None:
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.execute(
+            """
+            INSERT OR REPLACE INTO countries
+            (
+                iso2, iso3, name, region, subregion, currency,
+                eu_member, eurozone_member, oecd_member
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                country.get("iso2"),
+                country["iso3"].upper(),
+                country["name"],
+                country.get("region"),
+                country.get("subregion"),
+                country.get("currency"),
+                bool(country.get("eu_member")),
+                bool(country.get("eurozone_member")),
+                bool(country.get("oecd_member")),
+            ],
+        )
+    finally:
+        con.close()
+
+
+def country_record(country_iso3: str) -> dict | None:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT iso2, iso3, name, region, subregion, currency,
+                   eu_member, eurozone_member, oecd_member
+            FROM countries
+            WHERE iso3 = ?
+            LIMIT 1
+            """,
+            [country_iso3.upper()],
+        )
+        row = result.fetchone()
+        if row is None:
+            return None
+        columns = [column[0] for column in result.description]
+        return dict(zip(columns, row))
+    finally:
+        con.close()
+
+
+def country_analysis_coverage() -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT
+                c.iso2,
+                c.iso3,
+                c.name,
+                c.region,
+                c.subregion,
+                c.currency,
+                c.eu_member,
+                c.eurozone_member,
+                c.oecd_member,
+                COUNT(DISTINCT o.indicator_id) FILTER (
+                    WHERE o.observation_type = 'observed'
+                ) AS observed_indicator_count,
+                COUNT(DISTINCT o.source_id) FILTER (
+                    WHERE o.observation_type = 'observed'
+                ) AS observed_source_count,
+                MAX(o.period) FILTER (
+                    WHERE o.observation_type = 'observed'
+                ) AS latest_observed_period
+            FROM countries c
+            LEFT JOIN observations o
+              ON o.country_iso3 = c.iso3
+            GROUP BY
+                c.iso2, c.iso3, c.name, c.region, c.subregion, c.currency,
+                c.eu_member, c.eurozone_member, c.oecd_member
+            ORDER BY c.name
+            """
+        )
+        columns = [column[0] for column in result.description]
+        rows = [dict(zip(columns, row)) for row in result.fetchall()]
+        for row in rows:
+            row["analysis_status"] = (
+                "available"
+                if row["observed_indicator_count"] > 0
+                else "registered_no_evidence"
+            )
+        return rows
+    finally:
+        con.close()
+
+
 def upsert_observations(rows: list[dict]) -> int:
     if not rows:
         return 0
