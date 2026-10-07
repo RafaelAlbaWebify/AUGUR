@@ -10,6 +10,7 @@ from app.db.analytics import (
     subnational_evidence_status,
     subnational_evidence_by_level_status,
     regional_sector_employment_status,
+    environmental_health_burden_status,
 )
 from app.esco_store import esco_status
 from app.providers import providers_for_country
@@ -75,6 +76,21 @@ def operability_status() -> dict:
             and age_days <= SYNC_FRESHNESS_MAX_DAYS
         )
     regional_sector = regional_sector_employment_status()
+    environmental_health = environmental_health_burden_status()
+    environmental_health_age_days = _age_days(
+        environmental_health.get("latest_retrieved_at"),
+        now,
+    )
+    environmental_health["age_days"] = (
+        round(environmental_health_age_days, 2)
+        if environmental_health_age_days is not None
+        else None
+    )
+    environmental_health["fresh"] = (
+        bool(environmental_health.get("available"))
+        and environmental_health_age_days is not None
+        and environmental_health_age_days <= SYNC_FRESHNESS_MAX_DAYS
+    )
     countries = evidence["countries"]
 
     provider_coverage = {}
@@ -236,6 +252,7 @@ def operability_status() -> dict:
         "subnational_evidence": subnational,
         "subnational_evidence_by_level": subnational_levels,
         "regional_sector_evidence": regional_sector,
+        "environmental_health_evidence": environmental_health,
         "provider_coverage": provider_coverage,
         "blockers": blockers,
         "evidence": evidence,
@@ -255,6 +272,7 @@ def operability_status() -> dict:
             "NUTS2 sector-employment evidence describes regional economic structure, not vacancies or hiring probability.",
             "Subnational operability reports NUTS2, NUTS3 and city evidence separately; absence at one level is not silently inferred from another.",
             "Subnational freshness is reported per geographic level and remains informational for national-analysis readiness.",
+            "EEA PM2.5 attributable health-burden freshness is reported separately and remains optional for national-analysis readiness.",
             "TTV calibration metrics are descriptive until an external calibration protocol and acceptance criteria are approved.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
