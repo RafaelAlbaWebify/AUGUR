@@ -1,3 +1,35 @@
+VALIDATION_COUNTRY_ISO3 = ("ESP", "PRT", "IRL")
+
+EU_MEMBER_ISO3 = {
+    "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN",
+    "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX",
+    "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE",
+}
+
+EUROZONE_MEMBER_ISO3 = {
+    "AUT", "BEL", "HRV", "CYP", "EST", "FIN", "FRA", "DEU", "GRC",
+    "IRL", "ITA", "LVA", "LTU", "LUX", "MLT", "NLD", "PRT", "SVK",
+    "SVN", "ESP",
+}
+
+OECD_MEMBER_ISO3 = {
+    "AUS", "AUT", "BEL", "CAN", "CHL", "COL", "CRI", "CZE", "DNK",
+    "EST", "FIN", "FRA", "DEU", "GRC", "HUN", "ISL", "IRL", "ISR",
+    "ITA", "JPN", "KOR", "LVA", "LTU", "LUX", "MEX", "NLD", "NZL",
+    "NOR", "POL", "PRT", "SVK", "SVN", "ESP", "SWE", "CHE", "TUR",
+    "GBR", "USA",
+}
+
+
+def country_membership_flags(country_iso3: str) -> dict:
+    code = country_iso3.upper()
+    return {
+        "eu_member": code in EU_MEMBER_ISO3,
+        "eurozone_member": code in EUROZONE_MEMBER_ISO3,
+        "oecd_member": code in OECD_MEMBER_ISO3,
+    }
+
+
 COUNTRIES = [
     {
         "iso2": "ES",
