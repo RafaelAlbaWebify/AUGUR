@@ -122,6 +122,7 @@ type RegionalIndicator = {
   dataset_id: string
   source_id: string
   reason?: string
+  category?: string
   history?: Array<{ period: number; value: number }>
 }
 
@@ -588,21 +589,50 @@ export default function OverviewPage({
                           : 'City selected'}
                   </strong>
                 </div>
-                {cityEvidenceState === 'ready' && cityEvidence?.indicators.map((indicator) => (
-                  <article key={indicator.indicator_id} className="geoEvidenceMetric">
-                    <span>{indicator.name}</span>
-                    <strong>
-                      {indicator.status === 'available' && indicator.value != null
-                        ? formatRegionalValue(indicator.value, indicator.unit)
-                        : '—'}
-                    </strong>
-                    <small>
-                      {indicator.status === 'available'
-                        ? `${indicator.period} · Eurostat · ${indicator.dataset_id}`
-                        : 'No comparable city observation'}
-                    </small>
-                  </article>
-                ))}
+                {cityEvidenceState === 'ready' && cityEvidence ? (
+                  <div className="cityEvidenceDomainStack">
+                    {[
+                      ['demography', 'Demography'],
+                      ['mobility', 'Mobility'],
+                      ['tourism', 'Tourism'],
+                      ['environment', 'Environment'],
+                    ].map(([category, label]) => {
+                      const indicators = cityEvidence.indicators.filter(
+                        (indicator) => (indicator.category ?? 'other') === category,
+                      )
+                      if (!indicators.length) return null
+
+                      return (
+                        <section key={category} className="cityEvidenceDomain">
+                          <div className="cityEvidenceDomainHeader">
+                            <strong>{label}</strong>
+                            <span>
+                              {indicators.filter((indicator) => indicator.status === 'available').length}
+                              /{indicators.length} available
+                            </span>
+                          </div>
+                          <div className="geoEvidenceMetricGrid">
+                            {indicators.map((indicator) => (
+                              <article key={indicator.indicator_id} className="geoEvidenceMetric">
+                                <span>{indicator.name}</span>
+                                <strong>
+                                  {indicator.status === 'available' && indicator.value != null
+                                    ? formatRegionalValue(indicator.value, indicator.unit)
+                                    : '—'}
+                                </strong>
+                                <small>
+                                  {indicator.status === 'available'
+                                    ? `${indicator.period} · ${indicator.source_id} · ${indicator.dataset_id}`
+                                    : 'Official city observation unavailable'}
+                                </small>
+                              </article>
+                            ))}
+                          </div>
+                        </section>
+                      )
+                    })}
+                  </div>
+                ) : null}
                 <p className="geoEvidenceScope">
                   Urban Audit cities · population from Eurostat · observed air quality from validated EEA monitoring where available.
                 </p>
