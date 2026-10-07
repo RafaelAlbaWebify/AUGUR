@@ -101,6 +101,23 @@ if (-not (Test-Path (Join-Path $Frontend "node_modules"))) {
     throw "Frontend dependencies not found. Run setup-phase0.ps1 first."
 }
 
+Write-Host "Checking required local evidence..."
+Push-Location $Backend
+try {
+    & $Python -m scripts.ensure_local_evidence
+    $EvidenceCode = $LASTEXITCODE
+}
+finally {
+    Pop-Location
+}
+
+if ($EvidenceCode -eq 2) {
+    Write-Warning "Some optional local evidence could not be repaired automatically. AUGUR will start and report the remaining evidence gap."
+}
+elseif ($EvidenceCode -ne 0) {
+    throw "Automatic local evidence check failed with exit code $EvidenceCode."
+}
+
 $BackendListeners = @(Get-PortListeners -Port $BackendPort)
 $ReuseBackend = $false
 
