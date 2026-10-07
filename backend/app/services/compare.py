@@ -7,6 +7,7 @@ from app.services.country import country_metadata
 def build_comparison(
     country_iso3s: list[str],
     snapshots: dict[str, list[dict]],
+    country_names: dict[str, str] | None = None,
 ) -> dict:
     indicator_rows: dict[str, dict] = {}
 
@@ -29,10 +30,11 @@ def build_comparison(
                 "source_id": item["source_id"],
             }
 
+    names = country_names or {}
     countries = [
         {
             "iso3": code,
-            "name": country_metadata(code)["name"],
+            "name": names.get(code, code),
         }
         for code in country_iso3s
     ]
@@ -61,4 +63,12 @@ def country_comparison(country_iso3s: list[str]) -> dict:
         code: latest_observations(code)
         for code in normalized
     }
-    return build_comparison(normalized, snapshots)
+    country_names = {
+        code: country_metadata(code)["name"]
+        for code in normalized
+    }
+    return build_comparison(
+        normalized,
+        snapshots,
+        country_names=country_names,
+    )
