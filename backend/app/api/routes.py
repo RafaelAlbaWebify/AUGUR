@@ -44,6 +44,8 @@ router = APIRouter()
 
 
 class TTVCalibrationCompleteRequest(BaseModel):
+    achieved_cefr: str
+    evidence_type: str
     observed_at: str | None = None
 
 
@@ -495,6 +497,8 @@ def ttv_calibration_complete_post(
     try:
         return complete_calibration_observation(
             case_id,
+            achieved_cefr=payload.achieved_cefr,
+            evidence_type=payload.evidence_type,
             observed_at=payload.observed_at,
         )
     except ValueError as exc:
