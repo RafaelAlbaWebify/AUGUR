@@ -64,6 +64,16 @@ def main() -> int:
         f"full_occupation_coverage={career_market['full_occupation_coverage']}"
     )
 
+    live_postings = result["live_postings_provider"]
+    print(
+        "live_postings_provider: "
+        f"configured={live_postings['configured']} "
+        f"provider={live_postings['provider_id']} "
+        f"contract={live_postings['contract_version']} "
+        f"blocking={live_postings['blocking']} "
+        f"reason={live_postings['reason']}"
+    )
+
     occupation_outlook = result["occupation_outlook_evidence"]
     print(
         "occupation_outlook_evidence: "
