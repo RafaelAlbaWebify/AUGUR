@@ -81,3 +81,61 @@ def test_sync_density_writes_normalized_rows(monkeypatch):
         "New South Wales",
         "Victoria",
     }
+
+
+POPULATION_CSV = """STRUCTURE,STRUCTURE_ID,STRUCTURE_NAME,ACTION,FREQ,Frequency of observation,TERRITORIAL_LEVEL,Territorial level,REF_AREA,Reference area,TERRITORIAL_TYPE,Territorial typology,MEASURE,Measure,AGE,Age,SEX,Sex,UNIT_MEASURE,Unit of measure,TIME_PERIOD,Time period,OBS_VALUE,Observation value,COUNTRY,Country,OBS_STATUS,Observation status,UNIT_MULT,Unit multiplier,DECIMALS,Decimals
+dataflow,OECD.CFE.EDS:DSD_REG_DEMO@DF_POP_BROAD(2.4),Population by broad age groups - Regions,I,A,Annual,TL2,Large region (TL2),AU1,New South Wales,,,POP,Population,_T,Total,_T,Total,PS,Persons,2024,2024,8534000,8534000,AUS,Australia,A,Normal value,0,Units,0,Zero
+dataflow,OECD.CFE.EDS:DSD_REG_DEMO@DF_POP_BROAD(2.4),Population by broad age groups - Regions,I,A,Annual,TL2,Large region (TL2),AU2,Victoria,,,POP,Population,_T,Total,_T,Total,PS,Persons,2024,2024,6959000,6959000,AUS,Australia,A,Normal value,0,Units,0,Zero
+dataflow,OECD.CFE.EDS:DSD_REG_DEMO@DF_POP_BROAD(2.4),Population by broad age groups - Regions,I,A,Annual,TL2,Large region (TL2),AU1,New South Wales,,,POP,Population,Y0T14,0-14,_T,Total,PS,Persons,2024,2024,1600000,1600000,AUS,Australia,A,Normal value,0,Units,0,Zero
+"""
+
+
+def test_normalize_population_keeps_total_population_only():
+    adapter = OECDRegionalAdapter(client=None)
+    try:
+        rows = adapter.normalize_population(
+            POPULATION_CSV,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["geo_code"] for row in rows} == {"AU1", "AU2"}
+    assert {row["indicator_id"] for row in rows} == {"regional_population"}
+    assert {row["unit"] for row in rows} == {"persons"}
+    assert {row["geo_name"] for row in rows} == {
+        "New South Wales",
+        "Victoria",
+    }
+
+
+def test_sync_population_writes_oecd_tl2_rows(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDRegionalAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_population",
+        lambda **kwargs: POPULATION_CSV,
+    )
+
+    try:
+        result = adapter.sync_population(
+            allowed_country_iso3={"AUS"},
+            start_year=2024,
+            end_year=2024,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 2
+    assert result["country_count"] == 1
+    assert result["geography_count"] == 2
+    assert result["geo_levels"] == ["tl2"]
+    assert {row["value"] for row in stored} == {8534000.0, 6959000.0}
