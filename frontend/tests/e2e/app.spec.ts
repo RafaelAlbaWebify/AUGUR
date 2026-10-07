@@ -223,6 +223,34 @@ async function mockApi(page: Page) {
       return
     }
 
+    if (route.request().url().includes('LEVL_3')) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/geo+json',
+        body: JSON.stringify({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: { NUTS_ID: 'ES120', NAME_LATN: 'Asturias', NUTS_NAME: 'Asturias', CNTR_CODE: 'ES', LEVL_CODE: 3 },
+              geometry: { type: 'Polygon', coordinates: [[[-7.0, 42.7], [-4.5, 42.7], [-4.5, 43.7], [-7.0, 43.7], [-7.0, 42.7]]] },
+            },
+            {
+              type: 'Feature',
+              properties: { NUTS_ID: 'PT170', NAME_LATN: 'Área Metropolitana de Lisboa', NUTS_NAME: 'Área Metropolitana de Lisboa', CNTR_CODE: 'PT', LEVL_CODE: 3 },
+              geometry: { type: 'Polygon', coordinates: [[[-9.6, 38.4], [-8.7, 38.4], [-8.7, 39.1], [-9.6, 39.1], [-9.6, 38.4]]] },
+            },
+            {
+              type: 'Feature',
+              properties: { NUTS_ID: 'IE061', NAME_LATN: 'Dublin', NUTS_NAME: 'Dublin', CNTR_CODE: 'IE', LEVL_CODE: 3 },
+              geometry: { type: 'Polygon', coordinates: [[[-6.6, 53.1], [-6.0, 53.1], [-6.0, 53.6], [-6.6, 53.6], [-6.6, 53.1]]] },
+            },
+          ],
+        }),
+      })
+      return
+    }
+
     await route.fulfill({
       status: 200,
       contentType: 'application/geo+json',
@@ -333,7 +361,22 @@ async function mockApi(page: Page) {
       }
     } else if (/^\/api\/regions\/[A-Z0-9]+\/evidence$/.test(path)) {
       const geoCode = path.split('/')[3]
-      body = {
+      const nuts3 = geoCode.length === 5
+      body = nuts3 ? {
+        geo_code: geoCode,
+        geo_level: 'nuts3',
+        source: 'Eurostat regional statistics',
+        indicator_count: 2,
+        available_count: 2,
+        complete: true,
+        indicators: [
+          { indicator_id: 'regional_intentional_homicide_rate', name: 'Police-recorded intentional homicide', status: 'available', period: 2024, value: 0.69, unit: 'per_100k_people', dataset_id: 'crim_gen_reg', source_id: 'EUROSTAT' },
+          { indicator_id: 'regional_robbery_rate', name: 'Police-recorded robbery', status: 'available', period: 2024, value: 34.07, unit: 'per_100k_people', dataset_id: 'crim_gen_reg', source_id: 'EUROSTAT' },
+        ],
+        notes: [
+          'NUTS3 police-recorded crime is descriptive safety context and can be affected by legal, reporting and recording differences.',
+        ],
+      } : {
         geo_code: geoCode,
         geo_level: 'nuts2',
         source: 'Eurostat regional statistics',
@@ -1672,6 +1715,29 @@ test('map exposes selectable Urban Audit cities only at high zoom', async ({ pag
   await expect(cityEvidence.getByText('3,420,000')).toBeVisible()
   await expect(cityEvidence.getByText('9.0 µg/m³')).toBeVisible()
   await expect(cityEvidence.getByText(/observed air quality from validated EEA/i)).toBeVisible()
+})
+
+test('Overview reveals NUTS 3 safety context', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  const map = page.getByTestId('regional-map')
+  await expect(map).toBeVisible()
+
+  for (let i = 0; i < 10; i += 1) {
+    const zoom = Number(await map.getAttribute('data-map-zoom'))
+    if (zoom >= 7) break
+    await map.locator('.leaflet-control-zoom-in').click()
+  }
+
+  const nuts3 = map.locator('.nuts3Boundary').first()
+  await expect(nuts3).toBeVisible()
+  await nuts3.click()
+
+  const evidence = page.getByRole('region', { name: /Regional evidence/i })
+  await expect(evidence.getByText('Police-recorded intentional homicide')).toBeVisible()
+  await expect(evidence.getByText('0.7 /100k')).toBeVisible()
+  await expect(evidence.getByText('Police-recorded robbery')).toBeVisible()
+  await expect(evidence.getByText('34.1 /100k')).toBeVisible()
 })
 
 test('unsaved profile edits survive target-country switching', async ({ page }) => {
