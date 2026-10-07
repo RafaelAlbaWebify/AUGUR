@@ -91,6 +91,8 @@ def test_ireland_ict_maps_to_shortage_signal(monkeypatch):
     assert result["source"]["label"].startswith("EURES")
     assert result["evidence_complete"] is False
     assert result["skill_match"]["status"] == "occupation_not_mapped_to_esco"
+    assert result["live_postings_evidence"]["status"] == "provider_not_configured"
+    assert result["live_postings_evidence"]["provider_id"] is None
 
 
 def test_portugal_ict_maps_to_shortage_signal(monkeypatch):
