@@ -13,7 +13,7 @@ DATASET_VERSION = "2.4"
 BASE_URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_REG_DEMO@DF_DENSITY,2.4/"
-    "A.TL2..DE1+DE2....PS_KM2"
+    "A.TL2.AU1+AU2.....PS_KM2"
 )
 
 PARAMS = {
