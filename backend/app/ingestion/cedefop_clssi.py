@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -20,6 +21,7 @@ DOWNLOAD_URL = (
 DOWNLOAD_LABEL = "2026 Cedefop Labour Skills Shortage Index (CLSSI) dataset"
 CATALOG_VERSION = "2024"
 RELEASE_VERSION = "2026"
+FORECAST_HORIZON = 2035
 TARGET_SHEET_COUNTRIES = {
     "ES": "ESP",
     "PT": "PRT",
@@ -348,3 +350,174 @@ def inspect_workbook(
             "AUGUR will not infer CLSSI column meanings before a real workbook inspection.",
         ],
     }
+
+
+
+def _as_float(value: object, field_name: str) -> float:
+    if value in (None, ""):
+        raise ValueError(f"{field_name} is missing")
+    try:
+        return float(value)
+    except (TypeError, ValueError) as exc:
+        raise ValueError(
+            f"{field_name} must be numeric: {value!r}"
+        ) from exc
+
+
+def _as_score(value: object, field_name: str) -> int:
+    number = _as_float(value, field_name)
+    rounded = int(round(number))
+    if abs(number - rounded) > 1e-9 or rounded not in {1, 2, 3, 4}:
+        raise ValueError(
+            f"{field_name} must be an integer shortage score 1-4: {value!r}"
+        )
+    return rounded
+
+
+def parse_workbook(
+    path: Path,
+    *,
+    retrieved_at: datetime | None = None,
+) -> list[dict]:
+    sheets = workbook_preview(
+        path,
+        max_rows=500,
+    )
+    retrieved = retrieved_at or datetime.now(timezone.utc)
+    rows: list[dict] = []
+    seen: set[tuple[str, str]] = set()
+
+    for sheet in sheets:
+        sheet_name = str(sheet["sheet"]).strip().upper()
+        country_iso3 = TARGET_SHEET_COUNTRIES.get(sheet_name)
+        if country_iso3 is None:
+            continue
+
+        schema = detect_sheet_schema(
+            sheet["rows"],
+            sheet_name=sheet_name,
+        )
+        if schema["status"] != "candidate":
+            raise ValueError(
+                f"CLSSI sheet {sheet_name} schema is not recognised safely"
+            )
+
+        matches = schema["matches"]
+        required = {
+            "occupation",
+            "index",
+            "lsi_comp",
+            "lsi1",
+            "lsi2",
+            "lsi3",
+        }
+        missing = required - set(matches)
+        if missing:
+            raise ValueError(
+                f"CLSSI sheet {sheet_name} missing columns: {sorted(missing)}"
+            )
+
+        header_index = int(schema["header_row_index"])
+        headers = schema["headers"]
+        main_group_index = None
+        for index, header in enumerate(headers):
+            if _normalise_header(header) == "main occupation group":
+                main_group_index = index
+                break
+
+        for row_number, values in enumerate(
+            sheet["rows"][header_index + 1 :],
+            start=header_index + 2,
+        ):
+            occupation_label = str(
+                values[matches["occupation"]]
+                if matches["occupation"] < len(values)
+                else ""
+            ).strip()
+            if not occupation_label:
+                continue
+
+            isco08 = resolve_isco2_label(occupation_label)
+            if isco08 is None:
+                raise ValueError(
+                    f"Unknown CLSSI ISCO-2 label in {sheet_name} row "
+                    f"{row_number}: {occupation_label!r}"
+                )
+
+            shortage_index = _as_float(
+                values[matches["index"]],
+                "Labour Shortage Index",
+            )
+            growth = _as_score(values[matches["lsi1"]], "LSI1")
+            replacement = _as_score(values[matches["lsi2"]], "LSI2")
+            imbalance = _as_score(values[matches["lsi3"]], "LSI3")
+            expected = (growth + replacement + imbalance) / 3.0
+
+            if not 1.0 <= shortage_index <= 4.0:
+                raise ValueError(
+                    f"CLSSI index outside 1-4 in {sheet_name} row "
+                    f"{row_number}: {shortage_index}"
+                )
+            if abs(shortage_index - expected) > 1e-5:
+                raise ValueError(
+                    f"CLSSI component average mismatch in {sheet_name} "
+                    f"row {row_number}: index={shortage_index} "
+                    f"components={growth}-{replacement}-{imbalance}"
+                )
+
+            key = (country_iso3, isco08)
+            if key in seen:
+                raise ValueError(
+                    f"Duplicate CLSSI country/ISCO row: {country_iso3}/{isco08}"
+                )
+            seen.add(key)
+
+            main_group = (
+                str(values[main_group_index]).strip()
+                if main_group_index is not None
+                and main_group_index < len(values)
+                and values[main_group_index] not in (None, "")
+                else None
+            )
+
+            component_code = str(
+                values[matches["lsi_comp"]]
+            ).strip()
+            canonical_component = (
+                f"{growth}-{replacement}-{imbalance}"
+            )
+            if component_code and component_code != canonical_component:
+                raise ValueError(
+                    f"CLSSI component code mismatch in {sheet_name} row "
+                    f"{row_number}: {component_code!r} != "
+                    f"{canonical_component!r}"
+                )
+
+            rows.append({
+                "country_iso3": country_iso3,
+                "horizon": FORECAST_HORIZON,
+                "isco08": isco08,
+                "occupation_label": occupation_label,
+                "main_occupation_group": main_group,
+                "shortage_index": shortage_index,
+                "component_code": canonical_component,
+                "employment_growth_score": growth,
+                "replacement_demand_score": replacement,
+                "imbalance_score": imbalance,
+                "source_id": SOURCE_ID,
+                "dataset_id": DATASET_ID,
+                "release_version": RELEASE_VERSION,
+                "retrieved_at": retrieved,
+                "source_updated_at": RELEASE_VERSION,
+            })
+
+    expected_countries = set(TARGET_SHEET_COUNTRIES.values())
+    parsed_countries = {row["country_iso3"] for row in rows}
+    if parsed_countries != expected_countries:
+        raise ValueError(
+            "CLSSI target-country coverage mismatch: "
+            f"expected={sorted(expected_countries)} "
+            f"parsed={sorted(parsed_countries)}"
+        )
+
+    return rows
