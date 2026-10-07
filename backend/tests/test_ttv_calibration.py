@@ -486,6 +486,8 @@ def test_opt_in_observation_lifecycle_creates_development_case(
 
     completed = module.complete_calibration_observation(
         started["case_id"],
+        achieved_cefr="B2",
+        evidence_type="official_exam",
         observed_at=observed_at.isoformat(),
     )
 
@@ -505,6 +507,8 @@ def test_opt_in_observation_lifecycle_creates_development_case(
         "weekly_study_hours": 10.0,
         "guided_hours_min": 100.0,
         "guided_hours_max": 250.0,
+        "achieved_cefr": "B2",
+        "outcome_evidence_type": "official_exam",
     }
     assert module.active_calibration_observation("IRL") is None
 
@@ -568,6 +572,8 @@ def test_observation_completion_rejects_date_before_start(
     with pytest.raises(ValueError, match="must not be before"):
         module.complete_calibration_observation(
             started["case_id"],
+            achieved_cefr="B2",
+            evidence_type="cefr_aligned_assessment",
             observed_at=(started_at - timedelta(days=1)).isoformat(),
         )
 
@@ -759,3 +765,34 @@ def test_calibration_context_normalizes_valid_cohort_fields():
         "guided_hours_min": 100.0,
         "guided_hours_max": 250.0,
     }
+
+
+
+@pytest.mark.parametrize(
+    "achieved_cefr,evidence_type,match",
+    [
+        ("B1", "official_exam", "achieved_cefr"),
+        ("", "official_exam", "achieved_cefr"),
+        ("B2", "", "evidence_type"),
+        ("B2", "self_report", "evidence_type"),
+    ],
+)
+def test_observation_completion_requires_documented_cefr_evidence(
+    monkeypatch,
+    tmp_path,
+    achieved_cefr,
+    evidence_type,
+    match,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+    started = module.start_calibration_observation(
+        "IRL",
+        _candidate_ttv_result(),
+    )
+
+    with pytest.raises(ValueError, match=match):
+        module.complete_calibration_observation(
+            started["case_id"],
+            achieved_cefr=achieved_cefr,
+            evidence_type=evidence_type,
+        )
