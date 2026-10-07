@@ -1148,6 +1148,7 @@ test('Decision Matrix shows preference index sensitivity and Pareto candidates',
           sensitivity: {
             method: 'joint_local_weight_neighborhood_plus_minus_1',
             total_possible_scenarios: 5,
+            cartesian_combination_count: 5,
             scenario_limit: 5000,
             truncated: false,
             dimension_count: 2,
