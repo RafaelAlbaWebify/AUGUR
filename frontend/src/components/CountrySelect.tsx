@@ -1,6 +1,7 @@
 import FlagIcon from './FlagIcon'
 
 type Country = {
+  iso2?: string
   iso3: string
   name: string
 }
@@ -20,9 +21,11 @@ export default function CountrySelect({
   ariaLabel,
   compact = false,
 }: CountrySelectProps) {
+  const selected = countries.find((country) => country.iso3 === value)
+
   return (
     <label className={compact ? 'countryPicker compact' : 'countryPicker'}>
-      <FlagIcon iso3={value} />
+      <FlagIcon iso3={value} iso2={selected?.iso2} />
       <select
         value={value}
         aria-label={ariaLabel}
