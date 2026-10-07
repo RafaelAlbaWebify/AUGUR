@@ -529,10 +529,12 @@ Current implementation status:
    - missing/contextual weighted evidence blocks the index instead of being imputed;
    - the index is relative to the current selected set and explicit weight profile and is never presented as a universal country ranking.
 4. **uncertainty/sensitivity analysis — PARTIAL / ACTIVE**
-   - one-at-a-time ±1 perturbation of explicit positive weights is active, bounded to the 0–5 weight scale;
+   - joint local ±1 perturbation of all explicit positive weights is active, bounded to the 0–5 weight scale;
+   - the engine evaluates the Cartesian local preference neighborhood, including simultaneous weight changes, and reports whether the neighborhood was exhaustive or capped;
+   - the current seven-dimension model has at most 2,187 local combinations, below AUGUR's 5,000-scenario safety cap;
    - per-country preference-fit score ranges are exposed;
-   - tested rank ranges, first-place scenario counts and a `rank_stable` / `preference_sensitive` label are exposed for the same tested perturbations;
-   - the Decision Matrix now displays this as tested preference robustness instead of claiming robustness is unavailable;
+   - tested rank ranges, first-place scenario counts and a `rank_stable` / `preference_sensitive` label are exposed for the same tested joint neighborhood;
+   - the Decision Matrix displays whether the tested neighborhood was exhaustive;
    - this measures preference-weight sensitivity only, not statistical uncertainty in source observations or the probability that a country is best;
    - probabilistic evidence-error propagation remains intentionally unimplemented until a defensible heterogeneous-source uncertainty model exists.
 5. **robust/Pareto choices — ACTIVE**
@@ -543,7 +545,8 @@ Current implementation status:
 P2 implementation boundary:
 - objective country evidence remains unchanged by preferences;
 - any weighted dimension without normalisable comparable evidence becomes an explicit blocker;
-- sensitivity ranges are preference-model robustness, not confidence intervals or statistical probability.
+- sensitivity ranges are local joint preference-model robustness, not confidence intervals or statistical probability;
+- if a future model exceeds the 5,000-scenario safety cap, the response must expose `truncated=true` rather than presenting partial exploration as exhaustive.
 
 ### P3 — commercial/live data if needed
 
