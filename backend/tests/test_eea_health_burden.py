@@ -61,3 +61,51 @@ def test_health_burden_inspector_is_read_only_metadata():
         "read-only" in note.lower()
         for note in result["notes"]
     )
+
+
+def _realistic_archive_bytes():
+    buffer = BytesIO()
+    with zipfile.ZipFile(buffer, "w") as archive:
+        archive.writestr(
+            f"{module.DATASET_VERSION}/{module.DATASET_VERSION}.csv",
+            (
+                "code,dimension,dimension_label,unit,unit_label,geo,geo_label,time,obs_value,obs_status\n"
+                "11_52,PMD,Premature deaths - Premature deaths,NR,Number,ES12,Principado de Asturias,2023,812,\n"
+                "11_52,YLL,Premature deaths - Years of life lost,NR,Number,ES120,Asturias,2023,9634,e\n"
+                "11_52,PMD,Premature deaths - Premature deaths,NR,Number,ES,Spain,2023,20000,\n"
+                "11_52,OTHER,Other metric,NR,Number,ES12,Principado de Asturias,2023,1,\n"
+                "11_52,PMD,Premature deaths - Premature deaths,NR,Number,PT11,Norte,2023,400,\n"
+            ),
+        )
+    return buffer.getvalue()
+
+
+def test_health_burden_parser_preserves_nuts_granularity_and_metadata():
+    rows = module.parse_eea_pm25_burden_archive(
+        _realistic_archive_bytes(),
+        country_prefixes={"ES"},
+    )
+
+    assert len(rows) == 2
+    nuts2 = next(row for row in rows if row["geo_code"] == "ES12")
+    nuts3 = next(row for row in rows if row["geo_code"] == "ES120")
+
+    assert nuts2["geo_level"] == "NUTS2"
+    assert nuts2["burden_type"] == "PMD"
+    assert nuts2["unit_code"] == "NR"
+    assert nuts2["value"] == 812.0
+    assert nuts2["dataset_version"] == module.DATASET_VERSION
+
+    assert nuts3["geo_level"] == "NUTS3"
+    assert nuts3["burden_type"] == "YLL"
+    assert nuts3["obs_status"] == "e"
+
+
+def test_health_burden_parser_excludes_national_and_other_country_rows():
+    rows = module.parse_eea_pm25_burden_archive(
+        _realistic_archive_bytes(),
+        country_prefixes={"ES"},
+    )
+
+    assert {row["geo_code"] for row in rows} == {"ES12", "ES120"}
+    assert {row["burden_type"] for row in rows} == {"PMD", "YLL"}
