@@ -24,6 +24,9 @@ POPULATION_BASE_URL = (
     "OECD.CFE.EDS,DSD_REG_DEMO@DF_POP_BROAD,2.4"
 )
 
+DENSITY_DEFAULT_KEY = "A.TL2+TL3......PS_KM2"
+POPULATION_DEFAULT_KEY = "A.TL2+TL3...POP._T._T."
+
 PARAMS = {
     "dimensionAtObservation": "AllDimensions",
     "format": "csvfilewithlabels",
@@ -72,7 +75,7 @@ class OECDRegionalAdapter:
         *,
         start_year: int = 2021,
         end_year: int | None = None,
-        key: str = "all",
+        key: str = DENSITY_DEFAULT_KEY,
     ) -> str:
         params = {
             **PARAMS,
@@ -125,7 +128,7 @@ class OECDRegionalAdapter:
         *,
         start_year: int = 2021,
         end_year: int | None = None,
-        key: str = "all",
+        key: str = POPULATION_DEFAULT_KEY,
     ) -> str:
         params = {
             **PARAMS,
@@ -309,7 +312,7 @@ class OECDRegionalAdapter:
         allowed_country_iso3: set[str] | None = None,
         start_year: int = 2021,
         end_year: int | None = None,
-        key: str = "all",
+        key: str = POPULATION_DEFAULT_KEY,
     ) -> dict:
         csv_text = self.fetch_population(
             start_year=start_year,
@@ -356,7 +359,7 @@ class OECDRegionalAdapter:
         allowed_country_iso3: set[str] | None = None,
         start_year: int = 2021,
         end_year: int | None = None,
-        key: str = "all",
+        key: str = DENSITY_DEFAULT_KEY,
     ) -> dict:
         csv_text = self.fetch_density(
             start_year=start_year,
