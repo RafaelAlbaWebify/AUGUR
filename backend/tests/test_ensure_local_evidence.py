@@ -541,3 +541,94 @@ def test_oja_imbalance_evidence_repairs_missing_store(monkeypatch, tmp_path):
     assert result["rows_parsed"] == 2
     assert result["rows_upserted"] == 2
     assert result["download"]["content_type"] == "text/csv"
+
+
+def test_nuts3_safety_repairs_only_missing_country_prefixes(monkeypatch):
+    statuses = iter([
+        {
+            "NUTS3": {
+                "available": True,
+                "row_count": 8,
+                "geography_count": 4,
+                "country_prefixes": ["ES", "PT"],
+                "indicator_ids": [
+                    "regional_intentional_homicide_rate",
+                    "regional_robbery_rate",
+                ],
+                "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+                "geo_level": "NUTS3",
+            }
+        },
+        {
+            "NUTS3": {
+                "available": True,
+                "row_count": 10,
+                "geography_count": 5,
+                "country_prefixes": ["ES", "IE", "PT"],
+                "indicator_ids": [
+                    "regional_intentional_homicide_rate",
+                    "regional_robbery_rate",
+                ],
+                "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+                "geo_level": "NUTS3",
+            }
+        },
+    ])
+    monkeypatch.setattr(
+        module,
+        "subnational_evidence_by_level_status",
+        lambda: next(statuses),
+    )
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "type": "FeatureCollection",
+                "features": [
+                    {"properties": {"NUTS_ID": "ES120", "CNTR_CODE": "ES"}},
+                    {"properties": {"NUTS_ID": "PT170", "CNTR_CODE": "PT"}},
+                    {"properties": {"NUTS_ID": "IE041", "CNTR_CODE": "IE"}},
+                    {"properties": {"NUTS_ID": "IE042", "CNTR_CODE": "IE"}},
+                ],
+            }
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, url):
+            return FakeResponse()
+
+    monkeypatch.setattr(module.httpx, "Client", FakeClient)
+
+    seen = {}
+    monkeypatch.setattr(
+        module,
+        "sync_regional_evidence_codes",
+        lambda codes: seen.setdefault(
+            "result",
+            {
+                "geo_code_count": len(codes),
+                "geographies_with_data": len(codes),
+                "rows_upserted": len(codes),
+                "results": [],
+                "codes": list(codes),
+            },
+        ),
+    )
+
+    result = module.ensure_nuts3_safety_evidence()
+
+    assert seen["result"]["codes"] == ["IE041", "IE042"]
+    assert result["requested_country_prefixes"] == ["IE"]
+    assert result["missing_country_prefixes_before"] == ["IE"]
+    assert result["action"] == "repaired"
