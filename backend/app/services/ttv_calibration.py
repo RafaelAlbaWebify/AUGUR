@@ -12,6 +12,7 @@ from app.core.config import settings
 
 
 CALIBRATION_SCHEMA_VERSION = "ttv-calibration-v1"
+CALIBRATION_EXCHANGE_VERSION = "ttv-development-exchange-v1"
 CALIBRATION_PROTOCOL_STATE = "definitions_frozen_acceptance_pending"
 CALIBRATION_PROTOCOL_VERSION = None
 CALIBRATION_PROTOCOL_DOCUMENT = "docs/TTV_CALIBRATION_PROTOCOL.md"
@@ -987,4 +988,101 @@ def cancel_calibration_observation(case_id: str) -> dict:
         "case_id": case_id,
         "status": "cancelled",
         "updated_at": now,
+    }
+
+
+
+def export_development_calibration_package() -> dict:
+    con = sqlite3.connect(settings.sqlite_path)
+    con.row_factory = sqlite3.Row
+    try:
+        rows = con.execute(
+            """
+            SELECT
+                case_id,
+                country_iso3,
+                employment_mode,
+                engine_version,
+                composition,
+                candidate_weeks_min,
+                candidate_weeks_max,
+                observed_weeks,
+                sample_role,
+                start_event_definition_version,
+                viability_outcome_definition_version,
+                stage_timings_json
+            FROM ttv_calibration_cases
+            WHERE sample_role = 'development'
+            ORDER BY case_id
+            """
+        ).fetchall()
+    finally:
+        con.close()
+
+    cases = []
+    for row in rows:
+        item = dict(row)
+        item["stage_timings"] = json.loads(
+            item.pop("stage_timings_json") or "{}"
+        )
+        cases.append(item)
+
+    return {
+        "exchange_version": CALIBRATION_EXCHANGE_VERSION,
+        "schema_version": CALIBRATION_SCHEMA_VERSION,
+        "scope_id": TTV_V1_CALIBRATION_SCOPE["scope_id"],
+        "privacy": {
+            "contains_full_profile": False,
+            "contains_name": False,
+            "contains_email": False,
+            "contains_address": False,
+            "contains_free_text_history": False,
+        },
+        "case_count": len(cases),
+        "cases": cases,
+        "notes": [
+            "Development exchange contains calibration fields only and excludes the personal profile.",
+            "Exact observation/import timestamps and local provenance labels are omitted from the exchange package.",
+            "Imported development cases remain exploratory and cannot become holdout evidence retrospectively.",
+        ],
+    }
+
+
+def import_development_calibration_package(package: dict) -> dict:
+    if package.get("exchange_version") != CALIBRATION_EXCHANGE_VERSION:
+        raise ValueError("unsupported TTV calibration exchange version")
+
+    raw_cases = package.get("cases")
+    if not isinstance(raw_cases, list):
+        raise ValueError("TTV calibration exchange cases must be a list")
+
+    preflight = calibration_batch_preflight(raw_cases)
+    imported_case_ids = []
+
+    for raw_case in raw_cases:
+        if not isinstance(raw_case, dict):
+            raise ValueError("TTV calibration exchange case must be an object")
+
+        if str(raw_case.get("sample_role") or "development").lower() != "development":
+            raise ValueError(
+                "TTV development exchange accepts development cases only"
+            )
+
+        saved = upsert_calibration_case(
+            {
+                **raw_case,
+                "sample_role": "development",
+                "source_label": "anonymized_development_exchange",
+                "observed_at": None,
+                "stage_timings": raw_case.get("stage_timings") or {},
+            }
+        )
+        imported_case_ids.append(saved["case_id"])
+
+    return {
+        "exchange_version": CALIBRATION_EXCHANGE_VERSION,
+        "imported_count": len(imported_case_ids),
+        "case_ids": imported_case_ids,
+        "preflight": preflight,
+        "calibration_status": calibration_status(),
     }
