@@ -367,3 +367,152 @@ def test_reviewed_ict_source_table_matches_production_manifest():
         assert row["occupation_label"] == signal["occupation_label"]
         assert row["shortage_countries"].split() == signal["shortage_countries"]
         assert row["surplus_countries"].split() == signal["surplus_countries"]
+
+
+
+def test_manifest_candidate_preserves_broad_evidence_and_reports_delta():
+    current = {
+        "evidence_id": "composite",
+        "rule_version": "composite-v1",
+        "countries": {
+            "IRL": {
+                "source_label": "Ireland",
+                "shortage_groups": ["ict_professionals"],
+            }
+        },
+        "broad_evidence": {
+            "evidence_id": "broad",
+        },
+        "unit_group_signals": {
+            "2511": {
+                "occupation_label": "Systems analysts",
+                "shortage_countries": ["IE"],
+                "surplus_countries": ["PT"],
+            }
+        },
+        "unit_group_evidence": {
+            "publication_url": "https://example.test/publication",
+        },
+    }
+    review = {
+        "ready_for_review": True,
+        "unresolved_count": 0,
+        "source_metadata": {
+            "evidence_id": "annex-2025",
+            "rule_version": "annex-v1",
+            "report_year": 2026,
+            "conditions_year": 2025,
+            "report_url": "https://example.test/annex.pdf",
+        },
+        "unit_group_signals": {
+            "2511": {
+                "occupation_label": "Systems analysts",
+                "esco_label": "systems analyst",
+                "shortage_countries": ["IE", "RO"],
+                "surplus_countries": ["PT"],
+                "match_score": 1.0,
+            },
+            "2512": {
+                "occupation_label": "Software developers",
+                "shortage_countries": ["IE"],
+                "surplus_countries": [],
+            },
+        },
+    }
+
+    result = module.build_eures_manifest_candidate(
+        review,
+        current,
+    )
+
+    assert result["status"] == "ready_for_human_promotion"
+    candidate = result["candidate_manifest"]
+    assert candidate["countries"] == current["countries"]
+    assert candidate["broad_evidence"] == current["broad_evidence"]
+    assert candidate["unit_group_signals"]["2511"] == {
+        "occupation_label": "Systems analysts",
+        "shortage_countries": ["IE", "RO"],
+        "surplus_countries": ["PT"],
+    }
+    assert candidate["unit_group_signals"]["2512"]["occupation_label"] == "Software developers"
+    assert result["comparison"]["current_unit_group_count"] == 1
+    assert result["comparison"]["candidate_unit_group_count"] == 2
+    assert result["comparison"]["added_unit_groups"] == ["2512"]
+    assert result["comparison"]["removed_unit_groups"] == []
+    assert result["comparison"]["changed_existing_unit_groups"] == ["2511"]
+
+
+def test_manifest_candidate_rejects_unresolved_review():
+    with pytest.raises(ValueError, match="fully resolved"):
+        module.build_eures_manifest_candidate(
+            {
+                "ready_for_review": False,
+                "unresolved_count": 1,
+                "unit_group_signals": {},
+            },
+            {"unit_group_signals": {}},
+        )
+
+
+def test_manifest_candidate_cannot_reduce_existing_coverage():
+    review = {
+        "ready_for_review": True,
+        "unresolved_count": 0,
+        "source_metadata": {
+            "evidence_id": "annex-2025",
+            "rule_version": "annex-v1",
+            "report_year": 2026,
+            "conditions_year": 2025,
+            "report_url": "https://example.test/annex.pdf",
+        },
+        "unit_group_signals": {
+            "2511": {
+                "occupation_label": "Systems analysts",
+                "shortage_countries": ["IE"],
+                "surplus_countries": [],
+            },
+        },
+    }
+    current = {
+        "unit_group_signals": {
+            "2511": {
+                "occupation_label": "Systems analysts",
+                "shortage_countries": ["IE"],
+                "surplus_countries": [],
+            },
+            "2512": {
+                "occupation_label": "Software developers",
+                "shortage_countries": ["IE"],
+                "surplus_countries": [],
+            },
+        },
+    }
+
+    with pytest.raises(ValueError, match="fewer unit groups"):
+        module.build_eures_manifest_candidate(
+            review,
+            current,
+        )
+
+
+def test_manifest_candidate_requires_source_metadata():
+    review = {
+        "ready_for_review": True,
+        "unresolved_count": 0,
+        "source_metadata": {
+            "evidence_id": "annex-2025",
+        },
+        "unit_group_signals": {
+            "2511": {
+                "occupation_label": "Systems analysts",
+                "shortage_countries": ["IE"],
+                "surplus_countries": [],
+            },
+        },
+    }
+
+    with pytest.raises(ValueError, match="source metadata missing"):
+        module.build_eures_manifest_candidate(
+            review,
+            {"unit_group_signals": {}},
+        )
