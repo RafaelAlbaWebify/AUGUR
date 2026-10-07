@@ -144,6 +144,15 @@ def test_main_returns_partial_when_repair_cannot_restore_evidence(monkeypatch, c
     )
     monkeypatch.setattr(
         module,
+        "ensure_eea_environmental_health_evidence",
+        lambda: {
+            "evidence_id": "eea_environmental_health",
+            "status": "available",
+            "action": "none",
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "ensure_clssi_evidence",
         lambda: {
             "evidence_id": "cedefop_clssi",
