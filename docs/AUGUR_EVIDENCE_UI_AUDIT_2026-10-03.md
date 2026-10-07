@@ -515,7 +515,8 @@ Current implementation status:
 
 Important P1 boundary:
 - Skills-OVATE detailed skill-demand shares remain unavailable through a stable reproducible public API/download workflow;
-- AUGUR must keep unavailable skill-share, employer-count and language-demand metrics explicitly missing rather than infer them from ESCO or aggregate OJA signals.
+- Cedefop RESET (Regional Skills Ecosystem Index) has been probed through the official dataset page; current automated discovery returns HTTP 403 and no reproducible download URL, so AUGUR records it as access-blocked and does not guess or scrape a data path;
+- AUGUR must keep unavailable skill-share, employer-count, language-demand and RESET metrics explicitly missing rather than infer them from ESCO, aggregate OJA signals or undocumented endpoints.
 
 ### P2 — personal decision engine
 
