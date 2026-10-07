@@ -984,6 +984,48 @@ def test_operability_exposes_subnational_evidence_status(monkeypatch):
     )
     monkeypatch.setattr(
         module,
+        "subnational_evidence_by_level_status",
+        lambda: {
+            "NUTS2": {
+                "available": True,
+                "row_count": 150,
+                "geography_count": 25,
+                "country_prefixes": ["ES", "IE", "PT"],
+                "indicator_ids": [
+                    "regional_employment_rate",
+                    "regional_unemployment_rate",
+                ],
+                "latest_retrieved_at": datetime.now(timezone.utc),
+                "geo_level": "NUTS2",
+            },
+            "NUTS3": {
+                "available": True,
+                "row_count": 90,
+                "geography_count": 45,
+                "country_prefixes": ["ES", "IE", "PT"],
+                "indicator_ids": [
+                    "regional_intentional_homicide_rate",
+                    "regional_robbery_rate",
+                ],
+                "latest_retrieved_at": datetime.now(timezone.utc),
+                "geo_level": "NUTS3",
+            },
+            "CITY": {
+                "available": True,
+                "row_count": 30,
+                "geography_count": 15,
+                "country_prefixes": ["ES", "IE", "PT"],
+                "indicator_ids": [
+                    "city_population",
+                    "city_pm25_annual_mean_observed",
+                ],
+                "latest_retrieved_at": datetime.now(timezone.utc),
+                "geo_level": "CITY",
+            },
+        },
+    )
+    monkeypatch.setattr(
+        module,
         "temporal_model_validation_status",
         _supported_temporal_validation,
     )
@@ -1015,3 +1057,13 @@ def test_operability_exposes_subnational_evidence_status(monkeypatch):
     assert result["subnational_evidence"]["available"] is True
     assert result["subnational_evidence"]["country_prefixes"] == ["ES", "IE", "PT"]
     assert result["subnational_evidence"]["geo_level"] == "NUTS2"
+    assert result["subnational_evidence_by_level"]["NUTS2"]["available"] is True
+    assert result["subnational_evidence_by_level"]["NUTS3"]["geography_count"] == 45
+    assert result["subnational_evidence_by_level"]["NUTS3"]["indicator_ids"] == [
+        "regional_intentional_homicide_rate",
+        "regional_robbery_rate",
+    ]
+    assert result["subnational_evidence_by_level"]["CITY"]["indicator_ids"] == [
+        "city_population",
+        "city_pm25_annual_mean_observed",
+    ]
