@@ -14,6 +14,7 @@ from app.ingestion.eures_annex_pdf import (
 )
 from app.services.eures_evidence_builder import (
     build_eures_unit_group_evidence_from_csv,
+    build_eures_manifest_candidate_from_files,
     write_eures_review_artifact,
 )
 
@@ -53,6 +54,14 @@ def main() -> int:
             settings.project_root
             / "exports"
             / "eures_market_review.json"
+        ),
+    )
+    parser.add_argument(
+        "--candidate-output",
+        default=str(
+            settings.project_root
+            / "exports"
+            / "eures_manifest_candidate.json"
         ),
     )
     parser.add_argument(
@@ -159,13 +168,61 @@ def main() -> int:
                 f"({item['reason']})"
             )
 
+    if not review["ready_for_review"]:
+        print()
+        print(
+            "Review contains unresolved rows. "
+            "Production evidence was not changed and no manifest candidate was generated."
+        )
+        return 2
+
+    manifest_path = (
+        settings.project_root
+        / "backend"
+        / "app"
+        / "evidence"
+        / "eures_lmi_2025.json"
+    )
+    candidate = build_eures_manifest_candidate_from_files(
+        review_path,
+        manifest_path,
+    )
+    candidate_path = Path(args.candidate_output).expanduser().resolve()
+    candidate_path.parent.mkdir(parents=True, exist_ok=True)
+    candidate_path.write_text(
+        json.dumps(
+            candidate["candidate_manifest"],
+            indent=2,
+            sort_keys=True,
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    delta = candidate["comparison"]
+    print()
+    print("AUGUR EURES MANIFEST CANDIDATE")
+    print("=" * 72)
+    print(f"candidate_output: {candidate_path}")
+    print(
+        "coverage: "
+        f"current={delta['current_unit_group_count']} "
+        f"candidate={delta['candidate_unit_group_count']}"
+    )
+    print(
+        "delta: "
+        f"added={len(delta['added_unit_groups'])} "
+        f"removed={len(delta['removed_unit_groups'])} "
+        f"changed_existing={len(delta['changed_existing_unit_groups'])}"
+    )
+
     print()
     print(
-        "NOTE: neither extraction nor ESCO review modifies "
+        "NOTE: extraction, ESCO review and candidate preparation never modify "
         "backend/app/evidence/eures_lmi_2025.json automatically."
     )
 
-    return 0 if review["ready_for_review"] else 2
+    return 0
 
 
 if __name__ == "__main__":
