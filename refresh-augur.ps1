@@ -52,6 +52,20 @@ if (-not $SkipSync) {
     if ($SubnationalCode -eq 2) {
         Write-Warning "Subnational refresh completed with incomplete regional coverage."
     }
+
+    $EeaHealthCode = Invoke-Step "Synchronize EEA regional PM2.5 health burden" {
+        Push-Location (Join-Path $Root "backend")
+        try {
+            & $BackendPython -m scripts.sync_eea_health_burden
+        }
+        finally {
+            Pop-Location
+        }
+    } -AllowedExitCodes @(0, 2)
+
+    if ($EeaHealthCode -eq 2) {
+        Write-Warning "EEA regional environmental-health evidence is currently unavailable."
+    }
 }
 else {
     Write-Host ""
