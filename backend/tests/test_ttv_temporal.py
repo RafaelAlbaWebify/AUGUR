@@ -240,11 +240,8 @@ def test_temporal_validation_gates_block_versioning():
     result = temporal_model_validation_status()
 
     assert result["ready_for_versioning"] is False
-    assert result["blockers"] == [
-        "composition_dependency_graph",
-        "external_calibration",
-    ]
-    assert result["experimental"] == ["composition_dependency_graph"]
+    assert result["blockers"] == ["external_calibration"]
+    assert result["experimental"] == []
     assert result["missing"] == ["external_calibration"]
     assert set(result["scope_bounded"]) == {
         "skill_gap_duration",
