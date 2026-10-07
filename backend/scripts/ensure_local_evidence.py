@@ -23,6 +23,8 @@ from app.ingestion.eurostat_regional_sector import (
     fetch_regional_sector_employment,
 )
 from app.ingestion.eea_health_burden import fetch_eea_pm25_burden_evidence
+from app.ingestion.gisco_cities import gisco_city_catalog
+from app.services.city_evidence import CITY_INDICATORS, sync_city_evidence_codes
 from app.ingestion.cedefop_clssi import (
     download_workbook as download_clssi_workbook,
     parse_workbook as parse_clssi_workbook,
@@ -37,6 +39,11 @@ from app.services.regional_evidence import sync_regional_evidence_codes
 NUTS3_URL = (
     "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/"
     "NUTS_RG_20M_2024_4326_LEVL_3.geojson"
+)
+
+CITIES_URL = (
+    "https://gisco-services.ec.europa.eu/distribution/v2/urau/geojson/"
+    "URAU_LB_2024_4326_CITIES.geojson"
 )
 
 
@@ -159,6 +166,67 @@ def ensure_nuts3_safety_evidence() -> dict:
     }
 
 
+def ensure_city_urban_audit_evidence() -> dict:
+    before = subnational_evidence_by_level_status()["CITY"]
+    expanded_ids = {
+        config["indicator_id"]
+        for config in CITY_INDICATORS
+        if config["indicator_id"] != "city_population"
+    }
+    available_ids = set(before.get("indicator_ids") or [])
+
+    if available_ids & expanded_ids:
+        return {
+            "evidence_id": "city_urban_audit_expanded",
+            "status": "available",
+            "action": "none",
+            "before": before,
+            "after": before,
+        }
+
+    target_iso2 = {
+        country["iso2"]
+        for country in COUNTRIES
+        if country.get("eu_member")
+    }
+
+    with httpx.Client(
+        timeout=120,
+        follow_redirects=True,
+        headers={"User-Agent": "AUGUR/0.1"},
+    ) as client:
+        response = client.get(CITIES_URL)
+        response.raise_for_status()
+        payload = response.json()
+
+    city_rows = gisco_city_catalog(
+        payload,
+        country_codes=target_iso2,
+    )
+    city_codes = sorted({
+        row["city_code"]
+        for row in city_rows
+    })
+
+    sync_result = sync_city_evidence_codes(
+        city_codes,
+        refresh_pm25=False,
+    )
+    after = subnational_evidence_by_level_status()["CITY"]
+    after_ids = set(after.get("indicator_ids") or [])
+    available = bool(after_ids & expanded_ids)
+
+    return {
+        "evidence_id": "city_urban_audit_expanded",
+        "status": "available" if available else "missing",
+        "action": "repaired" if available else "repair_failed",
+        "city_count_requested": len(city_codes),
+        "sync_result": sync_result,
+        "before": before,
+        "after": after,
+    }
+
+
 def ensure_clssi_evidence() -> dict:
     before = labour_shortage_index_status()
     if before.get("available"):
@@ -227,6 +295,7 @@ def main() -> int:
     results = [
         ensure_regional_sector_evidence(),
         ensure_nuts3_safety_evidence(),
+        ensure_city_urban_audit_evidence(),
         ensure_eea_environmental_health_evidence(),
         ensure_clssi_evidence(),
         ensure_oja_imbalance_evidence(),
