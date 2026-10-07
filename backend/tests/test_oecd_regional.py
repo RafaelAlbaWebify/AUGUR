@@ -139,3 +139,37 @@ def test_sync_population_writes_oecd_tl2_rows(monkeypatch):
     assert result["geography_count"] == 2
     assert result["geo_levels"] == ["tl2"]
     assert {row["value"] for row in stored} == {8534000.0, 6959000.0}
+
+
+def test_fetch_defaults_use_all_tl2_tl3_keys():
+    class Response:
+        def __init__(self, text):
+            self.text = text
+
+        def raise_for_status(self):
+            return None
+
+    class Client:
+        def __init__(self):
+            self.calls = []
+
+        def get(self, url, params):
+            self.calls.append((url, params))
+            if "DF_DENSITY" in url:
+                return Response(CSV_WITH_LABELS)
+            return Response(POPULATION_CSV)
+
+    client = Client()
+    adapter = OECDRegionalAdapter(client=client)
+
+    density = adapter.fetch_density(start_year=2021)
+    population = adapter.fetch_population(start_year=2021)
+
+    assert density == CSV_WITH_LABELS
+    assert population == POPULATION_CSV
+    assert client.calls[0][0].endswith(
+        "/A.TL2+TL3......PS_KM2"
+    )
+    assert client.calls[1][0].endswith(
+        "/A.TL2+TL3...POP._T._T."
+    )
