@@ -8,7 +8,7 @@ import httpx
 from app.catalog import COUNTRIES
 from app.db.bootstrap import initialize_datastores
 from app.db.analytics import subnational_storage_status
-from app.services.city_evidence import city_evidence
+from app.services.city_evidence import sync_city_evidence_codes
 from app.services.regional_evidence import regional_evidence
 
 
@@ -117,24 +117,35 @@ def main() -> int:
                 f"{code:<6} available={available}/{result.get('indicator_count', 0)}"
             )
 
-        city_with_data = 0
-        city_observations = 0
-        for index, code in enumerate(city_codes, start=1):
-            result = city_evidence(code, force_refresh=True)
-            available = int(result.get("available_count", 0))
-            city_observations += available
-            if available:
-                city_with_data += 1
+        city_sync = sync_city_evidence_codes(city_codes)
+        city_with_data = int(city_sync["cities_with_data"])
+        city_observations = sum(
+            int(item["available_indicator_count"])
+            for item in city_sync["results"]
+        )
+
+        for index, item in enumerate(city_sync["results"], start=1):
             print(
                 f"  city   {index:>2}/{len(city_codes):<2} "
-                f"{code:<7} available={available}/{result.get('indicator_count', 0)}"
+                f"{item['city_code']:<7} "
+                f"available={item['available_indicator_count']}"
             )
+
+        if city_sync.get("dataset_failures"):
+            print("  city dataset failures:")
+            for failure in city_sync["dataset_failures"]:
+                print(
+                    f"    {failure['dataset_id']}: "
+                    f"{failure['error_type']}: {failure['error']}"
+                )
 
         print(
             f"Stored coverage: regions {region_with_data}/{len(region_codes)} "
             f"({region_observations} latest series), "
             f"cities {city_with_data}/{len(city_codes)} "
-            f"({city_observations} latest series)"
+            f"({city_observations} latest Urban Audit series; "
+            f"{city_sync['rows_upserted']} historical rows upserted; "
+            f"{city_sync['pm25_refreshed']} PM2.5 city matches refreshed)"
         )
 
         if region_codes and region_with_data == 0:
