@@ -32,6 +32,8 @@ from app.services.ttv_calibration import (
     start_calibration_observation,
     complete_calibration_observation,
     cancel_calibration_observation,
+    export_development_calibration_package,
+    import_development_calibration_package,
 )
 from app.services.operability import operability_status
 from app.services.regional_evidence import regional_evidence, regional_comparison, geographic_level
@@ -42,6 +44,16 @@ router = APIRouter()
 
 class TTVCalibrationCompleteRequest(BaseModel):
     observed_at: str | None = None
+
+
+class TTVCalibrationImportRequest(BaseModel):
+    exchange_version: str
+    schema_version: str | None = None
+    scope_id: str | None = None
+    privacy: dict | None = None
+    case_count: int | None = None
+    cases: list[dict]
+    notes: list[str] | None = None
 
 
 
@@ -492,6 +504,21 @@ def ttv_calibration_complete_post(
 def ttv_calibration_cancel_post(case_id: str):
     try:
         return cancel_calibration_observation(case_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/ttv/calibration/export")
+def ttv_calibration_export_get():
+    return export_development_calibration_package()
+
+
+@router.post("/ttv/calibration/import")
+def ttv_calibration_import_post(payload: TTVCalibrationImportRequest):
+    try:
+        return import_development_calibration_package(
+            payload.model_dump()
+        )
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
 
