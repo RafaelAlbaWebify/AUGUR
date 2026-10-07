@@ -55,6 +55,7 @@ def operability_status() -> dict:
     career_market = career_market_evidence_status()
     live_postings = live_postings_provider_status()
     occupation_outlook = labour_occupation_outlook_status()
+    future_shortage_index = labour_shortage_index_status()
     oja_imbalance = labour_oja_imbalance_eu27_status()
     subnational = subnational_evidence_status()
     subnational_levels = subnational_evidence_by_level_status()
@@ -230,6 +231,7 @@ def operability_status() -> dict:
         "career_market_evidence": career_market,
         "live_postings_provider": live_postings,
         "occupation_outlook_evidence": occupation_outlook,
+        "future_shortage_index_evidence": future_shortage_index,
         "eu27_oja_imbalance_evidence": oja_imbalance,
         "subnational_evidence": subnational,
         "subnational_evidence_by_level": subnational_levels,
