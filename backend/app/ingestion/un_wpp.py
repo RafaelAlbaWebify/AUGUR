@@ -169,6 +169,111 @@ class UNWPPAdapter:
 
         return rows
 
+    def normalize_countries(
+        self,
+        country_iso3s: list[str],
+        csv_text: str,
+    ) -> list[dict]:
+        targets = {
+            code.upper()
+            for code in country_iso3s
+            if code
+        }
+        reader = csv.DictReader(io.StringIO(csv_text))
+        retrieved_at = datetime.now(timezone.utc)
+        rows: list[dict] = []
+
+        for record in reader:
+            country_iso3 = str(record.get("ISO3_code") or "").upper()
+            if country_iso3 not in targets:
+                continue
+
+            variant = (record.get("Variant") or "").strip().lower()
+            if variant and variant != "medium":
+                continue
+
+            year_text = record.get("Time")
+            if not year_text or not str(year_text).isdigit():
+                continue
+
+            year = int(year_text)
+            observation_type = (
+                "official_forecast"
+                if year >= PROJECTION_START_YEAR
+                else "observed"
+            )
+
+            for field_name, config in FIELD_MAP.items():
+                raw_value = record.get(field_name)
+                if raw_value in (None, "", ".."):
+                    continue
+
+                rows.append(
+                    {
+                        "country_iso3": country_iso3,
+                        "indicator_id": config["indicator_id"],
+                        "period": year,
+                        "value": float(raw_value) * config["multiplier"],
+                        "unit": config["unit"],
+                        "source_id": SOURCE_ID,
+                        "dataset_id": DATASET_ID,
+                        "observation_type": observation_type,
+                        "retrieved_at": retrieved_at,
+                        "source_updated_at": "2024",
+                        "source_observation_status": (
+                            "medium_projection"
+                            if observation_type == "official_forecast"
+                            else "estimate"
+                        ),
+                        "source_decimal": None,
+                    }
+                )
+
+        return rows
+
+    def sync_countries(
+        self,
+        country_iso3s: list[str],
+        csv_text: str | None = None,
+    ) -> dict:
+        countries = sorted({
+            code.upper()
+            for code in country_iso3s
+            if code
+        })
+        payload = csv_text if csv_text is not None else self.fetch_csv()
+        rows = self.normalize_countries(countries, payload)
+        inserted = upsert_observations(rows)
+
+        covered = sorted({
+            row["country_iso3"]
+            for row in rows
+        })
+        observed = sum(
+            row["observation_type"] == "observed"
+            for row in rows
+        )
+        forecasts = sum(
+            row["observation_type"] == "official_forecast"
+            for row in rows
+        )
+
+        return {
+            "countries": countries,
+            "country_count": len(countries),
+            "countries_with_data": len(covered),
+            "source": SOURCE_ID,
+            "vintage": "WPP 2024 medium variant",
+            "rows": inserted,
+            "observed": observed,
+            "official_forecasts": forecasts,
+            "indicators": sorted({
+                row["indicator_id"]
+                for row in rows
+            }),
+            "complete": len(covered) == len(countries),
+        }
+
     def sync_country(self, country_iso3: str, csv_text: str | None = None) -> dict:
         print(
             f"[1/1] UN WPP 2024 demographic indicators ({country_iso3.upper()})"
