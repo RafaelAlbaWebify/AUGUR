@@ -1,9 +1,16 @@
+import { countryFlag } from '../lib/countryFlag'
+
 type FlagIconProps = {
   iso3: string
+  iso2?: string
   className?: string
 }
 
-export default function FlagIcon({ iso3, className = '' }: FlagIconProps) {
+export default function FlagIcon({
+  iso3,
+  iso2,
+  className = '',
+}: FlagIconProps) {
   const common = {
     className: `flagIcon ${className}`.trim(),
     viewBox: '0 0 24 16',
@@ -41,8 +48,12 @@ export default function FlagIcon({ iso3, className = '' }: FlagIconProps) {
   }
 
   return (
-    <svg {...common}>
-      <rect width="24" height="16" rx="2" fill="#355064" />
-    </svg>
+    <span
+      className={`flagIcon flagEmoji ${className}`.trim()}
+      role="img"
+      aria-label={`${iso3} flag`}
+    >
+      {countryFlag(iso2, iso3)}
+    </span>
   )
 }
