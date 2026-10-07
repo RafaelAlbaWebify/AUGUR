@@ -77,6 +77,7 @@ def test_subnational_indicator_series_returns_recent_points_in_time_order(
             """
             CREATE TABLE subnational_observations (
                 geo_code TEXT,
+                geo_name TEXT,
                 geo_level TEXT,
                 indicator_id TEXT,
                 period INTEGER,
@@ -91,7 +92,7 @@ def test_subnational_indicator_series_returns_recent_points_in_time_order(
         )
         now = datetime.now(timezone.utc)
         rows = [
-            ("ES12", "NUTS2", "regional_employment_rate", year, value, "percent", "EUROSTAT", "lfst_r_lfe2emprt", now, None)
+            ("ES12", "Asturias", "NUTS2", "regional_employment_rate", year, value, "percent", "EUROSTAT", "lfst_r_lfe2emprt", now, None)
             for year, value in [
                 (2019, 64.0),
                 (2020, 63.0),
@@ -103,7 +104,7 @@ def test_subnational_indicator_series_returns_recent_points_in_time_order(
             ]
         ]
         con.executemany(
-            "INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            "INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             rows,
         )
     finally:
