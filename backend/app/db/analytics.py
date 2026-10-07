@@ -2145,6 +2145,38 @@ def latest_subnational_observations(geo_code: str) -> list[dict]:
         con.close()
 
 
+def subnational_indicator_series(
+    geo_code: str,
+    max_points: int = 8,
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            WITH recent AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id
+                        ORDER BY period DESC, source_id ASC
+                    ) AS point_rank
+                FROM subnational_observations
+                WHERE geo_code = ?
+            )
+            SELECT
+                geo_code, geo_level, indicator_id, period, value, unit,
+                source_id, dataset_id
+            FROM recent
+            WHERE point_rank <= ?
+            ORDER BY indicator_id, period
+            """,
+            [geo_code.upper(), max_points],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
 def subnational_storage_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
