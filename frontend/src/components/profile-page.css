@@ -1368,3 +1368,57 @@
   color: #d8aaaa;
   font-size: 8px;
 }
+
+
+.ttvExchangeCard {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 9px 10px;
+  border: 1px solid rgba(111, 137, 153, .22);
+  border-radius: 9px;
+  background: rgba(5, 16, 25, .42);
+}
+
+.ttvExchangeCard > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.ttvExchangeCard strong {
+  color: #d8e7ee;
+  font-size: 9px;
+}
+
+.ttvExchangeCard span,
+.ttvExchangeCard small {
+  color: #758d9c;
+  font-size: 8px;
+  line-height: 1.4;
+}
+
+.ttvExchangeCard small.error {
+  color: #d8aaaa;
+}
+
+.ttvImportButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 9px;
+  border: 1px solid rgba(127, 151, 166, .24);
+  border-radius: 7px;
+  background: rgba(37, 52, 61, .52);
+  color: #9db0bc;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.ttvImportButton input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
