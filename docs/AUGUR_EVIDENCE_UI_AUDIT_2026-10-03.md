@@ -464,40 +464,47 @@ Current implementation status:
    - periods 2026–2027;
    - ISCO 2-digit preferred, ISCO 1-digit fallback;
    - context-only for CareerFit.
-4. **Regional/NUTS geography — ACTIVE / EXPANDING**
+4. **Cedefop CLSSI — ACTIVE**
+   - official 2026 workbook integrated through reproducible Cedefop download;
+   - 114 validated rows for ESP/IRL/PRT;
+   - country-specific ISCO-08 2-digit shortage evidence to 2035;
+   - published shortage scale 1–4 is preserved together with employment-growth, replacement-demand and supply-demand-imbalance components;
+   - strict exact occupation-label mapping is used, with verified source-specific aliases only; unknown or inconsistent rows fail import;
+   - CareerFit exposes CLSSI as future shortage context only; it does not replace current EURES evidence or change TTV timing.
+5. **Regional/NUTS geography — ACTIVE / EXPANDING**
    - quarterly regional JVS `jvs_q_isco_r21` inspected but does not cover ES/PT/IE NUTS2 regions in 2026-Q2, so AUGUR does not infer regional occupation vacancy pressure from it;
    - Eurostat NUTS2 employment and unemployment rates are active for ES/PT/IE;
    - 36 NUTS2 regions loaded, including Galicia and Principado de Asturias;
    - regional sector-employment ingestion via `lfst_r_lfe2en2` is implemented to describe economic structure by NACE;
    - regional sector composition remains context, not occupation-specific vacancy evidence.
-5. **language requirements extracted from OJAs — SOURCE-ACCESS-GATED**
+6. **language requirements extracted from OJAs — SOURCE-ACCESS-GATED**
    - Skills-OVATE exposes language-related OJA analytics interactively, but detailed data access is organised through Eurostat's Microdata access portal;
    - AUGUR does not scrape Tableau or infer language-demand shares from ESCO;
    - the public Cedefop 2026 OJA imbalance CSV contains only a combined EU27 occupation score, so its non-native-language component cannot be decomposed into a country language-demand percentage;
    - CareerFit now returns a structured `source_access_gated` state rather than a null/zero placeholder.
-6. **occupation/skill demand trend — PARTIAL / ACTIVE**
+7. **occupation/skill demand trend — PARTIAL / ACTIVE**
    - occupation short-term trend is active through Cedefop STAS 2026–2027 employment outlook, exposed as contextual occupation trend by ISCO 2-digit with ISCO 1-digit fallback;
    - STAS growth direction is explicitly labelled as employment outlook, not OJA demand growth or statistical significance;
    - detailed skill-demand shares and skill time series remain source-access-gated behind Skills-OVATE / Eurostat microdata;
    - ESCO relationships remain taxonomy evidence and are never substituted for employer-demand frequency.
-7. **housing affordability vs income — ACTIVE / EXPANDING**
+8. **housing affordability vs income — ACTIVE / EXPANDING**
    - NUTS2 disposable household income per inhabitant in PPS integrated from `nama_10r_2hhinc`;
    - NUTS2 housing-cost overburden integrated from `ilc_lvho07_r`;
    - overburden is already defined relative to disposable household income (>40% housing-cost threshold), so AUGUR does not derive a redundant synthetic ratio;
    - regional periods remain explicit when income and housing series have different latest years.
-8. **healthcare access — ACTIVE / EXPANDING**
+9. **healthcare access — ACTIVE / EXPANDING**
    - NUTS2 unmet medical examination needs integrated from `hlth_silc_08_r` where regional reporting exists;
    - NUTS2 available hospital beds per 100,000 integrated from `hlth_rs_bdsrg2`;
    - Portugal currently has no NUTS2 unmet-needs observations in this source, so AUGUR leaves the regional value unavailable rather than copying the national figure;
    - unmet needs and bed capacity remain separate signals and are not combined into a synthetic healthcare score.
-9. **environment/air quality — ACTIVE / EXPANDING**
+10. **environment/air quality — ACTIVE / EXPANDING**
    - observed city PM2.5 is integrated from validated EEA E1a measurements via the official Parquet download API;
    - EEA city names are mapped to Urban Audit/GISCO city codes by normalized exact matching, with only the official "(greater city)" qualifier ignored; ambiguous matches are rejected;
    - annual city PM2.5 requires at least 75% calendar-year coverage per sampling point, uses validated/verified observations only, and averages eligible sampling-point annual means;
    - the 2024 Oviedo live-source validation produced 9.0111 µg/m³ from two eligible hourly sampling points; one daily stream was excluded for insufficient coverage;
    - city PM2.5 is labelled observed monitoring evidence and is not treated as population-weighted exposure or NUTS2 environmental evidence;
    - EEA burden-of-disease data for countries/NUTS/cities is a separate future environmental-health extension, not merged into the concentration signal.
-10. **safety and access-to-services — ACTIVE / EXPANDING**
+11. **safety and access-to-services — ACTIVE / EXPANDING**
    - NUTS2 household internet access is integrated from Eurostat `isoc_r_iacc_h` as access/connectivity context;
    - NUTS2 air-passenger throughput is integrated from `tran_r_avpa_nm` using passengers carried in thousand passengers, as regional connectivity context rather than a universal quality-of-life score;
    - NUTS3 police-recorded intentional homicide and robbery rates are exposed separately from `crim_gen_reg` in per-100,000 units;
