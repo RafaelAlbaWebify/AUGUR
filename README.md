@@ -97,7 +97,7 @@ Use the incremental refresh workflow to keep synchronized evidence inside AUGUR'
 .\refresh-augur.ps1
 ```
 
-This runs the current multi-provider country evidence synchronization and then `check-operability.ps1`.
+This runs the current multi-provider country sync, registered-country subnational sync, automatic repair of required local evidence and then `check-operability.ps1`.
 
 The existing ESCO dataset is preserved by default. To import or refresh a full official ESCO package at the same time:
 
@@ -105,39 +105,53 @@ The existing ESCO dataset is preserved by default. To import or refresh a full o
 .\refresh-augur.ps1 -EscoPath "C:\path\to\esco"
 ```
 
-Use `-SkipSync` only when you intentionally want to refresh ESCO and re-check operability without synchronizing country evidence.
+Use `-SkipSync` only when you intentionally want zero external evidence synchronization. Automatic local-evidence repair is also skipped in this mode.
 
-### Import TTV calibration cases
+### TTV calibration development workflow
 
-AUGUR includes a local-only calibration store for anonymous observed TTV cases. This infrastructure does **not** activate the TTV model or mark it externally calibrated.
+AUGUR includes a local-first TTV calibration workflow. This infrastructure does **not** activate the TTV model or mark it externally calibrated.
 
-CSV columns:
+For an eligible bounded TTV v1 case, **My Fit** can:
 
-```text
-case_id,country_iso3,employment_mode,engine_version,composition,candidate_weeks_min,candidate_weeks_max,observed_weeks,sample_role,start_event_definition_version,viability_outcome_definition_version,source_label,observed_at,stage_timings_json
-```
+1. explicitly start a development observation;
+2. freeze the candidate range and its non-sensitive model context before the outcome is known;
+3. keep the active observation separate from completed calibration evidence;
+4. record a documented B2-or-better outcome;
+5. calculate observed elapsed weeks automatically;
+6. store the completed result as `sample_role=development`;
+7. cancel an unfinished observation without creating calibration evidence.
 
-Required import columns remain everything through `observed_weeks`. `sample_role` defaults to `development`. Start/outcome definition versions, `source_label`, `observed_at` and `stage_timings_json` are optional for development cases. Holdout imports are blocked while the calibration protocol has no approved version.
+The local calibration store does not contain the full personal profile.
 
-When stage-level observations are available, `stage_timings_json` may contain anonymised timings for `legal`, `language`, `skills`, `employment` and `financial`. Each included stage must provide its candidate minimum, candidate maximum and observed weeks.
+It stores only calibration fields required for evaluation, including:
 
-Example import:
+- anonymous case ID;
+- country and remote-employment mode;
+- temporal engine/composition versions;
+- candidate range and observed weeks;
+- frozen start/outcome definition versions;
+- optional stage timings;
+- bounded context such as starting/target CEFR and study-hours/week.
+
+My Fit also supports a versioned `ttv-development-exchange-v1` JSON package for moving **development** cases between AUGUR installations. The exchange excludes the full profile, direct identifiers, free-text history and local provenance timestamps. Imported exchange cases cannot be promoted retrospectively into holdout evidence.
+
+`check-operability.ps1` reports descriptive calibration diagnostics including:
+
+- development/holdout case counts;
+- candidate-interval coverage;
+- mean and median interval width;
+- mean absolute and signed midpoint error;
+- below/above-range miss counts;
+- mean miss distance;
+- represented CEFR-start and weekly-study-hour cohorts.
+
+CSV import remains available as a compatibility/development path:
 
 ```powershell
 .\import-ttv-calibration.ps1 -Path ".\my-calibration-cases.csv"
 ```
 
-The local SQLite calibration table stores no full personal profile payload. It records only anonymous case identifiers, country, employment mode, candidate range, observed duration and provenance labels.
-
-`check-operability.ps1` reports descriptive calibration metrics:
-
-- observed case count;
-- country count;
-- candidate-interval coverage;
-- mean absolute midpoint error;
-- mean signed midpoint error.
-
-These metrics remain descriptive until AUGUR has an approved external-calibration protocol and acceptance criteria.
+These diagnostics remain descriptive. TTV stays unversioned until the external-calibration gate is satisfied on a frozen holdout under a pre-declared protocol and acceptance criteria.
 
 ### Start
 
