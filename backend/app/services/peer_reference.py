@@ -1,7 +1,6 @@
 from __future__ import annotations
 
-from app.db.analytics import indicator_series
-from app.services.country import list_countries
+from app.db.analytics import indicator_peer_series
 
 
 def _average_rank(values: list[tuple[str, float]], target_iso3: str) -> float | None:
@@ -26,63 +25,93 @@ def build_peer_reference(
     series_by_country: dict[str, list[dict]],
 ) -> dict:
     target = target_country_iso3.upper()
-    registered = sorted(series_by_country)
+    target_rows = series_by_country.get(target, [])
 
-    period_maps: dict[str, dict[int, dict]] = {}
-    for iso3 in registered:
-        rows = series_by_country.get(iso3, [])
-        period_maps[iso3] = {
-            int(row["period"]): row
-            for row in rows
-        }
-
-    common_periods = set(period_maps[registered[0]]) if registered else set()
-    for iso3 in registered[1:]:
-        common_periods &= set(period_maps[iso3])
-
-    if not common_periods:
+    if not target_rows:
         return {
-            "status": "insufficient_common_period",
-            "reference_group": "registered_countries",
-            "reference_countries": registered,
+            "status": "target_missing",
+            "reference_group": "countries_with_comparable_observation",
+            "reference_countries": [],
             "sample_size": 0,
             "period": None,
             "rank_low_to_high": None,
             "percentile_low_to_high": None,
             "adequacy": "insufficient",
             "interpretation": "numeric_position_only",
-            "note": "No common observed period exists across all registered countries for this indicator.",
+            "note": "The target country has no observed value for this indicator.",
         }
 
-    period = max(common_periods)
-    values = [
-        (iso3, float(period_maps[iso3][period]["value"]))
-        for iso3 in registered
-    ]
+    period_maps = {
+        iso3: {
+            int(row["period"]): row
+            for row in rows
+        }
+        for iso3, rows in series_by_country.items()
+    }
 
+    candidates = []
+    for period in sorted(
+        {int(row["period"]) for row in target_rows},
+        reverse=True,
+    ):
+        values = [
+            (iso3, float(rows[period]["value"]))
+            for iso3, rows in period_maps.items()
+            if period in rows
+        ]
+        candidates.append((period, values))
+
+    selected = next(
+        (
+            (period, values)
+            for period, values in candidates
+            if len(values) >= 5
+        ),
+        None,
+    )
+
+    if selected is None:
+        selected = max(
+            candidates,
+            key=lambda item: (len(item[1]), item[0]),
+        )
+
+    period, values = selected
+    reference_countries = sorted(iso3 for iso3, _ in values)
     rank = _average_rank(values, target)
+
     if rank is None:
         return {
             "status": "target_missing",
-            "reference_group": "registered_countries",
-            "reference_countries": registered,
+            "reference_group": "countries_with_comparable_observation",
+            "reference_countries": reference_countries,
             "sample_size": len(values),
             "period": period,
             "rank_low_to_high": None,
             "percentile_low_to_high": None,
             "adequacy": "insufficient",
             "interpretation": "numeric_position_only",
-            "note": "Target country is missing from the common-period peer values.",
+            "note": "The target country is missing from the selected peer period.",
         }
 
     sample_size = len(values)
-    percentile = 50.0 if sample_size == 1 else ((rank - 1.0) / (sample_size - 1.0)) * 100.0
-    adequacy = "supported" if sample_size >= 5 else "limited"
+    percentile = (
+        50.0
+        if sample_size == 1
+        else ((rank - 1.0) / (sample_size - 1.0)) * 100.0
+    )
+    adequacy = (
+        "supported"
+        if sample_size >= 5
+        else "limited"
+        if sample_size >= 2
+        else "insufficient"
+    )
 
     return {
         "status": "available",
-        "reference_group": "registered_countries",
-        "reference_countries": registered,
+        "reference_group": "countries_with_comparable_observation",
+        "reference_countries": reference_countries,
         "sample_size": sample_size,
         "period": period,
         "rank_low_to_high": rank,
@@ -91,7 +120,8 @@ def build_peer_reference(
         "interpretation": "numeric_position_only",
         "note": (
             "Peer position is descriptive and does not imply better or worse. "
-            "With fewer than five countries, AUGUR labels the reference as limited."
+            "AUGUR prefers the latest target-country period with at least five "
+            "comparable country observations; smaller samples are labelled limited."
         ),
     }
 
@@ -100,13 +130,8 @@ def indicator_peer_reference(
     indicator_id: str,
     target_country_iso3: str,
 ) -> dict:
-    series_by_country = {
-        country["iso3"]: indicator_series(country["iso3"], indicator_id)
-        for country in list_countries()
-        if country.get("analysis_status") == "available"
-    }
     return build_peer_reference(
         indicator_id,
         target_country_iso3,
-        series_by_country,
+        indicator_peer_series(indicator_id),
     )
