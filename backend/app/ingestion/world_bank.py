@@ -128,6 +128,9 @@ class WorldBankAdapter:
             if isinstance(item.get("region"), dict)
             else None
         )
+        if region == "Aggregates":
+            raise ValueError(f"{code} is a World Bank aggregate, not a country")
+
         admin_region = (
             (item.get("adminregion") or {}).get("value")
             if isinstance(item.get("adminregion"), dict)
