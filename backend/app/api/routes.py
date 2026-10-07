@@ -12,6 +12,7 @@ from app.db.analytics import (
     official_forecasts,
     country_indicator_series,
     subnational_storage_status,
+    environmental_health_burden_status,
 )
 from app.services.country import country_snapshot, list_countries
 from app.services.trends import country_trends
@@ -310,7 +311,8 @@ def compare_personalized(
 def subnational_status_get():
     return {
         **subnational_storage_status(),
-        "model_countries": ["ESP", "IRL"],
+        "environmental_health": environmental_health_burden_status(),
+        "model_countries": ["ESP", "PRT", "IRL"],
         "storage": "duckdb",
     }
 
