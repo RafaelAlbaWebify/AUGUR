@@ -1122,8 +1122,9 @@ test('source-native OECD region can be selected without GISCO geometry', async (
 
   await regionSelect.selectOption('AU1')
 
-  await expect(page.getByText('TL2 EVIDENCE')).toBeVisible()
-  await expect(page.getByText('New South Wales', { exact: true })).toBeVisible()
+  const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
+  await expect(geographicEvidence.getByText('TL2 EVIDENCE')).toBeVisible()
+  await expect(geographicEvidence.locator('.radarPanelTopline strong')).toHaveText('New South Wales')
   await expect(page.getByText('Population', { exact: true })).toBeVisible()
   await expect(page.getByText('8,534,000')).toBeVisible()
   await expect(page.getByText('Population density', { exact: true })).toBeVisible()
@@ -1177,7 +1178,7 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   await expect(regionalCards.getByText('1,650k passengers')).toBeVisible()
   await expect(page.getByRole('region', { name: 'Country metric cards' })).toHaveCount(0)
   await expect(page.locator('.regionalEvidencePanel')).toHaveCount(0)
-  await expect(page.getByText(/Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 \+ Urban Audit 2024/)).toBeVisible()
+  await expect(page.getByText(/Base map: OpenStreetMap · European subnational overlays: Eurostat GISCO NUTS 2024 \+ Urban Audit 2024/)).toBeVisible()
 })
 
 test('switches country without a page reload', async ({ page }) => {
@@ -2894,6 +2895,9 @@ test('mobile My Fit keeps summary, completion, actions and evidence reachable', 
 
 test('city evidence is grouped into demography mobility tourism and environment', async ({ page }) => {
   await page.goto('/country/ESP/overview')
+
+  const selector = page.getByLabel('Select country')
+  await expect(selector.locator('option')).toHaveCount(countries.length)
 
   const map = page.getByTestId('regional-map')
   await expect(map).toHaveAttribute('data-map-status', 'ready')
