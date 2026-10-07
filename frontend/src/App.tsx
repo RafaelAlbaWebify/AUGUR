@@ -18,6 +18,11 @@ type Country = {
   eu_member: boolean
   eurozone_member: boolean
   oecd_member: boolean
+  capital_city?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  analysis_status?: 'available' | 'registered_no_evidence'
+  observed_indicator_count?: number
 }
 
 type CountriesResponse = {
@@ -778,6 +783,15 @@ export default function App() {
           selectedCountry={selectedCountry}
           selectedCountryName={selectedCountryMeta?.name ?? selectedCountry}
           selectedCountryIso2={selectedCountryMeta?.iso2 ?? ''}
+          selectedCountryCenter={
+            selectedCountryMeta?.latitude != null
+            && selectedCountryMeta?.longitude != null
+              ? {
+                  lat: selectedCountryMeta.latitude,
+                  lon: selectedCountryMeta.longitude,
+                }
+              : null
+          }
           currentIndicators={enrichedIndicators}
           overviewSeries={overviewSeries?.series ?? []}
           assessment={assessment}
