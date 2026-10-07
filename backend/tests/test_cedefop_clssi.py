@@ -169,6 +169,7 @@ def test_detect_real_country_sheet_schema():
         ("Information and communications technicians", "35"),
         ("Customer services clerks", "42"),
         ("Electrical and electronic trades workers", "74"),
+        ("Food processing, wood working, garment and other craft and related trades", "75"),
         ("Refuse workers and other elementary workers", "96"),
     ],
 )
