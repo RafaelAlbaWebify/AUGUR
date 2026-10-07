@@ -1455,3 +1455,33 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+.ttvCalibrationOutcomeFields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.ttvCalibrationOutcomeFields label {
+  display: grid;
+  gap: 4px;
+  color: #8098a7;
+  font-size: 7px;
+}
+
+.ttvCalibrationOutcomeFields select {
+  width: 100%;
+  padding: 6px 7px;
+  border: 1px solid rgba(111, 137, 153, .24);
+  border-radius: 7px;
+  background: rgba(4, 16, 24, .86);
+  color: #d4e6ee;
+  font-size: 8px;
+}
+
+@media (max-width: 620px) {
+  .ttvCalibrationOutcomeFields {
+    grid-template-columns: 1fr;
+  }
+}
