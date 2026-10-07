@@ -7,6 +7,29 @@ from app.services import operability as module
 
 
 @pytest.fixture(autouse=True)
+def _default_dynamic_country_registry(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "country_metadata",
+        lambda iso3: {
+            "iso3": iso3,
+            "eu_member": iso3 in {"ESP", "PRT", "IRL"},
+            "oecd_member": iso3 in {"ESP", "PRT", "IRL"},
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "country_coverage_summary",
+        lambda: {
+            "registered_country_count": 3,
+            "analyzable_country_count": 3,
+            "validation_country_count": 3,
+            "countries": [],
+        },
+    )
+
+
+@pytest.fixture(autouse=True)
 def _default_environmental_health_evidence(monkeypatch):
     monkeypatch.setattr(
         module,
@@ -104,7 +127,7 @@ def _country(
     }
 
 
-def _all_providers(_country_iso3: str):
+def _all_providers(_country_iso3: str, country=None):
     return [
         SimpleNamespace(provider_id="WORLD_BANK"),
         SimpleNamespace(provider_id="EUROSTAT"),
@@ -1278,3 +1301,76 @@ def test_operability_exposes_future_shortage_index_status(monkeypatch):
     assert result["blockers"] == ["ttv_temporal_model"]
 
 
+
+
+def test_global_partial_country_does_not_block_validation_readiness(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    countries = [
+        _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+        _country("IND", 40, 8, 10, 0, 0, ["WORLD_BANK", "IMF", "UN_WPP"]),
+    ]
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {"countries": countries},
+    )
+    monkeypatch.setattr(
+        module,
+        "country_metadata",
+        lambda iso3: {
+            "iso3": iso3,
+            "eu_member": iso3 in {"ESP", "PRT", "IRL"},
+            "oecd_member": iso3 in {"ESP", "PRT", "IRL"},
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "country_coverage_summary",
+        lambda: {
+            "registered_country_count": 4,
+            "analyzable_country_count": 4,
+            "validation_country_count": 3,
+            "countries": [],
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["country_analysis_ready"] is True
+    assert result["local_employment_evidence_ready"] is True
+    assert result["country_coverage"]["analyzable_country_count"] == 4
+    assert result["validation_country_iso3"] == ["ESP", "PRT", "IRL"]
