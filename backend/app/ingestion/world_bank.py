@@ -31,6 +31,74 @@ class WorldBankAdapter:
         if self._owns_client:
             self.client.close()
 
+    def fetch_country_catalog(self) -> list[dict]:
+        response = self.client.get(
+            f"{BASE_URL}/country",
+            params={
+                "format": "json",
+                "per_page": 400,
+            },
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+        if (
+            not isinstance(payload, list)
+            or len(payload) < 2
+            or not isinstance(payload[1], list)
+        ):
+            raise ValueError("Unexpected World Bank country catalog response")
+
+        countries = []
+        for item in payload[1]:
+            if not isinstance(item, dict):
+                continue
+
+            iso3 = str(item.get("id") or "").upper()
+            iso2 = str(item.get("iso2Code") or "").upper()
+            name = str(item.get("name") or "").strip()
+            region = (
+                (item.get("region") or {}).get("value")
+                if isinstance(item.get("region"), dict)
+                else None
+            )
+            admin_region = (
+                (item.get("adminregion") or {}).get("value")
+                if isinstance(item.get("adminregion"), dict)
+                else None
+            )
+
+            if (
+                len(iso3) != 3
+                or not iso3.isalpha()
+                or len(iso2) != 2
+                or not iso2.isalpha()
+                or not name
+                or region == "Aggregates"
+            ):
+                continue
+
+            countries.append({
+                "iso2": iso2,
+                "iso3": iso3,
+                "name": name,
+                "region": region,
+                "subregion": admin_region or None,
+                "currency": None,
+                **country_membership_flags(iso3),
+            })
+
+        if not countries:
+            raise ValueError("World Bank country catalog contained no countries")
+
+        return countries
+
+    def register_country_catalog(self) -> list[dict]:
+        countries = self.fetch_country_catalog()
+        for country in countries:
+            upsert_country(country)
+        return countries
+
     def fetch_country_metadata(self, country_iso3: str) -> dict:
         code = country_iso3.upper()
         response = self.client.get(
