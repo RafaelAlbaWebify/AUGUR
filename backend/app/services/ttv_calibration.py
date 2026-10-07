@@ -7,6 +7,7 @@ import sqlite3
 from datetime import datetime, timezone
 from uuid import uuid4
 from pathlib import Path
+from statistics import median
 
 from app.core.config import settings
 
@@ -443,13 +444,23 @@ def _case_interval_metrics(cases: list[dict]) -> dict:
         return {
             "case_count": 0,
             "interval_coverage_pct": None,
+            "mean_interval_width_weeks": None,
+            "median_interval_width_weeks": None,
             "mean_absolute_midpoint_error_weeks": None,
             "mean_signed_midpoint_error_weeks": None,
+            "outside_interval_count": 0,
+            "below_interval_count": 0,
+            "above_interval_count": 0,
+            "mean_miss_distance_weeks": None,
         }
 
     covered = 0
+    below = 0
+    above = 0
+    widths = []
     absolute_errors = []
     signed_errors = []
+    miss_distances = []
 
     for case in cases:
         lower = float(case["candidate_weeks_min"])
@@ -457,8 +468,16 @@ def _case_interval_metrics(cases: list[dict]) -> dict:
         observed = float(case["observed_weeks"])
         midpoint = (lower + upper) / 2.0
 
+        widths.append(upper - lower)
+
         if lower <= observed <= upper:
             covered += 1
+        elif observed < lower:
+            below += 1
+            miss_distances.append(lower - observed)
+        else:
+            above += 1
+            miss_distances.append(observed - upper)
 
         signed_error = midpoint - observed
         signed_errors.append(signed_error)
@@ -470,6 +489,14 @@ def _case_interval_metrics(cases: list[dict]) -> dict:
             covered / len(cases) * 100.0,
             2,
         ),
+        "mean_interval_width_weeks": round(
+            sum(widths) / len(widths),
+            2,
+        ),
+        "median_interval_width_weeks": round(
+            float(median(widths)),
+            2,
+        ),
         "mean_absolute_midpoint_error_weeks": round(
             sum(absolute_errors) / len(absolute_errors),
             2,
@@ -477,6 +504,14 @@ def _case_interval_metrics(cases: list[dict]) -> dict:
         "mean_signed_midpoint_error_weeks": round(
             sum(signed_errors) / len(signed_errors),
             2,
+        ),
+        "outside_interval_count": below + above,
+        "below_interval_count": below,
+        "above_interval_count": above,
+        "mean_miss_distance_weeks": (
+            round(sum(miss_distances) / len(miss_distances), 2)
+            if miss_distances
+            else 0.0
         ),
     }
 
@@ -576,22 +611,7 @@ def calibration_status() -> dict:
             ],
         }
 
-    covered = 0
-    absolute_errors = []
-    signed_errors = []
-
-    for case in cases:
-        lower = float(case["candidate_weeks_min"])
-        upper = float(case["candidate_weeks_max"])
-        observed = float(case["observed_weeks"])
-        midpoint = (lower + upper) / 2.0
-
-        if lower <= observed <= upper:
-            covered += 1
-
-        signed_error = midpoint - observed
-        signed_errors.append(signed_error)
-        absolute_errors.append(abs(signed_error))
+    overall_metrics = _case_interval_metrics(cases)
 
     sample_role_metrics = {
         role: _case_interval_metrics(
@@ -620,40 +640,7 @@ def calibration_status() -> dict:
         if not stage_rows:
             continue
 
-        covered_stage = 0
-        absolute_stage_errors = []
-        signed_stage_errors = []
-
-        for stage in stage_rows:
-            lower = float(stage["candidate_weeks_min"])
-            upper = float(stage["candidate_weeks_max"])
-            observed = float(stage["observed_weeks"])
-            midpoint = (lower + upper) / 2.0
-
-            if lower <= observed <= upper:
-                covered_stage += 1
-
-            signed_error = midpoint - observed
-            signed_stage_errors.append(signed_error)
-            absolute_stage_errors.append(abs(signed_error))
-
-        stage_metrics[stage_id] = {
-            "case_count": len(stage_rows),
-            "interval_coverage_pct": round(
-                covered_stage / len(stage_rows) * 100.0,
-                2,
-            ),
-            "mean_absolute_midpoint_error_weeks": round(
-                sum(absolute_stage_errors)
-                / len(absolute_stage_errors),
-                2,
-            ),
-            "mean_signed_midpoint_error_weeks": round(
-                sum(signed_stage_errors)
-                / len(signed_stage_errors),
-                2,
-            ),
-        }
+        stage_metrics[stage_id] = _case_interval_metrics(stage_rows)
 
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
@@ -701,18 +688,11 @@ def calibration_status() -> dict:
             if case["sample_role"] == "holdout"
         ),
         "protocol_ready_for_holdout": CALIBRATION_PROTOCOL_VERSION is not None,
-        "interval_coverage_pct": round(
-            covered / len(cases) * 100.0,
-            2,
-        ),
-        "mean_absolute_midpoint_error_weeks": round(
-            sum(absolute_errors) / len(absolute_errors),
-            2,
-        ),
-        "mean_signed_midpoint_error_weeks": round(
-            sum(signed_errors) / len(signed_errors),
-            2,
-        ),
+        **{
+            key: value
+            for key, value in overall_metrics.items()
+            if key != "case_count"
+        },
         "stage_metrics": stage_metrics,
         "sample_role_metrics": sample_role_metrics,
         "externally_calibrated": False,
