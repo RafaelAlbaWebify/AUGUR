@@ -1,5 +1,7 @@
 param(
     [string]$EscoPath,
+    [string]$StasPath,
+    [string]$OjaPath,
     [switch]$SkipSync
 )
 
@@ -87,6 +89,30 @@ else {
     Write-Host "Use -EscoPath only when you want to import or refresh the official ESCO package."
 }
 
+if ($StasPath) {
+    $ResolvedStasPath = (Resolve-Path $StasPath).Path
+    Invoke-Step "Refresh Cedefop STAS dataset" {
+        & (Join-Path $Root "import-cedefop-stas.ps1") --input $ResolvedStasPath
+    } | Out-Null
+}
+else {
+    Write-Host ""
+    Write-Host "Cedefop STAS dataset left unchanged."
+    Write-Host "Use -StasPath only when you have downloaded a newer official STAS workbook."
+}
+
+if ($OjaPath) {
+    $ResolvedOjaPath = (Resolve-Path $OjaPath).Path
+    Invoke-Step "Refresh Cedefop OJA imbalance dataset" {
+        & (Join-Path $Root "import-cedefop-oja-imbalance.ps1") --input $ResolvedOjaPath
+    } | Out-Null
+}
+else {
+    Write-Host ""
+    Write-Host "Cedefop OJA imbalance dataset left unchanged."
+    Write-Host "Use -OjaPath only when you have downloaded a newer official OJA imbalance CSV."
+}
+
 Write-Host ""
 Write-Host "== Operability check ==" -ForegroundColor Cyan
 & (Join-Path $Root "check-operability.ps1")
@@ -101,7 +127,7 @@ if ($OperabilityCode -eq 0) {
 if ($OperabilityCode -eq 2) {
     Write-Host ""
     Write-Warning "Refresh complete: AUGUR remains partially operational."
-    Write-Host "Review the blockers above. No existing ESCO dataset was downgraded or replaced unless -EscoPath was supplied."
+    Write-Host "Review the blockers above. Manual-package datasets are changed only when their corresponding -EscoPath, -StasPath or -OjaPath parameter is supplied."
     exit 2
 }
 
