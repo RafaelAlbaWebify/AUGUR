@@ -1,7 +1,26 @@
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
+import pytest
+
 from app.services import operability as module
+
+
+@pytest.fixture(autouse=True)
+def _default_optional_labour_evidence(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "labour_shortage_index_status",
+        lambda: {
+            "available": False,
+            "row_count": 0,
+            "country_count": 0,
+            "countries": [],
+            "horizons": [],
+            "release_versions": [],
+            "latest_retrieved_at": None,
+        },
+    )
 
 
 def _country(
@@ -1161,3 +1180,77 @@ def test_operability_marks_stale_subnational_level_without_blocking_national_ana
     assert result["subnational_evidence_by_level"]["NUTS3"]["fresh"] is False
     assert result["subnational_evidence_by_level"]["NUTS3"]["age_days"] >= 45
     assert "data_sync_stale" not in result["blockers"]
+
+
+
+def test_operability_exposes_future_shortage_index_status(monkeypatch):
+    monkeypatch.setattr(module, "providers_for_country", _all_providers)
+    monkeypatch.setattr(
+        module,
+        "career_market_evidence_status",
+        lambda: {
+            "evidence_id": "test",
+            "rule_version": "test",
+            "report_year": 2025,
+            "conditions_year": 2024,
+            "supported_countries": ["ESP", "IRL", "PRT"],
+            "broad_country_count": 3,
+            "unit_group_count": 4,
+            "coverage_scope": "partial_unit_group_coverage",
+            "full_occupation_coverage": False,
+            "notes": [],
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "labour_shortage_index_status",
+        lambda: {
+            "available": True,
+            "row_count": 120,
+            "country_count": 3,
+            "countries": ["ESP", "IRL", "PRT"],
+            "horizons": [2035],
+            "release_versions": ["2026"],
+            "latest_retrieved_at": datetime.now(timezone.utc),
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "temporal_model_validation_status",
+        _supported_temporal_validation,
+    )
+    monkeypatch.setattr(
+        module,
+        "analytical_evidence_status",
+        lambda: {
+            "countries": [
+                _country("ESP", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("IRL", 100, 18, 12, 9, 9, _provider_ids()),
+                _country("PRT", 100, 18, 12, 9, 9, _provider_ids()),
+            ]
+        },
+    )
+    monkeypatch.setattr(
+        module,
+        "esco_status",
+        lambda: {
+            "mode": "full",
+            "version": "1.2.1",
+            "occupation_count": 3000,
+            "skill_count": 14000,
+            "relation_count": 120000,
+        },
+    )
+
+    result = module.operability_status()
+
+    assert result["future_shortage_index_evidence"] == {
+        "available": True,
+        "row_count": 120,
+        "country_count": 3,
+        "countries": ["ESP", "IRL", "PRT"],
+        "horizons": [2035],
+        "release_versions": ["2026"],
+        "latest_retrieved_at": result["future_shortage_index_evidence"]["latest_retrieved_at"],
+    }
+    assert result["blockers"] == ["ttv_temporal_model"]
