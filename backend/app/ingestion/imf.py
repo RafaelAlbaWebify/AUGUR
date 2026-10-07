@@ -8,6 +8,7 @@ import httpx
 from app.db.analytics import upsert_observations
 
 BASE_URL = "https://www.imf.org/external/datamapper/api/v2"
+FALLBACK_BASE_URL = "https://www.imf.org/external/datamapper/api/v1"
 SOURCE_ID = "IMF"
 DATASET_ID = "WEO_APRIL_2026"
 FORECAST_START_YEAR = 2026
@@ -56,39 +57,67 @@ class IMFAdapter:
     def fetch_indicator(self, source_indicator: str) -> dict:
         last_error: Exception | None = None
 
-        for attempt in range(1, self.max_retries + 1):
-            try:
-                response = self.client.get(
-                    f"{BASE_URL}/{source_indicator}",
-                )
-                response.raise_for_status()
-                payload = response.json()
-
-                values = payload.get("values")
-                if not isinstance(values, dict):
-                    raise ValueError(
-                        f"Unexpected IMF response for {source_indicator}: missing values"
+        for base_url in (BASE_URL, FALLBACK_BASE_URL):
+            for attempt in range(1, self.max_retries + 1):
+                try:
+                    response = self.client.get(
+                        f"{base_url}/{source_indicator}",
                     )
+                    response.raise_for_status()
+                    payload = response.json()
 
-                return payload
+                    values = payload.get("values")
+                    if not isinstance(values, dict):
+                        raise ValueError(
+                            f"Unexpected IMF response for {source_indicator}: missing values"
+                        )
 
-            except (
-                httpx.TimeoutException,
-                httpx.TransportError,
-                httpx.HTTPStatusError,
-            ) as exc:
-                last_error = exc
+                    return payload
 
-                if attempt >= self.max_retries:
-                    break
+                except httpx.HTTPStatusError as exc:
+                    last_error = exc
 
-                delay_seconds = 2 ** (attempt - 1)
-                print(
-                    f"   retry {attempt}/{self.max_retries - 1} "
-                    f"after {type(exc).__name__} "
-                    f"(waiting {delay_seconds}s)"
-                )
-                time.sleep(delay_seconds)
+                    # DataMapper v2 currently returns 403 to some automated
+                    # clients (including GitHub-hosted runners). The public v1
+                    # endpoint exposes the same values contract and remains a
+                    # safe transport fallback.
+                    if (
+                        base_url == BASE_URL
+                        and exc.response.status_code in {403, 404}
+                    ):
+                        print(
+                            f"   IMF DataMapper v2 returned "
+                            f"{exc.response.status_code}; falling back to v1"
+                        )
+                        break
+
+                    if attempt >= self.max_retries:
+                        break
+
+                    delay_seconds = 2 ** (attempt - 1)
+                    print(
+                        f"   retry {attempt}/{self.max_retries - 1} "
+                        f"after {type(exc).__name__} "
+                        f"(waiting {delay_seconds}s)"
+                    )
+                    time.sleep(delay_seconds)
+
+                except (
+                    httpx.TimeoutException,
+                    httpx.TransportError,
+                ) as exc:
+                    last_error = exc
+
+                    if attempt >= self.max_retries:
+                        break
+
+                    delay_seconds = 2 ** (attempt - 1)
+                    print(
+                        f"   retry {attempt}/{self.max_retries - 1} "
+                        f"after {type(exc).__name__} "
+                        f"(waiting {delay_seconds}s)"
+                    )
+                    time.sleep(delay_seconds)
 
         if last_error is not None:
             raise last_error
