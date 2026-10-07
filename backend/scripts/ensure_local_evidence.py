@@ -11,15 +11,18 @@ from app.db.analytics import (
     labour_oja_imbalance_eu27_status,
     labour_shortage_index_status,
     regional_sector_employment_status,
+    environmental_health_burden_status,
     subnational_evidence_by_level_status,
     upsert_labour_oja_imbalance_eu27,
     upsert_labour_shortage_index,
     upsert_regional_sector_employment,
+    upsert_environmental_health_burden,
 )
 from app.ingestion.eurostat import EurostatAdapter
 from app.ingestion.eurostat_regional_sector import (
     fetch_regional_sector_employment,
 )
+from app.ingestion.eea_health_burden import fetch_eea_pm25_burden_evidence
 from app.ingestion.cedefop_clssi import (
     download_workbook as download_clssi_workbook,
     parse_workbook as parse_clssi_workbook,
@@ -35,6 +38,40 @@ NUTS3_URL = (
     "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/"
     "NUTS_RG_20M_2024_4326_LEVL_3.geojson"
 )
+
+
+def ensure_eea_environmental_health_evidence() -> dict:
+    before = environmental_health_burden_status()
+    if before.get("available"):
+        return {
+            "evidence_id": "eea_environmental_health",
+            "status": "available",
+            "action": "none",
+            "before": before,
+            "after": before,
+        }
+
+    prefixes = {
+        country["iso2"]
+        for country in COUNTRIES
+        if country.get("eu_member")
+    }
+    rows, diagnostic = fetch_eea_pm25_burden_evidence(
+        country_prefixes=prefixes,
+    )
+    rows_upserted = upsert_environmental_health_burden(rows)
+    after = environmental_health_burden_status()
+
+    return {
+        "evidence_id": "eea_environmental_health",
+        "status": "available" if after.get("available") else "missing",
+        "action": "repaired" if after.get("available") else "repair_failed",
+        "rows_parsed": len(rows),
+        "rows_upserted": rows_upserted,
+        "diagnostic": diagnostic,
+        "before": before,
+        "after": after,
+    }
 
 
 def ensure_regional_sector_evidence() -> dict:
@@ -184,6 +221,7 @@ def main() -> int:
     results = [
         ensure_regional_sector_evidence(),
         ensure_nuts3_safety_evidence(),
+        ensure_eea_environmental_health_evidence(),
         ensure_clssi_evidence(),
         ensure_oja_imbalance_evidence(),
     ]
