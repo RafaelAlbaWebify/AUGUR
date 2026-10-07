@@ -223,6 +223,59 @@ def _normalize_stage_timings(value) -> dict:
     return normalized
 
 
+def _normalize_calibration_context(value) -> dict:
+    if value in (None, "", {}):
+        return {}
+
+    if isinstance(value, str):
+        try:
+            value = json.loads(value)
+        except json.JSONDecodeError as exc:
+            raise ValueError(
+                "context_json must be valid JSON"
+            ) from exc
+
+    if not isinstance(value, dict):
+        raise ValueError("calibration context must be an object")
+
+    allowed_cefr = {"A1", "A2", "B1", "B2", "C1", "C2"}
+    normalized = {}
+
+    scope_id = str(value.get("scope_id") or "").strip()
+    if scope_id:
+        normalized["scope_id"] = scope_id
+
+    for field in ("current_cefr", "target_cefr"):
+        raw = str(value.get(field) or "").strip().upper()
+        if raw:
+            if raw not in allowed_cefr:
+                raise ValueError(f"{field} must be a CEFR level")
+            normalized[field] = raw
+
+    weekly = value.get("weekly_study_hours")
+    if weekly not in (None, ""):
+        weekly = _as_float(weekly, "weekly_study_hours")
+        if not (0 < weekly <= 80):
+            raise ValueError("weekly_study_hours must be > 0 and <= 80")
+        normalized["weekly_study_hours"] = weekly
+
+    guided_min = value.get("guided_hours_min")
+    guided_max = value.get("guided_hours_max")
+    if guided_min not in (None, "") or guided_max not in (None, ""):
+        if guided_min in (None, "") or guided_max in (None, ""):
+            raise ValueError(
+                "guided_hours_min and guided_hours_max must be supplied together"
+            )
+        guided_min = _as_float(guided_min, "guided_hours_min")
+        guided_max = _as_float(guided_max, "guided_hours_max")
+        if guided_min < 0 or guided_max < guided_min:
+            raise ValueError("guided hour range is invalid")
+        normalized["guided_hours_min"] = guided_min
+        normalized["guided_hours_max"] = guided_max
+
+    return normalized
+
+
 def validate_calibration_case(case: dict) -> dict:
     case_id = str(case.get("case_id") or "").strip()
     country_iso3 = str(case.get("country_iso3") or "").strip().upper()
@@ -309,6 +362,11 @@ def validate_calibration_case(case: dict) -> dict:
         if "stage_timings_json" in case
         else case.get("stage_timings")
     )
+    context = _normalize_calibration_context(
+        case.get("context_json")
+        if "context_json" in case
+        else case.get("context")
+    )
 
     return {
         "case_id": case_id,
@@ -325,6 +383,7 @@ def validate_calibration_case(case: dict) -> dict:
         "start_event_definition_version": start_event_definition_version,
         "viability_outcome_definition_version": viability_outcome_definition_version,
         "stage_timings": stage_timings,
+        "context": context,
     }
 
 
@@ -351,9 +410,10 @@ def upsert_calibration_case(case: dict) -> dict:
                 start_event_definition_version,
                 viability_outcome_definition_version,
                 stage_timings_json,
+                context_json,
                 imported_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 normalized["case_id"],
@@ -371,6 +431,10 @@ def upsert_calibration_case(case: dict) -> dict:
                 normalized["viability_outcome_definition_version"],
                 json.dumps(
                     normalized["stage_timings"],
+                    sort_keys=True,
+                ),
+                json.dumps(
+                    normalized["context"],
                     sort_keys=True,
                 ),
                 imported_at,
@@ -540,6 +604,7 @@ def calibration_status() -> dict:
                     start_event_definition_version,
                     viability_outcome_definition_version,
                     stage_timings_json,
+                    context_json,
                     imported_at
                 FROM ttv_calibration_cases
                 ORDER BY imported_at, case_id
@@ -577,6 +642,12 @@ def calibration_status() -> dict:
                 "mean_miss_distance_weeks": None,
                 "stage_metrics": {},
                 "sample_role_metrics": {},
+                "context_summary": {
+                    "context_case_count": 0,
+                    "current_cefr_levels": [],
+                    "target_cefr_levels": [],
+                    "weekly_study_hours": [],
+                },
                 "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
@@ -648,6 +719,34 @@ def calibration_status() -> dict:
 
         stage_metrics[stage_id] = _case_interval_metrics(stage_rows)
 
+    parsed_contexts = []
+    for case in cases:
+        try:
+            parsed = json.loads(case.get("context_json") or "{}")
+        except json.JSONDecodeError:
+            parsed = {}
+        if parsed:
+            parsed_contexts.append(parsed)
+
+    context_summary = {
+        "context_case_count": len(parsed_contexts),
+        "current_cefr_levels": sorted({
+            str(item["current_cefr"])
+            for item in parsed_contexts
+            if item.get("current_cefr")
+        }),
+        "target_cefr_levels": sorted({
+            str(item["target_cefr"])
+            for item in parsed_contexts
+            if item.get("target_cefr")
+        }),
+        "weekly_study_hours": sorted({
+            float(item["weekly_study_hours"])
+            for item in parsed_contexts
+            if item.get("weekly_study_hours") is not None
+        }),
+    }
+
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
         "protocol_state": CALIBRATION_PROTOCOL_STATE,
@@ -701,6 +800,7 @@ def calibration_status() -> dict:
         },
         "stage_metrics": stage_metrics,
         "sample_role_metrics": sample_role_metrics,
+        "context_summary": context_summary,
         "externally_calibrated": False,
         "notes": [
             "Metrics describe observed calibration cases only.",
@@ -904,6 +1004,14 @@ def complete_calibration_observation(
                     "observed_weeks": observed_weeks,
                 }
             },
+            "context": {
+                "scope_id": baseline.get("scope_id"),
+                "current_cefr": language.get("current_cefr"),
+                "target_cefr": language.get("target_cefr"),
+                "weekly_study_hours": language.get("weekly_study_hours"),
+                "guided_hours_min": language.get("guided_hours_min"),
+                "guided_hours_max": language.get("guided_hours_max"),
+            },
         }
     )
 
@@ -996,7 +1104,8 @@ def export_development_calibration_package() -> dict:
                 sample_role,
                 start_event_definition_version,
                 viability_outcome_definition_version,
-                stage_timings_json
+                stage_timings_json,
+                context_json
             FROM ttv_calibration_cases
             WHERE sample_role = 'development'
             ORDER BY case_id
@@ -1010,6 +1119,9 @@ def export_development_calibration_package() -> dict:
         item = dict(row)
         item["stage_timings"] = json.loads(
             item.pop("stage_timings_json") or "{}"
+        )
+        item["context"] = json.loads(
+            item.pop("context_json") or "{}"
         )
         cases.append(item)
 
@@ -1061,6 +1173,7 @@ def import_development_calibration_package(package: dict) -> dict:
                 "source_label": "anonymized_development_exchange",
                 "observed_at": None,
                 "stage_timings": raw_case.get("stage_timings") or {},
+                "context": raw_case.get("context") or {},
             }
         )
         imported_case_ids.append(saved["case_id"])
