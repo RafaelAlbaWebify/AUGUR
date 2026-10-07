@@ -149,6 +149,21 @@ The main remaining product value comes from:
 - improving explanation/decision support without pretending unavailable evidence exists.
 
 
+## Live global-baseline validation
+
+GitHub Actions live-source validation on 2026-10-07 confirmed:
+
+- World Bank country discovery returned **217 real countries** after aggregate filtering;
+- the full baseline left **217 analyzable countries** in AUGUR;
+- World Bank WDI inserted **47,421** national observation rows;
+- UN WPP inserted **130,464** demographic/history/projection rows;
+- World Bank sample coverage passed for Germany, United States and India;
+- UN WPP sample coverage passed for Germany, United States and India;
+- IMF DataMapper v2 and v1 both returned HTTP 403 from the GitHub-hosted runner, so CI records this as `source_access_restricted_in_ci` rather than pretending the adapter or country coverage failed;
+- the remainder of the live source smoke completed successfully.
+
+These figures validate the global national architecture against live official sources. They do not imply equal indicator depth for every country; `/api/countries/coverage` remains the source of truth for per-country analytical coverage.
+
 ## Global geography coverage architecture
 
 Product scope is data-driven rather than hard-coded to the original Spain / Portugal / Ireland validation set.
