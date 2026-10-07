@@ -72,3 +72,35 @@ def test_world_bank_batch_query_uses_multiple_country_path(monkeypatch):
     assert params["per_page"] == 20000
     assert result["rows"] == 2
     assert {row["country_iso3"] for row in stored} == {"DEU", "ESP"}
+
+
+def test_world_bank_large_batch_uses_all_country_endpoint(monkeypatch):
+    countries = [
+        f"A{chr(65 + ((index // 26) % 26))}{chr(65 + (index % 26))}"
+        for index in range(30)
+    ]
+    payload = [
+        {"pages": 1, "lastupdated": "2026-10-01"},
+        [],
+    ]
+    client = Client(payload)
+    monkeypatch.setattr(
+        module,
+        "world_bank_indicators",
+        lambda: [{
+            "indicator_id": "population_total",
+            "source_indicator": "SP.POP.TOTL",
+            "unit": "persons",
+        }],
+    )
+    monkeypatch.setattr(
+        module,
+        "upsert_observations",
+        lambda rows: len(rows),
+    )
+
+    adapter = WorldBankAdapter(client=client)
+    adapter.sync_countries(countries)
+
+    assert len(client.calls) == 1
+    assert "/country/all/indicator/SP.POP.TOTL" in client.calls[0][0]
