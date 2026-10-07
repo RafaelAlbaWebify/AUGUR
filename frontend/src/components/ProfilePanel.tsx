@@ -381,6 +381,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [ttv, setTtv] = useState<TTVResponse | null>(null)
   const [ttvObservation, setTtvObservation] = useState<TTVCalibrationObservation | null>(null)
   const [ttvObservationStatus, setTtvObservationStatus] = useState<'idle' | 'loading' | 'working' | 'error'>('idle')
+  const [ttvExchangeStatus, setTtvExchangeStatus] = useState<'idle' | 'working' | 'saved' | 'imported' | 'error'>('idle')
   const fitRequestIdRef = useRef(0)
 
   useEffect(() => {
@@ -503,6 +504,50 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       setTtvObservationStatus('idle')
     } catch {
       setTtvObservationStatus('error')
+    }
+  }
+
+  async function exportTtvDevelopmentData() {
+    setTtvExchangeStatus('working')
+    try {
+      const response = await fetch(`${apiBase}/api/ttv/calibration/export`)
+      if (!response.ok) throw new Error(`TTV exchange HTTP ${response.status}`)
+      const data = await response.json()
+      const blob = new Blob(
+        [JSON.stringify(data, null, 2)],
+        { type: 'application/json' },
+      )
+      const url = URL.createObjectURL(blob)
+      const anchor = document.createElement('a')
+      anchor.href = url
+      anchor.download = 'AUGUR_TTV_DEVELOPMENT_EXCHANGE.json'
+      document.body.appendChild(anchor)
+      anchor.click()
+      anchor.remove()
+      URL.revokeObjectURL(url)
+      setTtvExchangeStatus('saved')
+    } catch {
+      setTtvExchangeStatus('error')
+    }
+  }
+
+  async function importTtvDevelopmentData(file: File) {
+    setTtvExchangeStatus('working')
+    try {
+      const text = await file.text()
+      const payload = JSON.parse(text)
+      const response = await fetch(
+        `${apiBase}/api/ttv/calibration/import`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        },
+      )
+      if (!response.ok) throw new Error(`TTV exchange HTTP ${response.status}`)
+      setTtvExchangeStatus('imported')
+    } catch {
+      setTtvExchangeStatus('error')
     }
   }
 
@@ -1101,6 +1146,38 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               Calibration observation action failed. TTV analysis remains unchanged.
             </div>
           )}
+          <div className="ttvExchangeCard" aria-label="TTV calibration data portability">
+            <div>
+              <strong>Calibration data portability</strong>
+              <span>Development cases only · profile and personal history excluded</span>
+            </div>
+            <div className="ttvCalibrationActions">
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => void exportTtvDevelopmentData()}
+                disabled={ttvExchangeStatus === 'working'}
+              >
+                Export anonymous development cases
+              </button>
+              <label className="ttvImportButton">
+                Import anonymous development cases
+                <input
+                  type="file"
+                  accept="application/json,.json"
+                  disabled={ttvExchangeStatus === 'working'}
+                  onChange={(event) => {
+                    const file = event.target.files?.[0]
+                    if (file) void importTtvDevelopmentData(file)
+                    event.currentTarget.value = ''
+                  }}
+                />
+              </label>
+            </div>
+            {ttvExchangeStatus === 'saved' && <small>Anonymous development package exported.</small>}
+            {ttvExchangeStatus === 'imported' && <small>Development package imported locally.</small>}
+            {ttvExchangeStatus === 'error' && <small className="error">Calibration exchange failed; existing cases were not reclassified.</small>}
+          </div>
         </section>
       </details>
     </section>
