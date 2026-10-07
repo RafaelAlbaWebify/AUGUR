@@ -1804,7 +1804,9 @@ test('opt-in TTV calibration observation lifecycle is visible in My Fit', async 
     })
   })
 
+  let completionPayload: unknown = null
   await page.route('http://127.0.0.1:8020/api/ttv/calibration/ttv-dev-esp-testcase/complete', async route => {
+    completionPayload = route.request().postDataJSON()
     observation = null
     await route.fulfill({
       status: 200,
@@ -1815,6 +1817,10 @@ test('opt-in TTV calibration observation lifecycle is visible in My Fit', async 
           case_id: 'ttv-dev-esp-testcase',
           sample_role: 'development',
           observed_weeks: 12,
+          context: {
+            achieved_cefr: 'B2',
+            outcome_evidence_type: 'official_exam',
+          },
         },
       }),
     })
@@ -1830,8 +1836,19 @@ test('opt-in TTV calibration observation lifecycle is visible in My Fit', async 
 
   await expect(ttv.getByText('TTV v1 calibration observation active')).toBeVisible()
   await expect(ttv.getByText(/candidate 10–25 weeks/i)).toBeVisible()
-  await ttv.getByRole('button', { name: 'Record B2 outcome now' }).click()
 
+  const recordButton = ttv.getByRole('button', { name: 'Record documented outcome' })
+  await expect(recordButton).toBeDisabled()
+  await ttv.getByLabel('Achieved CEFR').selectOption('B2')
+  await ttv.getByLabel('Outcome evidence').selectOption('official_exam')
+  await expect(recordButton).toBeEnabled()
+  await recordButton.click()
+
+  expect(completionPayload).toMatchObject({
+    achieved_cefr: 'B2',
+    evidence_type: 'official_exam',
+    observed_at: null,
+  })
   await expect(ttv.getByText('TTV v1 calibration observation active')).toHaveCount(0)
   await expect(ttv.getByRole('button', { name: 'Start calibration observation' })).toBeVisible()
 })
