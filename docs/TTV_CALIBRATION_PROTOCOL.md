@@ -165,6 +165,20 @@ These metrics are descriptive.
 
 No current metric has an approved pass/fail threshold.
 
+### Why width and miss distance matter
+
+Coverage alone is not sufficient. A very wide interval can achieve high coverage while being too vague to support a decision.
+
+AUGUR therefore reports interval width alongside coverage and records the distance from the nearest interval boundary when an observation misses the range.
+
+These diagnostics are descriptive until acceptance thresholds are frozen. They are intended to let the development sample expose the trade-off between:
+
+- empirical coverage;
+- interval sharpness;
+- midpoint error;
+- systematic early/late bias;
+- severity and direction of misses.
+
 ## 8. Required future acceptance criteria
 
 Before a final holdout evaluation, AUGUR must still define and freeze:
