@@ -78,11 +78,18 @@ def probe_imf() -> dict:
     finally:
         adapter.close()
 
+    values = payload.get("values") if isinstance(payload, dict) else None
     return {
         "source": "IMF",
         "indicator": config["source_indicator"],
+        "payload_top_level_keys": sorted(payload) if isinstance(payload, dict) else [],
+        "value_keys": sorted(values)[:20] if isinstance(values, dict) else [],
         "rows": coverage,
-        "ok": all(count > 0 for count in coverage.values()),
+        "ok": any(count > 0 for count in coverage.values()),
+        "full_sample_coverage": all(
+            count > 0
+            for count in coverage.values()
+        ),
     }
 
 
