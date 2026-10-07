@@ -1,0 +1,42 @@
+name: AUGUR Global Baseline Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/app/catalog.py"
+      - "backend/app/db/analytics.py"
+      - "backend/app/ingestion/world_bank.py"
+      - "backend/app/ingestion/imf.py"
+      - "backend/app/ingestion/un_wpp.py"
+      - "backend/scripts/sync_global_baseline.py"
+      - ".github/workflows/global-baseline-smoke.yml"
+
+concurrency:
+  group: augur-global-baseline-smoke
+  cancel-in-progress: true
+
+jobs:
+  global-baseline:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Sync full global country baseline
+        run: python -m scripts.sync_global_baseline
