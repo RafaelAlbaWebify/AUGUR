@@ -268,6 +268,26 @@ type TTVResponse = {
   notes: string[]
 }
 
+type TTVCalibrationStatus = {
+  protocol_state: string
+  protocol_version: string | null
+  development_case_count: number
+  holdout_case_count: number
+  interval_coverage_pct: number | null
+  mean_interval_width_weeks: number | null
+  mean_absolute_midpoint_error_weeks: number | null
+  mean_miss_distance_weeks: number | null
+  context_summary: {
+    context_case_count: number
+    current_cefr_levels: string[]
+    target_cefr_levels: string[]
+    weekly_study_hours: number[]
+  }
+  protocol_readiness?: {
+    blockers: string[]
+  }
+}
+
 type TTVCalibrationObservation = {
   case_id: string
   country_iso3: string
@@ -380,6 +400,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [careerFit, setCareerFit] = useState<CareerFitResponse | null>(null)
   const [ttv, setTtv] = useState<TTVResponse | null>(null)
   const [ttvObservation, setTtvObservation] = useState<TTVCalibrationObservation | null>(null)
+  const [ttvCalibrationStatus, setTtvCalibrationStatus] = useState<TTVCalibrationStatus | null>(null)
   const [ttvObservationStatus, setTtvObservationStatus] = useState<'idle' | 'loading' | 'working' | 'error'>('idle')
   const [ttvExchangeStatus, setTtvExchangeStatus] = useState<'idle' | 'working' | 'saved' | 'imported' | 'error'>('idle')
   const fitRequestIdRef = useRef(0)
@@ -436,6 +457,16 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     }
   }
 
+  async function refreshTtvCalibrationStatus() {
+    try {
+      const response = await fetch(`${apiBase}/api/ttv/calibration/status`)
+      if (!response.ok) return
+      setTtvCalibrationStatus(await response.json())
+    } catch {
+      // TTV fit remains usable when calibration diagnostics are unavailable.
+    }
+  }
+
   async function refreshTtvObservation() {
     setTtvObservationStatus('loading')
     try {
@@ -486,6 +517,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       if (!response.ok) throw new Error(`TTV calibration HTTP ${response.status}`)
       setTtvObservation(null)
       setTtvObservationStatus('idle')
+      await refreshTtvCalibrationStatus()
     } catch {
       setTtvObservationStatus('error')
     }
@@ -546,6 +578,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       )
       if (!response.ok) throw new Error(`TTV exchange HTTP ${response.status}`)
       setTtvExchangeStatus('imported')
+      await refreshTtvCalibrationStatus()
     } catch {
       setTtvExchangeStatus('error')
     }
@@ -603,6 +636,7 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     setTtvObservation(null)
     void refreshTargetFits()
     void refreshTtvObservation()
+    void refreshTtvCalibrationStatus()
   }, [apiBase, targetCountry])
 
   async function save() {
@@ -1151,6 +1185,43 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               <strong>Calibration data portability</strong>
               <span>Development cases only · profile and personal history excluded</span>
             </div>
+            {ttvCalibrationStatus && (
+              <div className="ttvCalibrationDiagnostics" aria-label="TTV calibration diagnostics">
+                <article>
+                  <span>Development cases</span>
+                  <strong>{ttvCalibrationStatus.development_case_count}</strong>
+                </article>
+                <article>
+                  <span>Interval coverage</span>
+                  <strong>
+                    {ttvCalibrationStatus.interval_coverage_pct == null
+                      ? '—'
+                      : `${ttvCalibrationStatus.interval_coverage_pct.toFixed(1)}%`}
+                  </strong>
+                </article>
+                <article>
+                  <span>Mean interval width</span>
+                  <strong>
+                    {ttvCalibrationStatus.mean_interval_width_weeks == null
+                      ? '—'
+                      : `${ttvCalibrationStatus.mean_interval_width_weeks.toFixed(1)} wk`}
+                  </strong>
+                </article>
+                <article>
+                  <span>CEFR starts</span>
+                  <strong>
+                    {ttvCalibrationStatus.context_summary.current_cefr_levels.length
+                      ? ttvCalibrationStatus.context_summary.current_cefr_levels.join(' · ')
+                      : '—'}
+                  </strong>
+                </article>
+              </div>
+            )}
+            {ttvCalibrationStatus?.context_summary.weekly_study_hours.length ? (
+              <small>
+                Study-intensity cohorts: {ttvCalibrationStatus.context_summary.weekly_study_hours.join(' · ')} h/week
+              </small>
+            ) : null}
             <div className="ttvCalibrationActions">
               <button
                 type="button"
