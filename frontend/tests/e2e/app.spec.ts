@@ -1737,7 +1737,7 @@ test('Overview reveals NUTS 3 safety context', async ({ page }) => {
   await expect(nuts3).toBeVisible()
   await nuts3.click()
 
-  const evidence = page.getByRole('region', { name: /Regional evidence/i })
+  const evidence = page.getByRole('region', { name: 'Regional metric cards' })
   await expect(evidence.getByText('Police-recorded intentional homicide')).toBeVisible()
   await expect(evidence.getByText('0.7 /100k')).toBeVisible()
   await expect(evidence.getByText('Police-recorded robbery')).toBeVisible()
