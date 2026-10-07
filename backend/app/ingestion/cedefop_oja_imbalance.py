@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
+import httpx
+
 
 DATASET_ID = "CEDEFOP_OJA_IMBALANCE"
 SOURCE_ID = "CEDEFOP"
@@ -12,6 +14,10 @@ RELEASE_VERSION = "2026-05"
 DOI = "10.2906/752555516245105"
 CANONICAL_URL = "https://www.cedefop.europa.eu/en/datasets/oja-imbalance-occupations"
 PUBLISHED_FILENAME = "cedefop-oja-imbalance-2026-05.csv"
+DIRECT_DOWNLOAD_URL = (
+    "https://www.cedefop.europa.eu/files/"
+    "cedefop-oja-imbalance-2026-05.csv"
+)
 
 
 ALIASES = {
@@ -63,6 +69,54 @@ def _dialect(sample: str) -> csv.Dialect:
         return csv.Sniffer().sniff(sample, delimiters=",;\t|")
     except csv.Error:
         return csv.excel
+
+
+def download_csv(
+    destination: Path,
+    *,
+    client: httpx.Client | None = None,
+) -> dict:
+    owns_client = client is None
+    active = client or httpx.Client(
+        timeout=120,
+        follow_redirects=True,
+        headers={"User-Agent": "AUGUR/0.1 Cedefop OJA imbalance"},
+    )
+    try:
+        response = active.get(DIRECT_DOWNLOAD_URL)
+        response.raise_for_status()
+        content_type = response.headers.get("content-type", "")
+        raw = response.content
+    finally:
+        if owns_client:
+            active.close()
+
+    if not raw:
+        raise ValueError("Downloaded Cedefop OJA imbalance file is empty.")
+    if "text/csv" not in content_type.lower() and "text/plain" not in content_type.lower():
+        raise ValueError(
+            "Unexpected Cedefop OJA imbalance content type: "
+            f"{content_type or 'missing'}"
+        )
+
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_bytes(raw)
+
+    headers, _rows, _delimiter = read_preview(destination, max_rows=1)
+    schema = detect_schema(headers)
+    if not schema["ready_for_parser_implementation"]:
+        destination.unlink(missing_ok=True)
+        raise ValueError(
+            "Downloaded Cedefop OJA imbalance CSV schema is not recognised."
+        )
+
+    return {
+        "url": DIRECT_DOWNLOAD_URL,
+        "path": str(destination),
+        "bytes": len(raw),
+        "content_type": content_type,
+        "release_version": RELEASE_VERSION,
+    }
 
 
 def read_preview(path: Path, max_rows: int = 20) -> tuple[list[str], list[list[str]], str]:
