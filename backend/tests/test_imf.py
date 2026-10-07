@@ -154,3 +154,59 @@ def test_imf_normalization_accepts_dataset_qualified_indicator_key():
 
     assert [row["period"] for row in rows] == [2025, 2026]
     assert [row["value"] for row in rows] == [0.8, 1.2]
+
+
+def test_imf_fetch_falls_back_to_v1_on_v2_403():
+    import httpx
+
+    class Response:
+        def __init__(self, status_code, payload, request):
+            self.status_code = status_code
+            self._payload = payload
+            self.request = request
+
+        def raise_for_status(self):
+            if self.status_code >= 400:
+                raise httpx.HTTPStatusError(
+                    "blocked",
+                    request=self.request,
+                    response=httpx.Response(
+                        self.status_code,
+                        request=self.request,
+                    ),
+                )
+
+        def json(self):
+            return self._payload
+
+    class Client:
+        def __init__(self):
+            self.urls = []
+
+        def get(self, url):
+            self.urls.append(url)
+            request = httpx.Request("GET", url)
+            if "/api/v2/" in url:
+                return Response(403, {}, request)
+            return Response(
+                200,
+                {
+                    "values": {
+                        "NGDP_RPCH": {
+                            "DEU": {"2025": 0.8},
+                        }
+                    }
+                },
+                request,
+            )
+
+    client = Client()
+    adapter = IMFAdapter(client=client, max_retries=2)
+
+    payload = adapter.fetch_indicator("NGDP_RPCH")
+
+    assert payload["values"]["NGDP_RPCH"]["DEU"]["2025"] == 0.8
+    assert client.urls == [
+        "https://www.imf.org/external/datamapper/api/v2/NGDP_RPCH",
+        "https://www.imf.org/external/datamapper/api/v1/NGDP_RPCH",
+    ]
