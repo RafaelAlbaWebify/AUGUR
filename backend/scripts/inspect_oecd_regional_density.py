@@ -19,7 +19,7 @@ BASE_URL = (
 PARAMS = {
     "startPeriod": "2021",
     "dimensionAtObservation": "AllDimensions",
-    "format": "csvfile",
+    "format": "csvfilewithlabels",
 }
 
 
