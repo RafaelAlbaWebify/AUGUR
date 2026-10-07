@@ -7,8 +7,10 @@ import httpx
 from app.db.bootstrap import initialize_datastores
 from app.catalog import COUNTRIES
 from app.db.analytics import (
+    labour_shortage_index_status,
     regional_sector_employment_status,
     subnational_evidence_by_level_status,
+    upsert_labour_shortage_index,
     upsert_regional_sector_employment,
 )
 from app.ingestion.eurostat import EurostatAdapter
@@ -144,6 +146,7 @@ def main() -> int:
     results = [
         ensure_regional_sector_evidence(),
         ensure_nuts3_safety_evidence(),
+        ensure_clssi_evidence(),
     ]
     repaired = [
         item["evidence_id"]
