@@ -1816,6 +1816,85 @@ test('opt-in TTV calibration observation lifecycle is visible in My Fit', async 
   await expect(ttv.getByRole('button', { name: 'Start calibration observation' })).toBeVisible()
 })
 
+test('TTV development exchange can export and import from My Fit', async ({ page }) => {
+  const exchange = {
+    exchange_version: 'ttv-development-exchange-v1',
+    schema_version: 'ttv-calibration-v1',
+    scope_id: 'ttv-estimation-scope-v1',
+    privacy: {
+      contains_full_profile: false,
+      contains_name: false,
+      contains_email: false,
+      contains_address: false,
+      contains_free_text_history: false,
+    },
+    case_count: 1,
+    cases: [{
+      case_id: 'exchange-001',
+      country_iso3: 'IRL',
+      employment_mode: 'remote',
+      engine_version: 'ttv-temporal-evidence-v1',
+      composition: 'critical_path_v1',
+      candidate_weeks_min: 10,
+      candidate_weeks_max: 25,
+      observed_weeks: 12,
+      sample_role: 'development',
+      start_event_definition_version: 'ttv-start-active-language-transition-v1',
+      viability_outcome_definition_version: 'ttv-outcome-b2-remote-viability-v1',
+      stage_timings: {},
+    }],
+    notes: [],
+  }
+
+  await page.route('http://127.0.0.1:8020/api/ttv/calibration/export', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(exchange),
+    })
+  })
+
+  let importedPayload: unknown = null
+  await page.route('http://127.0.0.1:8020/api/ttv/calibration/import', async route => {
+    importedPayload = route.request().postDataJSON()
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        exchange_version: 'ttv-development-exchange-v1',
+        imported_count: 1,
+        case_ids: ['exchange-001'],
+      }),
+    })
+  })
+
+  await page.goto('/country/ESP/profile')
+  await page.getByText('Detailed fit evidence and TTV').click()
+  const portability = page.getByRole('region', { name: 'TTV readiness' })
+    .getByLabel('TTV calibration data portability')
+
+  await expect(portability.getByText('Calibration data portability')).toBeVisible()
+  await expect(portability.getByText(/profile and personal history excluded/i)).toBeVisible()
+
+  const downloadPromise = page.waitForEvent('download')
+  await portability.getByRole('button', { name: 'Export anonymous development cases' }).click()
+  const download = await downloadPromise
+  expect(download.suggestedFilename()).toBe('AUGUR_TTV_DEVELOPMENT_EXCHANGE.json')
+  await expect(portability.getByText('Anonymous development package exported.')).toBeVisible()
+
+  await portability.locator('input[type="file"]').setInputFiles({
+    name: 'AUGUR_TTV_DEVELOPMENT_EXCHANGE.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(JSON.stringify(exchange)),
+  })
+
+  await expect(portability.getByText('Development package imported locally.')).toBeVisible()
+  expect(importedPayload).toMatchObject({
+    exchange_version: 'ttv-development-exchange-v1',
+    case_count: 1,
+  })
+})
+
 test('map starts broad and exposes regional detail when country is focused', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
