@@ -43,6 +43,29 @@ if (-not $SkipSync) {
     if ($SyncCode -eq 2) {
         Write-Warning "Core synchronization completed with partial provider failures. Operability check will identify remaining gaps."
     }
+
+    $SubnationalCode = Invoke-Step "Synchronize registered-country subnational evidence" {
+        & (Join-Path $Root "sync-subnational.ps1")
+    } -AllowedExitCodes @(0, 2)
+
+    if ($SubnationalCode -eq 2) {
+        Write-Warning "Subnational synchronization completed with incomplete regional coverage."
+    }
+}
+
+$BackendPython = Join-Path $Root "backend\.venv\Scripts\python.exe"
+$LocalEvidenceCode = Invoke-Step "Ensure required local evidence" {
+    Push-Location (Join-Path $Root "backend")
+    try {
+        & $BackendPython -m scripts.ensure_local_evidence
+    }
+    finally {
+        Pop-Location
+    }
+} -AllowedExitCodes @(0, 2)
+
+if ($LocalEvidenceCode -eq 2) {
+    Write-Warning "Some optional local evidence could not be repaired automatically."
 }
 
 if ($EscoPath) {
