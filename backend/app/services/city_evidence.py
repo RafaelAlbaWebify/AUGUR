@@ -321,6 +321,8 @@ def city_evidence(
             if item["status"] == "available"
         ]
         upsert_subnational_observations(rows_to_store)
+        if force_refresh:
+            _refresh_city_pm25(code)
         combined = _city_result_from_local(
             code,
             latest_subnational_observations(code),
