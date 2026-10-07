@@ -185,10 +185,12 @@ class OECDRegionalAdapter:
         allowed_country_iso3: set[str] | None = None,
         start_year: int = 2021,
         end_year: int | None = None,
+        key: str = "all",
     ) -> dict:
         csv_text = self.fetch_density(
             start_year=start_year,
             end_year=end_year,
+            key=key,
         )
         rows = self.normalize_density(
             csv_text,
