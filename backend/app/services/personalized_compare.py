@@ -242,9 +242,19 @@ def _sensitivity_analysis(
         })
         value_options.append(options)
 
-    total_possible = 1
+    cartesian_combination_count = 1
     for options in value_options:
-        total_possible *= len(options)
+        cartesian_combination_count *= len(options)
+
+    all_zero_combination_possible = all(
+        0.0 in options
+        for options in value_options
+    )
+    total_possible = (
+        cartesian_combination_count - 1
+        if all_zero_combination_possible
+        else cartesian_combination_count
+    )
 
     scenarios = []
     seen = set()
@@ -328,6 +338,7 @@ def _sensitivity_analysis(
         "method": "joint_local_weight_neighborhood_plus_minus_1",
         "scenario_count": len(scenarios),
         "total_possible_scenarios": total_possible,
+        "cartesian_combination_count": cartesian_combination_count,
         "scenario_limit": SENSITIVITY_MAX_SCENARIOS,
         "truncated": truncated,
         "dimension_count": len(dimensions),
