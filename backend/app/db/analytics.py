@@ -1785,6 +1785,48 @@ def indicator_series(country_iso3: str, indicator_id: str) -> list[dict]:
         con.close()
 
 
+def indicator_peer_series(indicator_id: str) -> dict[str, list[dict]]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT
+                    o.country_iso3,
+                    o.period,
+                    o.value,
+                    o.unit,
+                    o.source_id,
+                    o.retrieved_at,
+                    o.source_updated_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY o.country_iso3, o.period
+                        ORDER BY s.priority ASC, o.source_id ASC
+                    ) AS rn
+                FROM observations o
+                JOIN sources s USING (source_id)
+                WHERE o.indicator_id = ?
+                  AND o.observation_type = 'observed'
+            )
+            SELECT
+                country_iso3, period, value, unit, source_id,
+                retrieved_at, source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY country_iso3, period
+            """,
+            [indicator_id],
+        )
+        columns = [column[0] for column in result.description]
+        grouped: dict[str, list[dict]] = {}
+        for row in result.fetchall():
+            item = dict(zip(columns, row))
+            grouped.setdefault(item["country_iso3"], []).append(item)
+        return grouped
+    finally:
+        con.close()
+
+
 def country_indicator_series(
     country_iso3: str,
     max_points: int = 8,
