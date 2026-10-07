@@ -2,7 +2,8 @@ param(
     [string]$EscoPath,
     [string]$StasPath,
     [string]$OjaPath,
-    [switch]$SkipSync
+    [switch]$SkipSync,
+    [switch]$GlobalBaseline
 )
 
 $ErrorActionPreference = "Stop"
@@ -36,6 +37,16 @@ Write-Host "AUGUR EVIDENCE REFRESH"
 Write-Host "======================"
 
 if (-not $SkipSync) {
+    if ($GlobalBaseline) {
+        $GlobalCode = Invoke-Step "Synchronize global baseline country evidence" {
+            & (Join-Path $Root "sync-global-baseline.ps1")
+        } -AllowedExitCodes @(0, 2)
+
+        if ($GlobalCode -eq 2) {
+            Write-Warning "Global baseline refresh completed with no analyzable countries."
+        }
+    }
+
     $SyncCode = Invoke-Step "Synchronize official country evidence" {
         & (Join-Path $Root "sync-core.ps1")
     } -AllowedExitCodes @(0, 2)
