@@ -80,8 +80,6 @@ jobs:
         run: >-
           python -m scripts.sync_oecd_regional
           --countries AUS
-          --density-key A.TL2.AU1+AU2.....PS_KM2
-          --population-key A.TL2.AU1+AU2..POP._T._T.
           --start-year 2021
 
       - name: Probe Urban Audit city evidence
