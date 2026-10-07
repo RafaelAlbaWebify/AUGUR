@@ -2503,14 +2503,15 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
             """
             INSERT OR REPLACE INTO subnational_observations
             (
-                geo_code, geo_level, indicator_id, period, value, unit,
+                geo_code, geo_name, geo_level, indicator_id, period, value, unit,
                 source_id, dataset_id, retrieved_at, source_updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 [
                     row["geo_code"].upper(),
+                    row.get("geo_name"),
                     row["geo_level"],
                     row["indicator_id"],
                     row["period"],
