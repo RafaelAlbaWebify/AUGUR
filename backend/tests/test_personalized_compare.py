@@ -166,6 +166,8 @@ def test_weighted_preference_index_keeps_tradeoff_on_pareto_frontier():
     assert round(personalized["scores"]["IRL"], 6) == 80.0
     assert set(personalized["pareto"]["frontier"]) == {"ESP", "IRL"}
     assert personalized["sensitivity"]["scenario_count"] > 1
+    assert personalized["sensitivity"]["method"] == "joint_local_weight_neighborhood_plus_minus_1"
+    assert personalized["sensitivity"]["truncated"] is False
     assert personalized["sensitivity"]["score_ranges"]["ESP"]["spread"] > 0
     assert personalized["sensitivity"]["rank_ranges"]["IRL"] == {
         "best_rank": 1,
@@ -277,3 +279,75 @@ def test_equal_tradeoff_is_preference_sensitive_under_weight_perturbation():
     assert sensitivity["rank_ranges"]["IRL"]["best_rank"] == 1
     assert sensitivity["rank_ranges"]["IRL"]["worst_rank"] == 2
     assert sensitivity["rank_ranges"]["IRL"]["status"] == "preference_sensitive"
+
+
+
+def test_joint_sensitivity_includes_simultaneous_weight_changes():
+    snapshots = {
+        "ESP": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 10.0, "ESP"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 5.0, "ESP"),
+        ],
+        "IRL": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 5.0, "IRL"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 10.0, "IRL"),
+        ],
+    }
+
+    result = build_personalized_normalization(
+        ["ESP", "IRL"],
+        snapshots,
+        {
+            "decision_weight_productive_capacity": 2,
+            "decision_weight_housing": 2,
+        },
+    )
+
+    sensitivity = result["personalized"]["sensitivity"]
+
+    assert sensitivity["method"] == "joint_local_weight_neighborhood_plus_minus_1"
+    assert sensitivity["scenario_count"] == 9
+    assert sensitivity["total_possible_scenarios"] == 9
+    assert sensitivity["dimension_count"] == 2
+    assert sensitivity["truncated"] is False
+    assert any(
+        scenario["weights"] == {
+            "housing": 3.0,
+            "productive_capacity": 3.0,
+        }
+        for scenario in sensitivity["scenarios"]
+    )
+    assert any(
+        scenario["weights"] == {
+            "housing": 1.0,
+            "productive_capacity": 3.0,
+        }
+        for scenario in sensitivity["scenarios"]
+    )
+
+
+def test_joint_sensitivity_drops_all_zero_combination():
+    snapshots = {
+        "ESP": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 10.0, "ESP"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 5.0, "ESP"),
+        ],
+        "IRL": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 5.0, "IRL"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 10.0, "IRL"),
+        ],
+    }
+
+    result = build_personalized_normalization(
+        ["ESP", "IRL"],
+        snapshots,
+        {
+            "decision_weight_productive_capacity": 1,
+            "decision_weight_housing": 1,
+        },
+    )
+
+    sensitivity = result["personalized"]["sensitivity"]
+    assert sensitivity["total_possible_scenarios"] == 9
+    assert sensitivity["scenario_count"] == 8
+    assert all(scenario["weights"] for scenario in sensitivity["scenarios"])
