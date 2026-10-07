@@ -14,6 +14,8 @@ on:
       - "backend/app/ingestion/world_bank.py"
       - "backend/app/ingestion/imf.py"
       - "backend/app/ingestion/un_wpp.py"
+      - "backend/app/ingestion/oecd_regional.py"
+      - "backend/scripts/sync_oecd_regional_density.py"
       - "backend/app/ingestion/eea_*.py"
       - "backend/app/ingestion/gisco_cities.py"
       - "backend/app/ingestion/cedefop_clssi.py"
@@ -68,6 +70,13 @@ jobs:
 
       - name: Inspect OECD regional density
         run: python -m scripts.inspect_oecd_regional_density
+
+      - name: Sync OECD Australia regional density
+        run: >-
+          python -m scripts.sync_oecd_regional_density
+          --countries AUS
+          --key A.TL2.AU1+AU2.....PS_KM2
+          --start-year 2021
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
