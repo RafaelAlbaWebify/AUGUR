@@ -11,6 +11,17 @@ def _city_history_stub(monkeypatch):
         "subnational_indicator_series",
         lambda code, max_points=8: [],
     )
+    monkeypatch.setattr(
+        module,
+        "city_evidence_bundle",
+        lambda code, max_history_points=8: {
+            "latest": module.latest_subnational_observations(code),
+            "history": module.subnational_indicator_series(
+                code,
+                max_points=max_history_points,
+            ),
+        },
+    )
 
 
 class FakeAdapter:
