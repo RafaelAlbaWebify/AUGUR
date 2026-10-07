@@ -280,6 +280,128 @@ def _fetch_city_indicators(
     return indicators
 
 
+def sync_city_evidence_codes(
+    city_codes: list[str],
+    adapter: EurostatAdapter | None = None,
+    *,
+    refresh_pm25: bool = True,
+) -> dict:
+    codes = sorted({
+        str(code).strip().upper()
+        for code in city_codes
+        if str(code).strip()
+    })
+    if not codes:
+        return {
+            "city_code_count": 0,
+            "cities_with_data": 0,
+            "rows_upserted": 0,
+            "pm25_refreshed": 0,
+            "results": [],
+        }
+
+    owns_adapter = adapter is None
+    active_adapter = adapter or EurostatAdapter(
+        timeout_seconds=90.0,
+        max_retries=3,
+    )
+
+    by_dataset: dict[str, list[dict]] = {}
+    for config in CITY_INDICATORS:
+        by_dataset.setdefault(config["dataset_id"], []).append(config)
+
+    rows_to_store: list[dict] = []
+    availability: dict[str, set[str]] = {code: set() for code in codes}
+    failures: list[dict] = []
+
+    try:
+        for dataset_id, configs in by_dataset.items():
+            try:
+                payload = active_adapter.fetch_dataset(
+                    dataset_id,
+                    {
+                        "cities": codes,
+                        "freq": "A",
+                    },
+                )
+            except Exception as exc:
+                failures.append({
+                    "dataset_id": dataset_id,
+                    "error_type": type(exc).__name__,
+                    "error": str(exc),
+                })
+                continue
+
+            for code in codes:
+                for config in configs:
+                    normalized = active_adapter.normalize(
+                        code,
+                        {
+                            "indicator_id": config["indicator_id"],
+                            "dataset_id": dataset_id,
+                            "unit": config["unit"],
+                            "dimension_values": {
+                                "cities": code,
+                                "indic_ur": config["indic_ur"],
+                            },
+                        },
+                        payload,
+                    )
+                    if normalized:
+                        availability[code].add(config["indicator_id"])
+
+                    rows_to_store.extend([
+                        {
+                            "geo_code": code,
+                            "geo_level": "city",
+                            "indicator_id": config["indicator_id"],
+                            "period": row["period"],
+                            "value": row["value"],
+                            "unit": config["unit"],
+                            "source_id": row["source_id"],
+                            "dataset_id": dataset_id,
+                            "retrieved_at": row["retrieved_at"],
+                            "source_updated_at": row.get("source_updated_at"),
+                        }
+                        for row in normalized
+                    ])
+    finally:
+        if owns_adapter:
+            active_adapter.close()
+
+    rows_upserted = upsert_subnational_observations(rows_to_store)
+
+    pm25_refreshed = 0
+    if refresh_pm25:
+        for code in codes:
+            if _refresh_city_pm25(code):
+                pm25_refreshed += 1
+
+    for code in codes:
+        _CITY_CACHE.pop(code, None)
+
+    results = [
+        {
+            "city_code": code,
+            "available_indicator_count": len(availability[code]),
+            "available_indicator_ids": sorted(availability[code]),
+        }
+        for code in codes
+    ]
+
+    return {
+        "city_code_count": len(codes),
+        "cities_with_data": sum(
+            1 for code in codes
+            if availability[code]
+        ),
+        "rows_upserted": rows_upserted,
+        "pm25_refreshed": pm25_refreshed,
+        "dataset_failures": failures,
+        "results": results,
+    }
+
+
 def _refresh_city_pm25(code: str) -> bool:
     try:
         resolved = resolve_eea_city(code)
