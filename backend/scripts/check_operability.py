@@ -160,8 +160,28 @@ def main() -> int:
         f"{calibration['interval_coverage_pct']}"
     )
     print(
+        "mean_interval_width_weeks: "
+        f"{calibration.get('mean_interval_width_weeks')}"
+    )
+    print(
+        "median_interval_width_weeks: "
+        f"{calibration.get('median_interval_width_weeks')}"
+    )
+    print(
         "mean_absolute_midpoint_error_weeks: "
         f"{calibration['mean_absolute_midpoint_error_weeks']}"
+    )
+    print(
+        "mean_miss_distance_weeks: "
+        f"{calibration.get('mean_miss_distance_weeks')}"
+    )
+    context = calibration.get("context_summary") or {}
+    print(
+        "calibration_context: "
+        f"cases={context.get('context_case_count', 0)} "
+        f"cefr_starts={context.get('current_cefr_levels', [])} "
+        f"cefr_targets={context.get('target_cefr_levels', [])} "
+        f"study_hours_per_week={context.get('weekly_study_hours', [])}"
     )
     print(
         "externally_calibrated: "
@@ -174,8 +194,10 @@ def main() -> int:
                 f"  {role}: "
                 f"cases={metrics['case_count']} "
                 f"coverage={metrics['interval_coverage_pct']}% "
+                f"width={metrics.get('mean_interval_width_weeks')}w "
                 f"mae={metrics['mean_absolute_midpoint_error_weeks']}w "
-                f"bias={metrics['mean_signed_midpoint_error_weeks']}w"
+                f"bias={metrics['mean_signed_midpoint_error_weeks']}w "
+                f"miss_distance={metrics.get('mean_miss_distance_weeks')}w"
             )
 
     if calibration.get("stage_metrics"):
