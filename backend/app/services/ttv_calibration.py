@@ -260,6 +260,13 @@ def _normalize_calibration_context(value) -> dict:
         if raw:
             if raw not in allowed_cefr:
                 raise ValueError(f"{field} must be a CEFR level")
+            if (
+                field == "achieved_cefr"
+                and raw not in TTV_OUTCOME_CEFR_LEVELS
+            ):
+                raise ValueError(
+                    "achieved_cefr must be B2, C1 or C2"
+                )
             normalized[field] = raw
 
     outcome_evidence_type = str(
@@ -664,6 +671,8 @@ def calibration_status() -> dict:
                     "context_case_count": 0,
                     "current_cefr_levels": [],
                     "target_cefr_levels": [],
+                    "achieved_cefr_levels": [],
+                    "outcome_evidence_types": [],
                     "weekly_study_hours": [],
                 },
                 "externally_calibrated": False,
@@ -769,6 +778,16 @@ def calibration_status() -> dict:
             str(item["target_cefr"])
             for item in parsed_contexts
             if item.get("target_cefr")
+        }),
+        "achieved_cefr_levels": sorted({
+            str(item["achieved_cefr"])
+            for item in parsed_contexts
+            if item.get("achieved_cefr")
+        }),
+        "outcome_evidence_types": sorted({
+            str(item["outcome_evidence_type"])
+            for item in parsed_contexts
+            if item.get("outcome_evidence_type")
         }),
         "weekly_study_hours": sorted({
             float(item["weekly_study_hours"])
