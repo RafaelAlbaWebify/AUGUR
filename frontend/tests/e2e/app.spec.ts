@@ -1011,7 +1011,7 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
   await expect(map.locator('.leaflet-control-zoom-in')).toBeVisible()
-  await expect(page.getByText('Zoom in to reveal NUTS 2 regions')).toBeVisible()
+  await expect(page.getByText('Zoom in to reveal available regional detail')).toBeVisible()
   await expect(map).toHaveAttribute('data-map-status', 'ready')
 
   await page.getByRole('button', { name: 'Focus country' }).click()
@@ -2769,6 +2769,9 @@ test('mobile My Fit keeps summary, completion, actions and evidence reachable', 
 
 test('city evidence is grouped into demography mobility tourism and environment', async ({ page }) => {
   await page.goto('/country/ESP/overview')
+
+  const map = page.getByTestId('regional-map')
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
 
   const zoomIn = page.locator('.leaflet-control-zoom-in')
   for (let index = 0; index < 12; index += 1) {
