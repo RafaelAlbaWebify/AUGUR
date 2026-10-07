@@ -58,6 +58,13 @@ type PersonalizedComparison = {
       method: string
       scenario_count: number
       score_ranges: Record<string, { min: number; max: number; spread: number }>
+      rank_ranges: Record<string, {
+        best_rank: number
+        worst_rank: number
+        top_scenario_count: number
+        scenario_count: number
+        status: 'rank_stable' | 'preference_sensitive'
+      }>
     }
     pareto?: null | {
       method: string
@@ -531,14 +538,46 @@ export default function ComparePanel({
 
           <section>
             <div className="panelHeading">
-              <div><span>ROBUSTNESS CHECK</span><h3>How sensitive is the comparison?</h3></div>
+              <div><span>ROBUSTNESS CHECK</span><h3>Tested preference robustness</h3></div>
             </div>
-            <div className="robustnessUnavailable">
-              <strong>Not available yet</strong>
-              <p>
-                A robustness result requires user-defined weights, comparable normalization, missing-data rules and sensitivity analysis. AUGUR will not invent a stability claim before those are implemented.
-              </p>
-            </div>
+            {mode === 'priorities'
+              && personalized?.status === 'ready'
+              && personalized.personalized.sensitivity ? (
+              <div className="robustnessResult">
+                {selected.map((iso3) => {
+                  const countryName = countries.find((country) => country.iso3 === iso3)?.name ?? iso3
+                  const rank = personalized.personalized.sensitivity?.rank_ranges[iso3]
+                  if (!rank) return null
+                  return (
+                    <article key={iso3}>
+                      <div>
+                        <strong>{countryName}</strong>
+                        <span>{rank.status === 'rank_stable' ? 'Stable tested rank' : 'Preference-sensitive'}</span>
+                      </div>
+                      <b>
+                        {rank.best_rank === rank.worst_rank
+                          ? `rank ${rank.best_rank}`
+                          : `rank ${rank.best_rank}–${rank.worst_rank}`}
+                      </b>
+                      <small>
+                        first in {rank.top_scenario_count}/{rank.scenario_count} tested weight scenarios
+                      </small>
+                    </article>
+                  )
+                })}
+                <p>
+                  Tested only under one-at-a-time ±1 changes to your explicit 0–5 weights.
+                  This is preference sensitivity, not statistical uncertainty or a probability of being best.
+                </p>
+              </div>
+            ) : (
+              <div className="robustnessUnavailable">
+                <strong>Needs explicit priorities</strong>
+                <p>
+                  Set decision weights and keep comparable evidence available to activate tested preference robustness.
+                </p>
+              </div>
+            )}
           </section>
         </aside>
       </div>
