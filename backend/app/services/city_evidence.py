@@ -25,6 +25,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_cpop1",
         "indic_ur": "DE1001V",
         "unit": "persons",
+        "category": "demography",
     },
     {
         "indicator_id": "city_median_age",
@@ -32,6 +33,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_cpopstr",
         "indic_ur": "DE1073V",
         "unit": "years",
+        "category": "demography",
     },
     {
         "indicator_id": "city_public_transport_commute_share",
@@ -39,6 +41,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_ctran",
         "indic_ur": "TT1010V",
         "unit": "percent",
+        "category": "mobility",
     },
     {
         "indicator_id": "city_walk_commute_share",
@@ -46,6 +49,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_ctran",
         "indic_ur": "TT1008V",
         "unit": "percent",
+        "category": "mobility",
     },
     {
         "indicator_id": "city_registered_cars_per_1000",
@@ -53,6 +57,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_ctran",
         "indic_ur": "TT1057I",
         "unit": "per_1000_people",
+        "category": "mobility",
     },
     {
         "indicator_id": "city_monthly_transit_pass",
@@ -60,6 +65,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_ctran",
         "indic_ur": "TT1080V",
         "unit": "eur_monthly",
+        "category": "mobility",
     },
     {
         "indicator_id": "city_tourist_nights_per_resident",
@@ -67,6 +73,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_ctour",
         "indic_ur": "CR2011I",
         "unit": "nights_per_person",
+        "category": "tourism",
     },
     {
         "indicator_id": "city_tourist_beds_per_1000",
@@ -74,6 +81,7 @@ CITY_INDICATORS = [
         "dataset_id": "urb_ctour",
         "indic_ur": "CR2010I",
         "unit": "per_1000_people",
+        "category": "tourism",
     },
 ]
 
@@ -108,6 +116,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
             indicators.append({
                 "indicator_id": config["indicator_id"],
                 "name": config["name"],
+                "category": config["category"],
                 "status": "available",
                 "period": row["period"],
                 "value": row["value"],
@@ -121,6 +130,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
             indicators.append({
                 "indicator_id": config["indicator_id"],
                 "name": config["name"],
+                "category": config["category"],
                 "status": "unavailable",
                 "dataset_id": config["dataset_id"],
                 "source_id": "EUROSTAT",
@@ -133,6 +143,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
         indicators.append({
             "indicator_id": "city_pm25_annual_mean_observed",
             "name": "Observed annual mean PM2.5",
+            "category": "environment",
             "status": "available",
             "period": pm25["period"],
             "value": pm25["value"],
@@ -146,6 +157,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
         indicators.append({
             "indicator_id": "city_pm25_annual_mean_observed",
             "name": "Observed annual mean PM2.5",
+            "category": "environment",
             "status": "unavailable",
             "dataset_id": "EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS",
             "source_id": "EEA",
@@ -200,6 +212,7 @@ def _fetch_city_indicators(
                 {
                     "indicator_id": config["indicator_id"],
                     "name": config["name"],
+                    "category": config["category"],
                     "status": "unavailable",
                     "dataset_id": dataset_id,
                     "source_id": "EUROSTAT",
@@ -240,6 +253,7 @@ def _fetch_city_indicators(
             indicators.append({
                 "indicator_id": config["indicator_id"],
                 "name": config["name"],
+                "category": config["category"],
                 "status": "available",
                 "period": latest["period"],
                 "value": latest["value"],
@@ -337,6 +351,7 @@ def city_evidence(
                 {
                     "indicator_id": "city_pm25_annual_mean_observed",
                     "name": "Observed annual mean PM2.5",
+                    "category": "environment",
                     "status": "unavailable",
                     "dataset_id": "EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS",
                     "source_id": "EEA",
