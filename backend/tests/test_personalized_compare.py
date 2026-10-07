@@ -348,6 +348,8 @@ def test_joint_sensitivity_drops_all_zero_combination():
     )
 
     sensitivity = result["personalized"]["sensitivity"]
-    assert sensitivity["total_possible_scenarios"] == 9
+    assert sensitivity["cartesian_combination_count"] == 9
+    assert sensitivity["total_possible_scenarios"] == 8
     assert sensitivity["scenario_count"] == 8
+    assert sensitivity["truncated"] is False
     assert all(scenario["weights"] for scenario in sensitivity["scenarios"])
