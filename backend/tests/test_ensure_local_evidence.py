@@ -142,6 +142,15 @@ def test_main_returns_partial_when_repair_cannot_restore_evidence(monkeypatch, c
             "action": "none",
         },
     )
+    monkeypatch.setattr(
+        module,
+        "ensure_clssi_evidence",
+        lambda: {
+            "evidence_id": "cedefop_clssi",
+            "status": "available",
+            "action": "none",
+        },
+    )
 
     code = module.main()
 
@@ -295,3 +304,121 @@ def test_nuts3_safety_repairs_missing_store(monkeypatch):
     assert result["action"] == "repaired"
     assert result["region_count_requested"] == 3
     assert result["sync_result"]["rows_upserted"] == 6
+
+
+
+def test_clssi_evidence_noops_when_already_available(monkeypatch):
+    status = {
+        "available": True,
+        "row_count": 129,
+        "country_count": 3,
+        "countries": ["ESP", "IRL", "PRT"],
+        "horizons": [2035],
+        "release_versions": ["2026"],
+        "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+    }
+    monkeypatch.setattr(
+        module,
+        "labour_shortage_index_status",
+        lambda: status,
+    )
+
+    def unexpected_download(path):
+        raise AssertionError("CLSSI download should not run")
+
+    monkeypatch.setattr(
+        module,
+        "download_clssi_workbook",
+        unexpected_download,
+    )
+
+    result = module.ensure_clssi_evidence()
+
+    assert result["status"] == "available"
+    assert result["action"] == "none"
+    assert result["before"] == status
+    assert result["after"] == status
+
+
+def test_clssi_evidence_repairs_missing_store(monkeypatch, tmp_path):
+    statuses = iter([
+        {
+            "available": False,
+            "row_count": 0,
+            "country_count": 0,
+            "countries": [],
+            "horizons": [],
+            "release_versions": [],
+            "latest_retrieved_at": None,
+        },
+        {
+            "available": True,
+            "row_count": 3,
+            "country_count": 3,
+            "countries": ["ESP", "IRL", "PRT"],
+            "horizons": [2035],
+            "release_versions": ["2026"],
+            "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+        },
+    ])
+    monkeypatch.setattr(
+        module,
+        "labour_shortage_index_status",
+        lambda: next(statuses),
+    )
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(data_dir=tmp_path),
+    )
+
+    downloaded = {}
+    monkeypatch.setattr(
+        module,
+        "download_clssi_workbook",
+        lambda path: downloaded.setdefault(
+            "result",
+            {
+                "url": "https://example.test/clssi.xlsx",
+                "path": str(path),
+                "bytes": 100,
+                "content_type": "application/xlsx",
+            },
+        ),
+    )
+
+    rows = [
+        {
+            "country_iso3": "ESP",
+            "horizon": 2035,
+            "isco08": "25",
+        },
+        {
+            "country_iso3": "IRL",
+            "horizon": 2035,
+            "isco08": "25",
+        },
+        {
+            "country_iso3": "PRT",
+            "horizon": 2035,
+            "isco08": "25",
+        },
+    ]
+    monkeypatch.setattr(
+        module,
+        "parse_clssi_workbook",
+        lambda path: rows,
+    )
+    monkeypatch.setattr(
+        module,
+        "upsert_labour_shortage_index",
+        lambda parsed: len(parsed),
+    )
+
+    result = module.ensure_clssi_evidence()
+
+    assert result["status"] == "available"
+    assert result["action"] == "repaired"
+    assert result["rows_parsed"] == 3
+    assert result["rows_upserted"] == 3
+    assert result["download"]["bytes"] == 100
