@@ -34,6 +34,7 @@ from app.services.ttv_calibration import (
     cancel_calibration_observation,
     export_development_calibration_package,
     import_development_calibration_package,
+    calibration_status,
 )
 from app.services.operability import operability_status
 from app.services.regional_evidence import regional_evidence, regional_comparison, geographic_level
@@ -506,6 +507,11 @@ def ttv_calibration_cancel_post(case_id: str):
         return cancel_calibration_observation(case_id)
     except ValueError as exc:
         raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.get("/ttv/calibration/status")
+def ttv_calibration_status_get():
+    return calibration_status()
 
 
 @router.get("/ttv/calibration/export")
