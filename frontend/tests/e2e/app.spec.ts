@@ -2771,7 +2771,7 @@ test('city evidence is grouped into demography mobility tourism and environment'
   await page.goto('/country/ESP/overview')
 
   const zoomIn = page.locator('.leaflet-control-zoom-in')
-  for (let index = 0; index < 7; index += 1) {
+  for (let index = 0; index < 12; index += 1) {
     await zoomIn.click()
   }
 
