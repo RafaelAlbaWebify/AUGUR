@@ -1,3 +1,4 @@
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pytest
@@ -16,6 +17,37 @@ def _use_temp_store(monkeypatch, tmp_path):
     )
     return path
 
+
+
+def _candidate_ttv_result():
+    return {
+        "candidate_time_range": {
+            "weeks_min": 10,
+            "weeks_max": 25,
+            "composition": "critical_path_v1",
+        },
+        "temporal_evidence": {
+            "engine_version": "ttv-temporal-evidence-v1",
+            "calendar_ready": True,
+            "estimation_scope": {
+                "scope_id": "ttv-estimation-scope-v1",
+                "in_scope": True,
+                "blockers": [],
+            },
+            "stages": {
+                "language": {
+                    "status": "available",
+                    "current_cefr": "B1",
+                    "target_cefr": "B2",
+                    "guided_hours_min": 100,
+                    "guided_hours_max": 250,
+                    "weekly_study_hours": 10,
+                    "weeks_min": 10,
+                    "weeks_max": 25,
+                }
+            },
+        },
+    }
 
 def test_empty_calibration_store_is_ready_but_not_calibrated(
     monkeypatch,
@@ -390,3 +422,101 @@ def test_holdout_scope_rejects_local_case_after_protocol_gate(monkeypatch):
         match="outside TTV v1 calibration scope",
     ):
         module.validate_calibration_case(case)
+
+
+
+def test_opt_in_observation_lifecycle_creates_development_case(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    started = module.start_calibration_observation(
+        "IRL",
+        _candidate_ttv_result(),
+    )
+    duplicate = module.start_calibration_observation(
+        "IRL",
+        _candidate_ttv_result(),
+    )
+
+    assert started["status"] == "active"
+    assert duplicate["case_id"] == started["case_id"]
+    assert started["baseline"]["language"]["current_cefr"] == "B1"
+    assert started["baseline"]["language"]["target_cefr"] == "B2"
+
+    started_at = datetime.fromisoformat(started["started_at"])
+    observed_at = started_at + timedelta(days=84)
+
+    completed = module.complete_calibration_observation(
+        started["case_id"],
+        observed_at=observed_at.isoformat(),
+    )
+
+    assert completed["observation"]["status"] == "completed"
+    assert completed["calibration_case"]["sample_role"] == "development"
+    assert completed["calibration_case"]["employment_mode"] == "remote"
+    assert completed["calibration_case"]["observed_weeks"] == 12.0
+    assert completed["calibration_case"]["stage_timings"]["language"] == {
+        "candidate_weeks_min": 10.0,
+        "candidate_weeks_max": 25.0,
+        "observed_weeks": 12.0,
+    }
+    assert module.active_calibration_observation("IRL") is None
+
+    status = module.calibration_status()
+    assert status["development_case_count"] == 1
+    assert status["holdout_case_count"] == 0
+    assert status["externally_calibrated"] is False
+
+
+def test_opt_in_observation_rejects_out_of_scope_candidate(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+    result = _candidate_ttv_result()
+    result["temporal_evidence"]["estimation_scope"]["in_scope"] = False
+    result["temporal_evidence"]["estimation_scope"]["blockers"] = [
+        "local_employment_mode_outside_v1_scope"
+    ]
+    result["candidate_time_range"] = None
+
+    with pytest.raises(ValueError, match="in-scope v1 case"):
+        module.start_calibration_observation("ESP", result)
+
+
+def test_cancelled_observation_does_not_create_calibration_case(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    started = module.start_calibration_observation(
+        "PRT",
+        _candidate_ttv_result(),
+    )
+    cancelled = module.cancel_calibration_observation(started["case_id"])
+
+    assert cancelled["status"] == "cancelled"
+    assert module.active_calibration_observation("PRT") is None
+    assert module.calibration_status()["case_count"] == 0
+
+
+def test_observation_completion_rejects_date_before_start(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    started = module.start_calibration_observation(
+        "IRL",
+        _candidate_ttv_result(),
+    )
+    started_at = datetime.fromisoformat(started["started_at"])
+
+    with pytest.raises(ValueError, match="must not be before"):
+        module.complete_calibration_observation(
+            started["case_id"],
+            observed_at=(started_at - timedelta(days=1)).isoformat(),
+        )
