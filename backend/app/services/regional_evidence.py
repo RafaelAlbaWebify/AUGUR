@@ -373,64 +373,43 @@ def regional_evidence(
             return cached[1]
 
         local_rows = latest_subnational_observations(code)
-        expected_ids = {
-            config["indicator_id"]
+        local = _regional_result_from_local(code, local_rows)
+        if local:
+            _REGIONAL_CACHE[code] = (monotonic(), local)
+            return local
+
+        # Interactive reads must never block on Eurostat. Missing local
+        # evidence is repaired by refresh/sync flows or an explicit
+        # force_refresh, not while the user is selecting a region.
+        indicators = [
+            {
+                "indicator_id": config["indicator_id"],
+                "name": config["name"],
+                "status": "unavailable",
+                "dataset_id": config["dataset_id"],
+                "source_id": "EUROSTAT",
+                "reason": "not_cached",
+            }
             for config in _indicator_configs_for_geo(code)
+        ]
+        result = {
+            "geo_code": code,
+            "geo_level": geographic_level(code),
+            "source": "AUGUR local store · Eurostat regional statistics",
+            "storage": "duckdb",
+            "indicator_count": len(indicators),
+            "available_count": 0,
+            "complete": False,
+            "indicators": indicators,
+            "sector_structure": _regional_sector_context(code),
+            "notes": [
+                "Interactive regional reads are local-only and never wait for an external provider.",
+                "Missing evidence is refreshed through AUGUR sync/repair flows.",
+                "Coverage varies by indicator and region; unavailable series remain explicit.",
+            ],
         }
-        cached_ids = {
-            row["indicator_id"]
-            for row in local_rows
-        }
-        missing_ids = expected_ids - cached_ids
-
-        if local_rows and not missing_ids:
-            local = _regional_result_from_local(code, local_rows)
-            if local:
-                _REGIONAL_CACHE[code] = (monotonic(), local)
-                return local
-
-        if local_rows and missing_ids:
-            enrichment_adapter = EurostatAdapter(
-                timeout_seconds=20.0,
-                max_retries=2,
-            )
-            try:
-                missing_results = [
-                    _latest_regional_indicator(
-                        enrichment_adapter,
-                        code,
-                        config,
-                    )
-                    for config in _indicator_configs_for_geo(code)
-                    if config["indicator_id"] in missing_ids
-                ]
-            finally:
-                enrichment_adapter.close()
-
-            rows_to_store = [
-                {
-                    "geo_code": code,
-                    "geo_level": geographic_level(code),
-                    "indicator_id": item["indicator_id"],
-                    "period": item["period"],
-                    "value": item["value"],
-                    "unit": item.get("unit"),
-                    "source_id": item["source_id"],
-                    "dataset_id": item["dataset_id"],
-                    "retrieved_at": datetime.now(timezone.utc),
-                    "source_updated_at": item.get("source_updated_at"),
-                }
-                for item in missing_results
-                if item["status"] == "available"
-            ]
-            if rows_to_store:
-                upsert_subnational_observations(rows_to_store)
-                local_rows = latest_subnational_observations(code)
-
-            local = _regional_result_from_local(code, local_rows)
-            if local:
-                _REGIONAL_CACHE[code] = (monotonic(), local)
-                return local
+        _REGIONAL_CACHE[code] = (monotonic(), result)
+        return result
 
     owns_adapter = adapter is None
     active_adapter = adapter or EurostatAdapter(timeout_seconds=20.0, max_retries=2)
