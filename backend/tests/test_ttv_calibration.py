@@ -312,3 +312,72 @@ def test_sample_role_metrics_keep_development_and_holdout_separate(
         "mean_absolute_midpoint_error_weeks": None,
         "mean_signed_midpoint_error_weeks": None,
     }
+
+
+def test_calibration_preflight_separates_v1_eligible_cases():
+    result = module.calibration_batch_preflight([
+        {
+            "case_id": "remote-v1",
+            "country_iso3": "IRL",
+            "employment_mode": "remote",
+            "engine_version": "ttv-temporal-evidence-v1",
+            "composition": "critical_path_v1",
+        },
+        {
+            "case_id": "local-dev",
+            "country_iso3": "ESP",
+            "employment_mode": "local",
+            "engine_version": "ttv-temporal-evidence-v1",
+            "composition": "critical_path_v1",
+        },
+    ])
+
+    assert result["case_count"] == 2
+    assert result["eligible_case_count"] == 1
+    assert result["ineligible_case_count"] == 1
+    assert result["all_cases_eligible"] is False
+    assert result["cases"][0]["eligible_for_v1_holdout"] is True
+    assert result["cases"][1]["blockers"] == [
+        "employment_mode_outside_ttv_v1_scope"
+    ]
+
+
+def test_calibration_protocol_readiness_exposes_holdout_scope():
+    result = module.calibration_protocol_readiness()
+
+    assert result["holdout_scope"]["scope_id"] == "ttv-estimation-scope-v1"
+    assert result["holdout_scope"]["employment_modes"] == ["remote"]
+    assert result["holdout_scope"]["engine_versions"] == [
+        "ttv-temporal-evidence-v1"
+    ]
+    assert result["holdout_scope"]["composition_versions"] == [
+        "critical_path_v1"
+    ]
+
+
+def test_holdout_scope_rejects_local_case_after_protocol_gate(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "CALIBRATION_PROTOCOL_VERSION",
+        "ttv-calibration-protocol-v1",
+    )
+
+    case = {
+        "case_id": "holdout-local-001",
+        "country_iso3": "ESP",
+        "employment_mode": "local",
+        "engine_version": "ttv-temporal-evidence-v1",
+        "composition": "critical_path_v1",
+        "candidate_weeks_min": 8,
+        "candidate_weeks_max": 18,
+        "observed_weeks": 12,
+        "sample_role": "holdout",
+        "start_event_definition_version": "start-v1",
+        "viability_outcome_definition_version": "outcome-v1",
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="outside TTV v1 calibration scope",
+    ):
+        module.validate_calibration_case(case)
