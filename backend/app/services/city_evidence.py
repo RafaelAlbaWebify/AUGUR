@@ -6,6 +6,7 @@ from time import monotonic
 from app.db.analytics import (
     latest_subnational_observations,
     subnational_indicator_series,
+    city_evidence_bundle,
     upsert_subnational_observations,
 )
 from app.ingestion.eurostat import EurostatAdapter
@@ -90,12 +91,18 @@ CITY_POPULATION = CITY_INDICATORS[0]
 
 
 
-def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
+def _city_result_from_local(
+    code: str,
+    rows: list[dict],
+    *,
+    history_rows: list[dict] | None = None,
+) -> dict | None:
     by_id = {
         row["indicator_id"]: row
         for row in rows
     }
-    history_rows = subnational_indicator_series(code, max_points=8)
+    if history_rows is None:
+        history_rows = subnational_indicator_series(code, max_points=8)
     history_by_id: dict[str, list[dict]] = {}
     for history_row in history_rows:
         history_by_id.setdefault(history_row["indicator_id"], []).append({
@@ -318,8 +325,13 @@ def city_evidence(
         if cached and monotonic() - cached[0] < CACHE_TTL_SECONDS:
             return cached[1]
 
-        local_rows = latest_subnational_observations(code)
-        local = _city_result_from_local(code, local_rows)
+        bundle = city_evidence_bundle(code, max_history_points=8)
+        local_rows = bundle["latest"]
+        local = _city_result_from_local(
+            code,
+            local_rows,
+            history_rows=bundle["history"],
+        )
         if local:
             _CITY_CACHE[code] = (monotonic(), local)
             return local
@@ -420,9 +432,11 @@ def city_evidence(
         if force_refresh:
             _refresh_city_pm25(code)
 
+        bundle = city_evidence_bundle(code, max_history_points=8)
         combined = _city_result_from_local(
             code,
-            latest_subnational_observations(code),
+            bundle["latest"],
+            history_rows=bundle["history"],
         )
         if combined:
             _CITY_CACHE[code] = (monotonic(), combined)
