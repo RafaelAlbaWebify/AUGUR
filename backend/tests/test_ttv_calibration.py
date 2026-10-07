@@ -74,6 +74,8 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
         "context_case_count": 0,
         "current_cefr_levels": [],
         "target_cefr_levels": [],
+        "achieved_cefr_levels": [],
+        "outcome_evidence_types": [],
         "weekly_study_hours": [],
     }
 
@@ -519,6 +521,8 @@ def test_opt_in_observation_lifecycle_creates_development_case(
         "context_case_count": 1,
         "current_cefr_levels": ["B1"],
         "target_cefr_levels": ["B2"],
+        "achieved_cefr_levels": ["B2"],
+        "outcome_evidence_types": ["official_exam"],
         "weekly_study_hours": [10.0],
     }
     assert status["externally_calibrated"] is False
@@ -659,6 +663,8 @@ def test_development_exchange_round_trip_excludes_personal_profile(
         "context_case_count": 1,
         "current_cefr_levels": ["B1"],
         "target_cefr_levels": ["B2"],
+        "achieved_cefr_levels": ["B2"],
+        "outcome_evidence_types": ["official_exam"],
         "weekly_study_hours": [10.0],
     }
     assert imported["calibration_status"]["externally_calibrated"] is False
@@ -796,3 +802,30 @@ def test_observation_completion_requires_documented_cefr_evidence(
             achieved_cefr=achieved_cefr,
             evidence_type=evidence_type,
         )
+
+
+
+def test_calibration_context_rejects_sub_b2_achieved_outcome():
+    case = {
+        "case_id": "context-sub-b2",
+        "country_iso3": "IRL",
+        "employment_mode": "remote",
+        "engine_version": "ttv-temporal-evidence-v1",
+        "composition": "critical_path_v1",
+        "candidate_weeks_min": 10,
+        "candidate_weeks_max": 25,
+        "observed_weeks": 12,
+        "context": {
+            "scope_id": "ttv-estimation-scope-v1",
+            "current_cefr": "A2",
+            "target_cefr": "B2",
+            "achieved_cefr": "B1",
+            "outcome_evidence_type": "official_exam",
+            "weekly_study_hours": 10,
+            "guided_hours_min": 100,
+            "guided_hours_max": 250,
+        },
+    }
+
+    with pytest.raises(ValueError, match="achieved_cefr"):
+        module.validate_calibration_case(case)
