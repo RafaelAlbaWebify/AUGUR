@@ -78,10 +78,10 @@ if (-not $SkipSync) {
         Write-Warning "EEA regional environmental-health evidence is currently unavailable."
     }
 
-    $OecdRegionalCode = Invoke-Step "Synchronize OECD non-EU regional density evidence" {
+    $OecdRegionalCode = Invoke-Step "Synchronize OECD non-EU regional demographic evidence" {
         Push-Location (Join-Path $Root "backend")
         try {
-            & $BackendPython -m scripts.sync_oecd_regional_density
+            & $BackendPython -m scripts.sync_oecd_regional
         }
         finally {
             Pop-Location
@@ -89,7 +89,7 @@ if (-not $SkipSync) {
     } -AllowedExitCodes @(0, 2)
 
     if ($OecdRegionalCode -eq 2) {
-        Write-Warning "OECD regional density evidence is currently unavailable."
+        Write-Warning "OECD regional demographic evidence is currently unavailable."
     }
 }
 else {
