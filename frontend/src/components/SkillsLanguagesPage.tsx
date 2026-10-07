@@ -286,6 +286,21 @@ export default function SkillsLanguagesPage({
                   <strong>Cedefop occupation outlook</strong>
                   <small>STAS and EU27 OJA context are active; detailed skill/language OJA shares require Eurostat microdata access.</small>
                 </div>
+                <div>
+                  <span>
+                    {livePostings?.status === 'provider_not_configured'
+                      ? 'CONTRACT READY · PROVIDER NOT CONFIGURED'
+                      : livePostings?.status === 'available'
+                      ? 'LIVE PROVIDER ACTIVE'
+                      : 'LIVE PROVIDER STATUS'}
+                  </span>
+                  <strong>Live job-posting enrichment</strong>
+                  <small>
+                    {livePostings?.status === 'available'
+                      ? `${livePostings.provider_id ?? 'Configured provider'} · contextual live-demand evidence`
+                      : `${livePostings?.contract_version ?? 'live-postings-v1'} · optional provider layer; missing access is not zero demand`}
+                  </small>
+                </div>
               </div>
 
               <p className="skillsOnboardingFooter">
