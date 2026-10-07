@@ -189,6 +189,12 @@ def _mock_full_esco_career(
 
     monkeypatch.setattr(
         career_fit_module,
+        "latest_labour_shortage_index",
+        lambda country_iso3, isco08: None,
+    )
+
+    monkeypatch.setattr(
+        career_fit_module,
         "latest_labour_oja_imbalance_eu27",
         lambda isco08: None,
     )
@@ -860,3 +866,110 @@ def test_career_fit_keeps_gated_oja_status_when_profession_is_unmapped(monkeypat
     assert result["status"] == "occupation_unmapped"
     assert result["skill_demand_trend_evidence"]["status"] == "source_access_gated"
     assert result["language_oja_requirements_evidence"]["status"] == "source_access_gated"
+
+
+
+def test_clssi_future_shortage_index_is_context_only(monkeypatch):
+    requested = []
+
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_shortage_index",
+        lambda country_iso3, isco08: (
+            requested.append((country_iso3, isco08))
+            or {
+                "country_iso3": country_iso3,
+                "horizon": 2035,
+                "isco08": isco08,
+                "occupation_label": "Information and communications technology professionals",
+                "main_occupation_group": "High-skilled non-manual occupations",
+                "shortage_index": 3.3333333,
+                "component_code": "4-2-4",
+                "employment_growth_score": 4,
+                "replacement_demand_score": 2,
+                "imbalance_score": 4,
+                "source_id": "CEDEFOP",
+                "dataset_id": "CEDEFOP_CLSSI",
+                "release_version": "2026",
+                "retrieved_at": None,
+                "source_updated_at": "2026",
+            }
+        ),
+    )
+
+    evidence = career_fit_module.future_shortage_index_evidence(
+        "IRL",
+        {"selected": {"isco_group": "2522", "code": "2522"}},
+    )
+
+    assert requested == [("IRL", "25")]
+    assert evidence["status"] == "available"
+    assert evidence["horizon"] == 2035
+    assert evidence["isco08"] == "25"
+    assert evidence["shortage_index"] == pytest.approx(3.3333333)
+    assert evidence["components"] == {
+        "employment_growth": 4,
+        "replacement_demand": 2,
+        "skills_imbalance": 4,
+    }
+    assert evidence["role"] == "context_only"
+    assert evidence["scale"]["maximum"] == 4
+
+
+def test_clssi_future_shortage_index_missing_is_not_zero(monkeypatch):
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_shortage_index",
+        lambda country_iso3, isco08: None,
+    )
+
+    evidence = career_fit_module.future_shortage_index_evidence(
+        "ESP",
+        {"selected": {"isco_group": "2522", "code": "2522"}},
+    )
+
+    assert evidence == {
+        "status": "evidence_missing",
+        "dataset_id": "CEDEFOP_CLSSI",
+        "isco08": "25",
+        "granularity": "isco_2digit",
+        "role": "context_only",
+    }
+
+
+def test_clssi_does_not_change_career_viability_gate(monkeypatch):
+    _mock_full_esco_career(monkeypatch, coverage=1.0)
+    monkeypatch.setattr(
+        career_fit_module,
+        "latest_labour_shortage_index",
+        lambda country_iso3, isco08: {
+            "country_iso3": country_iso3,
+            "horizon": 2035,
+            "isco08": isco08,
+            "occupation_label": "Information and communications technicians",
+            "main_occupation_group": "High-skilled non-manual occupations",
+            "shortage_index": 4.0,
+            "component_code": "4-4-4",
+            "employment_growth_score": 4,
+            "replacement_demand_score": 4,
+            "imbalance_score": 4,
+            "source_id": "CEDEFOP",
+            "dataset_id": "CEDEFOP_CLSSI",
+            "release_version": "2026",
+            "retrieved_at": None,
+            "source_updated_at": "2026",
+        },
+    )
+
+    result = career_fit(
+        PersonalProfileResponse(
+            profile_id="default",
+            profession="IT support engineer",
+            skills=["Windows", "networking", "ticketing", "troubleshooting"],
+        ),
+        "IRL",
+    )
+
+    assert result["viability_evidence_ready"] is True
+    assert result["future_shortage_index_evidence"]["status"] == "available"
+    assert result["future_shortage_index_evidence"]["role"] == "context_only"
