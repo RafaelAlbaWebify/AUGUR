@@ -26,11 +26,7 @@ def build_peer_reference(
     series_by_country: dict[str, list[dict]],
 ) -> dict:
     target = target_country_iso3.upper()
-    registered = [
-        country["iso3"]
-        for country in list_countries()
-        if country.get("analysis_status") == "available"
-    ]
+    registered = sorted(series_by_country)
 
     period_maps: dict[str, dict[int, dict]] = {}
     for iso3 in registered:
