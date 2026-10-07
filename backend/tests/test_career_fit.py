@@ -1,3 +1,5 @@
+import pytest
+
 from app.models.profile import PersonalProfileResponse
 from app.services import career_fit as career_fit_module
 from app.services.career_fit import (
