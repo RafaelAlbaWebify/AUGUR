@@ -85,6 +85,17 @@ class WorldBankAdapter:
                 "region": region,
                 "subregion": admin_region or None,
                 "currency": None,
+                "capital_city": (str(item.get("capitalCity") or "").strip() or None),
+                "latitude": (
+                    float(item["latitude"])
+                    if item.get("latitude") not in (None, "")
+                    else None
+                ),
+                "longitude": (
+                    float(item["longitude"])
+                    if item.get("longitude") not in (None, "")
+                    else None
+                ),
                 **country_membership_flags(iso3),
             })
 
@@ -147,6 +158,17 @@ class WorldBankAdapter:
             "region": region,
             "subregion": admin_region or None,
             "currency": None,
+            "capital_city": (str(item.get("capitalCity") or "").strip() or None),
+            "latitude": (
+                float(item["latitude"])
+                if item.get("latitude") not in (None, "")
+                else None
+            ),
+            "longitude": (
+                float(item["longitude"])
+                if item.get("longitude") not in (None, "")
+                else None
+            ),
             **country_membership_flags(iso3),
         }
 
