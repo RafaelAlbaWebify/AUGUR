@@ -1,4 +1,4 @@
-from app.catalog import COUNTRY_BY_ISO3
+from app.catalog import COUNTRY_BY_ISO3, VALIDATION_COUNTRY_ISO3
 from app.db.analytics import (
     country_analysis_coverage,
     country_record,
@@ -6,8 +6,33 @@ from app.db.analytics import (
 )
 
 
-def list_countries() -> list[dict]:
+def list_registered_countries() -> list[dict]:
     return country_analysis_coverage()
+
+
+def list_countries() -> list[dict]:
+    validation = set(VALIDATION_COUNTRY_ISO3)
+    return [
+        country
+        for country in list_registered_countries()
+        if country.get("analysis_status") == "available"
+        or country["iso3"] in validation
+    ]
+
+
+def country_coverage_summary() -> dict:
+    countries = list_registered_countries()
+    analyzable = [
+        country
+        for country in countries
+        if country.get("analysis_status") == "available"
+    ]
+    return {
+        "registered_country_count": len(countries),
+        "analyzable_country_count": len(analyzable),
+        "validation_country_count": len(VALIDATION_COUNTRY_ISO3),
+        "countries": countries,
+    }
 
 
 def country_metadata(country_iso3: str) -> dict:
