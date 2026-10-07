@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.db.bootstrap import datastore_status
@@ -26,11 +27,22 @@ from app.services.language_fit import language_fit
 from app.services.career_fit import career_fit
 from app.esco_store import esco_status
 from app.services.ttv import ttv_status
+from app.services.ttv_calibration import (
+    active_calibration_observation,
+    start_calibration_observation,
+    complete_calibration_observation,
+    cancel_calibration_observation,
+)
 from app.services.operability import operability_status
 from app.services.regional_evidence import regional_evidence, regional_comparison, geographic_level
 from app.services.city_evidence import city_evidence
 
 router = APIRouter()
+
+
+class TTVCalibrationCompleteRequest(BaseModel):
+    observed_at: str | None = None
+
 
 
 @router.get("/health")
@@ -424,6 +436,64 @@ def ttv_get(country_iso3: str):
         raise HTTPException(status_code=404, detail="Country is not registered")
 
     return ttv_status(get_profile(), country_iso3)
+
+
+@router.get("/countries/{country_iso3}/ttv/calibration/active")
+def ttv_calibration_active_get(country_iso3: str):
+    country_iso3 = country_iso3.upper()
+    registry = {country["iso3"] for country in list_countries()}
+
+    if country_iso3 not in registry:
+        raise HTTPException(status_code=404, detail="Country is not registered")
+
+    return {
+        "country_iso3": country_iso3,
+        "observation": active_calibration_observation(country_iso3),
+    }
+
+
+@router.post("/countries/{country_iso3}/ttv/calibration/start")
+def ttv_calibration_start_post(country_iso3: str):
+    country_iso3 = country_iso3.upper()
+    registry = {country["iso3"] for country in list_countries()}
+
+    if country_iso3 not in registry:
+        raise HTTPException(status_code=404, detail="Country is not registered")
+
+    try:
+        result = start_calibration_observation(
+            country_iso3,
+            ttv_status(get_profile(), country_iso3),
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+    return {
+        "country_iso3": country_iso3,
+        "observation": result,
+    }
+
+
+@router.post("/ttv/calibration/{case_id}/complete")
+def ttv_calibration_complete_post(
+    case_id: str,
+    payload: TTVCalibrationCompleteRequest,
+):
+    try:
+        return complete_calibration_observation(
+            case_id,
+            observed_at=payload.observed_at,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/ttv/calibration/{case_id}/cancel")
+def ttv_calibration_cancel_post(case_id: str):
+    try:
+        return cancel_calibration_observation(case_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
 
 
 
