@@ -188,6 +188,7 @@ type CityEvidenceResponse = {
 }
 
 const regionalEvidenceCache = new Map<string, RegionalEvidenceResponse>()
+const cityEvidenceCache = new Map<string, CityEvidenceResponse>()
 
 type OverviewPageProps = {
   apiBase: string
@@ -397,6 +398,13 @@ export default function OverviewPage({
       return
     }
 
+    const cached = cityEvidenceCache.get(selectedCity.code)
+    if (cached) {
+      setCityEvidence(cached)
+      setCityEvidenceState('ready')
+      return
+    }
+
     const controller = new AbortController()
     setCityEvidenceState('loading')
 
@@ -409,6 +417,7 @@ export default function OverviewPage({
       })
       .then((payload) => {
         if (controller.signal.aborted) return
+        cityEvidenceCache.set(selectedCity.code, payload)
         setCityEvidence(payload)
         setCityEvidenceState('ready')
       })
