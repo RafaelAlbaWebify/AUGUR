@@ -189,3 +189,28 @@ Architecture boundary:
 - discovery alone does not make a geography analyzable: at least one stored observation is required for the geography/country to be surfaced as analytical coverage;
 - missing provider-specific evidence remains explicit and must not be synthesized from unrelated levels.
 
+
+
+## OECD source-native regional expansion
+
+AUGUR no longer treats European NUTS/Urban Audit geography as the universal subnational model.
+
+Implemented and live-verified on 2026-10-07:
+
+- OECD Regions and Cities population-density dataset `DSD_REG_DEMO@DF_DENSITY` version 2.4;
+- OECD regional population dataset `DSD_REG_DEMO@DF_POP_BROAD` version 2.4;
+- OECD TL2 and TL3 are stored as source-native geography levels under `OECD_TL_2024`;
+- labeled SDMX CSV was verified live, including `AU1 = New South Wales` and `AU2 = Victoria`;
+- live density observations for AU1/AU2 were verified for 2021–2024;
+- OECD population and density reuse AUGUR's existing semantic indicator IDs:
+  - `regional_population`
+  - `regional_population_density`;
+- the OECD sync is restricted to registered OECD countries outside the EU so Eurostat remains the preferred regional source for EU countries;
+- source-native geography names are persisted in `subnational_observations` and `geography_registry`;
+- `GET /api/geographies?country_iso3=...` exposes analyzable source-native regions by country;
+- Overview can select source-native regions even before official boundary geometry is integrated;
+- regional evidence for OECD TL2/TL3 only exposes actually stored OECD metrics and does not fabricate missing Eurostat indicators;
+- sector and EEA environmental-health context remain unavailable for OECD regions unless independently sourced.
+
+The next OECD regional extension should use `DSD_REG_LAB@DF_RATES` / the Developer API labour dataset to add employment-to-population and unemployment-rate evidence. Its measure codes and units must be live-inspected before ingestion.
+
