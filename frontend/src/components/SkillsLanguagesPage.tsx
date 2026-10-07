@@ -73,6 +73,15 @@ type CareerFit = {
     reproducible_public_ingestion?: boolean
     role?: string
   } | null
+  live_postings_evidence?: {
+    status?: string
+    contract_version?: string
+    provider_id?: string | null
+    role?: string
+    requested_metrics?: string[]
+    required_capabilities?: string[]
+    optional_capabilities?: string[]
+  } | null
   vacancy_demand_evidence?: {
     status?: string
     vacancy_rate_pct?: number
@@ -191,6 +200,7 @@ export default function SkillsLanguagesPage({
   const skillDemandTrend = career?.skill_demand_trend_evidence
   const languageOjaRequirements = career?.language_oja_requirements_evidence
   const eu27OjaImbalance = career?.eu27_oja_imbalance_evidence
+  const livePostings = career?.live_postings_evidence
   const profileReadyForSkills = Boolean(
     (profile?.profession && profile.profession.trim()) ||
     career?.occupation_match?.selected?.preferred_label,
@@ -462,6 +472,21 @@ export default function SkillsLanguagesPage({
                     </small>
                   </article>
                   <article className="restricted">
+                    <span>
+                      {livePostings?.status === 'provider_not_configured'
+                        ? 'CONTRACT READY · PROVIDER NOT CONFIGURED'
+                        : livePostings?.status === 'available'
+                        ? 'ACTIVE'
+                        : 'NOT CONFIGURED'}
+                    </span>
+                    <strong>Live job-posting enrichment</strong>
+                    <small>
+                      {livePostings?.status === 'available'
+                        ? `${livePostings.provider_id ?? 'Configured provider'} · contextual employer-demand evidence`
+                        : `${livePostings?.contract_version ?? 'live-postings-v1'} · optional provider layer; missing access is not zero demand`}
+                    </small>
+                  </article>
+                  <article className="restricted">
                     <span>{skillDemandTrend?.status === 'source_access_gated' ? 'SOURCE ACCESS GATED' : 'ACCESS NEEDED'}</span>
                     <strong>Skill demand shares / trends</strong>
                     <small>Cedefop Skills-OVATE detailed OJA evidence · Eurostat microdata access</small>
@@ -529,7 +554,13 @@ export default function SkillsLanguagesPage({
                     ? `Eurostat experimental ISCO-3 source does not cover ${countryName}; this is not zero demand`
                     : 'not available'}.</li>
               <li>Skill evidence: {career?.skill_match?.dataset_version ?? career?.skill_match?.dataset_mode ?? 'not available'}.</li>
-              <li>Live skill demand, employer counts and rising-skill trends are intentionally withheld until a job-posting evidence source is integrated.</li>
+              <li>
+                Live postings: {livePostings?.status === 'provider_not_configured'
+                  ? `${livePostings.contract_version ?? 'live-postings-v1'} contract ready; no provider configured, so live skill/language demand remains withheld rather than treated as zero.`
+                  : livePostings?.status === 'available'
+                  ? `${livePostings.provider_id ?? 'configured provider'} evidence available as context only.`
+                  : 'provider state unavailable; no live-demand inference is made.'}
+              </li>
             </ul>
           </section>
         </aside>
