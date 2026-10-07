@@ -150,6 +150,40 @@ AUGUR behaviour:
 - zero or null is never interpreted as zero employer demand;
 - declared CEFR and target-country language evidence remain separate from OJA demand.
 
+## Active future shortage evidence
+
+### Cedefop CLSSI
+
+Dataset:
+- official 2026 Cedefop Labour and Skills Shortage Index workbook;
+- country-specific sheets;
+- ISCO-08 2-digit occupation groups;
+- forecast horizon: 2035;
+- active AUGUR coverage: Spain, Portugal and Ireland.
+
+Methodology:
+- the published Labour Shortage Index is on a 1–4 scale;
+- 1 indicates no shortage / surplus conditions and 4 indicates intense shortage;
+- the overall index is the simple average of three published 1–4 components:
+  - employment growth;
+  - replacement demand;
+  - supply-demand imbalance.
+
+AUGUR behaviour:
+- the official workbook is downloaded reproducibly from Cedefop;
+- country is read from the workbook sheet name;
+- occupation labels are mapped to ISCO-2 only through an explicit canonical/verified alias table;
+- unknown labels, duplicate country/ISCO rows, invalid 1–4 scores, component-code mismatches or overall-index arithmetic mismatches fail the import;
+- CareerFit exposes CLSSI as `future_shortage_index_evidence`;
+- CLSSI remains context-only and does not change EURES market gates, CareerFit completeness or TTV timing;
+- missing CLSSI evidence is never interpreted as zero shortage pressure.
+
+Validated live import:
+- 114 rows;
+- countries: ESP, IRL, PRT;
+- horizon: 2035;
+- release: 2026.
+
 ## Active occupation trend evidence
 
 ### Cedefop STAS
