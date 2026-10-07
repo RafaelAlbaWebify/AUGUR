@@ -323,3 +323,43 @@ def test_eurostat_normalization_can_select_rate_unit_by_human_label():
     assert [row["value"] for row in rows] == [24.0, 21.0]
     assert [row["period"] for row in rows] == [2022, 2023]
     assert {row["unit"] for row in rows} == {"per_100k_people"}
+
+
+def test_eurostat_normalization_can_select_exact_dimension_code():
+    payload = {
+        "id": ["indic_ur", "time"],
+        "size": [2, 2],
+        "dimension": {
+            "indic_ur": {
+                "category": {
+                    "index": {"TT1008V": 0, "TT1010V": 1},
+                    "label": {
+                        "TT1008V": "Journeys to work by foot",
+                        "TT1010V": "Journeys to work by public transport",
+                    },
+                }
+            },
+            "time": {
+                "category": {
+                    "index": {"2023": 0, "2024": 1},
+                }
+            },
+        },
+        "value": [12.0, 13.0, 39.0, 40.0],
+        "updated": "2026-10-02",
+    }
+    config = {
+        "indicator_id": "city_public_transport_commute_share",
+        "dataset_id": "urb_ctran",
+        "unit": "percent",
+        "dimension_values": {"indic_ur": "TT1010V"},
+    }
+
+    adapter = EurostatAdapter(client=None)
+    try:
+        rows = adapter.normalize("ES001C", config, payload)
+    finally:
+        adapter.close()
+
+    assert [row["value"] for row in rows] == [39.0, 40.0]
+    assert [row["period"] for row in rows] == [2023, 2024]
