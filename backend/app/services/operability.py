@@ -12,9 +12,11 @@ from app.db.analytics import (
     regional_sector_employment_status,
     environmental_health_burden_status,
 )
+from app.catalog import VALIDATION_COUNTRY_ISO3
 from app.esco_store import esco_status
 from app.providers import providers_for_country
 from app.services.career_fit import career_market_evidence_status
+from app.services.country import country_coverage_summary, country_metadata
 from app.services.live_postings import live_postings_provider_status
 from app.services.ttv import TEMPORAL_MODEL_VERSION
 from app.services.ttv_calibration import calibration_status
@@ -92,13 +94,24 @@ def operability_status() -> dict:
         and environmental_health_age_days <= SYNC_FRESHNESS_MAX_DAYS
     )
     countries = evidence["countries"]
+    validation_codes = set(VALIDATION_COUNTRY_ISO3)
+    validation_countries = [
+        country
+        for country in countries
+        if country["country_iso3"] in validation_codes
+    ]
+    country_coverage = country_coverage_summary()
 
     provider_coverage = {}
     for country in countries:
         iso3 = country["country_iso3"]
+        metadata = country_metadata(iso3)
         expected = sorted(
             provider.provider_id
-            for provider in providers_for_country(iso3)
+            for provider in providers_for_country(
+                iso3,
+                country=metadata,
+            )
         )
         available = sorted(country.get("source_ids") or [])
         missing = sorted(set(expected) - set(available))
@@ -131,21 +144,21 @@ def operability_status() -> dict:
             "fresh": len(missing) == 0 and len(stale) == 0,
         }
 
-    country_analysis_ready = bool(countries) and all(
+    country_analysis_ready = bool(validation_countries) and all(
         country["observed_rows"] > 0
         and country["observed_indicators"] > 0
         and country["official_forecast_rows"] > 0
         and provider_coverage[country["country_iso3"]]["complete"]
         and provider_coverage[country["country_iso3"]]["fresh"]
-        for country in countries
+        for country in validation_countries
     )
 
-    data_sync_fresh = bool(countries) and all(
+    data_sync_fresh = bool(validation_countries) and all(
         provider_coverage[country["country_iso3"]]["fresh"]
-        for country in countries
+        for country in validation_countries
     )
 
-    local_employment_evidence_ready = bool(countries) and all(
+    local_employment_evidence_ready = bool(validation_countries) and all(
         country["labour_earnings"]["row_count"] > 0
         and country["labour_earnings"]["isco_group_count"] > 0
         and _is_fresh(
@@ -157,16 +170,16 @@ def operability_status() -> dict:
             country.get("net_earnings", {}).get("latest_retrieved_at"),
             now,
         )
-        for country in countries
+        for country in validation_countries
     )
 
-    job_transition_evidence_ready = bool(countries) and all(
+    job_transition_evidence_ready = bool(validation_countries) and all(
         country.get("job_transitions", {}).get("row_count", 0) > 0
         and _is_fresh(
             country.get("job_transitions", {}).get("latest_retrieved_at"),
             now,
         )
-        for country in countries
+        for country in validation_countries
     )
 
     esco_full_ready = (
@@ -236,6 +249,8 @@ def operability_status() -> dict:
         "ttv_temporal_validation": temporal_validation,
         "ttv_calibration": calibration,
         "country_analysis_ready": country_analysis_ready,
+        "validation_country_iso3": list(VALIDATION_COUNTRY_ISO3),
+        "country_coverage": country_coverage,
         "data_sync_fresh": data_sync_fresh,
         "sync_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
         "auxiliary_evidence_freshness_max_days": SYNC_FRESHNESS_MAX_DAYS,
@@ -271,6 +286,7 @@ def operability_status() -> dict:
             "NUTS2 labour evidence is regional context and does not imply occupation-specific regional demand unless the source explicitly supports it.",
             "NUTS2 sector-employment evidence describes regional economic structure, not vacancies or hiring probability.",
             "Subnational operability reports NUTS2, NUTS3 and city evidence separately; absence at one level is not silently inferred from another.",
+            "Product readiness is regression-gated on the validation-country set; newly discovered countries contribute to coverage without becoming global blockers.",
             "Subnational freshness is reported per geographic level and remains informational for national-analysis readiness.",
             "EEA PM2.5 attributable health-burden freshness is reported separately and remains optional for national-analysis readiness.",
             "TTV calibration metrics are descriptive until an external calibration protocol and acceptance criteria are approved.",
