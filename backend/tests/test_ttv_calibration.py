@@ -70,6 +70,12 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     assert result["interval_coverage_pct"] is None
     assert result["stage_metrics"] == {}
     assert result["sample_role_metrics"] == {}
+    assert result["context_summary"] == {
+        "context_case_count": 0,
+        "current_cefr_levels": [],
+        "target_cefr_levels": [],
+        "weekly_study_hours": [],
+    }
 
 
 def test_calibration_metrics_are_descriptive_only(
@@ -492,11 +498,25 @@ def test_opt_in_observation_lifecycle_creates_development_case(
         "candidate_weeks_max": 25.0,
         "observed_weeks": 12.0,
     }
+    assert completed["calibration_case"]["context"] == {
+        "scope_id": "ttv-estimation-scope-v1",
+        "current_cefr": "B1",
+        "target_cefr": "B2",
+        "weekly_study_hours": 10.0,
+        "guided_hours_min": 100.0,
+        "guided_hours_max": 250.0,
+    }
     assert module.active_calibration_observation("IRL") is None
 
     status = module.calibration_status()
     assert status["development_case_count"] == 1
     assert status["holdout_case_count"] == 0
+    assert status["context_summary"] == {
+        "context_case_count": 1,
+        "current_cefr_levels": ["B1"],
+        "target_cefr_levels": ["B2"],
+        "weekly_study_hours": [10.0],
+    }
     assert status["externally_calibrated"] is False
 
 
@@ -582,6 +602,14 @@ def test_development_exchange_round_trip_excludes_personal_profile(
                     "observed_weeks": 12,
                 }
             },
+            "context": {
+                "scope_id": "ttv-estimation-scope-v1",
+                "current_cefr": "B1",
+                "target_cefr": "B2",
+                "weekly_study_hours": 10,
+                "guided_hours_min": 100,
+                "guided_hours_max": 250,
+            },
         }
     )
 
@@ -596,6 +624,14 @@ def test_development_exchange_round_trip_excludes_personal_profile(
     assert "observed_at" not in exported
     assert "imported_at" not in exported
     assert "profile" not in exported
+    assert exported["context"] == {
+        "scope_id": "ttv-estimation-scope-v1",
+        "current_cefr": "B1",
+        "target_cefr": "B2",
+        "weekly_study_hours": 10.0,
+        "guided_hours_min": 100.0,
+        "guided_hours_max": 250.0,
+    }
 
     target_dir = tmp_path / "target"
     target_dir.mkdir()
@@ -613,6 +649,12 @@ def test_development_exchange_round_trip_excludes_personal_profile(
     assert imported["case_ids"] == ["exchange-001"]
     assert imported["calibration_status"]["development_case_count"] == 1
     assert imported["calibration_status"]["holdout_case_count"] == 0
+    assert imported["calibration_status"]["context_summary"] == {
+        "context_case_count": 1,
+        "current_cefr_levels": ["B1"],
+        "target_cefr_levels": ["B2"],
+        "weekly_study_hours": [10.0],
+    }
     assert imported["calibration_status"]["externally_calibrated"] is False
 
 
@@ -656,3 +698,64 @@ def test_development_exchange_rejects_unknown_version(
                 "cases": [],
             }
         )
+
+
+
+@pytest.mark.parametrize(
+    "context",
+    [
+        {"current_cefr": "Z9"},
+        {"target_cefr": "B9"},
+        {"weekly_study_hours": 0},
+        {"weekly_study_hours": 81},
+        {"guided_hours_min": 100},
+        {"guided_hours_min": 250, "guided_hours_max": 100},
+    ],
+)
+def test_calibration_context_validates_cefr_and_study_intensity(context):
+    case = {
+        "case_id": "context-invalid",
+        "country_iso3": "IRL",
+        "employment_mode": "remote",
+        "engine_version": "ttv-temporal-evidence-v1",
+        "composition": "critical_path_v1",
+        "candidate_weeks_min": 10,
+        "candidate_weeks_max": 25,
+        "observed_weeks": 12,
+        "context": context,
+    }
+
+    with pytest.raises(ValueError):
+        module.validate_calibration_case(case)
+
+
+def test_calibration_context_normalizes_valid_cohort_fields():
+    result = module.validate_calibration_case(
+        {
+            "case_id": "context-valid",
+            "country_iso3": "IRL",
+            "employment_mode": "remote",
+            "engine_version": "ttv-temporal-evidence-v1",
+            "composition": "critical_path_v1",
+            "candidate_weeks_min": 10,
+            "candidate_weeks_max": 25,
+            "observed_weeks": 12,
+            "context": {
+                "scope_id": "ttv-estimation-scope-v1",
+                "current_cefr": "b1",
+                "target_cefr": "b2",
+                "weekly_study_hours": 10,
+                "guided_hours_min": 100,
+                "guided_hours_max": 250,
+            },
+        }
+    )
+
+    assert result["context"] == {
+        "scope_id": "ttv-estimation-scope-v1",
+        "current_cefr": "B1",
+        "target_cefr": "B2",
+        "weekly_study_hours": 10.0,
+        "guided_hours_min": 100.0,
+        "guided_hours_max": 250.0,
+    }
