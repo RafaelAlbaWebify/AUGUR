@@ -259,6 +259,18 @@ function formatRegionalValue(value: number, unit?: string) {
   if (unit === 'per_100k_people') {
     return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} /100k`
   }
+  if (unit === 'per_1000_people') {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} /1,000`
+  }
+  if (unit === 'years') {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} years`
+  }
+  if (unit === 'eur_monthly') {
+    return `${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'EUR', maximumFractionDigits: 2 }).format(value)} /month`
+  }
+  if (unit === 'nights_per_person') {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} nights/resident`
+  }
   if (unit === 'thousand_passengers') {
     return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)}k passengers`
   }
