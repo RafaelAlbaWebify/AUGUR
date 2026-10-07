@@ -312,7 +312,16 @@ def initialize_analytics_schema() -> None:
                 parent_geo_id, latitude, longitude
             )
             SELECT
-                s.geo_code,
+                (
+                    CASE
+                        WHEN LOWER(s.geo_level) IN ('nuts2', 'nuts3')
+                            THEN 'NUTS_2024'
+                        WHEN LOWER(s.geo_level) = 'city'
+                            THEN 'URBAN_AUDIT_2024'
+                        ELSE 'SOURCE_NATIVE'
+                    END
+                    || ':' || s.geo_code
+                ),
                 c.iso3,
                 SUBSTR(s.geo_code, 1, 2),
                 MAX(s.geo_name),
@@ -2315,7 +2324,7 @@ def geography_coverage_status() -> dict:
                 COUNT(s.indicator_id) AS observation_count
             FROM geography_registry g
             LEFT JOIN subnational_observations s
-              ON s.geo_code = g.geo_id
+              ON s.geo_code = g.source_geo_code
             GROUP BY
                 g.country_iso3,
                 g.country_iso2,
@@ -2405,8 +2414,9 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                 if level == "city"
                 else "SOURCE_NATIVE"
             )
-            geography_rows[code] = {
-                "geo_id": code,
+            registry_id = row.get("geo_id") or f"{system}:{code}"
+            geography_rows[registry_id] = {
+                "geo_id": registry_id,
                 "country_iso3": country_iso3,
                 "country_iso2": country_iso2,
                 "name": row.get("geo_name"),
