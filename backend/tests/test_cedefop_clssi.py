@@ -178,3 +178,86 @@ def test_resolve_isco2_label_uses_explicit_isco08_mapping(label, code):
 
 def test_resolve_isco2_label_rejects_unknown_label():
     assert module.resolve_isco2_label("Mystery future occupation") is None
+
+
+
+def _real_schema_rows(index_value=3.0, component="4-2-3", lsi1=4, lsi2=2, lsi3=3):
+    return [
+        [
+            "Main Occupation Group",
+            "Occupation Group (2 digit)",
+            "Labour Shortage Index",
+            "LSI (Comp.)",
+            "LSI1",
+            "LSI2",
+            "LSI3",
+        ],
+        [
+            "High-skilled non-manual occupations",
+            "Information and communications technology professionals",
+            index_value,
+            component,
+            lsi1,
+            lsi2,
+            lsi3,
+        ],
+    ]
+
+
+def test_parse_workbook_reads_target_country_sheets(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        module,
+        "workbook_preview",
+        lambda path, max_rows=500: [
+            {"sheet": "ES", "rows": _real_schema_rows()},
+            {"sheet": "PT", "rows": _real_schema_rows(2.0, "1-2-3", 1, 2, 3)},
+            {"sheet": "IE", "rows": _real_schema_rows(4.0, "4-4-4", 4, 4, 4)},
+            {"sheet": "EU27", "rows": _real_schema_rows()},
+        ],
+    )
+
+    rows = module.parse_workbook(tmp_path / "clssi.xlsx")
+
+    assert len(rows) == 3
+    assert {row["country_iso3"] for row in rows} == {"ESP", "PRT", "IRL"}
+    ie = next(row for row in rows if row["country_iso3"] == "IRL")
+    assert ie["isco08"] == "25"
+    assert ie["horizon"] == 2035
+    assert ie["shortage_index"] == 4.0
+    assert ie["employment_growth_score"] == 4
+    assert ie["replacement_demand_score"] == 4
+    assert ie["imbalance_score"] == 4
+    assert ie["component_code"] == "4-4-4"
+    assert ie["release_version"] == "2026"
+
+
+def test_parse_workbook_rejects_component_average_mismatch(monkeypatch, tmp_path):
+    monkeypatch.setattr(
+        module,
+        "workbook_preview",
+        lambda path, max_rows=500: [
+            {"sheet": "ES", "rows": _real_schema_rows(2.0, "4-2-3", 4, 2, 3)},
+            {"sheet": "PT", "rows": _real_schema_rows()},
+            {"sheet": "IE", "rows": _real_schema_rows()},
+        ],
+    )
+
+    with pytest.raises(ValueError, match="component average mismatch"):
+        module.parse_workbook(tmp_path / "clssi.xlsx")
+
+
+def test_parse_workbook_rejects_unknown_occupation_label(monkeypatch, tmp_path):
+    rows = _real_schema_rows()
+    rows[1][1] = "Future mystery professionals"
+    monkeypatch.setattr(
+        module,
+        "workbook_preview",
+        lambda path, max_rows=500: [
+            {"sheet": "ES", "rows": rows},
+            {"sheet": "PT", "rows": _real_schema_rows()},
+            {"sheet": "IE", "rows": _real_schema_rows()},
+        ],
+    )
+
+    with pytest.raises(ValueError, match="Unknown CLSSI ISCO-2 label"):
+        module.parse_workbook(tmp_path / "clssi.xlsx")
