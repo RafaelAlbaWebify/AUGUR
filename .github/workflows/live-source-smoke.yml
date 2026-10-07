@@ -95,6 +95,9 @@ jobs:
       - name: Inspect modern EEA Air Quality API
         run: python -m scripts.inspect_eea_air_quality_api
 
+      - name: Inspect EEA PM2.5 health-burden dataset
+        run: python -m scripts.inspect_eea_health_burden
+
       - name: Probe verified PM2.5 for Oviedo
         run: python -m scripts.probe_eea_pm25_city --city Oviedo --country ES --year 2024
 
