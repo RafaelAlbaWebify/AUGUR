@@ -297,3 +297,68 @@ def test_force_refresh_moves_pm25_network_work_to_sync_path(monkeypatch):
         and item["status"] == "available"
         for item in result["indicators"]
     )
+
+
+def test_batch_city_sync_fetches_each_dataset_once_and_stores_history(monkeypatch):
+    stored = []
+    pm25_calls = []
+
+    class BatchAdapter:
+        def __init__(self):
+            self.fetches = []
+
+        def fetch_dataset(self, dataset_id, filters):
+            self.fetches.append((dataset_id, filters))
+            assert filters["cities"] == ["ES001C", "ES013C"]
+            return {"dataset_id": dataset_id}
+
+        def normalize(self, city_code, config, payload):
+            if city_code == "ES013C" and config["indicator_id"] == "city_tourist_beds_per_1000":
+                return []
+            return [
+                {
+                    "period": 2023,
+                    "value": 10.0,
+                    "source_id": "EUROSTAT",
+                    "retrieved_at": "2026-10-07T00:00:00+00:00",
+                    "source_updated_at": "2026-10-02",
+                },
+                {
+                    "period": 2024,
+                    "value": 11.0,
+                    "source_id": "EUROSTAT",
+                    "retrieved_at": "2026-10-07T00:00:00+00:00",
+                    "source_updated_at": "2026-10-02",
+                },
+            ]
+
+    adapter = BatchAdapter()
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+    monkeypatch.setattr(
+        module,
+        "_refresh_city_pm25",
+        lambda code: pm25_calls.append(code) or code == "ES013C",
+    )
+
+    result = module.sync_city_evidence_codes(
+        ["ES013C", "ES001C", "ES001C"],
+        adapter=adapter,
+    )
+
+    assert result["city_code_count"] == 2
+    assert result["cities_with_data"] == 2
+    assert result["pm25_refreshed"] == 1
+    assert len(adapter.fetches) == 4
+    assert {dataset for dataset, _filters in adapter.fetches} == {
+        "urb_cpop1",
+        "urb_cpopstr",
+        "urb_ctran",
+        "urb_ctour",
+    }
+    assert len(stored) == (2 * len(module.CITY_INDICATORS) - 1) * 2
+    assert {row["period"] for row in stored} == {2023, 2024}
+    assert pm25_calls == ["ES001C", "ES013C"]
