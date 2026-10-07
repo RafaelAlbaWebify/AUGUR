@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from time import perf_counter
 
 from app.db.bootstrap import initialize_datastores
 from app.ingestion.imf import IMFAdapter
@@ -16,21 +17,30 @@ def main() -> int:
     imf = IMFAdapter(timeout_seconds=120, max_retries=3)
     un_wpp = UNWPPAdapter(timeout_seconds=180, max_retries=3)
 
+    started_at = perf_counter()
     try:
+        catalog_started = perf_counter()
         countries = world_bank.register_country_catalog()
+        catalog_seconds = perf_counter() - catalog_started
         codes = sorted(country["iso3"] for country in countries)
 
         print(f"Discovered {len(codes)} real countries from World Bank metadata.")
 
         print("\n[World Bank baseline]")
+        wb_started = perf_counter()
         wb_result = world_bank.sync_countries(codes)
+        wb_seconds = perf_counter() - wb_started
 
         print("\n[IMF baseline]")
+        imf_started = perf_counter()
         imf_result = imf.sync_countries(codes)
+        imf_seconds = perf_counter() - imf_started
 
         print("\n[UN WPP baseline]")
+        wpp_started = perf_counter()
         wpp_csv = un_wpp.fetch_csv()
         wpp_result = un_wpp.sync_countries(codes, csv_text=wpp_csv)
+        wpp_seconds = perf_counter() - wpp_started
     finally:
         world_bank.close()
         imf.close()
@@ -40,6 +50,13 @@ def main() -> int:
     payload = {
         "country_catalog_count": len(codes),
         "analyzable_country_count": coverage["analyzable_country_count"],
+        "duration_seconds": {
+            "country_catalog": round(catalog_seconds, 3),
+            "world_bank": round(wb_seconds, 3),
+            "imf": round(imf_seconds, 3),
+            "un_wpp": round(wpp_seconds, 3),
+            "total": round(perf_counter() - started_at, 3),
+        },
         "sources": {
             "WORLD_BANK": {
                 "rows": wb_result["rows"],
