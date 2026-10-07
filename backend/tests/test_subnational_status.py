@@ -119,3 +119,68 @@ def test_subnational_indicator_series_returns_recent_points_in_time_order(
 
     assert [row["period"] for row in series] == [2022, 2023, 2024, 2025]
     assert [row["value"] for row in series] == [67.0, 69.0, 70.5, 72.0]
+
+
+def test_geography_registry_reports_provider_neutral_coverage(
+    monkeypatch,
+    tmp_path,
+):
+    path = tmp_path / "geography-coverage.duckdb"
+    con = duckdb.connect(str(path))
+    try:
+        con.execute(
+            """
+            CREATE TABLE geography_registry (
+                geo_id VARCHAR PRIMARY KEY,
+                country_iso3 VARCHAR,
+                country_iso2 VARCHAR,
+                name VARCHAR,
+                geo_level VARCHAR,
+                geography_system VARCHAR,
+                source_id VARCHAR,
+                source_geo_code VARCHAR,
+                parent_geo_id VARCHAR,
+                latitude DOUBLE,
+                longitude DOUBLE
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE subnational_observations (
+                geo_code VARCHAR,
+                indicator_id VARCHAR
+            )
+            """
+        )
+        con.executemany(
+            "INSERT INTO geography_registry VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                ("ES12", "ESP", "ES", "Asturias", "nuts2", "NUTS_2024", "EUROSTAT", "ES12", None, None, None),
+                ("ES013C", "ESP", "ES", "Oviedo", "city", "URBAN_AUDIT_2024", "EUROSTAT", "ES013C", None, None, None),
+                ("US-CA", "USA", "US", "California", "admin1", "ISO_3166_2", "TEST", "US-CA", None, None, None),
+            ],
+        )
+        con.executemany(
+            "INSERT INTO subnational_observations VALUES (?, ?)",
+            [
+                ("ES12", "regional_population"),
+                ("ES013C", "city_population"),
+                ("US-CA", "regional_population"),
+            ],
+        )
+    finally:
+        con.close()
+
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+
+    result = module.geography_coverage_status()
+
+    assert result["countries_with_subnational_evidence"] == 2
+    assert result["geography_count"] == 3
+    assert result["systems"] == ["ISO_3166_2", "NUTS_2024", "URBAN_AUDIT_2024"]
+    assert {"nuts2", "city", "admin1"} == set(result["levels"])
