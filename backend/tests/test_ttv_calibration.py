@@ -520,3 +520,107 @@ def test_observation_completion_rejects_date_before_start(
             started["case_id"],
             observed_at=(started_at - timedelta(days=1)).isoformat(),
         )
+
+
+
+def test_development_exchange_round_trip_excludes_personal_profile(
+    monkeypatch,
+    tmp_path,
+):
+    source_path = _use_temp_store(monkeypatch, tmp_path / "source")
+    module.upsert_calibration_case(
+        {
+            "case_id": "exchange-001",
+            "country_iso3": "IRL",
+            "employment_mode": "remote",
+            "engine_version": "ttv-temporal-evidence-v1",
+            "composition": "critical_path_v1",
+            "candidate_weeks_min": 10,
+            "candidate_weeks_max": 25,
+            "observed_weeks": 12,
+            "sample_role": "development",
+            "start_event_definition_version": "ttv-start-active-language-transition-v1",
+            "viability_outcome_definition_version": "ttv-outcome-b2-remote-viability-v1",
+            "source_label": "local provenance that must not travel",
+            "observed_at": "2027-01-01T00:00:00+00:00",
+            "stage_timings": {
+                "language": {
+                    "candidate_weeks_min": 10,
+                    "candidate_weeks_max": 25,
+                    "observed_weeks": 12,
+                }
+            },
+        }
+    )
+
+    package = module.export_development_calibration_package()
+
+    assert package["exchange_version"] == "ttv-development-exchange-v1"
+    assert package["case_count"] == 1
+    assert package["privacy"]["contains_full_profile"] is False
+    exported = package["cases"][0]
+    assert exported["case_id"] == "exchange-001"
+    assert "source_label" not in exported
+    assert "observed_at" not in exported
+    assert "imported_at" not in exported
+    assert "profile" not in exported
+
+    target_dir = tmp_path / "target"
+    target_dir.mkdir()
+    target_path = target_dir / "augur_test.sqlite"
+    initialize_sqlite(target_path)
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(sqlite_path=target_path),
+    )
+
+    imported = module.import_development_calibration_package(package)
+
+    assert imported["imported_count"] == 1
+    assert imported["case_ids"] == ["exchange-001"]
+    assert imported["calibration_status"]["development_case_count"] == 1
+    assert imported["calibration_status"]["holdout_case_count"] == 0
+    assert imported["calibration_status"]["externally_calibrated"] is False
+
+
+def test_development_exchange_rejects_holdout_role(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+    package = {
+        "exchange_version": "ttv-development-exchange-v1",
+        "cases": [
+            {
+                "case_id": "holdout-in-disguise",
+                "country_iso3": "IRL",
+                "employment_mode": "remote",
+                "engine_version": "ttv-temporal-evidence-v1",
+                "composition": "critical_path_v1",
+                "candidate_weeks_min": 10,
+                "candidate_weeks_max": 25,
+                "observed_weeks": 12,
+                "sample_role": "holdout",
+                "stage_timings": {},
+            }
+        ],
+    }
+
+    with pytest.raises(ValueError, match="development cases only"):
+        module.import_development_calibration_package(package)
+
+
+def test_development_exchange_rejects_unknown_version(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    with pytest.raises(ValueError, match="unsupported"):
+        module.import_development_calibration_package(
+            {
+                "exchange_version": "unknown-v9",
+                "cases": [],
+            }
+        )
