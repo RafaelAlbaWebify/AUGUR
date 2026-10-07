@@ -5,6 +5,7 @@ const countries = [
   { iso2: 'PT', iso3: 'PRT', name: 'Portugal', region: 'Europe', subregion: 'Southern Europe', currency: 'EUR', eu_member: true, eurozone_member: true, oecd_member: true },
   { iso2: 'IE', iso3: 'IRL', name: 'Ireland', region: 'Europe', subregion: 'Northern Europe', currency: 'EUR', eu_member: true, eurozone_member: true, oecd_member: true },
   { iso2: 'DE', iso3: 'DEU', name: 'Germany', region: 'Europe', subregion: 'Western Europe', currency: 'EUR', eu_member: true, eurozone_member: true, oecd_member: true, latitude: 52.52, longitude: 13.405, analysis_status: 'available' },
+  { iso2: 'AU', iso3: 'AUS', name: 'Australia', region: 'East Asia & Pacific', subregion: null, currency: 'AUD', eu_member: false, eurozone_member: false, oecd_member: true, latitude: -35.2809, longitude: 149.13, analysis_status: 'available' },
 ]
 
 function metric(country: string) {
@@ -369,6 +370,47 @@ async function mockApi(page: Page) {
       }
     } else if (/^\/api\/regions\/[A-Z0-9]+\/evidence$/.test(path)) {
       const geoCode = path.split('/')[3]
+      if (geoCode === 'AU1') {
+        body = {
+          geo_code: 'AU1',
+          geo_name: 'New South Wales',
+          geo_level: 'tl2',
+          source: 'AUGUR local store · OECD regional statistics',
+          source_ids: ['OECD'],
+          indicator_count: 1,
+          available_count: 1,
+          complete: true,
+          indicators: [
+            {
+              indicator_id: 'regional_population_density',
+              name: 'Population density',
+              status: 'available',
+              period: 2024,
+              value: 10.58,
+              unit: 'people_per_km2',
+              dataset_id: 'DSD_REG_DEMO@DF_DENSITY',
+              source_id: 'OECD',
+            },
+          ],
+          sector_structure: {
+            status: 'unavailable',
+            reason: 'sector_context_not_available_for_geography_system',
+            dataset_id: null,
+            source_id: null,
+            sectors: [],
+          },
+          environmental_health: {
+            status: 'unavailable',
+            reason: 'environmental_health_not_available_for_geography_system',
+            source_id: null,
+            dataset_id: null,
+            metrics: [],
+          },
+          notes: [
+            'OECD TL2/TL3 levels are not treated as interchangeable with Eurostat NUTS levels.',
+          ],
+        }
+      } else {
       const nuts3 = geoCode.length === 5
       body = nuts3 ? {
         geo_code: geoCode,
@@ -418,6 +460,7 @@ async function mockApi(page: Page) {
           notes: [],
         },
         notes: [],
+      }
       }
     } else if (path.endsWith('/ttv/calibration/active')) {
       body = {
@@ -649,6 +692,46 @@ async function mockApi(page: Page) {
       }
     } else if (path === '/api/countries') {
       body = { countries }
+    } else if (path === '/api/geographies') {
+      const requestedCountry = url.searchParams.get('country_iso3')
+      body = {
+        country_iso3: requestedCountry,
+        geo_level: null,
+        geographies: requestedCountry === 'AUS'
+          ? [
+              {
+                geo_id: 'OECD_TL_2024:AU1',
+                country_iso3: 'AUS',
+                country_iso2: 'AU',
+                name: 'New South Wales',
+                geo_level: 'tl2',
+                geography_system: 'OECD_TL_2024',
+                source_id: 'OECD',
+                source_geo_code: 'AU1',
+                parent_geo_id: null,
+                latitude: null,
+                longitude: null,
+                indicator_count: 1,
+                latest_period: 2024,
+              },
+              {
+                geo_id: 'OECD_TL_2024:AU2',
+                country_iso3: 'AUS',
+                country_iso2: 'AU',
+                name: 'Victoria',
+                geo_level: 'tl2',
+                geography_system: 'OECD_TL_2024',
+                source_id: 'OECD',
+                source_geo_code: 'AU2',
+                parent_geo_id: null,
+                latitude: null,
+                longitude: null,
+                indicator_count: 1,
+                latest_period: 2024,
+              },
+            ]
+          : [],
+      }
     } else if (path === '/api/compare/personalized') {
       const requested = (url.searchParams.get('countries') ?? 'IRL,ESP,PRT').split(',')
       body = {
@@ -1016,6 +1099,23 @@ test('dynamic non-pilot country opens through the normal overview route', async 
   const map = page.getByTestId('regional-map')
   await expect(map).toHaveAttribute('data-map-status', 'ready')
   await expect(page.getByText('No integrated subnational source for this country yet')).toBeVisible()
+})
+
+test('source-native OECD region can be selected without GISCO geometry', async ({ page }) => {
+  await page.goto('/country/AUS/overview')
+
+  await expect(page.getByText('Australia — country trajectory')).toBeVisible()
+
+  const regionSelect = page.getByRole('combobox', { name: 'Available source-native region' })
+  await expect(regionSelect).toBeVisible()
+  await expect(regionSelect).toContainText('New South Wales · TL2')
+
+  await regionSelect.selectOption('AU1')
+
+  await expect(page.getByText('TL2 EVIDENCE')).toBeVisible()
+  await expect(page.getByText('New South Wales', { exact: true })).toBeVisible()
+  await expect(page.getByText('Population density', { exact: true })).toBeVisible()
+  await expect(page.getByText('10.6 /km²')).toBeVisible()
 })
 
 test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
