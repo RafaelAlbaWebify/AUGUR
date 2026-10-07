@@ -6,6 +6,7 @@ from time import monotonic
 from app.db.analytics import (
     latest_subnational_observations,
     subnational_indicator_series,
+    regional_evidence_bundle,
     upsert_subnational_observations,
     latest_regional_sector_employment_for_geo,
     latest_environmental_health_burden_for_geo,
@@ -187,12 +188,20 @@ def geographic_level(geo_code: str) -> str:
 
 
 
-def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
+def _regional_result_from_local(
+    code: str,
+    rows: list[dict],
+    *,
+    history_rows: list[dict] | None = None,
+    sector_rows: list[dict] | None = None,
+    environmental_health_rows: list[dict] | None = None,
+) -> dict | None:
     if not rows:
         return None
 
     by_id = {row["indicator_id"]: row for row in rows}
-    history_rows = subnational_indicator_series(code, max_points=8)
+    if history_rows is None:
+        history_rows = subnational_indicator_series(code, max_points=8)
     history_by_id: dict[str, list[dict]] = {}
     for history_row in history_rows:
         history_by_id.setdefault(history_row["indicator_id"], []).append({
@@ -237,8 +246,8 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
         "available_count": available_count,
         "complete": available_count == len(indicators),
         "indicators": indicators,
-        "sector_structure": _regional_sector_context(code),
-        "environmental_health": _environmental_health_context(code),
+        "sector_structure": _regional_sector_context(code, sector_rows),
+        "environmental_health": _environmental_health_context(code, environmental_health_rows),
         "notes": [
             "Regional evidence is served from AUGUR's local analytical store when available.",
             "Coverage varies by indicator and region; unavailable series remain explicit.",
@@ -250,8 +259,12 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
 
 
 
-def _environmental_health_context(code: str) -> dict:
-    rows = latest_environmental_health_burden_for_geo(code)
+def _environmental_health_context(
+    code: str,
+    rows: list[dict] | None = None,
+) -> dict:
+    if rows is None:
+        rows = latest_environmental_health_burden_for_geo(code)
     if not rows:
         return {
             "status": "unavailable",
@@ -300,7 +313,10 @@ def _environmental_health_context(code: str) -> dict:
     }
 
 
-def _regional_sector_context(code: str) -> dict:
+def _regional_sector_context(
+    code: str,
+    rows: list[dict] | None = None,
+) -> dict:
     if geographic_level(code) != "nuts2":
         return {
             "status": "unavailable",
@@ -310,7 +326,8 @@ def _regional_sector_context(code: str) -> dict:
             "sectors": [],
         }
 
-    rows = latest_regional_sector_employment_for_geo(code)
+    if rows is None:
+        rows = latest_regional_sector_employment_for_geo(code)
     if not rows:
         return {
             "status": "unavailable",
@@ -442,8 +459,15 @@ def regional_evidence(
         if cached and monotonic() - cached[0] < CACHE_TTL_SECONDS:
             return cached[1]
 
-        local_rows = latest_subnational_observations(code)
-        local = _regional_result_from_local(code, local_rows)
+        bundle = regional_evidence_bundle(code, max_history_points=8)
+        local_rows = bundle["latest"]
+        local = _regional_result_from_local(
+            code,
+            local_rows,
+            history_rows=bundle["history"],
+            sector_rows=bundle["sectors"],
+            environmental_health_rows=bundle["environmental_health"],
+        )
         if local:
             _REGIONAL_CACHE[code] = (monotonic(), local)
             return local
@@ -472,8 +496,8 @@ def regional_evidence(
             "available_count": 0,
             "complete": False,
             "indicators": indicators,
-            "sector_structure": _regional_sector_context(code),
-            "environmental_health": _environmental_health_context(code),
+            "sector_structure": _regional_sector_context(code, bundle["sectors"]),
+            "environmental_health": _environmental_health_context(code, bundle["environmental_health"]),
             "notes": [
                 "Interactive regional reads are local-only and never wait for an external provider.",
                 "Missing evidence is refreshed through AUGUR sync/repair flows.",
