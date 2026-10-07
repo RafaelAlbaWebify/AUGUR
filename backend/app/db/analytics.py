@@ -2303,6 +2303,34 @@ def regional_evidence_bundle(
         con.close()
 
 
+def subnational_geography_codes(
+    geo_level: str,
+    indicator_ids: list[str] | None = None,
+) -> list[str]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        params: list[object] = [geo_level.lower()]
+        indicator_filter = ""
+        if indicator_ids:
+            placeholders = ",".join("?" for _ in indicator_ids)
+            indicator_filter = f" AND indicator_id IN ({placeholders})"
+            params.extend(indicator_ids)
+
+        rows = con.execute(
+            f"""
+            SELECT DISTINCT geo_code
+            FROM subnational_observations
+            WHERE LOWER(geo_level) = ?
+            {indicator_filter}
+            ORDER BY geo_code
+            """,
+            params,
+        ).fetchall()
+        return [row[0] for row in rows]
+    finally:
+        con.close()
+
+
 def subnational_storage_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
