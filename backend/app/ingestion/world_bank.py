@@ -233,8 +233,13 @@ class WorldBankAdapter:
         if not countries:
             return {}, []
 
+        country_path = (
+            "all"
+            if len(countries) > 25
+            else ";".join(countries)
+        )
         url = (
-            f"{BASE_URL}/country/{';'.join(countries)}"
+            f"{BASE_URL}/country/{country_path}"
             f"/indicator/{source_indicator}"
         )
         params = {
