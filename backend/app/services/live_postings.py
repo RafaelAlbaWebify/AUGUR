@@ -100,8 +100,12 @@ def validate_live_postings_snapshot(snapshot: dict) -> dict:
     if posting_count < 0:
         raise ValueError("posting_count must be non-negative")
 
-    skills = snapshot.get("skills") or []
-    languages = snapshot.get("languages") or []
+    skills = snapshot.get("skills", [])
+    languages = snapshot.get("languages", [])
+    if skills is None:
+        skills = []
+    if languages is None:
+        languages = []
     if not isinstance(skills, list) or not isinstance(languages, list):
         raise ValueError("skills and languages must be lists")
 
