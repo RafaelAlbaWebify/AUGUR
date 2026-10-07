@@ -17,6 +17,19 @@ def _local_history_stub(monkeypatch):
         "subnational_indicator_series",
         lambda code, max_points=8: [],
     )
+    monkeypatch.setattr(
+        regional_module,
+        "regional_evidence_bundle",
+        lambda code, max_history_points=8: {
+            "latest": regional_module.latest_subnational_observations(code),
+            "history": regional_module.subnational_indicator_series(
+                code,
+                max_points=max_history_points,
+            ),
+            "sectors": regional_module.latest_regional_sector_employment_for_geo(code),
+            "environmental_health": regional_module.latest_environmental_health_burden_for_geo(code),
+        },
+    )
 
 
 class FakeAdapter:
