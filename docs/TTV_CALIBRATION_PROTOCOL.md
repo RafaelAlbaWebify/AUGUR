@@ -246,3 +246,29 @@ Import locally with:
 ```
 
 Imported development cases may be inspected descriptively, but they do not satisfy the external-calibration gate.
+
+
+## 13. In-product opt-in observation workflow
+
+AUGUR can now collect bounded TTV v1 **development** observations directly from My Fit without requiring CSV entry.
+
+The workflow is deliberately opt-in and local:
+
+1. AUGUR checks that the current TTV candidate is inside `ttv-estimation-scope-v1`;
+2. the user explicitly starts a calibration observation;
+3. AUGUR stores the frozen candidate range, engine/composition versions, start timestamp and language baseline in the local SQLite datastore;
+4. an active observation remains separate from the calibration case store;
+5. when the user has a documented B2-or-better result, the user explicitly records the observed outcome;
+6. AUGUR calculates elapsed weeks from the stored start timestamp and writes a `sample_role=development` calibration case;
+7. cancelling an observation creates no calibration case.
+
+The product does not automatically infer that B2 has been achieved from profile edits, elapsed time or another heuristic.
+
+This workflow reduces manual data-entry error and preserves the pre-outcome candidate range, but it does **not** constitute external validation. Development cases remain exploratory and cannot be promoted to holdout cases retrospectively.
+
+Holdout collection remains disabled until:
+
+- the calibration protocol receives an immutable version;
+- acceptance criteria are frozen before holdout evaluation.
+
+The local observation workflow stores only bounded calibration metadata; it does not duplicate the full personal profile in the calibration datastore.
