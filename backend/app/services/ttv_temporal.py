@@ -42,8 +42,8 @@ TEMPORAL_MODEL_VALIDATION_GATES = {
         "reason": "preserved_remote_income_requires_no_job_search_transition",
     },
     "local_employment_transition": {
-        "state": "experimental",
-        "reason": "country_level_transition_probability_not_occupation_specific",
+        "state": "scope_bounded",
+        "reason": "v1_estimation_scope_excludes_local_employment_search_duration",
     },
     "local_financial_transition": {
         "state": "scope_bounded",
