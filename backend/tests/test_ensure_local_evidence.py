@@ -133,6 +133,15 @@ def test_main_returns_partial_when_repair_cannot_restore_evidence(monkeypatch, c
             "action": "repair_failed",
         },
     )
+    monkeypatch.setattr(
+        module,
+        "ensure_nuts3_safety_evidence",
+        lambda: {
+            "evidence_id": "nuts3_safety",
+            "status": "available",
+            "action": "none",
+        },
+    )
 
     code = module.main()
 
@@ -140,3 +149,149 @@ def test_main_returns_partial_when_repair_cannot_restore_evidence(monkeypatch, c
     output = capsys.readouterr().out
     assert '"status": "partial"' in output
     assert '"regional_sector_employment"' in output
+
+
+
+def test_nuts3_safety_noops_when_already_available(monkeypatch):
+    levels = {
+        "NUTS3": {
+            "available": True,
+            "row_count": 20,
+            "geography_count": 10,
+            "country_prefixes": ["ES", "IE", "PT"],
+            "indicator_ids": [
+                "regional_intentional_homicide_rate",
+                "regional_robbery_rate",
+            ],
+            "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+            "geo_level": "NUTS3",
+        }
+    }
+
+    monkeypatch.setattr(
+        module,
+        "subnational_evidence_by_level_status",
+        lambda: levels,
+    )
+
+    class UnexpectedClient:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("GISCO network should not be used")
+
+    monkeypatch.setattr(module.httpx, "Client", UnexpectedClient)
+
+    result = module.ensure_nuts3_safety_evidence()
+
+    assert result["status"] == "available"
+    assert result["action"] == "none"
+    assert result["before"] == levels["NUTS3"]
+
+
+def test_nuts3_safety_repairs_missing_store(monkeypatch):
+    statuses = iter([
+        {
+            "NUTS3": {
+                "available": False,
+                "row_count": 0,
+                "geography_count": 0,
+                "country_prefixes": [],
+                "indicator_ids": [],
+                "latest_retrieved_at": None,
+                "geo_level": "NUTS3",
+            }
+        },
+        {
+            "NUTS3": {
+                "available": True,
+                "row_count": 6,
+                "geography_count": 3,
+                "country_prefixes": ["ES", "IE", "PT"],
+                "indicator_ids": [
+                    "regional_intentional_homicide_rate",
+                    "regional_robbery_rate",
+                ],
+                "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+                "geo_level": "NUTS3",
+            }
+        },
+    ])
+    monkeypatch.setattr(
+        module,
+        "subnational_evidence_by_level_status",
+        lambda: next(statuses),
+    )
+
+    class FakeResponse:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "properties": {
+                            "NUTS_ID": "ES120",
+                            "CNTR_CODE": "ES",
+                        }
+                    },
+                    {
+                        "properties": {
+                            "NUTS_ID": "PT170",
+                            "CNTR_CODE": "PT",
+                        }
+                    },
+                    {
+                        "properties": {
+                            "NUTS_ID": "IE061",
+                            "CNTR_CODE": "IE",
+                        }
+                    },
+                    {
+                        "properties": {
+                            "NUTS_ID": "BG411",
+                            "CNTR_CODE": "BG",
+                        }
+                    },
+                ],
+            }
+
+    class FakeClient:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return None
+
+        def get(self, url):
+            assert url == module.NUTS3_URL
+            return FakeResponse()
+
+    monkeypatch.setattr(module.httpx, "Client", FakeClient)
+
+    seen = {}
+    def fake_sync(codes):
+        seen["codes"] = codes
+        return {
+            "geo_code_count": len(codes),
+            "geographies_with_data": len(codes),
+            "rows_upserted": len(codes) * 2,
+            "results": [],
+        }
+
+    monkeypatch.setattr(
+        module,
+        "sync_regional_evidence_codes",
+        fake_sync,
+    )
+
+    result = module.ensure_nuts3_safety_evidence()
+
+    assert seen["codes"] == ["ES120", "IE061", "PT170"]
+    assert result["status"] == "available"
+    assert result["action"] == "repaired"
+    assert result["region_count_requested"] == 3
+    assert result["sync_result"]["rows_upserted"] == 6
