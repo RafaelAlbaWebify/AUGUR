@@ -11,6 +11,7 @@ on:
       - "backend/scripts/inspect_eurostat_city_evidence.py"
       - "backend/scripts/inspect_global_country_baseline.py"
       - "backend/scripts/inspect_oecd_regional_density.py"
+      - "backend/scripts/inspect_oecd_regional_dependency.py"
       - "backend/scripts/inspect_oecd_regional_population.py"
       - "backend/app/ingestion/world_bank.py"
       - "backend/app/ingestion/imf.py"
@@ -75,6 +76,9 @@ jobs:
 
       - name: Inspect OECD regional population
         run: python -m scripts.inspect_oecd_regional_population
+
+      - name: Inspect OECD regional dependency ratio
+        run: python -m scripts.inspect_oecd_regional_dependency
 
       - name: Sync OECD Australia regional demographics
         run: >-
