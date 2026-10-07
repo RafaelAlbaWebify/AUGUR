@@ -250,6 +250,13 @@ type PersonalizedComparisonResponse = {
       scenario_count: number
       weight_bounds: [number, number]
       score_ranges: Record<string, { min: number; max: number; spread: number }>
+      rank_ranges: Record<string, {
+        best_rank: number
+        worst_rank: number
+        top_scenario_count: number
+        scenario_count: number
+        status: 'rank_stable' | 'preference_sensitive'
+      }>
     }
     pareto?: null | {
       method: string
