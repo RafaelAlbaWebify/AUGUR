@@ -169,6 +169,11 @@ type RegionalEvidenceResponse = {
     dataset_version?: string
     geo_level?: string
     period?: number
+    comparison_policy?: {
+      safe_for_direct_cross_region_comparison?: boolean
+      reason?: string
+      preferred_comparison_basis?: string
+    }
     metrics?: EnvironmentalHealthMetric[]
     notes?: string[]
   }
@@ -648,7 +653,7 @@ export default function OverviewPage({
                   && regionalEvidence.environmental_health.metrics?.length ? (
                   <div className="regionalSectorContext">
                     <strong>PM2.5 attributable health burden</strong>
-                    <span>EEA health-impact evidence · separate from ambient concentration</span>
+                    <span>EEA health-impact evidence · absolute counts, not a population-normalized regional ranking</span>
                     <div className="regionalSectorList">
                       {regionalEvidence.environmental_health.metrics.map((metric) => (
                         <article key={`${metric.burden_type}-${metric.unit_code}`}>
@@ -660,7 +665,11 @@ export default function OverviewPage({
                                 : metric.label}
                           </span>
                           <strong>{new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(metric.value)}</strong>
-                          <small>{metric.period} · {metric.unit_label}{metric.obs_status ? ` · status ${metric.obs_status}` : ''}</small>
+                          <small>
+                            {metric.period} · {metric.unit_label}
+                            {metric.obs_status ? ` · status ${metric.obs_status}` : ''}
+                            {' · do not compare directly across differently sized regions'}
+                          </small>
                         </article>
                       ))}
                     </div>
