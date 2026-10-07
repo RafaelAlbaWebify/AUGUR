@@ -178,6 +178,20 @@ CREATE TABLE IF NOT EXISTS regional_sector_employment (
     PRIMARY KEY (geo_code, period, nace_code, source_id)
 );
 
+CREATE TABLE IF NOT EXISTS geography_registry (
+    geo_id VARCHAR PRIMARY KEY,
+    country_iso3 VARCHAR,
+    country_iso2 VARCHAR,
+    name VARCHAR,
+    geo_level VARCHAR NOT NULL,
+    geography_system VARCHAR NOT NULL,
+    source_id VARCHAR,
+    source_geo_code VARCHAR NOT NULL,
+    parent_geo_id VARCHAR,
+    latitude DOUBLE,
+    longitude DOUBLE
+);
+
 CREATE TABLE IF NOT EXISTS subnational_observations (
     geo_code VARCHAR NOT NULL,
     geo_name VARCHAR,
@@ -285,6 +299,46 @@ def initialize_analytics_schema() -> None:
             con.execute(
                 "ALTER TABLE subnational_observations ADD COLUMN geo_name VARCHAR"
             )
+
+        # Backfill the provider-neutral geography registry from existing
+        # NUTS/Urban Audit evidence. Country identity is resolved explicitly
+        # through the country table rather than inferred by API consumers.
+        con.execute(
+            """
+            INSERT OR REPLACE INTO geography_registry
+            (
+                geo_id, country_iso3, country_iso2, name, geo_level,
+                geography_system, source_id, source_geo_code,
+                parent_geo_id, latitude, longitude
+            )
+            SELECT
+                s.geo_code,
+                c.iso3,
+                SUBSTR(s.geo_code, 1, 2),
+                MAX(s.geo_name),
+                LOWER(s.geo_level),
+                CASE
+                    WHEN LOWER(s.geo_level) IN ('nuts2', 'nuts3')
+                        THEN 'NUTS_2024'
+                    WHEN LOWER(s.geo_level) = 'city'
+                        THEN 'URBAN_AUDIT_2024'
+                    ELSE 'SOURCE_NATIVE'
+                END,
+                MIN(s.source_id),
+                s.geo_code,
+                NULL,
+                NULL,
+                NULL
+            FROM subnational_observations s
+            LEFT JOIN countries c
+              ON c.iso2 = SUBSTR(s.geo_code, 1, 2)
+            GROUP BY
+                s.geo_code,
+                c.iso3,
+                SUBSTR(s.geo_code, 1, 2),
+                LOWER(s.geo_level)
+            """
+        )
 
         if "interpretation_policy" not in existing_columns:
             con.execute("ALTER TABLE indicators ADD COLUMN interpretation_policy VARCHAR")
@@ -2208,12 +2262,191 @@ def analytical_evidence_status() -> dict:
         con.close()
 
 
+def upsert_geographies(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO geography_registry
+            (
+                geo_id, country_iso3, country_iso2, name, geo_level,
+                geography_system, source_id, source_geo_code,
+                parent_geo_id, latitude, longitude
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["geo_id"],
+                    row.get("country_iso3"),
+                    row.get("country_iso2"),
+                    row.get("name"),
+                    row["geo_level"].lower(),
+                    row["geography_system"],
+                    row.get("source_id"),
+                    row.get("source_geo_code", row["geo_id"]),
+                    row.get("parent_geo_id"),
+                    row.get("latitude"),
+                    row.get("longitude"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def geography_coverage_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        rows = con.execute(
+            """
+            SELECT
+                g.country_iso3,
+                g.country_iso2,
+                g.geography_system,
+                g.geo_level,
+                COUNT(DISTINCT g.geo_id) AS geography_count,
+                COUNT(DISTINCT s.indicator_id) AS indicator_count,
+                COUNT(s.indicator_id) AS observation_count
+            FROM geography_registry g
+            LEFT JOIN subnational_observations s
+              ON s.geo_code = g.geo_id
+            GROUP BY
+                g.country_iso3,
+                g.country_iso2,
+                g.geography_system,
+                g.geo_level
+            ORDER BY
+                g.country_iso3 NULLS LAST,
+                g.country_iso2,
+                g.geography_system,
+                g.geo_level
+            """
+        ).fetchall()
+
+        items = [
+            {
+                "country_iso3": row[0],
+                "country_iso2": row[1],
+                "geography_system": row[2],
+                "geo_level": row[3],
+                "geography_count": int(row[4]),
+                "indicator_count": int(row[5]),
+                "observation_count": int(row[6]),
+                "analysis_status": (
+                    "available"
+                    if int(row[6]) > 0
+                    else "registered_no_evidence"
+                ),
+            }
+            for row in rows
+        ]
+
+        return {
+            "geography_count": sum(item["geography_count"] for item in items),
+            "countries_with_subnational_evidence": len({
+                item["country_iso3"]
+                for item in items
+                if (
+                    item["country_iso3"]
+                    and item["analysis_status"] == "available"
+                )
+            }),
+            "systems": sorted({
+                item["geography_system"]
+                for item in items
+            }),
+            "levels": sorted({
+                item["geo_level"]
+                for item in items
+            }),
+            "coverage": items,
+        }
+    finally:
+        con.close()
+
+
 def upsert_subnational_observations(rows: list[dict]) -> int:
     if not rows:
         return 0
 
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        iso2_to_iso3 = {
+            row[0]: row[1]
+            for row in con.execute(
+                "SELECT iso2, iso3 FROM countries WHERE iso2 IS NOT NULL"
+            ).fetchall()
+        }
+
+        geography_rows = {}
+        for row in rows:
+            code = row["geo_code"].upper()
+            level = str(row["geo_level"]).lower()
+            country_iso2 = row.get("country_iso2") or (
+                code[:2]
+                if len(code) >= 2 and code[:2].isalpha()
+                else None
+            )
+            country_iso3 = row.get("country_iso3") or (
+                iso2_to_iso3.get(country_iso2)
+                if country_iso2
+                else None
+            )
+            system = row.get("geography_system") or (
+                "NUTS_2024"
+                if level in {"nuts2", "nuts3"}
+                else "URBAN_AUDIT_2024"
+                if level == "city"
+                else "SOURCE_NATIVE"
+            )
+            geography_rows[code] = {
+                "geo_id": code,
+                "country_iso3": country_iso3,
+                "country_iso2": country_iso2,
+                "name": row.get("geo_name"),
+                "geo_level": level,
+                "geography_system": system,
+                "source_id": row.get("source_id"),
+                "source_geo_code": row.get("source_geo_code", code),
+                "parent_geo_id": row.get("parent_geo_id"),
+                "latitude": row.get("latitude"),
+                "longitude": row.get("longitude"),
+            }
+
+        if geography_rows:
+            con.executemany(
+                """
+                INSERT OR REPLACE INTO geography_registry
+                (
+                    geo_id, country_iso3, country_iso2, name, geo_level,
+                    geography_system, source_id, source_geo_code,
+                    parent_geo_id, latitude, longitude
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                [
+                    [
+                        item["geo_id"],
+                        item["country_iso3"],
+                        item["country_iso2"],
+                        item["name"],
+                        item["geo_level"],
+                        item["geography_system"],
+                        item["source_id"],
+                        item["source_geo_code"],
+                        item["parent_geo_id"],
+                        item["latitude"],
+                        item["longitude"],
+                    ]
+                    for item in geography_rows.values()
+                ],
+            )
         con.executemany(
             """
             INSERT OR REPLACE INTO subnational_observations
