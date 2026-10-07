@@ -66,9 +66,6 @@ jobs:
       - name: Probe global UN WPP batch
         run: python -m scripts.inspect_global_country_baseline --source un_wpp
 
-      - name: Sync full global country baseline
-        run: python -m scripts.sync_global_baseline
-
       - name: Inspect OECD regional density
         run: python -m scripts.inspect_oecd_regional_density
 
