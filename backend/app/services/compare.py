@@ -1,15 +1,13 @@
 from __future__ import annotations
 
-from app.catalog import COUNTRIES
 from app.db.analytics import latest_observations
+from app.services.country import country_metadata
 
 
 def build_comparison(
     country_iso3s: list[str],
     snapshots: dict[str, list[dict]],
 ) -> dict:
-    registry = {country["iso3"]: country for country in COUNTRIES}
-
     indicator_rows: dict[str, dict] = {}
 
     for country_iso3 in country_iso3s:
@@ -34,7 +32,7 @@ def build_comparison(
     countries = [
         {
             "iso3": code,
-            "name": registry[code]["name"],
+            "name": country_metadata(code)["name"],
         }
         for code in country_iso3s
     ]
