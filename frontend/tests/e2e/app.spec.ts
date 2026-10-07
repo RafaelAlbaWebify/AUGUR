@@ -411,6 +411,11 @@ async function mockApi(page: Page) {
         },
         notes: [],
       }
+    } else if (path.endsWith('/ttv/calibration/active')) {
+      body = {
+        country_iso3: country,
+        observation: null,
+      }
     } else if (path.endsWith('/career-fit')) {
       body = {
         target_country_iso3: country,
@@ -1673,6 +1678,142 @@ test('candidate temporal evidence remains explicitly non-estimate', async ({ pag
   await expect(ttv.getByText('Language planning evidence')).toBeVisible()
   await expect(ttv.getByText('Language: 100–250 guided hours · add study hours/week for calendar conversion')).toBeVisible()
   await expect(ttv.getByText('Estimate available')).toHaveCount(0)
+})
+
+test('opt-in TTV calibration observation lifecycle is visible in My Fit', async ({ page }) => {
+  let observation: null | Record<string, unknown> = null
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/ttv', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        target_country_iso3: 'ESP',
+        method: 'ttv_dependency_graph_v1',
+        stages: {},
+        blocked_by: [],
+        blocker_details: [],
+        dependency_ready: false,
+        temporal_evidence_state: 'not_implemented',
+        temporal_model_version: null,
+        temporal_evidence_ready: true,
+        temporal_evidence: {
+          engine_version: 'ttv-temporal-evidence-v1',
+          calendar_ready: true,
+          estimation_scope: {
+            scope_id: 'ttv-estimation-scope-v1',
+            in_scope: true,
+            blockers: [],
+          },
+          unavailable_stages: [],
+          candidate_range: {
+            weeks_min: 10,
+            weeks_max: 25,
+            composition: 'critical_path_v1',
+          },
+          stages: {
+            language: {
+              status: 'available',
+              weeks_min: 10,
+              weeks_max: 25,
+              reason: 'cambridge_guided_hours_with_user_study_intensity',
+              current_cefr: 'B1',
+              target_cefr: 'B2',
+              guided_hours_min: 100,
+              guided_hours_max: 250,
+              weekly_study_hours: 10,
+            },
+          },
+        },
+        candidate_time_range: {
+          weeks_min: 10,
+          weeks_max: 25,
+          composition: 'critical_path_v1',
+          stage_groups: {},
+        },
+        estimate_status: 'dependencies_blocked',
+        ready_for_time_estimate: false,
+        time_estimate: null,
+        notes: [],
+      }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/ttv/calibration/active', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        observation,
+      }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/countries/ESP/ttv/calibration/start', async route => {
+    observation = {
+      case_id: 'ttv-dev-esp-testcase',
+      country_iso3: 'ESP',
+      status: 'active',
+      scope_id: 'ttv-estimation-scope-v1',
+      engine_version: 'ttv-temporal-evidence-v1',
+      composition: 'critical_path_v1',
+      candidate_weeks_min: 10,
+      candidate_weeks_max: 25,
+      started_at: '2026-10-07T05:00:00+00:00',
+      completed_at: null,
+      baseline: {
+        target_country_iso3: 'ESP',
+        language: {
+          current_cefr: 'B1',
+          target_cefr: 'B2',
+          weekly_study_hours: 10,
+          guided_hours_min: 100,
+          guided_hours_max: 250,
+        },
+      },
+      completion: {},
+    }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        observation,
+      }),
+    })
+  })
+
+  await page.route('http://127.0.0.1:8020/api/ttv/calibration/ttv-dev-esp-testcase/complete', async route => {
+    observation = null
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        observation: { status: 'completed' },
+        calibration_case: {
+          case_id: 'ttv-dev-esp-testcase',
+          sample_role: 'development',
+          observed_weeks: 12,
+        },
+      }),
+    })
+  })
+
+  await page.goto('/country/ESP/profile')
+  await page.getByText('Detailed fit evidence and TTV').click()
+  const ttv = page.getByRole('region', { name: 'TTV readiness' })
+
+  await expect(ttv.getByText('Help validate TTV v1')).toBeVisible()
+  await expect(ttv.getByText(/Local|Opt in/i)).toBeVisible()
+  await ttv.getByRole('button', { name: 'Start calibration observation' }).click()
+
+  await expect(ttv.getByText('TTV v1 calibration observation active')).toBeVisible()
+  await expect(ttv.getByText(/candidate 10–25 weeks/i)).toBeVisible()
+  await ttv.getByRole('button', { name: 'Record B2 outcome now' }).click()
+
+  await expect(ttv.getByText('TTV v1 calibration observation active')).toHaveCount(0)
+  await expect(ttv.getByRole('button', { name: 'Start calibration observation' })).toBeVisible()
 })
 
 test('map starts broad and exposes regional detail when country is focused', async ({ page }) => {
