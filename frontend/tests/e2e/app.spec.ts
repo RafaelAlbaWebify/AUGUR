@@ -1097,6 +1097,10 @@ test('Decision Matrix shows preference index sensitivity and Pareto candidates',
               ESP: { min: 16.7, max: 25, spread: 8.3 },
               IRL: { min: 75, max: 83.3, spread: 8.3 },
             },
+            rank_ranges: {
+              ESP: { best_rank: 2, worst_rank: 2, top_scenario_count: 0, scenario_count: 5, status: 'rank_stable' },
+              IRL: { best_rank: 1, worst_rank: 1, top_scenario_count: 5, scenario_count: 5, status: 'rank_stable' },
+            },
           },
           pareto: {
             method: 'pareto_nondominance_on_positive_weight_dimensions',
