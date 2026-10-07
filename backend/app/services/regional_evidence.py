@@ -5,6 +5,7 @@ from time import monotonic
 
 from app.db.analytics import (
     latest_subnational_observations,
+    subnational_indicator_series,
     upsert_subnational_observations,
     latest_regional_sector_employment_for_geo,
     latest_environmental_health_burden_for_geo,
@@ -191,6 +192,14 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
         return None
 
     by_id = {row["indicator_id"]: row for row in rows}
+    history_rows = subnational_indicator_series(code, max_points=8)
+    history_by_id: dict[str, list[dict]] = {}
+    for history_row in history_rows:
+        history_by_id.setdefault(history_row["indicator_id"], []).append({
+            "period": history_row["period"],
+            "value": history_row["value"],
+        })
+
     indicators = []
     for config in _indicator_configs_for_geo(code):
         row = by_id.get(config["indicator_id"])
@@ -205,6 +214,7 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
                 "dataset_id": row["dataset_id"],
                 "source_id": row["source_id"],
                 "source_updated_at": row.get("source_updated_at"),
+                "history": history_by_id.get(config["indicator_id"], []),
             })
         else:
             indicators.append({
@@ -214,6 +224,7 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
                 "dataset_id": config["dataset_id"],
                 "source_id": "EUROSTAT",
                 "reason": "not_cached",
+                "history": [],
             })
 
     available_count = sum(1 for item in indicators if item["status"] == "available")
@@ -398,6 +409,13 @@ def _latest_regional_indicator(
         "dataset_id": config["dataset_id"],
         "source_id": "EUROSTAT",
         "source_updated_at": latest.get("source_updated_at"),
+        "history": [
+            {
+                "period": row["period"],
+                "value": row["value"],
+            }
+            for row in sorted(rows, key=lambda row: row["period"])[-8:]
+        ],
     }
 
 
@@ -430,6 +448,7 @@ def regional_evidence(
                 "dataset_id": config["dataset_id"],
                 "source_id": "EUROSTAT",
                 "reason": "not_cached",
+                "history": [],
             }
             for config in _indicator_configs_for_geo(code)
         ]
