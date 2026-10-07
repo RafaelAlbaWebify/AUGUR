@@ -189,6 +189,26 @@ CREATE TABLE IF NOT EXISTS subnational_observations (
     source_updated_at VARCHAR,
     PRIMARY KEY (geo_code, indicator_id, period, source_id)
 );
+
+CREATE TABLE IF NOT EXISTS environmental_health_burden (
+    geo_code VARCHAR NOT NULL,
+    geo_name VARCHAR,
+    geo_level VARCHAR NOT NULL,
+    period INTEGER NOT NULL,
+    burden_type VARCHAR NOT NULL,
+    burden_label VARCHAR,
+    value DOUBLE NOT NULL,
+    unit_code VARCHAR NOT NULL,
+    unit_label VARCHAR,
+    obs_status VARCHAR,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    dataset_version VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    PRIMARY KEY (
+        geo_code, period, burden_type, unit_code, source_id, dataset_version
+    )
+);
 """
 
 
@@ -981,6 +1001,154 @@ def latest_labour_job_transition(
         return dict(zip(columns, row))
     finally:
         con.close()
+
+def upsert_environmental_health_burden(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO environmental_health_burden
+            (
+                geo_code, geo_name, geo_level, period, burden_type,
+                burden_label, value, unit_code, unit_label, obs_status,
+                source_id, dataset_id, dataset_version, retrieved_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["geo_code"].upper(),
+                    row.get("geo_name"),
+                    row["geo_level"],
+                    row["period"],
+                    row["burden_type"],
+                    row.get("burden_label"),
+                    row["value"],
+                    row["unit_code"],
+                    row.get("unit_label"),
+                    row.get("obs_status"),
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["dataset_version"],
+                    row["retrieved_at"],
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_environmental_health_burden_for_geo(
+    geo_code: str,
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'environmental_health_burden'
+            """
+        ).fetchone()[0]
+        if not table_exists:
+            return []
+
+        result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY burden_type, unit_code
+                        ORDER BY period DESC, dataset_version DESC
+                    ) AS rn
+                FROM environmental_health_burden
+                WHERE geo_code = ?
+            )
+            SELECT
+                geo_code, geo_name, geo_level, period, burden_type,
+                burden_label, value, unit_code, unit_label, obs_status,
+                source_id, dataset_id, dataset_version, retrieved_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY burden_type, unit_code
+            """,
+            [geo_code.upper()],
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def environmental_health_burden_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'environmental_health_burden'
+            """
+        ).fetchone()[0]
+        if not table_exists:
+            return {
+                "available": False,
+                "row_count": 0,
+                "geography_count": 0,
+                "nuts2_count": 0,
+                "nuts3_count": 0,
+                "period_min": None,
+                "period_max": None,
+                "burden_types": [],
+                "unit_codes": [],
+                "latest_retrieved_at": None,
+            }
+
+        row = con.execute(
+            """
+            SELECT
+                COUNT(*),
+                COUNT(DISTINCT geo_code),
+                COUNT(DISTINCT CASE WHEN UPPER(geo_level) = 'NUTS2' THEN geo_code END),
+                COUNT(DISTINCT CASE WHEN UPPER(geo_level) = 'NUTS3' THEN geo_code END),
+                MIN(period),
+                MAX(period),
+                MAX(retrieved_at)
+            FROM environmental_health_burden
+            """
+        ).fetchone()
+        burden_types = [
+            item[0]
+            for item in con.execute(
+                "SELECT DISTINCT burden_type FROM environmental_health_burden ORDER BY burden_type"
+            ).fetchall()
+        ]
+        unit_codes = [
+            item[0]
+            for item in con.execute(
+                "SELECT DISTINCT unit_code FROM environmental_health_burden ORDER BY unit_code"
+            ).fetchall()
+        ]
+        return {
+            "available": bool(row[0]),
+            "row_count": int(row[0]),
+            "geography_count": int(row[1]),
+            "nuts2_count": int(row[2]),
+            "nuts3_count": int(row[3]),
+            "period_min": row[4],
+            "period_max": row[5],
+            "burden_types": burden_types,
+            "unit_codes": unit_codes,
+            "latest_retrieved_at": row[6],
+        }
+    finally:
+        con.close()
+
 
 def subnational_evidence_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
