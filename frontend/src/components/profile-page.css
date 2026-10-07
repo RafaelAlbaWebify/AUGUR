@@ -1294,3 +1294,77 @@
     grid-template-columns: 1fr;
   }
 }
+
+
+.ttvCalibrationCard {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid rgba(76, 161, 205, .28);
+  border-radius: 9px;
+  background: rgba(8, 27, 40, .58);
+}
+
+.ttvCalibrationCard.active {
+  border-color: rgba(70, 170, 119, .32);
+}
+
+.ttvCalibrationCard > div:first-child {
+  display: grid;
+  gap: 3px;
+}
+
+.ttvCalibrationCard strong {
+  color: #dcecf4;
+  font-size: 9px;
+}
+
+.ttvCalibrationCard span,
+.ttvCalibrationCard p {
+  color: #7f99a9;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
+.ttvCalibrationCard p {
+  margin: 0;
+}
+
+.ttvCalibrationCard button {
+  justify-self: start;
+  padding: 6px 9px;
+  border: 1px solid rgba(83, 176, 218, .34);
+  border-radius: 7px;
+  background: rgba(22, 104, 138, .32);
+  color: #cceefa;
+  font-size: 8px;
+  cursor: pointer;
+}
+
+.ttvCalibrationCard button.secondary {
+  background: rgba(37, 52, 61, .52);
+  border-color: rgba(127, 151, 166, .24);
+  color: #9db0bc;
+}
+
+.ttvCalibrationCard button:disabled {
+  opacity: .5;
+  cursor: default;
+}
+
+.ttvCalibrationActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+
+.ttvCalibrationError {
+  margin-top: 7px;
+  padding: 7px 8px;
+  border: 1px solid rgba(185, 91, 91, .25);
+  border-radius: 7px;
+  background: rgba(82, 31, 31, .22);
+  color: #d8aaaa;
+  font-size: 8px;
+}
