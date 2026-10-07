@@ -587,6 +587,26 @@ async function mockApi(page: Page) {
           updated_at: null,
         }
       }
+    } else if (path === '/api/ttv/calibration/status') {
+      body = {
+        protocol_state: 'definitions_frozen_acceptance_pending',
+        protocol_version: null,
+        development_case_count: 0,
+        holdout_case_count: 0,
+        interval_coverage_pct: null,
+        mean_interval_width_weeks: null,
+        mean_absolute_midpoint_error_weeks: null,
+        mean_miss_distance_weeks: null,
+        context_summary: {
+          context_case_count: 0,
+          current_cefr_levels: [],
+          target_cefr_levels: [],
+          weekly_study_hours: [],
+        },
+        protocol_readiness: {
+          blockers: ['protocol_version', 'acceptance_criteria'],
+        },
+      }
     } else if (path === '/api/health') {
       body = { status: 'ok', phase: 1, version: 'test', datastores: { sqlite: true, duckdb: true } }
     } else if (path === '/api/operability') {
@@ -1814,6 +1834,46 @@ test('opt-in TTV calibration observation lifecycle is visible in My Fit', async 
 
   await expect(ttv.getByText('TTV v1 calibration observation active')).toHaveCount(0)
   await expect(ttv.getByRole('button', { name: 'Start calibration observation' })).toBeVisible()
+})
+
+test('My Fit exposes TTV calibration diagnostics without implying validation', async ({ page }) => {
+  await page.route('http://127.0.0.1:8020/api/ttv/calibration/status', async route => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        protocol_state: 'definitions_frozen_acceptance_pending',
+        protocol_version: null,
+        development_case_count: 6,
+        holdout_case_count: 0,
+        interval_coverage_pct: 66.67,
+        mean_interval_width_weeks: 14.5,
+        mean_absolute_midpoint_error_weeks: 5.2,
+        mean_miss_distance_weeks: 3.0,
+        context_summary: {
+          context_case_count: 6,
+          current_cefr_levels: ['A2', 'B1'],
+          target_cefr_levels: ['B2'],
+          weekly_study_hours: [5, 10],
+        },
+        protocol_readiness: {
+          blockers: ['protocol_version', 'acceptance_criteria'],
+        },
+      }),
+    })
+  })
+
+  await page.goto('/country/ESP/profile')
+  await page.getByText('Detailed fit evidence and TTV').click()
+
+  const diagnostics = page.getByLabel('TTV calibration diagnostics')
+  await expect(diagnostics).toBeVisible()
+  await expect(diagnostics.getByText('6', { exact: true })).toBeVisible()
+  await expect(diagnostics.getByText('66.7%')).toBeVisible()
+  await expect(diagnostics.getByText('14.5 wk')).toBeVisible()
+  await expect(diagnostics.getByText('A2 · B1')).toBeVisible()
+  await expect(page.getByText('Study-intensity cohorts: 5 · 10 h/week')).toBeVisible()
+  await expect(page.getByText(/validated|validation passed/i)).toHaveCount(0)
 })
 
 test('TTV development exchange can export and import from My Fit', async ({ page }) => {
