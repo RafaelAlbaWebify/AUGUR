@@ -15,6 +15,10 @@ from app.ingestion.eurostat import EurostatAdapter
 from app.ingestion.eurostat_regional_sector import (
     fetch_regional_sector_employment,
 )
+from app.ingestion.cedefop_clssi import (
+    download_workbook as download_clssi_workbook,
+    parse_workbook as parse_clssi_workbook,
+)
 from app.services.regional_evidence import sync_regional_evidence_codes
 
 
@@ -98,6 +102,37 @@ def ensure_nuts3_safety_evidence() -> dict:
         "action": "repaired" if after.get("available") else "repair_failed",
         "region_count_requested": len(codes),
         "sync_result": sync_result,
+        "before": before,
+        "after": after,
+    }
+
+
+def ensure_clssi_evidence() -> dict:
+    before = labour_shortage_index_status()
+    if before.get("available"):
+        return {
+            "evidence_id": "cedefop_clssi",
+            "status": "available",
+            "action": "none",
+            "before": before,
+            "after": before,
+        }
+
+    from app.core.config import settings
+
+    path = settings.data_dir / "cache" / "cedefop_clssi_2026.xlsx"
+    download = download_clssi_workbook(path)
+    rows = parse_clssi_workbook(path)
+    rows_upserted = upsert_labour_shortage_index(rows)
+    after = labour_shortage_index_status()
+
+    return {
+        "evidence_id": "cedefop_clssi",
+        "status": "available" if after.get("available") else "missing",
+        "action": "repaired" if after.get("available") else "repair_failed",
+        "rows_parsed": len(rows),
+        "rows_upserted": rows_upserted,
+        "download": download,
         "before": before,
         "after": after,
     }
