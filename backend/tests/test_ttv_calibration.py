@@ -26,7 +26,7 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     result = module.calibration_status()
 
     assert result["infrastructure_ready"] is True
-    assert result["protocol_state"] == "draft_not_approved"
+    assert result["protocol_state"] == "definitions_frozen_acceptance_pending"
     assert result["protocol_version"] is None
     assert result["protocol_document"] == "docs/TTV_CALIBRATION_PROTOCOL.md"
     assert result["case_count"] == 0
