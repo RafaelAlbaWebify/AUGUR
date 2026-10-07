@@ -339,3 +339,179 @@ def write_eures_review_artifact(
         encoding="utf-8",
     )
     return output_path
+
+
+
+def build_eures_manifest_candidate(
+    review: dict,
+    current_manifest: dict,
+) -> dict:
+    if not review.get("ready_for_review"):
+        raise ValueError(
+            "EURES review must be fully resolved before manifest preparation"
+        )
+    if int(review.get("unresolved_count") or 0) != 0:
+        raise ValueError(
+            "EURES review contains unresolved rows"
+        )
+
+    signals = review.get("unit_group_signals")
+    if not isinstance(signals, dict) or not signals:
+        raise ValueError(
+            "EURES review contains no unit-group signals"
+        )
+
+    source = review.get("source_metadata") or {}
+    required_source_fields = {
+        "evidence_id",
+        "rule_version",
+        "report_year",
+        "conditions_year",
+        "report_url",
+    }
+    missing = sorted(
+        field
+        for field in required_source_fields
+        if not source.get(field)
+    )
+    if missing:
+        raise ValueError(
+            "EURES review source metadata missing: "
+            + ", ".join(missing)
+        )
+
+    current_signals = (
+        current_manifest.get("unit_group_signals")
+        or {}
+    )
+    if len(signals) < len(current_signals):
+        raise ValueError(
+            "candidate review has fewer unit groups than current production evidence"
+        )
+
+    normalized_signals = {}
+    for isco, signal in sorted(signals.items()):
+        digits = "".join(
+            character
+            for character in str(isco)
+            if character.isdigit()
+        )
+        if len(digits) != 4:
+            raise ValueError(
+                f"invalid ISCO unit-group code in review: {isco!r}"
+            )
+
+        occupation_label = str(
+            signal.get("occupation_label")
+            or signal.get("esco_label")
+            or ""
+        ).strip()
+        if not occupation_label:
+            raise ValueError(
+                f"missing occupation label for ISCO {digits}"
+            )
+
+        shortages = signal.get("shortage_countries") or []
+        surpluses = signal.get("surplus_countries") or []
+        if not isinstance(shortages, list) or not isinstance(surpluses, list):
+            raise ValueError(
+                f"country lists must be arrays for ISCO {digits}"
+            )
+
+        # Reuse the strict EURES two-letter code validator.
+        shortage_codes = _country_codes(" ".join(shortages))
+        surplus_codes = _country_codes(" ".join(surpluses))
+
+        normalized_signals[digits] = {
+            "occupation_label": occupation_label,
+            "shortage_countries": shortage_codes,
+            "surplus_countries": surplus_codes,
+        }
+
+    current_keys = set(current_signals)
+    candidate_keys = set(normalized_signals)
+    overlapping = current_keys & candidate_keys
+    changed_existing = sorted(
+        isco
+        for isco in overlapping
+        if {
+            "occupation_label": current_signals[isco].get("occupation_label"),
+            "shortage_countries": current_signals[isco].get("shortage_countries") or [],
+            "surplus_countries": current_signals[isco].get("surplus_countries") or [],
+        }
+        != normalized_signals[isco]
+    )
+
+    unit_group_evidence = {
+        "evidence_id": source["evidence_id"],
+        "rule_version": source["rule_version"],
+        "report_year": int(source["report_year"]),
+        "conditions_year": int(source["conditions_year"]),
+        "report_url": source["report_url"],
+        "publication_url": (
+            current_manifest.get("unit_group_evidence", {})
+            .get("publication_url")
+        ),
+        "source_scope": "isco_unit_group",
+        "notes": [
+            "Unit-group shortage/surplus country lists come from the fully resolved ELA Annex review artifact.",
+            "The candidate was generated automatically from reviewed source extraction and still requires explicit human promotion.",
+        ],
+    }
+
+    manifest = {
+        **current_manifest,
+        "notes": [
+            "Broad country-page evidence and unit-group annex evidence are versioned separately.",
+            "Broad shortage/surplus groups are contextual fallback signals, not guarantees of individual job availability.",
+            "Verified unit-group signals take precedence over broad-group signals.",
+            "This candidate contains the fully resolved reviewed Annex unit-group set; production promotion remains explicit.",
+        ],
+        "unit_group_signals": normalized_signals,
+        "unit_group_evidence": unit_group_evidence,
+    }
+
+    return {
+        "status": "ready_for_human_promotion",
+        "candidate_manifest": manifest,
+        "comparison": {
+            "current_unit_group_count": len(current_signals),
+            "candidate_unit_group_count": len(normalized_signals),
+            "added_unit_groups": sorted(candidate_keys - current_keys),
+            "removed_unit_groups": sorted(current_keys - candidate_keys),
+            "changed_existing_unit_groups": changed_existing,
+            "unchanged_existing_count": (
+                len(overlapping) - len(changed_existing)
+            ),
+        },
+        "notes": [
+            "This function never mutates the production manifest.",
+            "A candidate is only generated from a fully resolved review artifact.",
+            "Existing country-level broad evidence is preserved unchanged.",
+        ],
+    }
+
+
+def build_eures_manifest_candidate_from_files(
+    review_path: str | Path,
+    manifest_path: str | Path,
+) -> dict:
+    review_file = Path(review_path).expanduser().resolve()
+    manifest_file = Path(manifest_path).expanduser().resolve()
+
+    review = json.loads(
+        review_file.read_text(encoding="utf-8")
+    )
+    current_manifest = json.loads(
+        manifest_file.read_text(encoding="utf-8")
+    )
+
+    result = build_eures_manifest_candidate(
+        review,
+        current_manifest,
+    )
+    return {
+        **result,
+        "review_path": str(review_file),
+        "current_manifest_path": str(manifest_file),
+    }
