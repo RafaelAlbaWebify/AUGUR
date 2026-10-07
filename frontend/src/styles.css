@@ -5310,6 +5310,58 @@ body:has(.shell.detailsOpen) {
   line-height: 1.5;
 }
 
+
+.robustnessResult {
+  display: grid;
+  gap: 7px;
+  margin-top: 10px;
+}
+
+.robustnessResult article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  align-items: center;
+  padding: 8px 9px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  background: rgba(5, 16, 25, .48);
+}
+
+.robustnessResult article > div {
+  display: grid;
+  gap: 2px;
+}
+
+.robustnessResult article strong {
+  color: #e5eff4;
+  font-size: 9px;
+}
+
+.robustnessResult article span {
+  color: #83a0b1;
+  font-size: 7px;
+}
+
+.robustnessResult article b {
+  color: #b9e7fb;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+.robustnessResult article small {
+  grid-column: 1 / -1;
+  color: #70899a;
+  font-size: 7px;
+}
+
+.robustnessResult > p {
+  margin: 2px 0 0;
+  color: #748d9e;
+  font-size: 8px;
+  line-height: 1.45;
+}
+
 @media (max-width: 1180px) {
   .decisionMatrixLayout {
     grid-template-columns: 1fr;
