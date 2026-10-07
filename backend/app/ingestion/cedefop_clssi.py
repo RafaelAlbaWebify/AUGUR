@@ -64,6 +64,7 @@ ISCO08_SUBMAJOR_BY_LABEL = {
     "handicraft and printing workers": "73",
     "electrical and electronic trades workers": "74",
     "food processing wood working garment and other craft and related trades workers": "75",
+    "food processing wood working garment and other craft and related trades": "75",
     "stationary plant and machine operators": "81",
     "assemblers": "82",
     "drivers and mobile plant operators": "83",
