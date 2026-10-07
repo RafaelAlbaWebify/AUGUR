@@ -93,20 +93,27 @@ Remaining:
 Current state:
 
 - city observed PM2.5 concentration active;
-- EEA PM2.5 premature-death NUTS2/NUTS3 2005-2023 source identified with official direct-download package;
-- safe live schema inspection is being added.
+- EEA PM2.5 premature-death / years-of-life-lost NUTS2/NUTS3 2005-2023 source verified through the official direct-download package;
+- live schema inspection passed;
+- parser and dedicated DuckDB storage implemented;
+- PMD and YLL, published unit, observation status, NUTS level, period and dataset version are preserved;
+- regional API exposes environmental-health burden separately from Eurostat regional indicators and from observed city PM2.5 concentration;
+- regional UI renders the EEA burden as a separate evidence block;
+- refresh/start repair flows automatically populate the local EEA evidence store;
+- live-source smoke validates both inspection and sync.
 
 Remaining:
 
-- inspect real archive schema;
-- if reproducible, implement parser/storage;
-- expose health burden separately from concentration;
-- preserve NUTS2/NUTS3, year, denominator and methodology;
-- never combine concentration and attributable mortality into a synthetic environmental score without separate methodology.
+- no structural implementation blocker remains for this source;
+- continue treating attributable health burden and measured concentration as separate evidence;
+- never combine concentration, premature deaths or years of life lost into a synthetic environmental score without a separately validated methodology.
 
 ## 7. Operational automation
 
 Current state:
+
+- interactive regional selection is now local-only: it never waits for Eurostat to repair missing series;
+- regional evidence is cached in backend and revisited regions are cached in the overview client;
 
 - core/subnational evidence syncs automated;
 - OJA and CLSSI repair automated;
