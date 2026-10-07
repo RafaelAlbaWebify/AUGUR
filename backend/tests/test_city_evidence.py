@@ -1,4 +1,16 @@
+import pytest
+
 from app.services.city_evidence import city_evidence
+
+
+@pytest.fixture(autouse=True)
+def _city_history_stub(monkeypatch):
+    from app.services import city_evidence as module
+    monkeypatch.setattr(
+        module,
+        "subnational_indicator_series",
+        lambda code, max_points=8: [],
+    )
 
 
 class FakeAdapter:
@@ -114,3 +126,76 @@ def test_local_city_result_combines_population_and_pm25():
     )
     assert pm25["value"] == 9.0111
     assert pm25["source_id"] == "EEA"
+
+
+def test_interactive_city_read_never_calls_external_providers(monkeypatch):
+    from app.services import city_evidence as module
+
+    monkeypatch.setattr(
+        module,
+        "latest_subnational_observations",
+        lambda code: [],
+    )
+    module._CITY_CACHE.clear()
+
+    class ForbiddenAdapter:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("interactive city read must not create Eurostat adapter")
+
+    monkeypatch.setattr(module, "EurostatAdapter", ForbiddenAdapter)
+    monkeypatch.setattr(
+        module,
+        "_refresh_city_pm25",
+        lambda code: (_ for _ in ()).throw(
+            AssertionError("interactive city read must not refresh EEA")
+        ),
+    )
+
+    result = module.city_evidence("ES013C")
+
+    assert result["available_count"] == 0
+    assert result["indicator_count"] == 2
+    assert all(item["reason"] == "not_cached" for item in result["indicators"])
+
+
+def test_local_city_result_includes_history(monkeypatch):
+    from app.services import city_evidence as module
+
+    monkeypatch.setattr(
+        module,
+        "subnational_indicator_series",
+        lambda code, max_points=8: [
+            {
+                "indicator_id": "city_population",
+                "period": 2023,
+                "value": 218000,
+            },
+            {
+                "indicator_id": "city_population",
+                "period": 2024,
+                "value": 220000,
+            },
+        ],
+    )
+
+    result = module._city_result_from_local(
+        "ES013C",
+        [{
+            "indicator_id": "city_population",
+            "period": 2024,
+            "value": 220000,
+            "unit": "persons",
+            "dataset_id": "urb_cpop1",
+            "source_id": "EUROSTAT",
+            "source_updated_at": "2026-01-01",
+        }],
+    )
+
+    population = next(
+        item for item in result["indicators"]
+        if item["indicator_id"] == "city_population"
+    )
+    assert population["history"] == [
+        {"period": 2023, "value": 218000},
+        {"period": 2024, "value": 220000},
+    ]
