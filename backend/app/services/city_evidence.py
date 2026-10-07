@@ -3,7 +3,11 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from time import monotonic
 
-from app.db.analytics import latest_subnational_observations, upsert_subnational_observations
+from app.db.analytics import (
+    latest_subnational_observations,
+    subnational_indicator_series,
+    upsert_subnational_observations,
+)
 from app.ingestion.eurostat import EurostatAdapter
 from app.ingestion.eea_city_air import fetch_city_pm25_annual
 from app.services.eea_city_catalog import resolve_eea_city
@@ -33,6 +37,13 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
         row["indicator_id"]: row
         for row in rows
     }
+    history_rows = subnational_indicator_series(code, max_points=8)
+    history_by_id: dict[str, list[dict]] = {}
+    for history_row in history_rows:
+        history_by_id.setdefault(history_row["indicator_id"], []).append({
+            "period": history_row["period"],
+            "value": history_row["value"],
+        })
     population = by_id.get(CITY_POPULATION["indicator_id"])
     pm25 = by_id.get("city_pm25_annual_mean_observed")
 
@@ -52,6 +63,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
             "dataset_id": population["dataset_id"],
             "source_id": population["source_id"],
             "source_updated_at": population.get("source_updated_at"),
+            "history": history_by_id.get(CITY_POPULATION["indicator_id"], []),
         })
     else:
         indicators.append({
@@ -61,6 +73,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
             "dataset_id": CITY_POPULATION["dataset_id"],
             "source_id": "EUROSTAT",
             "reason": "not_cached",
+            "history": [],
         })
 
     if pm25:
@@ -74,6 +87,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
             "dataset_id": pm25["dataset_id"],
             "source_id": pm25["source_id"],
             "source_updated_at": pm25.get("source_updated_at"),
+            "history": history_by_id.get("city_pm25_annual_mean_observed", []),
         })
     else:
         indicators.append({
@@ -83,6 +97,7 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
             "dataset_id": "EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS",
             "source_id": "EEA",
             "reason": "not_cached",
+            "history": [],
         })
 
     available_count = sum(
@@ -154,24 +169,49 @@ def city_evidence(
             return cached[1]
 
         local_rows = latest_subnational_observations(code)
-        has_population = any(
-            row["indicator_id"] == CITY_POPULATION["indicator_id"]
-            for row in local_rows
-        )
-        has_pm25 = any(
-            row["indicator_id"] == "city_pm25_annual_mean_observed"
-            for row in local_rows
-        )
+        local = _city_result_from_local(code, local_rows)
+        if local:
+            _CITY_CACHE[code] = (monotonic(), local)
+            return local
 
-        if not has_pm25:
-            _refresh_city_pm25(code)
-            local_rows = latest_subnational_observations(code)
-
-        if has_population:
-            local = _city_result_from_local(code, local_rows)
-            if local:
-                _CITY_CACHE[code] = (monotonic(), local)
-                return local
+        # Interactive city reads are local-only. Population and EEA PM2.5
+        # are populated by sync/repair flows or explicit force_refresh.
+        result = {
+            "city_code": code,
+            "geo_level": "city",
+            "source": "AUGUR local store · Eurostat Urban Audit + EEA air quality",
+            "storage": "duckdb",
+            "minimum_population_scope": 50000,
+            "indicator_count": 2,
+            "available_count": 0,
+            "complete": False,
+            "indicators": [
+                {
+                    "indicator_id": CITY_POPULATION["indicator_id"],
+                    "name": CITY_POPULATION["name"],
+                    "status": "unavailable",
+                    "dataset_id": CITY_POPULATION["dataset_id"],
+                    "source_id": "EUROSTAT",
+                    "reason": "not_cached",
+                    "history": [],
+                },
+                {
+                    "indicator_id": "city_pm25_annual_mean_observed",
+                    "name": "Observed annual mean PM2.5",
+                    "status": "unavailable",
+                    "dataset_id": "EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS",
+                    "source_id": "EEA",
+                    "reason": "not_cached",
+                    "history": [],
+                },
+            ],
+            "notes": [
+                "Interactive city reads are local-only and never wait for external providers.",
+                "Missing city evidence is refreshed through AUGUR sync/repair flows.",
+            ],
+        }
+        _CITY_CACHE[code] = (monotonic(), result)
+        return result
 
     owns_adapter = adapter is None
     active_adapter = adapter or EurostatAdapter(timeout_seconds=20.0, max_retries=2)
@@ -237,6 +277,13 @@ def city_evidence(
             "dataset_id": CITY_POPULATION["dataset_id"],
             "source_id": "EUROSTAT",
             "source_updated_at": latest.get("source_updated_at"),
+            "history": [
+                {
+                    "period": row["period"],
+                    "value": row["value"],
+                }
+                for row in sorted(rows, key=lambda row: row["period"])[-8:]
+            ],
         }]
         available_count = 1
 
