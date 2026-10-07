@@ -7,7 +7,7 @@ import httpx
 from app.catalog import COUNTRIES
 from app.db.bootstrap import initialize_datastores
 from app.db.analytics import subnational_storage_status
-from app.services.regional_evidence import regional_evidence
+from app.services.regional_evidence import sync_regional_evidence_codes
 
 
 NUTS3_URL = (
@@ -56,28 +56,26 @@ def main() -> int:
             and len(str(feature.get("properties", {}).get("NUTS_ID", ""))) == 5
         })
 
-        with_data = 0
-        observation_count = 0
         print()
         print("=" * 72)
         print(f"AUGUR NUTS3 SAFETY SYNC · {iso3}")
         print("=" * 72)
         print(f"NUTS3 regions discovered: {len(codes)}")
 
-        for index, code in enumerate(codes, start=1):
-            result = regional_evidence(code, force_refresh=True)
-            available = int(result.get("available_count", 0))
-            observation_count += available
-            if available:
-                with_data += 1
+        sync_result = sync_regional_evidence_codes(codes)
+        with_data = int(sync_result["geographies_with_data"])
+        observation_count = int(sync_result["rows_upserted"])
+
+        for index, item in enumerate(sync_result["results"], start=1):
             print(
                 f"  region {index:>3}/{len(codes):<3} "
-                f"{code:<6} available={available}/{result.get('indicator_count', 0)}"
+                f"{item['geo_code']:<6} "
+                f"available={item['available_count']}/{item['indicator_count']}"
             )
 
         print(
             f"Stored safety coverage: {with_data}/{len(codes)} regions "
-            f"({observation_count} latest series)"
+            f"({observation_count} rows upserted)"
         )
         if codes and with_data == 0:
             any_country_empty = True
