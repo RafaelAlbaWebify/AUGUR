@@ -264,3 +264,70 @@ def test_local_partial_region_is_served_without_network_enrichment(monkeypatch):
     }
     assert "regional_household_internet_access" in unavailable
     assert "regional_air_passengers_thousands" in unavailable
+
+
+def test_regional_evidence_exposes_environmental_health_separately(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "latest_subnational_observations",
+        lambda code: [
+            {
+                "indicator_id": "regional_employment_rate",
+                "period": 2025,
+                "value": 72.0,
+                "unit": "percent",
+                "dataset_id": "lfst_r_lfe2emprt",
+                "source_id": "EUROSTAT",
+                "source_updated_at": "2026-09-10",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "latest_regional_sector_employment_for_geo",
+        lambda code: [],
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "latest_environmental_health_burden_for_geo",
+        lambda code: [
+            {
+                "geo_code": code,
+                "geo_level": "NUTS2",
+                "period": 2023,
+                "burden_type": "PMD",
+                "burden_label": "Premature deaths - Premature deaths",
+                "value": 812.0,
+                "unit_code": "NR",
+                "unit_label": "Number",
+                "obs_status": None,
+                "source_id": "EEA",
+                "dataset_id": "EEA_PM25_PREMATURE_DEATHS_NUTS23",
+                "dataset_version": "eea-test-v1",
+            },
+            {
+                "geo_code": code,
+                "geo_level": "NUTS2",
+                "period": 2023,
+                "burden_type": "YLL",
+                "burden_label": "Premature deaths - Years of life lost",
+                "value": 9634.0,
+                "unit_code": "NR",
+                "unit_label": "Number",
+                "obs_status": "e",
+                "source_id": "EEA",
+                "dataset_id": "EEA_PM25_PREMATURE_DEATHS_NUTS23",
+                "dataset_version": "eea-test-v1",
+            },
+        ],
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    result = regional_evidence("ES12")
+
+    health = result["environmental_health"]
+    assert health["status"] == "available"
+    assert health["source_id"] == "EEA"
+    assert health["period"] == 2023
+    assert {item["burden_type"] for item in health["metrics"]} == {"PMD", "YLL"}
+    assert any("not a measurement" in note for note in health["notes"])
