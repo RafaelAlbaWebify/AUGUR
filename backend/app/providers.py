@@ -98,10 +98,13 @@ PROVIDERS = [
 PROVIDER_BY_ID = {provider.provider_id: provider for provider in PROVIDERS}
 
 
-def providers_for_country(country_iso3: str) -> list[ProviderSpec]:
-    country = country_config(country_iso3)
+def providers_for_country(
+    country_iso3: str,
+    country: dict | None = None,
+) -> list[ProviderSpec]:
+    metadata = country if country is not None else country_config(country_iso3)
     return [
         provider
         for provider in PROVIDERS
-        if provider.supports(country)
+        if provider.supports(metadata)
     ]
