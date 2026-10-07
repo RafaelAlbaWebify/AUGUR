@@ -2177,6 +2177,76 @@ def subnational_indicator_series(
         con.close()
 
 
+def city_evidence_bundle(
+    city_code: str,
+    max_history_points: int = 8,
+) -> dict:
+    """Read interactive city evidence through one DuckDB connection."""
+    code = city_code.upper()
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        latest_result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id
+                        ORDER BY period DESC, source_id ASC
+                    ) AS rn
+                FROM subnational_observations
+                WHERE geo_code = ?
+                  AND LOWER(geo_level) = 'city'
+            )
+            SELECT
+                geo_code, geo_level, indicator_id, period, value, unit,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY indicator_id
+            """,
+            [code],
+        )
+        latest_columns = [column[0] for column in latest_result.description]
+        latest = [
+            dict(zip(latest_columns, row))
+            for row in latest_result.fetchall()
+        ]
+
+        history_result = con.execute(
+            """
+            WITH recent AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id
+                        ORDER BY period DESC, source_id ASC
+                    ) AS point_rank
+                FROM subnational_observations
+                WHERE geo_code = ?
+                  AND LOWER(geo_level) = 'city'
+            )
+            SELECT
+                geo_code, geo_level, indicator_id, period, value, unit,
+                source_id, dataset_id
+            FROM recent
+            WHERE point_rank <= ?
+            ORDER BY indicator_id, period
+            """,
+            [code, max_history_points],
+        )
+        history_columns = [column[0] for column in history_result.description]
+        history = [
+            dict(zip(history_columns, row))
+            for row in history_result.fetchall()
+        ]
+
+        return {
+            "latest": latest,
+            "history": history,
+        }
+    finally:
+        con.close()
+
+
 def regional_evidence_bundle(
     geo_code: str,
     max_history_points: int = 8,
