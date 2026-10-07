@@ -2545,7 +2545,7 @@ def latest_subnational_observations(geo_code: str) -> list[dict]:
                 WHERE geo_code = ?
             )
             SELECT
-                geo_code, geo_level, indicator_id, period, value, unit,
+                geo_code, geo_name, geo_level, indicator_id, period, value, unit,
                 source_id, dataset_id, retrieved_at, source_updated_at
             FROM ranked
             WHERE rn = 1
@@ -2577,7 +2577,7 @@ def subnational_indicator_series(
                 WHERE geo_code = ?
             )
             SELECT
-                geo_code, geo_level, indicator_id, period, value, unit,
+                geo_code, geo_name, geo_level, indicator_id, period, value, unit,
                 source_id, dataset_id
             FROM recent
             WHERE point_rank <= ?
