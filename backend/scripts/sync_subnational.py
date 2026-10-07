@@ -14,7 +14,11 @@ from app.services.regional_evidence import regional_evidence
 
 NUTS2_URL = "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326_LEVL_2.geojson"
 CITIES_URL = "https://gisco-services.ec.europa.eu/distribution/v2/urau/geojson/URAU_LB_2024_4326_CITIES.geojson"
-DEFAULT_COUNTRIES = ["ESP", "IRL"]
+DEFAULT_COUNTRIES = [
+    country["iso3"]
+    for country in COUNTRIES
+    if country.get("eu_member")
+]
 CITY_CODE_RE = re.compile(r"^[A-Z]{2}\d{3}C$")
 
 
@@ -52,7 +56,7 @@ def main() -> int:
         "--countries",
         nargs="+",
         default=DEFAULT_COUNTRIES,
-        help="ISO3 country codes. Default: ESP IRL",
+        help="ISO3 country codes. Default: all registered EU countries.",
     )
     args = parser.parse_args()
 
