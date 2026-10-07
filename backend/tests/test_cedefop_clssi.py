@@ -119,3 +119,62 @@ def test_download_workbook_rejects_non_xlsx_payload(tmp_path):
         )
 
     assert not path.exists()
+
+
+
+def test_detect_real_country_sheet_schema():
+    rows = [
+        [
+            "Main Occupation Group",
+            "Occupation Group (2 digit)",
+            "Labour Shortage Index",
+            "LSI (Comp.)",
+            "LSI1",
+            "LSI2",
+            "LSI3",
+        ],
+        [
+            "High-skilled non-manual occupations",
+            "Information and communications technology professionals",
+            3.3333333,
+            "4-2-4",
+            4,
+            2,
+            4,
+        ],
+    ]
+
+    result = module.detect_sheet_schema(
+        rows,
+        sheet_name="IE",
+    )
+
+    assert result["status"] == "candidate"
+    assert result["country_from_sheet"] == "IE"
+    assert result["matches"]["occupation"] == 1
+    assert result["matches"]["index"] == 2
+    assert result["matches"]["lsi_comp"] == 3
+    assert result["matches"]["lsi1"] == 4
+    assert result["matches"]["lsi2"] == 5
+    assert result["matches"]["lsi3"] == 6
+
+
+@pytest.mark.parametrize(
+    ("label", "code"),
+    [
+        ("Chief executives, senior officials and legislators", "11"),
+        ("Administrative and commercial managers", "12"),
+        ("Production and specialised services managers", "13"),
+        ("Information and communications technology professionals", "25"),
+        ("Information and communications technicians", "35"),
+        ("Customer services clerks", "42"),
+        ("Electrical and electronic trades workers", "74"),
+        ("Refuse workers and other elementary workers", "96"),
+    ],
+)
+def test_resolve_isco2_label_uses_explicit_isco08_mapping(label, code):
+    assert module.resolve_isco2_label(label) == code
+
+
+def test_resolve_isco2_label_rejects_unknown_label():
+    assert module.resolve_isco2_label("Mystery future occupation") is None
