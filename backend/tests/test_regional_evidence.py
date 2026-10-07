@@ -220,13 +220,13 @@ def test_safety_indicators_are_rates_not_counts():
     } == {"ICCS0101", "ICCS0401"}
 
 
-def test_local_partial_region_auto_enriches_missing_indicators(monkeypatch):
-    stored = []
-    calls = {"latest": 0}
+def test_local_partial_region_is_served_without_network_enrichment(monkeypatch):
+    calls = {"adapter_created": 0}
 
-    def fake_latest(code):
-        calls["latest"] += 1
-        base = [
+    monkeypatch.setattr(
+        regional_module,
+        "latest_subnational_observations",
+        lambda code: [
             {
                 "indicator_id": "regional_employment_rate",
                 "period": 2025,
@@ -236,46 +236,15 @@ def test_local_partial_region_auto_enriches_missing_indicators(monkeypatch):
                 "source_id": "EUROSTAT",
                 "source_updated_at": "2026-09-10",
             }
-        ]
-        return base + stored
+        ],
+    )
 
-    class EnrichmentAdapter:
+    class ForbiddenAdapter:
         def __init__(self, *args, **kwargs):
-            pass
+            calls["adapter_created"] += 1
+            raise AssertionError("interactive regional reads must not create a network adapter")
 
-        def close(self):
-            pass
-
-        def fetch_dataset(self, dataset_id, filters):
-            return {
-                "dataset_id": dataset_id,
-                "geo": filters["geo"],
-            }
-
-        def normalize(self, geo_code, config, payload):
-            return [
-                {
-                    "period": 2025,
-                    "value": 99.0,
-                    "source_updated_at": "2026-09-10",
-                }
-            ]
-
-    monkeypatch.setattr(
-        regional_module,
-        "latest_subnational_observations",
-        fake_latest,
-    )
-    monkeypatch.setattr(
-        regional_module,
-        "upsert_subnational_observations",
-        lambda rows: stored.extend(rows) or len(rows),
-    )
-    monkeypatch.setattr(
-        regional_module,
-        "EurostatAdapter",
-        EnrichmentAdapter,
-    )
+    monkeypatch.setattr(regional_module, "EurostatAdapter", ForbiddenAdapter)
     monkeypatch.setattr(
         regional_module,
         "latest_regional_sector_employment_for_geo",
@@ -285,23 +254,13 @@ def test_local_partial_region_auto_enriches_missing_indicators(monkeypatch):
 
     result = regional_evidence("ES12")
 
-    expected_ids = {
-        item["indicator_id"]
-        for item in REGIONAL_INDICATORS
-    }
-    returned_ids = {
+    assert result["available_count"] == 1
+    assert result["complete"] is False
+    assert calls["adapter_created"] == 0
+    unavailable = {
         item["indicator_id"]
         for item in result["indicators"]
-        if item["status"] == "available"
+        if item["status"] == "unavailable"
     }
-
-    assert expected_ids == returned_ids
-    assert any(
-        row["indicator_id"] == "regional_household_internet_access"
-        for row in stored
-    )
-    assert any(
-        row["indicator_id"] == "regional_air_passengers_thousands"
-        for row in stored
-    )
-    assert calls["latest"] >= 2
+    assert "regional_household_internet_access" in unavailable
+    assert "regional_air_passengers_thousands" in unavailable
