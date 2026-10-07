@@ -167,6 +167,13 @@ def test_weighted_preference_index_keeps_tradeoff_on_pareto_frontier():
     assert set(personalized["pareto"]["frontier"]) == {"ESP", "IRL"}
     assert personalized["sensitivity"]["scenario_count"] > 1
     assert personalized["sensitivity"]["score_ranges"]["ESP"]["spread"] > 0
+    assert personalized["sensitivity"]["rank_ranges"]["IRL"] == {
+        "best_rank": 1,
+        "worst_rank": 1,
+        "top_scenario_count": personalized["sensitivity"]["scenario_count"],
+        "scenario_count": personalized["sensitivity"]["scenario_count"],
+        "status": "rank_stable",
+    }
 
 
 def test_pareto_frontier_excludes_strictly_dominated_country():
@@ -240,3 +247,33 @@ def test_all_zero_explicit_weights_do_not_create_score():
 
     assert result["status"] == "no_positive_weights"
     assert result["personalized"]["scores"] == {}
+
+
+def test_equal_tradeoff_is_preference_sensitive_under_weight_perturbation():
+    snapshots = {
+        "ESP": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 10.0, "ESP"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 5.0, "ESP"),
+        ],
+        "IRL": [
+            _row("unemployment_rate", "Unemployment", "productive_capacity", 5.0, "IRL"),
+            _row("housing_cost_overburden_rate", "Housing burden", "housing", 10.0, "IRL"),
+        ],
+    }
+
+    result = build_personalized_normalization(
+        ["ESP", "IRL"],
+        snapshots,
+        {
+            "decision_weight_productive_capacity": 1,
+            "decision_weight_housing": 1,
+        },
+    )
+
+    sensitivity = result["personalized"]["sensitivity"]
+    assert sensitivity["rank_ranges"]["ESP"]["best_rank"] == 1
+    assert sensitivity["rank_ranges"]["ESP"]["worst_rank"] == 2
+    assert sensitivity["rank_ranges"]["ESP"]["status"] == "preference_sensitive"
+    assert sensitivity["rank_ranges"]["IRL"]["best_rank"] == 1
+    assert sensitivity["rank_ranges"]["IRL"]["worst_rank"] == 2
+    assert sensitivity["rank_ranges"]["IRL"]["status"] == "preference_sensitive"
