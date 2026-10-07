@@ -14,7 +14,7 @@ The temporal evidence engine and the published TTV model are separate layers.
 
 ## Validation rule
 
-The temporal model can only be versioned when every validation gate is in the `supported` state.
+The temporal model can only be versioned when every validation gate is either `supported` or explicitly `scope_bounded`, and no unresolved blocker remains. A scope-bounded gate means AUGUR excludes that case class rather than inventing an unsupported duration.
 
 The current gate policy is exposed by:
 
@@ -36,12 +36,12 @@ and by:
 | legal_domestic_eu_timing | supported | Domestic and EU free-movement work-right timing has an explicit evidence path. |
 | language_guided_hours | supported | CEFR progression uses published guided-learning-hour ranges. |
 | language_calendar_intensity | supported | Calendar conversion requires explicit user study hours/week. |
-| skill_gap_duration | missing | No accepted training-duration model exists for missing essential ESCO skills. |
+| skill_gap_duration | scope_bounded | TTV v1 requires complete declared essential-skill coverage; cases with a skill gap are outside estimation scope. |
 | remote_income_transition | supported | Preserved remote income does not require a job-search transition stage. |
-| local_employment_transition | experimental | Country-level unemployment-to-employment transitions are not occupation-specific. |
-| local_financial_transition | missing | Occupation-specific net income, household budget and transition costs are incomplete. |
-| composition_dependency_graph | experimental | The stage dependency graph is explicit, but its sequencing assumptions have not been externally calibrated. |
-| external_calibration | missing | Local calibration infrastructure exists, but candidate ranges have not been validated against an approved representative set of observed relocation outcomes. |
+| local_employment_transition | scope_bounded | TTV v1 excludes local job-search timing rather than converting country transition probabilities into an individual duration. |
+| local_financial_transition | scope_bounded | TTV v1 requires preserved portable income; local financial-transition timing remains outside scope. |
+| composition_dependency_graph | supported | Within the bounded v1 scope, legal/language/skills preparation can overlap and the employment/financial stages are zero-duration, yielding an explicit critical path. |
+| external_calibration | missing | Candidate ranges have not yet been validated on a frozen representative holdout of observed viability outcomes. |
 
 ## What does not qualify as validation
 
@@ -73,17 +73,18 @@ Until then, withholding a TTV duration is the intended product behaviour.
 
 The candidate temporal engine no longer assumes that every stage progresses fully in parallel.
 
-Current experimental dependency structure:
+Current bounded v1 dependency structure:
 
 1. legal, language and skills preparation may progress in parallel;
-2. employment transition follows preparation;
-3. financial transition follows employment.
+2. v1 requires complete essential-skill coverage, so the skills duration is zero for in-scope cases;
+3. v1 requires preserved portable remote income, so employment-search and local-financial transition durations are zero;
+4. the remaining candidate range is therefore the critical path across applicable preparation stages.
 
-The candidate range therefore follows a critical-path composition:
+The implementation still uses the general formula:
 
 `max(legal, language, skills) + employment + financial`
 
-This is more explicit than the previous `parallel_max` rule, but it remains an experimental modelling assumption until externally calibrated. It does not activate a published TTV estimate.
+but in-scope v1 cases have zero employment and financial transition stages. The composition is therefore supported as structural scope logic. This does **not** satisfy external calibration and does not activate a published TTV estimate on its own.
 
 
 ## Local-employment transition boundary
@@ -100,7 +101,7 @@ These sources add occupational demand context, but they do **not** report an occ
 
 AUGUR therefore does not convert vacancy rates or advertisement rates into weeks-to-employment.
 
-The `local_employment_transition` validation gate remains `experimental` until one of the following exists:
+The `local_employment_transition` path remains implemented as exploratory evidence, but it is **outside TTV v1 estimation scope** until one of the following exists:
 
 1. direct occupation-specific transition-duration/probability evidence suitable for the target population; or
 2. an externally calibrated model that demonstrates how occupational demand evidence can be converted into elapsed transition time.
@@ -173,7 +174,7 @@ Eurostat also notes that Household Budget Survey comparability is not fully harm
 
 AUGUR therefore does not turn national household expenditure averages into an individual transition-cost estimate.
 
-The `local_financial_transition` gate remains `missing` until AUGUR has a defensible household-level transition-cost input/evidence model. Any future model must distinguish:
+The `local_financial_transition` path remains outside TTV v1 estimation scope until AUGUR has a defensible household-level transition-cost input/evidence model. Any future model must distinguish:
 
 1. official contextual price/expenditure evidence;
 2. user-declared household assumptions;
@@ -182,3 +183,26 @@ The `local_financial_transition` gate remains `missing` until AUGUR has a defens
 5. uncertainty in the resulting duration.
 
 Until then, national expenditure evidence may enrich FinancialFit context, but it must not unlock a TTV duration.
+
+
+## TTV v1 estimation scope
+
+The first versionable TTV model is deliberately narrower than the full dependency graph.
+
+An in-scope v1 case requires:
+
+- preserved portable remote income;
+- complete declared essential-skill coverage and supportive CareerFit viability evidence;
+- domestic or EU free-movement legal timing supported by the current LegalFit implementation;
+- either B2-or-better target-language readiness, or a declared CEFR level plus explicit weekly study intensity so guided hours can be converted to calendar weeks.
+
+Out of scope for v1:
+
+- local-employment job-search timing;
+- cases with unresolved essential-skill gaps;
+- local financial-transition / relocation-budget accumulation timing;
+- legal regimes whose timing has not been verified by the current LegalFit evidence path.
+
+Scope exclusion is not equivalent to a zero duration. AUGUR withholds the candidate range for out-of-scope cases.
+
+With this bounded scope, the only remaining temporal-model validation blocker is external calibration against observed outcomes.
