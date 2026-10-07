@@ -304,6 +304,17 @@ The workflow is deliberately opt-in and local:
 
 The product does not automatically infer that B2 has been achieved from profile edits, elapsed time or another heuristic.
 
+Accepted achieved levels are B2, C1 and C2.
+
+Accepted outcome evidence types are:
+
+- `official_exam`;
+- `cefr_aligned_assessment`;
+- `course_certificate`;
+- `other_documented`.
+
+The calibration datastore records only the achieved CEFR level and evidence category. It does not require or store the underlying certificate, exam document or other personal document.
+
 This workflow reduces manual data-entry error and preserves the pre-outcome candidate range, but it does **not** constitute external validation. Development cases remain exploratory and cannot be promoted to holdout cases retrospectively.
 
 Holdout collection remains disabled until:
