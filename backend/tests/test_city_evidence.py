@@ -1,6 +1,7 @@
 import pytest
 
 from app.services.city_evidence import city_evidence
+from app.services import city_evidence as module
 
 
 @pytest.fixture(autouse=True)
