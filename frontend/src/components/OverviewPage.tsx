@@ -181,6 +181,28 @@ type RegionalEvidenceResponse = {
   notes: string[]
 }
 
+type CountryGeography = {
+  geo_id: string
+  country_iso3: string
+  country_iso2?: string | null
+  name?: string | null
+  geo_level: string
+  geography_system: string
+  source_id?: string | null
+  source_geo_code: string
+  parent_geo_id?: string | null
+  latitude?: number | null
+  longitude?: number | null
+  indicator_count: number
+  latest_period?: number | null
+}
+
+type GeographyResponse = {
+  country_iso3: string
+  geo_level?: string | null
+  geographies: CountryGeography[]
+}
+
 type CityEvidenceResponse = {
   city_code: string
   geo_level: string
@@ -356,12 +378,13 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
-  const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string; level: number } | null>(null)
+  const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string; level: number | string } | null>(null)
   const [selectedCity, setSelectedCity] = useState<{ code: string; name: string } | null>(null)
   const [regionalEvidence, setRegionalEvidence] = useState<RegionalEvidenceResponse | null>(null)
   const [regionalEvidenceState, setRegionalEvidenceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const [cityEvidence, setCityEvidence] = useState<CityEvidenceResponse | null>(null)
   const [cityEvidenceState, setCityEvidenceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
+  const [countryGeographies, setCountryGeographies] = useState<CountryGeography[]>([])
 
   useEffect(() => {
     setSelectedRegion(null)
@@ -370,7 +393,31 @@ export default function OverviewPage({
     setRegionalEvidenceState('idle')
     setCityEvidence(null)
     setCityEvidenceState('idle')
+    setCountryGeographies([])
   }, [selectedCountry])
+
+  useEffect(() => {
+    const controller = new AbortController()
+
+    fetch(
+      `${apiBase}/api/geographies?country_iso3=${encodeURIComponent(selectedCountry)}`,
+      { signal: controller.signal },
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error(`Geography catalog HTTP ${response.status}`)
+        return response.json() as Promise<GeographyResponse>
+      })
+      .then((payload) => {
+        if (controller.signal.aborted) return
+        setCountryGeographies(payload.geographies ?? [])
+      })
+      .catch((error) => {
+        if ((error as Error).name === 'AbortError') return
+        setCountryGeographies([])
+      })
+
+    return () => controller.abort()
+  }, [apiBase, selectedCountry])
 
   useEffect(() => {
     if (!selectedRegion) {
@@ -564,13 +611,67 @@ export default function OverviewPage({
           ) : (
             <div className="regionalMapState error">Regional map unavailable for this country.</div>
           )}
+
+          {countryGeographies.some(
+            (item) => !['NUTS_2024', 'URBAN_AUDIT_2024'].includes(item.geography_system),
+          ) ? (
+            <div className="sourceNativeGeographyPicker">
+              <div>
+                <span>AVAILABLE REGIONS</span>
+                <strong>Official source-native geography</strong>
+              </div>
+              <select
+                aria-label="Available source-native region"
+                value={
+                  selectedRegion
+                    && countryGeographies.some(
+                      (item) => item.source_geo_code === selectedRegion.id,
+                    )
+                    ? selectedRegion.id
+                    : ''
+                }
+                onChange={(event) => {
+                  const geography = countryGeographies.find(
+                    (item) => item.source_geo_code === event.target.value,
+                  )
+                  if (!geography) {
+                    setSelectedRegion(null)
+                    return
+                  }
+                  setSelectedCity(null)
+                  setSelectedRegion({
+                    id: geography.source_geo_code,
+                    name: geography.name ?? geography.source_geo_code,
+                    level: geography.geo_level.toUpperCase(),
+                  })
+                }}
+              >
+                <option value="">Select a region…</option>
+                {countryGeographies
+                  .filter(
+                    (item) => !['NUTS_2024', 'URBAN_AUDIT_2024'].includes(item.geography_system),
+                  )
+                  .map((item) => (
+                    <option key={item.geo_id} value={item.source_geo_code}>
+                      {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()}
+                    </option>
+                  ))}
+              </select>
+            </div>
+          ) : null}
         </section>
 
         {(selectedRegion || selectedCity) ? (
           <section className="recentChangesPanel geographicEvidencePanel" aria-label="Selected geographic evidence">
             <div className="radarPanelTopline">
               <div>
-                <span>{selectedCity ? 'CITY EVIDENCE' : `NUTS ${selectedRegion?.level} EVIDENCE`}</span>
+                <span>
+                  {selectedCity
+                    ? 'CITY EVIDENCE'
+                    : typeof selectedRegion?.level === 'number'
+                      ? `NUTS ${selectedRegion.level} EVIDENCE`
+                      : `${selectedRegion?.level ?? 'REGIONAL'} EVIDENCE`}
+                </span>
                 <strong>{selectedCity?.name ?? selectedRegion?.name}</strong>
               </div>
               <span className="mapInteractionHint">
