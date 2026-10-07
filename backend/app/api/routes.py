@@ -14,6 +14,7 @@ from app.db.analytics import (
     subnational_storage_status,
     environmental_health_burden_status,
     geography_coverage_status,
+    geographies_for_country,
 )
 from app.services.country import (
     country_snapshot,
@@ -108,6 +109,21 @@ def countries_coverage():
 @router.get("/geographies/coverage")
 def geographies_coverage():
     return geography_coverage_status()
+
+
+@router.get("/geographies")
+def geographies(
+    country_iso3: str = Query(..., min_length=3, max_length=3),
+    geo_level: str | None = Query(default=None),
+):
+    return {
+        "country_iso3": country_iso3.upper(),
+        "geo_level": geo_level.lower() if geo_level else None,
+        "geographies": geographies_for_country(
+            country_iso3,
+            geo_level=geo_level,
+        ),
+    }
 
 
 @router.get("/countries/{country_iso3}/snapshot")
