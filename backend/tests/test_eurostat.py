@@ -363,3 +363,55 @@ def test_eurostat_normalization_can_select_exact_dimension_code():
 
     assert [row["value"] for row in rows] == [39.0, 40.0]
     assert [row["period"] for row in rows] == [2023, 2024]
+
+
+def test_eurostat_fetch_dataset_repeats_multi_value_filters():
+    class Response:
+        def raise_for_status(self):
+            return None
+
+        def json(self):
+            return {
+                "id": ["cities", "time"],
+                "size": [2, 1],
+                "dimension": {
+                    "cities": {
+                        "category": {
+                            "index": {"ES001C": 0, "ES013C": 1},
+                        }
+                    },
+                    "time": {
+                        "category": {
+                            "index": {"2024": 0},
+                        }
+                    },
+                },
+                "value": [1.0, 2.0],
+            }
+
+    class Client:
+        def __init__(self):
+            self.params = None
+
+        def get(self, url, params):
+            self.params = params
+            return Response()
+
+    client = Client()
+    adapter = EurostatAdapter(client=client)
+
+    payload = adapter.fetch_dataset(
+        "urb_cpop1",
+        {
+            "cities": ["ES001C", "ES013C"],
+            "freq": "A",
+        },
+    )
+
+    assert payload["id"] == ["cities", "time"]
+    assert client.params == [
+        ("lang", "EN"),
+        ("cities", "ES001C"),
+        ("cities", "ES013C"),
+        ("freq", "A"),
+    ]
