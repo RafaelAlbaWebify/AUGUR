@@ -9,15 +9,15 @@ import httpx
 
 SOURCE_ID = "OECD"
 DATASET_ID = "DSD_REG_DEMO@DF_DENSITY"
-DATASET_VERSION = "1.0"
+DATASET_VERSION = "2.4"
 BASE_URL = (
     "https://sdmx.oecd.org/public/rest/data/"
-    "OECD.CFE.EDS,DSD_REG_DEMO@DF_DENSITY,1.0/"
+    "OECD.CFE.EDS,DSD_REG_DEMO@DF_DENSITY,2.4/"
+    "A.TL2..DE1+DE2....PS_KM2"
 )
 
 PARAMS = {
-    "startPeriod": "2024",
-    "endPeriod": "2024",
+    "startPeriod": "2021",
     "dimensionAtObservation": "AllDimensions",
     "format": "csvfile",
 }
