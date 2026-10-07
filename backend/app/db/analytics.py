@@ -16,7 +16,10 @@ CREATE TABLE IF NOT EXISTS countries (
     currency VARCHAR,
     eu_member BOOLEAN,
     eurozone_member BOOLEAN,
-    oecd_member BOOLEAN
+    oecd_member BOOLEAN,
+    capital_city VARCHAR,
+    latitude DOUBLE,
+    longitude DOUBLE
 );
 
 CREATE TABLE IF NOT EXISTS sources (
@@ -217,11 +220,27 @@ def initialize_analytics_schema() -> None:
     try:
         con.execute(SCHEMA_SQL)
 
+        country_columns = {
+            row[1]
+            for row in con.execute("PRAGMA table_info('countries')").fetchall()
+        }
+        if "capital_city" not in country_columns:
+            con.execute("ALTER TABLE countries ADD COLUMN capital_city VARCHAR")
+        if "latitude" not in country_columns:
+            con.execute("ALTER TABLE countries ADD COLUMN latitude DOUBLE")
+        if "longitude" not in country_columns:
+            con.execute("ALTER TABLE countries ADD COLUMN longitude DOUBLE")
+
         for country in COUNTRIES:
             con.execute(
                 """
                 INSERT OR REPLACE INTO countries
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (
+                    iso2, iso3, name, region, subregion, currency,
+                    eu_member, eurozone_member, oecd_member,
+                    capital_city, latitude, longitude
+                )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """,
                 [
                     country["iso2"],
@@ -233,6 +252,9 @@ def initialize_analytics_schema() -> None:
                     country["eu_member"],
                     country["eurozone_member"],
                     country["oecd_member"],
+                    country.get("capital_city"),
+                    country.get("latitude"),
+                    country.get("longitude"),
                 ],
             )
 
@@ -304,9 +326,10 @@ def upsert_country(country: dict) -> None:
             INSERT OR REPLACE INTO countries
             (
                 iso2, iso3, name, region, subregion, currency,
-                eu_member, eurozone_member, oecd_member
+                eu_member, eurozone_member, oecd_member,
+                capital_city, latitude, longitude
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 country.get("iso2"),
@@ -318,6 +341,9 @@ def upsert_country(country: dict) -> None:
                 bool(country.get("eu_member")),
                 bool(country.get("eurozone_member")),
                 bool(country.get("oecd_member")),
+                country.get("capital_city"),
+                country.get("latitude"),
+                country.get("longitude"),
             ],
         )
     finally:
@@ -330,7 +356,8 @@ def country_record(country_iso3: str) -> dict | None:
         result = con.execute(
             """
             SELECT iso2, iso3, name, region, subregion, currency,
-                   eu_member, eurozone_member, oecd_member
+                   eu_member, eurozone_member, oecd_member,
+                   capital_city, latitude, longitude
             FROM countries
             WHERE iso3 = ?
             LIMIT 1
@@ -361,6 +388,9 @@ def country_analysis_coverage() -> list[dict]:
                 c.eu_member,
                 c.eurozone_member,
                 c.oecd_member,
+                c.capital_city,
+                c.latitude,
+                c.longitude,
                 COUNT(DISTINCT o.indicator_id) FILTER (
                     WHERE o.observation_type = 'observed'
                 ) AS observed_indicator_count,
@@ -375,7 +405,8 @@ def country_analysis_coverage() -> list[dict]:
               ON o.country_iso3 = c.iso3
             GROUP BY
                 c.iso2, c.iso3, c.name, c.region, c.subregion, c.currency,
-                c.eu_member, c.eurozone_member, c.oecd_member
+                c.eu_member, c.eurozone_member, c.oecd_member,
+                c.capital_city, c.latitude, c.longitude
             ORDER BY c.name
             """
         )
@@ -1625,7 +1656,8 @@ def country_registry() -> list[dict]:
         result = con.execute(
             """
             SELECT iso2, iso3, name, region, subregion, currency,
-                   eu_member, eurozone_member, oecd_member
+                   eu_member, eurozone_member, oecd_member,
+                   capital_city, latitude, longitude
             FROM countries
             ORDER BY name
             """
