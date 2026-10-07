@@ -8,6 +8,18 @@ from app.models.profile import PersonalProfileResponse
 
 TEMPORAL_EVIDENCE_ENGINE_VERSION = "ttv-temporal-evidence-v1"
 
+TTV_ESTIMATION_SCOPE_V1 = {
+    "scope_id": "ttv-estimation-scope-v1",
+    "employment_mode": "preserved_remote_income_only",
+    "essential_skill_gap": "none_allowed",
+    "legal_scope": "domestic_or_eu_free_movement_currently_supported",
+    "language_scope": "declared_cefr_with_explicit_weekly_study_intensity_when_below_b2",
+    "reason": (
+        "AUGUR v1 candidate timing is intentionally bounded to cases where "
+        "essential skills are already covered and portable remote income is preserved."
+    ),
+}
+
 TEMPORAL_MODEL_VALIDATION_GATES = {
     "legal_domestic_eu_timing": {
         "state": "supported",
@@ -22,8 +34,8 @@ TEMPORAL_MODEL_VALIDATION_GATES = {
         "reason": "calendar_conversion_requires_explicit_user_hours_per_week",
     },
     "skill_gap_duration": {
-        "state": "missing",
-        "reason": "training_duration_for_missing_essential_skills_not_modelled",
+        "state": "scope_bounded",
+        "reason": "v1_estimation_scope_requires_declared_essential_skill_coverage_complete",
     },
     "remote_income_transition": {
         "state": "supported",
@@ -34,8 +46,8 @@ TEMPORAL_MODEL_VALIDATION_GATES = {
         "reason": "country_level_transition_probability_not_occupation_specific",
     },
     "local_financial_transition": {
-        "state": "missing",
-        "reason": "occupation_specific_net_income_household_budget_and_transition_costs_incomplete",
+        "state": "scope_bounded",
+        "reason": "v1_estimation_scope_requires_preserved_portable_income",
     },
     "composition_dependency_graph": {
         "state": "experimental",
@@ -71,10 +83,11 @@ def temporal_model_validation_status() -> dict:
         gate_id: dict(config)
         for gate_id, config in TEMPORAL_MODEL_VALIDATION_GATES.items()
     }
+    accepted_states = {"supported", "scope_bounded"}
     blockers = [
         gate_id
         for gate_id, config in gates.items()
-        if config["state"] != "supported"
+        if config["state"] not in accepted_states
     ]
     experimental = [
         gate_id
@@ -86,6 +99,11 @@ def temporal_model_validation_status() -> dict:
         for gate_id, config in gates.items()
         if config["state"] == "missing"
     ]
+    scope_bounded = [
+        gate_id
+        for gate_id, config in gates.items()
+        if config["state"] == "scope_bounded"
+    ]
 
     return {
         "engine_version": TEMPORAL_EVIDENCE_ENGINE_VERSION,
@@ -94,11 +112,38 @@ def temporal_model_validation_status() -> dict:
         "blockers": blockers,
         "experimental": experimental,
         "missing": missing,
+        "scope_bounded": scope_bounded,
+        "model_scope": TTV_ESTIMATION_SCOPE_V1,
         "notes": [
             "Supported means the evidence path is implemented with an explicit basis; it does not imply external calibration.",
+            "Scope-bounded means AUGUR deliberately excludes cases that would require an unvalidated duration assumption instead of inventing one.",
             "Experimental gates must be validated or replaced before a published TTV model can be versioned.",
             "Missing gates have no accepted duration model yet.",
         ],
+    }
+
+
+def ttv_estimation_scope_status(
+    profile: PersonalProfileResponse,
+    career: dict,
+    financial: dict,
+) -> dict:
+    blockers = []
+
+    if not career.get("viability_evidence_ready"):
+        blockers.append("essential_skill_or_market_viability_not_ready")
+
+    if not profile.remote_work:
+        blockers.append("local_employment_mode_outside_v1_scope")
+
+    if financial.get("status") != "portable_income_comparable":
+        blockers.append("portable_income_not_verified")
+
+    return {
+        "scope_id": TTV_ESTIMATION_SCOPE_V1["scope_id"],
+        "in_scope": not blockers,
+        "blockers": blockers,
+        "definition": TTV_ESTIMATION_SCOPE_V1,
     }
 
 
@@ -417,6 +462,12 @@ def temporal_evidence_graph(
     career: dict,
     financial: dict,
 ) -> dict:
+    scope = ttv_estimation_scope_status(
+        profile,
+        career,
+        financial,
+    )
+
     stages = {
         "legal": legal_temporal_evidence(legal),
         "language": language_temporal_evidence(profile, language),
@@ -449,13 +500,15 @@ def temporal_evidence_graph(
 
     return {
         "engine_version": TEMPORAL_EVIDENCE_ENGINE_VERSION,
-        "calendar_ready": calendar_ready,
+        "estimation_scope": scope,
+        "calendar_ready": calendar_ready and scope["in_scope"],
         "stages": stages,
         "unavailable_stages": unavailable,
-        "candidate_range": candidate_range,
+        "candidate_range": candidate_range if scope["in_scope"] else None,
         "notes": [
             "Legal, language and skills preparation may progress in parallel; employment follows preparation and financial transition follows employment in the candidate critical path.",
             "Guided language hours are planning guidance and may vary by learner.",
             "This evidence engine does not activate AUGUR TTV until the temporal model is explicitly versioned.",
+            "Candidate timing is withheld outside the explicit v1 estimation scope instead of assigning unvalidated skill-gap or local-financial durations.",
         ],
     }
