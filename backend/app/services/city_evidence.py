@@ -18,16 +18,66 @@ _CITY_CACHE: dict[str, tuple[float, dict]] = {}
 AIR_QUALITY_VERIFIED_YEAR = 2024
 
 
-CITY_POPULATION = {
-    "indicator_id": "city_population",
-    "name": "Population",
-    "dataset_id": "urb_cpop1",
-    "filters": {
-        "freq": "A",
+CITY_INDICATORS = [
+    {
+        "indicator_id": "city_population",
+        "name": "Population",
+        "dataset_id": "urb_cpop1",
         "indic_ur": "DE1001V",
+        "unit": "persons",
     },
-    "unit": "persons",
-}
+    {
+        "indicator_id": "city_median_age",
+        "name": "Median population age",
+        "dataset_id": "urb_cpopstr",
+        "indic_ur": "DE1073V",
+        "unit": "years",
+    },
+    {
+        "indicator_id": "city_public_transport_commute_share",
+        "name": "Journeys to work by public transport",
+        "dataset_id": "urb_ctran",
+        "indic_ur": "TT1010V",
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "city_walk_commute_share",
+        "name": "Journeys to work by foot",
+        "dataset_id": "urb_ctran",
+        "indic_ur": "TT1008V",
+        "unit": "percent",
+    },
+    {
+        "indicator_id": "city_registered_cars_per_1000",
+        "name": "Registered cars",
+        "dataset_id": "urb_ctran",
+        "indic_ur": "TT1057I",
+        "unit": "per_1000_people",
+    },
+    {
+        "indicator_id": "city_monthly_transit_pass",
+        "name": "Monthly public transport ticket",
+        "dataset_id": "urb_ctran",
+        "indic_ur": "TT1080V",
+        "unit": "eur_monthly",
+    },
+    {
+        "indicator_id": "city_tourist_nights_per_resident",
+        "name": "Tourist overnight stays per resident",
+        "dataset_id": "urb_ctour",
+        "indic_ur": "CR2011I",
+        "unit": "nights_per_person",
+    },
+    {
+        "indicator_id": "city_tourist_beds_per_1000",
+        "name": "Tourist bed-places",
+        "dataset_id": "urb_ctour",
+        "indic_ur": "CR2010I",
+        "unit": "per_1000_people",
+    },
+]
+
+CITY_POPULATION = CITY_INDICATORS[0]
 
 
 
@@ -44,38 +94,41 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
             "period": history_row["period"],
             "value": history_row["value"],
         })
-    population = by_id.get(CITY_POPULATION["indicator_id"])
-    pm25 = by_id.get("city_pm25_annual_mean_observed")
 
-    if not population and not pm25:
+    if not any(
+        config["indicator_id"] in by_id
+        for config in CITY_INDICATORS
+    ) and "city_pm25_annual_mean_observed" not in by_id:
         return None
 
     indicators = []
+    for config in CITY_INDICATORS:
+        row = by_id.get(config["indicator_id"])
+        if row:
+            indicators.append({
+                "indicator_id": config["indicator_id"],
+                "name": config["name"],
+                "status": "available",
+                "period": row["period"],
+                "value": row["value"],
+                "unit": row["unit"],
+                "dataset_id": row["dataset_id"],
+                "source_id": row["source_id"],
+                "source_updated_at": row.get("source_updated_at"),
+                "history": history_by_id.get(config["indicator_id"], []),
+            })
+        else:
+            indicators.append({
+                "indicator_id": config["indicator_id"],
+                "name": config["name"],
+                "status": "unavailable",
+                "dataset_id": config["dataset_id"],
+                "source_id": "EUROSTAT",
+                "reason": "not_cached",
+                "history": [],
+            })
 
-    if population:
-        indicators.append({
-            "indicator_id": CITY_POPULATION["indicator_id"],
-            "name": CITY_POPULATION["name"],
-            "status": "available",
-            "period": population["period"],
-            "value": population["value"],
-            "unit": population["unit"],
-            "dataset_id": population["dataset_id"],
-            "source_id": population["source_id"],
-            "source_updated_at": population.get("source_updated_at"),
-            "history": history_by_id.get(CITY_POPULATION["indicator_id"], []),
-        })
-    else:
-        indicators.append({
-            "indicator_id": CITY_POPULATION["indicator_id"],
-            "name": CITY_POPULATION["name"],
-            "status": "unavailable",
-            "dataset_id": CITY_POPULATION["dataset_id"],
-            "source_id": "EUROSTAT",
-            "reason": "not_cached",
-            "history": [],
-        })
-
+    pm25 = by_id.get("city_pm25_annual_mean_observed")
     if pm25:
         indicators.append({
             "indicator_id": "city_pm25_annual_mean_observed",
@@ -117,10 +170,93 @@ def _city_result_from_local(code: str, rows: list[dict]) -> dict | None:
         "indicators": indicators,
         "notes": [
             "City evidence is served from AUGUR's local analytical store when available.",
-            "Population uses Eurostat Urban Audit city statistics.",
+            "Urban Audit coverage varies by city and indicator; missing observations remain explicit.",
+            "Transport and tourism indicators preserve Eurostat Urban Audit definitions and publication years.",
             "Observed PM2.5 uses validated EEA E1a monitoring data and is not a population-exposure model.",
         ],
     }
+
+
+def _fetch_city_indicators(
+    adapter: EurostatAdapter,
+    code: str,
+) -> list[dict]:
+    by_dataset: dict[str, list[dict]] = {}
+    for config in CITY_INDICATORS:
+        by_dataset.setdefault(config["dataset_id"], []).append(config)
+
+    indicators: list[dict] = []
+    for dataset_id, configs in by_dataset.items():
+        try:
+            payload = adapter.fetch_dataset(
+                dataset_id,
+                {
+                    "cities": code,
+                    "freq": "A",
+                },
+            )
+        except Exception as exc:
+            indicators.extend([
+                {
+                    "indicator_id": config["indicator_id"],
+                    "name": config["name"],
+                    "status": "unavailable",
+                    "dataset_id": dataset_id,
+                    "source_id": "EUROSTAT",
+                    "reason": type(exc).__name__,
+                    "history": [],
+                }
+                for config in configs
+            ])
+            continue
+
+        for config in configs:
+            rows = adapter.normalize(
+                code,
+                {
+                    "indicator_id": config["indicator_id"],
+                    "dataset_id": dataset_id,
+                    "unit": config["unit"],
+                    "dimension_values": {
+                        "indic_ur": config["indic_ur"],
+                    },
+                },
+                payload,
+            )
+            if not rows:
+                indicators.append({
+                    "indicator_id": config["indicator_id"],
+                    "name": config["name"],
+                    "status": "unavailable",
+                    "dataset_id": dataset_id,
+                    "source_id": "EUROSTAT",
+                    "reason": "no_observation",
+                    "history": [],
+                })
+                continue
+
+            ordered = sorted(rows, key=lambda row: row["period"])
+            latest = ordered[-1]
+            indicators.append({
+                "indicator_id": config["indicator_id"],
+                "name": config["name"],
+                "status": "available",
+                "period": latest["period"],
+                "value": latest["value"],
+                "unit": config["unit"],
+                "dataset_id": dataset_id,
+                "source_id": "EUROSTAT",
+                "source_updated_at": latest.get("source_updated_at"),
+                "history": [
+                    {
+                        "period": row["period"],
+                        "value": row["value"],
+                    }
+                    for row in ordered[-8:]
+                ],
+            })
+
+    return indicators
 
 
 def _refresh_city_pm25(code: str) -> bool:
@@ -182,19 +318,22 @@ def city_evidence(
             "source": "AUGUR local store · Eurostat Urban Audit + EEA air quality",
             "storage": "duckdb",
             "minimum_population_scope": 50000,
-            "indicator_count": 2,
+            "indicator_count": len(CITY_INDICATORS) + 1,
             "available_count": 0,
             "complete": False,
             "indicators": [
-                {
-                    "indicator_id": CITY_POPULATION["indicator_id"],
-                    "name": CITY_POPULATION["name"],
-                    "status": "unavailable",
-                    "dataset_id": CITY_POPULATION["dataset_id"],
-                    "source_id": "EUROSTAT",
-                    "reason": "not_cached",
-                    "history": [],
-                },
+                *[
+                    {
+                        "indicator_id": config["indicator_id"],
+                        "name": config["name"],
+                        "status": "unavailable",
+                        "dataset_id": config["dataset_id"],
+                        "source_id": "EUROSTAT",
+                        "reason": "not_cached",
+                        "history": [],
+                    }
+                    for config in CITY_INDICATORS
+                ],
                 {
                     "indicator_id": "city_pm25_annual_mean_observed",
                     "name": "Observed annual mean PM2.5",
@@ -217,21 +356,17 @@ def city_evidence(
     active_adapter = adapter or EurostatAdapter(timeout_seconds=20.0, max_retries=2)
 
     try:
-        try:
-            payload = active_adapter.fetch_dataset(
-                CITY_POPULATION["dataset_id"],
-                {
-                    "cities": code,
-                    **CITY_POPULATION["filters"],
-                },
-            )
-            rows = active_adapter.normalize(
-                code,
-                CITY_POPULATION,
-                payload,
-            )
-        except Exception as exc:
-            result = {
+        indicators = _fetch_city_indicators(active_adapter, code)
+    finally:
+        if owns_adapter:
+            active_adapter.close()
+
+    available_count = sum(
+        1 for item in indicators
+        if item["status"] == "available"
+    )
+
+    result = {
                 "city_code": code,
                 "geo_level": "city",
                 "source": "Eurostat City Statistics / Urban Audit",
@@ -292,14 +427,16 @@ def city_evidence(
         "geo_level": "city",
         "source": "Eurostat City Statistics / Urban Audit",
         "minimum_population_scope": 50000,
-        "indicator_count": 1,
+        "indicator_count": len(indicators),
         "available_count": available_count,
-        "complete": available_count == 1,
+        "complete": available_count == len(indicators),
         "indicators": indicators,
         "notes": [
             "City selection is limited to GISCO Urban Audit cities.",
             "Eurostat Urban Audit city collection covers cities with at least 50,000 inhabitants.",
+            "Urban Audit indicators are fetched by stable INDIC_UR codes and remain explicit when a city has no observation.",
             "Population uses urb_cpop1 indicator DE1001V (population on 1 January, total).",
+            "Transport uses urb_ctran; tourism uses urb_ctour; population structure uses urb_cpopstr.",
         ],
     }
 
