@@ -489,6 +489,82 @@ def regional_evidence(
     return result
 
 
+def sync_regional_evidence_codes(
+    geo_codes: list[str],
+    adapter: EurostatAdapter | None = None,
+) -> dict:
+    codes = sorted({
+        str(code).strip().upper()
+        for code in geo_codes
+        if str(code).strip()
+    })
+
+    owns_adapter = adapter is None
+    active_adapter = adapter or EurostatAdapter(
+        timeout_seconds=90.0,
+        max_retries=3,
+    )
+
+    rows_to_store = []
+    results = []
+
+    try:
+        for code in codes:
+            indicators = [
+                _latest_regional_indicator(
+                    active_adapter,
+                    code,
+                    config,
+                )
+                for config in _indicator_configs_for_geo(code)
+            ]
+            available_count = sum(
+                1
+                for item in indicators
+                if item["status"] == "available"
+            )
+            results.append({
+                "geo_code": code,
+                "geo_level": geographic_level(code),
+                "indicator_count": len(indicators),
+                "available_count": available_count,
+            })
+
+            rows_to_store.extend([
+                {
+                    "geo_code": code,
+                    "geo_level": geographic_level(code),
+                    "indicator_id": item["indicator_id"],
+                    "period": item["period"],
+                    "value": item["value"],
+                    "unit": item.get("unit"),
+                    "source_id": item["source_id"],
+                    "dataset_id": item["dataset_id"],
+                    "retrieved_at": datetime.now(timezone.utc),
+                    "source_updated_at": item.get("source_updated_at"),
+                }
+                for item in indicators
+                if item["status"] == "available"
+            ])
+    finally:
+        if owns_adapter:
+            active_adapter.close()
+
+    stored = upsert_subnational_observations(rows_to_store)
+    for code in codes:
+        _REGIONAL_CACHE.pop(code, None)
+
+    return {
+        "geo_code_count": len(codes),
+        "geographies_with_data": sum(
+            1 for item in results
+            if item["available_count"] > 0
+        ),
+        "rows_upserted": stored,
+        "results": results,
+    }
+
+
 def regional_comparison(
     geo_codes: list[str],
     adapter: EurostatAdapter | None = None,
