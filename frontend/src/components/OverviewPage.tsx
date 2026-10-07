@@ -122,6 +122,7 @@ type RegionalIndicator = {
   dataset_id: string
   source_id: string
   reason?: string
+  history?: Array<{ period: number; value: number }>
 }
 
 type RegionalSector = {
@@ -257,6 +258,17 @@ function formatRegionalValue(value: number, unit?: string) {
   }
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
+
+function regionalChangeLabel(points?: Array<{ period: number; value: number }>) {
+  if (!points || points.length < 2) return null
+  const previous = points[points.length - 2]
+  const latest = points[points.length - 1]
+  if (previous.value === 0) return null
+  const pct = ((latest.value - previous.value) / Math.abs(previous.value)) * 100
+  const prefix = pct > 0 ? '+' : ''
+  return `${prefix}${pct.toFixed(1)}% vs ${previous.period}`
+}
+
 
 function trajectoryTone(value?: string) {
   if (value === 'improving') return 'good'
@@ -721,12 +733,26 @@ export default function OverviewPage({
                   </div>
                   <div className="countryMetricTrend">
                     <strong>{indicator.period ?? '—'}</strong>
-                    <span>{indicator.status === 'available' ? 'latest regional observation' : 'regional evidence unavailable'}</span>
+                    <span>
+                      {indicator.status === 'available'
+                        ? regionalChangeLabel(indicator.history) ?? 'latest regional observation'
+                        : 'regional evidence unavailable'}
+                    </span>
                   </div>
                 </div>
 
-                <div className="countryMetricSparkline">
-                  <span>regional history not yet integrated</span>
+                <div className="countryMetricSparkline" aria-label={`${indicator.name} regional history`}>
+                  {indicator.history && indicator.history.length >= 2 ? (
+                    <svg viewBox="0 0 112 42" role="img">
+                      <polyline points={sparklinePoints(indicator.history)} />
+                      {indicator.history.map((point, pointIndex, allPoints) => {
+                        const coordinates = sparklinePoints(allPoints).split(' ')[pointIndex]?.split(',') ?? ['0', '0']
+                        return <circle key={point.period} cx={coordinates[0]} cy={coordinates[1]} r={pointIndex === allPoints.length - 1 ? 2.8 : 1.6} />
+                      })}
+                    </svg>
+                  ) : (
+                    <span>history unavailable</span>
+                  )}
                 </div>
               </div>
 
