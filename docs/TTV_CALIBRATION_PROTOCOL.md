@@ -87,6 +87,32 @@ This lock is enforced by the calibration importer, not only by documentation.
 
 The calibration store does not contain the full personal profile.
 
+### Calibration context fields
+
+For the bounded language-transition v1 scope, AUGUR may store and exchange only the following non-sensitive calibration covariates:
+
+- `scope_id`;
+- starting CEFR level;
+- target CEFR level;
+- weekly study hours used by the frozen candidate model;
+- guided-learning-hour minimum and maximum used by the candidate model.
+
+These fields are required for cohort analysis because elapsed language progression cannot be interpreted responsibly without its starting level and study intensity.
+
+They are **not** a copy of the personal profile. Development exchange packages continue to exclude:
+
+- age;
+- profession;
+- skills list;
+- citizenships;
+- income or savings;
+- household information;
+- names, email addresses or postal addresses;
+- free-text personal history;
+- exact local provenance labels and local import timestamps.
+
+AUGUR reports the represented CEFR starting levels and study-hour cohorts in calibration diagnostics so sample concentration is visible before any holdout criteria are frozen.
+
 ## 4. Stage-level observations
 
 When available, the following stages may be supplied:
@@ -286,3 +312,21 @@ Holdout collection remains disabled until:
 - acceptance criteria are frozen before holdout evaluation.
 
 The local observation workflow stores only bounded calibration metadata; it does not duplicate the full personal profile in the calibration datastore.
+
+
+## 14. Development exchange between installations
+
+AUGUR exposes a versioned `ttv-development-exchange-v1` JSON package for moving development evidence between local installations.
+
+The package contains calibration fields, stage timings and the bounded non-sensitive calibration context only.
+
+It deliberately omits:
+
+- the full profile;
+- local source labels;
+- exact observation/import timestamps;
+- all direct personal identifiers.
+
+Imported cases remain `sample_role=development`. The exchange importer rejects attempts to transport holdout cases through the development format.
+
+This mechanism is intended to make a future multi-installation development sample possible while preserving AUGUR's local-first privacy boundary. It does not itself make the sample representative and it does not clear the `external_calibration` gate.
