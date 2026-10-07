@@ -10,12 +10,14 @@ on:
       - "backend/app/ingestion/gisco_cities.py"
       - "backend/app/ingestion/cedefop_clssi.py"
       - "backend/app/ingestion/cedefop_oja_imbalance.py"
+      - "backend/app/ingestion/cedefop_reset.py"
       - "backend/scripts/inspect_eurostat_regional_*.py"
       - "backend/scripts/*eea*.py"
       - "backend/scripts/inspect_*gisco*.py"
       - "backend/scripts/inspect_cedefop_clssi.py"
       - "backend/scripts/import_cedefop_clssi.py"
       - "backend/scripts/import_cedefop_oja_imbalance.py"
+      - "backend/scripts/inspect_cedefop_reset.py"
       - "backend/scripts/sync_eurostat_regional_*.py"
       - "backend/scripts/*nuts3*.py"
       - ".github/workflows/live-source-smoke.yml"
@@ -55,6 +57,9 @@ jobs:
 
       - name: Import Cedefop OJA imbalance
         run: python -m scripts.import_cedefop_oja_imbalance
+
+      - name: Inspect Cedefop RESET workbook
+        run: python -m scripts.inspect_cedefop_reset
 
       - name: Inspect regional JVS schema
         run: python -m scripts.inspect_eurostat_regional_jvs --period 2026-Q2
