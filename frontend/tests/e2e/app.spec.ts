@@ -2442,6 +2442,30 @@ test('captures Skills and Languages populated visual fixture', async ({ page }) 
           direction: 'positive_growth',
           role: 'context_only',
         },
+        future_shortage_index_evidence: {
+          status: 'available',
+          source_id: 'CEDEFOP',
+          dataset_id: 'CEDEFOP_CLSSI',
+          release_version: '2026',
+          horizon: 2035,
+          isco08: '35',
+          granularity: 'isco_2digit',
+          occupation_label: 'Information and communications technicians',
+          main_occupation_group: 'High-skilled non-manual occupations',
+          shortage_index: 3.3333333,
+          component_code: '4-3-3',
+          components: {
+            employment_growth: 4,
+            replacement_demand: 3,
+            skills_imbalance: 3,
+          },
+          scale: {
+            minimum: 1,
+            maximum: 4,
+            direction: 'higher_means_more_intense_shortage',
+          },
+          role: 'context_only',
+        },
         skill_demand_trend_evidence: {
           status: 'source_access_gated',
           source_id: 'CEDEFOP',
@@ -2518,7 +2542,8 @@ test('captures Skills and Languages populated visual fixture', async ({ page }) 
   const coverage = page.getByRole('region', { name: 'Demand evidence coverage' })
   await expect(coverage).toBeVisible()
   await expect(coverage.getByText('Future shortage pressure')).toBeVisible()
-  await expect(coverage.getByText(/Cedefop CLSSI 2026/i)).toBeVisible()
+  await expect(coverage.getByText(/ACTIVE · 2035/i)).toBeVisible()
+  await expect(coverage.getByText(/Cedefop CLSSI · index 3\.33\/4 · ISCO-2 35 · growth 4 · replacement 3 · imbalance 3/i)).toBeVisible()
   await expect(coverage.getByText(/Cedefop STAS/i)).toBeVisible()
   await expect(coverage.getByText(/SOURCE ACCESS GATED/i).first()).toBeVisible()
   await expect(coverage.getByText(/Skills-OVATE detailed OJA evidence/i).first()).toBeVisible()
