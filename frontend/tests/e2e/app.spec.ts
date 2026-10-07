@@ -1146,7 +1146,11 @@ test('Decision Matrix shows preference index sensitivity and Pareto candidates',
           included_dimensions: ['housing', 'productive_capacity'],
           coverage: { ESP: 1, IRL: 1 },
           sensitivity: {
-            method: 'one_at_a_time_weight_perturbation_plus_minus_1',
+            method: 'joint_local_weight_neighborhood_plus_minus_1',
+            total_possible_scenarios: 5,
+            scenario_limit: 5000,
+            truncated: false,
+            dimension_count: 2,
             scenario_count: 5,
             weight_bounds: [0, 5],
             score_ranges: {
