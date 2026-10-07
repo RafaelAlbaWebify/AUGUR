@@ -121,3 +121,11 @@ def test_overview_series_endpoint_returns_observed_history():
         assert len(item["points"]) <= 8
         periods = [point["period"] for point in item["points"]]
         assert periods == sorted(periods)
+
+
+def test_region_comparison_rejects_mixed_nuts_levels():
+    with TestClient(app) as client:
+        response = client.get("/api/regions/compare?regions=ES12,ES120")
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Regional comparison requires all regions to use the same NUTS level"
