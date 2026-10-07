@@ -2177,6 +2177,132 @@ def subnational_indicator_series(
         con.close()
 
 
+def regional_evidence_bundle(
+    geo_code: str,
+    max_history_points: int = 8,
+) -> dict:
+    """Read all interactive regional evidence through one DuckDB connection."""
+    code = geo_code.upper()
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        latest_result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id
+                        ORDER BY period DESC, source_id ASC
+                    ) AS rn
+                FROM subnational_observations
+                WHERE geo_code = ?
+            )
+            SELECT
+                geo_code, geo_level, indicator_id, period, value, unit,
+                source_id, dataset_id, retrieved_at, source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY indicator_id
+            """,
+            [code],
+        )
+        latest_columns = [column[0] for column in latest_result.description]
+        latest = [
+            dict(zip(latest_columns, row))
+            for row in latest_result.fetchall()
+        ]
+
+        history_result = con.execute(
+            """
+            WITH recent AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY indicator_id
+                        ORDER BY period DESC, source_id ASC
+                    ) AS point_rank
+                FROM subnational_observations
+                WHERE geo_code = ?
+            )
+            SELECT
+                geo_code, geo_level, indicator_id, period, value, unit,
+                source_id, dataset_id
+            FROM recent
+            WHERE point_rank <= ?
+            ORDER BY indicator_id, period
+            """,
+            [code, max_history_points],
+        )
+        history_columns = [column[0] for column in history_result.description]
+        history = [
+            dict(zip(history_columns, row))
+            for row in history_result.fetchall()
+        ]
+
+        sector_result = con.execute(
+            """
+            WITH ranked AS (
+                SELECT *,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY nace_code
+                        ORDER BY period DESC
+                    ) AS rn
+                FROM regional_sector_employment
+                WHERE geo_code = ?
+                  AND geo_level = 'NUTS2'
+            )
+            SELECT
+                geo_code, geo_name, geo_level, period, nace_code, nace_label,
+                employment_thousands, source_id, dataset_id, retrieved_at,
+                source_updated_at
+            FROM ranked
+            WHERE rn = 1
+            ORDER BY
+                CASE WHEN nace_code = 'TOTAL' THEN 0 ELSE 1 END,
+                employment_thousands DESC,
+                nace_code
+            """,
+            [code],
+        )
+        sector_columns = [column[0] for column in sector_result.description]
+        sectors = [
+            dict(zip(sector_columns, row))
+            for row in sector_result.fetchall()
+        ]
+
+        health_result = con.execute(
+            """
+            WITH latest_period AS (
+                SELECT MAX(period) AS period
+                FROM environmental_health_burden
+                WHERE geo_code = ?
+            )
+            SELECT
+                e.geo_code, e.geo_name, e.geo_level, e.period,
+                e.burden_type, e.burden_label, e.value,
+                e.unit_code, e.unit_label, e.obs_status,
+                e.source_id, e.dataset_id, e.dataset_version, e.retrieved_at
+            FROM environmental_health_burden e, latest_period p
+            WHERE e.geo_code = ?
+              AND e.period = p.period
+            ORDER BY e.burden_type, e.unit_code
+            """,
+            [code, code],
+        )
+        health_columns = [column[0] for column in health_result.description]
+        environmental_health = [
+            dict(zip(health_columns, row))
+            for row in health_result.fetchall()
+        ]
+
+        return {
+            "latest": latest,
+            "history": history,
+            "sectors": sectors,
+            "environmental_health": environmental_health,
+        }
+    finally:
+        con.close()
+
+
 def subnational_storage_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
