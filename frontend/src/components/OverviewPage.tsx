@@ -229,6 +229,9 @@ function formatRegionalValue(value: number, unit?: string) {
   if (unit === 'per_100k_people') {
     return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} /100k`
   }
+  if (unit === 'thousand_passengers') {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)}k passengers`
+  }
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
