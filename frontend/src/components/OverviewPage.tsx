@@ -605,7 +605,9 @@ export default function OverviewPage({
                       : regionalEvidenceState === 'error'
                         ? 'Regional evidence unavailable'
                         : regionalEvidence
-                          ? `${regionalEvidence.available_count}/${regionalEvidence.indicator_count} series available`
+                          ? regionalEvidence.available_count === 0
+                            ? 'No Eurostat series available for this regional code'
+                            : `${regionalEvidence.available_count}/${regionalEvidence.indicator_count} series available`
                           : 'Region selected'}
                   </strong>
                 </div>
@@ -622,7 +624,7 @@ export default function OverviewPage({
                         <small>
                           {indicator.status === 'available'
                             ? `${indicator.period} · ${indicator.dataset_id}`
-                            : 'No comparable observation'}
+                            : 'Eurostat regional observation unavailable for this code'}
                         </small>
                       </article>
                     ))}
