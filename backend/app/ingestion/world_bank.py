@@ -11,6 +11,15 @@ SOURCE_ID = "WORLD_BANK"
 DATASET_ID = "WDI"
 
 
+def _optional_float(value) -> float | None:
+    if value in (None, "", ".."):
+        return None
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return None
+
+
 class WorldBankAdapter:
     def __init__(
         self,
@@ -86,16 +95,8 @@ class WorldBankAdapter:
                 "subregion": admin_region or None,
                 "currency": None,
                 "capital_city": (str(item.get("capitalCity") or "").strip() or None),
-                "latitude": (
-                    float(item["latitude"])
-                    if item.get("latitude") not in (None, "")
-                    else None
-                ),
-                "longitude": (
-                    float(item["longitude"])
-                    if item.get("longitude") not in (None, "")
-                    else None
-                ),
+                "latitude": _optional_float(item.get("latitude")),
+                "longitude": _optional_float(item.get("longitude")),
                 **country_membership_flags(iso3),
             })
 
@@ -159,16 +160,8 @@ class WorldBankAdapter:
             "subregion": admin_region or None,
             "currency": None,
             "capital_city": (str(item.get("capitalCity") or "").strip() or None),
-            "latitude": (
-                float(item["latitude"])
-                if item.get("latitude") not in (None, "")
-                else None
-            ),
-            "longitude": (
-                float(item["longitude"])
-                if item.get("longitude") not in (None, "")
-                else None
-            ),
+            "latitude": _optional_float(item.get("latitude")),
+            "longitude": _optional_float(item.get("longitude")),
             **country_membership_flags(iso3),
         }
 
