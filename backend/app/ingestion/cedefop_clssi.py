@@ -19,6 +19,59 @@ DOWNLOAD_URL = (
 )
 DOWNLOAD_LABEL = "2026 Cedefop Labour Skills Shortage Index (CLSSI) dataset"
 CATALOG_VERSION = "2024"
+RELEASE_VERSION = "2026"
+TARGET_SHEET_COUNTRIES = {
+    "ES": "ESP",
+    "PT": "PRT",
+    "IE": "IRL",
+}
+
+ISCO08_SUBMAJOR_BY_LABEL = {
+    "commissioned armed forces officers": "01",
+    "non commissioned armed forces officers": "02",
+    "armed forces occupations other ranks": "03",
+    "chief executives senior officials and legislators": "11",
+    "administrative and commercial managers": "12",
+    "production and specialised services managers": "13",
+    "production and specialized services managers": "13",
+    "hospitality retail and other services managers": "14",
+    "science and engineering professionals": "21",
+    "health professionals": "22",
+    "teaching professionals": "23",
+    "business and administration professionals": "24",
+    "information and communications technology professionals": "25",
+    "legal social and cultural professionals": "26",
+    "science and engineering associate professionals": "31",
+    "health associate professionals": "32",
+    "business and administration associate professionals": "33",
+    "legal social cultural and related associate professionals": "34",
+    "information and communications technicians": "35",
+    "general and keyboard clerks": "41",
+    "customer services clerks": "42",
+    "numerical and material recording clerks": "43",
+    "other clerical support workers": "44",
+    "personal service workers": "51",
+    "sales workers": "52",
+    "personal care workers": "53",
+    "protective services workers": "54",
+    "market oriented skilled agricultural workers": "61",
+    "market oriented skilled forestry fishery and hunting workers": "62",
+    "subsistence farmers fishers hunters and gatherers": "63",
+    "building and related trades workers excluding electricians": "71",
+    "metal machinery and related trades workers": "72",
+    "handicraft and printing workers": "73",
+    "electrical and electronic trades workers": "74",
+    "food processing wood working garment and other craft and related trades workers": "75",
+    "stationary plant and machine operators": "81",
+    "assemblers": "82",
+    "drivers and mobile plant operators": "83",
+    "cleaners and helpers": "91",
+    "agricultural forestry and fishery labourers": "92",
+    "labourers in mining construction manufacturing and transport": "93",
+    "food preparation assistants": "94",
+    "street and related sales and service workers": "95",
+    "refuse workers and other elementary workers": "96",
+}
 
 
 HEADER_ALIASES = {
@@ -40,6 +93,7 @@ HEADER_ALIASES = {
         "occupation name",
         "occupation label",
         "isco occupation",
+        "occupation group 2 digit",
     },
     "isco": {
         "isco",
@@ -55,6 +109,8 @@ HEADER_ALIASES = {
         "shortage index",
         "labour skills shortage index",
         "labour and skills shortage index",
+        "labour shortage index",
+        "labour shortage indexx",
         "index",
     },
     "year": {
@@ -63,6 +119,10 @@ HEADER_ALIASES = {
         "forecast year",
         "reference year",
     },
+    "lsi_comp": {"lsi comp"},
+    "lsi1": {"lsi1"},
+    "lsi2": {"lsi2"},
+    "lsi3": {"lsi3"},
 }
 
 
@@ -70,6 +130,16 @@ def _normalise_header(value: object) -> str:
     text = str(value or "").strip().lower()
     text = re.sub(r"[_/\\()\[\]{}:;,\.\-]+", " ", text)
     return re.sub(r"\s+", " ", text).strip()
+
+
+def _normalise_occupation_label(value: object) -> str:
+    return _normalise_header(value)
+
+
+def resolve_isco2_label(value: object) -> str | None:
+    return ISCO08_SUBMAJOR_BY_LABEL.get(
+        _normalise_occupation_label(value)
+    )
 
 
 def download_workbook(
@@ -115,6 +185,8 @@ def download_workbook(
 
 def detect_sheet_schema(
     rows: list[list[object]],
+    *,
+    sheet_name: str | None = None,
 ) -> dict:
     best = None
 
@@ -137,6 +209,14 @@ def detect_sheet_schema(
         has_country = (
             "country" in matches
             or "country_code" in matches
+            or (
+                sheet_name is not None
+                and (
+                    sheet_name in TARGET_SHEET_COUNTRIES
+                    or sheet_name == "EU27"
+                    or re.fullmatch(r"[A-Z]{2}", sheet_name) is not None
+                )
+            )
         )
         has_occupation = (
             "occupation" in matches
@@ -173,6 +253,11 @@ def detect_sheet_schema(
             ],
             "score": score,
             "has_country": has_country,
+            "country_from_sheet": (
+                sheet_name
+                if sheet_name and "country" not in matches and "country_code" not in matches
+                else None
+            ),
             "has_occupation": has_occupation,
         }
 
@@ -224,6 +309,7 @@ def inspect_workbook(
     for sheet in sheets:
         schema = detect_sheet_schema(
             sheet["rows"],
+            sheet_name=sheet["sheet"],
         )
         header_index = schema["header_row_index"]
         diagnostics.append({
