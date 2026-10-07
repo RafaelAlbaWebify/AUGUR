@@ -438,6 +438,28 @@ async function mockApi(page: Page) {
           granularity: 'isco_3digit',
           role: 'context_only',
         },
+        live_postings_evidence: {
+          status: 'provider_not_configured',
+          contract_version: 'live-postings-v1',
+          provider_id: null,
+          role: 'context_only',
+          requested_metrics: [
+            'active_posting_count',
+            'skill_demand_share',
+            'language_requirement_share',
+          ],
+          required_capabilities: [
+            'active_postings',
+            'country_filter',
+            'occupation_filter',
+            'posting_date',
+          ],
+          optional_capabilities: [
+            'skills',
+            'languages',
+            'salary',
+          ],
+        },
         skill_match: {
           status: 'not_evaluated',
           matched_skills: [],
@@ -1052,6 +1074,15 @@ test('Skills and Languages distinguishes learning gaps from demand ranking', asy
     await expect(summary.getByText(/not employer-demand frequency/i)).toBeVisible()
     await expect(summary.getByText(/not a skill-demand ranking/i)).toBeVisible()
   }
+})
+
+test('Skills and Languages exposes live-postings provider state explicitly', async ({ page }) => {
+  await page.goto('/country/ESP/skills')
+
+  await expect(page.getByText('Live job-posting enrichment')).toBeVisible()
+  await expect(page.getByText('CONTRACT READY · PROVIDER NOT CONFIGURED')).toBeVisible()
+  await expect(page.getByText(/missing access is not zero demand/i)).toBeVisible()
+  await expect(page.getByText(/live-postings-v1 contract ready/i)).toBeVisible()
 })
 
 test('Decision Matrix keeps personal weighting explicit when no weights are saved', async ({ page }) => {
