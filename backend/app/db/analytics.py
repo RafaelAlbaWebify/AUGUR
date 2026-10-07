@@ -105,6 +105,27 @@ CREATE TABLE IF NOT EXISTS labour_oja_imbalance_eu27 (
     PRIMARY KEY (isco08, source_id, release_version)
 );
 
+CREATE TABLE IF NOT EXISTS labour_shortage_index (
+    country_iso3 VARCHAR NOT NULL,
+    horizon INTEGER NOT NULL,
+    isco08 VARCHAR NOT NULL,
+    occupation_label VARCHAR NOT NULL,
+    main_occupation_group VARCHAR,
+    shortage_index DOUBLE NOT NULL,
+    component_code VARCHAR,
+    employment_growth_score INTEGER,
+    replacement_demand_score INTEGER,
+    imbalance_score INTEGER,
+    source_id VARCHAR NOT NULL,
+    dataset_id VARCHAR NOT NULL,
+    release_version VARCHAR NOT NULL,
+    retrieved_at TIMESTAMP NOT NULL,
+    source_updated_at VARCHAR,
+    PRIMARY KEY (
+        country_iso3, horizon, isco08, source_id, release_version
+    )
+);
+
 CREATE TABLE IF NOT EXISTS labour_occupation_outlook (
     country_iso3 VARCHAR NOT NULL,
     period INTEGER NOT NULL,
@@ -610,6 +631,145 @@ def labour_oja_imbalance_eu27_status() -> dict:
         }
     finally:
         con.close()
+
+def upsert_labour_shortage_index(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO labour_shortage_index
+            (
+                country_iso3, horizon, isco08, occupation_label,
+                main_occupation_group, shortage_index, component_code,
+                employment_growth_score, replacement_demand_score,
+                imbalance_score, source_id, dataset_id, release_version,
+                retrieved_at, source_updated_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["country_iso3"],
+                    row["horizon"],
+                    row["isco08"],
+                    row["occupation_label"],
+                    row.get("main_occupation_group"),
+                    row["shortage_index"],
+                    row.get("component_code"),
+                    row.get("employment_growth_score"),
+                    row.get("replacement_demand_score"),
+                    row.get("imbalance_score"),
+                    row["source_id"],
+                    row["dataset_id"],
+                    row["release_version"],
+                    row["retrieved_at"],
+                    row.get("source_updated_at"),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def latest_labour_shortage_index(
+    country_iso3: str,
+    isco08: str,
+) -> dict | None:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'labour_shortage_index'
+            """
+        ).fetchone()[0]
+        if not table_exists:
+            return None
+
+        result = con.execute(
+            """
+            SELECT
+                country_iso3, horizon, isco08, occupation_label,
+                main_occupation_group, shortage_index, component_code,
+                employment_growth_score, replacement_demand_score,
+                imbalance_score, source_id, dataset_id, release_version,
+                retrieved_at, source_updated_at
+            FROM labour_shortage_index
+            WHERE country_iso3 = ? AND isco08 = ?
+            ORDER BY horizon DESC, release_version DESC
+            LIMIT 1
+            """,
+            [country_iso3.upper(), str(isco08)],
+        )
+        row = result.fetchone()
+        if row is None:
+            return None
+        columns = [column[0] for column in result.description]
+        return dict(zip(columns, row))
+    finally:
+        con.close()
+
+
+def labour_shortage_index_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        table_exists = con.execute(
+            """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_name = 'labour_shortage_index'
+            """
+        ).fetchone()[0]
+        if not table_exists:
+            return {
+                "available": False,
+                "row_count": 0,
+                "country_count": 0,
+                "countries": [],
+                "horizons": [],
+                "release_versions": [],
+                "latest_retrieved_at": None,
+            }
+
+        row = con.execute(
+            """
+            SELECT COUNT(*), COUNT(DISTINCT country_iso3), MAX(retrieved_at)
+            FROM labour_shortage_index
+            """
+        ).fetchone()
+        countries = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT country_iso3 FROM labour_shortage_index ORDER BY country_iso3"
+            ).fetchall()
+        ]
+        horizons = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT horizon FROM labour_shortage_index ORDER BY horizon"
+            ).fetchall()
+        ]
+        releases = [
+            value[0] for value in con.execute(
+                "SELECT DISTINCT release_version FROM labour_shortage_index ORDER BY release_version"
+            ).fetchall()
+        ]
+        return {
+            "available": bool(row[0]),
+            "row_count": row[0],
+            "country_count": row[1],
+            "countries": countries,
+            "horizons": horizons,
+            "release_versions": releases,
+            "latest_retrieved_at": row[2],
+        }
+    finally:
+        con.close()
+
 
 def upsert_labour_occupation_outlook(rows: list[dict]) -> int:
     if not rows:
