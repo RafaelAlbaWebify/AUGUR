@@ -402,6 +402,8 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [ttvObservation, setTtvObservation] = useState<TTVCalibrationObservation | null>(null)
   const [ttvCalibrationStatus, setTtvCalibrationStatus] = useState<TTVCalibrationStatus | null>(null)
   const [ttvObservationStatus, setTtvObservationStatus] = useState<'idle' | 'loading' | 'working' | 'error'>('idle')
+  const [ttvOutcomeCefr, setTtvOutcomeCefr] = useState('')
+  const [ttvOutcomeEvidenceType, setTtvOutcomeEvidenceType] = useState('')
   const [ttvExchangeStatus, setTtvExchangeStatus] = useState<'idle' | 'working' | 'saved' | 'imported' | 'error'>('idle')
   const fitRequestIdRef = useRef(0)
 
@@ -511,11 +513,17 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ observed_at: null }),
+          body: JSON.stringify({
+            achieved_cefr: ttvOutcomeCefr,
+            evidence_type: ttvOutcomeEvidenceType,
+            observed_at: null,
+          }),
         },
       )
       if (!response.ok) throw new Error(`TTV calibration HTTP ${response.status}`)
       setTtvObservation(null)
+      setTtvOutcomeCefr('')
+      setTtvOutcomeEvidenceType('')
       setTtvObservationStatus('idle')
       await refreshTtvCalibrationStatus()
     } catch {
@@ -533,6 +541,8 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
       )
       if (!response.ok) throw new Error(`TTV calibration HTTP ${response.status}`)
       setTtvObservation(null)
+      setTtvOutcomeCefr('')
+      setTtvOutcomeEvidenceType('')
       setTtvObservationStatus('idle')
     } catch {
       setTtvObservationStatus('error')
@@ -1137,13 +1147,46 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
               <p>
                 Local opt-in development evidence only. When you have a documented B2-or-better result, record the outcome here; this does not turn the candidate range into an AUGUR estimate.
               </p>
+              <div className="ttvCalibrationOutcomeFields">
+                <label>
+                  Achieved CEFR
+                  <select
+                    aria-label="Achieved CEFR"
+                    value={ttvOutcomeCefr}
+                    onChange={(event) => setTtvOutcomeCefr(event.target.value)}
+                  >
+                    <option value="">Select level</option>
+                    <option value="B2">B2</option>
+                    <option value="C1">C1</option>
+                    <option value="C2">C2</option>
+                  </select>
+                </label>
+                <label>
+                  Outcome evidence
+                  <select
+                    aria-label="Outcome evidence"
+                    value={ttvOutcomeEvidenceType}
+                    onChange={(event) => setTtvOutcomeEvidenceType(event.target.value)}
+                  >
+                    <option value="">Select evidence</option>
+                    <option value="official_exam">Official exam</option>
+                    <option value="cefr_aligned_assessment">CEFR-aligned assessment</option>
+                    <option value="course_certificate">Course certificate</option>
+                    <option value="other_documented">Other documented result</option>
+                  </select>
+                </label>
+              </div>
               <div className="ttvCalibrationActions">
                 <button
                   type="button"
                   onClick={() => void completeTtvObservation()}
-                  disabled={ttvObservationStatus === 'working'}
+                  disabled={
+                    ttvObservationStatus === 'working'
+                    || !ttvOutcomeCefr
+                    || !ttvOutcomeEvidenceType
+                  }
                 >
-                  Record B2 outcome now
+                  Record documented outcome
                 </button>
                 <button
                   type="button"
