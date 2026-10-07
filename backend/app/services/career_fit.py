@@ -7,6 +7,7 @@ from app.db.analytics import (
     latest_labour_job_vacancy_rate,
     latest_labour_occupation_outlook,
     latest_labour_oja_imbalance_eu27,
+    latest_labour_shortage_index,
 )
 from app.models.profile import PersonalProfileResponse
 from app.services.esco_match import match_profile_skills
@@ -519,6 +520,65 @@ def eu27_oja_imbalance_evidence(
         ],
     }
 
+def future_shortage_index_evidence(
+    target_country_iso3: str,
+    occupation_match: dict,
+) -> dict | None:
+    selected = occupation_match.get("selected")
+    if not selected:
+        return None
+
+    raw_isco = str(selected.get("isco_group") or selected.get("code") or "")
+    digits = "".join(character for character in raw_isco if character.isdigit())
+    if len(digits) < 2:
+        return None
+
+    isco_submajor = digits[:2]
+    row = latest_labour_shortage_index(
+        target_country_iso3,
+        isco_submajor,
+    )
+    if row is None:
+        return {
+            "status": "evidence_missing",
+            "dataset_id": "CEDEFOP_CLSSI",
+            "isco08": isco_submajor,
+            "granularity": "isco_2digit",
+            "role": "context_only",
+        }
+
+    return {
+        "status": "available",
+        "source_id": row["source_id"],
+        "dataset_id": row["dataset_id"],
+        "release_version": row["release_version"],
+        "horizon": row["horizon"],
+        "isco08": row["isco08"],
+        "granularity": "isco_2digit",
+        "occupation_label": row["occupation_label"],
+        "main_occupation_group": row.get("main_occupation_group"),
+        "shortage_index": row["shortage_index"],
+        "component_code": row.get("component_code"),
+        "components": {
+            "employment_growth": row.get("employment_growth_score"),
+            "replacement_demand": row.get("replacement_demand_score"),
+            "skills_imbalance": row.get("imbalance_score"),
+        },
+        "scale": {
+            "minimum": 1,
+            "maximum": 4,
+            "direction": "higher_means_more_intense_shortage",
+        },
+        "role": "context_only",
+        "notes": [
+            "Cedefop CLSSI is a future occupational shortage index through 2035.",
+            "The three published components are employment growth, replacement demand and supply-demand imbalance.",
+            "Scores are quartile-style 1-4 shortage intensities; the overall index is the simple average of the three components.",
+            "This evidence does not change CareerFit completeness, EURES shortage/surplus gates or TTV timing.",
+        ],
+    }
+
+
 def occupation_outlook_evidence(
     target_country_iso3: str,
     occupation_match: dict,
@@ -689,6 +749,10 @@ def career_fit(
         target,
         occupation_match,
     )
+    future_shortage_index = future_shortage_index_evidence(
+        target,
+        occupation_match,
+    )
     occupation_trend = occupation_outlook_trend_evidence(
         occupation_outlook,
     )
@@ -710,6 +774,7 @@ def career_fit(
             "occupation_match": occupation_match,
             "vacancy_demand_evidence": vacancy_demand_evidence,
             "occupation_outlook_evidence": occupation_outlook,
+            "future_shortage_index_evidence": future_shortage_index,
             "occupation_trend_evidence": occupation_trend,
             "skill_demand_trend_evidence": skill_demand_trend,
             "language_oja_requirements_evidence": language_oja_requirements,
@@ -743,6 +808,7 @@ def career_fit(
             "occupation_match": occupation_match,
             "vacancy_demand_evidence": vacancy_demand_evidence,
             "occupation_outlook_evidence": occupation_outlook,
+            "future_shortage_index_evidence": future_shortage_index,
             "occupation_trend_evidence": occupation_trend,
             "skill_demand_trend_evidence": skill_demand_trend,
             "language_oja_requirements_evidence": language_oja_requirements,
@@ -840,6 +906,7 @@ def career_fit(
         "occupation_match": occupation_match,
         "vacancy_demand_evidence": vacancy_demand_evidence,
         "occupation_outlook_evidence": occupation_outlook,
+        "future_shortage_index_evidence": future_shortage_index,
         "occupation_trend_evidence": occupation_trend,
         "skill_demand_trend_evidence": skill_demand_trend,
         "language_oja_requirements_evidence": language_oja_requirements,
@@ -857,6 +924,7 @@ def career_fit(
             f"Market signal source: {market_source['evidence_id']} · {market_source['conditions_year']} conditions · {market_source['scope']}.",
             "Eurostat vacancy-rate evidence is contextual demand evidence at ISCO major-group level and does not change the shortage/surplus gate.",
             "Cedefop STAS provides short-term occupation outlook context and does not change the shortage/surplus gate or TTV timing.",
+            "Cedefop CLSSI provides future ISCO-2 shortage intensity context to 2035 and does not change the shortage/surplus gate or TTV timing.",
             "Cedefop OJA imbalance provides an exploratory EU27-level ISCO-4 recruitment-pressure context and does not change country-specific market gates or TTV timing.",
             "Live posting counts, salary, seniority, location and employer-specific skill/language requirements remain unavailable until a live-postings provider is configured.",
             "When ESCO resolves an occupation confidently, CareerFit uses verified EURES ISCO unit-group evidence first, then the ISCO sub-major group; keyword classification is only a fallback.",
