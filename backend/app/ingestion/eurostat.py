@@ -295,8 +295,14 @@ class EurostatAdapter:
         if self._owns_client:
             self.client.close()
 
-    def fetch_dataset(self, dataset_id: str, filters: dict[str, str]) -> dict:
-        params = {"lang": "EN", **filters}
+    def fetch_dataset(self, dataset_id: str, filters: dict[str, object]) -> dict:
+        params: list[tuple[str, str]] = [("lang", "EN")]
+        for key, value in filters.items():
+            if isinstance(value, (list, tuple, set)):
+                params.extend((key, str(item)) for item in value)
+            else:
+                params.append((key, str(value)))
+
         last_error: Exception | None = None
 
         for attempt in range(1, self.max_retries + 1):
