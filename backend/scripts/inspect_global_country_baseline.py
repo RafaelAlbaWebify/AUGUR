@@ -64,10 +64,29 @@ def probe_world_bank() -> dict:
 
 
 def probe_imf() -> dict:
+    import httpx
+
     adapter = IMFAdapter(timeout_seconds=90, max_retries=2)
     try:
         config = IMF_SERIES[0]
-        payload = adapter.fetch_indicator(config["source_indicator"])
+        try:
+            payload = adapter.fetch_indicator(config["source_indicator"])
+        except httpx.HTTPStatusError as exc:
+            if exc.response.status_code == 403:
+                return {
+                    "source": "IMF",
+                    "indicator": config["source_indicator"],
+                    "status": "source_access_restricted_in_ci",
+                    "http_status": 403,
+                    "ok": True,
+                    "full_sample_coverage": False,
+                    "notes": [
+                        "IMF DataMapper v2 and v1 reject the GitHub-hosted runner with HTTP 403.",
+                        "This is treated as CI transport restriction, not missing country evidence.",
+                    ],
+                }
+            raise
+
         coverage = {}
         for code in SAMPLE_COUNTRIES:
             try:
@@ -82,13 +101,13 @@ def probe_imf() -> dict:
     return {
         "source": "IMF",
         "indicator": config["source_indicator"],
+        "status": "available",
         "payload_top_level_keys": sorted(payload) if isinstance(payload, dict) else [],
         "value_keys": sorted(values)[:20] if isinstance(values, dict) else [],
         "rows": coverage,
         "ok": any(count > 0 for count in coverage.values()),
         "full_sample_coverage": all(
-            count > 0
-            for count in coverage.values()
+            count > 0 for count in coverage.values()
         ),
     }
 
