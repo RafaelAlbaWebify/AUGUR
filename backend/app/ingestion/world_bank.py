@@ -3,8 +3,8 @@ from datetime import datetime, timezone
 
 import httpx
 
-from app.catalog import world_bank_indicators
-from app.db.analytics import upsert_observations
+from app.catalog import country_membership_flags, world_bank_indicators
+from app.db.analytics import upsert_country, upsert_observations
 
 BASE_URL = "https://api.worldbank.org/v2"
 SOURCE_ID = "WORLD_BANK"
@@ -30,6 +30,59 @@ class WorldBankAdapter:
     def close(self) -> None:
         if self._owns_client:
             self.client.close()
+
+    def fetch_country_metadata(self, country_iso3: str) -> dict:
+        code = country_iso3.upper()
+        response = self.client.get(
+            f"{BASE_URL}/country/{code}",
+            params={"format": "json"},
+        )
+        response.raise_for_status()
+        payload = response.json()
+
+        if (
+            not isinstance(payload, list)
+            or len(payload) < 2
+            or not isinstance(payload[1], list)
+            or not payload[1]
+        ):
+            raise ValueError(f"World Bank has no country metadata for {code}")
+
+        item = payload[1][0]
+        if not isinstance(item, dict):
+            raise ValueError(f"Unexpected World Bank country metadata for {code}")
+
+        iso3 = str(item.get("id") or code).upper()
+        iso2 = str(item.get("iso2Code") or "").upper() or None
+        name = str(item.get("name") or iso3).strip()
+        region = (
+            (item.get("region") or {}).get("value")
+            if isinstance(item.get("region"), dict)
+            else None
+        )
+        admin_region = (
+            (item.get("adminregion") or {}).get("value")
+            if isinstance(item.get("adminregion"), dict)
+            else None
+        )
+
+        if not iso3 or not name:
+            raise ValueError(f"Incomplete World Bank country metadata for {code}")
+
+        return {
+            "iso2": iso2,
+            "iso3": iso3,
+            "name": name,
+            "region": region,
+            "subregion": admin_region or None,
+            "currency": None,
+            **country_membership_flags(iso3),
+        }
+
+    def ensure_country_registered(self, country_iso3: str) -> dict:
+        metadata = self.fetch_country_metadata(country_iso3)
+        upsert_country(metadata)
+        return metadata
 
     def fetch_indicator(
         self,
