@@ -527,7 +527,9 @@ def test_development_exchange_round_trip_excludes_personal_profile(
     monkeypatch,
     tmp_path,
 ):
-    source_path = _use_temp_store(monkeypatch, tmp_path / "source")
+    source_dir = tmp_path / "source"
+    source_dir.mkdir()
+    _use_temp_store(monkeypatch, source_dir)
     module.upsert_calibration_case(
         {
             "case_id": "exchange-001",
