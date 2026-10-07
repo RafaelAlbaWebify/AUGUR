@@ -58,6 +58,7 @@ type PersonalizedComparison = {
       method: string
       scenario_count: number
       total_possible_scenarios?: number
+      cartesian_combination_count?: number
       scenario_limit?: number
       truncated?: boolean
       dimension_count?: number
