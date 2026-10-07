@@ -151,6 +151,15 @@ def test_main_returns_partial_when_repair_cannot_restore_evidence(monkeypatch, c
             "action": "none",
         },
     )
+    monkeypatch.setattr(
+        module,
+        "ensure_oja_imbalance_evidence",
+        lambda: {
+            "evidence_id": "cedefop_oja_imbalance",
+            "status": "available",
+            "action": "none",
+        },
+    )
 
     code = module.main()
 
@@ -422,3 +431,104 @@ def test_clssi_evidence_repairs_missing_store(monkeypatch, tmp_path):
     assert result["rows_parsed"] == 3
     assert result["rows_upserted"] == 3
     assert result["download"]["bytes"] == 100
+
+
+
+def test_oja_imbalance_evidence_noops_when_already_available(monkeypatch):
+    status = {
+        "available": True,
+        "row_count": 308,
+        "release_versions": ["2026-05"],
+        "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+        "geographic_scope": "EU27",
+    }
+    monkeypatch.setattr(
+        module,
+        "labour_oja_imbalance_eu27_status",
+        lambda: status,
+    )
+
+    def unexpected_download(path):
+        raise AssertionError("OJA imbalance download should not run")
+
+    monkeypatch.setattr(
+        module,
+        "download_oja_imbalance_csv",
+        unexpected_download,
+    )
+
+    result = module.ensure_oja_imbalance_evidence()
+
+    assert result["status"] == "available"
+    assert result["action"] == "none"
+    assert result["before"] == status
+    assert result["after"] == status
+
+
+def test_oja_imbalance_evidence_repairs_missing_store(monkeypatch, tmp_path):
+    statuses = iter([
+        {
+            "available": False,
+            "row_count": 0,
+            "release_versions": [],
+            "latest_retrieved_at": None,
+            "geographic_scope": "EU27",
+        },
+        {
+            "available": True,
+            "row_count": 2,
+            "release_versions": ["2026-05"],
+            "latest_retrieved_at": "2026-10-07T00:00:00+00:00",
+            "geographic_scope": "EU27",
+        },
+    ])
+    monkeypatch.setattr(
+        module,
+        "labour_oja_imbalance_eu27_status",
+        lambda: next(statuses),
+    )
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(data_dir=tmp_path),
+    )
+    monkeypatch.setattr(
+        module,
+        "download_oja_imbalance_csv",
+        lambda path: {
+            "url": "https://www.cedefop.europa.eu/files/cedefop-oja-imbalance-2026-05.csv",
+            "path": str(path),
+            "bytes": 1234,
+            "content_type": "text/csv",
+            "release_version": "2026-05",
+        },
+    )
+
+    rows = [
+        {
+            "isco08": "2522",
+            "score": 0.62,
+        },
+        {
+            "isco08": "3512",
+            "score": 0.41,
+        },
+    ]
+    monkeypatch.setattr(
+        module,
+        "parse_oja_imbalance_csv",
+        lambda path: rows,
+    )
+    monkeypatch.setattr(
+        module,
+        "upsert_labour_oja_imbalance_eu27",
+        lambda parsed: len(parsed),
+    )
+
+    result = module.ensure_oja_imbalance_evidence()
+
+    assert result["status"] == "available"
+    assert result["action"] == "repaired"
+    assert result["rows_parsed"] == 2
+    assert result["rows_upserted"] == 2
+    assert result["download"]["content_type"] == "text/csv"
