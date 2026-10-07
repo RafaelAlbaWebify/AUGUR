@@ -8,9 +8,11 @@ from app.db.bootstrap import initialize_datastores
 from app.catalog import COUNTRIES
 from app.core.config import settings
 from app.db.analytics import (
+    labour_oja_imbalance_eu27_status,
     labour_shortage_index_status,
     regional_sector_employment_status,
     subnational_evidence_by_level_status,
+    upsert_labour_oja_imbalance_eu27,
     upsert_labour_shortage_index,
     upsert_regional_sector_employment,
 )
@@ -21,6 +23,10 @@ from app.ingestion.eurostat_regional_sector import (
 from app.ingestion.cedefop_clssi import (
     download_workbook as download_clssi_workbook,
     parse_workbook as parse_clssi_workbook,
+)
+from app.ingestion.cedefop_oja_imbalance import (
+    download_csv as download_oja_imbalance_csv,
+    parse_csv as parse_oja_imbalance_csv,
 )
 from app.services.regional_evidence import sync_regional_evidence_codes
 
@@ -139,6 +145,39 @@ def ensure_clssi_evidence() -> dict:
     }
 
 
+def ensure_oja_imbalance_evidence() -> dict:
+    before = labour_oja_imbalance_eu27_status()
+    if before.get("available"):
+        return {
+            "evidence_id": "cedefop_oja_imbalance",
+            "status": "available",
+            "action": "none",
+            "before": before,
+            "after": before,
+        }
+
+    path = (
+        settings.data_dir
+        / "cache"
+        / "cedefop-oja-imbalance-2026-05.csv"
+    )
+    download = download_oja_imbalance_csv(path)
+    rows = parse_oja_imbalance_csv(path)
+    rows_upserted = upsert_labour_oja_imbalance_eu27(rows)
+    after = labour_oja_imbalance_eu27_status()
+
+    return {
+        "evidence_id": "cedefop_oja_imbalance",
+        "status": "available" if after.get("available") else "missing",
+        "action": "repaired" if after.get("available") else "repair_failed",
+        "rows_parsed": len(rows),
+        "rows_upserted": rows_upserted,
+        "download": download,
+        "before": before,
+        "after": after,
+    }
+
+
 def main() -> int:
     initialize_datastores()
 
@@ -146,6 +185,7 @@ def main() -> int:
         ensure_regional_sector_evidence(),
         ensure_nuts3_safety_evidence(),
         ensure_clssi_evidence(),
+        ensure_oja_imbalance_evidence(),
     ]
     repaired = [
         item["evidence_id"]
