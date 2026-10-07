@@ -1,3 +1,5 @@
+import pytest
+
 from app.services import regional_evidence as regional_module
 from app.services.regional_evidence import (
     REGIONAL_INDICATORS,
@@ -6,6 +8,15 @@ from app.services.regional_evidence import (
     regional_comparison,
     regional_evidence,
 )
+
+
+@pytest.fixture(autouse=True)
+def _local_history_stub(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "subnational_indicator_series",
+        lambda code, max_points=8: [],
+    )
 
 
 class FakeAdapter:
@@ -331,3 +342,65 @@ def test_regional_evidence_exposes_environmental_health_separately(monkeypatch):
     assert health["period"] == 2023
     assert {item["burden_type"] for item in health["metrics"]} == {"PMD", "YLL"}
     assert any("not a measurement" in note for note in health["notes"])
+
+
+def test_local_regional_evidence_includes_recent_history(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "latest_subnational_observations",
+        lambda code: [
+            {
+                "indicator_id": "regional_employment_rate",
+                "period": 2025,
+                "value": 72.0,
+                "unit": "percent",
+                "dataset_id": "lfst_r_lfe2emprt",
+                "source_id": "EUROSTAT",
+                "source_updated_at": "2026-09-10",
+            }
+        ],
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "subnational_indicator_series",
+        lambda code, max_points=8: [
+            {
+                "indicator_id": "regional_employment_rate",
+                "period": 2023,
+                "value": 69.0,
+            },
+            {
+                "indicator_id": "regional_employment_rate",
+                "period": 2024,
+                "value": 70.5,
+            },
+            {
+                "indicator_id": "regional_employment_rate",
+                "period": 2025,
+                "value": 72.0,
+            },
+        ],
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "latest_regional_sector_employment_for_geo",
+        lambda code: [],
+    )
+    monkeypatch.setattr(
+        regional_module,
+        "latest_environmental_health_burden_for_geo",
+        lambda code: [],
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    result = regional_evidence("ES12")
+
+    employment = next(
+        item for item in result["indicators"]
+        if item["indicator_id"] == "regional_employment_rate"
+    )
+    assert employment["history"] == [
+        {"period": 2023, "value": 69.0},
+        {"period": 2024, "value": 70.5},
+        {"period": 2025, "value": 72.0},
+    ]
