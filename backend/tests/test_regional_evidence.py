@@ -417,3 +417,87 @@ def test_local_regional_evidence_includes_recent_history(monkeypatch):
         {"period": 2024, "value": 70.5},
         {"period": 2025, "value": 72.0},
     ]
+
+
+def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "regional_evidence_bundle",
+        lambda code, max_history_points=8: {
+            "latest": [
+                {
+                    "geo_code": "AU1",
+                    "geo_name": "New South Wales",
+                    "geo_level": "tl2",
+                    "indicator_id": "regional_population_density",
+                    "period": 2024,
+                    "value": 10.58,
+                    "unit": "people_per_km2",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_REG_DEMO@DF_DENSITY",
+                    "retrieved_at": None,
+                    "source_updated_at": "2.4",
+                }
+            ],
+            "history": [
+                {
+                    "geo_code": "AU1",
+                    "geo_name": "New South Wales",
+                    "geo_level": "tl2",
+                    "indicator_id": "regional_population_density",
+                    "period": 2023,
+                    "value": 10.41,
+                    "unit": "people_per_km2",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_REG_DEMO@DF_DENSITY",
+                },
+                {
+                    "geo_code": "AU1",
+                    "geo_name": "New South Wales",
+                    "geo_level": "tl2",
+                    "indicator_id": "regional_population_density",
+                    "period": 2024,
+                    "value": 10.58,
+                    "unit": "people_per_km2",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_REG_DEMO@DF_DENSITY",
+                },
+            ],
+            "sectors": [],
+            "environmental_health": [],
+        },
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    result = regional_evidence("AU1")
+
+    assert result["geo_code"] == "AU1"
+    assert result["geo_name"] == "New South Wales"
+    assert result["geo_level"] == "tl2"
+    assert result["source_ids"] == ["OECD"]
+    assert result["indicator_count"] == 1
+    assert result["available_count"] == 1
+    assert result["complete"] is True
+    assert result["indicators"] == [
+        {
+            "indicator_id": "regional_population_density",
+            "name": "Population density",
+            "status": "available",
+            "period": 2024,
+            "value": 10.58,
+            "unit": "people_per_km2",
+            "dataset_id": "DSD_REG_DEMO@DF_DENSITY",
+            "source_id": "OECD",
+            "source_updated_at": "2.4",
+            "history": [
+                {"period": 2023, "value": 10.41},
+                {"period": 2024, "value": 10.58},
+            ],
+        }
+    ]
+    assert result["sector_structure"]["status"] == "unavailable"
+    assert result["environmental_health"]["status"] == "unavailable"
+    assert any(
+        "not treated as interchangeable" in note
+        for note in result["notes"]
+    )
