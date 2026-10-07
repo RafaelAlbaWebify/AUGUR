@@ -183,10 +183,24 @@ def main() -> int:
         / "evidence"
         / "eures_lmi_2025.json"
     )
-    candidate = build_eures_manifest_candidate_from_files(
-        review_path,
-        manifest_path,
-    )
+    try:
+        candidate = build_eures_manifest_candidate_from_files(
+            review_path,
+            manifest_path,
+        )
+    except (ValueError, FileNotFoundError, json.JSONDecodeError) as exc:
+        print()
+        print("AUGUR EURES MANIFEST CANDIDATE")
+        print("=" * 72)
+        print(f"status: partial")
+        print(f"reason: {type(exc).__name__}")
+        print(f"detail: {exc}")
+        print(
+            "Production evidence was not changed and no manifest candidate "
+            "was promoted."
+        )
+        return 2
+
     candidate_path = Path(args.candidate_output).expanduser().resolve()
     candidate_path.parent.mkdir(parents=True, exist_ok=True)
     candidate_path.write_text(
