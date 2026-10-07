@@ -4,6 +4,7 @@ const countries = [
   { iso2: 'ES', iso3: 'ESP', name: 'Spain', region: 'Europe', subregion: 'Southern Europe', currency: 'EUR', eu_member: true, eurozone_member: true, oecd_member: true },
   { iso2: 'PT', iso3: 'PRT', name: 'Portugal', region: 'Europe', subregion: 'Southern Europe', currency: 'EUR', eu_member: true, eurozone_member: true, oecd_member: true },
   { iso2: 'IE', iso3: 'IRL', name: 'Ireland', region: 'Europe', subregion: 'Northern Europe', currency: 'EUR', eu_member: true, eurozone_member: true, oecd_member: true },
+  { iso2: 'DE', iso3: 'DEU', name: 'Germany', region: 'Europe', subregion: 'Western Europe', currency: 'EUR', eu_member: true, eurozone_member: true, oecd_member: true, latitude: 52.52, longitude: 13.405, analysis_status: 'available' },
 ]
 
 function metric(country: string) {
@@ -1003,6 +1004,18 @@ test('top navigation uses real routes and exposes all six product views', async 
   await expect(page).toHaveURL(/\/country\/ESP\/skills$/)
   await expect(page.getByRole('region', { name: 'Skills and languages' })).toBeVisible()
   await expect(page.getByText('6. SKILLS & LANGUAGES')).toBeVisible()
+})
+
+test('dynamic non-pilot country opens through the normal overview route', async ({ page }) => {
+  await page.goto('/country/DEU/overview')
+
+  await expect(page).toHaveURL(/\/country\/DEU\/overview$/)
+  await expect(page.getByText('Germany — country trajectory')).toBeVisible()
+  await expect(page.locator('.countryIdentityCard').getByText('DEU', { exact: true })).toBeVisible()
+
+  const map = page.getByTestId('regional-map')
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
+  await expect(page.getByText('No integrated subnational source for this country yet')).toBeVisible()
 })
 
 test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
