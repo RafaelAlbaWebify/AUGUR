@@ -14,7 +14,11 @@ from app.db.analytics import (
     subnational_storage_status,
     environmental_health_burden_status,
 )
-from app.services.country import country_snapshot, list_countries
+from app.services.country import (
+    country_snapshot,
+    list_countries,
+    country_coverage_summary,
+)
 from app.services.trends import country_trends
 from app.services.assessment import country_assessment
 from app.services.trajectory import country_future_trajectory
@@ -93,6 +97,11 @@ def operability_get():
 @router.get("/countries")
 def countries():
     return {"countries": list_countries()}
+
+
+@router.get("/countries/coverage")
+def countries_coverage():
+    return country_coverage_summary()
 
 
 @router.get("/countries/{country_iso3}/snapshot")
