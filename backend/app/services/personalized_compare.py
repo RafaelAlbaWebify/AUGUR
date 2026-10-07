@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from itertools import product
 
 from app.catalog import (
     INDICATORS,
@@ -15,6 +16,7 @@ WEIGHT_PREFIX = "decision_weight_"
 WEIGHT_MIN = 0.0
 WEIGHT_MAX = 5.0
 NORMALIZATION_VERSION = "augur_selected_set_utility_v1"
+SENSITIVITY_MAX_SCENARIOS = 5000
 
 INDICATOR_META = {
     item["indicator_id"]: item
@@ -229,43 +231,59 @@ def _sensitivity_analysis(
     dimension_by_id: dict[str, dict],
     weights: dict[str, float],
 ) -> dict:
-    scenarios = [
-        {
-            "id": "base",
-            "weights": dict(weights),
+    dimensions = sorted(weights)
+    value_options: list[list[float]] = []
+
+    for dimension in dimensions:
+        current = float(weights[dimension])
+        options = sorted({
+            min(WEIGHT_MAX, max(WEIGHT_MIN, current + delta))
+            for delta in (-1.0, 0.0, 1.0)
+        })
+        value_options.append(options)
+
+    total_possible = 1
+    for options in value_options:
+        total_possible *= len(options)
+
+    scenarios = []
+    seen = set()
+
+    for index, combination in enumerate(product(*value_options)):
+        if len(scenarios) >= SENSITIVITY_MAX_SCENARIOS:
+            break
+
+        scenario_weights = {
+            dimension: value
+            for dimension, value in zip(dimensions, combination)
+            if value > 0
+        }
+        if not scenario_weights:
+            continue
+
+        signature = tuple(
+            (dimension, scenario_weights.get(dimension, 0.0))
+            for dimension in dimensions
+        )
+        if signature in seen:
+            continue
+        seen.add(signature)
+
+        is_base = all(
+            abs(scenario_weights.get(dimension, 0.0) - weights[dimension]) < 1e-12
+            for dimension in dimensions
+        )
+        scenarios.append({
+            "id": "base" if is_base else f"joint_{index + 1}",
+            "weights": scenario_weights,
             "scores": _score_countries(
                 countries,
                 dimension_by_id,
-                weights,
+                scenario_weights,
             ),
-        }
-    ]
+        })
 
-    for dimension, current in sorted(weights.items()):
-        for delta, suffix in ((-1.0, "minus_1"), (1.0, "plus_1")):
-            updated = min(
-                WEIGHT_MAX,
-                max(WEIGHT_MIN, current + delta),
-            )
-            if abs(updated - current) < 1e-12:
-                continue
-            scenario_weights = dict(weights)
-            if updated <= 0:
-                scenario_weights.pop(dimension, None)
-            else:
-                scenario_weights[dimension] = updated
-            if not scenario_weights:
-                continue
-            scenarios.append({
-                "id": f"{dimension}_{suffix}",
-                "weights": scenario_weights,
-                "scores": _score_countries(
-                    countries,
-                    dimension_by_id,
-                    scenario_weights,
-                ),
-            })
-
+    scenarios.sort(key=lambda item: (item["id"] != "base", item["id"]))
     ranges = {}
     rank_ranges = {}
     scenario_ranks = [
@@ -304,18 +322,25 @@ def _sensitivity_analysis(
             ),
         }
 
+    truncated = len(scenarios) < total_possible
+
     return {
-        "method": "one_at_a_time_weight_perturbation_plus_minus_1",
+        "method": "joint_local_weight_neighborhood_plus_minus_1",
         "scenario_count": len(scenarios),
+        "total_possible_scenarios": total_possible,
+        "scenario_limit": SENSITIVITY_MAX_SCENARIOS,
+        "truncated": truncated,
+        "dimension_count": len(dimensions),
         "weight_bounds": [WEIGHT_MIN, WEIGHT_MAX],
         "score_ranges": ranges,
         "rank_ranges": rank_ranges,
         "scenario_ranks": scenario_ranks,
         "scenarios": scenarios,
         "notes": [
-            "Sensitivity varies one explicit positive weight by ±1 within the 0–5 scale while holding all others fixed.",
+            "Sensitivity evaluates simultaneous local changes across every explicit positive weight using each dimension's current value and bounded ±1 alternatives.",
+            "The tested neighborhood is exhaustive when truncated=false.",
             "These ranges measure preference-weight sensitivity, not statistical uncertainty in the underlying evidence.",
-            "Rank ranges show only whether country ordering changes under the tested one-at-a-time ±1 weight perturbations.",
+            "Rank ranges describe only the tested local preference neighborhood and are not probabilities of a country being best.",
         ],
     }
 
