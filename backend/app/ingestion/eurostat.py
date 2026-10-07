@@ -361,6 +361,11 @@ class EurostatAdapter:
         labels: dict[str, str],
         dimensions: dict,
     ) -> bool:
+        required_codes = config.get("dimension_values") or {}
+        for dimension_id, required_code in required_codes.items():
+            if labels.get(dimension_id) != required_code:
+                return False
+
         requirements = config.get("label_contains") or {}
         for dimension_id, required_text in requirements.items():
             code = labels.get(dimension_id)
