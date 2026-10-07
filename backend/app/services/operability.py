@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 from app.db.analytics import (
     analytical_evidence_status,
     labour_occupation_outlook_status,
+    labour_shortage_index_status,
     labour_oja_imbalance_eu27_status,
     subnational_evidence_status,
     subnational_evidence_by_level_status,
@@ -246,6 +247,7 @@ def operability_status() -> dict:
             "Analysis readiness uses core Personal Fit evidence and is reported separately from exhaustive market-evidence coverage and full product readiness.",
             "Cedefop STAS occupation outlook is auxiliary forward-looking labour evidence and does not by itself change TTV or full-product readiness.",
             "Cedefop OJA imbalance is exploratory EU27-level occupation context and does not count as country-specific coverage or TTV evidence.",
+            "Cedefop CLSSI is forward-looking ISCO-2 shortage context to 2035 and does not count as EURES market-gate or TTV evidence.",
             "Live-postings provider status is informational and does not block public-data operability until a provider is explicitly configured.",
             "NUTS2 labour evidence is regional context and does not imply occupation-specific regional demand unless the source explicitly supports it.",
             "NUTS2 sector-employment evidence describes regional economic structure, not vacancies or hiring probability.",
