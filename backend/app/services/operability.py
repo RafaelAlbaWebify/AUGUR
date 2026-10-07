@@ -13,6 +13,7 @@ from app.db.analytics import (
 from app.esco_store import esco_status
 from app.providers import providers_for_country
 from app.services.career_fit import career_market_evidence_status
+from app.services.live_postings import live_postings_provider_status
 from app.services.ttv import TEMPORAL_MODEL_VERSION
 from app.services.ttv_calibration import calibration_status
 from app.services.ttv_temporal import temporal_model_validation_status
@@ -51,6 +52,7 @@ def operability_status() -> dict:
     temporal_validation = temporal_model_validation_status()
     calibration = calibration_status()
     career_market = career_market_evidence_status()
+    live_postings = live_postings_provider_status()
     occupation_outlook = labour_occupation_outlook_status()
     oja_imbalance = labour_oja_imbalance_eu27_status()
     subnational = subnational_evidence_status()
@@ -210,6 +212,7 @@ def operability_status() -> dict:
         "personal_fit_core_evidence_ready": personal_fit_core_evidence_ready,
         "personal_fit_full_evidence_ready": personal_fit_full_evidence_ready,
         "career_market_evidence": career_market,
+        "live_postings_provider": live_postings,
         "occupation_outlook_evidence": occupation_outlook,
         "eu27_oja_imbalance_evidence": oja_imbalance,
         "subnational_evidence": subnational,
@@ -228,6 +231,7 @@ def operability_status() -> dict:
             "Analysis readiness uses core Personal Fit evidence and is reported separately from exhaustive market-evidence coverage and full product readiness.",
             "Cedefop STAS occupation outlook is auxiliary forward-looking labour evidence and does not by itself change TTV or full-product readiness.",
             "Cedefop OJA imbalance is exploratory EU27-level occupation context and does not count as country-specific coverage or TTV evidence.",
+            "Live-postings provider status is informational and does not block public-data operability until a provider is explicitly configured.",
             "NUTS2 labour evidence is regional context and does not imply occupation-specific regional demand unless the source explicitly supports it.",
             "NUTS2 sector-employment evidence describes regional economic structure, not vacancies or hiring probability.",
             "Subnational operability reports NUTS2, NUTS3 and city evidence separately; absence at one level is not silently inferred from another.",
