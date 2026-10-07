@@ -107,6 +107,18 @@ def main() -> int:
         f"geo_level={regional_sector['geo_level']}"
     )
 
+    print()
+    print("SUBNATIONAL EVIDENCE BY LEVEL")
+    for level, status in result["subnational_evidence_by_level"].items():
+        print(
+            f"{level}: "
+            f"available={status['available']} "
+            f"rows={status['row_count']} "
+            f"geographies={status['geography_count']} "
+            f"countries={status['country_prefixes']} "
+            f"indicators={status['indicator_ids']}"
+        )
+
     if result["blockers"]:
         print("blockers:")
         for blocker in result["blockers"]:
