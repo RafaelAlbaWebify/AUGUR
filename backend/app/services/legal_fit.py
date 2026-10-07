@@ -1,14 +1,9 @@
 from __future__ import annotations
 
-from app.catalog import country_config
+from app.catalog import EU_MEMBER_ISO3
 from app.models.profile import PersonalProfileResponse
+from app.services.country import country_metadata
 
-
-EU_MEMBER_ISO3 = {
-    "AUT", "BEL", "BGR", "HRV", "CYP", "CZE", "DNK", "EST", "FIN",
-    "FRA", "DEU", "GRC", "HUN", "IRL", "ITA", "LVA", "LTU", "LUX",
-    "MLT", "NLD", "POL", "PRT", "ROU", "SVK", "SVN", "ESP", "SWE",
-}
 
 RULE_VERSION = "2026-10-01"
 
@@ -29,7 +24,7 @@ def legal_fit(
     target_country_iso3: str,
 ) -> dict:
     target = target_country_iso3.upper()
-    country = country_config(target)
+    country = country_metadata(target)
 
     if not profile.current_country:
         return {
