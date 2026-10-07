@@ -531,7 +531,9 @@ Current implementation status:
 4. **uncertainty/sensitivity analysis — PARTIAL / ACTIVE**
    - one-at-a-time ±1 perturbation of explicit positive weights is active, bounded to the 0–5 weight scale;
    - per-country preference-fit score ranges are exposed;
-   - this measures preference-weight sensitivity only, not statistical uncertainty in source observations;
+   - tested rank ranges, first-place scenario counts and a `rank_stable` / `preference_sensitive` label are exposed for the same tested perturbations;
+   - the Decision Matrix now displays this as tested preference robustness instead of claiming robustness is unavailable;
+   - this measures preference-weight sensitivity only, not statistical uncertainty in source observations or the probability that a country is best;
    - probabilistic evidence-error propagation remains intentionally unimplemented until a defensible heterogeneous-source uncertainty model exists.
 5. **robust/Pareto choices — ACTIVE**
    - Pareto nondominance is calculated on positive-weight, fully comparable dimensions;
