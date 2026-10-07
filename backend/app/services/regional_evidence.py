@@ -7,6 +7,7 @@ from app.db.analytics import (
     latest_subnational_observations,
     upsert_subnational_observations,
     latest_regional_sector_employment_for_geo,
+    latest_environmental_health_burden_for_geo,
 )
 from app.ingestion.eurostat import EurostatAdapter
 
@@ -226,6 +227,7 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
         "complete": available_count == len(indicators),
         "indicators": indicators,
         "sector_structure": _regional_sector_context(code),
+        "environmental_health": _environmental_health_context(code),
         "notes": [
             "Regional evidence is served from AUGUR's local analytical store when available.",
             "Coverage varies by indicator and region; unavailable series remain explicit.",
@@ -235,6 +237,45 @@ def _regional_result_from_local(code: str, rows: list[dict]) -> dict | None:
         ],
     }
 
+
+
+def _environmental_health_context(code: str) -> dict:
+    rows = latest_environmental_health_burden_for_geo(code)
+    if not rows:
+        return {
+            "status": "unavailable",
+            "reason": "not_cached",
+            "source_id": "EEA",
+            "dataset_id": "EEA_PM25_PREMATURE_DEATHS_NUTS23",
+            "metrics": [],
+        }
+
+    metrics = [
+        {
+            "burden_type": row["burden_type"],
+            "label": row.get("burden_label") or row["burden_type"],
+            "period": row["period"],
+            "value": row["value"],
+            "unit_code": row["unit_code"],
+            "unit_label": row.get("unit_label") or row["unit_code"],
+            "obs_status": row.get("obs_status"),
+        }
+        for row in rows
+    ]
+    return {
+        "status": "available",
+        "source_id": rows[0]["source_id"],
+        "dataset_id": rows[0]["dataset_id"],
+        "dataset_version": rows[0]["dataset_version"],
+        "geo_level": rows[0]["geo_level"],
+        "period": max(row["period"] for row in rows),
+        "metrics": metrics,
+        "notes": [
+            "EEA PM2.5 health burden is attributable-impact evidence, not a measurement of current ambient concentration.",
+            "Published NUTS granularity, units and observation status are preserved.",
+            "Premature deaths and years of life lost remain separate measures and are not combined into an AUGUR score.",
+        ],
+    }
 
 
 def _regional_sector_context(code: str) -> dict:
@@ -402,6 +443,7 @@ def regional_evidence(
             "complete": False,
             "indicators": indicators,
             "sector_structure": _regional_sector_context(code),
+            "environmental_health": _environmental_health_context(code),
             "notes": [
                 "Interactive regional reads are local-only and never wait for an external provider.",
                 "Missing evidence is refreshed through AUGUR sync/repair flows.",
@@ -436,6 +478,8 @@ def regional_evidence(
         "available_count": available_count,
         "complete": available_count == len(indicators),
         "indicators": indicators,
+        "sector_structure": _regional_sector_context(code),
+        "environmental_health": _environmental_health_context(code),
         "notes": [
             "Regional evidence uses the selected Eurostat geographic code directly.",
             "Coverage varies by indicator and region; unavailable series remain explicit.",
