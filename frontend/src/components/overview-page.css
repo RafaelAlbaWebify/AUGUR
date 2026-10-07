@@ -2281,6 +2281,50 @@
   pointer-events: none;
 }
 
+.sourceNativeGeographyPicker {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(190px, 280px);
+  gap: 12px;
+  align-items: center;
+  padding: 10px 12px;
+  border-top: 1px solid rgba(112, 156, 182, .2);
+  background: rgba(7, 22, 32, .96);
+}
+
+.sourceNativeGeographyPicker > div {
+  display: grid;
+  gap: 2px;
+}
+
+.sourceNativeGeographyPicker span {
+  color: #7898aa;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: .08em;
+}
+
+.sourceNativeGeographyPicker strong {
+  color: #e3f3fb;
+  font-size: 11px;
+}
+
+.sourceNativeGeographyPicker select {
+  min-height: 32px;
+  width: 100%;
+  border: 1px solid rgba(116, 169, 198, .32);
+  border-radius: 6px;
+  background: #0a1c28;
+  color: #dff3fc;
+  padding: 0 9px;
+  font: 600 11px/1.2 Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+@media (max-width: 640px) {
+  .sourceNativeGeographyPicker {
+    grid-template-columns: 1fr;
+  }
+}
+
 .regionalMapLoading {
   position: absolute;
   inset: 0;
