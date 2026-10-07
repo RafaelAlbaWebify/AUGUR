@@ -546,7 +546,19 @@ P2 implementation boundary:
 - sensitivity ranges are preference-model robustness, not confidence intervals or statistical probability.
 
 ### P3 — commercial/live data if needed
-Evaluate Lightcast or equivalent only after the public-data model is working and the value of higher-frequency/granular postings has been demonstrated.
+
+**P3 status: CONTRACT READY / PROVIDER NOT CONFIGURED**
+
+- a vendor-neutral `live-postings-v1` evidence contract is implemented;
+- CareerFit exposes `provider_not_configured` explicitly rather than treating absent live data as zero demand;
+- operability reports live-postings provider status but does not make it a blocker for the verified public-data model;
+- provider-specific live evidence remains context-only and cannot change CareerFit/TTV gates without a separate validated methodology;
+- Lightcast currently has the strongest semantic fit for enriched occupation/skill analytics, while Coresignal is the most practical self-service pilot candidate;
+- Adzuna is suitable for basic live posting/salary context but should not be assumed to provide structured skill-demand analytics through its standard developer API;
+- Jooble's documented 500-lifetime-request free quota per country key is not a good basis for repeatable AUGUR analytics;
+- no paid provider will be adopted until a controlled pilot demonstrates decision value beyond the existing EURES / Eurostat / Cedefop stack.
+
+Detailed provider evaluation: `docs/LIVE_POSTINGS_PROVIDER_EVALUATION_2026-10-07.md`.
 
 ---
 
