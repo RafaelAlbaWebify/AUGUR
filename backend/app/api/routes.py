@@ -389,6 +389,12 @@ def regions_compare_get(
             detail="Only NUTS 2 and NUTS 3 region codes are supported",
         )
 
+    if len(levels) != 1:
+        raise HTTPException(
+            status_code=400,
+            detail="Regional comparison requires all regions to use the same NUTS level",
+        )
+
     supported_iso2 = {country["iso2"] for country in list_countries()}
     unsupported = [
         code for code in requested
