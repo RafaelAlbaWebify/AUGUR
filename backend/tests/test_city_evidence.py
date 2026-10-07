@@ -199,3 +199,55 @@ def test_local_city_result_includes_history(monkeypatch):
         {"period": 2023, "value": 218000},
         {"period": 2024, "value": 220000},
     ]
+
+
+def test_force_refresh_moves_pm25_network_work_to_sync_path(monkeypatch):
+    from app.services import city_evidence as module
+
+    stored = []
+    refresh_calls = []
+
+    class SyncAdapter:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def close(self):
+            pass
+
+        def fetch_dataset(self, dataset_id, filters):
+            return {"ok": True}
+
+        def normalize(self, city_code, config, payload):
+            return [{
+                "period": 2025,
+                "value": 220000.0,
+                "source_updated_at": "2026-10-02",
+            }]
+
+    monkeypatch.setattr(module, "EurostatAdapter", SyncAdapter)
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+    monkeypatch.setattr(
+        module,
+        "_refresh_city_pm25",
+        lambda code: refresh_calls.append(code) or True,
+    )
+    monkeypatch.setattr(
+        module,
+        "latest_subnational_observations",
+        lambda code: list(stored),
+    )
+    module._CITY_CACHE.clear()
+
+    result = module.city_evidence("ES013C", force_refresh=True)
+
+    assert refresh_calls == ["ES013C"]
+    assert result["available_count"] >= 1
+    assert any(
+        item["indicator_id"] == "city_population"
+        and item["status"] == "available"
+        for item in result["indicators"]
+    )
