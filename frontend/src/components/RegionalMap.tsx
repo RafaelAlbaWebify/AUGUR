@@ -38,9 +38,11 @@ type RegionalMapProps = {
 const GISCO_BASE = 'https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson'
 const GISCO_NUTS0_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_0.geojson`
 const GISCO_NUTS2_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_2.geojson`
+const GISCO_NUTS3_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_3.geojson`
 const GISCO_URBAN_AUDIT_CITY_URL = 'https://gisco-services.ec.europa.eu/distribution/v2/urau/geojson/URAU_LB_2024_4326_CITIES.geojson'
 const REGIONS_VISIBLE_ZOOM = 5.5
-const CITIES_VISIBLE_ZOOM = 7.5
+const NUTS3_VISIBLE_ZOOM = 7
+const CITIES_VISIBLE_ZOOM = 8.5
 
 
 const geoJsonCache = new Map<string, Promise<GeoJSON.FeatureCollection>>()
@@ -127,6 +129,7 @@ export default function RegionalMap({
   const onSelectCityRef = useRef(onSelectCity)
   const countryLayerRef = useRef<L.GeoJSON | null>(null)
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
+  const nuts3LayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
@@ -194,17 +197,20 @@ export default function RegionalMap({
 
     countryLayerRef.current?.remove()
     regionLayerRef.current?.remove()
+    nuts3LayerRef.current?.remove()
     cityLayerRef.current?.remove()
     countryLayerRef.current = null
     regionLayerRef.current = null
+    nuts3LayerRef.current = null
     cityLayerRef.current = null
 
     Promise.all([
       loadGeoJson(GISCO_NUTS0_URL),
       loadGeoJson(GISCO_NUTS2_URL),
+      loadGeoJson(GISCO_NUTS3_URL),
       loadGeoJson(GISCO_URBAN_AUDIT_CITY_URL),
     ])
-      .then(([countriesData, regionsData, citiesData]) => {
+      .then(([countriesData, regionsData, nuts3Data, citiesData]) => {
         if (cancelled) return
 
         const countries = countriesData.features as CountryFeature[]
@@ -212,6 +218,11 @@ export default function RegionalMap({
           .filter((feature) =>
             feature.properties?.CNTR_CODE === countryIso2
             && Number(feature.properties?.LEVL_CODE ?? 2) === 2
+          )
+        const nuts3Regions = (nuts3Data.features as RegionFeature[])
+          .filter((feature) =>
+            feature.properties?.CNTR_CODE === countryIso2
+            && Number(feature.properties?.LEVL_CODE ?? 3) === 3
           )
 
         const countryCollection: GeoJSON.FeatureCollection = {
@@ -222,6 +233,10 @@ export default function RegionalMap({
         const regionCollection: GeoJSON.FeatureCollection = {
           type: 'FeatureCollection',
           features: regions,
+        }
+        const nuts3Collection: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features: nuts3Regions,
         }
 
         const selectableCountries = new Set(selectableCountryIso2)
@@ -304,6 +319,42 @@ export default function RegionalMap({
           },
         })
 
+        const nuts3Layer = L.geoJSON(nuts3Collection, {
+          style: (feature) => {
+            const region = feature as RegionFeature | undefined
+            const id = region?.properties?.NUTS_ID ?? ''
+            const selected = id === selectedRegion
+            return {
+              className: selected ? 'nuts3Boundary selectedNuts3Boundary' : 'nuts3Boundary',
+              color: selected ? '#ffffff' : '#9dcfe8',
+              weight: selected ? 3 : 1.1,
+              opacity: selected ? 1 : 0.78,
+              fillColor: selected ? '#16c7f2' : '#2b6d8b',
+              fillOpacity: selected ? 0.30 : 0.035,
+            }
+          },
+          interactive: true,
+          onEachFeature: (feature, layer) => {
+            const region = feature as RegionFeature
+            const id = region.properties?.NUTS_ID ?? ''
+            const name = regionName(region)
+
+            layer.bindTooltip(`${name} · ${id} · NUTS 3`, {
+              sticky: true,
+              direction: 'top',
+              className: 'augurMapTooltip',
+            })
+
+            layer.on('click', () => {
+              onSelectRegionRef.current(id, name, 3)
+              const bounds = (layer as L.Polygon).getBounds()
+              if (bounds.isValid()) {
+                map.fitBounds(bounds, { padding: [34, 34], maxZoom: 8.5 })
+              }
+            })
+          },
+        })
+
         const cityLayer = L.layerGroup(
           cityFeatures.map((feature) => {
             const [lon, lat] = feature.geometry.coordinates
@@ -339,6 +390,7 @@ export default function RegionalMap({
 
         countryLayerRef.current = countryLayer
         regionLayerRef.current = regionLayer
+        nuts3LayerRef.current = nuts3Layer
         cityLayerRef.current = cityLayer
 
         const applyProgressiveLayers = () => {
@@ -348,6 +400,12 @@ export default function RegionalMap({
             if (!map.hasLayer(regionLayer)) regionLayer.addTo(map)
           } else if (map.hasLayer(regionLayer)) {
             map.removeLayer(regionLayer)
+          }
+
+          if (currentZoom >= NUTS3_VISIBLE_ZOOM) {
+            if (!map.hasLayer(nuts3Layer)) nuts3Layer.addTo(map)
+          } else if (map.hasLayer(nuts3Layer)) {
+            map.removeLayer(nuts3Layer)
           }
 
           if (currentZoom >= CITIES_VISIBLE_ZOOM) {
@@ -391,6 +449,25 @@ export default function RegionalMap({
         opacity: selected ? 1 : 0.92,
         fillColor: selected ? '#13b9ed' : '#2085ad',
         fillOpacity: selected ? 0.30 : 0.08,
+      }
+    })
+  }, [selectedRegion])
+
+  useEffect(() => {
+    const layer = nuts3LayerRef.current
+    if (!layer) return
+
+    layer.setStyle((feature) => {
+      const region = feature as RegionFeature | undefined
+      const id = region?.properties?.NUTS_ID ?? ''
+      const selected = id === selectedRegion
+      return {
+        className: selected ? 'nuts3Boundary selectedNuts3Boundary' : 'nuts3Boundary',
+        color: selected ? '#ffffff' : '#9dcfe8',
+        weight: selected ? 3 : 1.1,
+        opacity: selected ? 1 : 0.78,
+        fillColor: selected ? '#16c7f2' : '#2b6d8b',
+        fillOpacity: selected ? 0.30 : 0.035,
       }
     })
   }, [selectedRegion])
@@ -464,10 +541,12 @@ export default function RegionalMap({
         <span>Zoom {zoom.toFixed(1)}</span>
         <strong>
           {zoom >= CITIES_VISIBLE_ZOOM
-            ? 'Urban Audit cities visible'
-            : zoom >= REGIONS_VISIBLE_ZOOM
-              ? 'NUTS 2 regions visible · zoom in for cities'
-              : 'Zoom in to reveal NUTS 2 regions'}
+            ? 'Urban Audit cities + NUTS 3 visible'
+            : zoom >= NUTS3_VISIBLE_ZOOM
+              ? 'NUTS 3 safety context visible · zoom in for cities'
+              : zoom >= REGIONS_VISIBLE_ZOOM
+                ? 'NUTS 2 regions visible · zoom in for NUTS 3'
+                : 'Zoom in to reveal NUTS 2 regions'}
         </strong>
       </div>
 
@@ -486,7 +565,7 @@ export default function RegionalMap({
       </div>
 
       <small className="regionalMapSource">
-        Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 + Urban Audit 2024 · © EuroGeographics · regions from zoom {REGIONS_VISIBLE_ZOOM} · official Urban Audit cities from zoom {CITIES_VISIBLE_ZOOM}
+        Base map: OpenStreetMap · Eurostat GISCO NUTS 2024 + Urban Audit 2024 · © EuroGeographics · NUTS 2 from zoom {REGIONS_VISIBLE_ZOOM} · NUTS 3 from zoom {NUTS3_VISIBLE_ZOOM} · cities from zoom {CITIES_VISIBLE_ZOOM}
       </small>
 
       {status === 'loading' && <div className="regionalMapLoading">Loading geographic layers…</div>}
