@@ -85,6 +85,16 @@ def main() -> int:
         f"releases={occupation_outlook['release_versions']}"
     )
 
+    future_shortage = result["future_shortage_index_evidence"]
+    print(
+        "future_shortage_index_evidence: "
+        f"available={future_shortage['available']} "
+        f"rows={future_shortage['row_count']} "
+        f"countries={future_shortage['country_count']} "
+        f"horizons={future_shortage['horizons']} "
+        f"releases={future_shortage['release_versions']}"
+    )
+
     oja_imbalance = result["eu27_oja_imbalance_evidence"]
     print(
         "eu27_oja_imbalance_evidence: "
