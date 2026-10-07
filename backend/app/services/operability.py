@@ -101,11 +101,15 @@ def operability_status() -> dict:
         if country["country_iso3"] in validation_codes
     ]
     country_coverage = country_coverage_summary()
+    coverage_metadata = {
+        country["iso3"]: country
+        for country in country_coverage.get("countries", [])
+    }
 
     provider_coverage = {}
     for country in countries:
         iso3 = country["country_iso3"]
-        metadata = country_metadata(iso3)
+        metadata = coverage_metadata.get(iso3) or country_metadata(iso3)
         expected = sorted(
             provider.provider_id
             for provider in providers_for_country(
