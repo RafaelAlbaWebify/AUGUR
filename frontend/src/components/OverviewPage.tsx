@@ -202,6 +202,7 @@ type OverviewPageProps = {
   selectedCountry: string
   selectedCountryName: string
   selectedCountryIso2: string
+  selectedCountryCenter: { lat: number; lon: number } | null
   currentIndicators: Indicator[]
   overviewSeries: OverviewSeriesItem[]
   assessment: AssessmentResponse | null
@@ -345,6 +346,7 @@ export default function OverviewPage({
   selectedCountry,
   selectedCountryName,
   selectedCountryIso2,
+  selectedCountryCenter,
   currentIndicators,
   overviewSeries,
   assessment,
@@ -532,7 +534,7 @@ export default function OverviewPage({
           <div className="radarPanelTopline mapPanelHeader">
             <div>
               <span>MAP</span>
-              <strong>Explore countries, NUTS 2 regions and Urban Audit cities</strong>
+              <strong>Explore country geography and available subnational evidence</strong>
             </div>
             <span className="mapInteractionHint">Scroll to zoom · drag to pan · cities at high zoom</span>
           </div>
@@ -540,6 +542,7 @@ export default function OverviewPage({
           {selectedCountryIso2 ? (
             <RegionalMap
               countryIso2={selectedCountryIso2}
+              countryCenter={selectedCountryCenter}
               selectedRegion={selectedRegion?.id ?? null}
               selectedCity={selectedCity?.code ?? null}
               selectableCountryIso2={countries.flatMap((country) => country.iso2 ? [country.iso2] : [])}
