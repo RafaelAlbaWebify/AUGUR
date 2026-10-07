@@ -619,6 +619,8 @@ def test_development_exchange_round_trip_excludes_personal_profile(
                 "weekly_study_hours": 10,
                 "guided_hours_min": 100,
                 "guided_hours_max": 250,
+                "achieved_cefr": "B2",
+                "outcome_evidence_type": "official_exam",
             },
         }
     )
@@ -641,6 +643,8 @@ def test_development_exchange_round_trip_excludes_personal_profile(
         "weekly_study_hours": 10.0,
         "guided_hours_min": 100.0,
         "guided_hours_max": 250.0,
+        "achieved_cefr": "B2",
+        "outcome_evidence_type": "official_exam",
     }
 
     target_dir = tmp_path / "target"
