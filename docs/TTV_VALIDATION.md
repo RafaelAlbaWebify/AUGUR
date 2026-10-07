@@ -118,10 +118,12 @@ For an eligible bounded TTV v1 case, My Fit can:
 1. start an explicit opt-in development observation;
 2. freeze the candidate range and model context before the outcome is known;
 3. keep the active observation separate from completed calibration cases;
-4. record a user-confirmed documented B2-or-better outcome;
+4. record a documented B2-or-better outcome;
 5. calculate observed elapsed weeks from the stored start/outcome timestamps;
 6. create a `sample_role=development` calibration case;
 7. cancel an observation without creating calibration evidence.
+
+Outcome completion requires an achieved CEFR of B2, C1 or C2 plus a structured evidence category (`official_exam`, `cefr_aligned_assessment`, `course_certificate` or `other_documented`). AUGUR records the category, not the underlying personal document.
 
 CSV import remains available as a compatibility/development path.
 
