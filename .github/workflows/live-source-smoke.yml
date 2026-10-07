@@ -9,6 +9,10 @@ on:
       - "backend/app/ingestion/eurostat.py"
       - "backend/app/services/city_evidence.py"
       - "backend/scripts/inspect_eurostat_city_evidence.py"
+      - "backend/scripts/inspect_global_country_baseline.py"
+      - "backend/app/ingestion/world_bank.py"
+      - "backend/app/ingestion/imf.py"
+      - "backend/app/ingestion/un_wpp.py"
       - "backend/app/ingestion/eea_*.py"
       - "backend/app/ingestion/gisco_cities.py"
       - "backend/app/ingestion/cedefop_clssi.py"
@@ -51,6 +55,9 @@ jobs:
 
       - name: Install backend dependencies
         run: python -m pip install -r requirements.txt
+
+      - name: Probe global country baseline
+        run: python -m scripts.inspect_global_country_baseline
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
