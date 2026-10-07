@@ -54,18 +54,23 @@ if (-not $SkipSync) {
 }
 
 $BackendPython = Join-Path $Root "backend\.venv\Scripts\python.exe"
-$LocalEvidenceCode = Invoke-Step "Ensure required local evidence" {
-    Push-Location (Join-Path $Root "backend")
-    try {
-        & $BackendPython -m scripts.ensure_local_evidence
-    }
-    finally {
-        Pop-Location
-    }
-} -AllowedExitCodes @(0, 2)
+if (-not $SkipSync) {
+    $LocalEvidenceCode = Invoke-Step "Ensure required local evidence" {
+        Push-Location (Join-Path $Root "backend")
+        try {
+            & $BackendPython -m scripts.ensure_local_evidence
+        }
+        finally {
+            Pop-Location
+        }
+    } -AllowedExitCodes @(0, 2)
 
-if ($LocalEvidenceCode -eq 2) {
-    Write-Warning "Some optional local evidence could not be repaired automatically."
+    if ($LocalEvidenceCode -eq 2) {
+        Write-Warning "Some optional local evidence could not be repaired automatically."
+    }
+}
+else {
+    Write-Host "Automatic evidence repair skipped because -SkipSync was supplied."
 }
 
 if ($EscoPath) {
