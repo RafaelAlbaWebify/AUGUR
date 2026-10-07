@@ -90,6 +90,26 @@ def initialize_sqlite(path: Path) -> None:
             )
             """
         )
+        con.execute(
+            """
+            CREATE TABLE IF NOT EXISTS ttv_calibration_observations (
+                case_id TEXT PRIMARY KEY,
+                country_iso3 TEXT NOT NULL,
+                status TEXT NOT NULL,
+                scope_id TEXT NOT NULL,
+                engine_version TEXT NOT NULL,
+                composition TEXT NOT NULL,
+                candidate_weeks_min REAL NOT NULL,
+                candidate_weeks_max REAL NOT NULL,
+                started_at TEXT NOT NULL,
+                completed_at TEXT,
+                baseline_json TEXT NOT NULL DEFAULT '{}',
+                completion_json TEXT NOT NULL DEFAULT '{}',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+            """
+        )
         ttv_calibration_columns = {
             row[1]
             for row in con.execute(
