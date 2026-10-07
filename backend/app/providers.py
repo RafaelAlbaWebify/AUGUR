@@ -105,9 +105,12 @@ def providers_for_country(
 ) -> list[ProviderSpec]:
     metadata = country
     if metadata is None:
-        metadata = country_record(country_iso3)
+        try:
+            metadata = country_config(country_iso3)
+        except ValueError:
+            metadata = country_record(country_iso3)
     if metadata is None:
-        metadata = country_config(country_iso3)
+        raise ValueError(f"Country is not registered: {country_iso3}")
 
     return [
         provider
