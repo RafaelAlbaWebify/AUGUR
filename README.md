@@ -107,6 +107,41 @@ The existing ESCO dataset is preserved by default. To import or refresh a full o
 
 Use `-SkipSync` only when you intentionally want zero external evidence synchronization. Automatic local-evidence repair is also skipped in this mode.
 
+### Global country baseline
+
+ESP / PRT / IRL remain AUGUR's validation set for regression and operability gating, but they are no longer the product boundary.
+
+AUGUR can discover the World Bank country catalog, register real countries dynamically, and ingest a broad national baseline from global official sources in batches.
+
+Run the global baseline explicitly with:
+
+```powershell
+.\sync-global-baseline.ps1
+```
+
+or as part of the normal refresh workflow:
+
+```powershell
+.\refresh-augur.ps1 -GlobalBaseline
+```
+
+The global baseline currently uses:
+
+- World Bank WDI for broad observed national indicators;
+- UN World Population Prospects for demographic history and official projections;
+- IMF DataMapper where the source is reachable from the current environment.
+
+A country is **registered** when authoritative metadata identify it. A country is **analyzable** only after AUGUR has stored real analytical observations for it. Discovered countries with no evidence are not surfaced in the normal country selector.
+
+Coverage can be inspected through:
+
+- `GET /api/countries/coverage` for national registration and analyzability;
+- `GET /api/geographies/coverage` for provider-neutral regional/city coverage.
+
+NUTS 2024 and Urban Audit remain European geography providers, not AUGUR's universal geography model. Non-European regional/city providers register their own native geography system and level through the provider-neutral geography registry.
+
+GitHub-hosted runners currently receive HTTP 403 from both IMF DataMapper v2 and v1. Live smoke tests report this explicitly as a CI transport restriction rather than treating it as missing country evidence; normal local ingestion still attempts IMF.
+
 ### TTV calibration development workflow
 
 AUGUR includes a local-first TTV calibration workflow. This infrastructure does **not** activate the TTV model or mark it externally calibrated.
