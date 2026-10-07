@@ -2705,6 +2705,45 @@
   line-height: 1.4;
 }
 
+
+.cityEvidenceDomainStack {
+  display: grid;
+  gap: 10px;
+  min-height: 0;
+  max-height: 260px;
+  overflow-y: auto;
+  padding-right: 4px;
+  scrollbar-width: thin;
+}
+
+.cityEvidenceDomain {
+  display: grid;
+  gap: 6px;
+}
+
+.cityEvidenceDomain + .cityEvidenceDomain {
+  padding-top: 8px;
+  border-top: 1px solid rgba(91, 143, 169, .18);
+}
+
+.cityEvidenceDomainHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cityEvidenceDomainHeader strong {
+  color: #dff3fb;
+  font-size: 10px;
+}
+
+.cityEvidenceDomainHeader span {
+  color: #708d9e;
+  font-size: 8px;
+}
+
+
 .leafletAugurMap .urbanAuditCity {
   cursor: pointer;
 }
