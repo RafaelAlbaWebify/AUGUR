@@ -2351,6 +2351,74 @@ def upsert_geographies(rows: list[dict]) -> int:
         con.close()
 
 
+def geographies_for_country(
+    country_iso3: str,
+    geo_level: str | None = None,
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        params: list[object] = [country_iso3.upper()]
+        level_filter = ""
+        if geo_level:
+            level_filter = "AND LOWER(g.geo_level) = ?"
+            params.append(geo_level.lower())
+
+        result = con.execute(
+            f"""
+            SELECT
+                g.geo_id,
+                g.country_iso3,
+                g.country_iso2,
+                g.name,
+                g.geo_level,
+                g.geography_system,
+                g.source_id,
+                g.source_geo_code,
+                g.parent_geo_id,
+                g.latitude,
+                g.longitude,
+                COUNT(DISTINCT s.indicator_id) AS indicator_count,
+                MAX(s.period) AS latest_period
+            FROM geography_registry g
+            LEFT JOIN subnational_observations s
+              ON s.geo_code = g.source_geo_code
+            WHERE g.country_iso3 = ?
+              {level_filter}
+            GROUP BY
+                g.geo_id,
+                g.country_iso3,
+                g.country_iso2,
+                g.name,
+                g.geo_level,
+                g.geography_system,
+                g.source_id,
+                g.source_geo_code,
+                g.parent_geo_id,
+                g.latitude,
+                g.longitude
+            HAVING COUNT(DISTINCT s.indicator_id) > 0
+            ORDER BY
+                CASE LOWER(g.geo_level)
+                    WHEN 'tl2' THEN 1
+                    WHEN 'nuts2' THEN 1
+                    WHEN 'admin1' THEN 1
+                    WHEN 'tl3' THEN 2
+                    WHEN 'nuts3' THEN 2
+                    WHEN 'admin2' THEN 2
+                    WHEN 'city' THEN 3
+                    ELSE 9
+                END,
+                COALESCE(g.name, g.source_geo_code),
+                g.source_geo_code
+            """,
+            params,
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
 def geography_coverage_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
