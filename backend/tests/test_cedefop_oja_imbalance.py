@@ -45,3 +45,54 @@ def test_parse_published_oja_csv(tmp_path):
     assert rows[0]["occupation_label"] == "Systems administrators"
     assert rows[0]["score"] == 0.625
     assert rows[0]["release_version"] == "2026-05"
+
+
+
+def test_download_csv_validates_official_schema(tmp_path):
+    from app.ingestion.cedefop_oja_imbalance import (
+        DIRECT_DOWNLOAD_URL,
+        download_csv,
+    )
+
+    class FakeResponse:
+        headers = {"content-type": "text/csv; charset=utf-8"}
+        content = (
+            b"ISCO_1,ISCO_4,Occupation,score\n"
+            b"2 Professionals,2522,Systems administrators,0.625\n"
+        )
+
+        def raise_for_status(self):
+            return None
+
+    class FakeClient:
+        def get(self, url):
+            assert url == DIRECT_DOWNLOAD_URL
+            return FakeResponse()
+
+    path = tmp_path / "oja.csv"
+    result = download_csv(path, client=FakeClient())
+
+    assert path.exists()
+    assert result["bytes"] > 0
+    assert result["release_version"] == "2026-05"
+    assert result["content_type"].startswith("text/csv")
+
+
+def test_download_csv_rejects_unexpected_content_type(tmp_path):
+    import pytest
+
+    from app.ingestion.cedefop_oja_imbalance import download_csv
+
+    class FakeResponse:
+        headers = {"content-type": "text/html"}
+        content = b"<html>not data</html>"
+
+        def raise_for_status(self):
+            return None
+
+    class FakeClient:
+        def get(self, url):
+            return FakeResponse()
+
+    with pytest.raises(ValueError, match="Unexpected"):
+        download_csv(tmp_path / "bad.csv", client=FakeClient())
