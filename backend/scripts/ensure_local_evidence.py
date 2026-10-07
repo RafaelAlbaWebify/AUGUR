@@ -108,20 +108,23 @@ def ensure_regional_sector_evidence() -> dict:
 
 def ensure_nuts3_safety_evidence() -> dict:
     before = subnational_evidence_by_level_status()["NUTS3"]
-    if before.get("available"):
+    target_iso2 = {
+        country["iso2"]
+        for country in COUNTRIES
+        if country.get("eu_member")
+    }
+    available_prefixes = set(before.get("country_prefixes") or [])
+    missing_prefixes = target_iso2 - available_prefixes
+
+    if before.get("available") and not missing_prefixes:
         return {
             "evidence_id": "nuts3_safety",
             "status": "available",
             "action": "none",
             "before": before,
             "after": before,
+            "missing_country_prefixes": [],
         }
-
-    target_iso2 = {
-        country["iso2"]
-        for country in COUNTRIES
-        if country.get("eu_member")
-    }
 
     with httpx.Client(
         timeout=120,
@@ -132,10 +135,11 @@ def ensure_nuts3_safety_evidence() -> dict:
         response.raise_for_status()
         payload = response.json()
 
+    requested_prefixes = missing_prefixes or target_iso2
     codes = sorted({
         str(feature.get("properties", {}).get("NUTS_ID", "")).upper()
         for feature in payload.get("features", [])
-        if feature.get("properties", {}).get("CNTR_CODE") in target_iso2
+        if feature.get("properties", {}).get("CNTR_CODE") in requested_prefixes
         and len(str(feature.get("properties", {}).get("NUTS_ID", ""))) == 5
     })
 
@@ -147,6 +151,8 @@ def ensure_nuts3_safety_evidence() -> dict:
         "status": "available" if after.get("available") else "missing",
         "action": "repaired" if after.get("available") else "repair_failed",
         "region_count_requested": len(codes),
+        "requested_country_prefixes": sorted(requested_prefixes),
+        "missing_country_prefixes_before": sorted(missing_prefixes),
         "sync_result": sync_result,
         "before": before,
         "after": after,
