@@ -9,7 +9,11 @@ from app.db.analytics import (
     geography_coverage_status,
 )
 from app.db.bootstrap import initialize_datastores
-from app.ingestion.oecd_regional import OECDRegionalAdapter
+from app.ingestion.oecd_regional import (
+    DENSITY_DEFAULT_KEY,
+    POPULATION_DEFAULT_KEY,
+    OECDRegionalAdapter,
+)
 from app.ingestion.world_bank import WorldBankAdapter
 
 
@@ -50,12 +54,12 @@ def main() -> int:
     parser.add_argument("--end-year", type=int)
     parser.add_argument(
         "--density-key",
-        default="all",
+        default=DENSITY_DEFAULT_KEY,
         help="Optional OECD density SDMX key.",
     )
     parser.add_argument(
         "--population-key",
-        default="all",
+        default=POPULATION_DEFAULT_KEY,
         help="Optional OECD population SDMX key.",
     )
     args = parser.parse_args()
