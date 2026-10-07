@@ -224,6 +224,11 @@ type TTVResponse = {
   temporal_evidence?: {
     engine_version: string
     calendar_ready: boolean
+    estimation_scope?: {
+      scope_id: string
+      in_scope: boolean
+      blockers: string[]
+    }
     unavailable_stages: string[]
     candidate_range: null | {
       weeks_min: number
@@ -243,6 +248,8 @@ type TTVResponse = {
       guided_hours_min?: number | null
       guided_hours_max?: number | null
       weekly_study_hours?: number | null
+      current_cefr?: string | null
+      target_cefr?: string | null
     }>
   }
   candidate_time_range?: null | {
@@ -259,6 +266,30 @@ type TTVResponse = {
   ready_for_time_estimate: boolean
   time_estimate: null
   notes: string[]
+}
+
+type TTVCalibrationObservation = {
+  case_id: string
+  country_iso3: string
+  status: 'active' | 'completed' | 'cancelled'
+  scope_id: string
+  engine_version: string
+  composition: string
+  candidate_weeks_min: number
+  candidate_weeks_max: number
+  started_at: string
+  completed_at?: string | null
+  baseline: {
+    target_country_iso3?: string
+    language?: {
+      current_cefr?: string | null
+      target_cefr?: string | null
+      weekly_study_hours?: number | null
+      guided_hours_min?: number | null
+      guided_hours_max?: number | null
+    }
+  }
+  completion?: Record<string, unknown>
 }
 
 type ProfilePanelProps = {
@@ -348,6 +379,8 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
   const [languageFit, setLanguageFit] = useState<LanguageFitResponse | null>(null)
   const [careerFit, setCareerFit] = useState<CareerFitResponse | null>(null)
   const [ttv, setTtv] = useState<TTVResponse | null>(null)
+  const [ttvObservation, setTtvObservation] = useState<TTVCalibrationObservation | null>(null)
+  const [ttvObservationStatus, setTtvObservationStatus] = useState<'idle' | 'loading' | 'working' | 'error'>('idle')
   const fitRequestIdRef = useRef(0)
 
   useEffect(() => {
@@ -402,6 +435,77 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     }
   }
 
+  async function refreshTtvObservation() {
+    setTtvObservationStatus('loading')
+    try {
+      const response = await fetch(
+        `${apiBase}/api/countries/${targetCountry}/ttv/calibration/active`,
+      )
+      if (!response.ok) throw new Error(`TTV calibration HTTP ${response.status}`)
+      const data = await response.json() as {
+        observation: TTVCalibrationObservation | null
+      }
+      setTtvObservation(data.observation)
+      setTtvObservationStatus('idle')
+    } catch {
+      setTtvObservationStatus('error')
+    }
+  }
+
+  async function startTtvObservation() {
+    setTtvObservationStatus('working')
+    try {
+      const response = await fetch(
+        `${apiBase}/api/countries/${targetCountry}/ttv/calibration/start`,
+        { method: 'POST' },
+      )
+      if (!response.ok) throw new Error(`TTV calibration HTTP ${response.status}`)
+      const data = await response.json() as {
+        observation: TTVCalibrationObservation
+      }
+      setTtvObservation(data.observation)
+      setTtvObservationStatus('idle')
+    } catch {
+      setTtvObservationStatus('error')
+    }
+  }
+
+  async function completeTtvObservation() {
+    if (!ttvObservation) return
+    setTtvObservationStatus('working')
+    try {
+      const response = await fetch(
+        `${apiBase}/api/ttv/calibration/${ttvObservation.case_id}/complete`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ observed_at: null }),
+        },
+      )
+      if (!response.ok) throw new Error(`TTV calibration HTTP ${response.status}`)
+      setTtvObservation(null)
+      setTtvObservationStatus('idle')
+    } catch {
+      setTtvObservationStatus('error')
+    }
+  }
+
+  async function cancelTtvObservation() {
+    if (!ttvObservation) return
+    setTtvObservationStatus('working')
+    try {
+      const response = await fetch(
+        `${apiBase}/api/ttv/calibration/${ttvObservation.case_id}/cancel`,
+        { method: 'POST' },
+      )
+      if (!response.ok) throw new Error(`TTV calibration HTTP ${response.status}`)
+      setTtvObservation(null)
+      setTtvObservationStatus('idle')
+    } catch {
+      setTtvObservationStatus('error')
+    }
+  }
+
   async function refreshReadiness() {
     try {
       const response = await fetch(`${apiBase}/api/profile/readiness`)
@@ -451,7 +555,9 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     setCareerFit(null)
     setFinancialFit(null)
     setTtv(null)
+    setTtvObservation(null)
     void refreshTargetFits()
+    void refreshTtvObservation()
   }, [apiBase, targetCountry])
 
   async function save() {
@@ -598,6 +704,15 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
     language_fit: 'Unlocks language viability',
     financial_fit: 'Unlocks purchasing-power viability',
   }
+
+  const ttvLanguageStage = ttv?.temporal_evidence?.stages?.language
+  const ttvCalibrationEligible = Boolean(
+    ttv?.candidate_time_range
+    && ttv?.temporal_evidence?.calendar_ready
+    && ttv?.temporal_evidence?.estimation_scope?.in_scope
+    && ttvLanguageStage
+    && (ttvLanguageStage.weeks_max ?? 0) > 0
+  )
 
   return (
     <section className="profilePageV3" aria-label="Personal profile">
@@ -930,6 +1045,60 @@ export default function ProfilePanel({ apiBase, targetCountry }: ProfilePanelPro
                   ? `Language: ${ttv.temporal_evidence.stages.language.guided_hours_min}–${ttv.temporal_evidence.stages.language.guided_hours_max} guided hours${ttv.temporal_evidence.stages.language.weekly_study_hours == null ? ' · add study hours/week for calendar conversion' : ''}`
                   : 'Language timing evidence unavailable'}
               </span>
+            </div>
+          )}
+          {ttvObservation ? (
+            <div className="ttvCalibrationCard active" aria-label="TTV calibration observation">
+              <div>
+                <strong>TTV v1 calibration observation active</strong>
+                <span>
+                  Started {new Date(ttvObservation.started_at).toLocaleDateString()} · candidate {ttvObservation.candidate_weeks_min}–{ttvObservation.candidate_weeks_max} weeks
+                </span>
+              </div>
+              <p>
+                Local opt-in development evidence only. When you have a documented B2-or-better result, record the outcome here; this does not turn the candidate range into an AUGUR estimate.
+              </p>
+              <div className="ttvCalibrationActions">
+                <button
+                  type="button"
+                  onClick={() => void completeTtvObservation()}
+                  disabled={ttvObservationStatus === 'working'}
+                >
+                  Record B2 outcome now
+                </button>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() => void cancelTtvObservation()}
+                  disabled={ttvObservationStatus === 'working'}
+                >
+                  Cancel observation
+                </button>
+              </div>
+            </div>
+          ) : ttvCalibrationEligible ? (
+            <div className="ttvCalibrationCard" aria-label="TTV calibration opt in">
+              <div>
+                <strong>Help validate TTV v1</strong>
+                <span>
+                  Eligible bounded case · {ttv?.candidate_time_range?.weeks_min}–{ttv?.candidate_time_range?.weeks_max} week candidate range
+                </span>
+              </div>
+              <p>
+                Opt in to save this baseline locally as development calibration evidence. AUGUR stores the candidate range and start date; no holdout or validation claim is created.
+              </p>
+              <button
+                type="button"
+                onClick={() => void startTtvObservation()}
+                disabled={ttvObservationStatus === 'working' || ttvObservationStatus === 'loading'}
+              >
+                Start calibration observation
+              </button>
+            </div>
+          ) : null}
+          {ttvObservationStatus === 'error' && (
+            <div className="ttvCalibrationError">
+              Calibration observation action failed. TTV analysis remains unchanged.
             </div>
           )}
         </section>
