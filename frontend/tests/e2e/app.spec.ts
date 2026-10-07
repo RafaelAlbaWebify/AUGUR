@@ -1141,7 +1141,7 @@ test('comparison remains neutral and aligned', async ({ page }) => {
   await expect(page.getByRole('columnheader', { name: 'Portugal' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Ireland' })).toBeVisible()
   await expect(page.getByText('Objective data')).toBeVisible()
-  await expect(page.getByText('How sensitive is the comparison?')).toBeVisible()
+  await expect(page.getByText('Tested preference robustness')).toBeVisible()
 })
 
 
@@ -1701,12 +1701,16 @@ test('map exposes selectable Urban Audit cities only at high zoom', async ({ pag
 
   const zoomIn = map.locator('.leaflet-control-zoom-in')
   const cities = map.locator('.urbanAuditCity')
-  for (let step = 0; step < 10; step += 1) {
-    if (await cities.count()) break
+  for (let step = 0; step < 16; step += 1) {
+    const before = Number(await map.getAttribute('data-map-zoom'))
+    if (before >= 8.5) break
     await zoomIn.click()
-    await page.waitForTimeout(80)
+    await expect.poll(
+      async () => Number(await map.getAttribute('data-map-zoom')),
+    ).toBeGreaterThan(before)
   }
 
+  await expect(map).toHaveAttribute('data-map-zoom', /^(8\.5|9\.0|9\.5|10\.0)$/)
   await expect.poll(async () => cities.count()).toBeGreaterThan(0)
 
   const madrid = cities.first()
@@ -1727,12 +1731,19 @@ test('Overview reveals NUTS 3 safety context', async ({ page }) => {
   const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
 
-  for (let i = 0; i < 10; i += 1) {
-    const zoom = Number(await map.getAttribute('data-map-zoom'))
-    if (zoom >= 7) break
-    await map.locator('.leaflet-control-zoom-in').click()
+  const zoomIn = map.locator('.leaflet-control-zoom-in')
+  for (let i = 0; i < 12; i += 1) {
+    const before = Number(await map.getAttribute('data-map-zoom'))
+    if (before >= 7) break
+    await zoomIn.click()
+    await expect.poll(
+      async () => Number(await map.getAttribute('data-map-zoom')),
+    ).toBeGreaterThan(before)
   }
 
+  await expect.poll(
+    async () => map.locator('.nuts3Boundary').count(),
+  ).toBeGreaterThan(0)
   const nuts3 = map.locator('.nuts3Boundary').first()
   await expect(nuts3).toBeVisible()
   await nuts3.click()
