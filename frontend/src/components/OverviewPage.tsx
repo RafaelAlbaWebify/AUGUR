@@ -132,6 +132,17 @@ type RegionalSector = {
   employment_share_pct?: number | null
 }
 
+type EnvironmentalHealthMetric = {
+  burden_type: string
+  label: string
+  period: number
+  value: number
+  unit_code: string
+  unit_label: string
+  obs_status?: string | null
+}
+
+
 type RegionalEvidenceResponse = {
   geo_code: string
   geo_level: string
@@ -148,6 +159,16 @@ type RegionalEvidenceResponse = {
     total_employment_thousands?: number | null
     sector_count?: number
     top_sectors?: RegionalSector[]
+    notes?: string[]
+  }
+  environmental_health?: {
+    status: string
+    source_id: string
+    dataset_id: string
+    dataset_version?: string
+    geo_level?: string
+    period?: number
+    metrics?: EnvironmentalHealthMetric[]
     notes?: string[]
   }
   notes: string[]
@@ -596,6 +617,29 @@ export default function OverviewPage({
                               ? `${sector.employment_share_pct.toFixed(1)}%`
                               : `${sector.employment_thousands.toFixed(1)}k`}
                           </strong>
+                        </article>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+                {regionalEvidenceState === 'ready'
+                  && regionalEvidence?.environmental_health?.status === 'available'
+                  && regionalEvidence.environmental_health.metrics?.length ? (
+                  <div className="regionalSectorContext">
+                    <strong>PM2.5 attributable health burden</strong>
+                    <span>EEA health-impact evidence · separate from ambient concentration</span>
+                    <div className="regionalSectorList">
+                      {regionalEvidence.environmental_health.metrics.map((metric) => (
+                        <article key={`${metric.burden_type}-${metric.unit_code}`}>
+                          <span>
+                            {metric.burden_type === 'PMD'
+                              ? 'Premature deaths'
+                              : metric.burden_type === 'YLL'
+                                ? 'Years of life lost'
+                                : metric.label}
+                          </span>
+                          <strong>{new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(metric.value)}</strong>
+                          <small>{metric.period} · {metric.unit_label}{metric.obs_status ? ` · status ${metric.obs_status}` : ''}</small>
                         </article>
                       ))}
                     </div>
