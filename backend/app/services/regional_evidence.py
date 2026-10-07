@@ -141,6 +141,25 @@ REGIONAL_INDICATORS = [
     },
 ]
 
+LOCAL_SUBNATIONAL_INDICATOR_META = {
+    "regional_population": {
+        "name": "Population",
+    },
+    "regional_population_density": {
+        "name": "Population density",
+    },
+    "regional_gdp_per_capita": {
+        "name": "GDP per capita",
+    },
+    "regional_employment_rate": {
+        "name": "Employment rate",
+    },
+    "regional_unemployment_rate": {
+        "name": "Unemployment rate",
+    },
+}
+
+
 NUTS3_SAFETY_INDICATORS = [
     {
         "indicator_id": "regional_intentional_homicide_rate",
@@ -199,6 +218,21 @@ def _regional_result_from_local(
     if not rows:
         return None
 
+    local_level = str(rows[0].get("geo_level") or geographic_level(code)).lower()
+    local_name = next(
+        (
+            str(row.get("geo_name"))
+            for row in rows
+            if row.get("geo_name")
+        ),
+        None,
+    )
+    source_ids = sorted({
+        str(row["source_id"])
+        for row in rows
+        if row.get("source_id")
+    })
+
     by_id = {row["indicator_id"]: row for row in rows}
     if history_rows is None:
         history_rows = subnational_indicator_series(code, max_points=8)
@@ -209,8 +243,23 @@ def _regional_result_from_local(
             "value": history_row["value"],
         })
 
+    configured = _indicator_configs_for_geo(code)
+    if local_level not in {"nuts2", "nuts3"}:
+        configured = [
+            {
+                "indicator_id": indicator_id,
+                "name": LOCAL_SUBNATIONAL_INDICATOR_META.get(
+                    indicator_id,
+                    {},
+                ).get("name", indicator_id.replace("_", " ").title()),
+                "dataset_id": row["dataset_id"],
+                "unit": row.get("unit"),
+            }
+            for indicator_id, row in sorted(by_id.items())
+        ]
+
     indicators = []
-    for config in _indicator_configs_for_geo(code):
+    for config in configured:
         row = by_id.get(config["indicator_id"])
         if row:
             indicators.append({
@@ -225,7 +274,7 @@ def _regional_result_from_local(
                 "source_updated_at": row.get("source_updated_at"),
                 "history": history_by_id.get(config["indicator_id"], []),
             })
-        else:
+        elif local_level in {"nuts2", "nuts3"}:
             indicators.append({
                 "indicator_id": config["indicator_id"],
                 "name": config["name"],
@@ -236,25 +285,69 @@ def _regional_result_from_local(
                 "history": [],
             })
 
-    available_count = sum(1 for item in indicators if item["status"] == "available")
+    available_count = sum(
+        1
+        for item in indicators
+        if item["status"] == "available"
+    )
+    source_label = (
+        "OECD regional statistics"
+        if source_ids == ["OECD"]
+        else "Eurostat regional statistics"
+        if source_ids == ["EUROSTAT"]
+        else "local subnational evidence"
+    )
+
+    sector_context = (
+        _regional_sector_context(code, sector_rows)
+        if local_level == "nuts2"
+        else {
+            "status": "unavailable",
+            "reason": "sector_context_not_available_for_geography_system",
+            "dataset_id": None,
+            "source_id": None,
+            "sectors": [],
+        }
+    )
+    environmental_context = (
+        _environmental_health_context(code, environmental_health_rows)
+        if local_level in {"nuts2", "nuts3"}
+        else {
+            "status": "unavailable",
+            "reason": "environmental_health_not_available_for_geography_system",
+            "source_id": None,
+            "dataset_id": None,
+            "metrics": [],
+        }
+    )
+
     return {
         "geo_code": code,
-        "geo_level": geographic_level(code),
-        "source": "AUGUR local store · Eurostat regional statistics",
+        "geo_name": local_name,
+        "geo_level": local_level,
+        "source": f"AUGUR local store · {source_label}",
+        "source_ids": source_ids,
         "storage": "duckdb",
         "indicator_count": len(indicators),
         "available_count": available_count,
         "complete": available_count == len(indicators),
         "indicators": indicators,
-        "sector_structure": _regional_sector_context(code, sector_rows),
-        "environmental_health": _environmental_health_context(code, environmental_health_rows),
-        "notes": [
-            "Regional evidence is served from AUGUR's local analytical store when available.",
-            "Coverage varies by indicator and region; unavailable series remain explicit.",
-            "The geographic code is stable comparison context and can be compared across countries at the same NUTS level.",
-            "NUTS2 access indicators are descriptive connectivity context, not quality-of-life scores.",
-            "NUTS3 police-recorded crime is descriptive safety context and can be affected by legal, reporting and recording differences.",
-        ],
+        "sector_structure": sector_context,
+        "environmental_health": environmental_context,
+        "notes": (
+            [
+                "Regional evidence is served from AUGUR's local analytical store when available.",
+                "Coverage varies by indicator and region; unavailable series remain explicit.",
+                "NUTS geographic levels retain Eurostat-specific comparison semantics.",
+            ]
+            if local_level in {"nuts2", "nuts3"}
+            else [
+                "Subnational evidence is served from AUGUR's local analytical store.",
+                "Only metrics explicitly published for this source-native geography are shown.",
+                "OECD TL2/TL3 levels are not treated as interchangeable with Eurostat NUTS levels.",
+                "No missing Eurostat metrics are inferred for OECD territorial levels.",
+            ]
+        ),
     }
 
 
