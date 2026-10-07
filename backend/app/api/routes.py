@@ -13,6 +13,7 @@ from app.db.analytics import (
     country_indicator_series,
     subnational_storage_status,
     environmental_health_burden_status,
+    geography_coverage_status,
 )
 from app.services.country import (
     country_snapshot,
@@ -102,6 +103,11 @@ def countries():
 @router.get("/countries/coverage")
 def countries_coverage():
     return country_coverage_summary()
+
+
+@router.get("/geographies/coverage")
+def geographies_coverage():
+    return geography_coverage_status()
 
 
 @router.get("/countries/{country_iso3}/snapshot")
