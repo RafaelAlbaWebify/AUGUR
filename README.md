@@ -179,43 +179,45 @@ Occupation resolution is transparent: candidate ESCO occupations include a match
 
 Annual EURES unit-group updates are prepared as review artifacts rather than written directly into production evidence.
 
-Prerequisites:
+Prerequisite:
 
-- import the full official ESCO dataset;
-- normalize the source table to CSV with these columns:
+- import the full official ESCO dataset.
 
-```text
-occupation_label,shortage_countries,surplus_countries
+For the current 2025 EURES Annex, AUGUR can now run the complete review pipeline directly from the official ELA PDF:
+
+```powershell
+.\build-eures-market-evidence-from-annex.ps1
 ```
 
-Country lists use two-letter EURES country codes separated by spaces, commas, semicolons or pipes. An optional `expected_isco` column pins a previously reviewed ISCO-08 unit-group mapping; if the live ESCO resolver returns a different code, the row is rejected for review.
+The command:
 
-The currently reviewed ICT subset is versioned at:
+1. downloads the official ELA Annex PDF unless `-PdfPath` is supplied;
+2. extracts the visible grid table with `pdfplumber` rather than OCR;
+3. writes `exports\eures_2025_annex_normalized.csv`;
+4. writes extraction diagnostics to `exports\eures_2025_annex_extraction.json`;
+5. resolves each occupation label against the local full ESCO dataset;
+6. requires a configurable match threshold and ambiguity margin;
+7. derives the ISCO unit group only from an accepted ESCO match;
+8. validates EURES country codes and duplicate ISCO assignments;
+9. writes `exports\eures_market_review.json`;
+10. keeps ambiguous/unresolved rows explicit;
+11. **never modifies** `backend/app/evidence/eures_lmi_2025.json` automatically.
 
-`backend/app/evidence/eures_shortages_surpluses_2025_ict_normalized.csv`
+Exit code `0` means both PDF extraction and ESCO review are fully resolved. Exit code `2` means attention is required and production evidence is unchanged.
 
-CI checks that this reviewed table and the production manifest remain identical for those 13 unit groups.
-
-For the current 2025 EURES annex:
+The lower-level CSV builder remains available for compatibility:
 
 ```powershell
 .\build-eures-market-evidence.ps1 -Path ".\eures-2025-normalized.csv"
 ```
 
-The command:
+The currently reviewed ICT subset remains versioned at:
 
-1. resolves each occupation label against the local full ESCO dataset;
-2. requires a configurable confidence threshold and ambiguity margin;
-3. derives the ISCO unit group only from the accepted ESCO match;
-4. validates country codes;
-5. reports duplicate ISCO assignments;
-6. writes `exports\eures_market_review.json`;
-7. keeps ambiguous/unresolved rows explicit;
-8. **never modifies** `backend/app/evidence/eures_lmi_2025.json` automatically.
+`backend/app/evidence/eures_shortages_surpluses_2025_ict_normalized.csv`
 
-Exit code `0` means every row resolved and the artifact is ready for human review. Exit code `2` means unresolved rows remain and production evidence is unchanged.
+CI checks that this reviewed table and the production manifest remain identical for those 13 unit groups.
 
-This workflow is intentionally separate from live synchronization because the official ELA annual material is published as a report/annex and interactive dashboard rather than a stable machine-readable CSV feed.
+This workflow remains separate from ordinary evidence refresh because the ELA Annex is an annual reviewed evidence source, not a stable machine-readable API.
 
 Official source pages:
 
