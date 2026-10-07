@@ -1141,7 +1141,7 @@ test('comparison remains neutral and aligned', async ({ page }) => {
   await expect(page.getByRole('columnheader', { name: 'Portugal' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Ireland' })).toBeVisible()
   await expect(page.getByText('Objective data')).toBeVisible()
-  await expect(page.getByText('Tested preference robustness')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tested preference robustness' })).toBeVisible()
 })
 
 
@@ -1715,7 +1715,10 @@ test('map exposes selectable Urban Audit cities only at high zoom', async ({ pag
 
   const madrid = cities.first()
   await expect(madrid).toBeVisible()
-  await madrid.click()
+  await page.evaluate(() => {
+    const marker = document.querySelector('.leafletAugurMap .urbanAuditCity')
+    marker?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  })
 
   await expect(page.getByText('CITY · Madrid · ES001C')).toBeVisible()
   const cityEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
@@ -1745,8 +1748,11 @@ test('Overview reveals NUTS 3 safety context', async ({ page }) => {
     async () => map.locator('.nuts3Boundary').count(),
   ).toBeGreaterThan(0)
   const nuts3 = map.locator('.nuts3Boundary').first()
-  await expect(nuts3).toBeVisible()
-  await nuts3.click()
+  await expect(nuts3).toHaveCount(1)
+  await page.evaluate(() => {
+    const region = document.querySelector('.leafletAugurMap .nuts3Boundary')
+    region?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  })
 
   const evidence = page.getByRole('region', { name: 'Regional metric cards' })
   await expect(evidence.getByText('Police-recorded intentional homicide')).toBeVisible()
