@@ -240,14 +240,22 @@ def test_temporal_validation_gates_block_versioning():
     result = temporal_model_validation_status()
 
     assert result["ready_for_versioning"] is False
-    assert "local_employment_transition" in result["experimental"]
-    assert "composition_dependency_graph" in result["experimental"]
-    assert "skill_gap_duration" in result["missing"]
-    assert "local_financial_transition" in result["missing"]
-    assert "external_calibration" in result["missing"]
+    assert result["blockers"] == [
+        "composition_dependency_graph",
+        "external_calibration",
+    ]
+    assert result["experimental"] == ["composition_dependency_graph"]
+    assert result["missing"] == ["external_calibration"]
+    assert set(result["scope_bounded"]) == {
+        "skill_gap_duration",
+        "local_employment_transition",
+        "local_financial_transition",
+    }
 
     assert result["gates"]["language_guided_hours"]["state"] == "supported"
     assert result["gates"]["remote_income_transition"]["state"] == "supported"
+    assert result["model_scope"]["employment_mode"] == "preserved_remote_income_only"
+    assert result["model_scope"]["essential_skill_gap"] == "none_allowed"
 
 
 def test_local_employment_prefers_profile_age_group(monkeypatch):
@@ -405,3 +413,75 @@ def test_temporal_composition_withholds_range_when_any_stage_unavailable():
     }
 
     assert compose_temporal_stages(stages) is None
+
+
+def test_temporal_graph_withholds_candidate_range_outside_v1_scope(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "latest_labour_job_transition",
+        lambda country_iso3, age_group="Y15-74", duration_group="TOTAL": {
+            "country_iso3": country_iso3,
+            "period": 2025,
+            "age_group": age_group,
+            "duration_group": duration_group,
+            "probability_pct": 25.0,
+            "source_id": "EUROSTAT",
+            "dataset_id": "lfsi_long_e01",
+        },
+    )
+
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        remote_work=False,
+        age=50,
+        preferences={"language_study_hours_per_week": 10},
+    )
+
+    result = temporal_evidence_graph(
+        profile,
+        "IRL",
+        _legal_ready(),
+        {
+            "status": "work_ready_heuristic",
+            "work_ready": True,
+            "matches": [
+                {
+                    "language": "English",
+                    "declared_cefr": "B2",
+                    "meets_work_ready_heuristic": True,
+                }
+            ],
+        },
+        _career_ready(),
+        {
+            "status": "local_income_reference_available",
+            "reason": "net_income_not_modelled",
+        },
+    )
+
+    assert result["estimation_scope"]["in_scope"] is False
+    assert "local_employment_mode_outside_v1_scope" in result["estimation_scope"]["blockers"]
+    assert result["candidate_range"] is None
+    assert result["calendar_ready"] is False
+
+
+def test_temporal_graph_marks_remote_skill_ready_portable_income_case_in_scope():
+    profile = PersonalProfileResponse(
+        profile_id="default",
+        remote_work=True,
+        preferences={"language_study_hours_per_week": 10},
+    )
+
+    result = temporal_evidence_graph(
+        profile,
+        "IRL",
+        _legal_ready(),
+        _language_b1(),
+        _career_ready(),
+        _financial_ready(),
+    )
+
+    assert result["estimation_scope"]["in_scope"] is True
+    assert result["estimation_scope"]["blockers"] == []
+    assert result["calendar_ready"] is True
+    assert result["candidate_range"] is not None
