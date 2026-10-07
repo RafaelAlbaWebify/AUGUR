@@ -57,6 +57,21 @@ def operability_status() -> dict:
     oja_imbalance = labour_oja_imbalance_eu27_status()
     subnational = subnational_evidence_status()
     subnational_levels = subnational_evidence_by_level_status()
+    for level_status in subnational_levels.values():
+        age_days = _age_days(
+            level_status.get("latest_retrieved_at"),
+            now,
+        )
+        level_status["age_days"] = (
+            round(age_days, 2)
+            if age_days is not None
+            else None
+        )
+        level_status["fresh"] = (
+            bool(level_status.get("available"))
+            and age_days is not None
+            and age_days <= SYNC_FRESHNESS_MAX_DAYS
+        )
     regional_sector = regional_sector_employment_status()
     countries = evidence["countries"]
 
@@ -235,6 +250,7 @@ def operability_status() -> dict:
             "NUTS2 labour evidence is regional context and does not imply occupation-specific regional demand unless the source explicitly supports it.",
             "NUTS2 sector-employment evidence describes regional economic structure, not vacancies or hiring probability.",
             "Subnational operability reports NUTS2, NUTS3 and city evidence separately; absence at one level is not silently inferred from another.",
+            "Subnational freshness is reported per geographic level and remains informational for national-analysis readiness.",
             "TTV calibration metrics are descriptive until an external calibration protocol and acceptance criteria are approved.",
             "Partial operability is reported explicitly rather than treating an initialized but incomplete datastore as ready.",
         ],
