@@ -99,7 +99,9 @@ Current state:
 - PMD and YLL, published unit, observation status, NUTS level, period and dataset version are preserved;
 - regional API exposes environmental-health burden separately from Eurostat regional indicators and from observed city PM2.5 concentration;
 - regional UI renders the EEA burden as a separate evidence block;
+- regional metric cards now expose up to eight locally stored historical observations with sparklines and latest-change context;
 - refresh/start repair flows automatically populate the local EEA evidence store;
+- operability reports EEA environmental-health availability and retrieval freshness separately from national readiness;
 - live-source smoke validates both inspection and sync.
 
 Remaining:
@@ -114,6 +116,7 @@ Current state:
 
 - interactive regional selection is now local-only: it never waits for Eurostat to repair missing series;
 - regional evidence is cached in backend and revisited regions are cached in the overview client;
+- interactive regional cards use local historical series; region selection does not fetch history from external providers;
 
 - core/subnational evidence syncs automated;
 - OJA and CLSSI repair automated;
