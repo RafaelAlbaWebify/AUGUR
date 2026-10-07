@@ -1825,8 +1825,21 @@ def subnational_storage_status() -> dict:
             SELECT
                 COUNT(*) AS observation_count,
                 COUNT(DISTINCT geo_code) AS geography_count,
-                COUNT(DISTINCT CASE WHEN geo_level = 'nuts2' THEN geo_code END) AS nuts2_count,
-                COUNT(DISTINCT CASE WHEN geo_level = 'city' THEN geo_code END) AS city_count
+                COUNT(
+                    DISTINCT CASE
+                    WHEN LOWER(geo_level) = 'nuts2' THEN geo_code
+                    END
+                ) AS nuts2_count,
+                COUNT(
+                    DISTINCT CASE
+                    WHEN LOWER(geo_level) = 'nuts3' THEN geo_code
+                    END
+                ) AS nuts3_count,
+                COUNT(
+                    DISTINCT CASE
+                    WHEN LOWER(geo_level) = 'city' THEN geo_code
+                    END
+                ) AS city_count
             FROM subnational_observations
             """
         ).fetchone()
@@ -1834,7 +1847,8 @@ def subnational_storage_status() -> dict:
             "observation_count": int(row[0]),
             "geography_count": int(row[1]),
             "nuts2_count": int(row[2]),
-            "city_count": int(row[3]),
+            "nuts3_count": int(row[3]),
+            "city_count": int(row[4]),
         }
     finally:
         con.close()
