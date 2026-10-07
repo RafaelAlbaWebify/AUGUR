@@ -221,3 +221,9 @@ The extractor is intentionally review-oriented:
 - production EURES evidence is never rewritten automatically.
 
 This removes manual PDF-to-CSV normalization while preserving the human-review boundary for semantic occupation mapping.
+
+STAS acquisition boundary:
+- the August 2026 spreadsheet is an official downloadable Cedefop dataset and the parser/importer are fully implemented;
+- Cedefop currently returns HTTP 403 to AUGUR's automated dataset-page resolver, so AUGUR does not guess a release URL or silently fall back to January 2026;
+- when the current XLSX is already local, import remains reproducible and schema-validated;
+- STAS is therefore the remaining manual acquisition exception in the current Cedefop evidence stack.
