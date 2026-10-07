@@ -5,6 +5,7 @@ import json
 import math
 import sqlite3
 from datetime import datetime, timezone
+from uuid import uuid4
 from pathlib import Path
 
 from app.core.config import settings
@@ -719,4 +720,271 @@ def calibration_status() -> dict:
             "AUGUR does not define a pass/fail threshold until a calibration protocol and representative dataset are approved.",
             "Observed cases contain no full personal profile payload in the calibration store.",
         ],
+    }
+
+
+
+def _parse_utc_timestamp(value: str, field_name: str) -> datetime:
+    try:
+        parsed = datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except (AttributeError, ValueError) as exc:
+        raise ValueError(f"{field_name} must be an ISO-8601 timestamp") from exc
+
+    if parsed.tzinfo is None:
+        parsed = parsed.replace(tzinfo=timezone.utc)
+
+    return parsed.astimezone(timezone.utc)
+
+
+def active_calibration_observation(country_iso3: str) -> dict | None:
+    target = country_iso3.strip().upper()
+    con = sqlite3.connect(settings.sqlite_path)
+    con.row_factory = sqlite3.Row
+    try:
+        row = con.execute(
+            """
+            SELECT *
+            FROM ttv_calibration_observations
+            WHERE country_iso3 = ? AND status = 'active'
+            ORDER BY started_at DESC
+            LIMIT 1
+            """,
+            [target],
+        ).fetchone()
+    finally:
+        con.close()
+
+    if row is None:
+        return None
+
+    result = dict(row)
+    result["baseline"] = json.loads(result.pop("baseline_json") or "{}")
+    result["completion"] = json.loads(result.pop("completion_json") or "{}")
+    return result
+
+
+def start_calibration_observation(
+    country_iso3: str,
+    ttv_result: dict,
+) -> dict:
+    target = country_iso3.strip().upper()
+    temporal = ttv_result.get("temporal_evidence") or {}
+    scope = temporal.get("estimation_scope") or {}
+    candidate = ttv_result.get("candidate_time_range")
+    language = (temporal.get("stages") or {}).get("language") or {}
+
+    if not scope.get("in_scope"):
+        raise ValueError(
+            "TTV calibration observation requires an in-scope v1 case"
+        )
+    if not temporal.get("calendar_ready"):
+        raise ValueError(
+            "TTV calibration observation requires calendar-ready temporal evidence"
+        )
+    if not candidate:
+        raise ValueError(
+            "TTV calibration observation requires a candidate range"
+        )
+    if language.get("weeks_max") in (None, 0):
+        raise ValueError(
+            "TTV calibration observation requires a non-zero language transition"
+        )
+
+    existing = active_calibration_observation(target)
+    if existing is not None:
+        return existing
+
+    started_at = datetime.now(timezone.utc)
+    case_id = f"ttv-dev-{target.lower()}-{uuid4().hex[:12]}"
+    baseline = {
+        "target_country_iso3": target,
+        "scope_id": scope.get("scope_id"),
+        "candidate_range": candidate,
+        "language": {
+            "current_cefr": language.get("current_cefr"),
+            "target_cefr": language.get("target_cefr"),
+            "guided_hours_min": language.get("guided_hours_min"),
+            "guided_hours_max": language.get("guided_hours_max"),
+            "weekly_study_hours": language.get("weekly_study_hours"),
+            "weeks_min": language.get("weeks_min"),
+            "weeks_max": language.get("weeks_max"),
+        },
+        "start_event_definition_version": CALIBRATION_START_EVENT_DEFINITION_VERSION,
+        "viability_outcome_definition_version": CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
+        "inclusion_exclusion_rules_version": CALIBRATION_INCLUSION_EXCLUSION_RULES_VERSION,
+    }
+
+    con = sqlite3.connect(settings.sqlite_path)
+    try:
+        con.execute(
+            """
+            INSERT INTO ttv_calibration_observations (
+                case_id,
+                country_iso3,
+                status,
+                scope_id,
+                engine_version,
+                composition,
+                candidate_weeks_min,
+                candidate_weeks_max,
+                started_at,
+                baseline_json,
+                created_at,
+                updated_at
+            )
+            VALUES (?, ?, 'active', ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                case_id,
+                target,
+                scope.get("scope_id") or TTV_V1_CALIBRATION_SCOPE["scope_id"],
+                temporal.get("engine_version") or "ttv-temporal-evidence-v1",
+                candidate.get("composition") or "critical_path_v1",
+                float(candidate["weeks_min"]),
+                float(candidate["weeks_max"]),
+                started_at.isoformat(),
+                json.dumps(baseline, sort_keys=True),
+                started_at.isoformat(),
+                started_at.isoformat(),
+            ],
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    return active_calibration_observation(target)
+
+
+def complete_calibration_observation(
+    case_id: str,
+    *,
+    observed_at: str | None = None,
+) -> dict:
+    con = sqlite3.connect(settings.sqlite_path)
+    con.row_factory = sqlite3.Row
+    try:
+        row = con.execute(
+            """
+            SELECT *
+            FROM ttv_calibration_observations
+            WHERE case_id = ?
+            """,
+            [case_id],
+        ).fetchone()
+    finally:
+        con.close()
+
+    if row is None:
+        raise ValueError("TTV calibration observation not found")
+    if row["status"] != "active":
+        raise ValueError("TTV calibration observation is not active")
+
+    started = _parse_utc_timestamp(row["started_at"], "started_at")
+    completed = (
+        _parse_utc_timestamp(observed_at, "observed_at")
+        if observed_at
+        else datetime.now(timezone.utc)
+    )
+    if completed < started:
+        raise ValueError("observed_at must not be before started_at")
+
+    observed_weeks = round(
+        (completed - started).total_seconds() / (7 * 24 * 60 * 60),
+        4,
+    )
+    baseline = json.loads(row["baseline_json"] or "{}")
+    language = baseline.get("language") or {}
+
+    case = upsert_calibration_case(
+        {
+            "case_id": row["case_id"],
+            "country_iso3": row["country_iso3"],
+            "employment_mode": "remote",
+            "engine_version": row["engine_version"],
+            "composition": row["composition"],
+            "candidate_weeks_min": row["candidate_weeks_min"],
+            "candidate_weeks_max": row["candidate_weeks_max"],
+            "observed_weeks": observed_weeks,
+            "source_label": "local_opt_in_observed_ttv_v1",
+            "observed_at": completed.isoformat(),
+            "sample_role": "development",
+            "start_event_definition_version": CALIBRATION_START_EVENT_DEFINITION_VERSION,
+            "viability_outcome_definition_version": CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
+            "stage_timings": {
+                "language": {
+                    "candidate_weeks_min": float(language.get("weeks_min") or 0),
+                    "candidate_weeks_max": float(language.get("weeks_max") or 0),
+                    "observed_weeks": observed_weeks,
+                }
+            },
+        }
+    )
+
+    completion = {
+        "outcome": "user_confirmed_b2_or_better",
+        "observed_at": completed.isoformat(),
+        "observed_weeks": observed_weeks,
+        "sample_role": "development",
+    }
+    now = datetime.now(timezone.utc).isoformat()
+
+    con = sqlite3.connect(settings.sqlite_path)
+    try:
+        con.execute(
+            """
+            UPDATE ttv_calibration_observations
+            SET status = 'completed',
+                completed_at = ?,
+                completion_json = ?,
+                updated_at = ?
+            WHERE case_id = ?
+            """,
+            [
+                completed.isoformat(),
+                json.dumps(completion, sort_keys=True),
+                now,
+                case_id,
+            ],
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    return {
+        "observation": {
+            **dict(row),
+            "status": "completed",
+            "completed_at": completed.isoformat(),
+            "baseline": baseline,
+            "completion": completion,
+        },
+        "calibration_case": case,
+        "calibration_status": calibration_status(),
+    }
+
+
+def cancel_calibration_observation(case_id: str) -> dict:
+    now = datetime.now(timezone.utc).isoformat()
+    con = sqlite3.connect(settings.sqlite_path)
+    try:
+        cursor = con.execute(
+            """
+            UPDATE ttv_calibration_observations
+            SET status = 'cancelled',
+                updated_at = ?
+            WHERE case_id = ? AND status = 'active'
+            """,
+            [now, case_id],
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    if cursor.rowcount == 0:
+        raise ValueError("Active TTV calibration observation not found")
+
+    return {
+        "case_id": case_id,
+        "status": "cancelled",
+        "updated_at": now,
     }
