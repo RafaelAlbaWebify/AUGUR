@@ -164,3 +164,26 @@ AUGUR behaviour:
 - CareerFit exposes a structured occupation trend derived from published STAS growth values;
 - direction is sign-based only (`positive_growth`, `negative_growth`, or `zero_growth`);
 - this is explicitly employment outlook, not OJA demand growth, statistical significance or a personal hiring probability.
+
+
+## ELA Annex extraction workflow
+
+The 2025 ELA shortage/surplus Annex is published as a PDF rather than a stable CSV/API.
+
+AUGUR now supports:
+
+```powershell
+.\build-eures-market-evidence-from-annex.ps1
+```
+
+The workflow downloads the official Annex, extracts the ruled table with `pdfplumber`, writes a normalized occupation/country table and passes it through the existing full-ESCO resolver.
+
+The extractor is intentionally review-oriented:
+
+- no OCR is used;
+- conflicting duplicate occupation rows block readiness;
+- ambiguous ESCO matches remain unresolved;
+- duplicate ISCO assignments remain unresolved;
+- production EURES evidence is never rewritten automatically.
+
+This removes manual PDF-to-CSV normalization while preserving the human-review boundary for semantic occupation mapping.
