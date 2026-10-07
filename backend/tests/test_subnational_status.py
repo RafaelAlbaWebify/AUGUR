@@ -184,3 +184,72 @@ def test_geography_registry_reports_provider_neutral_coverage(
     assert result["geography_count"] == 3
     assert result["systems"] == ["ISO_3166_2", "NUTS_2024", "URBAN_AUDIT_2024"]
     assert {"nuts2", "city", "admin1"} == set(result["levels"])
+
+
+def test_geographies_for_country_returns_only_analyzable_rows(
+    monkeypatch,
+    tmp_path,
+):
+    path = tmp_path / "country-geographies.duckdb"
+    con = duckdb.connect(str(path))
+    try:
+        con.execute(
+            """
+            CREATE TABLE geography_registry (
+                geo_id VARCHAR PRIMARY KEY,
+                country_iso3 VARCHAR,
+                country_iso2 VARCHAR,
+                name VARCHAR,
+                geo_level VARCHAR,
+                geography_system VARCHAR,
+                source_id VARCHAR,
+                source_geo_code VARCHAR,
+                parent_geo_id VARCHAR,
+                latitude DOUBLE,
+                longitude DOUBLE
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE subnational_observations (
+                geo_code VARCHAR,
+                indicator_id VARCHAR,
+                period INTEGER
+            )
+            """
+        )
+        con.executemany(
+            "INSERT INTO geography_registry VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                ("OECD_TL_2024:AU1", "AUS", "AU", "New South Wales", "tl2", "OECD_TL_2024", "OECD", "AU1", None, None, None),
+                ("OECD_TL_2024:AU2", "AUS", "AU", "Victoria", "tl2", "OECD_TL_2024", "OECD", "AU2", None, None, None),
+                ("OECD_TL_2024:AU3", "AUS", "AU", "Queensland", "tl2", "OECD_TL_2024", "OECD", "AU3", None, None, None),
+                ("NUTS_2024:ES12", "ESP", "ES", "Asturias", "nuts2", "NUTS_2024", "EUROSTAT", "ES12", None, None, None),
+            ],
+        )
+        con.executemany(
+            "INSERT INTO subnational_observations VALUES (?, ?, ?)",
+            [
+                ("AU1", "regional_population_density", 2024),
+                ("AU2", "regional_population_density", 2024),
+                ("ES12", "regional_population_density", 2024),
+            ],
+        )
+    finally:
+        con.close()
+
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+
+    rows = module.geographies_for_country("AUS")
+
+    assert [row["source_geo_code"] for row in rows] == ["AU1", "AU2"]
+    assert [row["name"] for row in rows] == ["New South Wales", "Victoria"]
+    assert all(row["geography_system"] == "OECD_TL_2024" for row in rows)
+    assert all(row["geo_level"] == "tl2" for row in rows)
+    assert all(row["indicator_count"] == 1 for row in rows)
+    assert all(row["latest_period"] == 2024 for row in rows)
