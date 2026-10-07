@@ -377,10 +377,20 @@ async function mockApi(page: Page) {
           geo_level: 'tl2',
           source: 'AUGUR local store · OECD regional statistics',
           source_ids: ['OECD'],
-          indicator_count: 1,
-          available_count: 1,
+          indicator_count: 2,
+          available_count: 2,
           complete: true,
           indicators: [
+            {
+              indicator_id: 'regional_population',
+              name: 'Population',
+              status: 'available',
+              period: 2024,
+              value: 8534000,
+              unit: 'persons',
+              dataset_id: 'DSD_REG_DEMO@DF_POP_BROAD',
+              source_id: 'OECD',
+            },
             {
               indicator_id: 'regional_population_density',
               name: 'Population density',
@@ -1114,6 +1124,8 @@ test('source-native OECD region can be selected without GISCO geometry', async (
 
   await expect(page.getByText('TL2 EVIDENCE')).toBeVisible()
   await expect(page.getByText('New South Wales', { exact: true })).toBeVisible()
+  await expect(page.getByText('Population', { exact: true })).toBeVisible()
+  await expect(page.getByText('8,534,000')).toBeVisible()
   await expect(page.getByText('Population density', { exact: true })).toBeVisible()
   await expect(page.getByText('10.6 /km²')).toBeVisible()
 })
