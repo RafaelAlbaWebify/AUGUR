@@ -350,12 +350,19 @@ async function mockApi(page: Page) {
         geo_level: 'city',
         source: 'AUGUR local store · Eurostat Urban Audit + EEA air quality',
         minimum_population_scope: 50000,
-        indicator_count: 2,
-        available_count: 2,
+        indicator_count: 9,
+        available_count: 9,
         complete: true,
         indicators: [
-          { indicator_id: 'city_population', name: 'Population', status: 'available', period: 2025, value: 3420000, unit: 'persons', dataset_id: 'urb_cpop1', source_id: 'EUROSTAT' },
-          { indicator_id: 'city_pm25_annual_mean_observed', name: 'Observed annual mean PM2.5', status: 'available', period: 2024, value: 9.0111, unit: 'ug_m3', dataset_id: 'EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS', source_id: 'EEA' },
+          { indicator_id: 'city_population', name: 'Population', category: 'demography', status: 'available', period: 2025, value: 3420000, unit: 'persons', dataset_id: 'urb_cpop1', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_median_age', name: 'Median population age', category: 'demography', status: 'available', period: 2024, value: 43.7, unit: 'years', dataset_id: 'urb_cpopstr', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_public_transport_commute_share', name: 'Journeys to work by public transport', category: 'mobility', status: 'available', period: 2023, value: 38.5, unit: 'percent', dataset_id: 'urb_ctran', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_walk_commute_share', name: 'Journeys to work by foot', category: 'mobility', status: 'available', period: 2023, value: 11.4, unit: 'percent', dataset_id: 'urb_ctran', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_registered_cars_per_1000', name: 'Registered cars', category: 'mobility', status: 'available', period: 2024, value: 455, unit: 'per_1000_people', dataset_id: 'urb_ctran', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_monthly_transit_pass', name: 'Monthly public transport ticket', category: 'mobility', status: 'available', period: 2024, value: 54.6, unit: 'eur_monthly', dataset_id: 'urb_ctran', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_tourist_nights_per_resident', name: 'Tourist overnight stays per resident', category: 'tourism', status: 'available', period: 2024, value: 7.8, unit: 'nights_per_person', dataset_id: 'urb_ctour', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_tourist_beds_per_1000', name: 'Tourist bed-places', category: 'tourism', status: 'available', period: 2024, value: 28.1, unit: 'per_1000_people', dataset_id: 'urb_ctour', source_id: 'EUROSTAT' },
+          { indicator_id: 'city_pm25_annual_mean_observed', name: 'Observed annual mean PM2.5', category: 'environment', status: 'available', period: 2024, value: 9.0111, unit: 'ug_m3', dataset_id: 'EEA_AIR_QUALITY_E1A_CITY_MEASUREMENTS', source_id: 'EEA' },
         ],
         notes: [],
       }
@@ -2759,6 +2766,30 @@ test('mobile My Fit keeps summary, completion, actions and evidence reachable', 
 })
 
 
+
+test('city evidence is grouped into demography mobility tourism and environment', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+
+  const zoomIn = page.locator('.leaflet-control-zoom-in')
+  for (let index = 0; index < 7; index += 1) {
+    await zoomIn.click()
+  }
+
+  const cityMarker = page.locator('.leafletAugurMap .urbanAuditCity').first()
+  await expect(cityMarker).toBeVisible()
+  await cityMarker.click({ force: true })
+
+  await expect(page.getByText('Demography', { exact: true })).toBeVisible()
+  await expect(page.getByText('Mobility', { exact: true })).toBeVisible()
+  await expect(page.getByText('Tourism', { exact: true })).toBeVisible()
+  await expect(page.getByText('Environment', { exact: true })).toBeVisible()
+  await expect(page.getByText('Median population age')).toBeVisible()
+  await expect(page.getByText('Monthly public transport ticket')).toBeVisible()
+  await expect(page.getByText('Tourist overnight stays per resident')).toBeVisible()
+  await expect(page.getByText('Observed annual mean PM2.5')).toBeVisible()
+  await expect(page.getByText('43.7 years')).toBeVisible()
+  await expect(page.getByText('€54.60 /month')).toBeVisible()
+})
 
 test('regional sector context appears for selected NUTS2 region', async ({ page }) => {
   await page.goto('/country/ESP/overview')
