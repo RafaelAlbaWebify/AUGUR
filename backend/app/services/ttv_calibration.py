@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import math
 import sqlite3
@@ -445,12 +446,173 @@ def validate_calibration_case(case: dict) -> dict:
     }
 
 
+def holdout_seal_status() -> dict:
+    con = sqlite3.connect(settings.sqlite_path)
+    con.row_factory = sqlite3.Row
+    try:
+        try:
+            row = con.execute(
+                """
+                SELECT
+                    protocol_version,
+                    acceptance_criteria_version,
+                    holdout_sha256,
+                    case_count,
+                    country_count,
+                    sealed_at
+                FROM ttv_holdout_seals
+                WHERE protocol_version = ?
+                LIMIT 1
+                """,
+                [CALIBRATION_PROTOCOL_VERSION],
+            ).fetchone()
+        except sqlite3.OperationalError as exc:
+            if "no such table" not in str(exc).lower():
+                raise
+            row = None
+    finally:
+        con.close()
+
+    if row is None:
+        return {
+            "sealed": False,
+            "protocol_version": CALIBRATION_PROTOCOL_VERSION,
+            "acceptance_criteria_version": CALIBRATION_ACCEPTANCE_CRITERIA_VERSION,
+            "holdout_sha256": None,
+            "case_count": 0,
+            "country_count": 0,
+            "sealed_at": None,
+        }
+
+    result = dict(row)
+    result["sealed"] = True
+    return result
+
+
+def _holdout_cases_for_seal() -> list[dict]:
+    con = sqlite3.connect(settings.sqlite_path)
+    con.row_factory = sqlite3.Row
+    try:
+        rows = con.execute(
+            """
+            SELECT
+                case_id,
+                country_iso3,
+                employment_mode,
+                engine_version,
+                composition,
+                candidate_weeks_min,
+                candidate_weeks_max,
+                observed_weeks,
+                sample_role,
+                start_event_definition_version,
+                viability_outcome_definition_version,
+                calibration_protocol_version,
+                stage_timings_json,
+                context_json
+            FROM ttv_calibration_cases
+            WHERE sample_role = 'holdout'
+            ORDER BY case_id
+            """
+        ).fetchall()
+    finally:
+        con.close()
+
+    return [dict(row) for row in rows]
+
+
+def _holdout_fingerprint(cases: list[dict]) -> str:
+    canonical = json.dumps(
+        cases,
+        sort_keys=True,
+        separators=(",", ":"),
+        ensure_ascii=False,
+    ).encode("utf-8")
+    return hashlib.sha256(canonical).hexdigest()
+
+
+def seal_holdout() -> dict:
+    existing = holdout_seal_status()
+    if existing["sealed"]:
+        current_cases = _holdout_cases_for_seal()
+        current_hash = _holdout_fingerprint(current_cases)
+        if current_hash != existing["holdout_sha256"]:
+            raise ValueError(
+                "sealed holdout contents no longer match the stored fingerprint"
+            )
+        return existing
+
+    cases = _holdout_cases_for_seal()
+    minimum = CALIBRATION_ACCEPTANCE_CRITERIA["minimum_holdout_cases"]
+    if len(cases) < minimum:
+        raise ValueError(
+            f"holdout requires at least {minimum} cases before sealing"
+        )
+
+    for case in cases:
+        if case.get("calibration_protocol_version") != CALIBRATION_PROTOCOL_VERSION:
+            raise ValueError(
+                "all holdout cases must use the frozen calibration protocol"
+            )
+
+    fingerprint = _holdout_fingerprint(cases)
+    sealed_at = datetime.now(timezone.utc).isoformat()
+    country_count = len({
+        case["country_iso3"]
+        for case in cases
+    })
+
+    con = sqlite3.connect(settings.sqlite_path)
+    try:
+        con.execute(
+            """
+            INSERT INTO ttv_holdout_seals (
+                protocol_version,
+                acceptance_criteria_version,
+                holdout_sha256,
+                case_count,
+                country_count,
+                sealed_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            [
+                CALIBRATION_PROTOCOL_VERSION,
+                CALIBRATION_ACCEPTANCE_CRITERIA_VERSION,
+                fingerprint,
+                len(cases),
+                country_count,
+                sealed_at,
+            ],
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    return holdout_seal_status()
+
+
 def upsert_calibration_case(case: dict) -> dict:
     normalized = validate_calibration_case(case)
     imported_at = datetime.now(timezone.utc).isoformat()
 
     con = sqlite3.connect(settings.sqlite_path)
     try:
+        if normalized["sample_role"] == "holdout":
+            sealed = con.execute(
+                """
+                SELECT 1
+                FROM ttv_holdout_seals
+                WHERE protocol_version = ?
+                LIMIT 1
+                """,
+                [CALIBRATION_PROTOCOL_VERSION],
+            ).fetchone()
+            if sealed is not None:
+                raise ValueError(
+                    "holdout is sealed; no new holdout cases can be imported"
+                )
+
         existing = con.execute(
             """
             SELECT sample_role
@@ -722,7 +884,11 @@ def _case_interval_metrics(cases: list[dict]) -> dict:
     }
 
 
-def evaluate_holdout_acceptance(cases: list[dict]) -> dict:
+def evaluate_holdout_acceptance(
+    cases: list[dict],
+    *,
+    holdout_sealed: bool = False,
+) -> dict:
     eligible = [
         case
         for case in cases
@@ -833,17 +999,29 @@ def evaluate_holdout_acceptance(cases: list[dict]) -> dict:
         for item in evaluated_checks
     )
 
+    numerical_status = (
+        "passed"
+        if passed
+        else "failed"
+        if sample_ready
+        else "insufficient_sample"
+    )
+    final_passed = bool(holdout_sealed and passed)
+    final_status = (
+        numerical_status
+        if not sample_ready
+        else numerical_status
+        if holdout_sealed
+        else "unsealed"
+    )
+
     return {
         "criteria_version": CALIBRATION_ACCEPTANCE_CRITERIA_VERSION,
         "scope_id": TTV_V1_CALIBRATION_SCOPE["scope_id"],
-        "status": (
-            "passed"
-            if passed
-            else "failed"
-            if sample_ready
-            else "insufficient_sample"
-        ),
-        "passed": passed,
+        "status": final_status,
+        "numerical_status": numerical_status,
+        "passed": final_passed,
+        "holdout_sealed": holdout_sealed,
         "eligible_holdout_case_count": case_count,
         "metrics": metrics,
         "checks": checks,
@@ -857,6 +1035,7 @@ def evaluate_holdout_acceptance(cases: list[dict]) -> dict:
 
 def calibration_status() -> dict:
     protocol_readiness = calibration_protocol_readiness()
+    holdout_seal = holdout_seal_status()
     con = sqlite3.connect(settings.sqlite_path)
     con.row_factory = sqlite3.Row
 
@@ -927,7 +1106,11 @@ def calibration_status() -> dict:
                     "outcome_evidence_types": [],
                     "weekly_study_hours": [],
                 },
-                "holdout_acceptance": evaluate_holdout_acceptance([]),
+                "holdout_seal": holdout_seal,
+                "holdout_acceptance": evaluate_holdout_acceptance(
+                    [],
+                    holdout_sealed=holdout_seal["sealed"],
+                ),
                 "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
@@ -976,6 +1159,11 @@ def calibration_status() -> dict:
                 "outcome_evidence_types": [],
                 "weekly_study_hours": [],
             },
+            "holdout_seal": holdout_seal,
+            "holdout_acceptance": evaluate_holdout_acceptance(
+                [],
+                holdout_sealed=holdout_seal["sealed"],
+            ),
             "externally_calibrated": False,
             "notes": [
                 "Calibration infrastructure is available but contains no observed cases.",
@@ -1052,7 +1240,10 @@ def calibration_status() -> dict:
         }),
     }
 
-    holdout_acceptance = evaluate_holdout_acceptance(cases)
+    holdout_acceptance = evaluate_holdout_acceptance(
+        cases,
+        holdout_sealed=holdout_seal["sealed"],
+    )
 
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
@@ -1115,6 +1306,7 @@ def calibration_status() -> dict:
         "stage_metrics": stage_metrics,
         "sample_role_metrics": sample_role_metrics,
         "context_summary": context_summary,
+        "holdout_seal": holdout_seal,
         "holdout_acceptance": holdout_acceptance,
         "externally_calibrated": False,
         "notes": [
