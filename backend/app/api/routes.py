@@ -1,3 +1,5 @@
+import json
+
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
@@ -16,6 +18,8 @@ from app.db.analytics import (
     geography_coverage_status,
     geographies_for_country,
     geography_records_by_source_codes,
+    geography_geometries_for_country,
+    geography_geometry_coverage_status,
 )
 from app.services.country import (
     country_snapshot,
@@ -110,6 +114,51 @@ def countries_coverage():
 @router.get("/geographies/coverage")
 def geographies_coverage():
     return geography_coverage_status()
+
+
+@router.get("/geographies/geometry")
+def geographies_geometry(
+    country_iso3: str = Query(..., min_length=3, max_length=3),
+    geography_system: str | None = Query(default=None),
+):
+    rows = geography_geometries_for_country(
+        country_iso3,
+        geography_system=geography_system,
+    )
+    features = []
+    for row in rows:
+        geometry = json.loads(row["geometry_geojson"])
+        features.append({
+            "type": "Feature",
+            "id": row["geo_id"],
+            "properties": {
+                "geo_id": row["geo_id"],
+                "country_iso3": row["country_iso3"],
+                "geography_system": row["geography_system"],
+                "geo_level": row["geo_level"],
+                "source_geo_code": row["source_geo_code"],
+                "source_id": row["source_id"],
+                "dataset_version": row["dataset_version"],
+            },
+            "geometry": geometry,
+        })
+
+    return {
+        "type": "FeatureCollection",
+        "country_iso3": country_iso3.upper(),
+        "geography_system": (
+            geography_system.upper()
+            if geography_system
+            else None
+        ),
+        "feature_count": len(features),
+        "features": features,
+    }
+
+
+@router.get("/geographies/geometry/coverage")
+def geographies_geometry_coverage():
+    return geography_geometry_coverage_status()
 
 
 @router.get("/geographies")
