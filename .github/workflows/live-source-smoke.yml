@@ -113,12 +113,6 @@ jobs:
       - name: Discover current OECD FUA geometry links
         run: python -m scripts.inspect_oecd_fua_geometry_links
 
-      - name: Sync representative OECD non-EU urban evidence
-        run: >-
-          python -m scripts.sync_oecd_fua
-          --countries AUS CAN USA JPN
-          --start-year 2020
-
       - name: Inspect OECD Australia urban dependency ratio
         run: python -m scripts.inspect_oecd_fua_dependency
 
@@ -133,6 +127,12 @@ jobs:
 
       - name: Inspect OECD Australia FUA PM2.5 exposure
         run: python -m scripts.inspect_oecd_fua_pollution
+
+      - name: Sync representative OECD non-EU urban evidence
+        run: >-
+          python -m scripts.sync_oecd_fua
+          --countries AUS CAN USA JPN
+          --start-year 2020
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
