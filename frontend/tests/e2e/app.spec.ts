@@ -3059,9 +3059,18 @@ test('city evidence is grouped into demography mobility tourism and environment'
   await expect.poll(async () => map.locator('.urbanAuditCity').count()).toBeGreaterThan(0)
   const cityMarker = map.locator('.urbanAuditCity').first()
   await expect(cityMarker).toBeVisible()
+
+  const cityEvidenceResponse = page.waitForResponse(
+    (response) => (
+      /\/api\/cities\/[A-Z0-9]+\/evidence$/.test(new URL(response.url()).pathname)
+      && response.status() === 200
+    ),
+  )
   await cityMarker.click({ force: true })
+  await cityEvidenceResponse
 
   const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
+  await expect(geographicEvidence.getByText('9/9 series available')).toBeVisible()
   await expect(geographicEvidence.getByText('Demography', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('Mobility', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('Tourism', { exact: true })).toBeVisible()
