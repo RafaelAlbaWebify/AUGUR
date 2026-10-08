@@ -661,6 +661,7 @@ export default function OverviewPage({
 
           <div
             className={`geographyCoverageStrip ${geographyCoverage.total ? 'available' : 'empty'}`}
+            role="region"
             aria-label="Country geographic coverage summary"
           >
             <div>
