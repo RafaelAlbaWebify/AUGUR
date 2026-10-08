@@ -1339,6 +1339,32 @@ test('dynamic non-pilot country opens through the normal overview route', async 
   await expect(page.getByText('No integrated subnational source for this country yet')).toBeVisible()
 })
 
+test('Overview summarizes subnational coverage for a dynamic country', async ({ page }) => {
+  await page.goto('/country/AUS/overview')
+
+  const coverage = page.getByRole('region', { name: 'Country geographic coverage summary' })
+  await expect(coverage).toBeVisible()
+  await expect(coverage.getByText('4 geographies · 2 source systems')).toBeVisible()
+  await expect(coverage.getByText('Regions')).toBeVisible()
+  await expect(coverage.getByText('Cities')).toBeVisible()
+  await expect(coverage.getByText('FUA')).toBeVisible()
+  await expect(coverage.getByText('Series')).toBeVisible()
+  await expect(coverage.locator('dd').nth(0)).toHaveText('2')
+  await expect(coverage.locator('dd').nth(1)).toHaveText('1')
+  await expect(coverage.locator('dd').nth(2)).toHaveText('1')
+  await expect(coverage.locator('dd').nth(3)).toHaveText('4')
+})
+
+test('Overview makes missing subnational coverage explicit', async ({ page }) => {
+  await page.goto('/country/DEU/overview')
+
+  const coverage = page.getByRole('region', { name: 'Country geographic coverage summary' })
+  await expect(coverage).toBeVisible()
+  await expect(coverage.getByText('No integrated subnational evidence')).toBeVisible()
+  await expect(coverage.locator('dd')).toHaveCount(4)
+  await expect(coverage.locator('dd')).toHaveText(['0', '0', '0', '0'])
+})
+
 test('source-native OECD region can be selected without GISCO geometry', async ({ page }) => {
   await page.goto('/country/AUS/overview')
 
