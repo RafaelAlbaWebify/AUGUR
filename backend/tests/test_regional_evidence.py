@@ -492,7 +492,9 @@ def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
     assert result["geo_name"] == "New South Wales"
     assert result["geo_level"] == "tl2"
     assert result["source_ids"] == ["OECD"]
-    assert result["indicator_count"] == 8
+    assert result["indicator_count"] == len(
+        regional_module.OECD_TL_EXPECTED_INDICATORS
+    )
     assert result["available_count"] == 1
     assert result["complete"] is False
     density = next(
@@ -521,6 +523,8 @@ def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
     }
     assert "regional_population" in unavailable
     assert "regional_employment_to_population_ratio" in unavailable
+    assert "regional_homicide_rate_per_100k" in unavailable
+    assert "regional_motor_vehicle_theft_rate_per_100k" in unavailable
     assert result["sector_structure"]["status"] == "unavailable"
     assert result["environmental_health"]["status"] == "unavailable"
     assert any(
