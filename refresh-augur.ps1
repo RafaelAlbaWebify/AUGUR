@@ -118,7 +118,11 @@ if (-not $SkipSync) {
     $OecdUrbanGeometryCode = Invoke-Step "Synchronize OECD urban boundary geometry" {
         Push-Location (Join-Path $Root "backend")
         try {
-            & $BackendPython -m scripts.sync_oecd_fua_geometry
+            $OecdGeometryArgs = @("-m", "scripts.sync_oecd_fua_geometry")
+            if ($ForceOecdRefresh) {
+                $OecdGeometryArgs += "--force"
+            }
+            & $BackendPython @OecdGeometryArgs
         }
         finally {
             Pop-Location
