@@ -572,8 +572,16 @@ def test_regional_cache_is_namespaced_by_geography_system(monkeypatch):
         geography_system="ISO_3166_2",
     )
 
-    assert oecd["indicators"][0]["value"] == 10.0
-    assert other["indicators"][0]["value"] == 20.0
+    oecd_density = next(
+        item for item in oecd["indicators"]
+        if item["indicator_id"] == "regional_population_density"
+    )
+    other_density = next(
+        item for item in other["indicators"]
+        if item["indicator_id"] == "regional_population_density"
+    )
+    assert oecd_density["value"] == 10.0
+    assert other_density["value"] == 20.0
     assert calls == [
         ("X1", "OECD_TL_2024"),
         ("X1", "ISO_3166_2"),
