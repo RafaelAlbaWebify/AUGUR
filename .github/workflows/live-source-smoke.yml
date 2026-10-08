@@ -26,8 +26,6 @@ on:
       - "backend/scripts/inspect_oecd_regional_labour.py"
       - "backend/scripts/inspect_oecd_regional_gdp.py"
       - "backend/scripts/inspect_oecd_regional_income.py"
-      - "backend/scripts/inspect_oecd_regional_broadband.py"
-      - "backend/scripts/inspect_oecd_regional_land_temperature.py"
       - "backend/app/ingestion/world_bank.py"
       - "backend/app/ingestion/imf.py"
       - "backend/app/ingestion/un_wpp.py"
@@ -93,12 +91,6 @@ jobs:
           python -m scripts.sync_oecd_regional
           --countries AUS
           --start-year 2021
-
-      - name: Inspect OECD regional broadband
-        run: python -m scripts.inspect_oecd_regional_broadband
-
-      - name: Inspect OECD regional land surface temperature
-        run: python -m scripts.inspect_oecd_regional_land_temperature
 
       - name: Sync representative OECD non-EU urban evidence
         run: >-
