@@ -379,8 +379,8 @@ async function mockApi(page: Page) {
           geo_level: isFua ? 'fua' : 'city',
           source: 'AUGUR local store · OECD urban statistics',
           source_ids: ['OECD'],
-          indicator_count: isFua ? 8 : 5,
-          available_count: isFua ? 8 : 5,
+          indicator_count: isFua ? 17 : 9,
+          available_count: isFua ? 17 : 9,
           complete: true,
           indicators: [
             {
@@ -438,6 +438,50 @@ async function mockApi(page: Page) {
               source_id: 'OECD',
               history: [],
             },
+            {
+              indicator_id: 'urban_commute_car_share',
+              name: 'Commute share by car',
+              status: 'available',
+              period: 2021,
+              value: isFua ? 61.0 : 52.0,
+              unit: 'percent',
+              dataset_id: 'DSD_FUA_TRAN@DF_TRAN_COMMUT',
+              source_id: 'OECD',
+              history: [],
+            },
+            {
+              indicator_id: 'urban_commute_public_transport_share',
+              name: 'Commute share by public transport',
+              status: 'available',
+              period: 2021,
+              value: isFua ? 20.0 : 25.0,
+              unit: 'percent',
+              dataset_id: 'DSD_FUA_TRAN@DF_TRAN_COMMUT',
+              source_id: 'OECD',
+              history: [],
+            },
+            {
+              indicator_id: 'urban_commute_bicycle_share',
+              name: 'Commute share by bicycle',
+              status: 'available',
+              period: 2021,
+              value: isFua ? 1.2 : 1.0,
+              unit: 'percent',
+              dataset_id: 'DSD_FUA_TRAN@DF_TRAN_COMMUT',
+              source_id: 'OECD',
+              history: [],
+            },
+            {
+              indicator_id: 'urban_commute_walk_share',
+              name: 'Commute share by walking',
+              status: 'available',
+              period: 2021,
+              value: isFua ? 3.7 : 4.0,
+              unit: 'percent',
+              dataset_id: 'DSD_FUA_TRAN@DF_TRAN_COMMUT',
+              source_id: 'OECD',
+              history: [],
+            },
             ...(isFua ? [
               {
                 indicator_id: 'urban_employment_to_population_ratio',
@@ -469,6 +513,61 @@ async function mockApi(page: Page) {
                 value: 3.8,
                 unit: 'percent',
                 dataset_id: 'DSD_FUA_LAB@DF_LABOUR',
+                source_id: 'OECD',
+                history: [],
+              },
+              {
+                indicator_id: 'urban_public_transport_access_5min',
+                name: 'Population within 5 min walk of public transport',
+                status: 'available',
+                period: 2023,
+                value: 82.9,
+                unit: 'percent',
+                dataset_id: 'DSD_FUA_TRAN@DF_PT_ACCESS',
+                source_id: 'OECD',
+                history: [],
+              },
+              {
+                indicator_id: 'urban_public_transport_access_10min',
+                name: 'Population within 10 min walk of public transport',
+                status: 'available',
+                period: 2023,
+                value: 96.5,
+                unit: 'percent',
+                dataset_id: 'DSD_FUA_TRAN@DF_PT_ACCESS',
+                source_id: 'OECD',
+                history: [],
+              },
+              {
+                indicator_id: 'urban_public_transport_access_15min',
+                name: 'Population within 15 min walk of public transport',
+                status: 'available',
+                period: 2023,
+                value: 98.5,
+                unit: 'percent',
+                dataset_id: 'DSD_FUA_TRAN@DF_PT_ACCESS',
+                source_id: 'OECD',
+                history: [],
+              },
+              {
+                indicator_id: 'urban_green_area_per_capita_m2',
+                name: 'Green area per resident',
+                status: 'available',
+                period: 2021,
+                value: 146.0,
+                unit: 'm2_per_person',
+                dataset_id: 'DSD_FUA_ENV@DF_GREEN_AREA',
+                source_id: 'OECD',
+                history: [],
+              },
+              {
+                indicator_id: 'urban_green_area_share',
+                name: 'Green area share',
+                status: 'available',
+                period: 2021,
+                value: 47.3,
+                unit: 'percent',
+                dataset_id: 'DSD_FUA_ENV@DF_GREEN_AREA',
                 source_id: 'OECD',
                 history: [],
               },
@@ -1451,6 +1550,8 @@ test('source-native OECD urban area can be selected separately from regions', as
   await expect(geographicEvidence.getByText('2,376 /km²')).toBeVisible()
   await expect(geographicEvidence.getByText('Total dependency ratio', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('48.4%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Commute share by public transport')).toBeVisible()
+  await expect(geographicEvidence.getByText('25.0%')).toBeVisible()
   await expect(geographicEvidence.getByText(/OECD urban statistics/)).toBeVisible()
   await expect(geographicEvidence.getByText('Unemployment rate, ages 15–64')).toHaveCount(0)
 
@@ -1464,6 +1565,14 @@ test('source-native OECD urban area can be selected separately from regions', as
   await expect(geographicEvidence.getByText('78.8%')).toBeVisible()
   await expect(geographicEvidence.getByText('Unemployment rate, ages 15–64')).toBeVisible()
   await expect(geographicEvidence.getByText('3.8%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Population within 10 min walk of public transport')).toBeVisible()
+  await expect(geographicEvidence.getByText('96.5%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Commute share by public transport')).toBeVisible()
+  await expect(geographicEvidence.getByText('20.0%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Green area per resident')).toBeVisible()
+  await expect(geographicEvidence.getByText('146 m²/person')).toBeVisible()
+  await expect(geographicEvidence.getByText('Green area share')).toBeVisible()
+  await expect(geographicEvidence.getByText('47.3%')).toBeVisible()
 })
 
 test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
