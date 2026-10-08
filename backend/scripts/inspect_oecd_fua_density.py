@@ -102,6 +102,8 @@ def main() -> int:
                 "reference": row.get("REF_AREA"),
                 "name": row.get("Reference area"),
                 "frequency": row.get("FREQ"),
+                "level": row.get("TERRITORIAL_LEVEL"),
+                "level_label": row.get("Territorial level"),
                 "measure": row.get("MEASURE"),
                 "unit": row.get("UNIT_MEASURE"),
                 "time": row.get("TIME_PERIOD"),
