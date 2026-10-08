@@ -54,7 +54,7 @@ def test_normalize_fua_density_can_filter_non_eu_oecd_targets():
         rows = adapter.normalize_density(
             FUA_CSV,
             countries=COUNTRIES,
-            allowed_country_iso3={"AUS", "CAN"},
+            allowed_country_iso3={"AUS", "JPN"},
         )
     finally:
         adapter.close()
@@ -106,7 +106,7 @@ def test_sync_fua_density_persists_history(monkeypatch):
     assert result["rows"] == 2
     assert result["country_count"] == 1
     assert result["covered_countries"] == ["AUS"]
-    assert result["missing_countries"] == ["CAN"]
+    assert result["missing_countries"] == ["JPN"]
     assert result["complete"] is False
     assert result["geography_count"] == 2
     assert result["city_count"] == 1
