@@ -175,6 +175,9 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_unemployment_rate_oecd": {
         "name": "Unemployment rate, ages 15–64",
     },
+    "regional_gdp_per_capita_ppp_usd": {
+        "name": "GDP per capita, constant PPP USD",
+    },
     "urban_population": {
         "name": "Population",
     },
