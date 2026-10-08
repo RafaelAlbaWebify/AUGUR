@@ -192,6 +192,14 @@ CREATE TABLE IF NOT EXISTS geography_registry (
     longitude DOUBLE
 );
 
+CREATE TABLE IF NOT EXISTS provider_access_state (
+    state_key VARCHAR PRIMARY KEY,
+    status VARCHAR NOT NULL,
+    last_attempt_at TIMESTAMP NOT NULL,
+    retry_after_at TIMESTAMP,
+    detail VARCHAR
+);
+
 CREATE TABLE IF NOT EXISTS geography_geometries (
     geo_id VARCHAR PRIMARY KEY,
     country_iso3 VARCHAR,
@@ -2693,6 +2701,67 @@ def geography_coverage_status() -> dict:
             }),
             "coverage": items,
         }
+    finally:
+        con.close()
+
+
+def provider_access_state(state_key: str) -> dict | None:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            """
+            SELECT
+                state_key,
+                status,
+                last_attempt_at,
+                retry_after_at,
+                detail
+            FROM provider_access_state
+            WHERE state_key = ?
+            LIMIT 1
+            """,
+            [state_key],
+        )
+        row = result.fetchone()
+        if row is None:
+            return None
+        columns = [column[0] for column in result.description]
+        return dict(zip(columns, row))
+    finally:
+        con.close()
+
+
+def record_provider_access_state(
+    state_key: str,
+    status: str,
+    *,
+    retry_after_at=None,
+    detail: str | None = None,
+) -> None:
+    from datetime import datetime, timezone
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.execute(
+            """
+            INSERT OR REPLACE INTO provider_access_state
+            (
+                state_key,
+                status,
+                last_attempt_at,
+                retry_after_at,
+                detail
+            )
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            [
+                state_key,
+                status,
+                datetime.now(timezone.utc),
+                retry_after_at,
+                detail,
+            ],
+        )
     finally:
         con.close()
 
