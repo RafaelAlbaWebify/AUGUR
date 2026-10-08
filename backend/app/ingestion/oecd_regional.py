@@ -43,7 +43,18 @@ DEMOGRAPHY_DEFAULT_KEY = (
     "INMIG+OUTMIG+NETMOB+MORT_STANDARD_RATIO"
     "._T._T."
 )
-LABOUR_DEFAULT_KEY = "A.TL2+TL3...EMP_RATIO.Y15T64._T."
+LABOUR_DEFAULT_KEY = "A.TL2+TL3...EMP_RATIO+UNE_RATE.Y15T64._T."
+
+LABOUR_METRICS = {
+    ("EMP_RATIO", "PT_POP_SUB"): {
+        "indicator_id": "regional_employment_to_population_ratio",
+        "unit": "percent",
+    },
+    ("UNE_RATE", "PT_LF_SUB"): {
+        "indicator_id": "regional_unemployment_rate_oecd",
+        "unit": "percent",
+    },
+}
 
 DEMOGRAPHY_METRICS = {
     ("INMIG", "PT_POP"): {
@@ -639,13 +650,14 @@ class OECDRegionalAdapter:
             level = str(record.get("TERRITORIAL_LEVEL") or "").upper()
             if level not in {"TL2", "TL3"}:
                 continue
-            if str(record.get("MEASURE") or "").upper() != "EMP_RATIO":
+            measure = str(record.get("MEASURE") or "").upper()
+            unit_code = str(record.get("UNIT_MEASURE") or "").upper()
+            metric = LABOUR_METRICS.get((measure, unit_code))
+            if metric is None:
                 continue
             if str(record.get("AGE") or "").upper() != "Y15T64":
                 continue
             if str(record.get("SEX") or "").upper() not in {"_T", "T", "TOTAL"}:
-                continue
-            if str(record.get("UNIT_MEASURE") or "").upper() != "PT_POP_SUB":
                 continue
 
             geo_code = str(record.get("REF_AREA") or "").upper()
@@ -669,10 +681,10 @@ class OECDRegionalAdapter:
                 "geo_code": geo_code,
                 "geo_name": _reference_name(record, geo_code),
                 "geo_level": level.lower(),
-                "indicator_id": "regional_employment_to_population_ratio",
+                "indicator_id": metric["indicator_id"],
                 "period": int(period),
                 "value": value,
-                "unit": "percent",
+                "unit": metric["unit"],
                 "source_id": SOURCE_ID,
                 "dataset_id": LABOUR_DATASET_ID,
                 "retrieved_at": retrieved_at,
