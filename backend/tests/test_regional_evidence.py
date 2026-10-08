@@ -641,3 +641,55 @@ def test_oecd_fua_local_evidence_exposes_expected_missing_metrics(monkeypatch):
         item["source_id"] == "OECD"
         for item in result["indicators"]
     )
+
+
+def test_oecd_fua_level_adds_labour_and_transport_expectations(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "regional_evidence_bundle",
+        lambda code, max_history_points=8, geography_system=None: {
+            "latest": [
+                {
+                    "geography_system": "OECD_FUA",
+                    "geo_code": "AUS01F",
+                    "geo_name": "Greater Sydney",
+                    "geo_level": "fua",
+                    "indicator_id": "urban_population_density",
+                    "period": 2020,
+                    "value": 421.0,
+                    "unit": "people_per_km2",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_FUA_TERR@DF_DENSITY",
+                    "retrieved_at": None,
+                    "source_updated_at": "1.1",
+                }
+            ],
+            "history": [],
+            "sectors": [],
+            "environmental_health": [],
+        },
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    result = regional_evidence(
+        "AUS01F",
+        geography_system="OECD_FUA",
+    )
+
+    assert result["geo_level"] == "fua"
+    assert result["indicator_count"] == 11
+    assert result["available_count"] == 1
+
+    unavailable = {
+        item["indicator_id"]
+        for item in result["indicators"]
+        if item["status"] == "unavailable"
+    }
+    assert {
+        "urban_employment_to_population_ratio",
+        "urban_labour_force_participation_rate",
+        "urban_unemployment_rate",
+        "urban_public_transport_access_5min",
+        "urban_public_transport_access_10min",
+        "urban_public_transport_access_15min",
+    }.issubset(unavailable)
