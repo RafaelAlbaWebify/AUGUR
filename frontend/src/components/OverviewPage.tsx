@@ -1119,8 +1119,8 @@ export default function OverviewPage({
                           ))
                           .slice(0, 8)
                           .map((item) => {
-                            const current = item.regions[selectedRegion.id]
-                            const other = item.regions[comparisonTarget]
+                            const current = item.regions[selectedRegion.id]!
+                            const other = item.regions[comparisonTarget]!
                             return (
                               <article key={item.indicator_id}>
                                 <span>{item.name}</span>
@@ -1140,7 +1140,7 @@ export default function OverviewPage({
                   </div>
                 ) : null}
                 <p className="geoEvidenceScope">
-                  Regional evidence stays separate from the national Country Radar.
+                  Subnational evidence stays separate from the national Country Radar.
                 </p>
               </div>
             )}
