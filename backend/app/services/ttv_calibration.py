@@ -827,8 +827,7 @@ def calibration_status() -> dict:
                     "weekly_study_hours": [],
                 },
                 "holdout_acceptance": evaluate_holdout_acceptance([]),
-                "holdout_acceptance": evaluate_holdout_acceptance([]),
-            "externally_calibrated": False,
+                "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
                 ],
