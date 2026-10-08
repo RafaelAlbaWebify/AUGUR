@@ -448,8 +448,12 @@ export default function OverviewPage({
     const controller = new AbortController()
     setRegionalEvidenceState('loading')
 
+    const evidencePath = selectedRegion.system === 'NUTS_2024'
+      ? `${apiBase}/api/regions/${selectedRegion.id}/evidence?system=NUTS_2024`
+      : `${apiBase}/api/geographies/${selectedRegion.id}/evidence?system=${encodeURIComponent(selectedRegion.system)}`
+
     fetch(
-      `${apiBase}/api/regions/${selectedRegion.id}/evidence?system=${encodeURIComponent(selectedRegion.system)}`,
+      evidencePath,
       { signal: controller.signal },
     )
       .then((response) => {
