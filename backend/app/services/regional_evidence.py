@@ -178,6 +178,9 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_gdp_per_capita_ppp_usd": {
         "name": "GDP per capita, constant PPP USD",
     },
+    "regional_disposable_income_ppp_usd": {
+        "name": "Disposable income per capita, constant PPP USD",
+    },
     "urban_population": {
         "name": "Population",
     },
