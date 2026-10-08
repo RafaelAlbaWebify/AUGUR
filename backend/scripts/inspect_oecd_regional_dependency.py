@@ -9,10 +9,10 @@ import httpx
 
 SOURCE_ID = "OECD"
 DATASET_ID = "DSD_REG_DEMO@DF_DEMO"
-DATASET_VERSION = "2.4"
+DATASET_VERSION = "2.0"
 URL = (
     "https://sdmx.oecd.org/public/rest/data/"
-    "OECD.CFE.EDS,DSD_REG_DEMO@DF_DEMO,2.4/"
+    "OECD.CFE.EDS,DSD_REG_DEMO@DF_DEMO,2.0/"
     "A..AU1+AU2..DEPEND_RATIO._T._T."
 )
 PARAMS = {
