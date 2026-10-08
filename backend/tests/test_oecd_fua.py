@@ -247,3 +247,76 @@ def test_sync_fua_dependency_persists_selected_ratios(monkeypatch):
         "urban_total_dependency_ratio",
         "urban_youth_dependency_ratio",
     ]
+
+
+LABOUR_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,MEASURE,Measure,UNIT_MEASURE,Unit of measure,AGE,Age,TERRITORIAL_LEVEL,Territorial level,TIME_PERIOD,OBS_VALUE
+dataflow,AUS01F,Greater Sydney,A,EMP_RATIO,Employment to population ratio,PT_POP_SUB,Percentage of population in the same subgroup,Y15T64,15-64,FUA,FUA,2023,75.8
+dataflow,AUS01F,Greater Sydney,A,LF_RATE,Labour force participation rate,PT_POP_SUB,Percentage of population in the same subgroup,Y15T64,15-64,FUA,FUA,2023,78.8
+dataflow,AUS01F,Greater Sydney,A,UNE_RATE,Unemployment rate,PT_LF_SUB,Percentage of labour force in the same subgroup,Y15T64,15-64,FUA,FUA,2023,3.8
+dataflow,AUS02F,Greater Melbourne,A,EMP_RATIO,Employment to population ratio,PT_POP_SUB,Percentage of population in the same subgroup,Y15T64,15-64,FUA,FUA,2023,74.9
+dataflow,AUS01C,Greater Sydney,A,UNE_RATE,Unemployment rate,PT_LF_SUB,Percentage of labour force in the same subgroup,Y15T64,15-64,CITY,City,2023,3.5
+dataflow,AT001F,Vienna,A,UNE_RATE,Unemployment rate,PT_LF_SUB,Percentage of labour force in the same subgroup,Y15T64,15-64,FUA,FUA,2023,6.0
+"""
+
+
+def test_normalize_fua_labour_keeps_comparable_rates_only():
+    adapter = OECDFUAAdapter(client=None)
+    try:
+        rows = adapter.normalize_labour(
+            LABOUR_CSV,
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 4
+    assert all(row["geo_level"] == "fua" for row in rows)
+    assert all(row["unit"] == "percent" for row in rows)
+    assert all(row["geo_code"] != "AUS01C" for row in rows)
+
+    sydney = {
+        row["indicator_id"]: row
+        for row in rows
+        if row["geo_code"] == "AUS01F"
+    }
+    assert sydney["urban_employment_to_population_ratio"]["value"] == 75.8
+    assert sydney["urban_labour_force_participation_rate"]["value"] == 78.8
+    assert sydney["urban_unemployment_rate"]["value"] == 3.8
+
+
+def test_sync_fua_labour_persists_rate_history(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDFUAAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_labour",
+        lambda **kwargs: LABOUR_CSV,
+    )
+
+    try:
+        result = adapter.sync_labour(
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS", "CAN"},
+            start_year=2021,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 4
+    assert result["country_count"] == 1
+    assert result["covered_countries"] == ["AUS"]
+    assert result["missing_countries"] == ["CAN"]
+    assert result["complete"] is False
+    assert result["fua_count"] == 2
+    assert result["indicator_ids"] == [
+        "urban_employment_to_population_ratio",
+        "urban_labour_force_participation_rate",
+        "urban_unemployment_rate",
+    ]
