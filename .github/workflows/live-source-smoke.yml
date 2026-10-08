@@ -17,6 +17,7 @@ on:
       - "backend/scripts/inspect_oecd_fua_dependency.py"
       - "backend/scripts/inspect_oecd_fua_labour.py"
       - "backend/scripts/inspect_oecd_fua_economy.py"
+      - "backend/scripts/inspect_oecd_fua_public_transport.py"
       - "backend/scripts/inspect_oecd_regional_demography.py"
       - "backend/scripts/inspect_oecd_regional_population.py"
       - "backend/scripts/inspect_oecd_regional_labour.py"
@@ -121,6 +122,9 @@ jobs:
 
       - name: Inspect OECD Australia FUA labour productivity
         run: python -m scripts.inspect_oecd_fua_economy
+
+      - name: Inspect OECD Australia FUA public transport access
+        run: python -m scripts.inspect_oecd_fua_public_transport
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
