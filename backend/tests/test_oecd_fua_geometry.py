@@ -194,3 +194,43 @@ def test_geometry_fetch_classifies_oecd_access_restriction():
             module.CITY_BOUNDARIES_URL,
             client=Client(),
         )
+
+
+def test_geometry_sync_command_defers_during_access_backoff(
+    monkeypatch,
+    capsys,
+):
+    from datetime import datetime, timedelta, timezone
+    from scripts import sync_oecd_fua_geometry as command
+
+    monkeypatch.setattr(command, "initialize_datastores", lambda: None)
+    monkeypatch.setattr(command, "_targets", lambda requested: {"AUS"})
+    monkeypatch.setattr(
+        command,
+        "provider_access_state",
+        lambda key: {
+            "state_key": key,
+            "status": "source_access_restricted",
+            "last_attempt_at": datetime.now(timezone.utc),
+            "retry_after_at": datetime.now(timezone.utc) + timedelta(hours=5),
+            "detail": "HTTP 403",
+        },
+    )
+
+    def unexpected_sync(*args, **kwargs):
+        raise AssertionError("Backoff must prevent a geometry network retry")
+
+    monkeypatch.setattr(
+        command,
+        "sync_oecd_fua_geometries_for_countries",
+        unexpected_sync,
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        ["sync_oecd_fua_geometry"],
+    )
+
+    assert command.main() == 0
+    output = capsys.readouterr().out
+    assert '"status": "provider_retry_deferred"' in output
+    assert '"provider_status": "source_access_restricted"' in output
