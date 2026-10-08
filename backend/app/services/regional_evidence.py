@@ -169,6 +169,9 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_age_adjusted_mortality_per_1000": {
         "name": "Age-adjusted mortality rate",
     },
+    "regional_employment_to_population_ratio": {
+        "name": "Employment-to-population ratio, ages 15–64",
+    },
     "urban_population": {
         "name": "Population",
     },
