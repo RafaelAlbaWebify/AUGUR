@@ -20,11 +20,12 @@ def _local_history_stub(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "regional_evidence_bundle",
-        lambda code, max_history_points=8: {
+        lambda code, max_history_points=8, geography_system=None: {
             "latest": regional_module.latest_subnational_observations(code),
             "history": regional_module.subnational_indicator_series(
                 code,
                 max_points=max_history_points,
+                geography_system=geography_system,
             ),
             "sectors": regional_module.latest_regional_sector_employment_for_geo(code),
             "environmental_health": regional_module.latest_environmental_health_burden_for_geo(code),
@@ -80,8 +81,20 @@ def test_regional_comparison_keeps_region_codes_separate():
     )
 
     assert result["regions"] == [
-        {"geo_code": "ES11", "geo_level": "nuts2"},
-        {"geo_code": "PT11", "geo_level": "nuts2"},
+        {
+            "geo_code": "ES11",
+            "geo_name": None,
+            "geo_level": "nuts2",
+            "source": None,
+            "source_ids": [],
+        },
+        {
+            "geo_code": "PT11",
+            "geo_name": None,
+            "geo_level": "nuts2",
+            "source": None,
+            "source_ids": [],
+        },
     ]
     assert result["indicator_count"] == len(REGIONAL_INDICATORS)
     for indicator in result["indicators"]:
@@ -165,7 +178,7 @@ def test_regional_evidence_exposes_sector_structure(monkeypatch):
 
 
 def test_regional_comparison_includes_sector_structure(monkeypatch):
-    def fake_region(code, adapter=None):
+    def fake_region(code, adapter=None, geography_system=None):
         share = 8.0 if code == "ES11" else 5.0
         return {
             "geo_code": code,
@@ -423,9 +436,10 @@ def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "regional_evidence_bundle",
-        lambda code, max_history_points=8: {
+        lambda code, max_history_points=8, geography_system=None: {
             "latest": [
                 {
+                    "geography_system": "OECD_TL_2024",
                     "geo_code": "AU1",
                     "geo_name": "New South Wales",
                     "geo_level": "tl2",
@@ -469,7 +483,10 @@ def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
     )
     regional_module._REGIONAL_CACHE.clear()
 
-    result = regional_evidence("AU1")
+    result = regional_evidence(
+        "AU1",
+        geography_system="OECD_TL_2024",
+    )
 
     assert result["geo_code"] == "AU1"
     assert result["geo_name"] == "New South Wales"
@@ -501,3 +518,54 @@ def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
         "not treated as interchangeable" in note
         for note in result["notes"]
     )
+
+
+
+def test_regional_cache_is_namespaced_by_geography_system(monkeypatch):
+    calls = []
+
+    def fake_bundle(code, max_history_points=8, geography_system=None):
+        calls.append((code, geography_system))
+        value = 10.0 if geography_system == "OECD_TL_2024" else 20.0
+        return {
+            "latest": [{
+                "geography_system": geography_system,
+                "geo_code": code,
+                "geo_name": "Example",
+                "geo_level": "tl2",
+                "indicator_id": "regional_population_density",
+                "period": 2024,
+                "value": value,
+                "unit": "people_per_km2",
+                "source_id": "OECD" if geography_system == "OECD_TL_2024" else "TEST",
+                "dataset_id": "example",
+                "retrieved_at": None,
+                "source_updated_at": None,
+            }],
+            "history": [],
+            "sectors": [],
+            "environmental_health": [],
+        }
+
+    monkeypatch.setattr(
+        regional_module,
+        "regional_evidence_bundle",
+        fake_bundle,
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    oecd = regional_evidence(
+        "X1",
+        geography_system="OECD_TL_2024",
+    )
+    other = regional_evidence(
+        "X1",
+        geography_system="ISO_3166_2",
+    )
+
+    assert oecd["indicators"][0]["value"] == 10.0
+    assert other["indicators"][0]["value"] == 20.0
+    assert calls == [
+        ("X1", "OECD_TL_2024"),
+        ("X1", "ISO_3166_2"),
+    ]
