@@ -16,6 +16,7 @@ from app.ingestion.oecd_fua import (
     DEPENDENCY_DEFAULT_KEY,
     LABOUR_DEFAULT_KEY,
     TRANSPORT_DEFAULT_KEY,
+    COMMUTE_DEFAULT_KEY,
     OECDFUAAdapter,
 )
 from app.ingestion.world_bank import WorldBankAdapter
@@ -96,6 +97,11 @@ def main() -> int:
         default=TRANSPORT_DEFAULT_KEY,
         help="Optional OECD FUA public-transport-access SDMX key.",
     )
+    parser.add_argument(
+        "--commute-key",
+        default=COMMUTE_DEFAULT_KEY,
+        help="Optional OECD city/FUA commute-mode SDMX key.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -148,6 +154,13 @@ def main() -> int:
             end_year=args.end_year,
             key=args.transport_key,
         )
+        commute = adapter.sync_commute(
+            countries=countries,
+            allowed_country_iso3=targets,
+            start_year=max(args.start_year, 2019),
+            end_year=args.end_year,
+            key=args.commute_key,
+        )
     finally:
         adapter.close()
 
@@ -157,6 +170,7 @@ def main() -> int:
         + dependency["rows"]
         + labour["rows"]
         + transport["rows"]
+        + commute["rows"]
     )
     datasets = {
         "density": density,
@@ -164,6 +178,7 @@ def main() -> int:
         "dependency": dependency,
         "labour": labour,
         "transport": transport,
+        "commute": commute,
     }
     complete = all(item["complete"] for item in datasets.values())
     missing_countries_by_dataset = {
