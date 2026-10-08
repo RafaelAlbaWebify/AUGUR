@@ -12,6 +12,7 @@ from app.db.bootstrap import initialize_datastores
 from app.ingestion.oecd_fua import (
     DEFAULT_KEY,
     POPULATION_DEFAULT_KEY,
+    DEPENDENCY_DEFAULT_KEY,
     OECDFUAAdapter,
 )
 from app.ingestion.world_bank import WorldBankAdapter
@@ -64,6 +65,11 @@ def main() -> int:
         default=POPULATION_DEFAULT_KEY,
         help="Optional OECD FUA population SDMX key.",
     )
+    parser.add_argument(
+        "--dependency-key",
+        default=DEPENDENCY_DEFAULT_KEY,
+        help="Optional OECD FUA dependency-ratio SDMX key.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -95,10 +101,17 @@ def main() -> int:
             end_year=args.end_year,
             key=args.population_key,
         )
+        dependency = adapter.sync_dependency(
+            countries=countries,
+            allowed_country_iso3=targets,
+            start_year=max(args.start_year, 2021),
+            end_year=args.end_year,
+            key=args.dependency_key,
+        )
     finally:
         adapter.close()
 
-    total_rows = density["rows"] + population["rows"]
+    total_rows = density["rows"] + population["rows"] + dependency["rows"]
     payload = {
         "source_id": "OECD",
         "geography_system": "OECD_FUA",
@@ -108,6 +121,7 @@ def main() -> int:
         "datasets": {
             "density": density,
             "population": population,
+            "dependency": dependency,
         },
         "geography_coverage": geography_coverage_status(),
     }
