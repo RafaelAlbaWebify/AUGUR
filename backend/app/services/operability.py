@@ -11,6 +11,7 @@ from app.db.analytics import (
     subnational_evidence_by_level_status,
     regional_sector_employment_status,
     environmental_health_burden_status,
+    geography_coverage_status,
 )
 from app.catalog import VALIDATION_COUNTRY_ISO3
 from app.esco_store import esco_status
@@ -62,6 +63,7 @@ def operability_status() -> dict:
     oja_imbalance = labour_oja_imbalance_eu27_status()
     subnational = subnational_evidence_status()
     subnational_levels = subnational_evidence_by_level_status()
+    geography_coverage = geography_coverage_status()
     for level_status in subnational_levels.values():
         age_days = _age_days(
             level_status.get("latest_retrieved_at"),
@@ -270,6 +272,7 @@ def operability_status() -> dict:
         "eu27_oja_imbalance_evidence": oja_imbalance,
         "subnational_evidence": subnational,
         "subnational_evidence_by_level": subnational_levels,
+        "geography_coverage": geography_coverage,
         "regional_sector_evidence": regional_sector,
         "environmental_health_evidence": environmental_health,
         "provider_coverage": provider_coverage,
@@ -289,7 +292,7 @@ def operability_status() -> dict:
             "Live-postings provider status is informational and does not block public-data operability until a provider is explicitly configured.",
             "NUTS2 labour evidence is regional context and does not imply occupation-specific regional demand unless the source explicitly supports it.",
             "NUTS2 sector-employment evidence describes regional economic structure, not vacancies or hiring probability.",
-            "Subnational operability reports NUTS2, NUTS3 and city evidence separately; absence at one level is not silently inferred from another.",
+            "Subnational operability retains legacy NUTS2/NUTS3/city summaries and also reports provider-neutral geography coverage by system and level.",
             "Product readiness is regression-gated on the validation-country set; newly discovered countries contribute to coverage without becoming global blockers.",
             "Subnational freshness is reported per geographic level and remains informational for national-analysis readiness.",
             "EEA PM2.5 attributable health-burden freshness is reported separately and remains optional for national-analysis readiness.",
