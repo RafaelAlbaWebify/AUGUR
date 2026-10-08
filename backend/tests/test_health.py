@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from app.api import routes as routes_module
 from app.main import app
 
 
@@ -123,9 +124,63 @@ def test_overview_series_endpoint_returns_observed_history():
         assert periods == sorted(periods)
 
 
-def test_region_comparison_rejects_mixed_nuts_levels():
+def test_region_comparison_rejects_mixed_geography_levels(monkeypatch):
+    monkeypatch.setattr(
+        routes_module,
+        "geography_records_by_source_codes",
+        lambda codes: [
+            {
+                "source_geo_code": "ES12",
+                "geography_system": "NUTS_2024",
+                "geo_level": "nuts2",
+            },
+            {
+                "source_geo_code": "ES120",
+                "geography_system": "NUTS_2024",
+                "geo_level": "nuts3",
+            },
+        ],
+    )
+
     with TestClient(app) as client:
         response = client.get("/api/regions/compare?regions=ES12,ES120")
 
     assert response.status_code == 400
-    assert response.json()["detail"] == "Regional comparison requires all regions to use the same NUTS level"
+    assert response.json()["detail"] == (
+        "Regional comparison requires the same geography system "
+        "and geographic level"
+    )
+
+
+def test_region_comparison_accepts_same_oecd_tl2_system(monkeypatch):
+    monkeypatch.setattr(
+        routes_module,
+        "geography_records_by_source_codes",
+        lambda codes: [
+            {
+                "source_geo_code": code,
+                "geography_system": "OECD_TL_2024",
+                "geo_level": "tl2",
+            }
+            for code in codes
+        ],
+    )
+    monkeypatch.setattr(
+        routes_module,
+        "regional_comparison",
+        lambda codes: {
+            "regions": [{"geo_code": code, "geo_level": "tl2"} for code in codes],
+            "indicator_count": 2,
+            "indicators": [],
+            "sector_comparison": {"status": "unavailable", "sectors": []},
+            "notes": [],
+        },
+    )
+
+    with TestClient(app) as client:
+        response = client.get("/api/regions/compare?regions=AU1,AU2")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["geography_system"] == "OECD_TL_2024"
+    assert body["geo_level"] == "tl2"
