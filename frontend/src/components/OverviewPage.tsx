@@ -301,6 +301,12 @@ function formatRegionalValue(value: number, unit?: string) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
+function selectedRegionLevelLabel(level: number | string | undefined) {
+  if (typeof level === 'number') return `NUTS ${level}`
+  if (!level) return 'REGIONAL'
+  return level
+}
+
 function regionalChangeLabel(points?: Array<{ period: number; value: number }>) {
   if (!points || points.length < 2) return null
   const previous = points[points.length - 2]
@@ -744,7 +750,7 @@ export default function OverviewPage({
             ) : (
               <div className="geoEvidenceCompact">
                 <div className="geoEvidenceStatus">
-                  <span>Eurostat regional statistics</span>
+                  <span>{regionalEvidence?.source ?? 'Regional evidence'}</span>
                   <strong>
                     {regionalEvidenceState === 'loading'
                       ? 'Loading regional evidence…'
@@ -752,7 +758,7 @@ export default function OverviewPage({
                         ? 'Regional evidence unavailable'
                         : regionalEvidence
                           ? regionalEvidence.available_count === 0
-                            ? 'No Eurostat series available for this regional code'
+                            ? 'No official regional series available for this geographic code'
                             : `${regionalEvidence.available_count}/${regionalEvidence.indicator_count} series available`
                           : 'Region selected'}
                   </strong>
@@ -770,7 +776,7 @@ export default function OverviewPage({
                         <small>
                           {indicator.status === 'available'
                             ? `${indicator.period} · ${indicator.dataset_id}`
-                            : 'Eurostat regional observation unavailable for this code'}
+                            : 'Official regional observation unavailable for this code'}
                         </small>
                       </article>
                     ))}
@@ -882,7 +888,7 @@ export default function OverviewPage({
             >
               <div className="countryMetricTop">
                 <span>{selectedRegion.name}</span>
-                <small>NUTS {selectedRegion.level}</small>
+                <small>{selectedRegionLevelLabel(selectedRegion.level)}</small>
               </div>
 
               <div className="countryMetricIdentity">
@@ -935,7 +941,7 @@ export default function OverviewPage({
             <article className="countryMetricCard regionalMetricCard unavailable">
               <div className="countryMetricTop">
                 <span>{selectedRegion.name}</span>
-                <small>NUTS {selectedRegion.level}</small>
+                <small>{selectedRegionLevelLabel(selectedRegion.level)}</small>
               </div>
               <strong className="countryMetricName">Loading regional evidence…</strong>
             </article>
@@ -945,7 +951,7 @@ export default function OverviewPage({
             <article className="countryMetricCard regionalMetricCard unavailable">
               <div className="countryMetricTop">
                 <span>{selectedRegion.name}</span>
-                <small>NUTS {selectedRegion.level}</small>
+                <small>{selectedRegionLevelLabel(selectedRegion.level)}</small>
               </div>
               <strong className="countryMetricName">Regional evidence unavailable</strong>
             </article>
