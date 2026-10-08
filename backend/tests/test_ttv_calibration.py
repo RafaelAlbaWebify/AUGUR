@@ -321,7 +321,7 @@ def test_development_case_defaults_to_exploratory_sample_role(
 def test_calibration_protocol_readiness_lists_unresolved_requirements():
     result = module.calibration_protocol_readiness()
 
-    assert result["protocol_state"] == "definitions_frozen_acceptance_pending"
+    assert result["protocol_state"] == "definitions_and_acceptance_frozen_protocol_pending"
     assert result["ready_for_holdout_collection"] is False
     assert result["blockers"] == ["protocol_version"]
     assert result["requirements"]["protocol_version"]["ready"] is False
