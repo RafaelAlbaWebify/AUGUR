@@ -1328,7 +1328,11 @@ def latest_environmental_health_burden_for_geo(
             WHERE rn = 1
             ORDER BY burden_type, unit_code
             """,
-            [geo_code.upper()],
+            [
+                geo_code.upper(),
+                geography_system,
+                geography_system,
+            ],
         )
         columns = [column[0] for column in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
@@ -2721,7 +2725,10 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
         con.close()
 
 
-def latest_subnational_observations(geo_code: str) -> list[dict]:
+def latest_subnational_observations(
+    geo_code: str,
+    geography_system: str | None = None,
+) -> list[dict]:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
         result = con.execute(
@@ -2734,9 +2741,11 @@ def latest_subnational_observations(geo_code: str) -> list[dict]:
                     ) AS rn
                 FROM subnational_observations
                 WHERE geo_code = ?
+                  AND (? IS NULL OR geography_system = ?)
             )
             SELECT
-                geo_code, geo_name, geo_level, indicator_id, period, value, unit,
+                geography_system, geo_code, geo_name, geo_level,
+                indicator_id, period, value, unit,
                 source_id, dataset_id, retrieved_at, source_updated_at
             FROM ranked
             WHERE rn = 1
@@ -2753,6 +2762,7 @@ def latest_subnational_observations(geo_code: str) -> list[dict]:
 def subnational_indicator_series(
     geo_code: str,
     max_points: int = 8,
+    geography_system: str | None = None,
 ) -> list[dict]:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
@@ -2766,15 +2776,22 @@ def subnational_indicator_series(
                     ) AS point_rank
                 FROM subnational_observations
                 WHERE geo_code = ?
+                  AND (? IS NULL OR geography_system = ?)
             )
             SELECT
-                geo_code, geo_name, geo_level, indicator_id, period, value, unit,
+                geography_system, geo_code, geo_name, geo_level,
+                indicator_id, period, value, unit,
                 source_id, dataset_id
             FROM recent
             WHERE point_rank <= ?
             ORDER BY indicator_id, period
             """,
-            [geo_code.upper(), max_points],
+            [
+                geo_code.upper(),
+                geography_system,
+                geography_system,
+                max_points,
+            ],
         )
         columns = [column[0] for column in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
@@ -2785,6 +2802,7 @@ def subnational_indicator_series(
 def city_evidence_bundle(
     city_code: str,
     max_history_points: int = 8,
+    geography_system: str | None = "URBAN_AUDIT_2024",
 ) -> dict:
     """Read interactive city evidence through one DuckDB connection."""
     code = city_code.upper()
@@ -2801,15 +2819,17 @@ def city_evidence_bundle(
                 FROM subnational_observations
                 WHERE geo_code = ?
                   AND LOWER(geo_level) = 'city'
+                  AND (? IS NULL OR geography_system = ?)
             )
             SELECT
-                geo_code, geo_level, indicator_id, period, value, unit,
+                geography_system, geo_code, geo_level,
+                indicator_id, period, value, unit,
                 source_id, dataset_id, retrieved_at, source_updated_at
             FROM ranked
             WHERE rn = 1
             ORDER BY indicator_id
             """,
-            [code],
+            [code, geography_system, geography_system],
         )
         latest_columns = [column[0] for column in latest_result.description]
         latest = [
@@ -2828,15 +2848,22 @@ def city_evidence_bundle(
                 FROM subnational_observations
                 WHERE geo_code = ?
                   AND LOWER(geo_level) = 'city'
+                  AND (? IS NULL OR geography_system = ?)
             )
             SELECT
-                geo_code, geo_level, indicator_id, period, value, unit,
+                geography_system, geo_code, geo_level,
+                indicator_id, period, value, unit,
                 source_id, dataset_id
             FROM recent
             WHERE point_rank <= ?
             ORDER BY indicator_id, period
             """,
-            [code, max_history_points],
+            [
+                code,
+                geography_system,
+                geography_system,
+                max_history_points,
+            ],
         )
         history_columns = [column[0] for column in history_result.description]
         history = [
@@ -2855,6 +2882,7 @@ def city_evidence_bundle(
 def regional_evidence_bundle(
     geo_code: str,
     max_history_points: int = 8,
+    geography_system: str | None = None,
 ) -> dict:
     """Read all interactive regional evidence through one DuckDB connection."""
     code = geo_code.upper()
@@ -2870,15 +2898,17 @@ def regional_evidence_bundle(
                     ) AS rn
                 FROM subnational_observations
                 WHERE geo_code = ?
+                  AND (? IS NULL OR geography_system = ?)
             )
             SELECT
-                geo_code, geo_level, indicator_id, period, value, unit,
+                geography_system, geo_code, geo_level,
+                indicator_id, period, value, unit,
                 source_id, dataset_id, retrieved_at, source_updated_at
             FROM ranked
             WHERE rn = 1
             ORDER BY indicator_id
             """,
-            [code],
+            [code, geography_system, geography_system],
         )
         latest_columns = [column[0] for column in latest_result.description]
         latest = [
@@ -2896,15 +2926,22 @@ def regional_evidence_bundle(
                     ) AS point_rank
                 FROM subnational_observations
                 WHERE geo_code = ?
+                  AND (? IS NULL OR geography_system = ?)
             )
             SELECT
-                geo_code, geo_level, indicator_id, period, value, unit,
+                geography_system, geo_code, geo_level,
+                indicator_id, period, value, unit,
                 source_id, dataset_id
             FROM recent
             WHERE point_rank <= ?
             ORDER BY indicator_id, period
             """,
-            [code, max_history_points],
+            [
+                code,
+                geography_system,
+                geography_system,
+                max_history_points,
+            ],
         )
         history_columns = [column[0] for column in history_result.description]
         history = [
