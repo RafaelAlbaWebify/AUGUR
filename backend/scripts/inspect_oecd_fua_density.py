@@ -47,10 +47,26 @@ def main() -> int:
 
     reader = csv.DictReader(io.StringIO(response.text))
     rows = list(reader)
+    city_name_tokens = (
+        "sydney",
+        "melbourne",
+        "brisbane",
+        "perth",
+        "adelaide",
+        "canberra",
+        "hobart",
+        "darwin",
+    )
     australian_rows = [
         row
         for row in rows
-        if str(row.get("COUNTRY") or "").upper() == "AUS"
+        if (
+            str(row.get("REF_AREA") or "").upper().startswith(("AU", "AUS"))
+            or any(
+                token in str(row.get("Reference area") or "").lower()
+                for token in city_name_tokens
+            )
+        )
     ]
     australian_refs = sorted({
         str(row.get("REF_AREA") or "")
@@ -64,6 +80,11 @@ def main() -> int:
         "australian_row_count": len(australian_rows),
         "australian_reference_count": len(australian_refs),
         "australian_reference_areas": australian_refs[:80],
+        "global_reference_sample": sorted({
+            str(row.get("REF_AREA") or "")
+            for row in rows
+            if row.get("REF_AREA")
+        })[:120],
         "measures": sorted({
             row.get("MEASURE")
             for row in australian_rows
