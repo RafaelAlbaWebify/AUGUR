@@ -1125,10 +1125,10 @@ test('source-native OECD region can be selected without GISCO geometry', async (
   const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
   await expect(geographicEvidence.getByText('TL2 EVIDENCE')).toBeVisible()
   await expect(geographicEvidence.locator('.radarPanelTopline strong')).toHaveText('New South Wales')
-  await expect(page.getByText('Population', { exact: true })).toBeVisible()
-  await expect(page.getByText('8,534,000')).toBeVisible()
-  await expect(page.getByText('Population density', { exact: true })).toBeVisible()
-  await expect(page.getByText('10.6 /km²')).toBeVisible()
+  await expect(geographicEvidence.getByText('Population', { exact: true })).toBeVisible()
+  await expect(geographicEvidence.getByText('8,534,000')).toBeVisible()
+  await expect(geographicEvidence.getByText('Population density', { exact: true })).toBeVisible()
+  await expect(geographicEvidence.getByText('10.6 /km²')).toBeVisible()
 })
 
 test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
@@ -2903,11 +2903,15 @@ test('city evidence is grouped into demography mobility tourism and environment'
   await expect(map).toHaveAttribute('data-map-status', 'ready')
 
   const zoomIn = page.locator('.leaflet-control-zoom-in')
-  for (let index = 0; index < 12; index += 1) {
+  await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(3)
+
+  while (Number(await map.getAttribute('data-map-zoom')) < 8.5) {
     await zoomIn.click()
+    await page.waitForTimeout(25)
   }
 
-  const cityMarker = page.locator('.leafletAugurMap .urbanAuditCity').first()
+  await expect.poll(async () => map.locator('.urbanAuditCity').count()).toBeGreaterThan(0)
+  const cityMarker = map.locator('.urbanAuditCity').first()
   await expect(cityMarker).toBeVisible()
   await cityMarker.click({ force: true })
 
