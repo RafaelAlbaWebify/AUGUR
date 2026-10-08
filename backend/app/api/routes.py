@@ -370,23 +370,70 @@ def city_evidence_get(city_code: str):
 
 
 @router.get("/regions/{geo_code}/evidence")
-def region_evidence_get(geo_code: str):
-    geo_code = geo_code.strip().upper()
-    supported_iso2 = {country["iso2"] for country in list_countries()}
+def region_evidence_get(
+    geo_code: str,
+    system: str | None = Query(
+        None,
+        description="Optional geography system, e.g. NUTS_2024 or OECD_TL_2024",
+    ),
+):
+    code = geo_code.strip().upper()
+    requested_system = system.strip().upper() if system else None
 
-    if geographic_level(geo_code) not in {"nuts2", "nuts3"}:
-        raise HTTPException(
-            status_code=400,
-            detail="Regional evidence currently supports NUTS 2 and NUTS 3 codes",
-        )
+    records = geography_records_by_source_codes([code])
+    if requested_system:
+        records = [
+            record
+            for record in records
+            if str(record["geography_system"]).upper() == requested_system
+        ]
 
-    if geo_code[:2] not in supported_iso2:
+    if not records:
+        # Compatibility fallback for pre-registry NUTS installations.
+        level = geographic_level(code)
+        supported_iso2 = {country["iso2"] for country in list_countries()}
+        if (
+            requested_system in {None, "NUTS_2024"}
+            and level in {"nuts2", "nuts3"}
+            and code[:2] in supported_iso2
+        ):
+            return regional_evidence(
+                code,
+                geography_system="NUTS_2024",
+            )
+
         raise HTTPException(
             status_code=404,
-            detail="Region is outside AUGUR's registered countries",
+            detail="Regional geography is not registered with analytical evidence",
         )
 
-    return regional_evidence(geo_code)
+    if len(records) > 1 and requested_system is None:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Regional source code is ambiguous across geography systems; "
+                "provide the system query parameter"
+            ),
+        )
+
+    record = records[0]
+    analyzable_countries = {
+        country["iso3"]
+        for country in list_countries()
+    }
+    if (
+        record.get("country_iso3")
+        and record["country_iso3"] not in analyzable_countries
+    ):
+        raise HTTPException(
+            status_code=404,
+            detail="Region belongs to a country without analytical coverage",
+        )
+
+    return regional_evidence(
+        code,
+        geography_system=str(record["geography_system"]),
+    )
 
 
 @router.get("/regions/compare")
@@ -474,7 +521,10 @@ def regions_compare_get(
             ),
         )
 
-    result = regional_comparison(requested)
+    result = regional_comparison(
+        requested,
+        geography_system=str(selected[0]["geography_system"]),
+    )
     result["geography_system"] = selected[0]["geography_system"]
     result["geo_level"] = selected[0]["geo_level"]
     return result
