@@ -344,11 +344,13 @@ export default function RegionalMap({
           },
         }).addTo(map)
 
+        const sourceNativeCollection: GeoJSON.FeatureCollection = {
+          type: 'FeatureCollection',
+          features: sourceNativeFeatures,
+        }
+
         const sourceNativeLayer = L.geoJSON(
-          {
-            type: 'FeatureCollection',
-            features: sourceNativeFeatures,
-          },
+          sourceNativeCollection,
           {
             style: (feature) => {
               const native = feature as SourceNativeFeature | undefined
