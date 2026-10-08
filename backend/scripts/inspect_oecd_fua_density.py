@@ -13,10 +13,10 @@ DATASET_VERSION = "1.1"
 URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_FUA_TERR@DF_DENSITY,1.1/"
-    "AU001F+AU001C.A.POP_DEN.."
+    ".A.POP_DEN.."
 )
 PARAMS = {
-    "startPeriod": "2018",
+    "startPeriod": "2020",
     "dimensionAtObservation": "AllDimensions",
     "format": "csvfilewithlabels",
 }
@@ -47,22 +47,31 @@ def main() -> int:
 
     reader = csv.DictReader(io.StringIO(response.text))
     rows = list(reader)
+    australian_rows = [
+        row
+        for row in rows
+        if str(row.get("COUNTRY") or "").upper() == "AUS"
+    ]
+    australian_refs = sorted({
+        str(row.get("REF_AREA") or "")
+        for row in australian_rows
+        if row.get("REF_AREA")
+    })
+
     diagnostics.update({
         "headers": reader.fieldnames or [],
         "row_count": len(rows),
-        "reference_areas": sorted({
-            row.get("REF_AREA")
-            for row in rows
-            if row.get("REF_AREA")
-        }),
+        "australian_row_count": len(australian_rows),
+        "australian_reference_count": len(australian_refs),
+        "australian_reference_areas": australian_refs[:80],
         "measures": sorted({
             row.get("MEASURE")
-            for row in rows
+            for row in australian_rows
             if row.get("MEASURE")
         }),
         "units": sorted({
             row.get("UNIT_MEASURE")
-            for row in rows
+            for row in australian_rows
             if row.get("UNIT_MEASURE")
         }),
         "sample_rows": [
@@ -76,13 +85,13 @@ def main() -> int:
                 "value": row.get("OBS_VALUE"),
                 "country": row.get("COUNTRY"),
             }
-            for row in rows[:12]
+            for row in australian_rows[:20]
         ],
-        "ready_for_parser_design": bool(rows),
+        "ready_for_parser_design": bool(australian_rows),
     })
 
     print(json.dumps(diagnostics, indent=2, default=str))
-    return 0 if rows else 2
+    return 0 if australian_rows else 2
 
 
 if __name__ == "__main__":
