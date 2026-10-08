@@ -80,7 +80,7 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert "infrastructure_ready" in body["ttv_calibration"]
     assert "externally_calibrated" in body["ttv_calibration"]
     assert "protocol_state" in body["ttv_calibration"]
-    assert body["ttv_calibration"]["protocol_state"] == "definitions_frozen_acceptance_pending"
+    assert body["ttv_calibration"]["protocol_state"] == "definitions_and_acceptance_frozen_protocol_pending"
     assert body["ttv_calibration"]["protocol_version"] is None
     assert body["ttv_calibration"]["protocol_ready_for_holdout"] is False
     assert "development_case_count" in body["ttv_calibration"]
@@ -90,7 +90,6 @@ def test_operability_endpoint_reports_readiness_and_blockers():
     assert body["ttv_calibration"]["protocol_readiness"]["ready_for_holdout_collection"] is False
     assert body["ttv_calibration"]["protocol_readiness"]["blockers"] == [
         "protocol_version",
-        "acceptance_criteria",
     ]
     assert "ready_for_versioning" in body["ttv_temporal_validation"]
     assert "gates" in body["ttv_temporal_validation"]
