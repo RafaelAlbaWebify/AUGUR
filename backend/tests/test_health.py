@@ -147,7 +147,7 @@ def test_region_comparison_rejects_mixed_geography_levels(monkeypatch):
 
     assert response.status_code == 400
     assert response.json()["detail"] == (
-        "Regional comparison requires the same geography system "
+        "Geographic comparison requires the same geography system "
         "and geographic level"
     )
 
@@ -250,3 +250,77 @@ def test_generic_geography_evidence_rejects_unregistered_system(monkeypatch):
         )
 
     assert response.status_code == 404
+
+
+def test_geography_comparison_accepts_same_oecd_city_level(monkeypatch):
+    monkeypatch.setattr(
+        routes_module,
+        "geography_records_by_source_codes",
+        lambda codes: [
+            {
+                "source_geo_code": code,
+                "geography_system": "OECD_FUA",
+                "geo_level": "city",
+            }
+            for code in codes
+        ],
+    )
+    monkeypatch.setattr(
+        routes_module,
+        "regional_comparison",
+        lambda codes, geography_system=None: {
+            "regions": [
+                {"geo_code": code, "geo_level": "city"}
+                for code in codes
+            ],
+            "indicator_count": 5,
+            "indicators": [],
+            "sector_comparison": {
+                "status": "unavailable",
+                "sectors": [],
+            },
+            "notes": [],
+        },
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/api/geographies/compare"
+            "?geographies=AUS01C,AUS02C"
+        )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["geography_system"] == "OECD_FUA"
+    assert body["geo_level"] == "city"
+
+
+def test_geography_comparison_rejects_city_fua_mix(monkeypatch):
+    monkeypatch.setattr(
+        routes_module,
+        "geography_records_by_source_codes",
+        lambda codes: [
+            {
+                "source_geo_code": "AUS01C",
+                "geography_system": "OECD_FUA",
+                "geo_level": "city",
+            },
+            {
+                "source_geo_code": "AUS01F",
+                "geography_system": "OECD_FUA",
+                "geo_level": "fua",
+            },
+        ],
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/api/geographies/compare"
+            "?geographies=AUS01C,AUS01F"
+        )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == (
+        "Geographic comparison requires the same geography system "
+        "and geographic level"
+    )
