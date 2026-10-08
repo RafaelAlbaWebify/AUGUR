@@ -492,7 +492,7 @@ def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
     assert result["geo_name"] == "New South Wales"
     assert result["geo_level"] == "tl2"
     assert result["source_ids"] == ["OECD"]
-    assert result["indicator_count"] == 7
+    assert result["indicator_count"] == 8
     assert result["available_count"] == 1
     assert result["complete"] is False
     density = next(
