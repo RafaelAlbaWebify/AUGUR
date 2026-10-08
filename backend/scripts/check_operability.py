@@ -205,6 +205,39 @@ def main() -> int:
         f"cefr_targets={context.get('target_cefr_levels', [])} "
         f"study_hours_per_week={context.get('weekly_study_hours', [])}"
     )
+    holdout_seal = calibration.get("holdout_seal") or {}
+    print(
+        "holdout_seal: "
+        f"sealed={holdout_seal.get('sealed', False)} "
+        f"cases={holdout_seal.get('case_count', 0)} "
+        f"countries={holdout_seal.get('country_count', 0)} "
+        f"sha256={holdout_seal.get('holdout_sha256')}"
+    )
+    holdout_acceptance = calibration.get("holdout_acceptance") or {}
+    print(
+        "holdout_acceptance: "
+        f"status={holdout_acceptance.get('status')} "
+        f"numerical_status={holdout_acceptance.get('numerical_status')} "
+        f"passed={holdout_acceptance.get('passed', False)} "
+        f"eligible_cases={holdout_acceptance.get('eligible_holdout_case_count', 0)}"
+    )
+    holdout_review = calibration.get("holdout_review") or {}
+    print(
+        "holdout_review: "
+        f"reviewed={holdout_review.get('reviewed', False)} "
+        f"representative={holdout_review.get('representative')} "
+        f"cohort_coverage_adequate={holdout_review.get('cohort_coverage_adequate')} "
+        f"reviewer={holdout_review.get('reviewer_label')}"
+    )
+    activation = calibration.get("activation_readiness") or {}
+    print(
+        "ttv_activation_readiness: "
+        f"ready={activation.get('ready_for_temporal_model_version', False)}"
+    )
+    if activation.get("blockers"):
+        print("ttv_activation_blockers:")
+        for blocker in activation["blockers"]:
+            print(f"  - {blocker}")
     print(
         "externally_calibrated: "
         f"{calibration['externally_calibrated']}"
