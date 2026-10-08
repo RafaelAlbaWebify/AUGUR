@@ -414,7 +414,31 @@ def validate_calibration_case(case: dict) -> dict:
         raise ValueError("observed_weeks must be >= 0")
 
     source_label = str(case.get("source_label") or "").strip() or None
+    start_event_at = str(case.get("start_event_at") or "").strip() or None
     observed_at = str(case.get("observed_at") or "").strip() or None
+
+    if sample_role == "holdout":
+        if not start_event_at:
+            raise ValueError("holdout cases require start_event_at")
+        if not observed_at:
+            raise ValueError("holdout cases require observed_at")
+
+        started = _parse_utc_timestamp(start_event_at, "start_event_at")
+        completed = _parse_utc_timestamp(observed_at, "observed_at")
+        if completed < started:
+            raise ValueError("observed_at must not be before start_event_at")
+
+        elapsed_weeks = (
+            completed - started
+        ).total_seconds() / (7 * 24 * 60 * 60)
+        if not math.isclose(
+            elapsed_weeks,
+            observed,
+            abs_tol=0.05,
+        ):
+            raise ValueError(
+                "observed_weeks does not match start_event_at → observed_at"
+            )
     stage_timings = _normalize_stage_timings(
         case.get("stage_timings_json")
         if "stage_timings_json" in case
@@ -436,6 +460,7 @@ def validate_calibration_case(case: dict) -> dict:
         "candidate_weeks_max": candidate_max,
         "observed_weeks": observed,
         "source_label": source_label,
+        "start_event_at": start_event_at,
         "observed_at": observed_at,
         "sample_role": sample_role,
         "start_event_definition_version": start_event_definition_version,
@@ -739,6 +764,8 @@ def _holdout_cases_for_seal() -> list[dict]:
                 candidate_weeks_min,
                 candidate_weeks_max,
                 observed_weeks,
+                start_event_at,
+                observed_at,
                 sample_role,
                 start_event_definition_version,
                 viability_outcome_definition_version,
@@ -872,6 +899,7 @@ def upsert_calibration_case(case: dict) -> dict:
                 candidate_weeks_max,
                 observed_weeks,
                 source_label,
+                start_event_at,
                 observed_at,
                 sample_role,
                 start_event_definition_version,
@@ -881,7 +909,7 @@ def upsert_calibration_case(case: dict) -> dict:
                 context_json,
                 imported_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 normalized["case_id"],
@@ -893,6 +921,7 @@ def upsert_calibration_case(case: dict) -> dict:
                 normalized["candidate_weeks_max"],
                 normalized["observed_weeks"],
                 normalized["source_label"],
+                normalized["start_event_at"],
                 normalized["observed_at"],
                 normalized["sample_role"],
                 normalized["start_event_definition_version"],
@@ -1290,6 +1319,7 @@ def calibration_status() -> dict:
                     candidate_weeks_max,
                     observed_weeks,
                     source_label,
+                    start_event_at,
                     observed_at,
                     sample_role,
                     start_event_definition_version,
@@ -1784,6 +1814,7 @@ def complete_calibration_observation(
             "candidate_weeks_max": row["candidate_weeks_max"],
             "observed_weeks": observed_weeks,
             "source_label": "local_opt_in_observed_ttv_v1",
+            "start_event_at": started.isoformat(),
             "observed_at": completed.isoformat(),
             "sample_role": "development",
             "start_event_definition_version": CALIBRATION_START_EVENT_DEFINITION_VERSION,
@@ -1896,6 +1927,8 @@ def export_development_calibration_package() -> dict:
                 candidate_weeks_min,
                 candidate_weeks_max,
                 observed_weeks,
+                start_event_at,
+                observed_at,
                 sample_role,
                 start_event_definition_version,
                 viability_outcome_definition_version,
