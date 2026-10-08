@@ -535,6 +535,15 @@ export default function OverviewPage({
 
   const seriesById = new Map(overviewSeries.map((item) => [item.indicator_id, item]))
 
+  const sourceNativeRegions = countryGeographies.filter((item) => (
+    !['NUTS_2024', 'URBAN_AUDIT_2024'].includes(item.geography_system)
+    && !['city', 'fua'].includes(item.geo_level.toLowerCase())
+  ))
+  const sourceNativeUrbanAreas = countryGeographies.filter((item) => (
+    item.geography_system !== 'URBAN_AUDIT_2024'
+    && ['city', 'fua'].includes(item.geo_level.toLowerCase())
+  ))
+
   const representative = RADAR_DOMAINS.map((domain) => {
     const preferred = domain.indicators
       .map((indicatorId) => currentIndicators.find((item) => item.indicator_id === indicatorId))
@@ -583,7 +592,10 @@ export default function OverviewPage({
             {selectedCity ? (
               <span className="countryRegionFocus">CITY · {selectedCity.name} · {selectedCity.code}</span>
             ) : selectedRegion ? (
-              <span className="countryRegionFocus">REGION · {selectedRegion.name} · {selectedRegion.id}</span>
+              <span className="countryRegionFocus">
+                {['CITY', 'FUA'].includes(String(selectedRegion.level).toUpperCase()) ? 'URBAN' : 'REGION'}
+                {' · '}{selectedRegion.name} · {selectedRegion.id}
+              </span>
             ) : null}
             <h3>{selectedCountryName.toUpperCase()}</h3>
             <p>{visual.summary ?? 'Country evidence is active. Regional metrics appear only where verified subnational sources exist.'}</p>
@@ -630,9 +642,7 @@ export default function OverviewPage({
             <div className="regionalMapState error">Regional map unavailable for this country.</div>
           )}
 
-          {countryGeographies.some(
-            (item) => !['NUTS_2024', 'URBAN_AUDIT_2024'].includes(item.geography_system),
-          ) ? (
+          {sourceNativeRegions.length ? (
             <div className="sourceNativeGeographyPicker">
               <div>
                 <span>AVAILABLE REGIONS</span>
@@ -642,14 +652,14 @@ export default function OverviewPage({
                 aria-label="Available source-native region"
                 value={
                   selectedRegion
-                    && countryGeographies.some(
+                    && sourceNativeRegions.some(
                       (item) => item.source_geo_code === selectedRegion.id,
                     )
                     ? selectedRegion.id
                     : ''
                 }
                 onChange={(event) => {
-                  const geography = countryGeographies.find(
+                  const geography = sourceNativeRegions.find(
                     (item) => item.source_geo_code === event.target.value,
                   )
                   if (!geography) {
@@ -666,15 +676,54 @@ export default function OverviewPage({
                 }}
               >
                 <option value="">Select a region…</option>
-                {countryGeographies
-                  .filter(
-                    (item) => !['NUTS_2024', 'URBAN_AUDIT_2024'].includes(item.geography_system),
+                {sourceNativeRegions.map((item) => (
+                  <option key={item.geo_id} value={item.source_geo_code}>
+                    {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()}
+                  </option>
+                ))}
+              </select>
+            </div>
+          ) : null}
+
+          {sourceNativeUrbanAreas.length ? (
+            <div className="sourceNativeGeographyPicker sourceNativeUrbanPicker">
+              <div>
+                <span>AVAILABLE URBAN AREAS</span>
+                <strong>OECD city / Functional Urban Area evidence</strong>
+              </div>
+              <select
+                aria-label="Available source-native urban area"
+                value={
+                  selectedRegion
+                    && sourceNativeUrbanAreas.some(
+                      (item) => item.source_geo_code === selectedRegion.id,
+                    )
+                    ? selectedRegion.id
+                    : ''
+                }
+                onChange={(event) => {
+                  const geography = sourceNativeUrbanAreas.find(
+                    (item) => item.source_geo_code === event.target.value,
                   )
-                  .map((item) => (
-                    <option key={item.geo_id} value={item.source_geo_code}>
-                      {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()}
-                    </option>
-                  ))}
+                  if (!geography) {
+                    setSelectedRegion(null)
+                    return
+                  }
+                  setSelectedCity(null)
+                  setSelectedRegion({
+                    id: geography.source_geo_code,
+                    name: geography.name ?? geography.source_geo_code,
+                    level: geography.geo_level.toUpperCase(),
+                    system: geography.geography_system,
+                  })
+                }}
+              >
+                <option value="">Select an urban area…</option>
+                {sourceNativeUrbanAreas.map((item) => (
+                  <option key={item.geo_id} value={item.source_geo_code}>
+                    {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()}
+                  </option>
+                ))}
               </select>
             </div>
           ) : null}
