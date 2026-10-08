@@ -58,13 +58,13 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     result = module.calibration_status()
 
     assert result["infrastructure_ready"] is True
-    assert result["protocol_state"] == "definitions_and_acceptance_frozen_protocol_pending"
-    assert result["protocol_version"] is None
+    assert result["protocol_state"] == "protocol_v1_frozen_holdout_collection_enabled"
+    assert result["protocol_version"] == "ttv-calibration-protocol-v1"
     assert result["protocol_document"] == "docs/TTV_CALIBRATION_PROTOCOL.md"
     assert result["case_count"] == 0
     assert result["development_case_count"] == 0
     assert result["holdout_case_count"] == 0
-    assert result["protocol_ready_for_holdout"] is False
+    assert result["protocol_ready_for_holdout"] is True
     assert result["sample_roles"] == []
     assert result["externally_calibrated"] is False
     assert result["interval_coverage_pct"] is None
@@ -266,26 +266,44 @@ def test_stage_level_calibration_rejects_partial_timing_payload():
         module.validate_calibration_case(case)
 
 
-def test_holdout_case_rejected_until_protocol_is_approved():
-    case = {
+def test_holdout_case_requires_frozen_protocol_and_definitions():
+    base = {
         "case_id": "holdout-001",
-        "country_iso3": "ESP",
-        "employment_mode": "local",
+        "country_iso3": "IRL",
+        "employment_mode": "remote",
         "engine_version": "ttv-temporal-evidence-v1",
         "composition": "critical_path_v1",
         "candidate_weeks_min": 8,
         "candidate_weeks_max": 18,
         "observed_weeks": 12,
         "sample_role": "holdout",
-        "start_event_definition_version": "start-v1",
-        "viability_outcome_definition_version": "outcome-v1",
+        "start_event_definition_version": module.CALIBRATION_START_EVENT_DEFINITION_VERSION,
+        "viability_outcome_definition_version": module.CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
     }
 
     with pytest.raises(
         ValueError,
-        match="approved calibration protocol version",
+        match="calibration_protocol_version",
     ):
-        module.validate_calibration_case(case)
+        module.validate_calibration_case(base)
+
+    with pytest.raises(
+        ValueError,
+        match="frozen start-event definition version",
+    ):
+        module.validate_calibration_case({
+            **base,
+            "calibration_protocol_version": module.CALIBRATION_PROTOCOL_VERSION,
+            "start_event_definition_version": "wrong-start",
+        })
+
+    validated = module.validate_calibration_case({
+        **base,
+        "calibration_protocol_version": module.CALIBRATION_PROTOCOL_VERSION,
+    })
+
+    assert validated["sample_role"] == "holdout"
+    assert validated["calibration_protocol_version"] == "ttv-calibration-protocol-v1"
 
 
 def test_development_case_defaults_to_exploratory_sample_role(
@@ -312,6 +330,7 @@ def test_development_case_defaults_to_exploratory_sample_role(
     assert saved["sample_role"] == "development"
     assert saved["start_event_definition_version"] is None
     assert saved["viability_outcome_definition_version"] is None
+    assert saved["calibration_protocol_version"] is None
     assert status["sample_roles"] == ["development"]
     assert status["development_case_count"] == 1
     assert status["holdout_case_count"] == 0
@@ -321,10 +340,13 @@ def test_development_case_defaults_to_exploratory_sample_role(
 def test_calibration_protocol_readiness_lists_unresolved_requirements():
     result = module.calibration_protocol_readiness()
 
-    assert result["protocol_state"] == "definitions_and_acceptance_frozen_protocol_pending"
-    assert result["ready_for_holdout_collection"] is False
-    assert result["blockers"] == ["protocol_version"]
-    assert result["requirements"]["protocol_version"]["ready"] is False
+    assert result["protocol_state"] == "protocol_v1_frozen_holdout_collection_enabled"
+    assert result["ready_for_holdout_collection"] is True
+    assert result["blockers"] == []
+    assert result["requirements"]["protocol_version"] == {
+        "ready": True,
+        "version": "ttv-calibration-protocol-v1",
+    }
     assert result["requirements"]["start_event_definition"] == {
         "ready": True,
         "version": "ttv-start-active-language-transition-v1",
@@ -453,8 +475,9 @@ def test_holdout_scope_rejects_local_case_after_protocol_gate(monkeypatch):
         "candidate_weeks_max": 18,
         "observed_weeks": 12,
         "sample_role": "holdout",
-        "start_event_definition_version": "start-v1",
-        "viability_outcome_definition_version": "outcome-v1",
+        "start_event_definition_version": module.CALIBRATION_START_EVENT_DEFINITION_VERSION,
+        "viability_outcome_definition_version": module.CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
+        "calibration_protocol_version": module.CALIBRATION_PROTOCOL_VERSION,
     }
 
     with pytest.raises(
