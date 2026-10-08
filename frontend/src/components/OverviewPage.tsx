@@ -583,6 +583,15 @@ export default function OverviewPage({
     ].some((value) => String(value ?? '').toLowerCase().includes(urbanSearchTerm))
   })
 
+  const geographyCoverage = {
+    total: countryGeographies.length,
+    regions: countryGeographies.filter((item) => !['city', 'fua'].includes(item.geo_level.toLowerCase())).length,
+    cities: countryGeographies.filter((item) => item.geo_level.toLowerCase() === 'city').length,
+    fua: countryGeographies.filter((item) => item.geo_level.toLowerCase() === 'fua').length,
+    systems: new Set(countryGeographies.map((item) => item.geography_system)).size,
+    series: countryGeographies.reduce((sum, item) => sum + (item.indicator_count ?? 0), 0),
+  }
+
   const representative = RADAR_DOMAINS.map((domain) => {
     const preferred = domain.indicators
       .map((indicatorId) => currentIndicators.find((item) => item.indicator_id === indicatorId))
@@ -648,6 +657,38 @@ export default function OverviewPage({
               <strong>Explore country geography and available subnational evidence</strong>
             </div>
             <span className="mapInteractionHint">Scroll to zoom · drag to pan · cities at high zoom</span>
+          </div>
+
+          <div
+            className={`geographyCoverageStrip ${geographyCoverage.total ? 'available' : 'empty'}`}
+            aria-label="Country geographic coverage summary"
+          >
+            <div>
+              <span>Subnational coverage</span>
+              <strong>
+                {geographyCoverage.total
+                  ? `${geographyCoverage.total} geographies · ${geographyCoverage.systems} source system${geographyCoverage.systems === 1 ? '' : 's'}`
+                  : 'No integrated subnational evidence'}
+              </strong>
+            </div>
+            <dl>
+              <div>
+                <dt>Regions</dt>
+                <dd>{geographyCoverage.regions}</dd>
+              </div>
+              <div>
+                <dt>Cities</dt>
+                <dd>{geographyCoverage.cities}</dd>
+              </div>
+              <div>
+                <dt>FUA</dt>
+                <dd>{geographyCoverage.fua}</dd>
+              </div>
+              <div>
+                <dt>Series</dt>
+                <dd>{geographyCoverage.series}</dd>
+              </div>
+            </dl>
           </div>
 
           {selectedCountryIso2 ? (
