@@ -492,26 +492,35 @@ def test_oecd_tl2_local_evidence_does_not_invent_eurostat_metrics(monkeypatch):
     assert result["geo_name"] == "New South Wales"
     assert result["geo_level"] == "tl2"
     assert result["source_ids"] == ["OECD"]
-    assert result["indicator_count"] == 1
+    assert result["indicator_count"] == 7
     assert result["available_count"] == 1
-    assert result["complete"] is True
-    assert result["indicators"] == [
-        {
-            "indicator_id": "regional_population_density",
-            "name": "Population density",
-            "status": "available",
-            "period": 2024,
-            "value": 10.58,
-            "unit": "people_per_km2",
-            "dataset_id": "DSD_REG_DEMO@DF_DENSITY",
-            "source_id": "OECD",
-            "source_updated_at": "2.4",
-            "history": [
-                {"period": 2023, "value": 10.41},
-                {"period": 2024, "value": 10.58},
-            ],
-        }
-    ]
+    assert result["complete"] is False
+    density = next(
+        item for item in result["indicators"]
+        if item["indicator_id"] == "regional_population_density"
+    )
+    assert density == {
+        "indicator_id": "regional_population_density",
+        "name": "Population density",
+        "status": "available",
+        "period": 2024,
+        "value": 10.58,
+        "unit": "people_per_km2",
+        "dataset_id": "DSD_REG_DEMO@DF_DENSITY",
+        "source_id": "OECD",
+        "source_updated_at": "2.4",
+        "history": [
+            {"period": 2023, "value": 10.41},
+            {"period": 2024, "value": 10.58},
+        ],
+    }
+    unavailable = {
+        item["indicator_id"]
+        for item in result["indicators"]
+        if item["status"] == "unavailable"
+    }
+    assert "regional_population" in unavailable
+    assert "regional_employment_to_population_ratio" in unavailable
     assert result["sector_structure"]["status"] == "unavailable"
     assert result["environmental_health"]["status"] == "unavailable"
     assert any(
@@ -569,3 +578,58 @@ def test_regional_cache_is_namespaced_by_geography_system(monkeypatch):
         ("X1", "OECD_TL_2024"),
         ("X1", "ISO_3166_2"),
     ]
+
+
+def test_oecd_fua_local_evidence_exposes_expected_missing_metrics(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "regional_evidence_bundle",
+        lambda code, max_history_points=8, geography_system=None: {
+            "latest": [
+                {
+                    "geography_system": "OECD_FUA",
+                    "geo_code": "AUS01C",
+                    "geo_name": "Greater Sydney",
+                    "geo_level": "city",
+                    "indicator_id": "urban_population_density",
+                    "period": 2020,
+                    "value": 2376.0,
+                    "unit": "people_per_km2",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_FUA_TERR@DF_DENSITY",
+                    "retrieved_at": None,
+                    "source_updated_at": "1.1",
+                }
+            ],
+            "history": [],
+            "sectors": [],
+            "environmental_health": [],
+        },
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    result = regional_evidence(
+        "AUS01C",
+        geography_system="OECD_FUA",
+    )
+
+    assert result["geo_level"] == "city"
+    assert result["indicator_count"] == 5
+    assert result["available_count"] == 1
+    assert result["complete"] is False
+
+    unavailable = {
+        item["indicator_id"]
+        for item in result["indicators"]
+        if item["status"] == "unavailable"
+    }
+    assert unavailable == {
+        "urban_population",
+        "urban_total_dependency_ratio",
+        "urban_youth_dependency_ratio",
+        "urban_old_age_dependency_ratio",
+    }
+    assert all(
+        item["source_id"] == "OECD"
+        for item in result["indicators"]
+    )
