@@ -31,6 +31,7 @@ type SourceNativeProperties = {
   geography_system?: string
   geo_level?: string
   source_geo_code?: string
+  name?: string
 }
 
 type SourceNativeFeature = GeoJSON.Feature<
@@ -373,10 +374,10 @@ export default function RegionalMap({
               const id = props.source_geo_code ?? ''
               const level = props.geo_level ?? 'region'
               const system = props.geography_system ?? 'SOURCE_NATIVE'
-              const name = id
+              const name = props.name ?? id
 
               layer.bindTooltip(
-                `${id} · ${level.toUpperCase()} · ${system}`,
+                `${name} · ${id} · ${level.toUpperCase()} · ${system}`,
                 {
                   sticky: true,
                   direction: 'top',
