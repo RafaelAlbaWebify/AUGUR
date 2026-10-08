@@ -539,6 +539,105 @@ def holdout_review_status() -> dict:
     return result
 
 
+def holdout_representativeness_diagnostics() -> dict:
+    cases = _holdout_cases_for_seal()
+    if not cases:
+        return {
+            "case_count": 0,
+            "country_counts": {},
+            "current_cefr_counts": {},
+            "weekly_study_hours_counts": {},
+            "context_complete_case_count": 0,
+            "context_complete_pct": None,
+            "largest_country_share_pct": None,
+            "largest_cefr_share_pct": None,
+            "largest_study_hours_share_pct": None,
+            "minimum_cases_for_cohort_claim": CALIBRATION_ACCEPTANCE_CRITERIA[
+                "minimum_cases_for_cohort_claim"
+            ],
+            "notes": [
+                "Diagnostics describe concentration only and do not decide representativeness.",
+            ],
+        }
+
+    country_counts: dict[str, int] = {}
+    cefr_counts: dict[str, int] = {}
+    study_counts: dict[str, int] = {}
+    context_complete = 0
+
+    for case in cases:
+        country = str(case.get("country_iso3") or "UNKNOWN")
+        country_counts[country] = country_counts.get(country, 0) + 1
+
+        try:
+            context = json.loads(case.get("context_json") or "{}")
+        except json.JSONDecodeError:
+            context = {}
+
+        cefr = str(context.get("current_cefr") or "").upper()
+        weekly = context.get("weekly_study_hours")
+        if cefr:
+            cefr_counts[cefr] = cefr_counts.get(cefr, 0) + 1
+        if weekly is not None:
+            key = str(float(weekly))
+            study_counts[key] = study_counts.get(key, 0) + 1
+        if cefr and weekly is not None:
+            context_complete += 1
+
+    case_count = len(cases)
+
+    def largest_share(counts: dict[str, int]) -> float | None:
+        if not counts:
+            return None
+        return round(max(counts.values()) / case_count * 100.0, 2)
+
+    cohort_min = CALIBRATION_ACCEPTANCE_CRITERIA[
+        "minimum_cases_for_cohort_claim"
+    ]
+
+    return {
+        "case_count": case_count,
+        "country_counts": dict(sorted(country_counts.items())),
+        "current_cefr_counts": dict(sorted(cefr_counts.items())),
+        "weekly_study_hours_counts": dict(
+            sorted(study_counts.items(), key=lambda item: float(item[0]))
+        ),
+        "context_complete_case_count": context_complete,
+        "context_complete_pct": round(
+            context_complete / case_count * 100.0,
+            2,
+        ),
+        "largest_country_share_pct": largest_share(country_counts),
+        "largest_cefr_share_pct": largest_share(cefr_counts),
+        "largest_study_hours_share_pct": largest_share(study_counts),
+        "minimum_cases_for_cohort_claim": cohort_min,
+        "cohorts_meeting_minimum": {
+            "countries": sorted(
+                key
+                for key, value in country_counts.items()
+                if value >= cohort_min
+            ),
+            "current_cefr": sorted(
+                key
+                for key, value in cefr_counts.items()
+                if value >= cohort_min
+            ),
+            "weekly_study_hours": sorted(
+                (
+                    key
+                    for key, value in study_counts.items()
+                    if value >= cohort_min
+                ),
+                key=float,
+            ),
+        },
+        "notes": [
+            "These diagnostics expose sample concentration; they do not decide whether the holdout is representative.",
+            "A cohort should not receive a cohort-specific performance claim unless it meets the pre-declared minimum case count.",
+        ],
+    }
+
+
 def record_holdout_review(
     *,
     representative: bool,
@@ -1173,6 +1272,7 @@ def calibration_status() -> dict:
     protocol_readiness = calibration_protocol_readiness()
     holdout_seal = holdout_seal_status()
     holdout_review = holdout_review_status()
+    representativeness_diagnostics = holdout_representativeness_diagnostics()
     con = sqlite3.connect(settings.sqlite_path)
     con.row_factory = sqlite3.Row
 
@@ -1245,6 +1345,7 @@ def calibration_status() -> dict:
                 },
                 "holdout_seal": holdout_seal,
                 "holdout_review": holdout_review,
+                "representativeness_diagnostics": representativeness_diagnostics,
                 "holdout_acceptance": evaluate_holdout_acceptance(
                     [],
                     holdout_sealed=holdout_seal["sealed"],
@@ -1308,6 +1409,7 @@ def calibration_status() -> dict:
             },
             "holdout_seal": holdout_seal,
             "holdout_review": holdout_review,
+            "representativeness_diagnostics": representativeness_diagnostics,
             "holdout_acceptance": evaluate_holdout_acceptance(
                 [],
                 holdout_sealed=holdout_seal["sealed"],
@@ -1471,6 +1573,7 @@ def calibration_status() -> dict:
         "context_summary": context_summary,
         "holdout_seal": holdout_seal,
         "holdout_review": holdout_review,
+        "representativeness_diagnostics": representativeness_diagnostics,
         "holdout_acceptance": holdout_acceptance,
         "activation_readiness": activation_readiness,
         "externally_calibrated": activation_readiness[
