@@ -119,7 +119,7 @@ def test_regional_evidence_exposes_sector_structure(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_subnational_observations",
-        lambda code: [
+        lambda code, geography_system=None: [
             {
                 "indicator_id": "regional_employment_rate",
                 "period": 2025,
@@ -134,7 +134,7 @@ def test_regional_evidence_exposes_sector_structure(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_regional_sector_employment_for_geo",
-        lambda code: [
+        lambda code, geography_system=None: [
             {
                 "geo_code": code,
                 "period": 2025,
@@ -263,7 +263,7 @@ def test_local_partial_region_is_served_without_network_enrichment(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_subnational_observations",
-        lambda code: [
+        lambda code, geography_system=None: [
             {
                 "indicator_id": "regional_employment_rate",
                 "period": 2025,
@@ -285,7 +285,7 @@ def test_local_partial_region_is_served_without_network_enrichment(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_regional_sector_employment_for_geo",
-        lambda code: [],
+        lambda code, geography_system=None: [],
     )
     regional_module._REGIONAL_CACHE.clear()
 
@@ -307,7 +307,7 @@ def test_regional_evidence_exposes_environmental_health_separately(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_subnational_observations",
-        lambda code: [
+        lambda code, geography_system=None: [
             {
                 "indicator_id": "regional_employment_rate",
                 "period": 2025,
@@ -322,12 +322,12 @@ def test_regional_evidence_exposes_environmental_health_separately(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_regional_sector_employment_for_geo",
-        lambda code: [],
+        lambda code, geography_system=None: [],
     )
     monkeypatch.setattr(
         regional_module,
         "latest_environmental_health_burden_for_geo",
-        lambda code: [
+        lambda code, geography_system=None: [
             {
                 "geo_code": code,
                 "geo_level": "NUTS2",
@@ -374,7 +374,7 @@ def test_local_regional_evidence_includes_recent_history(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_subnational_observations",
-        lambda code: [
+        lambda code, geography_system=None: [
             {
                 "indicator_id": "regional_employment_rate",
                 "period": 2025,
@@ -410,12 +410,12 @@ def test_local_regional_evidence_includes_recent_history(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "latest_regional_sector_employment_for_geo",
-        lambda code: [],
+        lambda code, geography_system=None: [],
     )
     monkeypatch.setattr(
         regional_module,
         "latest_environmental_health_burden_for_geo",
-        lambda code: [],
+        lambda code, geography_system=None: [],
     )
     regional_module._REGIONAL_CACHE.clear()
 
