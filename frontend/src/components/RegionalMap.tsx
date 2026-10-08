@@ -25,14 +25,34 @@ type CityFeature = GeoJSON.Feature<
   Record<string, unknown>
 >
 
+type SourceNativeProperties = {
+  geo_id?: string
+  country_iso3?: string
+  geography_system?: string
+  geo_level?: string
+  source_geo_code?: string
+}
+
+type SourceNativeFeature = GeoJSON.Feature<
+  GeoJSON.Polygon | GeoJSON.MultiPolygon,
+  SourceNativeProperties
+>
+
 type RegionalMapProps = {
+  apiBase: string
+  countryIso3: string
   countryIso2: string
   countryCenter?: { lat: number; lon: number } | null
   selectedRegion: string | null
   selectedCity: string | null
   selectableCountryIso2?: string[]
   onSelectCountry?: (countryIso2: string) => void
-  onSelectRegion: (regionId: string, regionName: string, level: number) => void
+  onSelectRegion: (
+    regionId: string,
+    regionName: string,
+    level: number | string,
+    system?: string,
+  ) => void
   onSelectCity: (cityCode: string, cityName: string) => void
 }
 
@@ -115,6 +135,8 @@ function cityName(feature: CityFeature) {
 }
 
 export default function RegionalMap({
+  apiBase,
+  countryIso3,
   countryIso2,
   countryCenter = null,
   selectedRegion,
@@ -133,6 +155,7 @@ export default function RegionalMap({
   const regionLayerRef = useRef<L.GeoJSON | null>(null)
   const nuts3LayerRef = useRef<L.GeoJSON | null>(null)
   const cityLayerRef = useRef<L.LayerGroup | null>(null)
+  const sourceNativeLayerRef = useRef<L.GeoJSON | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
   const [subnationalAvailable, setSubnationalAvailable] = useState(true)
@@ -202,18 +225,26 @@ export default function RegionalMap({
     regionLayerRef.current?.remove()
     nuts3LayerRef.current?.remove()
     cityLayerRef.current?.remove()
+    sourceNativeLayerRef.current?.remove()
     countryLayerRef.current = null
     regionLayerRef.current = null
     nuts3LayerRef.current = null
     cityLayerRef.current = null
+    sourceNativeLayerRef.current = null
 
     Promise.all([
       loadGeoJson(GISCO_NUTS0_URL),
       loadGeoJson(GISCO_NUTS2_URL),
       loadGeoJson(GISCO_NUTS3_URL),
       loadGeoJson(GISCO_URBAN_AUDIT_CITY_URL),
+      loadGeoJson(
+        `${apiBase}/api/geographies/geometry?country_iso3=${encodeURIComponent(countryIso3)}`,
+      ).catch(() => ({
+        type: 'FeatureCollection',
+        features: [],
+      } as GeoJSON.FeatureCollection)),
     ])
-      .then(([countriesData, regionsData, nuts3Data, citiesData]) => {
+      .then(([countriesData, regionsData, nuts3Data, citiesData, sourceNativeData]) => {
         if (cancelled) return
 
         const countries = countriesData.features as CountryFeature[]
@@ -249,6 +280,13 @@ export default function RegionalMap({
             return code.startsWith(countryIso2) && code.endsWith('C')
           })
 
+        const sourceNativeFeatures = (
+          sourceNativeData.features as SourceNativeFeature[]
+        ).filter((feature) => {
+          const system = feature.properties?.geography_system ?? ''
+          return !['NUTS_2024', 'URBAN_AUDIT_2024'].includes(system)
+        })
+
         const hasCountryGeometry = countries.some(
           (feature) => feature.properties?.CNTR_CODE === countryIso2,
         )
@@ -256,6 +294,7 @@ export default function RegionalMap({
           regions.length > 0
           || nuts3Regions.length > 0
           || cityFeatures.length > 0
+          || sourceNativeFeatures.length > 0
         )
         setSubnationalAvailable(hasSubnational)
 
@@ -303,6 +342,57 @@ export default function RegionalMap({
             })
           },
         }).addTo(map)
+
+        const sourceNativeLayer = L.geoJSON(
+          {
+            type: 'FeatureCollection',
+            features: sourceNativeFeatures,
+          },
+          {
+            style: (feature) => {
+              const native = feature as SourceNativeFeature | undefined
+              const id = native?.properties?.source_geo_code ?? ''
+              const selected = id === selectedRegion
+              const level = native?.properties?.geo_level ?? ''
+              const urban = ['city', 'fua'].includes(level.toLowerCase())
+              return {
+                className: selected
+                  ? 'sourceNativeBoundary selectedSourceNativeBoundary'
+                  : 'sourceNativeBoundary',
+                color: selected ? '#ffffff' : urban ? '#74e6cf' : '#e2b66f',
+                weight: selected ? 3.4 : 1.6,
+                opacity: selected ? 1 : 0.88,
+                fillColor: selected ? '#19b7d8' : urban ? '#2a9f8c' : '#a66e2c',
+                fillOpacity: selected ? 0.28 : 0.07,
+              }
+            },
+            interactive: true,
+            onEachFeature: (feature, layer) => {
+              const native = feature as SourceNativeFeature
+              const props = native.properties ?? {}
+              const id = props.source_geo_code ?? ''
+              const level = props.geo_level ?? 'region'
+              const system = props.geography_system ?? 'SOURCE_NATIVE'
+              const name = id
+
+              layer.bindTooltip(
+                `${id} · ${level.toUpperCase()} · ${system}`,
+                {
+                  sticky: true,
+                  direction: 'top',
+                  className: 'augurMapTooltip',
+                },
+              )
+              layer.on('click', () => {
+                onSelectRegionRef.current(id, name, level, system)
+                const bounds = (layer as L.Polygon).getBounds()
+                if (bounds.isValid()) {
+                  map.fitBounds(bounds, { padding: [34, 34], maxZoom: 8.5 })
+                }
+              })
+            },
+          },
+        )
 
         const regionLayer = L.geoJSON(regionCollection, {
           style: (feature) => {
@@ -413,6 +503,7 @@ export default function RegionalMap({
         regionLayerRef.current = regionLayer
         nuts3LayerRef.current = nuts3Layer
         cityLayerRef.current = cityLayer
+        sourceNativeLayerRef.current = sourceNativeLayer
 
         const redrawProgressiveLayers = () => {
           map.invalidateSize()
@@ -432,9 +523,11 @@ export default function RegionalMap({
           const currentZoom = map.getZoom()
 
           if (currentZoom >= REGIONS_VISIBLE_ZOOM) {
+            if (!map.hasLayer(sourceNativeLayer)) sourceNativeLayer.addTo(map)
             if (!map.hasLayer(regionLayer)) regionLayer.addTo(map)
-          } else if (map.hasLayer(regionLayer)) {
-            map.removeLayer(regionLayer)
+          } else {
+            if (map.hasLayer(sourceNativeLayer)) map.removeLayer(sourceNativeLayer)
+            if (map.hasLayer(regionLayer)) map.removeLayer(regionLayer)
           }
 
           if (currentZoom >= NUTS3_VISIBLE_ZOOM) {
@@ -470,6 +563,8 @@ export default function RegionalMap({
       if (progressiveHandler) map.off('zoomend', progressiveHandler)
     }
   }, [
+    apiBase,
+    countryIso3,
     countryIso2,
     countryCenter?.lat,
     countryCenter?.lon,
