@@ -15,7 +15,7 @@ def _local_history_stub(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "subnational_indicator_series",
-        lambda code, max_points=8: [],
+        lambda code, max_points=8, geography_system=None: [],
     )
     monkeypatch.setattr(
         regional_module,
@@ -389,7 +389,7 @@ def test_local_regional_evidence_includes_recent_history(monkeypatch):
     monkeypatch.setattr(
         regional_module,
         "subnational_indicator_series",
-        lambda code, max_points=8: [
+        lambda code, max_points=8, geography_system=None: [
             {
                 "indicator_id": "regional_employment_rate",
                 "period": 2023,
