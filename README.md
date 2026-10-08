@@ -99,6 +99,14 @@ Use the incremental refresh workflow to keep synchronized evidence inside AUGUR'
 
 This runs the current multi-provider country sync, registered-country subnational sync, automatic repair of required local evidence and then `check-operability.ps1`.
 
+OECD provider-native regional and urban refreshes are freshness-aware. By default, countries with OECD evidence retrieved within the last 24 hours are skipped instead of redownloading the same large SDMX datasets. Coverage gaps remain explicit and are not treated as fresh evidence.
+
+To force OECD TL2/TL3 and FUA/city evidence to be downloaded again regardless of local freshness:
+
+```powershell
+.\refresh-augur.ps1 -ForceOecdRefresh
+```
+
 The existing ESCO dataset is preserved by default. To import or refresh a full official ESCO package at the same time:
 
 ```powershell
