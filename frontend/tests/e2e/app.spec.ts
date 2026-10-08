@@ -379,8 +379,8 @@ async function mockApi(page: Page) {
           geo_level: isFua ? 'fua' : 'city',
           source: 'AUGUR local store · OECD urban statistics',
           source_ids: ['OECD'],
-          indicator_count: isFua ? 17 : 9,
-          available_count: isFua ? 17 : 9,
+          indicator_count: isFua ? 18 : 10,
+          available_count: isFua ? 18 : 10,
           complete: true,
           indicators: [
             {
@@ -402,6 +402,17 @@ async function mockApi(page: Page) {
               value: isFua ? 421 : 2376,
               unit: 'people_per_km2',
               dataset_id: 'DSD_FUA_TERR@DF_DENSITY',
+              source_id: 'OECD',
+              history: [],
+            },
+            {
+              indicator_id: 'urban_pm25_population_exposure',
+              name: 'Population exposure to PM2.5',
+              status: 'available',
+              period: 2025,
+              value: isFua ? 52.4 : 57.8909,
+              unit: 'ug_m3',
+              dataset_id: 'DSD_FUA_ENV@DF_POLLUTION',
               source_id: 'OECD',
               history: [],
             },
@@ -1637,6 +1648,8 @@ test('source-native OECD urban area can be selected separately from regions', as
   await expect(geographicEvidence.getByText('5,570,000')).toBeVisible()
   await expect(geographicEvidence.getByText('Population density', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('2,376 /km²')).toBeVisible()
+  await expect(geographicEvidence.getByText('Population exposure to PM2.5')).toBeVisible()
+  await expect(geographicEvidence.getByText('57.9 µg/m³')).toBeVisible()
   await expect(geographicEvidence.getByText('Total dependency ratio', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('48.4%')).toBeVisible()
   await expect(geographicEvidence.getByText('Commute share by public transport')).toBeVisible()
@@ -1662,6 +1675,8 @@ test('source-native OECD urban area can be selected separately from regions', as
   await expect(geographicEvidence.getByText('146 m²/person')).toBeVisible()
   await expect(geographicEvidence.getByText('Green area share')).toBeVisible()
   await expect(geographicEvidence.getByText('47.3%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Population exposure to PM2.5')).toBeVisible()
+  await expect(geographicEvidence.getByText('52.4 µg/m³')).toBeVisible()
 })
 
 test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
