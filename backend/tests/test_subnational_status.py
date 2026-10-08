@@ -526,3 +526,30 @@ def test_stale_geography_countries_can_require_specific_indicators(
     )
 
     assert stale == {"AUS"}
+
+
+def test_provider_access_state_round_trip(monkeypatch, tmp_path):
+    from datetime import timedelta
+
+    path = tmp_path / "provider-access.duckdb"
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+    module.initialize_analytics_schema()
+
+    retry_after = datetime.now(timezone.utc) + timedelta(hours=6)
+    module.record_provider_access_state(
+        "OECD_FUA_GEOMETRY",
+        "source_access_restricted",
+        retry_after_at=retry_after,
+        detail="HTTP 403",
+    )
+
+    state = module.provider_access_state("OECD_FUA_GEOMETRY")
+
+    assert state is not None
+    assert state["status"] == "source_access_restricted"
+    assert state["detail"] == "HTTP 403"
+    assert state["retry_after_at"] is not None
