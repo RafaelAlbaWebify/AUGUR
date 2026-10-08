@@ -27,6 +27,17 @@ def _default_dynamic_country_registry(monkeypatch):
             "countries": [],
         },
     )
+    monkeypatch.setattr(
+        module,
+        "geography_coverage_status",
+        lambda: {
+            "geography_count": 0,
+            "countries_with_subnational_evidence": 0,
+            "systems": [],
+            "levels": [],
+            "coverage": [],
+        },
+    )
 
 
 @pytest.fixture(autouse=True)
@@ -1373,4 +1384,5 @@ def test_global_partial_country_does_not_block_validation_readiness(monkeypatch)
     assert result["country_analysis_ready"] is True
     assert result["local_employment_evidence_ready"] is True
     assert result["country_coverage"]["analyzable_country_count"] == 4
+    assert "geography_coverage" in result
     assert result["validation_country_iso3"] == ["ESP", "PRT", "IRL"]
