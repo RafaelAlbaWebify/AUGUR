@@ -169,7 +169,7 @@ def test_sync_fua_population_persists_history(monkeypatch):
 
 
 DEPENDENCY_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,MEASURE,Measure,UNIT_MEASURE,Unit of measure,AGE,Age,SEX,ORIGIN,TERRITORIAL_LEVEL,Territorial level,CITIZENSHIP,TIME_PERIOD,OBS_VALUE
-dataflow,AUS01C,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15_GE65,Less than 15 years or 65 years or over,_T,_T,CITY,City,_T,2024,46.4
+dataflow,AUS01C,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15_GE65,Less than 15 years or 65 years or over,_T,_T,CITY,City,_T,2022,48.4
 dataflow,AUS01C,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15,Less than 15 years,_T,_T,CITY,City,_T,2024,24.8
 dataflow,AUS01C,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_GE65,65 years or over,_T,_T,CITY,City,_T,2024,21.6
 dataflow,AUS01F,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15_GE65,Less than 15 years or 65 years or over,_T,_T,FUA,FUA,_T,2023,49.0
@@ -194,7 +194,7 @@ def test_normalize_fua_dependency_keeps_three_distinct_ratios():
         for row in rows
         if row["geo_code"] == "AUS01C"
     }
-    assert city_rows["urban_total_dependency_ratio"]["value"] == 46.4
+    assert city_rows["urban_total_dependency_ratio"]["value"] == 48.4
     assert city_rows["urban_youth_dependency_ratio"]["value"] == 24.8
     assert city_rows["urban_old_age_dependency_ratio"]["value"] == 21.6
     assert all(row["unit"] == "percent" for row in city_rows.values())
