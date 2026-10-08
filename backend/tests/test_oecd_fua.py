@@ -390,3 +390,86 @@ def test_sync_fua_transport_persists_access_history(monkeypatch):
         "urban_public_transport_access_15min",
         "urban_public_transport_access_5min",
     ]
+
+
+COMMUTE_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,MEASURE,Measure,UNIT_MEASURE,Unit of measure,TRAN_MODE,Mode of transport,TERRITORIAL_LEVEL,Territorial level,TRAVEL_TIME,Travel time,SERVICE,Service,TIME_PERIOD,OBS_VALUE,OBS_STATUS
+dataflow,AUS01C,Greater Sydney,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,CAR,Car,CITY,City,_Z,Not applicable,_Z,Not applicable,2021,52.0,A
+dataflow,AUS01C,Greater Sydney,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,PUBLIC_TRANSPORT,Public transport,CITY,City,_Z,Not applicable,_Z,Not applicable,2021,25.0,A
+dataflow,AUS01C,Greater Sydney,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,BIKE,Bicycle,CITY,City,_Z,Not applicable,_Z,Not applicable,2021,1.0,A
+dataflow,AUS01C,Greater Sydney,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,WALK,Walking,CITY,City,_Z,Not applicable,_Z,Not applicable,2021,4.0,A
+dataflow,AUS01F,Greater Sydney,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,CAR,Car,FUA,FUA,_Z,Not applicable,_Z,Not applicable,2021,61.0,A
+dataflow,AUS01F,Greater Sydney,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,PUBLIC_TRANSPORT,Public transport,FUA,FUA,_Z,Not applicable,_Z,Not applicable,2021,20.0,A
+dataflow,AUS01F,Greater Sydney,A,COMMUTE,Commute mode,PS,Persons,PUBLIC_TRANSPORT,Public transport,FUA,FUA,_Z,Not applicable,_Z,Not applicable,2021,1000000,A
+dataflow,AUS01F,Greater Sydney,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,_O,Other,FUA,FUA,_Z,Not applicable,_Z,Not applicable,2021,3.0,A
+dataflow,AT001F,Vienna,A,COMMUTE,Commute mode,PT_WR,Percentage of workers,WALK,Walking,FUA,FUA,_Z,Not applicable,_Z,Not applicable,2021,8.0,A
+"""
+
+
+def test_normalize_fua_commute_keeps_worker_shares_for_core_modes():
+    adapter = OECDFUAAdapter(client=None)
+    try:
+        rows = adapter.normalize_commute(
+            COMMUTE_CSV,
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    city = {
+        row["indicator_id"]: row
+        for row in rows
+        if row["geo_code"] == "AUS01C"
+    }
+    assert city["urban_commute_car_share"]["value"] == 52.0
+    assert city["urban_commute_public_transport_share"]["value"] == 25.0
+    assert city["urban_commute_bicycle_share"]["value"] == 1.0
+    assert city["urban_commute_walk_share"]["value"] == 4.0
+
+    fua = {
+        row["indicator_id"]: row
+        for row in rows
+        if row["geo_code"] == "AUS01F"
+    }
+    assert fua["urban_commute_car_share"]["value"] == 61.0
+    assert fua["urban_commute_public_transport_share"]["value"] == 20.0
+
+    assert all(row["unit"] == "percent" for row in rows)
+    assert all(row["indicator_id"] != "_O" for row in rows)
+
+
+def test_sync_fua_commute_persists_city_and_fua_worker_shares(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDFUAAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_commute",
+        lambda **kwargs: COMMUTE_CSV,
+    )
+
+    try:
+        result = adapter.sync_commute(
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS", "CAN"},
+            start_year=2019,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 6
+    assert result["covered_countries"] == ["AUS"]
+    assert result["missing_countries"] == ["CAN"]
+    assert result["city_count"] == 1
+    assert result["fua_count"] == 1
+    assert set(result["indicator_ids"]) == {
+        "urban_commute_car_share",
+        "urban_commute_public_transport_share",
+        "urban_commute_bicycle_share",
+        "urban_commute_walk_share",
+    }
