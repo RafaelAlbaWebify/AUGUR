@@ -62,7 +62,7 @@ def _read_shapefile_archive(payload: bytes) -> tuple[shapefile.Reader, str]:
     if not (
         "WGS 1984" in normalized
         or "WGS 84" in normalized
-        or "EPSG","4326" in normalized
+        or '"EPSG","4326"' in normalized
         or "EPSG:4326" in normalized
     ):
         raise ValueError(
