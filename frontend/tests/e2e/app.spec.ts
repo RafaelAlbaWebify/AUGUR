@@ -370,7 +370,50 @@ async function mockApi(page: Page) {
       }
     } else if (/^\/api\/regions\/[A-Z0-9]+\/evidence$/.test(path)) {
       const geoCode = path.split('/')[3]
-      if (geoCode === 'AU1') {
+      if (geoCode === 'AUS01C' || geoCode === 'AUS01F') {
+        const isFua = geoCode.endsWith('F')
+        body = {
+          geography_system: 'OECD_FUA',
+          geo_code: geoCode,
+          geo_name: isFua ? 'Sydney FUA' : 'Greater Sydney',
+          geo_level: isFua ? 'fua' : 'city',
+          source: 'AUGUR local store · OECD urban statistics',
+          source_ids: ['OECD'],
+          indicator_count: 1,
+          available_count: 1,
+          complete: true,
+          indicators: [
+            {
+              indicator_id: 'urban_population_density',
+              name: 'Population density',
+              status: 'available',
+              period: 2020,
+              value: isFua ? 421 : 2376,
+              unit: 'people_per_km2',
+              dataset_id: 'DSD_FUA_TERR@DF_DENSITY',
+              source_id: 'OECD',
+              history: [],
+            },
+          ],
+          sector_structure: {
+            status: 'unavailable',
+            reason: 'sector_context_not_available_for_geography_system',
+            dataset_id: null,
+            source_id: null,
+            sectors: [],
+          },
+          environmental_health: {
+            status: 'unavailable',
+            reason: 'environmental_health_not_available_for_geography_system',
+            source_id: null,
+            dataset_id: null,
+            metrics: [],
+          },
+          notes: [
+            'OECD city and Functional Urban Area definitions remain distinct geographic levels.',
+          ],
+        }
+      } else if (geoCode === 'AU1') {
         body = {
           geo_code: 'AU1',
           geo_name: 'New South Wales',
@@ -738,6 +781,36 @@ async function mockApi(page: Page) {
                 longitude: null,
                 indicator_count: 1,
                 latest_period: 2024,
+              },
+              {
+                geo_id: 'OECD_FUA:AUS01C',
+                country_iso3: 'AUS',
+                country_iso2: 'AU',
+                name: 'Greater Sydney',
+                geo_level: 'city',
+                geography_system: 'OECD_FUA',
+                source_id: 'OECD',
+                source_geo_code: 'AUS01C',
+                parent_geo_id: null,
+                latitude: null,
+                longitude: null,
+                indicator_count: 1,
+                latest_period: 2020,
+              },
+              {
+                geo_id: 'OECD_FUA:AUS01F',
+                country_iso3: 'AUS',
+                country_iso2: 'AU',
+                name: 'Sydney FUA',
+                geo_level: 'fua',
+                geography_system: 'OECD_FUA',
+                source_id: 'OECD',
+                source_geo_code: 'AUS01F',
+                parent_geo_id: null,
+                latitude: null,
+                longitude: null,
+                indicator_count: 1,
+                latest_period: 2020,
               },
             ]
           : [],
@@ -1129,6 +1202,28 @@ test('source-native OECD region can be selected without GISCO geometry', async (
   await expect(geographicEvidence.getByText('8,534,000')).toBeVisible()
   await expect(geographicEvidence.getByText('Population density', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('10.6 /km²')).toBeVisible()
+})
+
+test('source-native OECD urban area can be selected separately from regions', async ({ page }) => {
+  await page.goto('/country/AUS/overview')
+
+  const regionSelect = page.getByRole('combobox', { name: 'Available source-native region' })
+  await expect(regionSelect).toContainText('New South Wales · TL2')
+  await expect(regionSelect).not.toContainText('Greater Sydney')
+
+  const urbanSelect = page.getByRole('combobox', { name: 'Available source-native urban area' })
+  await expect(urbanSelect).toBeVisible()
+  await expect(urbanSelect).toContainText('Greater Sydney · CITY')
+  await expect(urbanSelect).toContainText('Sydney FUA · FUA')
+
+  await urbanSelect.selectOption('AUS01C')
+
+  const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
+  await expect(geographicEvidence.getByText('CITY EVIDENCE')).toBeVisible()
+  await expect(geographicEvidence.locator('.radarPanelTopline strong')).toHaveText('Greater Sydney')
+  await expect(geographicEvidence.getByText('Population density', { exact: true })).toBeVisible()
+  await expect(geographicEvidence.getByText('2,376 /km²')).toBeVisible()
+  await expect(geographicEvidence.getByText(/OECD urban statistics/)).toBeVisible()
 })
 
 test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
