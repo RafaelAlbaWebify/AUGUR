@@ -212,7 +212,14 @@ Implemented and live-verified on 2026-10-07:
 - regional evidence for OECD TL2/TL3 only exposes actually stored OECD metrics and does not fabricate missing Eurostat indicators;
 - sector and EEA environmental-health context remain unavailable for OECD regions unless independently sourced.
 
-The next OECD regional extension should use `DSD_REG_LAB@DF_RATES` / the Developer API labour dataset to add employment-to-population and unemployment-rate evidence. Its measure codes and units must be live-inspected before ingestion.
+Regional labour extension status:
+
+- OECD `DSD_REG_LAB@DF_RATES` v2.4 was live-inspected on 2026-10-08;
+- `EMP_RATIO` for ages 15–64, total sex, is published in `PT_POP_SUB` (percentage of population in the same subgroup);
+- AU1 (New South Wales) and AU2 (Victoria) returned observed 2021–2024 employment-to-population ratios;
+- `regional_employment_to_population_ratio` is now ingested, persisted, synced and exposed in source-native OECD regional evidence;
+- no unemployment-rate code is accepted yet: the attempted `UNEMP_RATIO` code returned no rows for AU1/AU2, so AUGUR continues to discover the published measure code rather than guessing it.
+
 
 
 
@@ -246,5 +253,15 @@ Dependency measures remain separate:
 - old-age dependency: people aged 65 or over relative to population aged 15–64.
 
 AUGUR does not collapse these measures into a composite urban score.
+
+Four-country live validation on 2026-10-08 used Australia, Canada, Japan and the United States and produced:
+
+- **9,868** OECD urban observation rows across population density, total population and dependency ratios;
+- **698** distinct registered OECD urban geographies across the four countries;
+- density coverage on **638** geographies (322 CITY, 316 FUA);
+- population coverage on **515** geographies (260 CITY, 255 FUA);
+- dependency-ratio coverage on **515** geographies (260 CITY, 255 FUA).
+
+Coverage is intentionally reported per dataset. A geography with density but without population or dependency evidence is not treated as complete, and country-level sync gaps remain explicit.
 
 Next urban expansion candidates must be inspected and validated before integration. OECD FUA labour-market, commuting and environmental datasets are candidates, but no values should be inferred into cities or FUAs from regional TL2/TL3 evidence.
