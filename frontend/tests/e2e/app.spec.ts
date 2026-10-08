@@ -409,8 +409,8 @@ async function mockApi(page: Page) {
               indicator_id: 'urban_total_dependency_ratio',
               name: 'Total dependency ratio',
               status: 'available',
-              period: isFua ? 2023 : 2024,
-              value: isFua ? 49.0 : 46.4,
+              period: isFua ? 2023 : 2022,
+              value: isFua ? 49.0 : 48.4,
               unit: 'percent',
               dataset_id: 'DSD_FUA_DEMO@DF_DEPEND',
               source_id: 'OECD',
@@ -1270,7 +1270,7 @@ test('source-native OECD urban area can be selected separately from regions', as
   await expect(geographicEvidence.getByText('Population density', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('2,376 /km²')).toBeVisible()
   await expect(geographicEvidence.getByText('Total dependency ratio', { exact: true })).toBeVisible()
-  await expect(geographicEvidence.getByText('46.4%')).toBeVisible()
+  await expect(geographicEvidence.getByText('48.4%')).toBeVisible()
   await expect(geographicEvidence.getByText(/OECD urban statistics/)).toBeVisible()
 })
 
