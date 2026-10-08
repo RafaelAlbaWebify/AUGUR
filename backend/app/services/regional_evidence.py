@@ -238,6 +238,9 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "urban_green_area_share": {
         "name": "Green area share",
     },
+    "urban_pm25_population_exposure": {
+        "name": "Population exposure to PM2.5",
+    },
 }
 
 
@@ -264,6 +267,7 @@ OECD_FUA_CITY_EXPECTED_INDICATORS = [
     ("urban_commute_public_transport_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
     ("urban_commute_bicycle_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
     ("urban_commute_walk_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_pm25_population_exposure", "DSD_FUA_ENV@DF_POLLUTION", "ug_m3"),
 ]
 
 OECD_FUA_ONLY_EXPECTED_INDICATORS = [
