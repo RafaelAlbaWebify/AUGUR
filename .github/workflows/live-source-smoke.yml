@@ -14,6 +14,7 @@ on:
       - "backend/scripts/inspect_oecd_fua_density.py"
       - "backend/scripts/inspect_oecd_fua_boundaries.py"
       - "backend/scripts/inspect_oecd_fua_dependency.py"
+      - "backend/scripts/inspect_oecd_fua_labour.py"
       - "backend/scripts/inspect_oecd_regional_demography.py"
       - "backend/scripts/inspect_oecd_regional_population.py"
       - "backend/scripts/inspect_oecd_regional_labour.py"
@@ -109,6 +110,9 @@ jobs:
 
       - name: Inspect OECD Australia urban dependency ratio
         run: python -m scripts.inspect_oecd_fua_dependency
+
+      - name: Inspect OECD Australia FUA labour market
+        run: python -m scripts.inspect_oecd_fua_labour
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
