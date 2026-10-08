@@ -192,6 +192,22 @@ CREATE TABLE IF NOT EXISTS geography_registry (
     longitude DOUBLE
 );
 
+CREATE TABLE IF NOT EXISTS geography_geometries (
+    geo_id VARCHAR PRIMARY KEY,
+    country_iso3 VARCHAR,
+    geography_system VARCHAR NOT NULL,
+    geo_level VARCHAR NOT NULL,
+    source_geo_code VARCHAR NOT NULL,
+    geometry_geojson VARCHAR NOT NULL,
+    bbox_min_lon DOUBLE,
+    bbox_min_lat DOUBLE,
+    bbox_max_lon DOUBLE,
+    bbox_max_lat DOUBLE,
+    source_id VARCHAR,
+    dataset_version VARCHAR,
+    retrieved_at TIMESTAMP NOT NULL
+);
+
 CREATE TABLE IF NOT EXISTS subnational_observations (
     geography_system VARCHAR NOT NULL,
     geo_code VARCHAR NOT NULL,
@@ -2595,6 +2611,132 @@ def geography_coverage_status() -> dict:
             }),
             "levels": sorted({
                 item["geo_level"]
+                for item in items
+            }),
+            "coverage": items,
+        }
+    finally:
+        con.close()
+
+
+def upsert_geography_geometries(rows: list[dict]) -> int:
+    if not rows:
+        return 0
+
+    con = duckdb.connect(str(settings.duckdb_path))
+    try:
+        con.executemany(
+            """
+            INSERT OR REPLACE INTO geography_geometries
+            (
+                geo_id, country_iso3, geography_system, geo_level,
+                source_geo_code, geometry_geojson,
+                bbox_min_lon, bbox_min_lat, bbox_max_lon, bbox_max_lat,
+                source_id, dataset_version, retrieved_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                [
+                    row["geo_id"],
+                    row.get("country_iso3"),
+                    row["geography_system"],
+                    row["geo_level"].lower(),
+                    row.get("source_geo_code", row["geo_id"]),
+                    row["geometry_geojson"],
+                    row.get("bbox_min_lon"),
+                    row.get("bbox_min_lat"),
+                    row.get("bbox_max_lon"),
+                    row.get("bbox_max_lat"),
+                    row.get("source_id"),
+                    row.get("dataset_version"),
+                    row.get("retrieved_at") or datetime.now(timezone.utc),
+                ]
+                for row in rows
+            ],
+        )
+        return len(rows)
+    finally:
+        con.close()
+
+
+def geography_geometries_for_country(
+    country_iso3: str,
+    geography_system: str | None = None,
+) -> list[dict]:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        params: list[object] = [country_iso3.upper()]
+        system_filter = ""
+        if geography_system:
+            system_filter = "AND geography_system = ?"
+            params.append(geography_system.upper())
+
+        result = con.execute(
+            f"""
+            SELECT
+                geo_id,
+                country_iso3,
+                geography_system,
+                geo_level,
+                source_geo_code,
+                geometry_geojson,
+                bbox_min_lon,
+                bbox_min_lat,
+                bbox_max_lon,
+                bbox_max_lat,
+                source_id,
+                dataset_version,
+                retrieved_at
+            FROM geography_geometries
+            WHERE country_iso3 = ?
+              {system_filter}
+            ORDER BY geography_system, geo_level, source_geo_code
+            """,
+            params,
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
+def geography_geometry_coverage_status() -> dict:
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        rows = con.execute(
+            """
+            SELECT
+                country_iso3,
+                geography_system,
+                geo_level,
+                COUNT(*) AS geometry_count,
+                MAX(retrieved_at) AS latest_retrieved_at
+            FROM geography_geometries
+            GROUP BY country_iso3, geography_system, geo_level
+            ORDER BY country_iso3, geography_system, geo_level
+            """
+        ).fetchall()
+
+        items = [
+            {
+                "country_iso3": row[0],
+                "geography_system": row[1],
+                "geo_level": row[2],
+                "geometry_count": int(row[3]),
+                "latest_retrieved_at": row[4],
+            }
+            for row in rows
+        ]
+        return {
+            "geometry_count": sum(item["geometry_count"] for item in items),
+            "countries_with_geometry": len({
+                item["country_iso3"]
+                for item in items
+                if item["country_iso3"]
+            }),
+            "systems": sorted({
+                item["geography_system"]
                 for item in items
             }),
             "coverage": items,
