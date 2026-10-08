@@ -13,7 +13,7 @@ DATASET_VERSION = "2.0"
 URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_REG_DEMO@DF_DEMO,2.0/"
-    "A..AU1+AU2..DEPEND_RATIO._T._T."
+    "A..AU1+AU2..._T._T."
 )
 PARAMS = {
     "startPeriod": "2021",
@@ -96,6 +96,10 @@ def main() -> int:
             for row in rows[:12]
         ],
         "ready_for_parser_design": bool(rows),
+        "dependency_ratio_rows": sum(
+            row.get("MEASURE") == "DEPEND_RATIO"
+            for row in rows
+        ),
     })
 
     print(json.dumps(diagnostics, indent=2))
