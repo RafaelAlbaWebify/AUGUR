@@ -393,3 +393,136 @@ def test_geography_geometry_storage_round_trip(monkeypatch, tmp_path):
     assert coverage["geometry_count"] == 1
     assert coverage["countries_with_geometry"] == 1
     assert coverage["systems"] == ["OECD_FUA"]
+
+
+def test_stale_geography_countries_respects_freshness_window(
+    monkeypatch,
+    tmp_path,
+):
+    from datetime import timedelta
+
+    path = tmp_path / "geography-freshness.duckdb"
+    con = duckdb.connect(str(path))
+    try:
+        con.execute(
+            """
+            CREATE TABLE geography_registry (
+                geo_id VARCHAR PRIMARY KEY,
+                country_iso3 VARCHAR,
+                country_iso2 VARCHAR,
+                name VARCHAR,
+                geo_level VARCHAR,
+                geography_system VARCHAR,
+                source_id VARCHAR,
+                source_geo_code VARCHAR,
+                parent_geo_id VARCHAR,
+                latitude DOUBLE,
+                longitude DOUBLE
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE subnational_observations (
+                geography_system VARCHAR,
+                geo_code VARCHAR,
+                indicator_id VARCHAR,
+                retrieved_at TIMESTAMP
+            )
+            """
+        )
+        now = datetime.now(timezone.utc)
+        con.executemany(
+            "INSERT INTO geography_registry VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                ("OECD_TL_2024:AU1", "AUS", "AU", "New South Wales", "tl2", "OECD_TL_2024", "OECD", "AU1", None, None, None),
+                ("OECD_TL_2024:CA1", "CAN", "CA", "Ontario", "tl2", "OECD_TL_2024", "OECD", "CA1", None, None, None),
+                ("OECD_TL_2024:JP1", "JPN", "JP", "Japan region", "tl2", "OECD_TL_2024", "OECD", "JP1", None, None, None),
+            ],
+        )
+        con.executemany(
+            "INSERT INTO subnational_observations VALUES (?, ?, ?, ?)",
+            [
+                ("OECD_TL_2024", "AU1", "regional_population", now),
+                ("OECD_TL_2024", "CA1", "regional_population", now - timedelta(hours=30)),
+            ],
+        )
+    finally:
+        con.close()
+
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+
+    stale = module.stale_geography_countries(
+        "OECD_TL_2024",
+        {"AUS", "CAN", "JPN"},
+        [],
+        max_age_hours=24,
+    )
+
+    assert stale == {"CAN", "JPN"}
+
+
+def test_stale_geography_countries_can_require_specific_indicators(
+    monkeypatch,
+    tmp_path,
+):
+    path = tmp_path / "geography-required-indicators.duckdb"
+    con = duckdb.connect(str(path))
+    try:
+        con.execute(
+            """
+            CREATE TABLE geography_registry (
+                geo_id VARCHAR PRIMARY KEY,
+                country_iso3 VARCHAR,
+                country_iso2 VARCHAR,
+                name VARCHAR,
+                geo_level VARCHAR,
+                geography_system VARCHAR,
+                source_id VARCHAR,
+                source_geo_code VARCHAR,
+                parent_geo_id VARCHAR,
+                latitude DOUBLE,
+                longitude DOUBLE
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE subnational_observations (
+                geography_system VARCHAR,
+                geo_code VARCHAR,
+                indicator_id VARCHAR,
+                retrieved_at TIMESTAMP
+            )
+            """
+        )
+        now = datetime.now(timezone.utc)
+        con.execute(
+            "INSERT INTO geography_registry VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            ["OECD_FUA:AUS01F", "AUS", "AU", "Sydney FUA", "fua", "OECD_FUA", "OECD", "AUS01F", None, None, None],
+        )
+        con.execute(
+            "INSERT INTO subnational_observations VALUES (?, ?, ?, ?)",
+            ["OECD_FUA", "AUS01F", "urban_population", now],
+        )
+    finally:
+        con.close()
+
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+
+    stale = module.stale_geography_countries(
+        "OECD_FUA",
+        {"AUS"},
+        {"urban_population", "urban_population_density"},
+        max_age_hours=24,
+    )
+
+    assert stale == {"AUS"}
