@@ -94,6 +94,19 @@ def initialize_sqlite(path: Path) -> None:
         )
         con.execute(
             """
+            CREATE TABLE IF NOT EXISTS ttv_holdout_seals (
+                protocol_version TEXT PRIMARY KEY,
+                acceptance_criteria_version TEXT NOT NULL,
+                holdout_sha256 TEXT NOT NULL,
+                case_count INTEGER NOT NULL,
+                country_count INTEGER NOT NULL,
+                sealed_at TEXT NOT NULL
+            )
+            """
+        )
+
+        con.execute(
+            """
             CREATE TABLE IF NOT EXISTS ttv_calibration_observations (
                 case_id TEXT PRIMARY KEY,
                 country_iso3 TEXT NOT NULL,
