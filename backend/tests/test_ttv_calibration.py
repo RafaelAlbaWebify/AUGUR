@@ -658,9 +658,11 @@ def test_development_exchange_round_trip_excludes_personal_profile(
     assert package["exchange_version"] == "ttv-development-exchange-v1"
     assert package["case_count"] == 1
     assert package["privacy"]["contains_full_profile"] is False
+    assert package["privacy"]["contains_exact_event_timestamps"] is False
     exported = package["cases"][0]
     assert exported["case_id"] == "exchange-001"
     assert "source_label" not in exported
+    assert "start_event_at" not in exported
     assert "observed_at" not in exported
     assert "imported_at" not in exported
     assert "profile" not in exported
