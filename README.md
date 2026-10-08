@@ -115,6 +115,48 @@ The existing ESCO dataset is preserved by default. To import or refresh a full o
 
 Use `-SkipSync` only when you intentionally want zero external evidence synchronization. Automatic local-evidence repair is also skipped in this mode.
 
+### TTV external calibration lifecycle
+
+AUGUR's bounded TTV v1 calibration protocol is frozen as `ttv-calibration-protocol-v1`.
+The protocol can collect a real holdout, but the temporal model remains unpublished
+until that holdout passes the pre-declared criteria and a representativeness review.
+
+The holdout workflow is deliberately explicit:
+
+1. Import a prospective holdout whose rows declare the frozen protocol and event/outcome definitions:
+
+```powershell
+.\import-ttv-holdout.ps1 -Path ".\path\to\ttv-holdout.csv"
+```
+
+2. After the full holdout has been collected, seal it. Sealing requires at least 60
+   cases, records a canonical SHA-256 fingerprint and prevents additional holdout
+   cases from being added under this protocol:
+
+```powershell
+.\seal-ttv-holdout.ps1
+```
+
+3. Record the separate representativeness/cohort-coverage review:
+
+```powershell
+.\review-ttv-holdout.ps1 `
+  -Representative yes `
+  -CohortCoverageAdequate yes `
+  -ReviewerLabel "methodology-review-v1"
+```
+
+4. Inspect the complete gate state:
+
+```powershell
+.\check-operability.ps1
+```
+
+Even when every calibration gate passes, AUGUR does **not** assign
+`TEMPORAL_MODEL_VERSION` automatically. Publishing a temporal model remains an
+explicit versioned release decision. Synthetic, retrospectively tuned or
+post-hoc promoted development cases must not be used as the final holdout.
+
 ### Global country baseline
 
 ESP / PRT / IRL remain AUGUR's validation set for regression and operability gating, but they are no longer the product boundary.
