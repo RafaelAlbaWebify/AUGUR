@@ -12,6 +12,7 @@ on:
       - "backend/scripts/inspect_global_country_baseline.py"
       - "backend/scripts/inspect_oecd_regional_density.py"
       - "backend/scripts/inspect_oecd_fua_density.py"
+      - "backend/scripts/inspect_oecd_fua_boundaries.py"
       - "backend/scripts/inspect_oecd_fua_dependency.py"
       - "backend/scripts/inspect_oecd_regional_demography.py"
       - "backend/scripts/inspect_oecd_regional_population.py"
@@ -96,6 +97,9 @@ jobs:
 
       - name: Inspect OECD Australia FUA density
         run: python -m scripts.inspect_oecd_fua_density
+
+      - name: Inspect official OECD city and FUA boundaries
+        run: python -m scripts.inspect_oecd_fua_boundaries
 
       - name: Sync representative OECD non-EU urban evidence
         run: >-
