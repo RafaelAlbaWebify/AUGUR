@@ -203,6 +203,28 @@ type GeographyResponse = {
   geographies: CountryGeography[]
 }
 
+type GeographyComparisonIndicator = {
+  indicator_id: string
+  name: string
+  unit?: string | null
+  regions: Record<string, RegionalIndicator>
+}
+
+type GeographyComparisonResponse = {
+  geography_system: string
+  geo_level: string
+  regions: Array<{
+    geo_code: string
+    geo_name?: string | null
+    geo_level: string
+    source?: string
+    source_ids?: string[]
+  }>
+  indicator_count: number
+  indicators: GeographyComparisonIndicator[]
+  notes?: string[]
+}
+
 type CityEvidenceResponse = {
   city_code: string
   geo_level: string
@@ -218,6 +240,7 @@ type CityEvidenceResponse = {
 const regionalEvidenceCache = new Map<string, RegionalEvidenceResponse>()
 const cityEvidenceCache = new Map<string, CityEvidenceResponse>()
 const geographyCatalogCache = new Map<string, CountryGeography[]>()
+const geographyComparisonCache = new Map<string, GeographyComparisonResponse>()
 
 type OverviewPageProps = {
   apiBase: string
@@ -405,6 +428,9 @@ export default function OverviewPage({
   const [countryGeographies, setCountryGeographies] = useState<CountryGeography[]>([])
   const [regionSearch, setRegionSearch] = useState('')
   const [urbanSearch, setUrbanSearch] = useState('')
+  const [comparisonTarget, setComparisonTarget] = useState('')
+  const [geographyComparison, setGeographyComparison] = useState<GeographyComparisonResponse | null>(null)
+  const [geographyComparisonState, setGeographyComparisonState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
 
   useEffect(() => {
     setSelectedRegion(null)
@@ -416,6 +442,9 @@ export default function OverviewPage({
     setCountryGeographies(geographyCatalogCache.get(selectedCountry) ?? [])
     setRegionSearch('')
     setUrbanSearch('')
+    setComparisonTarget('')
+    setGeographyComparison(null)
+    setGeographyComparisonState('idle')
   }, [selectedCountry])
 
   useEffect(() => {
@@ -493,6 +522,53 @@ export default function OverviewPage({
 
     return () => controller.abort()
   }, [apiBase, selectedRegion])
+
+  useEffect(() => {
+    setComparisonTarget('')
+    setGeographyComparison(null)
+    setGeographyComparisonState('idle')
+  }, [selectedRegion?.id, selectedRegion?.system])
+
+  useEffect(() => {
+    if (!selectedRegion || !comparisonTarget) {
+      setGeographyComparison(null)
+      setGeographyComparisonState('idle')
+      return
+    }
+
+    const codes = [selectedRegion.id, comparisonTarget].sort()
+    const cacheKey = `${selectedRegion.system}:${codes.join('|')}`
+    const cached = geographyComparisonCache.get(cacheKey)
+    if (cached) {
+      setGeographyComparison(cached)
+      setGeographyComparisonState('ready')
+      return
+    }
+
+    const controller = new AbortController()
+    setGeographyComparisonState('loading')
+    fetch(
+      `${apiBase}/api/geographies/compare?geographies=${codes.map(encodeURIComponent).join(',')}`,
+      { signal: controller.signal },
+    )
+      .then((response) => {
+        if (!response.ok) throw new Error(`Geography comparison HTTP ${response.status}`)
+        return response.json() as Promise<GeographyComparisonResponse>
+      })
+      .then((payload) => {
+        if (controller.signal.aborted) return
+        geographyComparisonCache.set(cacheKey, payload)
+        setGeographyComparison(payload)
+        setGeographyComparisonState('ready')
+      })
+      .catch((error) => {
+        if ((error as Error).name === 'AbortError') return
+        setGeographyComparison(null)
+        setGeographyComparisonState('error')
+      })
+
+    return () => controller.abort()
+  }, [apiBase, selectedRegion, comparisonTarget])
 
   useEffect(() => {
     if (!selectedCity) {
@@ -585,6 +661,21 @@ export default function OverviewPage({
       item.geo_level,
     ].some((value) => String(value ?? '').toLowerCase().includes(urbanSearchTerm))
   })
+
+  const selectedComparisonLevel = selectedRegion
+    ? (
+        typeof selectedRegion.level === 'number'
+          ? `nuts${selectedRegion.level}`
+          : String(selectedRegion.level).toLowerCase()
+      )
+    : null
+  const comparisonCandidates = selectedRegion
+    ? countryGeographies.filter((item) => (
+        item.geography_system === selectedRegion.system
+        && item.geo_level.toLowerCase() === selectedComparisonLevel
+        && item.source_geo_code !== selectedRegion.id
+      ))
+    : []
 
   const geographyCoverage = {
     total: countryGeographies.length,
@@ -993,6 +1084,59 @@ export default function OverviewPage({
                         </article>
                       ))}
                     </div>
+                  </div>
+                ) : null}
+                {selectedRegion && comparisonCandidates.length ? (
+                  <div className="geographyComparePanel" aria-label="Geography comparison">
+                    <div className="geographyCompareHeader">
+                      <div>
+                        <span>COMPARE LIKE-FOR-LIKE</span>
+                        <strong>{selectedRegion.name}</strong>
+                      </div>
+                      <select
+                        aria-label="Compare selected geography with"
+                        value={comparisonTarget}
+                        onChange={(event) => setComparisonTarget(event.target.value)}
+                      >
+                        <option value="">Compare with…</option>
+                        {comparisonCandidates.map((item) => (
+                          <option key={item.geo_id} value={item.source_geo_code}>
+                            {item.name ?? item.source_geo_code}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    {geographyComparisonState === 'loading' ? (
+                      <span className="geographyCompareState">Loading comparison…</span>
+                    ) : geographyComparisonState === 'error' ? (
+                      <span className="geographyCompareState error">Comparison unavailable</span>
+                    ) : geographyComparisonState === 'ready' && geographyComparison ? (
+                      <div className="geographyCompareRows">
+                        {geographyComparison.indicators
+                          .filter((item) => (
+                            item.regions[selectedRegion.id]?.status === 'available'
+                            && item.regions[comparisonTarget]?.status === 'available'
+                          ))
+                          .slice(0, 8)
+                          .map((item) => {
+                            const current = item.regions[selectedRegion.id]
+                            const other = item.regions[comparisonTarget]
+                            return (
+                              <article key={item.indicator_id}>
+                                <span>{item.name}</span>
+                                <div>
+                                  <strong>{formatRegionalValue(current.value ?? 0, current.unit ?? item.unit ?? undefined)}</strong>
+                                  <small>vs</small>
+                                  <strong>{formatRegionalValue(other.value ?? 0, other.unit ?? item.unit ?? undefined)}</strong>
+                                </div>
+                              </article>
+                            )
+                          })}
+                      </div>
+                    ) : null}
+                    <small className="geographyCompareNote">
+                      Same geography system and level only · descriptive comparison · no ranking
+                    </small>
                   </div>
                 ) : null}
                 <p className="geoEvidenceScope">
