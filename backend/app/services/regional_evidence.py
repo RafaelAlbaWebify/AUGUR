@@ -169,6 +169,9 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_age_adjusted_mortality_per_1000": {
         "name": "Age-adjusted mortality rate",
     },
+    "urban_population": {
+        "name": "Population",
+    },
     "urban_population_density": {
         "name": "Population density",
     },
