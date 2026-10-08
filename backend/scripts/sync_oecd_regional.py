@@ -27,20 +27,36 @@ def _target_countries(requested: list[str] | None) -> set[str]:
         else set(OECD_MEMBER_ISO3) - set(EU_MEMBER_ISO3)
     )
 
-    world_bank = WorldBankAdapter(timeout_seconds=90, max_retries=3)
-    try:
-        for code in sorted(requested_codes):
-            if country_record(code) is None:
-                world_bank.ensure_country_registered(code)
-    finally:
-        world_bank.close()
+    existing = {
+        country["iso3"]
+        for country in country_registry()
+    }
+    missing = requested_codes - existing
 
+    if missing:
+        world_bank = WorldBankAdapter(timeout_seconds=90, max_retries=3)
+        try:
+            if requested:
+                for code in sorted(missing):
+                    world_bank.ensure_country_registered(code)
+            else:
+                # One authoritative catalog request is cheaper and more robust
+                # than one metadata request per OECD country. It also prepares
+                # the local registry for future global analysis.
+                world_bank.register_country_catalog()
+        finally:
+            world_bank.close()
+
+    registry = {
+        country["iso3"]: country
+        for country in country_registry()
+    }
     return {
         code
         for code in requested_codes
         if (
-            (country_record(code) or {}).get("oecd_member")
-            and not (country_record(code) or {}).get("eu_member")
+            registry.get(code, {}).get("oecd_member")
+            and not registry.get(code, {}).get("eu_member")
         )
     }
 
