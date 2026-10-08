@@ -3,7 +3,8 @@ param(
     [string]$StasPath,
     [string]$OjaPath,
     [switch]$SkipSync,
-    [switch]$GlobalBaseline
+    [switch]$GlobalBaseline,
+    [switch]$ForceOecdRefresh
 )
 
 $ErrorActionPreference = "Stop"
@@ -78,10 +79,14 @@ if (-not $SkipSync) {
         Write-Warning "EEA regional environmental-health evidence is currently unavailable."
     }
 
-    $OecdRegionalCode = Invoke-Step "Synchronize OECD non-EU regional demographic evidence" {
+    $OecdRegionalCode = Invoke-Step "Synchronize OECD non-EU regional evidence" {
         Push-Location (Join-Path $Root "backend")
         try {
-            & $BackendPython -m scripts.sync_oecd_regional
+            $OecdRegionalArgs = @("-m", "scripts.sync_oecd_regional")
+            if ($ForceOecdRefresh) {
+                $OecdRegionalArgs += "--force"
+            }
+            & $BackendPython @OecdRegionalArgs
         }
         finally {
             Pop-Location
@@ -92,10 +97,14 @@ if (-not $SkipSync) {
         Write-Warning "OECD regional demographic evidence is currently unavailable."
     }
 
-    $OecdUrbanCode = Invoke-Step "Synchronize OECD non-EU urban density evidence" {
+    $OecdUrbanCode = Invoke-Step "Synchronize OECD non-EU urban evidence" {
         Push-Location (Join-Path $Root "backend")
         try {
-            & $BackendPython -m scripts.sync_oecd_fua
+            $OecdUrbanArgs = @("-m", "scripts.sync_oecd_fua")
+            if ($ForceOecdRefresh) {
+                $OecdUrbanArgs += "--force"
+            }
+            & $BackendPython @OecdUrbanArgs
         }
         finally {
             Pop-Location
@@ -103,7 +112,7 @@ if (-not $SkipSync) {
     } -AllowedExitCodes @(0, 2)
 
     if ($OecdUrbanCode -eq 2) {
-        Write-Warning "OECD FUA/city density evidence is currently unavailable."
+        Write-Warning "OECD FUA/city evidence is currently unavailable."
     }
 
     $OecdUrbanGeometryCode = Invoke-Step "Synchronize OECD urban boundary geometry" {
