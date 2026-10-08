@@ -214,3 +214,37 @@ Implemented and live-verified on 2026-10-07:
 
 The next OECD regional extension should use `DSD_REG_LAB@DF_RATES` / the Developer API labour dataset to add employment-to-population and unemployment-rate evidence. Its measure codes and units must be live-inspected before ingestion.
 
+
+
+## OECD source-native urban coverage
+
+AUGUR now has a first non-European urban provider based on OECD harmonised city and Functional Urban Area (FUA) statistics.
+
+Implemented:
+
+- geography system `OECD_FUA`, kept distinct from Eurostat Urban Audit;
+- source-native OECD CITY and FUA codes are registered in `geography_registry`;
+- city and FUA remain separate geographic levels and are not compared interchangeably;
+- country identity is resolved against AUGUR's registered ISO2/ISO3 catalog because the OECD FUA territorial datasets do not consistently populate a country field;
+- mixed code prefixes such as `AT001C`, `AUS01C` and `CAN01C` are resolved longest-prefix-first to prevent country collisions;
+- OECD urban evidence is fetched only during sync/refresh and served locally from DuckDB during interaction;
+- the Overview separates source-native regional geographies from source-native urban areas.
+
+Live OECD evidence verified for Australia includes:
+
+- `AUS01C` — Greater Sydney — CITY;
+- `AUS01F` — Greater Sydney — FUA;
+- 38 Australian CITY/FUA reference codes in the OECD density dataset;
+- population density from `DSD_FUA_TERR@DF_DENSITY` v1.1;
+- total population from `DSD_FUA_DEMO@DF_AGE_SEX` v1.2;
+- total, youth and old-age dependency ratios from `DSD_FUA_DEMO@DF_DEPEND` v1.2.
+
+Dependency measures remain separate:
+
+- total dependency: people aged under 15 plus 65 or over, relative to population aged 15–64;
+- youth dependency: people aged under 15 relative to population aged 15–64;
+- old-age dependency: people aged 65 or over relative to population aged 15–64.
+
+AUGUR does not collapse these measures into a composite urban score.
+
+Next urban expansion candidates must be inspected and validated before integration. OECD FUA labour-market, commuting and environmental datasets are candidates, but no values should be inferred into cities or FUAs from regional TL2/TL3 evidence.
