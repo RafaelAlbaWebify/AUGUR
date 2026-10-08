@@ -924,3 +924,88 @@ def test_holdout_acceptance_fails_poor_coverage_and_bias():
     assert result["checks"]["interval_coverage_pct"]["passed"] is False
     assert result["checks"]["absolute_mean_signed_midpoint_error_weeks"]["passed"] is False
     assert result["checks"]["above_interval_rate_pct"]["passed"] is False
+
+
+
+def _valid_holdout_case(case_id="holdout-immutable-001"):
+    return {
+        "case_id": case_id,
+        "country_iso3": "IRL",
+        "employment_mode": "remote",
+        "engine_version": "ttv-temporal-evidence-v1",
+        "composition": "critical_path_v1",
+        "candidate_weeks_min": 10,
+        "candidate_weeks_max": 25,
+        "observed_weeks": 16,
+        "sample_role": "holdout",
+        "start_event_definition_version": module.CALIBRATION_START_EVENT_DEFINITION_VERSION,
+        "viability_outcome_definition_version": module.CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
+        "calibration_protocol_version": module.CALIBRATION_PROTOCOL_VERSION,
+    }
+
+
+def test_holdout_case_is_immutable_after_import(monkeypatch, tmp_path):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    saved = module.upsert_calibration_case(_valid_holdout_case())
+    assert saved["sample_role"] == "holdout"
+
+    with pytest.raises(ValueError, match="immutable once imported"):
+        module.upsert_calibration_case({
+            **_valid_holdout_case(),
+            "observed_weeks": 17,
+        })
+
+    status = module.calibration_status()
+    assert status["holdout_case_count"] == 1
+    assert status["calibration_protocol_versions"] == [
+        "ttv-calibration-protocol-v1"
+    ]
+
+
+def test_csv_import_validates_entire_batch_before_writing(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    csv_path = tmp_path / "batch.csv"
+    csv_path.write_text(
+        "case_id,country_iso3,employment_mode,engine_version,"
+        "composition,candidate_weeks_min,candidate_weeks_max,"
+        "observed_weeks,sample_role\n"
+        "valid-001,IRL,remote,ttv-temporal-evidence-v1,"
+        "critical_path_v1,10,25,16,development\n"
+        "invalid-002,IRL,remote,ttv-temporal-evidence-v1,"
+        "critical_path_v1,25,10,16,development\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Invalid calibration row 3"):
+        module.import_calibration_csv(csv_path)
+
+    assert module.calibration_status()["case_count"] == 0
+
+
+def test_csv_import_rejects_duplicate_case_ids_before_writing(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    csv_path = tmp_path / "duplicate.csv"
+    csv_path.write_text(
+        "case_id,country_iso3,employment_mode,engine_version,"
+        "composition,candidate_weeks_min,candidate_weeks_max,"
+        "observed_weeks,sample_role\n"
+        "dup-001,IRL,remote,ttv-temporal-evidence-v1,"
+        "critical_path_v1,10,25,16,development\n"
+        "dup-001,IRL,remote,ttv-temporal-evidence-v1,"
+        "critical_path_v1,10,25,17,development\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="duplicate case_id"):
+        module.import_calibration_csv(csv_path)
+
+    assert module.calibration_status()["case_count"] == 0
