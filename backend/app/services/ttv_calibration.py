@@ -847,6 +847,7 @@ def calibration_status() -> dict:
                 "sample_roles": [],
                 "start_event_definition_versions": [],
                 "viability_outcome_definition_versions": [],
+                "calibration_protocol_versions": [],
                 "development_case_count": 0,
                 "holdout_case_count": 0,
                 "protocol_ready_for_holdout": CALIBRATION_PROTOCOL_VERSION is not None,
@@ -895,6 +896,7 @@ def calibration_status() -> dict:
             "sample_roles": [],
             "start_event_definition_versions": [],
             "viability_outcome_definition_versions": [],
+            "calibration_protocol_versions": [],
             "development_case_count": 0,
             "holdout_case_count": 0,
             "protocol_ready_for_holdout": CALIBRATION_PROTOCOL_VERSION is not None,
@@ -1030,6 +1032,13 @@ def calibration_status() -> dict:
                 case["viability_outcome_definition_version"]
                 for case in cases
                 if case["viability_outcome_definition_version"]
+            }
+        ),
+        "calibration_protocol_versions": sorted(
+            {
+                case["calibration_protocol_version"]
+                for case in cases
+                if case["calibration_protocol_version"]
             }
         ),
         "development_case_count": sum(
