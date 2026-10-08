@@ -331,6 +331,31 @@ function formatRegionalValue(value: number, unit?: string) {
   return new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 }).format(value)
 }
 
+function sourceNativeUrbanDomain(indicatorId: string) {
+  if (
+    indicatorId === 'urban_population'
+    || indicatorId === 'urban_population_density'
+    || indicatorId.includes('dependency_ratio')
+  ) return 'demography'
+
+  if (
+    indicatorId.includes('employment_to_population')
+    || indicatorId.includes('labour_force')
+    || indicatorId.includes('unemployment')
+  ) return 'labour'
+
+  if (
+    indicatorId.includes('public_transport')
+    || indicatorId.includes('commute_')
+  ) return 'mobility'
+
+  if (
+    indicatorId.includes('green_area')
+  ) return 'environment'
+
+  return 'other'
+}
+
 function selectedRegionLevelLabel(level: number | string | undefined) {
   if (typeof level === 'number') return `NUTS ${level}`
   if (!level) return 'REGIONAL'
@@ -1021,23 +1046,72 @@ export default function OverviewPage({
                   </strong>
                 </div>
                 {regionalEvidenceState === 'ready' && regionalEvidence && (
-                  <div className="geoEvidenceMetricGrid">
-                    {regionalEvidence.indicators.map((indicator) => (
-                      <article key={indicator.indicator_id} className="geoEvidenceMetric">
-                        <span>{indicator.name}</span>
-                        <strong>
-                          {indicator.status === 'available' && indicator.value != null
-                            ? formatRegionalValue(indicator.value, indicator.unit)
-                            : '—'}
-                        </strong>
-                        <small>
-                          {indicator.status === 'available'
-                            ? `${indicator.period} · ${indicator.dataset_id}`
-                            : 'Official regional observation unavailable for this code'}
-                        </small>
-                      </article>
-                    ))}
-                  </div>
+                  ['CITY', 'FUA'].includes(String(selectedRegion?.level).toUpperCase())
+                    && selectedRegion?.system === 'OECD_FUA'
+                    ? (
+                      <div className="cityEvidenceDomainStack">
+                        {[
+                          ['demography', 'Demography'],
+                          ['labour', 'Labour'],
+                          ['mobility', 'Mobility'],
+                          ['environment', 'Environment'],
+                          ['other', 'Other'],
+                        ].map(([domain, label]) => {
+                          const indicators = regionalEvidence.indicators.filter(
+                            (indicator) => sourceNativeUrbanDomain(indicator.indicator_id) === domain,
+                          )
+                          if (!indicators.length) return null
+
+                          return (
+                            <section key={domain} className="cityEvidenceDomain">
+                              <div className="cityEvidenceDomainHeader">
+                                <strong>{label}</strong>
+                                <span>
+                                  {indicators.filter((indicator) => indicator.status === 'available').length}
+                                  /{indicators.length} available
+                                </span>
+                              </div>
+                              <div className="geoEvidenceMetricGrid">
+                                {indicators.map((indicator) => (
+                                  <article key={indicator.indicator_id} className="geoEvidenceMetric">
+                                    <span>{indicator.name}</span>
+                                    <strong>
+                                      {indicator.status === 'available' && indicator.value != null
+                                        ? formatRegionalValue(indicator.value, indicator.unit)
+                                        : '—'}
+                                    </strong>
+                                    <small>
+                                      {indicator.status === 'available'
+                                        ? `${indicator.period} · ${indicator.dataset_id}`
+                                        : 'Official urban observation unavailable for this code'}
+                                    </small>
+                                  </article>
+                                ))}
+                              </div>
+                            </section>
+                          )
+                        })}
+                      </div>
+                    )
+                    : (
+                      <div className="geoEvidenceMetricGrid">
+                        {regionalEvidence.indicators.map((indicator) => (
+                          <article key={indicator.indicator_id} className="geoEvidenceMetric">
+                            <span>{indicator.name}</span>
+                            <strong>
+                              {indicator.status === 'available' && indicator.value != null
+                                ? formatRegionalValue(indicator.value, indicator.unit)
+                                : '—'}
+                            </strong>
+                            <small>
+                              {indicator.status === 'available'
+                                ? `${indicator.period} · ${indicator.dataset_id}`
+                                : 'Official regional observation unavailable for this code'}
+                            </small>
+                          </article>
+                        ))}
+                      </div>
+                    )
                 )}
                 {regionalEvidenceState === 'ready'
                   && regionalEvidence?.sector_structure?.status === 'available'
