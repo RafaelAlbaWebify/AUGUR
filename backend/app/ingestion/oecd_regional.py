@@ -29,6 +29,12 @@ DEMOGRAPHY_BASE_URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_REG_DEMO@DF_DEMO,2.0"
 )
+LABOUR_DATASET_ID = "DSD_REG_LAB@DF_RATES"
+LABOUR_DATASET_VERSION = "2.4"
+LABOUR_BASE_URL = (
+    "https://sdmx.oecd.org/public/rest/data/"
+    "OECD.CFE.EDS,DSD_REG_LAB@DF_RATES,2.4"
+)
 
 DENSITY_DEFAULT_KEY = "A.TL2+TL3......PS_KM2"
 POPULATION_DEFAULT_KEY = "A.TL2+TL3...POP._T._T."
@@ -37,6 +43,7 @@ DEMOGRAPHY_DEFAULT_KEY = (
     "INMIG+OUTMIG+NETMOB+MORT_STANDARD_RATIO"
     "._T._T."
 )
+LABOUR_DEFAULT_KEY = "A.TL2+TL3...EMP_RATIO.Y15T64._T."
 
 DEMOGRAPHY_METRICS = {
     ("INMIG", "PT_POP"): {
@@ -260,6 +267,61 @@ class OECDRegionalAdapter:
             raise last_error
         raise RuntimeError(
             "OECD regional demography request failed without an exception"
+        )
+
+    def fetch_labour(
+        self,
+        *,
+        start_year: int = 2021,
+        end_year: int | None = None,
+        key: str = LABOUR_DEFAULT_KEY,
+    ) -> str:
+        params = {
+            **PARAMS,
+            "startPeriod": str(start_year),
+        }
+        if end_year is not None:
+            params["endPeriod"] = str(end_year)
+
+        last_error: Exception | None = None
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                response = self.client.get(
+                    f"{LABOUR_BASE_URL}/{key}",
+                    params=params,
+                )
+                response.raise_for_status()
+                text = response.text
+                if (
+                    "REF_AREA" not in text
+                    or "OBS_VALUE" not in text
+                    or "MEASURE" not in text
+                    or "UNIT_MEASURE" not in text
+                ):
+                    raise ValueError(
+                        "Unexpected OECD regional labour CSV schema"
+                    )
+                return text
+            except (
+                httpx.TimeoutException,
+                httpx.TransportError,
+                httpx.HTTPStatusError,
+            ) as exc:
+                last_error = exc
+                if attempt >= self.max_retries:
+                    break
+                delay_seconds = 2 ** (attempt - 1)
+                print(
+                    f"   retry {attempt}/{self.max_retries - 1} "
+                    f"after {type(exc).__name__} "
+                    f"(waiting {delay_seconds}s)"
+                )
+                time.sleep(delay_seconds)
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError(
+            "OECD regional labour request failed without an exception"
         )
 
     def normalize_density(
@@ -555,6 +617,107 @@ class OECDRegionalAdapter:
                 (row["period"] for row in rows),
                 default=None,
             ),
+            "complete": bool(rows),
+        }
+
+    def normalize_labour(
+        self,
+        csv_text: str,
+        *,
+        allowed_country_iso3: set[str] | None = None,
+    ) -> list[dict]:
+        reader = csv.DictReader(io.StringIO(csv_text))
+        retrieved_at = datetime.now(timezone.utc)
+        allowed = (
+            {code.upper() for code in allowed_country_iso3}
+            if allowed_country_iso3 is not None
+            else None
+        )
+        rows: list[dict] = []
+
+        for record in reader:
+            level = str(record.get("TERRITORIAL_LEVEL") or "").upper()
+            if level not in {"TL2", "TL3"}:
+                continue
+            if str(record.get("MEASURE") or "").upper() != "EMP_RATIO":
+                continue
+            if str(record.get("AGE") or "").upper() != "Y15T64":
+                continue
+            if str(record.get("SEX") or "").upper() not in {"_T", "T", "TOTAL"}:
+                continue
+            if str(record.get("UNIT_MEASURE") or "").upper() != "PT_POP_SUB":
+                continue
+
+            geo_code = str(record.get("REF_AREA") or "").upper()
+            country_iso3 = str(record.get("COUNTRY") or "").upper() or None
+            if not geo_code:
+                continue
+            if allowed is not None and country_iso3 not in allowed:
+                continue
+
+            period = str(record.get("TIME_PERIOD") or "")
+            raw_value = record.get("OBS_VALUE")
+            if not period.isdigit() or raw_value in (None, "", ".."):
+                continue
+
+            try:
+                value = float(raw_value)
+            except (TypeError, ValueError):
+                continue
+
+            rows.append({
+                "geo_code": geo_code,
+                "geo_name": _reference_name(record, geo_code),
+                "geo_level": level.lower(),
+                "indicator_id": "regional_employment_to_population_ratio",
+                "period": int(period),
+                "value": value,
+                "unit": "percent",
+                "source_id": SOURCE_ID,
+                "dataset_id": LABOUR_DATASET_ID,
+                "retrieved_at": retrieved_at,
+                "source_updated_at": LABOUR_DATASET_VERSION,
+                "country_iso3": country_iso3,
+                "country_iso2": geo_code[:2] if len(geo_code) >= 2 else None,
+                "geography_system": GEOGRAPHY_SYSTEM,
+                "source_geo_code": geo_code,
+            })
+
+        return rows
+
+    def sync_labour(
+        self,
+        *,
+        allowed_country_iso3: set[str] | None = None,
+        start_year: int = 2021,
+        end_year: int | None = None,
+        key: str = LABOUR_DEFAULT_KEY,
+    ) -> dict:
+        csv_text = self.fetch_labour(
+            start_year=start_year,
+            end_year=end_year,
+            key=key,
+        )
+        rows = self.normalize_labour(
+            csv_text,
+            allowed_country_iso3=allowed_country_iso3,
+        )
+        inserted = upsert_subnational_observations(rows)
+        return {
+            "source_id": SOURCE_ID,
+            "dataset_id": LABOUR_DATASET_ID,
+            "dataset_version": LABOUR_DATASET_VERSION,
+            "rows": inserted,
+            "country_count": len({
+                row["country_iso3"]
+                for row in rows
+                if row.get("country_iso3")
+            }),
+            "geography_count": len({row["geo_code"] for row in rows}),
+            "geo_levels": sorted({row["geo_level"] for row in rows}),
+            "indicator_ids": sorted({row["indicator_id"] for row in rows}),
+            "period_min": min((row["period"] for row in rows), default=None),
+            "period_max": max((row["period"] for row in rows), default=None),
             "complete": bool(rows),
         }
 
