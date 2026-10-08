@@ -1328,11 +1328,7 @@ def latest_environmental_health_burden_for_geo(
             WHERE rn = 1
             ORDER BY burden_type, unit_code
             """,
-            [
-                geo_code.upper(),
-                geography_system,
-                geography_system,
-            ],
+            [geo_code.upper()],
         )
         columns = [column[0] for column in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
