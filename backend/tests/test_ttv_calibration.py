@@ -1259,3 +1259,51 @@ def test_negative_holdout_review_blocks_activation(monkeypatch, tmp_path):
         "holdout_not_representative",
         "holdout_cohort_coverage_inadequate",
     ]
+
+
+
+def test_holdout_representativeness_diagnostics_expose_concentration(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    for index in range(20):
+        module.upsert_calibration_case({
+            **_valid_holdout_case(f"holdout-diag-{index:03d}"),
+            "country_iso3": "IRL" if index < 15 else "PRT",
+            "context": {
+                "current_cefr": "B1" if index < 16 else "A2",
+                "weekly_study_hours": 10 if index < 18 else 5,
+            },
+        })
+
+    diagnostics = module.holdout_representativeness_diagnostics()
+
+    assert diagnostics["case_count"] == 20
+    assert diagnostics["country_counts"] == {"IRL": 15, "PRT": 5}
+    assert diagnostics["current_cefr_counts"] == {"A2": 4, "B1": 16}
+    assert diagnostics["weekly_study_hours_counts"] == {
+        "5.0": 2,
+        "10.0": 18,
+    }
+    assert diagnostics["context_complete_case_count"] == 20
+    assert diagnostics["context_complete_pct"] == 100.0
+    assert diagnostics["largest_country_share_pct"] == 75.0
+    assert diagnostics["largest_cefr_share_pct"] == 80.0
+    assert diagnostics["largest_study_hours_share_pct"] == 90.0
+    assert diagnostics["cohorts_meeting_minimum"]["countries"] == ["IRL"]
+    assert diagnostics["cohorts_meeting_minimum"]["current_cefr"] == ["B1"]
+    assert diagnostics["cohorts_meeting_minimum"]["weekly_study_hours"] == [
+        "10.0"
+    ]
+
+
+def test_empty_holdout_representativeness_diagnostics(monkeypatch, tmp_path):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    diagnostics = module.holdout_representativeness_diagnostics()
+
+    assert diagnostics["case_count"] == 0
+    assert diagnostics["context_complete_pct"] is None
+    assert diagnostics["largest_country_share_pct"] is None
