@@ -299,10 +299,26 @@ export default function RegionalMap({
         )
         setSubnationalAvailable(hasSubnational)
 
-        if (!hasCountryGeometry && countryCenter) {
+        if (!hasCountryGeometry && sourceNativeFeatures.length > 0) {
+          const previewLayer = L.geoJSON({
+            type: 'FeatureCollection',
+            features: sourceNativeFeatures,
+          } as GeoJSON.FeatureCollection)
+          const bounds = previewLayer.getBounds()
+          if (bounds.isValid()) {
+            map.fitBounds(bounds, {
+              padding: [24, 24],
+              maxZoom: 6,
+              animate: false,
+            })
+            if (map.getZoom() < REGIONS_VISIBLE_ZOOM) {
+              map.setZoom(REGIONS_VISIBLE_ZOOM, { animate: false })
+            }
+          }
+        } else if (!hasCountryGeometry && countryCenter) {
           map.setView(
             [countryCenter.lat, countryCenter.lon],
-            5,
+            REGIONS_VISIBLE_ZOOM,
             { animate: false },
           )
         }
@@ -634,6 +650,7 @@ export default function RegionalMap({
     const map = mapRef.current
     const countryLayer = countryLayerRef.current
     const regionLayer = regionLayerRef.current
+    const sourceNativeLayer = sourceNativeLayerRef.current
     if (status !== 'ready' || !map || !countryLayer || !regionLayer) return
 
     const selectedLayers = countryLayer.getLayers().filter((layer) => {
@@ -641,7 +658,34 @@ export default function RegionalMap({
       return feature?.properties?.CNTR_CODE === countryIso2
     })
 
-    if (!selectedLayers.length) return
+    if (!selectedLayers.length) {
+      if (sourceNativeLayer && sourceNativeLayer.getLayers().length) {
+        if (!map.hasLayer(sourceNativeLayer)) {
+          sourceNativeLayer.addTo(map)
+        }
+        const nativeBounds = sourceNativeLayer.getBounds()
+        if (nativeBounds.isValid()) {
+          map.fitBounds(nativeBounds, {
+            padding: [24, 24],
+            maxZoom: 6,
+            animate: false,
+          })
+          if (map.getZoom() < REGIONS_VISIBLE_ZOOM) {
+            map.setZoom(REGIONS_VISIBLE_ZOOM, { animate: false })
+          }
+        }
+        return
+      }
+
+      if (countryCenter) {
+        map.setView(
+          [countryCenter.lat, countryCenter.lon],
+          REGIONS_VISIBLE_ZOOM,
+          { animate: false },
+        )
+      }
+      return
+    }
 
     if (!map.hasLayer(regionLayer)) {
       regionLayer.addTo(map)
