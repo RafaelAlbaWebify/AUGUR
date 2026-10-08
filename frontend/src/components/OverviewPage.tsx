@@ -275,6 +275,9 @@ function formatRegionalValue(value: number, unit?: string) {
   if (unit === 'pps_per_person') {
     return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)} PPS/person`
   }
+  if (unit === 'usd_ppp_per_person') {
+    return `${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(value)} PPP/person`
+  }
   if (unit === 'ug_m3') {
     return `${value.toFixed(1)} µg/m³`
   }
