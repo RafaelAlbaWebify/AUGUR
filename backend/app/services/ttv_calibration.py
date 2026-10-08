@@ -826,7 +826,9 @@ def calibration_status() -> dict:
                     "outcome_evidence_types": [],
                     "weekly_study_hours": [],
                 },
-                "externally_calibrated": False,
+                "holdout_acceptance": evaluate_holdout_acceptance([]),
+                "holdout_acceptance": evaluate_holdout_acceptance([]),
+            "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
                 ],
@@ -949,6 +951,8 @@ def calibration_status() -> dict:
         }),
     }
 
+    holdout_acceptance = evaluate_holdout_acceptance(cases)
+
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
         "protocol_state": CALIBRATION_PROTOCOL_STATE,
@@ -1003,10 +1007,11 @@ def calibration_status() -> dict:
         "stage_metrics": stage_metrics,
         "sample_role_metrics": sample_role_metrics,
         "context_summary": context_summary,
+        "holdout_acceptance": holdout_acceptance,
         "externally_calibrated": False,
         "notes": [
             "Metrics describe observed calibration cases only.",
-            "AUGUR does not define a pass/fail threshold until a calibration protocol and representative dataset are approved.",
+            "Frozen numerical acceptance thresholds are pre-declared, but they do not establish representativeness or external calibration by themselves.",
             "Observed cases contain no full personal profile payload in the calibration store.",
         ],
     }
