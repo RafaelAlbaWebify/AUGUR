@@ -1,0 +1,51 @@
+name: AUGUR OECD Research Smoke
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/scripts/inspect_oecd_regional_broadband.py"
+      - "backend/scripts/inspect_oecd_regional_land_temperature.py"
+      - "backend/scripts/inspect_oecd_fua_pollution.py"
+      - "backend/scripts/inspect_oecd_fua_economy.py"
+      - ".github/workflows/oecd-research-smoke.yml"
+  schedule:
+    - cron: "37 7 * * 2"
+
+concurrency:
+  group: augur-oecd-research-smoke
+  cancel-in-progress: true
+
+jobs:
+  research:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Inspect OECD regional broadband
+        run: python -m scripts.inspect_oecd_regional_broadband
+
+      - name: Inspect OECD regional land surface temperature
+        run: python -m scripts.inspect_oecd_regional_land_temperature
+
+      - name: Inspect OECD urban PM2.5 research series
+        run: python -m scripts.inspect_oecd_fua_pollution
+
+      - name: Inspect OECD urban economy coverage
+        run: python -m scripts.inspect_oecd_fua_economy
