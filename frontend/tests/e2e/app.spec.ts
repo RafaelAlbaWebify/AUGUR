@@ -598,9 +598,9 @@ async function mockApi(page: Page) {
           geo_level: 'tl2',
           source: 'AUGUR local store · OECD regional statistics',
           source_ids: ['OECD'],
-          indicator_count: 6,
-          available_count: 6,
-          complete: true,
+          indicator_count: 8,
+          available_count: 7,
+          complete: false,
           indicators: [
             {
               indicator_id: 'regional_population',
@@ -661,6 +661,27 @@ async function mockApi(page: Page) {
               unit: 'usd_ppp_per_person',
               dataset_id: 'DSD_REG_ECO@DF_INC',
               source_id: 'OECD',
+            },
+            {
+              indicator_id: 'regional_daytime_land_surface_temperature',
+              name: 'Daytime yearly land surface temperature',
+              status: 'available',
+              period: 2023,
+              value: 27.25,
+              unit: 'celsius',
+              dataset_id: 'DSD_REG_CLIM@DF_LAND_TEMP',
+              source_id: 'OECD',
+            },
+            {
+              indicator_id: 'regional_household_broadband_access',
+              name: 'Households with broadband access',
+              status: 'unavailable',
+              period: null,
+              value: null,
+              unit: 'percent',
+              dataset_id: 'DSD_REG_SOC@DF_BROADBAND',
+              source_id: 'OECD',
+              reason: 'not_published_for_geography',
             },
           ],
           sector_structure: {
@@ -1567,6 +1588,9 @@ test('source-native OECD region can be selected without GISCO geometry', async (
   await expect(geographicEvidence.getByText('$62,150 PPP/person')).toBeVisible()
   await expect(geographicEvidence.getByText('Disposable income per capita, constant PPP USD')).toBeVisible()
   await expect(geographicEvidence.getByText('$36,200 PPP/person')).toBeVisible()
+  await expect(geographicEvidence.getByText('Daytime yearly land surface temperature')).toBeVisible()
+  await expect(geographicEvidence.getByText('27.3 °C')).toBeVisible()
+  await expect(geographicEvidence.getByText('Households with broadband access')).toBeVisible()
 
   const comparePanel = geographicEvidence.getByRole('region', { name: 'Geography comparison' })
   await expect(comparePanel).toBeVisible()
