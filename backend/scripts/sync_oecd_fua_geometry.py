@@ -2,17 +2,26 @@ from __future__ import annotations
 
 import argparse
 import json
+from datetime import datetime, timedelta, timezone
 
 import httpx
 
 from app.catalog import EU_MEMBER_ISO3, OECD_MEMBER_ISO3
-from app.db.analytics import country_registry, geography_geometry_coverage_status
+from app.db.analytics import (
+    country_registry,
+    geography_geometry_coverage_status,
+    provider_access_state,
+    record_provider_access_state,
+)
 from app.db.bootstrap import initialize_datastores
 from app.ingestion.oecd_fua_geometry import (
     GeometrySourceRestricted,
     sync_oecd_fua_geometries_for_countries,
 )
 from app.ingestion.world_bank import WorldBankAdapter
+
+
+STATE_KEY = "OECD_FUA_GEOMETRY"
 
 
 def _targets(requested: list[str] | None) -> set[str]:
@@ -56,6 +65,11 @@ def main() -> int:
         description="Synchronize official OECD city/FUA boundary geometries."
     )
     parser.add_argument("--countries", nargs="+")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Ignore provider-access backoff and retry immediately.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -70,9 +84,36 @@ def main() -> int:
         }, indent=2))
         return 0
 
+    state = provider_access_state(STATE_KEY)
+    if not args.force and state and state.get("retry_after_at") is not None:
+        retry_after = state["retry_after_at"]
+        if retry_after.tzinfo is None:
+            retry_after = retry_after.replace(tzinfo=timezone.utc)
+        if retry_after > datetime.now(timezone.utc):
+            print(json.dumps({
+                "source_id": "OECD",
+                "geography_system": "OECD_FUA",
+                "status": "provider_retry_deferred",
+                "provider_status": state.get("status"),
+                "retry_after_at": retry_after.isoformat(),
+                "target_countries": sorted(targets),
+                "rows": 0,
+                "notes": [
+                    "A previous provider-access failure is still inside the local backoff window.",
+                    "Use --force to retry immediately.",
+                ],
+            }, indent=2))
+            return 0
+
     try:
         result = sync_oecd_fua_geometries_for_countries(targets)
     except GeometrySourceRestricted as exc:
+        record_provider_access_state(
+            STATE_KEY,
+            "source_access_restricted",
+            retry_after_at=datetime.now(timezone.utc) + timedelta(hours=6),
+            detail=str(exc),
+        )
         print(json.dumps({
             "source_id": "OECD",
             "geography_system": "OECD_FUA",
@@ -88,6 +129,12 @@ def main() -> int:
         }, indent=2))
         return 0
     except httpx.HTTPError as exc:
+        record_provider_access_state(
+            STATE_KEY,
+            "source_request_failed",
+            retry_after_at=datetime.now(timezone.utc) + timedelta(hours=1),
+            detail=str(exc),
+        )
         print(json.dumps({
             "source_id": "OECD",
             "geography_system": "OECD_FUA",
@@ -98,6 +145,13 @@ def main() -> int:
             "error": str(exc),
         }, indent=2))
         return 2
+
+    record_provider_access_state(
+        STATE_KEY,
+        "available",
+        retry_after_at=None,
+        detail=None,
+    )
 
     payload = {
         "source_id": "OECD",
