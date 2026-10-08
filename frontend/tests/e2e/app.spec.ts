@@ -963,6 +963,83 @@ async function mockApi(page: Page) {
       }
     } else if (path === '/api/countries') {
       body = { countries }
+    } else if (path === '/api/geographies/compare') {
+      const requested = (url.searchParams.get('geographies') ?? '').split(',').filter(Boolean)
+      body = {
+        geography_system: 'OECD_TL_2024',
+        geo_level: 'tl2',
+        regions: requested.map((code) => ({
+          geo_code: code,
+          geo_name: code === 'AU1' ? 'New South Wales' : 'Victoria',
+          geo_level: 'tl2',
+          source: 'AUGUR local store · OECD regional statistics',
+          source_ids: ['OECD'],
+        })),
+        indicator_count: 2,
+        indicators: [
+          {
+            indicator_id: 'regional_population',
+            name: 'Population',
+            unit: 'persons',
+            regions: {
+              AU1: {
+                indicator_id: 'regional_population',
+                name: 'Population',
+                status: 'available',
+                period: 2024,
+                value: 8534000,
+                unit: 'persons',
+                dataset_id: 'DSD_REG_DEMO@DF_POP_BROAD',
+                source_id: 'OECD',
+              },
+              AU2: {
+                indicator_id: 'regional_population',
+                name: 'Population',
+                status: 'available',
+                period: 2024,
+                value: 7011000,
+                unit: 'persons',
+                dataset_id: 'DSD_REG_DEMO@DF_POP_BROAD',
+                source_id: 'OECD',
+              },
+            },
+          },
+          {
+            indicator_id: 'regional_population_density',
+            name: 'Population density',
+            unit: 'people_per_km2',
+            regions: {
+              AU1: {
+                indicator_id: 'regional_population_density',
+                name: 'Population density',
+                status: 'available',
+                period: 2024,
+                value: 10.58,
+                unit: 'people_per_km2',
+                dataset_id: 'DSD_REG_DEMO@DF_DENSITY',
+                source_id: 'OECD',
+              },
+              AU2: {
+                indicator_id: 'regional_population_density',
+                name: 'Population density',
+                status: 'available',
+                period: 2024,
+                value: 29.9,
+                unit: 'people_per_km2',
+                dataset_id: 'DSD_REG_DEMO@DF_DENSITY',
+                source_id: 'OECD',
+              },
+            },
+          },
+        ],
+        sector_comparison: {
+          status: 'unavailable',
+          sectors: [],
+        },
+        notes: [
+          'Comparison is descriptive and does not rank regions.',
+        ],
+      }
     } else if (path === '/api/geographies/geometry') {
       const requestedCountry = url.searchParams.get('country_iso3')
       body = {
@@ -1490,6 +1567,18 @@ test('source-native OECD region can be selected without GISCO geometry', async (
   await expect(geographicEvidence.getByText('$62,150 PPP/person')).toBeVisible()
   await expect(geographicEvidence.getByText('Disposable income per capita, constant PPP USD')).toBeVisible()
   await expect(geographicEvidence.getByText('$36,200 PPP/person')).toBeVisible()
+
+  const comparePanel = geographicEvidence.getByRole('region', { name: 'Geography comparison' })
+  await expect(comparePanel).toBeVisible()
+  const compareSelect = comparePanel.getByRole('combobox', { name: 'Compare selected geography with' })
+  await expect(compareSelect).toContainText('Victoria')
+  await compareSelect.selectOption('AU2')
+
+  await expect(comparePanel.getByText('8,534,000')).toBeVisible()
+  await expect(comparePanel.getByText('7,011,000')).toBeVisible()
+  await expect(comparePanel.getByText('10.6 /km²')).toBeVisible()
+  await expect(comparePanel.getByText('29.9 /km²')).toBeVisible()
+  await expect(comparePanel.getByText(/no ranking/i)).toBeVisible()
 })
 
 test('provider-native OECD geometry renders and selects the FUA', async ({ page }) => {
