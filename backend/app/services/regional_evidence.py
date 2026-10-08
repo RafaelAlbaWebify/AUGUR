@@ -169,6 +169,9 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_age_adjusted_mortality_per_1000": {
         "name": "Age-adjusted mortality rate",
     },
+    "urban_population_density": {
+        "name": "Population density",
+    },
 }
 
 
@@ -303,7 +306,9 @@ def _regional_result_from_local(
         if item["status"] == "available"
     )
     source_label = (
-        "OECD regional statistics"
+        "OECD urban statistics"
+        if source_ids == ["OECD"] and local_level in {"city", "fua"}
+        else "OECD regional statistics"
         if source_ids == ["OECD"]
         else "Eurostat regional statistics"
         if source_ids == ["EUROSTAT"]
@@ -358,12 +363,21 @@ def _regional_result_from_local(
                 "NUTS geographic levels retain Eurostat-specific comparison semantics.",
             ]
             if local_level in {"nuts2", "nuts3"}
-            else [
-                "Subnational evidence is served from AUGUR's local analytical store.",
-                "Only metrics explicitly published for this source-native geography are shown.",
-                "OECD TL2/TL3 levels are not treated as interchangeable with Eurostat NUTS levels.",
-                "No missing Eurostat metrics are inferred for OECD territorial levels.",
-            ]
+            else (
+                [
+                    "Urban evidence is served from AUGUR's local analytical store.",
+                    "OECD city and Functional Urban Area definitions remain distinct geographic levels.",
+                    "Only metrics explicitly published for this OECD urban geography are shown.",
+                    "No Urban Audit metrics are inferred for OECD urban geographies.",
+                ]
+                if local_level in {"city", "fua"}
+                else [
+                    "Subnational evidence is served from AUGUR's local analytical store.",
+                    "Only metrics explicitly published for this source-native geography are shown.",
+                    "OECD TL2/TL3 levels are not treated as interchangeable with Eurostat NUTS levels.",
+                    "No missing Eurostat metrics are inferred for OECD territorial levels.",
+                ]
+            )
         ),
     }
 
