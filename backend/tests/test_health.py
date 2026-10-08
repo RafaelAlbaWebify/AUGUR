@@ -184,3 +184,69 @@ def test_region_comparison_accepts_same_oecd_tl2_system(monkeypatch):
     body = response.json()
     assert body["geography_system"] == "OECD_TL_2024"
     assert body["geo_level"] == "tl2"
+
+
+def test_generic_geography_evidence_uses_requested_system(monkeypatch):
+    monkeypatch.setattr(
+        routes_module,
+        "geography_records_by_source_codes",
+        lambda codes: [
+            {
+                "source_geo_code": "AUS01C",
+                "geography_system": "OECD_FUA",
+                "geo_level": "city",
+            },
+            {
+                "source_geo_code": "AUS01C",
+                "geography_system": "TEST_OTHER_SYSTEM",
+                "geo_level": "city",
+            },
+        ],
+    )
+    seen = {}
+    monkeypatch.setattr(
+        routes_module,
+        "regional_evidence",
+        lambda code, geography_system=None: seen.setdefault(
+            "result",
+            {
+                "geo_code": code,
+                "geography_system": geography_system,
+                "geo_level": "city",
+                "indicator_count": 1,
+                "available_count": 1,
+                "complete": True,
+                "indicators": [],
+            },
+        ),
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/api/geographies/AUS01C/evidence?system=OECD_FUA"
+        )
+
+    assert response.status_code == 200
+    assert response.json()["geography_system"] == "OECD_FUA"
+    assert seen["result"]["geo_code"] == "AUS01C"
+
+
+def test_generic_geography_evidence_rejects_unregistered_system(monkeypatch):
+    monkeypatch.setattr(
+        routes_module,
+        "geography_records_by_source_codes",
+        lambda codes: [
+            {
+                "source_geo_code": "AUS01C",
+                "geography_system": "OECD_FUA",
+                "geo_level": "city",
+            }
+        ],
+    )
+
+    with TestClient(app) as client:
+        response = client.get(
+            "/api/geographies/AUS01C/evidence?system=TEST_OTHER_SYSTEM"
+        )
+
+    assert response.status_code == 404
