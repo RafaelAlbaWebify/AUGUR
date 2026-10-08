@@ -823,7 +823,10 @@ def regional_comparison(
         "regions": [
             {
                 "geo_code": item["geo_code"],
+                "geo_name": item.get("geo_name"),
                 "geo_level": item["geo_level"],
+                "source": item.get("source"),
+                "source_ids": item.get("source_ids", []),
             }
             for item in evidence
         ],
@@ -838,7 +841,7 @@ def regional_comparison(
         },
         "notes": [
             "Comparison is descriptive and does not rank regions.",
-            "Only like-for-like indicators and geographic levels should be interpreted directly.",
+            "Only like-for-like indicators from the same geography system and geographic level should be interpreted directly.",
             "Sector comparison describes employment composition, not vacancy demand or hiring probability.",
         ],
     }
