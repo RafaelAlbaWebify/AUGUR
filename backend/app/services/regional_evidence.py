@@ -181,6 +181,12 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_disposable_income_ppp_usd": {
         "name": "Disposable income per capita, constant PPP USD",
     },
+    "regional_homicide_rate_per_100k": {
+        "name": "Intentional homicide rate",
+    },
+    "regional_motor_vehicle_theft_rate_per_100k": {
+        "name": "Motor vehicle theft rate",
+    },
     "urban_population": {
         "name": "Population",
     },
@@ -244,6 +250,8 @@ OECD_TL_EXPECTED_INDICATORS = [
     ("regional_age_adjusted_mortality_per_1000", "DSD_REG_DEMO@DF_DEMO", "per_1000_people"),
     ("regional_employment_to_population_ratio", "DSD_REG_LAB@DF_RATES", "percent"),
     ("regional_unemployment_rate_oecd", "DSD_REG_LAB@DF_RATES", "percent"),
+    ("regional_homicide_rate_per_100k", "DSD_REG_SOC@DF_SAFETY", "per_100k_people"),
+    ("regional_motor_vehicle_theft_rate_per_100k", "DSD_REG_SOC@DF_SAFETY", "per_100k_people"),
 ]
 
 OECD_FUA_CITY_EXPECTED_INDICATORS = [
