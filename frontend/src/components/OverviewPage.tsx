@@ -299,6 +299,9 @@ function formatRegionalValue(value: number, unit?: string) {
   if (unit === 'nights_per_person') {
     return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} nights/resident`
   }
+  if (unit === 'm2_per_person') {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} m²/person`
+  }
   if (unit === 'thousand_passengers') {
     return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)}k passengers`
   }
