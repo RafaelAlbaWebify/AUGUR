@@ -18,8 +18,10 @@ on:
       - "backend/app/ingestion/imf.py"
       - "backend/app/ingestion/un_wpp.py"
       - "backend/app/ingestion/oecd_regional.py"
+      - "backend/app/ingestion/oecd_fua.py"
       - "backend/scripts/sync_oecd_regional_density.py"
       - "backend/scripts/sync_oecd_regional.py"
+      - "backend/scripts/sync_oecd_fua.py"
       - "backend/app/ingestion/eea_*.py"
       - "backend/app/ingestion/gisco_cities.py"
       - "backend/app/ingestion/cedefop_clssi.py"
@@ -89,6 +91,12 @@ jobs:
 
       - name: Inspect OECD Australia FUA density
         run: python -m scripts.inspect_oecd_fua_density
+
+      - name: Sync OECD Australia urban density
+        run: >-
+          python -m scripts.sync_oecd_fua
+          --countries AUS
+          --start-year 2020
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
