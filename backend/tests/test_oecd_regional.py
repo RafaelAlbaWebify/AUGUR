@@ -391,3 +391,63 @@ def test_sync_regional_gdp_persists_filtered_rows(monkeypatch):
     assert result["geography_count"] == 2
     assert result["geo_levels"] == ["tl2"]
     assert result["indicator_ids"] == ["regional_gdp_per_capita_ppp_usd"]
+
+
+INCOME_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,TERRITORIAL_LEVEL,Territorial level,MEASURE,Measure,PRICE_BASE,Price base,UNIT_MEASURE,Unit of measure,TIME_PERIOD,OBS_VALUE,COUNTRY
+dataflow,AU1,New South Wales,A,TL2,Large region (TL2),B6N,Disposable income net,Q,Constant prices,USD_PPP_PS,US dollars per person PPP converted,2023,36200,AUS
+dataflow,AU2,Victoria,A,TL2,Large region (TL2),B6N,Disposable income net,Q,Constant prices,USD_PPP_PS,US dollars per person PPP converted,2023,35100,AUS
+dataflow,US011,Example US region,A,TL3,Small region (TL3),B6N,Disposable income net,Q,Constant prices,USD_PPP_PS,US dollars per person PPP converted,2023,41000,USA
+dataflow,AU1,New South Wales,A,TL2,Large region (TL2),B6N,Disposable income net,V,Current prices,USD_PPP_PS,US dollars per person PPP converted,2023,39000,AUS
+"""
+
+
+def test_normalize_regional_income_keeps_constant_ppp_per_capita():
+    adapter = OECDRegionalAdapter(client=None)
+    try:
+        rows = adapter.normalize_income(
+            INCOME_CSV,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["geo_code"] for row in rows} == {"AU1", "AU2"}
+    assert {row["indicator_id"] for row in rows} == {
+        "regional_disposable_income_ppp_usd"
+    }
+    assert {row["unit"] for row in rows} == {"usd_ppp_per_person"}
+
+    nsw = next(row for row in rows if row["geo_code"] == "AU1")
+    assert nsw["value"] == 36200.0
+    assert nsw["period"] == 2023
+
+
+def test_sync_regional_income_persists_filtered_rows(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDRegionalAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_income",
+        lambda **kwargs: INCOME_CSV,
+    )
+
+    try:
+        result = adapter.sync_income(
+            allowed_country_iso3={"AUS"},
+            start_year=2021,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 2
+    assert result["country_count"] == 1
+    assert result["geography_count"] == 2
+    assert result["geo_levels"] == ["tl2"]
+    assert result["indicator_ids"] == ["regional_disposable_income_ppp_usd"]
