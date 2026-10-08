@@ -2681,16 +2681,94 @@ def geography_coverage_status() -> dict:
             for row in rows
         ]
 
+        country_summaries = []
+        country_codes = sorted({
+            item["country_iso3"]
+            for item in items
+            if item["country_iso3"]
+        })
+        for country_iso3 in country_codes:
+            country_items = [
+                item
+                for item in items
+                if item["country_iso3"] == country_iso3
+                and item["analysis_status"] == "available"
+            ]
+            if not country_items:
+                continue
+
+            levels = {
+                str(item["geo_level"]).lower()
+                for item in country_items
+            }
+            has_regional = bool(
+                levels
+                & {"tl2", "tl3", "nuts2", "nuts3", "admin1", "admin2", "region"}
+            )
+            has_urban = bool(levels & {"city", "fua"})
+            scope = (
+                "regional_and_urban"
+                if has_regional and has_urban
+                else "regional"
+                if has_regional
+                else "urban"
+                if has_urban
+                else "other_subnational"
+            )
+
+            country_summaries.append({
+                "country_iso3": country_iso3,
+                "country_iso2": next(
+                    (
+                        item["country_iso2"]
+                        for item in country_items
+                        if item.get("country_iso2")
+                    ),
+                    None,
+                ),
+                "subnational_scope": scope,
+                "geography_count": sum(
+                    item["geography_count"]
+                    for item in country_items
+                ),
+                "regional_geography_count": sum(
+                    item["geography_count"]
+                    for item in country_items
+                    if str(item["geo_level"]).lower()
+                    not in {"city", "fua"}
+                ),
+                "city_count": sum(
+                    item["geography_count"]
+                    for item in country_items
+                    if str(item["geo_level"]).lower() == "city"
+                ),
+                "fua_count": sum(
+                    item["geography_count"]
+                    for item in country_items
+                    if str(item["geo_level"]).lower() == "fua"
+                ),
+                "indicator_series_count": sum(
+                    item["indicator_count"]
+                    for item in country_items
+                ),
+                "systems": sorted({
+                    item["geography_system"]
+                    for item in country_items
+                }),
+                "levels": sorted(levels),
+                "latest_period": max(
+                    (
+                        item["latest_period"]
+                        for item in country_items
+                        if item["latest_period"] is not None
+                    ),
+                    default=None,
+                ),
+            })
+
         return {
             "geography_count": sum(item["geography_count"] for item in items),
-            "countries_with_subnational_evidence": len({
-                item["country_iso3"]
-                for item in items
-                if (
-                    item["country_iso3"]
-                    and item["analysis_status"] == "available"
-                )
-            }),
+            "countries_with_subnational_evidence": len(country_summaries),
             "systems": sorted({
                 item["geography_system"]
                 for item in items
@@ -2699,6 +2777,7 @@ def geography_coverage_status() -> dict:
                 item["geo_level"]
                 for item in items
             }),
+            "country_summaries": country_summaries,
             "coverage": items,
         }
     finally:
