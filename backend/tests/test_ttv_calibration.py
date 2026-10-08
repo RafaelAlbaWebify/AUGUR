@@ -898,7 +898,10 @@ def test_holdout_acceptance_can_pass_frozen_numeric_thresholds():
         for index in range(60)
     ]
 
-    result = module.evaluate_holdout_acceptance(cases)
+    result = module.evaluate_holdout_acceptance(
+        cases,
+        holdout_sealed=True,
+    )
 
     assert result["status"] == "passed"
     assert result["passed"] is True
@@ -917,7 +920,10 @@ def test_holdout_acceptance_fails_poor_coverage_and_bias():
         for index in range(60)
     ]
 
-    result = module.evaluate_holdout_acceptance(cases)
+    result = module.evaluate_holdout_acceptance(
+        cases,
+        holdout_sealed=True,
+    )
 
     assert result["status"] == "failed"
     assert result["passed"] is False
@@ -1101,3 +1107,67 @@ def test_holdout_csv_import_rejects_wrong_protocol_before_write(
         module.import_holdout_calibration_csv(csv_path)
 
     assert module.calibration_status()["case_count"] == 0
+
+
+
+def test_holdout_seal_requires_minimum_sample(monkeypatch, tmp_path):
+    _use_temp_store(monkeypatch, tmp_path)
+    module.upsert_calibration_case(_valid_holdout_case("holdout-small-001"))
+
+    with pytest.raises(ValueError, match="at least 60 cases"):
+        module.seal_holdout()
+
+    assert module.holdout_seal_status()["sealed"] is False
+
+
+def test_holdout_acceptance_requires_seal_before_final_pass(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    for index in range(60):
+        module.upsert_calibration_case({
+            **_valid_holdout_case(f"holdout-seal-{index:03d}"),
+            "candidate_weeks_min": 10,
+            "candidate_weeks_max": 20,
+            "observed_weeks": 15,
+        })
+
+    before = module.calibration_status()
+    assert before["holdout_case_count"] == 60
+    assert before["holdout_seal"]["sealed"] is False
+    assert before["holdout_acceptance"]["numerical_status"] == "passed"
+    assert before["holdout_acceptance"]["status"] == "unsealed"
+    assert before["holdout_acceptance"]["passed"] is False
+
+    seal = module.seal_holdout()
+    assert seal["sealed"] is True
+    assert seal["case_count"] == 60
+    assert len(seal["holdout_sha256"]) == 64
+
+    repeated = module.seal_holdout()
+    assert repeated["holdout_sha256"] == seal["holdout_sha256"]
+    assert repeated["sealed_at"] == seal["sealed_at"]
+
+    after = module.calibration_status()
+    assert after["holdout_acceptance"]["status"] == "passed"
+    assert after["holdout_acceptance"]["passed"] is True
+    assert after["externally_calibrated"] is False
+
+
+def test_sealed_holdout_rejects_additional_cases(monkeypatch, tmp_path):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    for index in range(60):
+        module.upsert_calibration_case(
+            _valid_holdout_case(f"holdout-locked-{index:03d}")
+        )
+    module.seal_holdout()
+
+    with pytest.raises(ValueError, match="holdout is sealed"):
+        module.upsert_calibration_case(
+            _valid_holdout_case("holdout-too-late")
+        )
+
+    assert module.calibration_status()["holdout_case_count"] == 60
