@@ -936,7 +936,12 @@ def test_holdout_acceptance_fails_poor_coverage_and_bias():
 
 
 
-def _valid_holdout_case(case_id="holdout-immutable-001"):
+def _valid_holdout_case(
+    case_id="holdout-immutable-001",
+    observed_weeks=16.0,
+):
+    started = datetime(2026, 1, 1, tzinfo=timezone.utc)
+    completed = started + timedelta(weeks=observed_weeks)
     return {
         "case_id": case_id,
         "country_iso3": "IRL",
@@ -945,9 +950,9 @@ def _valid_holdout_case(case_id="holdout-immutable-001"):
         "composition": "critical_path_v1",
         "candidate_weeks_min": 10,
         "candidate_weeks_max": 25,
-        "observed_weeks": 16,
-        "start_event_at": "2026-01-01T00:00:00+00:00",
-        "observed_at": "2026-04-23T00:00:00+00:00",
+        "observed_weeks": observed_weeks,
+        "start_event_at": started.isoformat(),
+        "observed_at": completed.isoformat(),
         "sample_role": "holdout",
         "start_event_definition_version": module.CALIBRATION_START_EVENT_DEFINITION_VERSION,
         "viability_outcome_definition_version": module.CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
@@ -964,7 +969,7 @@ def test_holdout_case_is_immutable_after_import(monkeypatch, tmp_path):
     with pytest.raises(ValueError, match="immutable once imported"):
         module.upsert_calibration_case({
             **_valid_holdout_case(),
-            "observed_weeks": 17,
+            "candidate_weeks_max": 26,
         })
 
     status = module.calibration_status()
@@ -1140,10 +1145,12 @@ def test_holdout_acceptance_requires_seal_before_final_pass(
 
     for index in range(60):
         module.upsert_calibration_case({
-            **_valid_holdout_case(f"holdout-seal-{index:03d}"),
+            **_valid_holdout_case(
+                f"holdout-seal-{index:03d}",
+                observed_weeks=15,
+            ),
             "candidate_weeks_min": 10,
             "candidate_weeks_max": 20,
-            "observed_weeks": 15,
         })
 
     before = module.calibration_status()
@@ -1204,10 +1211,12 @@ def test_positive_holdout_review_clears_activation_readiness(
 
     for index in range(60):
         module.upsert_calibration_case({
-            **_valid_holdout_case(f"holdout-review-{index:03d}"),
+            **_valid_holdout_case(
+                f"holdout-review-{index:03d}",
+                observed_weeks=15,
+            ),
             "candidate_weeks_min": 10,
             "candidate_weeks_max": 20,
-            "observed_weeks": 15,
         })
 
     module.seal_holdout()
@@ -1253,10 +1262,12 @@ def test_negative_holdout_review_blocks_activation(monkeypatch, tmp_path):
 
     for index in range(60):
         module.upsert_calibration_case({
-            **_valid_holdout_case(f"holdout-negative-{index:03d}"),
+            **_valid_holdout_case(
+                f"holdout-negative-{index:03d}",
+                observed_weeks=15,
+            ),
             "candidate_weeks_min": 10,
             "candidate_weeks_max": 20,
-            "observed_weeks": 15,
         })
 
     module.seal_holdout()
