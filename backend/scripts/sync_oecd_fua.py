@@ -19,7 +19,6 @@ from app.ingestion.oecd_fua import (
     TRANSPORT_DEFAULT_KEY,
     COMMUTE_DEFAULT_KEY,
     GREEN_AREA_DEFAULT_KEY,
-    POLLUTION_DEFAULT_KEY,
     OECDFUAAdapter,
 )
 from app.ingestion.world_bank import WorldBankAdapter
@@ -121,11 +120,6 @@ def main() -> int:
         default=GREEN_AREA_DEFAULT_KEY,
         help="Optional OECD FUA green-area SDMX key.",
     )
-    parser.add_argument(
-        "--pollution-key",
-        default=POLLUTION_DEFAULT_KEY,
-        help="Optional OECD city/FUA PM2.5 exposure SDMX key.",
-    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -214,13 +208,6 @@ def main() -> int:
             end_year=args.end_year,
             key=args.green_area_key,
         )
-        pollution = adapter.sync_pollution(
-            countries=countries,
-            allowed_country_iso3=targets,
-            start_year=max(args.start_year, 2020),
-            end_year=args.end_year,
-            key=args.pollution_key,
-        )
     finally:
         adapter.close()
 
@@ -232,7 +219,6 @@ def main() -> int:
         + transport["rows"]
         + commute["rows"]
         + green_area["rows"]
-        + pollution["rows"]
     )
     datasets = {
         "density": density,
@@ -242,7 +228,6 @@ def main() -> int:
         "transport": transport,
         "commute": commute,
         "green_area": green_area,
-        "pollution": pollution,
     }
     complete = all(item["complete"] for item in datasets.values())
     missing_countries_by_dataset = {
