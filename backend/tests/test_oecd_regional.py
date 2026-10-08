@@ -246,6 +246,8 @@ def test_sync_demography_writes_selected_oecd_metrics(monkeypatch):
 LABOUR_CSV = """STRUCTURE,FREQ,TERRITORIAL_LEVEL,REF_AREA,Reference area,TERRITORIAL_TYPE,MEASURE,Measure,AGE,SEX,UNIT_MEASURE,Unit of measure,TIME_PERIOD,OBS_VALUE,COUNTRY
 dataflow,A,TL2,AU1,New South Wales,,EMP_RATIO,Employment to population ratio,Y15T64,_T,PT_POP_SUB,Percentage of population in the same subgroup,2024,76.5,AUS
 dataflow,A,TL2,AU2,Victoria,,EMP_RATIO,Employment to population ratio,Y15T64,_T,PT_POP_SUB,Percentage of population in the same subgroup,2024,77.2,AUS
+dataflow,A,TL2,AU1,New South Wales,,UNE_RATE,Unemployment rate,Y15T64,_T,PT_LF_SUB,Percentage of labour force in the same subgroup,2024,4.0,AUS
+dataflow,A,TL2,AU2,Victoria,,UNE_RATE,Unemployment rate,Y15T64,_T,PT_LF_SUB,Percentage of labour force in the same subgroup,2024,4.2,AUS
 dataflow,A,TL3,US011,Example US region,,EMP_RATIO,Employment to population ratio,Y15T64,_T,PT_POP_SUB,Percentage of population in the same subgroup,2024,73.1,USA
 dataflow,A,TL2,AU1,New South Wales,,EMP_RATIO,Employment to population ratio,Y15T64,F,PT_POP_SUB,Percentage of population in the same subgroup,2024,72.0,AUS
 """
@@ -261,13 +263,14 @@ def test_normalize_labour_keeps_total_15_64_employment_ratio():
     finally:
         adapter.close()
 
-    assert len(rows) == 2
+    assert len(rows) == 4
     assert {row["geo_code"] for row in rows} == {"AU1", "AU2"}
     assert {row["indicator_id"] for row in rows} == {
-        "regional_employment_to_population_ratio"
+        "regional_employment_to_population_ratio",
+        "regional_unemployment_rate_oecd",
     }
     assert {row["unit"] for row in rows} == {"percent"}
-    assert {row["value"] for row in rows} == {76.5, 77.2}
+    assert {row["value"] for row in rows} == {76.5, 77.2, 4.0, 4.2}
 
 
 def test_sync_labour_writes_oecd_tl2_rows(monkeypatch):
@@ -293,12 +296,13 @@ def test_sync_labour_writes_oecd_tl2_rows(monkeypatch):
     finally:
         adapter.close()
 
-    assert result["rows"] == 2
+    assert result["rows"] == 4
     assert result["country_count"] == 1
     assert result["geography_count"] == 2
     assert result["geo_levels"] == ["tl2"]
     assert result["indicator_ids"] == [
-        "regional_employment_to_population_ratio"
+        "regional_employment_to_population_ratio",
+        "regional_unemployment_rate_oecd",
     ]
 
 
@@ -324,6 +328,6 @@ def test_fetch_labour_default_uses_validated_employment_ratio_key():
 
     assert result == LABOUR_CSV
     assert client.calls[0][0].endswith(
-        "/A.TL2+TL3...EMP_RATIO.Y15T64._T."
+        "/A.TL2+TL3...EMP_RATIO+UNE_RATE.Y15T64._T."
     )
     assert client.calls[0][1]["startPeriod"] == "2021"
