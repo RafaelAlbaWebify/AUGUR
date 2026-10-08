@@ -112,17 +112,28 @@ def main() -> int:
         adapter.close()
 
     total_rows = density["rows"] + population["rows"] + dependency["rows"]
+    datasets = {
+        "density": density,
+        "population": population,
+        "dependency": dependency,
+    }
+    complete = all(item["complete"] for item in datasets.values())
+    missing_countries_by_dataset = {
+        name: item["missing_countries"]
+        for name, item in datasets.items()
+        if item["missing_countries"]
+    }
+
     payload = {
         "source_id": "OECD",
         "geography_system": "OECD_FUA",
         "target_country_count": len(targets),
         "target_countries": sorted(targets),
         "rows": total_rows,
-        "datasets": {
-            "density": density,
-            "population": population,
-            "dependency": dependency,
-        },
+        "status": "complete" if complete else "partial",
+        "complete": complete,
+        "missing_countries_by_dataset": missing_countries_by_dataset,
+        "datasets": datasets,
         "geography_coverage": geography_coverage_status(),
     }
     print(json.dumps(payload, indent=2, default=str))
