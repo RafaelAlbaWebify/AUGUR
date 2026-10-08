@@ -464,8 +464,8 @@ async function mockApi(page: Page) {
           geo_level: 'tl2',
           source: 'AUGUR local store · OECD regional statistics',
           source_ids: ['OECD'],
-          indicator_count: 3,
-          available_count: 3,
+          indicator_count: 4,
+          available_count: 4,
           complete: true,
           indicators: [
             {
@@ -494,6 +494,16 @@ async function mockApi(page: Page) {
               status: 'available',
               period: 2024,
               value: 76.5,
+              unit: 'percent',
+              dataset_id: 'DSD_REG_LAB@DF_RATES',
+              source_id: 'OECD',
+            },
+            {
+              indicator_id: 'regional_unemployment_rate_oecd',
+              name: 'Unemployment rate, ages 15–64',
+              status: 'available',
+              period: 2024,
+              value: 4.0,
               unit: 'percent',
               dataset_id: 'DSD_REG_LAB@DF_RATES',
               source_id: 'OECD',
@@ -1258,6 +1268,8 @@ test('source-native OECD region can be selected without GISCO geometry', async (
   await expect(geographicEvidence.getByText('10.6 /km²')).toBeVisible()
   await expect(geographicEvidence.getByText('Employment-to-population ratio, ages 15–64')).toBeVisible()
   await expect(geographicEvidence.getByText('76.5%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Unemployment rate, ages 15–64')).toBeVisible()
+  await expect(geographicEvidence.getByText('4.0%')).toBeVisible()
 })
 
 test('source-native OECD urban area can be selected separately from regions', async ({ page }) => {
