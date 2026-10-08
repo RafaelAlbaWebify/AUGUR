@@ -173,3 +173,71 @@ def test_fetch_defaults_use_all_tl2_tl3_keys():
     assert client.calls[1][0].endswith(
         "/A.TL2+TL3...POP._T._T."
     )
+
+
+DEMOGRAPHY_CSV = """STRUCTURE,FREQ,TERRITORIAL_LEVEL,REF_AREA,Reference area,TERRITORIAL_TYPE,MEASURE,Measure,AGE,SEX,UNIT_MEASURE,Unit of measure,TIME_PERIOD,OBS_VALUE,COUNTRY
+dataflow,A,TL2,AU1,New South Wales,,INMIG,New residents in the region coming from another country,_T,_T,PT_POP,Percentage of population,2023,3.1,AUS
+dataflow,A,TL2,AU1,New South Wales,,INMIG,New residents in the region coming from another country,_T,_T,PS,Persons,2023,250037,AUS
+dataflow,A,TL2,AU1,New South Wales,,OUTMIG,Persons who left the region to reside in another country,_T,_T,PT_POP,Percentage of population,2023,1.2,AUS
+dataflow,A,TL2,AU1,New South Wales,,NETMOB,Net internal mobility,_T,_T,PT_POP,Percentage of population,2023,-0.4,AUS
+dataflow,A,TL2,AU1,New South Wales,,MORT_STANDARD_RATIO,Age-adjusted mortality rate,_T,_T,10P3HB,Per 1 000 inhabitants,2022,5.6,AUS
+dataflow,A,TL2,AU1,New South Wales,,MORT,Deaths,_T,_T,DT,Deaths,2023,60000,AUS
+dataflow,A,TL3,US011,Example US region,,INMIG,New residents in the region coming from another country,_T,_T,PT_POP,Percentage of population,2023,2.2,USA
+"""
+
+
+def test_normalize_demography_keeps_comparable_metric_units_only():
+    adapter = OECDRegionalAdapter(client=None)
+    try:
+        rows = adapter.normalize_demography(
+            DEMOGRAPHY_CSV,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 4
+    by_id = {row["indicator_id"]: row for row in rows}
+
+    assert by_id["regional_international_inmigration_share"]["value"] == 3.1
+    assert by_id["regional_international_inmigration_share"]["unit"] == "percent"
+    assert by_id["regional_international_outmigration_share"]["value"] == 1.2
+    assert by_id["regional_net_internal_mobility_share"]["value"] == -0.4
+    assert by_id["regional_age_adjusted_mortality_per_1000"]["value"] == 5.6
+    assert by_id["regional_age_adjusted_mortality_per_1000"]["unit"] == "per_1000_people"
+    assert all(row["country_iso3"] == "AUS" for row in rows)
+
+
+def test_sync_demography_writes_selected_oecd_metrics(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDRegionalAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_demography",
+        lambda **kwargs: DEMOGRAPHY_CSV,
+    )
+
+    try:
+        result = adapter.sync_demography(
+            allowed_country_iso3={"AUS"},
+            start_year=2021,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 4
+    assert result["country_count"] == 1
+    assert result["geography_count"] == 1
+    assert result["geo_levels"] == ["tl2"]
+    assert result["indicator_ids"] == [
+        "regional_age_adjusted_mortality_per_1000",
+        "regional_international_inmigration_share",
+        "regional_international_outmigration_share",
+        "regional_net_internal_mobility_share",
+    ]
