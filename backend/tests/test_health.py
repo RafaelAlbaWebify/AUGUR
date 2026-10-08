@@ -168,7 +168,7 @@ def test_region_comparison_accepts_same_oecd_tl2_system(monkeypatch):
     monkeypatch.setattr(
         routes_module,
         "regional_comparison",
-        lambda codes: {
+        lambda codes, geography_system=None: {
             "regions": [{"geo_code": code, "geo_level": "tl2"} for code in codes],
             "indicator_count": 2,
             "indicators": [],
