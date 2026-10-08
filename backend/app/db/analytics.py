@@ -2443,6 +2443,7 @@ def geographies_for_country(
             FROM geography_registry g
             LEFT JOIN subnational_observations s
               ON s.geo_code = g.source_geo_code
+             AND s.geography_system = g.geography_system
             WHERE g.country_iso3 = ?
               {level_filter}
             GROUP BY
@@ -2536,6 +2537,7 @@ def geography_coverage_status() -> dict:
             FROM geography_registry g
             LEFT JOIN subnational_observations s
               ON s.geo_code = g.source_geo_code
+             AND s.geography_system = g.geography_system
             GROUP BY
                 g.country_iso3,
                 g.country_iso2,
@@ -2672,13 +2674,33 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
             """
             INSERT OR REPLACE INTO subnational_observations
             (
-                geo_code, geo_name, geo_level, indicator_id, period, value, unit,
-                source_id, dataset_id, retrieved_at, source_updated_at
+                geography_system,
+                geo_code,
+                geo_name,
+                geo_level,
+                indicator_id,
+                period,
+                value,
+                unit,
+                source_id,
+                dataset_id,
+                retrieved_at,
+                source_updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 [
+                    (
+                        row.get("geography_system")
+                        or (
+                            "NUTS_2024"
+                            if str(row["geo_level"]).lower() in {"nuts2", "nuts3"}
+                            else "URBAN_AUDIT_2024"
+                            if str(row["geo_level"]).lower() == "city"
+                            else "SOURCE_NATIVE"
+                        )
+                    ),
                     row["geo_code"].upper(),
                     row.get("geo_name"),
                     row["geo_level"],
@@ -2991,7 +3013,9 @@ def subnational_storage_status() -> dict:
             """
             SELECT
                 COUNT(*) AS observation_count,
-                COUNT(DISTINCT geo_code) AS geography_count,
+                COUNT(
+                    DISTINCT geography_system || ':' || geo_code
+                ) AS geography_count,
                 COUNT(
                     DISTINCT CASE
                     WHEN LOWER(geo_level) = 'nuts2' THEN geo_code
