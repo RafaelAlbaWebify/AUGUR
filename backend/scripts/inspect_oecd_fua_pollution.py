@@ -66,6 +66,26 @@ def main() -> int:
             for row in rows
             if row.get("TERRITORIAL_LEVEL")
         }),
+        "unit_multipliers": sorted({
+            row.get("UNIT_MULT")
+            for row in rows
+            if row.get("UNIT_MULT")
+        }),
+        "time_seasons": sorted({
+            row.get("TIME_SEASON")
+            for row in rows
+            if row.get("TIME_SEASON")
+        }),
+        "designations": sorted({
+            row.get("DESIGNATION")
+            for row in rows
+            if row.get("DESIGNATION")
+        }),
+        "observation_statuses": sorted({
+            row.get("OBS_STATUS")
+            for row in rows
+            if row.get("OBS_STATUS")
+        }),
         "references": sorted({
             row.get("REF_AREA")
             for row in rows
@@ -81,6 +101,13 @@ def main() -> int:
                 "unit_label": row.get("Unit of measure"),
                 "pollutant_level": row.get("POLLUTANT_CONCENTRATION"),
                 "pollutant_level_label": row.get("Pollutant concentration level"),
+                "time_season": row.get("TIME_SEASON"),
+                "time_season_label": row.get("Time of the day and season"),
+                "designation": row.get("DESIGNATION"),
+                "designation_label": row.get("IUCN management categories"),
+                "unit_multiplier": row.get("UNIT_MULT"),
+                "unit_multiplier_label": row.get("Unit multiplier"),
+                "obs_status": row.get("OBS_STATUS"),
                 "level": row.get("TERRITORIAL_LEVEL"),
                 "level_label": row.get("Territorial level"),
                 "time": row.get("TIME_PERIOD"),
