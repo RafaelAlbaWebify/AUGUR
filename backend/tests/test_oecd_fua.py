@@ -473,3 +473,67 @@ def test_sync_fua_commute_persists_city_and_fua_worker_shares(monkeypatch):
         "urban_commute_bicycle_share",
         "urban_commute_walk_share",
     }
+
+
+GREEN_AREA_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,MEASURE,Measure,UNIT_MEASURE,Unit of measure,POLLUTANT_CONCENTRATION,Pollutant concentration level,TIME_SEASON,Time of the day and season,TERRITORIAL_LEVEL,Territorial level,TIME_PERIOD,OBS_VALUE
+dataflow,AUS01F,Greater Sydney,A,GREEN_AREA,Green area in FUAs' urban centres,M2_PS,Square metres per person,_Z,Not applicable,_Z,Not applicable,FUA,FUA,2021,146
+dataflow,AUS01F,Greater Sydney,A,GREEN_AREA,Green area in FUAs' urban centres,PT_LAR,Percentage of land area,_Z,Not applicable,_Z,Not applicable,FUA,FUA,2021,47.3
+dataflow,AUS01C,Greater Sydney,A,GREEN_AREA,Green area in FUAs' urban centres,M2_PS,Square metres per person,_Z,Not applicable,_Z,Not applicable,CITY,City,2021,120
+dataflow,AT001F,Vienna,A,GREEN_AREA,Green area in FUAs' urban centres,M2_PS,Square metres per person,_Z,Not applicable,_Z,Not applicable,FUA,FUA,2021,95
+"""
+
+
+def test_normalize_fua_green_area_keeps_two_fua_metrics_only():
+    adapter = OECDFUAAdapter(client=None)
+    try:
+        rows = adapter.normalize_green_area(
+            GREEN_AREA_CSV,
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    by_id = {row["indicator_id"]: row for row in rows}
+    assert by_id["urban_green_area_per_capita_m2"]["value"] == 146.0
+    assert by_id["urban_green_area_per_capita_m2"]["unit"] == "m2_per_person"
+    assert by_id["urban_green_area_share"]["value"] == 47.3
+    assert by_id["urban_green_area_share"]["unit"] == "percent"
+    assert all(row["geo_level"] == "fua" for row in rows)
+    assert all(row["geo_code"] == "AUS01F" for row in rows)
+
+
+def test_sync_fua_green_area_reports_partial_country_coverage(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDFUAAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_green_area",
+        lambda **kwargs: GREEN_AREA_CSV,
+    )
+
+    try:
+        result = adapter.sync_green_area(
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS", "CAN"},
+            start_year=2020,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 2
+    assert result["covered_countries"] == ["AUS"]
+    assert result["missing_countries"] == ["CAN"]
+    assert result["complete"] is False
+    assert result["fua_count"] == 1
+    assert set(result["indicator_ids"]) == {
+        "urban_green_area_per_capita_m2",
+        "urban_green_area_share",
+    }
