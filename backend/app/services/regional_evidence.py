@@ -205,6 +205,15 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "urban_unemployment_rate": {
         "name": "Unemployment rate, ages 15–64",
     },
+    "urban_public_transport_access_5min": {
+        "name": "Population within 5 min walk of public transport",
+    },
+    "urban_public_transport_access_10min": {
+        "name": "Population within 10 min walk of public transport",
+    },
+    "urban_public_transport_access_15min": {
+        "name": "Population within 15 min walk of public transport",
+    },
 }
 
 
@@ -219,7 +228,7 @@ OECD_TL_EXPECTED_INDICATORS = [
     ("regional_unemployment_rate_oecd", "DSD_REG_LAB@DF_RATES", "percent"),
 ]
 
-OECD_FUA_EXPECTED_INDICATORS = [
+OECD_FUA_CITY_EXPECTED_INDICATORS = [
     ("urban_population", "DSD_FUA_DEMO@DF_AGE_SEX", "persons"),
     ("urban_population_density", "DSD_FUA_TERR@DF_DENSITY", "people_per_km2"),
     ("urban_total_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
@@ -227,15 +236,27 @@ OECD_FUA_EXPECTED_INDICATORS = [
     ("urban_old_age_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
 ]
 
+OECD_FUA_ONLY_EXPECTED_INDICATORS = [
+    ("urban_employment_to_population_ratio", "DSD_FUA_LAB@DF_LABOUR", "percent"),
+    ("urban_labour_force_participation_rate", "DSD_FUA_LAB@DF_LABOUR", "percent"),
+    ("urban_unemployment_rate", "DSD_FUA_LAB@DF_LABOUR", "percent"),
+    ("urban_public_transport_access_5min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
+    ("urban_public_transport_access_10min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
+    ("urban_public_transport_access_15min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
+]
+
 
 def _source_native_expected_configs(
     geography_system: str | None,
+    geo_level: str | None = None,
 ) -> list[dict] | None:
     system = str(geography_system or "").upper()
     if system == "OECD_TL_2024":
         definitions = OECD_TL_EXPECTED_INDICATORS
     elif system == "OECD_FUA":
-        definitions = OECD_FUA_EXPECTED_INDICATORS
+        definitions = list(OECD_FUA_CITY_EXPECTED_INDICATORS)
+        if str(geo_level or "").lower() == "fua":
+            definitions += OECD_FUA_ONLY_EXPECTED_INDICATORS
     else:
         return None
 
@@ -339,7 +360,10 @@ def _regional_result_from_local(
         })
 
     configured = _indicator_configs_for_geo(code)
-    source_native_expected = _source_native_expected_configs(local_system)
+    source_native_expected = _source_native_expected_configs(
+        local_system,
+        local_level,
+    )
     if source_native_expected is not None:
         configured = source_native_expected
     elif local_level not in {"nuts2", "nuts3"}:
