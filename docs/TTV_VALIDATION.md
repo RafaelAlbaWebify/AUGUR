@@ -158,14 +158,17 @@ AUGUR also supports a versioned `ttv-development-exchange-v1` package for moving
 
 These diagnostics and exchange mechanisms do not constitute validation on their own.
 
+The calibration protocol is now frozen as `ttv-calibration-protocol-v1`, including the bounded v1 scope, event/outcome definitions and `ttv-acceptance-criteria-v1`.
+
 The `external_calibration` gate remains `missing` until AUGUR has:
 
-1. a representative observed sample inside the frozen TTV v1 scope;
-2. a frozen calibration protocol version;
-3. acceptance criteria defined before evaluating the final holdout sample;
-4. a frozen holdout not used for model design/tuning;
-5. evidence that the model performs acceptably on that holdout;
-6. documented cohort coverage and limitations.
+1. a representative observed holdout inside the frozen TTV v1 scope;
+2. holdout cases prospectively bound to `ttv-calibration-protocol-v1`;
+3. a frozen holdout not used for model design/tuning;
+4. evidence that the model passes the pre-declared acceptance criteria;
+5. explicit representativeness review and documented cohort coverage/limitations.
+
+The protocol can therefore accept holdout collection without activating the model. If the protocol or candidate model must change after holdout collection begins, the affected evidence belongs to a new protocol/model version rather than being silently reinterpreted.
 
 The local calibration workflow is therefore validation infrastructure, not a shortcut to activating `TEMPORAL_MODEL_VERSION`.
 
