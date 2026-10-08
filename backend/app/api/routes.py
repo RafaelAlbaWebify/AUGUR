@@ -137,6 +137,7 @@ def geographies_geometry(
                 "geography_system": row["geography_system"],
                 "geo_level": row["geo_level"],
                 "source_geo_code": row["source_geo_code"],
+                "name": row.get("name"),
                 "source_id": row["source_id"],
                 "dataset_version": row["dataset_version"],
             },
