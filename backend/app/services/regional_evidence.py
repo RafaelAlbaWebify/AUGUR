@@ -175,6 +175,15 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "urban_population_density": {
         "name": "Population density",
     },
+    "urban_total_dependency_ratio": {
+        "name": "Total dependency ratio",
+    },
+    "urban_youth_dependency_ratio": {
+        "name": "Youth dependency ratio",
+    },
+    "urban_old_age_dependency_ratio": {
+        "name": "Old-age dependency ratio",
+    },
 }
 
 
