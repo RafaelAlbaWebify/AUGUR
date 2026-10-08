@@ -157,6 +157,18 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_unemployment_rate": {
         "name": "Unemployment rate",
     },
+    "regional_international_inmigration_share": {
+        "name": "International in-migration",
+    },
+    "regional_international_outmigration_share": {
+        "name": "International out-migration",
+    },
+    "regional_net_internal_mobility_share": {
+        "name": "Net internal mobility",
+    },
+    "regional_age_adjusted_mortality_per_1000": {
+        "name": "Age-adjusted mortality rate",
+    },
 }
 
 
