@@ -13,7 +13,7 @@ DATASET_VERSION = "1.2"
 URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_FUA_TRAN@DF_TRAN_COMMUT,1.2/"
-    "AUS01F+AUS02F+AUS01C+AUS02C.A..."
+    "AUS01F+AUS02F+AUS01C+AUS02C.A......"
 )
 PARAMS = {
     "dimensionAtObservation": "AllDimensions",
