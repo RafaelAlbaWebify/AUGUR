@@ -13,7 +13,7 @@ DATASET_VERSION = "2.4"
 URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_REG_LAB@DF_RATES,2.4/"
-    "A..AU1+AU2..EMP_RATIO+UNEMP_RATIO.Y15T64._T."
+    "A..AU1+AU2...Y15T64._T."
 )
 PARAMS = {
     "startPeriod": "2021",
