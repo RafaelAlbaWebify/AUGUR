@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 
+from app.catalog import EU_MEMBER_ISO3, OECD_MEMBER_ISO3
 from app.db.analytics import (
     country_record,
     country_registry,
@@ -20,30 +21,27 @@ from app.ingestion.world_bank import WorldBankAdapter
 
 
 def _target_countries(requested: list[str] | None) -> set[str]:
-    if requested:
-        requested_codes = {value.upper() for value in requested}
-        world_bank = WorldBankAdapter(timeout_seconds=90, max_retries=3)
-        try:
-            for code in sorted(requested_codes):
-                if country_record(code) is None:
-                    world_bank.ensure_country_registered(code)
-        finally:
-            world_bank.close()
+    requested_codes = (
+        {value.upper() for value in requested}
+        if requested
+        else set(OECD_MEMBER_ISO3) - set(EU_MEMBER_ISO3)
+    )
 
-        return {
-            code
-            for code in requested_codes
-            if (
-                (country_record(code) or {}).get("oecd_member")
-                and not (country_record(code) or {}).get("eu_member")
-            )
-        }
+    world_bank = WorldBankAdapter(timeout_seconds=90, max_retries=3)
+    try:
+        for code in sorted(requested_codes):
+            if country_record(code) is None:
+                world_bank.ensure_country_registered(code)
+    finally:
+        world_bank.close()
 
     return {
-        country["iso3"]
-        for country in country_registry()
-        if country.get("oecd_member")
-        and not country.get("eu_member")
+        code
+        for code in requested_codes
+        if (
+            (country_record(code) or {}).get("oecd_member")
+            and not (country_record(code) or {}).get("eu_member")
+        )
     }
 
 
