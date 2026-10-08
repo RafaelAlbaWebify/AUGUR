@@ -268,3 +268,50 @@ Four-country live validation on 2026-10-08 used Australia, Canada, Japan and the
 Coverage is intentionally reported per dataset. A geography with density but without population or dependency evidence is not treated as complete, and country-level sync gaps remain explicit.
 
 Next urban expansion candidates must be inspected and validated before integration. OECD FUA labour-market, commuting and environmental datasets are candidates, but no values should be inferred into cities or FUAs from regional TL2/TL3 evidence.
+
+
+## OECD urban expansion status
+
+AUGUR now treats OECD Functional Urban Areas and cities as a provider-native
+urban geography system (`OECD_FUA`) rather than mapping them to Urban Audit
+or NUTS.
+
+Implemented and persisted when published:
+
+- city/FUA population;
+- city/FUA population density;
+- city/FUA total, youth and old-age dependency ratios;
+- FUA employment-to-population ratio;
+- FUA labour-force participation rate;
+- FUA unemployment rate;
+- FUA walking access to a public-transport stop within 5, 10 and 15 minutes.
+
+Semantics are level-aware:
+
+- CITY does not expect FUA-only labour or transport-access indicators;
+- FUA and CITY remain separate comparable geographic levels;
+- unavailable OECD datasets are explicit coverage gaps rather than inferred
+  from regional values.
+
+Provider-native geometry architecture is also implemented:
+
+- `geography_geometries` stores source-native GeoJSON plus bounding boxes;
+- `/api/geographies/geometry` exposes the geometry as a FeatureCollection;
+- Leaflet renders provider-native polygons independently from GISCO/NUTS;
+- the official OECD city/FUA shapefile importer validates WGS84, matches
+  source codes against `geography_registry`, and never substitutes
+  third-party geometry;
+- OECD's hosted boundary archives currently return access restrictions from
+  GitHub-hosted runners, so geometry availability is reported separately from
+  analytical evidence and does not block urban analysis.
+
+Still withheld from production ingestion:
+
+- OECD FUA PM2.5 exposure. The current live source declares micrograms per
+  cubic metre with unit multiplier 0, but the Australian time series contains
+  abrupt order-of-magnitude discontinuities under otherwise identical
+  dimensions. AUGUR will not surface this series until the discontinuity is
+  understood.
+- OECD FUA economy data for the probed Australian FUAs. The dataset is valid,
+  but the probe returns no records; this remains a source coverage gap.
+
