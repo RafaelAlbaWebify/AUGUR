@@ -384,7 +384,12 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
-  const [selectedRegion, setSelectedRegion] = useState<{ id: string; name: string; level: number | string } | null>(null)
+  const [selectedRegion, setSelectedRegion] = useState<{
+    id: string
+    name: string
+    level: number | string
+    system: string
+  } | null>(null)
   const [selectedCity, setSelectedCity] = useState<{ code: string; name: string } | null>(null)
   const [regionalEvidence, setRegionalEvidence] = useState<RegionalEvidenceResponse | null>(null)
   const [regionalEvidenceState, setRegionalEvidenceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
@@ -432,7 +437,8 @@ export default function OverviewPage({
       return
     }
 
-    const cached = regionalEvidenceCache.get(selectedRegion.id)
+    const regionalCacheKey = `${selectedRegion.system}:${selectedRegion.id}`
+    const cached = regionalEvidenceCache.get(regionalCacheKey)
     if (cached) {
       setRegionalEvidence(cached)
       setRegionalEvidenceState('ready')
@@ -442,16 +448,17 @@ export default function OverviewPage({
     const controller = new AbortController()
     setRegionalEvidenceState('loading')
 
-    fetch(`${apiBase}/api/regions/${selectedRegion.id}/evidence`, {
-      signal: controller.signal,
-    })
+    fetch(
+      `${apiBase}/api/regions/${selectedRegion.id}/evidence?system=${encodeURIComponent(selectedRegion.system)}`,
+      { signal: controller.signal },
+    )
       .then((response) => {
         if (!response.ok) throw new Error(`Regional evidence HTTP ${response.status}`)
         return response.json() as Promise<RegionalEvidenceResponse>
       })
       .then((payload) => {
         if (controller.signal.aborted) return
-        regionalEvidenceCache.set(selectedRegion.id, payload)
+        regionalEvidenceCache.set(regionalCacheKey, payload)
         setRegionalEvidence(payload)
         setRegionalEvidenceState('ready')
       })
@@ -607,7 +614,12 @@ export default function OverviewPage({
               }}
               onSelectRegion={(id, name, level) => {
                 setSelectedCity(null)
-                setSelectedRegion({ id, name, level })
+                setSelectedRegion({
+                  id,
+                  name,
+                  level,
+                  system: 'NUTS_2024',
+                })
               }}
               onSelectCity={(code, name) => {
                 setSelectedRegion(null)
@@ -649,6 +661,7 @@ export default function OverviewPage({
                     id: geography.source_geo_code,
                     name: geography.name ?? geography.source_geo_code,
                     level: geography.geo_level.toUpperCase(),
+                    system: geography.geography_system,
                   })
                 }}
               >
