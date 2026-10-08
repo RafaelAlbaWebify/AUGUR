@@ -61,7 +61,9 @@ def main() -> int:
         row
         for row in rows
         if (
-            str(row.get("REF_AREA") or "").upper().startswith(("AU", "AUS"))
+            str(row.get("COUNTRY") or "").upper() == "AUS"
+            or str(row.get("Country") or "").strip().lower() == "australia"
+            or str(row.get("REF_AREA") or "").upper().startswith(("AU", "AUS"))
             or any(
                 token in str(row.get("Reference area") or "").lower()
                 for token in city_name_tokens
