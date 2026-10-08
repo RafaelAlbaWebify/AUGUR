@@ -482,3 +482,81 @@ def test_temporal_graph_marks_remote_skill_ready_portable_income_case_in_scope()
     assert result["estimation_scope"]["blockers"] == []
     assert result["calendar_ready"] is True
     assert result["candidate_range"] is not None
+
+
+
+def test_temporal_validation_gate_reports_calibration_blockers(monkeypatch):
+    monkeypatch.setattr(
+        module,
+        "calibration_status",
+        lambda: {
+            "externally_calibrated": False,
+            "protocol_version": "ttv-calibration-protocol-v1",
+            "holdout_seal": {"sealed": False, "holdout_sha256": None},
+            "holdout_review": {"reviewed": False},
+            "holdout_acceptance": {"status": "insufficient_sample"},
+            "activation_readiness": {
+                "ready_for_temporal_model_version": False,
+                "blockers": [
+                    "holdout_not_sealed",
+                    "holdout_acceptance_not_passed",
+                    "representativeness_review_missing",
+                ],
+            },
+        },
+    )
+
+    result = module.temporal_model_validation_status()
+
+    assert result["ready_for_versioning"] is False
+    assert result["gates"]["external_calibration"]["state"] == "missing"
+    assert result["gates"]["external_calibration"]["blockers"] == [
+        "holdout_not_sealed",
+        "holdout_acceptance_not_passed",
+        "representativeness_review_missing",
+    ]
+
+
+def test_temporal_validation_gate_becomes_supported_after_external_calibration(
+    monkeypatch,
+):
+    monkeypatch.setattr(
+        module,
+        "calibration_status",
+        lambda: {
+            "externally_calibrated": True,
+            "protocol_version": "ttv-calibration-protocol-v1",
+            "holdout_seal": {
+                "sealed": True,
+                "holdout_sha256": "abc123",
+            },
+            "holdout_review": {
+                "reviewed": True,
+                "representative": True,
+                "cohort_coverage_adequate": True,
+            },
+            "holdout_acceptance": {
+                "status": "passed",
+                "passed": True,
+            },
+            "activation_readiness": {
+                "ready_for_temporal_model_version": True,
+                "blockers": [],
+            },
+        },
+    )
+
+    result = module.temporal_model_validation_status()
+
+    assert result["ready_for_versioning"] is True
+    assert result["blockers"] == []
+    assert result["missing"] == []
+    assert result["gates"]["external_calibration"] == {
+        "state": "supported",
+        "reason": (
+            "sealed_holdout_passed_predeclared_criteria_and_"
+            "representativeness_review"
+        ),
+        "protocol_version": "ttv-calibration-protocol-v1",
+        "holdout_sha256": "abc123",
+    }
