@@ -12,6 +12,7 @@ on:
       - "backend/scripts/inspect_global_country_baseline.py"
       - "backend/scripts/inspect_oecd_regional_density.py"
       - "backend/scripts/inspect_oecd_fua_density.py"
+      - "backend/scripts/inspect_oecd_fua_dependency.py"
       - "backend/scripts/inspect_oecd_regional_demography.py"
       - "backend/scripts/inspect_oecd_regional_population.py"
       - "backend/app/ingestion/world_bank.py"
@@ -97,6 +98,9 @@ jobs:
           python -m scripts.sync_oecd_fua
           --countries AUS
           --start-year 2020
+
+      - name: Inspect OECD Australia urban dependency ratio
+        run: python -m scripts.inspect_oecd_fua_dependency
 
       - name: Probe Urban Audit city evidence
         run: python -m scripts.inspect_eurostat_city_evidence
