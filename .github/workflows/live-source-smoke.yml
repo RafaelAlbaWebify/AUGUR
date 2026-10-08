@@ -15,6 +15,7 @@ on:
       - "backend/scripts/inspect_oecd_fua_boundaries.py"
       - "backend/scripts/inspect_oecd_fua_geometry_links.py"
       - "backend/scripts/inspect_oecd_fua_dependency.py"
+      - "backend/scripts/inspect_oecd_fua_green_area.py"
       - "backend/scripts/inspect_oecd_fua_labour.py"
       - "backend/scripts/inspect_oecd_fua_economy.py"
       - "backend/scripts/inspect_oecd_fua_public_transport.py"
@@ -120,6 +121,9 @@ jobs:
 
       - name: Inspect OECD Australia urban dependency ratio
         run: python -m scripts.inspect_oecd_fua_dependency
+
+      - name: Inspect OECD Sydney FUA green-area measures
+        run: python -m scripts.inspect_oecd_fua_green_area
 
       - name: Inspect OECD Australia FUA labour market
         run: python -m scripts.inspect_oecd_fua_labour
