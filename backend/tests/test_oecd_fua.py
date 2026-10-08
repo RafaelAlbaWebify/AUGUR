@@ -109,3 +109,60 @@ def test_sync_fua_density_persists_history(monkeypatch):
     assert result["city_count"] == 1
     assert result["fua_count"] == 1
     assert {row["geo_code"] for row in stored} == {"AUS01C", "AUS01F"}
+
+
+POPULATION_CSV = """STRUCTURE,STRUCTURE_ID,STRUCTURE_NAME,ACTION,REF_AREA,Reference area,FREQ,Frequency of observation,MEASURE,Measure,UNIT_MEASURE,Unit of measure,AGE,Age,SEX,Sex,TERRITORIAL_LEVEL,Territorial level,TIME_PERIOD,Time period,OBS_VALUE,Observation value,OBS_STATUS,Observation status
+dataflow,OECD.CFE.EDS:DSD_FUA_DEMO@DF_AGE_SEX(1.2),Population by age and sex,I,AUS01C,Greater Sydney,A,Annual,POP,Population,PS,Persons,_T,Total,_T,Total,CITY,City,2024,2024,5570000,5570000,A,Normal value
+dataflow,OECD.CFE.EDS:DSD_FUA_DEMO@DF_AGE_SEX(1.2),Population by age and sex,I,AUS01F,Sydney FUA,A,Annual,POP,Population,PS,Persons,_T,Total,_T,Total,FUA,Functional urban area,2024,2024,5850000,5850000,A,Normal value
+dataflow,OECD.CFE.EDS:DSD_FUA_DEMO@DF_AGE_SEX(1.2),Population by age and sex,I,AUS01C,Greater Sydney,A,Annual,POP,Population,PS,Persons,Y0T4,0-4,_T,Total,CITY,City,2024,2024,300000,300000,A,Normal value
+dataflow,OECD.CFE.EDS:DSD_FUA_DEMO@DF_AGE_SEX(1.2),Population by age and sex,I,AT001C,Vienna,A,Annual,POP,Population,PS,Persons,_T,Total,_T,Total,CITY,City,2024,2024,2000000,2000000,A,Normal value
+"""
+
+
+def test_normalize_fua_population_keeps_total_population_only():
+    adapter = OECDFUAAdapter(client=None)
+    try:
+        rows = adapter.normalize_population(
+            POPULATION_CSV,
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["geo_code"] for row in rows} == {"AUS01C", "AUS01F"}
+    assert {row["indicator_id"] for row in rows} == {"urban_population"}
+    assert {row["unit"] for row in rows} == {"persons"}
+    assert {row["value"] for row in rows} == {5570000.0, 5850000.0}
+
+
+def test_sync_fua_population_persists_history(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDFUAAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_population",
+        lambda **kwargs: POPULATION_CSV,
+    )
+
+    try:
+        result = adapter.sync_population(
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+            start_year=2021,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 2
+    assert result["country_count"] == 1
+    assert result["geography_count"] == 2
+    assert result["city_count"] == 1
+    assert result["fua_count"] == 1
