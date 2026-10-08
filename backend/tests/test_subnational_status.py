@@ -346,3 +346,50 @@ def test_same_source_code_isolated_by_geography_system(
     assert admin[0]["value"] == 20.0
     assert oecd[0]["geography_system"] == "OECD_TL_2024"
     assert admin[0]["geography_system"] == "ISO_3166_2"
+
+
+def test_geography_geometry_storage_round_trip(monkeypatch, tmp_path):
+    path = tmp_path / "geography-geometry.duckdb"
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+    module.initialize_analytics_schema()
+
+    stored = module.upsert_geography_geometries([
+        {
+            "geo_id": "OECD_FUA:AUS01F",
+            "country_iso3": "AUS",
+            "geography_system": "OECD_FUA",
+            "geo_level": "fua",
+            "source_geo_code": "AUS01F",
+            "geometry_geojson": (
+                '{"type":"Polygon","coordinates":'
+                '[[[151.0,-34.0],[151.5,-34.0],'
+                '[151.5,-33.5],[151.0,-34.0]]]}'
+            ),
+            "bbox_min_lon": 151.0,
+            "bbox_min_lat": -34.0,
+            "bbox_max_lon": 151.5,
+            "bbox_max_lat": -33.5,
+            "source_id": "OECD",
+            "dataset_version": "official-boundaries",
+        }
+    ])
+
+    assert stored == 1
+
+    rows = module.geography_geometries_for_country(
+        "AUS",
+        geography_system="OECD_FUA",
+    )
+    assert len(rows) == 1
+    assert rows[0]["geo_id"] == "OECD_FUA:AUS01F"
+    assert rows[0]["source_geo_code"] == "AUS01F"
+    assert rows[0]["geo_level"] == "fua"
+
+    coverage = module.geography_geometry_coverage_status()
+    assert coverage["geometry_count"] == 1
+    assert coverage["countries_with_geometry"] == 1
+    assert coverage["systems"] == ["OECD_FUA"]
