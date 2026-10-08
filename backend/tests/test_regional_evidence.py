@@ -92,7 +92,7 @@ def test_regional_comparison_keeps_region_codes_separate():
             "geo_code": "PT11",
             "geo_name": None,
             "geo_level": "nuts2",
-            "source": None,
+            "source": "Eurostat regional statistics",
             "source_ids": [],
         },
     ]
