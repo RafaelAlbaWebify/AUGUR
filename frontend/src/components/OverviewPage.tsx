@@ -652,6 +652,8 @@ export default function OverviewPage({
 
           {selectedCountryIso2 ? (
             <RegionalMap
+              apiBase={apiBase}
+              countryIso3={selectedCountry}
               countryIso2={selectedCountryIso2}
               countryCenter={selectedCountryCenter}
               selectedRegion={selectedRegion?.id ?? null}
@@ -663,13 +665,13 @@ export default function OverviewPage({
                   onCountryChange(country.iso3)
                 }
               }}
-              onSelectRegion={(id, name, level) => {
+              onSelectRegion={(id, name, level, system) => {
                 setSelectedCity(null)
                 setSelectedRegion({
                   id,
                   name,
                   level,
-                  system: 'NUTS_2024',
+                  system: system ?? 'NUTS_2024',
                 })
               }}
               onSelectCity={(code, name) => {
