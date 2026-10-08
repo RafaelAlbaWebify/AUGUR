@@ -139,3 +139,76 @@ def test_regional_sync_explicit_selection_registers_only_requested(monkeypatch):
 
 def test_urban_sync_explicit_selection_registers_only_requested(monkeypatch):
     _exercise_explicit_registration(monkeypatch, sync_oecd_fua)
+
+
+def test_regional_sync_skips_network_when_local_evidence_is_fresh(
+    monkeypatch,
+    capsys,
+):
+    monkeypatch.setattr(sync_oecd_regional, "initialize_datastores", lambda: None)
+    monkeypatch.setattr(
+        sync_oecd_regional,
+        "_target_countries",
+        lambda requested: {"AUS", "CAN"},
+    )
+    monkeypatch.setattr(
+        sync_oecd_regional,
+        "stale_geography_countries",
+        lambda system, countries, required, max_age_hours=24.0: set(),
+    )
+
+    class UnexpectedAdapter:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("Fresh evidence must not create an OECD client")
+
+    monkeypatch.setattr(
+        sync_oecd_regional,
+        "OECDRegionalAdapter",
+        UnexpectedAdapter,
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        ["sync_oecd_regional"],
+    )
+
+    assert sync_oecd_regional.main() == 0
+    output = capsys.readouterr().out
+    assert '"status": "fresh_local_evidence"' in output
+    assert '"AUS"' in output
+    assert '"CAN"' in output
+
+
+def test_urban_sync_skips_network_when_local_evidence_is_fresh(
+    monkeypatch,
+    capsys,
+):
+    monkeypatch.setattr(sync_oecd_fua, "initialize_datastores", lambda: None)
+    monkeypatch.setattr(
+        sync_oecd_fua,
+        "_target_countries",
+        lambda requested: {"AUS"},
+    )
+    monkeypatch.setattr(
+        sync_oecd_fua,
+        "stale_geography_countries",
+        lambda system, countries, required, max_age_hours=24.0: set(),
+    )
+
+    class UnexpectedAdapter:
+        def __init__(self, *args, **kwargs):
+            raise AssertionError("Fresh evidence must not create an OECD client")
+
+    monkeypatch.setattr(
+        sync_oecd_fua,
+        "OECDFUAAdapter",
+        UnexpectedAdapter,
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        ["sync_oecd_fua"],
+    )
+
+    assert sync_oecd_fua.main() == 0
+    output = capsys.readouterr().out
+    assert '"status": "fresh_local_evidence"' in output
+    assert '"AUS"' in output
