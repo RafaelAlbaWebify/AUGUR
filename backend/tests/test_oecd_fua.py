@@ -320,3 +320,73 @@ def test_sync_fua_labour_persists_rate_history(monkeypatch):
         "urban_labour_force_participation_rate",
         "urban_unemployment_rate",
     ]
+
+
+TRANSPORT_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,MEASURE,Measure,UNIT_MEASURE,Unit of measure,TRAN_MODE,Mode of transport,TERRITORIAL_LEVEL,Territorial level,TRAVEL_TIME,Travel time,SERVICE,Service,TIME_PERIOD,OBS_VALUE
+dataflow,AUS01F,Greater Sydney,A,POP_WITH_ACCESS,Population with access to at least one service point,PT_POP,Percentage of population,,Walking,FUA,FUA,MN_LE5,Within 5 minutes,PT_STOP,Public transport stop,2023,82.9
+dataflow,AUS01F,Greater Sydney,A,POP_WITH_ACCESS,Population with access to at least one service point,PT_POP,Percentage of population,,Walking,FUA,FUA,MN_LE10,Within 10 minutes,PT_STOP,Public transport stop,2023,96.5
+dataflow,AUS01F,Greater Sydney,A,POP_WITH_ACCESS,Population with access to at least one service point,PT_POP,Percentage of population,,Walking,FUA,FUA,MN_LE15,Within 15 minutes,PT_STOP,Public transport stop,2023,98.5
+dataflow,AUS02F,Greater Melbourne,A,POP_WITH_ACCESS,Population with access to at least one service point,PT_POP,Percentage of population,,Walking,FUA,FUA,MN_LE10,Within 10 minutes,PT_STOP,Public transport stop,2023,95.0
+dataflow,AUS01C,Greater Sydney,A,POP_WITH_ACCESS,Population with access to at least one service point,PT_POP,Percentage of population,,Walking,CITY,City,MN_LE10,Within 10 minutes,PT_STOP,Public transport stop,2023,99.0
+dataflow,AT001F,Vienna,A,POP_WITH_ACCESS,Population with access to at least one service point,PT_POP,Percentage of population,,Walking,FUA,FUA,MN_LE10,Within 10 minutes,PT_STOP,Public transport stop,2023,97.0
+"""
+
+
+def test_normalize_fua_transport_keeps_three_access_thresholds():
+    adapter = OECDFUAAdapter(client=None)
+    try:
+        rows = adapter.normalize_transport(
+            TRANSPORT_CSV,
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    sydney = {
+        row["indicator_id"]: row
+        for row in rows
+        if row["geo_code"] == "AUS01F"
+    }
+    assert sydney["urban_public_transport_access_5min"]["value"] == 82.9
+    assert sydney["urban_public_transport_access_10min"]["value"] == 96.5
+    assert sydney["urban_public_transport_access_15min"]["value"] == 98.5
+    assert all(row["geo_level"] == "fua" for row in rows)
+    assert all(row["unit"] == "percent" for row in rows)
+    assert all(row["geo_code"] != "AUS01C" for row in rows)
+
+
+def test_sync_fua_transport_persists_access_history(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDFUAAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_transport",
+        lambda **kwargs: TRANSPORT_CSV,
+    )
+
+    try:
+        result = adapter.sync_transport(
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS", "CAN"},
+            start_year=2019,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 4
+    assert result["covered_countries"] == ["AUS"]
+    assert result["missing_countries"] == ["CAN"]
+    assert result["complete"] is False
+    assert result["fua_count"] == 2
+    assert result["indicator_ids"] == [
+        "urban_public_transport_access_10min",
+        "urban_public_transport_access_15min",
+        "urban_public_transport_access_5min",
+    ]
