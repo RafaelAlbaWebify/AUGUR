@@ -622,7 +622,7 @@ def test_oecd_fua_local_evidence_exposes_expected_missing_metrics(monkeypatch):
     )
 
     assert result["geo_level"] == "city"
-    assert result["indicator_count"] == 5
+    assert result["indicator_count"] == 9
     assert result["available_count"] == 1
     assert result["complete"] is False
 
@@ -636,6 +636,10 @@ def test_oecd_fua_local_evidence_exposes_expected_missing_metrics(monkeypatch):
         "urban_total_dependency_ratio",
         "urban_youth_dependency_ratio",
         "urban_old_age_dependency_ratio",
+        "urban_commute_car_share",
+        "urban_commute_public_transport_share",
+        "urban_commute_bicycle_share",
+        "urban_commute_walk_share",
     }
     assert all(
         item["source_id"] == "OECD"
@@ -677,7 +681,7 @@ def test_oecd_fua_level_adds_labour_and_transport_expectations(monkeypatch):
     )
 
     assert result["geo_level"] == "fua"
-    assert result["indicator_count"] == 11
+    assert result["indicator_count"] == 17
     assert result["available_count"] == 1
 
     unavailable = {
@@ -692,4 +696,84 @@ def test_oecd_fua_level_adds_labour_and_transport_expectations(monkeypatch):
         "urban_public_transport_access_5min",
         "urban_public_transport_access_10min",
         "urban_public_transport_access_15min",
+        "urban_commute_car_share",
+        "urban_commute_public_transport_share",
+        "urban_commute_bicycle_share",
+        "urban_commute_walk_share",
+        "urban_green_area_per_capita_m2",
+        "urban_green_area_share",
     }.issubset(unavailable)
+
+
+
+def test_oecd_fua_green_and_commute_metrics_surface_when_cached(monkeypatch):
+    monkeypatch.setattr(
+        regional_module,
+        "regional_evidence_bundle",
+        lambda code, max_history_points=8, geography_system=None: {
+            "latest": [
+                {
+                    "geography_system": "OECD_FUA",
+                    "geo_code": "AUS01F",
+                    "geo_name": "Greater Sydney",
+                    "geo_level": "fua",
+                    "indicator_id": "urban_commute_public_transport_share",
+                    "period": 2021,
+                    "value": 20.0,
+                    "unit": "percent",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_FUA_TRAN@DF_TRAN_COMMUT",
+                    "retrieved_at": None,
+                    "source_updated_at": "1.2",
+                },
+                {
+                    "geography_system": "OECD_FUA",
+                    "geo_code": "AUS01F",
+                    "geo_name": "Greater Sydney",
+                    "geo_level": "fua",
+                    "indicator_id": "urban_green_area_per_capita_m2",
+                    "period": 2021,
+                    "value": 146.0,
+                    "unit": "m2_per_person",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_FUA_ENV@DF_GREEN_AREA",
+                    "retrieved_at": None,
+                    "source_updated_at": "1.2",
+                },
+                {
+                    "geography_system": "OECD_FUA",
+                    "geo_code": "AUS01F",
+                    "geo_name": "Greater Sydney",
+                    "geo_level": "fua",
+                    "indicator_id": "urban_green_area_share",
+                    "period": 2021,
+                    "value": 47.3,
+                    "unit": "percent",
+                    "source_id": "OECD",
+                    "dataset_id": "DSD_FUA_ENV@DF_GREEN_AREA",
+                    "retrieved_at": None,
+                    "source_updated_at": "1.2",
+                },
+            ],
+            "history": [],
+            "sectors": [],
+            "environmental_health": [],
+        },
+    )
+    regional_module._REGIONAL_CACHE.clear()
+
+    result = regional_evidence(
+        "AUS01F",
+        geography_system="OECD_FUA",
+    )
+    by_id = {
+        item["indicator_id"]: item
+        for item in result["indicators"]
+    }
+
+    assert by_id["urban_commute_public_transport_share"]["status"] == "available"
+    assert by_id["urban_commute_public_transport_share"]["value"] == 20.0
+    assert by_id["urban_green_area_per_capita_m2"]["status"] == "available"
+    assert by_id["urban_green_area_per_capita_m2"]["value"] == 146.0
+    assert by_id["urban_green_area_share"]["status"] == "available"
+    assert by_id["urban_green_area_share"]["value"] == 47.3
