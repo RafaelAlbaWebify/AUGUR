@@ -499,8 +499,8 @@ async function mockApi(page: Page) {
           geo_level: 'tl2',
           source: 'AUGUR local store · OECD regional statistics',
           source_ids: ['OECD'],
-          indicator_count: 5,
-          available_count: 5,
+          indicator_count: 6,
+          available_count: 6,
           complete: true,
           indicators: [
             {
@@ -551,6 +551,16 @@ async function mockApi(page: Page) {
               value: 62150,
               unit: 'usd_ppp_per_person',
               dataset_id: 'DSD_REG_ECO@DF_GDP',
+              source_id: 'OECD',
+            },
+            {
+              indicator_id: 'regional_disposable_income_ppp_usd',
+              name: 'Disposable income per capita, constant PPP USD',
+              status: 'available',
+              period: 2023,
+              value: 36200,
+              unit: 'usd_ppp_per_person',
+              dataset_id: 'DSD_REG_ECO@DF_INC',
               source_id: 'OECD',
             },
           ],
@@ -1317,6 +1327,8 @@ test('source-native OECD region can be selected without GISCO geometry', async (
   await expect(geographicEvidence.getByText('4.0%')).toBeVisible()
   await expect(geographicEvidence.getByText('GDP per capita, constant PPP USD')).toBeVisible()
   await expect(geographicEvidence.getByText('$62,150 PPP/person')).toBeVisible()
+  await expect(geographicEvidence.getByText('Disposable income per capita, constant PPP USD')).toBeVisible()
+  await expect(geographicEvidence.getByText('$36,200 PPP/person')).toBeVisible()
 })
 
 test('source-native OECD urban area can be selected separately from regions', async ({ page }) => {
