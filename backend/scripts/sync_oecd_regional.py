@@ -19,6 +19,8 @@ from app.ingestion.oecd_regional import (
     GDP_DEFAULT_KEY,
     INCOME_DEFAULT_KEY,
     SAFETY_DEFAULT_KEY,
+    BROADBAND_DEFAULT_KEY,
+    LAND_TEMP_DEFAULT_KEY,
     OECDRegionalAdapter,
 )
 from app.ingestion.world_bank import WorldBankAdapter
@@ -118,6 +120,16 @@ def main() -> int:
         default=SAFETY_DEFAULT_KEY,
         help="Optional OECD regional safety SDMX key.",
     )
+    parser.add_argument(
+        "--broadband-key",
+        default=BROADBAND_DEFAULT_KEY,
+        help="Optional OECD regional broadband SDMX key.",
+    )
+    parser.add_argument(
+        "--land-temperature-key",
+        default=LAND_TEMP_DEFAULT_KEY,
+        help="Optional OECD regional land-temperature SDMX key.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -197,6 +209,18 @@ def main() -> int:
             end_year=args.end_year,
             key=args.safety_key,
         )
+        broadband = adapter.sync_broadband(
+            allowed_country_iso3=targets,
+            start_year=max(args.start_year, 2022),
+            end_year=args.end_year,
+            key=args.broadband_key,
+        )
+        land_temperature = adapter.sync_land_temperature(
+            allowed_country_iso3=targets,
+            start_year=max(args.start_year, 2019),
+            end_year=args.end_year,
+            key=args.land_temperature_key,
+        )
     finally:
         adapter.close()
 
@@ -208,6 +232,8 @@ def main() -> int:
         + gdp["rows"]
         + income["rows"]
         + safety["rows"]
+        + broadband["rows"]
+        + land_temperature["rows"]
     )
     payload = {
         "source_id": "OECD",
@@ -226,6 +252,8 @@ def main() -> int:
             "gdp": gdp,
             "income": income,
             "safety": safety,
+            "broadband": broadband,
+            "land_temperature": land_temperature,
         },
         "geography_coverage": geography_coverage_status(),
     }
