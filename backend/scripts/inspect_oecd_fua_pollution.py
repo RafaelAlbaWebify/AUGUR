@@ -79,7 +79,7 @@ def main() -> int:
                 "measure_label": row.get("Measure"),
                 "unit": row.get("UNIT_MEASURE"),
                 "unit_label": row.get("Unit of measure"),
-                "pollutant_level": row.get("POLLUTANT_CONC"),
+                "pollutant_level": row.get("POLLUTANT_CONCENTRATION"),
                 "pollutant_level_label": row.get("Pollutant concentration level"),
                 "level": row.get("TERRITORIAL_LEVEL"),
                 "level_label": row.get("Territorial level"),
