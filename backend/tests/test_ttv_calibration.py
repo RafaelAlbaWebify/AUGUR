@@ -1009,3 +1009,95 @@ def test_csv_import_rejects_duplicate_case_ids_before_writing(
         module.import_calibration_csv(csv_path)
 
     assert module.calibration_status()["case_count"] == 0
+
+
+
+def test_holdout_csv_import_requires_protocol_bound_holdout_rows(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    csv_path = tmp_path / "holdout.csv"
+    csv_path.write_text(
+        "case_id,country_iso3,employment_mode,engine_version,composition,"
+        "candidate_weeks_min,candidate_weeks_max,observed_weeks,"
+        "sample_role,start_event_definition_version,"
+        "viability_outcome_definition_version,calibration_protocol_version\n"
+        "holdout-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
+        "10,25,16,holdout,"
+        "ttv-start-active-language-transition-v1,"
+        "ttv-outcome-b2-remote-viability-v1,"
+        "ttv-calibration-protocol-v1\n",
+        encoding="utf-8",
+    )
+
+    result = module.import_holdout_calibration_csv(csv_path)
+
+    assert result["import_mode"] == "holdout"
+    assert result["frozen_protocol_version"] == "ttv-calibration-protocol-v1"
+    assert result["acceptance_criteria_version"] == "ttv-acceptance-criteria-v1"
+    assert result["imported_count"] == 1
+
+    status = module.calibration_status()
+    assert status["holdout_case_count"] == 1
+    assert status["calibration_protocol_versions"] == [
+        "ttv-calibration-protocol-v1"
+    ]
+
+
+def test_holdout_csv_import_rejects_mixed_development_rows_before_write(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    csv_path = tmp_path / "mixed.csv"
+    csv_path.write_text(
+        "case_id,country_iso3,employment_mode,engine_version,composition,"
+        "candidate_weeks_min,candidate_weeks_max,observed_weeks,"
+        "sample_role,start_event_definition_version,"
+        "viability_outcome_definition_version,calibration_protocol_version\n"
+        "holdout-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
+        "10,25,16,holdout,"
+        "ttv-start-active-language-transition-v1,"
+        "ttv-outcome-b2-remote-viability-v1,"
+        "ttv-calibration-protocol-v1\n"
+        "dev-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
+        "10,25,15,development,"
+        "ttv-start-active-language-transition-v1,"
+        "ttv-outcome-b2-remote-viability-v1,"
+        "ttv-calibration-protocol-v1\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="sample_role must be holdout"):
+        module.import_holdout_calibration_csv(csv_path)
+
+    assert module.calibration_status()["case_count"] == 0
+
+
+def test_holdout_csv_import_rejects_wrong_protocol_before_write(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    csv_path = tmp_path / "wrong-protocol.csv"
+    csv_path.write_text(
+        "case_id,country_iso3,employment_mode,engine_version,composition,"
+        "candidate_weeks_min,candidate_weeks_max,observed_weeks,"
+        "sample_role,start_event_definition_version,"
+        "viability_outcome_definition_version,calibration_protocol_version\n"
+        "holdout-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
+        "10,25,16,holdout,"
+        "ttv-start-active-language-transition-v1,"
+        "ttv-outcome-b2-remote-viability-v1,"
+        "ttv-calibration-protocol-v0\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="calibration_protocol_version"):
+        module.import_holdout_calibration_csv(csv_path)
+
+    assert module.calibration_status()["case_count"] == 0
