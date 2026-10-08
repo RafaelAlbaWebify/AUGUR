@@ -304,6 +304,9 @@ function formatRegionalValue(value: number, unit?: string) {
   if (unit === 'ug_m3') {
     return `${value.toFixed(1)} µg/m³`
   }
+  if (unit === 'celsius') {
+    return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 }).format(value)} °C`
+  }
   if (unit === 'thousand_passengers') {
     return `${new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(value)}k passengers`
   }
