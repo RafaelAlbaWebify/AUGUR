@@ -2669,29 +2669,32 @@ def geography_geometries_for_country(
         params: list[object] = [country_iso3.upper()]
         system_filter = ""
         if geography_system:
-            system_filter = "AND geography_system = ?"
+            system_filter = "AND gg.geography_system = ?"
             params.append(geography_system.upper())
 
         result = con.execute(
             f"""
             SELECT
-                geo_id,
-                country_iso3,
-                geography_system,
-                geo_level,
-                source_geo_code,
-                geometry_geojson,
-                bbox_min_lon,
-                bbox_min_lat,
-                bbox_max_lon,
-                bbox_max_lat,
-                source_id,
-                dataset_version,
-                retrieved_at
-            FROM geography_geometries
-            WHERE country_iso3 = ?
+                gg.geo_id,
+                gg.country_iso3,
+                gg.geography_system,
+                gg.geo_level,
+                gg.source_geo_code,
+                COALESCE(gr.name, gg.source_geo_code) AS name,
+                gg.geometry_geojson,
+                gg.bbox_min_lon,
+                gg.bbox_min_lat,
+                gg.bbox_max_lon,
+                gg.bbox_max_lat,
+                gg.source_id,
+                gg.dataset_version,
+                gg.retrieved_at
+            FROM geography_geometries gg
+            LEFT JOIN geography_registry gr
+              ON gr.geo_id = gg.geo_id
+            WHERE gg.country_iso3 = ?
               {system_filter}
-            ORDER BY geography_system, geo_level, source_geo_code
+            ORDER BY gg.geography_system, gg.geo_level, gg.source_geo_code
             """,
             params,
         )
