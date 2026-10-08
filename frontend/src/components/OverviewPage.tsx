@@ -217,6 +217,7 @@ type CityEvidenceResponse = {
 
 const regionalEvidenceCache = new Map<string, RegionalEvidenceResponse>()
 const cityEvidenceCache = new Map<string, CityEvidenceResponse>()
+const geographyCatalogCache = new Map<string, CountryGeography[]>()
 
 type OverviewPageProps = {
   apiBase: string
@@ -406,12 +407,18 @@ export default function OverviewPage({
     setRegionalEvidenceState('idle')
     setCityEvidence(null)
     setCityEvidenceState('idle')
-    setCountryGeographies([])
+    setCountryGeographies(geographyCatalogCache.get(selectedCountry) ?? [])
     setRegionSearch('')
     setUrbanSearch('')
   }, [selectedCountry])
 
   useEffect(() => {
+    const cached = geographyCatalogCache.get(selectedCountry)
+    if (cached) {
+      setCountryGeographies(cached)
+      return
+    }
+
     const controller = new AbortController()
 
     fetch(
@@ -424,7 +431,9 @@ export default function OverviewPage({
       })
       .then((payload) => {
         if (controller.signal.aborted) return
-        setCountryGeographies(payload.geographies ?? [])
+        const geographies = payload.geographies ?? []
+        geographyCatalogCache.set(selectedCountry, geographies)
+        setCountryGeographies(geographies)
       })
       .catch((error) => {
         if ((error as Error).name === 'AbortError') return
