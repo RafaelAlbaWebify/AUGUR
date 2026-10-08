@@ -241,3 +241,62 @@ def test_sync_demography_writes_selected_oecd_metrics(monkeypatch):
         "regional_international_outmigration_share",
         "regional_net_internal_mobility_share",
     ]
+
+
+LABOUR_CSV = """STRUCTURE,FREQ,TERRITORIAL_LEVEL,REF_AREA,Reference area,TERRITORIAL_TYPE,MEASURE,Measure,AGE,SEX,UNIT_MEASURE,Unit of measure,TIME_PERIOD,OBS_VALUE,COUNTRY
+dataflow,A,TL2,AU1,New South Wales,,EMP_RATIO,Employment to population ratio,Y15T64,_T,PT_POP_SUB,Percentage of population in the same subgroup,2024,76.5,AUS
+dataflow,A,TL2,AU2,Victoria,,EMP_RATIO,Employment to population ratio,Y15T64,_T,PT_POP_SUB,Percentage of population in the same subgroup,2024,77.2,AUS
+dataflow,A,TL3,US011,Example US region,,EMP_RATIO,Employment to population ratio,Y15T64,_T,PT_POP_SUB,Percentage of population in the same subgroup,2024,73.1,USA
+dataflow,A,TL2,AU1,New South Wales,,EMP_RATIO,Employment to population ratio,Y15T64,F,PT_POP_SUB,Percentage of population in the same subgroup,2024,72.0,AUS
+"""
+
+
+def test_normalize_labour_keeps_total_15_64_employment_ratio():
+    adapter = OECDRegionalAdapter(client=None)
+    try:
+        rows = adapter.normalize_labour(
+            LABOUR_CSV,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["geo_code"] for row in rows} == {"AU1", "AU2"}
+    assert {row["indicator_id"] for row in rows} == {
+        "regional_employment_to_population_ratio"
+    }
+    assert {row["unit"] for row in rows} == {"percent"}
+    assert {row["value"] for row in rows} == {76.5, 77.2}
+
+
+def test_sync_labour_writes_oecd_tl2_rows(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDRegionalAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_labour",
+        lambda **kwargs: LABOUR_CSV,
+    )
+
+    try:
+        result = adapter.sync_labour(
+            allowed_country_iso3={"AUS"},
+            start_year=2021,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 2
+    assert result["country_count"] == 1
+    assert result["geography_count"] == 2
+    assert result["geo_levels"] == ["tl2"]
+    assert result["indicator_ids"] == [
+        "regional_employment_to_population_ratio"
+    ]
