@@ -379,10 +379,21 @@ async function mockApi(page: Page) {
           geo_level: isFua ? 'fua' : 'city',
           source: 'AUGUR local store · OECD urban statistics',
           source_ids: ['OECD'],
-          indicator_count: 1,
-          available_count: 1,
+          indicator_count: 2,
+          available_count: 2,
           complete: true,
           indicators: [
+            {
+              indicator_id: 'urban_population',
+              name: 'Population',
+              status: 'available',
+              period: 2024,
+              value: isFua ? 5850000 : 5570000,
+              unit: 'persons',
+              dataset_id: 'DSD_FUA_DEMO@DF_AGE_SEX',
+              source_id: 'OECD',
+              history: [],
+            },
             {
               indicator_id: 'urban_population_density',
               name: 'Population density',
@@ -1221,6 +1232,8 @@ test('source-native OECD urban area can be selected separately from regions', as
   const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
   await expect(geographicEvidence.getByText('CITY EVIDENCE')).toBeVisible()
   await expect(geographicEvidence.locator('.radarPanelTopline strong')).toHaveText('Greater Sydney')
+  await expect(geographicEvidence.getByText('Population', { exact: true })).toBeVisible()
+  await expect(geographicEvidence.getByText('5,570,000')).toBeVisible()
   await expect(geographicEvidence.getByText('Population density', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('2,376 /km²')).toBeVisible()
   await expect(geographicEvidence.getByText(/OECD urban statistics/)).toBeVisible()
