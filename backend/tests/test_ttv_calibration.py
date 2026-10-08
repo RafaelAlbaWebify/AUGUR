@@ -58,7 +58,7 @@ def test_empty_calibration_store_is_ready_but_not_calibrated(
     result = module.calibration_status()
 
     assert result["infrastructure_ready"] is True
-    assert result["protocol_state"] == "definitions_frozen_acceptance_pending"
+    assert result["protocol_state"] == "definitions_and_acceptance_frozen_protocol_pending"
     assert result["protocol_version"] is None
     assert result["protocol_document"] == "docs/TTV_CALIBRATION_PROTOCOL.md"
     assert result["case_count"] == 0
@@ -323,10 +323,7 @@ def test_calibration_protocol_readiness_lists_unresolved_requirements():
 
     assert result["protocol_state"] == "definitions_frozen_acceptance_pending"
     assert result["ready_for_holdout_collection"] is False
-    assert result["blockers"] == [
-        "protocol_version",
-        "acceptance_criteria",
-    ]
+    assert result["blockers"] == ["protocol_version"]
     assert result["requirements"]["protocol_version"]["ready"] is False
     assert result["requirements"]["start_event_definition"] == {
         "ready": True,
@@ -340,7 +337,12 @@ def test_calibration_protocol_readiness_lists_unresolved_requirements():
         "ready": True,
         "version": "ttv-inclusion-remote-scope-v1",
     }
-    assert result["requirements"]["acceptance_criteria"]["ready"] is False
+    assert result["requirements"]["acceptance_criteria"] == {
+        "ready": True,
+        "version": "ttv-acceptance-criteria-v1",
+    }
+    assert result["acceptance_criteria"]["minimum_holdout_cases"] == 60
+    assert result["acceptance_criteria"]["minimum_interval_coverage_pct"] == 80.0
 
 
 def test_sample_role_metrics_keep_development_and_holdout_separate(
@@ -833,3 +835,69 @@ def test_calibration_context_rejects_sub_b2_achieved_outcome():
 
     with pytest.raises(ValueError, match="achieved_cefr"):
         module.validate_calibration_case(case)
+
+
+def _holdout_case(index, lower=10.0, upper=20.0, observed=15.0):
+    return {
+        "case_id": f"holdout-{index:03d}",
+        "country_iso3": "IRL",
+        "employment_mode": "remote",
+        "engine_version": "ttv-temporal-evidence-v1",
+        "composition": "critical_path_v1",
+        "sample_role": "holdout",
+        "candidate_weeks_min": lower,
+        "candidate_weeks_max": upper,
+        "observed_weeks": observed,
+    }
+
+
+def test_holdout_acceptance_reports_insufficient_sample():
+    result = module.evaluate_holdout_acceptance([
+        _holdout_case(index)
+        for index in range(20)
+    ])
+
+    assert result["status"] == "insufficient_sample"
+    assert result["passed"] is False
+    assert result["eligible_holdout_case_count"] == 20
+    assert result["checks"]["minimum_holdout_cases"]["passed"] is False
+    assert result["representativeness_review_required"] is True
+
+
+def test_holdout_acceptance_can_pass_frozen_numeric_thresholds():
+    cases = [
+        _holdout_case(
+            index,
+            lower=10.0,
+            upper=20.0,
+            observed=15.0 if index % 5 else 18.0,
+        )
+        for index in range(60)
+    ]
+
+    result = module.evaluate_holdout_acceptance(cases)
+
+    assert result["status"] == "passed"
+    assert result["passed"] is True
+    assert result["metrics"]["interval_coverage_pct"] == 100.0
+    assert all(item["passed"] for item in result["checks"].values())
+
+
+def test_holdout_acceptance_fails_poor_coverage_and_bias():
+    cases = [
+        _holdout_case(
+            index,
+            lower=10.0,
+            upper=20.0,
+            observed=32.0,
+        )
+        for index in range(60)
+    ]
+
+    result = module.evaluate_holdout_acceptance(cases)
+
+    assert result["status"] == "failed"
+    assert result["passed"] is False
+    assert result["checks"]["interval_coverage_pct"]["passed"] is False
+    assert result["checks"]["absolute_mean_signed_midpoint_error_weeks"]["passed"] is False
+    assert result["checks"]["above_interval_rate_pct"]["passed"] is False
