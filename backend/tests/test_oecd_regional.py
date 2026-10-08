@@ -451,3 +451,118 @@ def test_sync_regional_income_persists_filtered_rows(monkeypatch):
     assert result["geography_count"] == 2
     assert result["geo_levels"] == ["tl2"]
     assert result["indicator_ids"] == ["regional_disposable_income_ppp_usd"]
+
+
+BROADBAND_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,TERRITORIAL_LEVEL,Territorial level,TERRITORIAL_TYPE,MEASURE,Measure,AGE,SEX,UNIT_MEASURE,Unit of measure,TIME_PERIOD,OBS_VALUE,COUNTRY
+dataflow,DE3,Berlin,A,TL2,TL2,,BB_ACC,Share of households with internet broadband access,_T,_T,PT_HH,Percentage of households,2022,99.5,DEU
+dataflow,DE712,Frankfurt am Main,A,TL3,TL3,,BB_ACC,Share of households with internet broadband access,_T,_T,PT_HH,Percentage of households,2022,100,DEU
+dataflow,JP13,Tokyo,A,TL2,TL2,,BB_ACC,Share of households with internet broadband access,_T,_T,PT_HH,Percentage of households,2022,98.0,JPN
+dataflow,AU1,New South Wales,A,TL2,TL2,,OTHER,Other,_T,_T,PT_HH,Percentage of households,2022,75,AUS
+"""
+
+
+def test_oecd_regional_broadband_normalization():
+    adapter = OECDRegionalAdapter(client=None)
+    try:
+        rows = adapter.normalize_broadband(
+            BROADBAND_CSV,
+            allowed_country_iso3={"DEU", "JPN"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 3
+    assert {row["indicator_id"] for row in rows} == {
+        "regional_household_broadband_access"
+    }
+    assert {row["unit"] for row in rows} == {"percent"}
+    assert {row["geo_level"] for row in rows} == {"tl2", "tl3"}
+    assert {row["country_iso3"] for row in rows} == {"DEU", "JPN"}
+
+
+def test_oecd_regional_broadband_reports_country_gap(monkeypatch):
+    from app.ingestion import oecd_regional as module
+
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDRegionalAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_broadband",
+        lambda **kwargs: BROADBAND_CSV,
+    )
+
+    try:
+        result = adapter.sync_broadband(
+            allowed_country_iso3={"AUS", "JPN"},
+        )
+    finally:
+        adapter.close()
+
+    assert result["covered_countries"] == ["JPN"]
+    assert result["missing_countries"] == ["AUS"]
+    assert result["complete"] is False
+    assert result["rows"] == 1
+
+
+LAND_TEMP_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,TERRITORIAL_LEVEL,Territorial level,TERRITORIAL_TYPE,MEASURE,Measure,RET_PERIOD,HEAT_STRESS,PROJ_SCENARIO,POLLUTANT_CONCENTRATION,UNIT_MEASURE,Unit of measure,TIME_PERIOD,OBS_VALUE,COUNTRY
+dataflow,AU1,New South Wales,A,TL2,TL2,,DAY_LAND_TEMP_YEARLY,Daytime yearly land surface temperature,_Z,_Z,_Z,_Z,C,Degrees celsius,2023,27.25,AUS
+dataflow,AU405,Barossa - Yorke - Mid North,A,TL3,TL3,,DAY_LAND_TEMP_YEARLY,Daytime yearly land surface temperature,_Z,_Z,_Z,_Z,C,Degrees celsius,2023,30.3988,AUS
+dataflow,JP13,Tokyo,A,TL2,TL2,,DAY_LAND_TEMP_YEARLY,Daytime yearly land surface temperature,_Z,_Z,_Z,_Z,C,Degrees celsius,2023,24.2,JPN
+dataflow,AU1,New South Wales,A,TL2,TL2,,OTHER,Other,_Z,_Z,_Z,_Z,C,Degrees celsius,2023,99,AUS
+"""
+
+
+def test_oecd_regional_land_temperature_normalization():
+    adapter = OECDRegionalAdapter(client=None)
+    try:
+        rows = adapter.normalize_land_temperature(
+            LAND_TEMP_CSV,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 2
+    assert {row["indicator_id"] for row in rows} == {
+        "regional_daytime_land_surface_temperature"
+    }
+    assert {row["unit"] for row in rows} == {"celsius"}
+    assert {row["geo_level"] for row in rows} == {"tl2", "tl3"}
+    assert {row["period"] for row in rows} == {2023}
+
+
+def test_oecd_regional_land_temperature_sync(monkeypatch):
+    from app.ingestion import oecd_regional as module
+
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDRegionalAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_land_temperature",
+        lambda **kwargs: LAND_TEMP_CSV,
+    )
+
+    try:
+        result = adapter.sync_land_temperature(
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 2
+    assert result["covered_countries"] == ["AUS"]
+    assert result["missing_countries"] == []
+    assert result["complete"] is True
+    assert {row["geo_code"] for row in stored} == {"AU1", "AU405"}
