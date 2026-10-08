@@ -85,6 +85,7 @@ def initialize_sqlite(path: Path) -> None:
                 sample_role TEXT NOT NULL DEFAULT 'development',
                 start_event_definition_version TEXT,
                 viability_outcome_definition_version TEXT,
+                calibration_protocol_version TEXT,
                 stage_timings_json TEXT NOT NULL DEFAULT '{}',
                 context_json TEXT NOT NULL DEFAULT '{}',
                 imported_at TEXT NOT NULL
@@ -142,6 +143,11 @@ def initialize_sqlite(path: Path) -> None:
             con.execute(
                 "ALTER TABLE ttv_calibration_cases "
                 "ADD COLUMN viability_outcome_definition_version TEXT"
+            )
+        if "calibration_protocol_version" not in ttv_calibration_columns:
+            con.execute(
+                "ALTER TABLE ttv_calibration_cases "
+                "ADD COLUMN calibration_protocol_version TEXT"
             )
 
         con.execute(
