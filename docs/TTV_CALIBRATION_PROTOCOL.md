@@ -1,13 +1,14 @@
-# AUGUR TTV Calibration Protocol — Draft
+# AUGUR TTV Calibration Protocol v1
 
-Status: **definitions frozen / acceptance criteria pending / protocol not approved**
+Status: **frozen for holdout collection / external calibration pending**
+
+Immutable protocol version: `ttv-calibration-protocol-v1`
 
 ## Current executable blockers
 
-AUGUR currently reports these remaining calibration-protocol blockers through `/api/operability` and `check-operability.ps1`:
+AUGUR currently reports no calibration-protocol-definition blockers through `/api/operability` and `check-operability.ps1`.
 
-- protocol version not approved;
-- acceptance criteria not frozen.
+The protocol, bounded scope, observational definitions and numerical acceptance criteria are frozen before holdout collection. This does not mean the model is externally calibrated.
 
 The following definitions are now frozen for the bounded remote-only TTV v1 scope:
 
@@ -15,7 +16,7 @@ The following definitions are now frozen for the bounded remote-only TTV v1 scop
 - viability outcome: `ttv-outcome-b2-remote-viability-v1`;
 - inclusion/exclusion rules: `ttv-inclusion-remote-scope-v1`.
 
-Until every blocker is cleared, holdout collection remains disabled by code.
+Holdout collection is enabled only for cases that explicitly bind to `ttv-calibration-protocol-v1`, use the frozen event/outcome definitions and fall inside the bounded remote-only TTV v1 scope.
 
 The frozen bounded-scope observational definitions are tracked separately in:
 
@@ -45,7 +46,7 @@ An observed case requires an anonymised elapsed duration expressed in weeks.
 - the pre-declared start event for the case; and
 - the first date on which the case satisfies the agreed observed viability outcome.
 
-The bounded v1 start-event and viability-outcome definitions are frozen. Imported development cases remain exploratory until acceptance criteria and the final protocol version are frozen.
+The bounded v1 start-event and viability-outcome definitions are frozen. Imported development cases remain exploratory unless they were prospectively collected under the frozen protocol; development cases remain exploratory and are never retrospectively promoted to holdout.
 
 ## 3. Minimum case fields
 
@@ -271,10 +272,9 @@ AUGUR includes an empty CSV template:
 
 Use it only for observed cases. Do not insert synthetic or illustrative rows into the calibration store.
 
-While this protocol remains draft:
+For exploratory/development collection:
 
 - use `sample_role=development`;
-- leave holdout collection disabled;
 - record the temporal `engine_version` and `composition` that generated the candidate interval;
 - add stage-level timings only when the observed stage boundaries are genuinely known;
 - use source labels that identify the evidence source category, not a person.
@@ -317,10 +317,7 @@ The calibration datastore records only the achieved CEFR level and evidence cate
 
 This workflow reduces manual data-entry error and preserves the pre-outcome candidate range, but it does **not** constitute external validation. Development cases remain exploratory and cannot be promoted to holdout cases retrospectively.
 
-Holdout collection remains disabled until:
-
-- the calibration protocol receives an immutable version;
-- acceptance criteria are frozen before holdout evaluation.
+Holdout collection is now protocol-gated rather than globally disabled. A holdout row must declare `calibration_protocol_version=ttv-calibration-protocol-v1` and the frozen event/outcome definition versions. The final holdout must remain untouched by model tuning.
 
 The local observation workflow stores only bounded calibration metadata; it does not duplicate the full personal profile in the calibration datastore.
 
