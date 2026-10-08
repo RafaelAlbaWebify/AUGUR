@@ -489,6 +489,142 @@ def holdout_seal_status() -> dict:
     return result
 
 
+def holdout_review_status() -> dict:
+    seal = holdout_seal_status()
+    con = sqlite3.connect(settings.sqlite_path)
+    con.row_factory = sqlite3.Row
+    try:
+        try:
+            row = con.execute(
+                """
+                SELECT
+                    protocol_version,
+                    holdout_sha256,
+                    representative,
+                    cohort_coverage_adequate,
+                    reviewer_label,
+                    notes,
+                    reviewed_at
+                FROM ttv_holdout_reviews
+                WHERE protocol_version = ?
+                LIMIT 1
+                """,
+                [CALIBRATION_PROTOCOL_VERSION],
+            ).fetchone()
+        except sqlite3.OperationalError as exc:
+            if "no such table" not in str(exc).lower():
+                raise
+            row = None
+    finally:
+        con.close()
+
+    if row is None:
+        return {
+            "reviewed": False,
+            "protocol_version": CALIBRATION_PROTOCOL_VERSION,
+            "holdout_sha256": seal.get("holdout_sha256"),
+            "representative": None,
+            "cohort_coverage_adequate": None,
+            "reviewer_label": None,
+            "notes": None,
+            "reviewed_at": None,
+        }
+
+    result = dict(row)
+    result["reviewed"] = True
+    result["representative"] = bool(result["representative"])
+    result["cohort_coverage_adequate"] = bool(
+        result["cohort_coverage_adequate"]
+    )
+    return result
+
+
+def record_holdout_review(
+    *,
+    representative: bool,
+    cohort_coverage_adequate: bool,
+    reviewer_label: str | None = None,
+    notes: str | None = None,
+) -> dict:
+    seal = holdout_seal_status()
+    if not seal["sealed"]:
+        raise ValueError(
+            "holdout must be sealed before representativeness review"
+        )
+
+    existing = holdout_review_status()
+    if existing["reviewed"]:
+        return existing
+
+    reviewed_at = datetime.now(timezone.utc).isoformat()
+    con = sqlite3.connect(settings.sqlite_path)
+    try:
+        con.execute(
+            """
+            INSERT INTO ttv_holdout_reviews (
+                protocol_version,
+                holdout_sha256,
+                representative,
+                cohort_coverage_adequate,
+                reviewer_label,
+                notes,
+                reviewed_at
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            [
+                CALIBRATION_PROTOCOL_VERSION,
+                seal["holdout_sha256"],
+                1 if representative else 0,
+                1 if cohort_coverage_adequate else 0,
+                str(reviewer_label or "").strip() or None,
+                str(notes or "").strip() or None,
+                reviewed_at,
+            ],
+        )
+        con.commit()
+    finally:
+        con.close()
+
+    return holdout_review_status()
+
+
+def calibration_activation_readiness(
+    *,
+    protocol_readiness: dict,
+    holdout_seal: dict,
+    holdout_acceptance: dict,
+    holdout_review: dict,
+) -> dict:
+    blockers = []
+
+    if not protocol_readiness.get("ready_for_holdout_collection"):
+        blockers.append("calibration_protocol_not_frozen")
+    if not holdout_seal.get("sealed"):
+        blockers.append("holdout_not_sealed")
+    if holdout_acceptance.get("status") != "passed":
+        blockers.append("holdout_acceptance_not_passed")
+    if not holdout_review.get("reviewed"):
+        blockers.append("representativeness_review_missing")
+    else:
+        if not holdout_review.get("representative"):
+            blockers.append("holdout_not_representative")
+        if not holdout_review.get("cohort_coverage_adequate"):
+            blockers.append("holdout_cohort_coverage_inadequate")
+
+    return {
+        "ready_for_temporal_model_version": not blockers,
+        "blockers": blockers,
+        "protocol_version": CALIBRATION_PROTOCOL_VERSION,
+        "acceptance_criteria_version": CALIBRATION_ACCEPTANCE_CRITERIA_VERSION,
+        "holdout_sha256": holdout_seal.get("holdout_sha256"),
+        "notes": [
+            "Readiness does not assign TEMPORAL_MODEL_VERSION automatically.",
+            "A model release still requires an explicit versioned code/config change after review.",
+        ],
+    }
+
+
 def _holdout_cases_for_seal() -> list[dict]:
     con = sqlite3.connect(settings.sqlite_path)
     con.row_factory = sqlite3.Row
@@ -1036,6 +1172,7 @@ def evaluate_holdout_acceptance(
 def calibration_status() -> dict:
     protocol_readiness = calibration_protocol_readiness()
     holdout_seal = holdout_seal_status()
+    holdout_review = holdout_review_status()
     con = sqlite3.connect(settings.sqlite_path)
     con.row_factory = sqlite3.Row
 
@@ -1107,11 +1244,30 @@ def calibration_status() -> dict:
                     "weekly_study_hours": [],
                 },
                 "holdout_seal": holdout_seal,
+                "holdout_review": holdout_review,
                 "holdout_acceptance": evaluate_holdout_acceptance(
                     [],
                     holdout_sealed=holdout_seal["sealed"],
                 ),
-                "externally_calibrated": False,
+                "activation_readiness": calibration_activation_readiness(
+                    protocol_readiness=protocol_readiness,
+                    holdout_seal=holdout_seal,
+                    holdout_acceptance=evaluate_holdout_acceptance(
+                        [],
+                        holdout_sealed=holdout_seal["sealed"],
+                    ),
+                    holdout_review=holdout_review,
+                ),
+                "activation_readiness": calibration_activation_readiness(
+                protocol_readiness=protocol_readiness,
+                holdout_seal=holdout_seal,
+                holdout_acceptance=evaluate_holdout_acceptance(
+                    [],
+                    holdout_sealed=holdout_seal["sealed"],
+                ),
+                holdout_review=holdout_review,
+            ),
+            "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
                 ],
@@ -1160,6 +1316,7 @@ def calibration_status() -> dict:
                 "weekly_study_hours": [],
             },
             "holdout_seal": holdout_seal,
+            "holdout_review": holdout_review,
             "holdout_acceptance": evaluate_holdout_acceptance(
                 [],
                 holdout_sealed=holdout_seal["sealed"],
@@ -1244,6 +1401,12 @@ def calibration_status() -> dict:
         cases,
         holdout_sealed=holdout_seal["sealed"],
     )
+    activation_readiness = calibration_activation_readiness(
+        protocol_readiness=protocol_readiness,
+        holdout_seal=holdout_seal,
+        holdout_acceptance=holdout_acceptance,
+        holdout_review=holdout_review,
+    )
 
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
@@ -1307,8 +1470,12 @@ def calibration_status() -> dict:
         "sample_role_metrics": sample_role_metrics,
         "context_summary": context_summary,
         "holdout_seal": holdout_seal,
+        "holdout_review": holdout_review,
         "holdout_acceptance": holdout_acceptance,
-        "externally_calibrated": False,
+        "activation_readiness": activation_readiness,
+        "externally_calibrated": activation_readiness[
+            "ready_for_temporal_model_version"
+        ],
         "notes": [
             "Metrics describe observed calibration cases only.",
             "Frozen numerical acceptance thresholds are pre-declared, but they do not establish representativeness or external calibration by themselves.",
