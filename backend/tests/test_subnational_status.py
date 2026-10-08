@@ -190,6 +190,15 @@ def test_geography_registry_reports_provider_neutral_coverage(
     assert result["geography_count"] == 3
     assert result["systems"] == ["ISO_3166_2", "NUTS_2024", "URBAN_AUDIT_2024"]
     assert {"nuts2", "city", "admin1"} == set(result["levels"])
+    summaries = {
+        item["country_iso3"]: item
+        for item in result["country_summaries"]
+    }
+    assert summaries["ESP"]["subnational_scope"] == "regional_and_urban"
+    assert summaries["ESP"]["regional_geography_count"] == 1
+    assert summaries["ESP"]["city_count"] == 1
+    assert summaries["USA"]["subnational_scope"] == "regional"
+    assert summaries["USA"]["regional_geography_count"] == 1
 
 
 def test_geographies_for_country_returns_only_analyzable_rows(
@@ -553,3 +562,74 @@ def test_provider_access_state_round_trip(monkeypatch, tmp_path):
     assert state["status"] == "source_access_restricted"
     assert state["detail"] == "HTTP 403"
     assert state["retry_after_at"] is not None
+
+
+
+def test_geography_country_summary_distinguishes_urban_only_coverage(
+    monkeypatch,
+    tmp_path,
+):
+    path = tmp_path / "urban-only-coverage.duckdb"
+    con = duckdb.connect(str(path))
+    try:
+        con.execute(
+            """
+            CREATE TABLE geography_registry (
+                geo_id VARCHAR PRIMARY KEY,
+                country_iso3 VARCHAR,
+                country_iso2 VARCHAR,
+                name VARCHAR,
+                geo_level VARCHAR,
+                geography_system VARCHAR,
+                source_id VARCHAR,
+                source_geo_code VARCHAR,
+                parent_geo_id VARCHAR,
+                latitude DOUBLE,
+                longitude DOUBLE
+            )
+            """
+        )
+        con.execute(
+            """
+            CREATE TABLE subnational_observations (
+                geography_system VARCHAR,
+                geo_code VARCHAR,
+                indicator_id VARCHAR,
+                dataset_id VARCHAR,
+                period INTEGER
+            )
+            """
+        )
+        con.executemany(
+            "INSERT INTO geography_registry VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [
+                ("OECD_FUA:AUS01C", "AUS", "AU", "Greater Sydney", "city", "OECD_FUA", "OECD", "AUS01C", None, None, None),
+                ("OECD_FUA:AUS01F", "AUS", "AU", "Sydney FUA", "fua", "OECD_FUA", "OECD", "AUS01F", None, None, None),
+            ],
+        )
+        con.executemany(
+            "INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?)",
+            [
+                ("OECD_FUA", "AUS01C", "urban_population", "POP", 2024),
+                ("OECD_FUA", "AUS01F", "urban_population", "POP", 2024),
+                ("OECD_FUA", "AUS01F", "urban_green_area_share", "GREEN", 2021),
+            ],
+        )
+    finally:
+        con.close()
+
+    monkeypatch.setattr(
+        module,
+        "settings",
+        SimpleNamespace(duckdb_path=path),
+    )
+
+    result = module.geography_coverage_status()
+    summary = result["country_summaries"][0]
+
+    assert summary["country_iso3"] == "AUS"
+    assert summary["subnational_scope"] == "urban"
+    assert summary["regional_geography_count"] == 0
+    assert summary["city_count"] == 1
+    assert summary["fua_count"] == 1
+    assert summary["systems"] == ["OECD_FUA"]
