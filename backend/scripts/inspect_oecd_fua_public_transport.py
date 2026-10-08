@@ -70,6 +70,11 @@ def main() -> int:
             for row in rows
             if row.get("SERVICE")
         }),
+        "travel_times": sorted({
+            row.get("TRAVEL_TIME")
+            for row in rows
+            if row.get("TRAVEL_TIME")
+        }),
         "references": sorted({
             row.get("REF_AREA")
             for row in rows
@@ -85,6 +90,8 @@ def main() -> int:
                 "unit_label": row.get("Unit of measure"),
                 "mode": row.get("MODE"),
                 "mode_label": row.get("Mode of transport"),
+                "travel_time": row.get("TRAVEL_TIME"),
+                "travel_time_label": row.get("Travel time"),
                 "service": row.get("SERVICE"),
                 "service_label": row.get("Service"),
                 "time": row.get("TIME_PERIOD"),
