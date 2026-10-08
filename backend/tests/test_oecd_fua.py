@@ -97,7 +97,7 @@ def test_sync_fua_density_persists_history(monkeypatch):
     try:
         result = adapter.sync_density(
             countries=COUNTRIES,
-            allowed_country_iso3={"AUS"},
+            allowed_country_iso3={"AUS", "CAN"},
             start_year=2020,
         )
     finally:
