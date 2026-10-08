@@ -74,33 +74,68 @@ def inspect_archive(client: httpx.Client, label: str, url: str) -> dict:
 
 
 def main() -> int:
+    archives = []
+    restricted = []
+
     with httpx.Client(
         timeout=httpx.Timeout(180.0),
         follow_redirects=True,
         headers={"User-Agent": "AUGUR/0.1"},
     ) as client:
-        city = inspect_archive(
-            client,
-            "cities",
-            CITY_BOUNDARIES_URL,
-        )
-        fua = inspect_archive(
-            client,
-            "fuas",
-            FUA_BOUNDARIES_URL,
-        )
+        for label, url in (
+            ("cities", CITY_BOUNDARIES_URL),
+            ("fuas", FUA_BOUNDARIES_URL),
+        ):
+            try:
+                archives.append(
+                    inspect_archive(client, label, url)
+                )
+            except httpx.HTTPStatusError as exc:
+                status_code = exc.response.status_code
+                if status_code in {401, 403}:
+                    restricted.append({
+                        "label": label,
+                        "url": str(exc.request.url),
+                        "http_status": status_code,
+                        "status": "source_access_restricted_in_ci",
+                    })
+                    continue
+                raise
 
+    ready = (
+        len(archives) == 2
+        and all(
+            archive["ready_for_geometry_parser"]
+            for archive in archives
+        )
+    )
     payload = {
         "source_id": "OECD",
         "geography_system": "OECD_FUA",
-        "archives": [city, fua],
-        "ready_for_geometry_parser": (
-            city["ready_for_geometry_parser"]
-            and fua["ready_for_geometry_parser"]
+        "archives": archives,
+        "restricted_archives": restricted,
+        "ready_for_geometry_parser": ready,
+        "status": (
+            "available"
+            if ready
+            else "source_access_restricted_in_ci"
+            if restricted
+            else "unavailable"
         ),
+        "notes": [
+            (
+                "OECD publishes official city and FUA boundary archives, "
+                "but automated access to www.oecd.org/content/dam may be "
+                "restricted from hosted runners."
+            ),
+            (
+                "AUGUR does not substitute estimated or third-party geometry "
+                "for the OECD source-native CITY/FUA identifiers."
+            ),
+        ],
     }
     print(json.dumps(payload, indent=2))
-    return 0 if payload["ready_for_geometry_parser"] else 2
+    return 0 if ready or restricted else 2
 
 
 if __name__ == "__main__":
