@@ -172,6 +172,9 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_employment_to_population_ratio": {
         "name": "Employment-to-population ratio, ages 15–64",
     },
+    "regional_unemployment_rate_oecd": {
+        "name": "Unemployment rate, ages 15–64",
+    },
     "urban_population": {
         "name": "Population",
     },
@@ -198,6 +201,7 @@ OECD_TL_EXPECTED_INDICATORS = [
     ("regional_net_internal_mobility_share", "DSD_REG_DEMO@DF_DEMO", "percent"),
     ("regional_age_adjusted_mortality_per_1000", "DSD_REG_DEMO@DF_DEMO", "per_1000_people"),
     ("regional_employment_to_population_ratio", "DSD_REG_LAB@DF_RATES", "percent"),
+    ("regional_unemployment_rate_oecd", "DSD_REG_LAB@DF_RATES", "percent"),
 ]
 
 OECD_FUA_EXPECTED_INDICATORS = [
