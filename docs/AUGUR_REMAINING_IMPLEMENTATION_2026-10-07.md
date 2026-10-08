@@ -218,7 +218,10 @@ Regional labour extension status:
 - `EMP_RATIO` for ages 15–64, total sex, is published in `PT_POP_SUB` (percentage of population in the same subgroup);
 - AU1 (New South Wales) and AU2 (Victoria) returned observed 2021–2024 employment-to-population ratios;
 - `regional_employment_to_population_ratio` is now ingested, persisted, synced and exposed in source-native OECD regional evidence;
-- no unemployment-rate code is accepted yet: the attempted `UNEMP_RATIO` code returned no rows for AU1/AU2, so AUGUR continues to discover the published measure code rather than guessing it.
+- OECD publishes regional unemployment as `UNE_RATE` for ages 15–64 and total sex, with unit `PT_LF_SUB` (percentage of the labour force in the same subgroup);
+- `regional_unemployment_rate_oecd` is now ingested, persisted, synced and exposed alongside the employment-to-population ratio;
+- live validation for New South Wales returned **4.0%** unemployment in 2024;
+- the combined `EMP_RATIO+UNE_RATE` regional sync passed live-source validation.
 
 
 
