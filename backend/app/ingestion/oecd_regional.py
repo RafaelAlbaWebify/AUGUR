@@ -113,6 +113,29 @@ def _reference_name(record: dict, code: str) -> str:
     return _first_present(record, candidates) or code
 
 
+def _coverage_fields(
+    rows: list[dict],
+    allowed_country_iso3: set[str] | None,
+) -> dict:
+    covered = sorted({
+        str(row["country_iso3"]).upper()
+        for row in rows
+        if row.get("country_iso3")
+    })
+    requested = (
+        sorted({code.upper() for code in allowed_country_iso3})
+        if allowed_country_iso3 is not None
+        else covered
+    )
+    missing = sorted(set(requested) - set(covered))
+    return {
+        "country_count": len(covered),
+        "covered_countries": covered,
+        "missing_countries": missing,
+        "complete": bool(rows) and not missing,
+    }
+
+
 class OECDRegionalAdapter:
     def __init__(
         self,
@@ -628,7 +651,7 @@ class OECDRegionalAdapter:
                 (row["period"] for row in rows),
                 default=None,
             ),
-            "complete": bool(rows),
+            **_coverage_fields(rows, allowed_country_iso3),
         }
 
     def normalize_demography(
@@ -748,7 +771,7 @@ class OECDRegionalAdapter:
                 (row["period"] for row in rows),
                 default=None,
             ),
-            "complete": bool(rows),
+            **_coverage_fields(rows, allowed_country_iso3),
         }
 
     def normalize_labour(
@@ -850,7 +873,7 @@ class OECDRegionalAdapter:
             "indicator_ids": sorted({row["indicator_id"] for row in rows}),
             "period_min": min((row["period"] for row in rows), default=None),
             "period_max": max((row["period"] for row in rows), default=None),
-            "complete": bool(rows),
+            **_coverage_fields(rows, allowed_country_iso3),
         }
 
     def normalize_gdp(
@@ -949,7 +972,7 @@ class OECDRegionalAdapter:
             "indicator_ids": sorted({row["indicator_id"] for row in rows}),
             "period_min": min((row["period"] for row in rows), default=None),
             "period_max": max((row["period"] for row in rows), default=None),
-            "complete": bool(rows),
+            **_coverage_fields(rows, allowed_country_iso3),
         }
 
     def normalize_income(
@@ -1048,7 +1071,7 @@ class OECDRegionalAdapter:
             "indicator_ids": sorted({row["indicator_id"] for row in rows}),
             "period_min": min((row["period"] for row in rows), default=None),
             "period_max": max((row["period"] for row in rows), default=None),
-            "complete": bool(rows),
+            **_coverage_fields(rows, allowed_country_iso3),
         }
 
     def sync_density(
@@ -1090,5 +1113,5 @@ class OECDRegionalAdapter:
             "geo_levels": levels,
             "period_min": min(periods) if periods else None,
             "period_max": max(periods) if periods else None,
-            "complete": bool(rows),
+            **_coverage_fields(rows, allowed_country_iso3),
         }
