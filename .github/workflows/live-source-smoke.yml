@@ -22,6 +22,7 @@ on:
       - "backend/scripts/inspect_oecd_regional_demography.py"
       - "backend/scripts/inspect_oecd_regional_population.py"
       - "backend/scripts/inspect_oecd_regional_labour.py"
+      - "backend/scripts/inspect_oecd_regional_gdp.py"
       - "backend/app/ingestion/world_bank.py"
       - "backend/app/ingestion/imf.py"
       - "backend/app/ingestion/un_wpp.py"
@@ -93,6 +94,9 @@ jobs:
 
       - name: Inspect OECD regional labour rates
         run: python -m scripts.inspect_oecd_regional_labour
+
+      - name: Inspect OECD regional GDP per capita PPP
+        run: python -m scripts.inspect_oecd_regional_gdp
 
       - name: Sync OECD Australia regional demographics
         run: >-
