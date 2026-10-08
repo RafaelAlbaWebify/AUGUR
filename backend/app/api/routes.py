@@ -477,29 +477,19 @@ def region_evidence_get(
     )
 
 
-@router.get("/regions/compare")
-def regions_compare_get(
-    regions: str = Query(
-        ...,
-        description="Comma-separated source-native regional geography codes",
-    )
-):
-    requested = [
-        value.strip().upper()
-        for value in regions.split(",")
-        if value.strip()
-    ]
-
+def _compare_registered_geographies(
+    requested: list[str],
+) -> dict:
     if len(requested) < 2:
         raise HTTPException(
             status_code=400,
-            detail="At least two regions are required for comparison",
+            detail="At least two geographies are required for comparison",
         )
 
     if len(requested) > 5:
         raise HTTPException(
             status_code=400,
-            detail="A maximum of five regions can be compared at once",
+            detail="A maximum of five geographies can be compared at once",
         )
 
     records = geography_records_by_source_codes(requested)
@@ -521,7 +511,7 @@ def regions_compare_get(
         raise HTTPException(
             status_code=404,
             detail=(
-                "Regions are not registered with analytical geography metadata: "
+                "Geographies are not registered with analytical metadata: "
                 + ", ".join(missing)
             ),
         )
@@ -535,7 +525,7 @@ def regions_compare_get(
         raise HTTPException(
             status_code=409,
             detail=(
-                "Regional source codes are ambiguous across geography systems: "
+                "Source codes are ambiguous across geography systems: "
                 + ", ".join(ambiguous)
             ),
         )
@@ -557,18 +547,49 @@ def regions_compare_get(
         raise HTTPException(
             status_code=400,
             detail=(
-                "Regional comparison requires the same geography system "
+                "Geographic comparison requires the same geography system "
                 "and geographic level"
             ),
         )
 
+    system = selected[0]["geography_system"]
     result = regional_comparison(
         requested,
-        geography_system=str(selected[0]["geography_system"]),
+        geography_system=system,
     )
-    result["geography_system"] = selected[0]["geography_system"]
+    result["geography_system"] = system
     result["geo_level"] = selected[0]["geo_level"]
     return result
+
+
+@router.get("/geographies/compare")
+def geographies_compare_get(
+    geographies: str = Query(
+        ...,
+        description="Comma-separated source-native geography codes",
+    ),
+):
+    requested = [
+        value.strip().upper()
+        for value in geographies.split(",")
+        if value.strip()
+    ]
+    return _compare_registered_geographies(requested)
+
+
+@router.get("/regions/compare")
+def regions_compare_get(
+    regions: str = Query(
+        ...,
+        description="Comma-separated regional geography codes",
+    )
+):
+    requested = [
+        value.strip().upper()
+        for value in regions.split(",")
+        if value.strip()
+    ]
+    return _compare_registered_geographies(requested)
 
 
 @router.get("/profile", response_model=PersonalProfileResponse)
