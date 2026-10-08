@@ -166,3 +166,78 @@ def test_sync_fua_population_persists_history(monkeypatch):
     assert result["geography_count"] == 2
     assert result["city_count"] == 1
     assert result["fua_count"] == 1
+
+
+DEPENDENCY_CSV = """STRUCTURE,REF_AREA,Reference area,FREQ,MEASURE,Measure,UNIT_MEASURE,Unit of measure,AGE,Age,SEX,ORIGIN,TERRITORIAL_LEVEL,Territorial level,CITIZENSHIP,TIME_PERIOD,OBS_VALUE
+dataflow,AUS01C,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15_GE65,Less than 15 years or 65 years or over,_T,_T,CITY,City,_T,2024,46.4
+dataflow,AUS01C,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15,Less than 15 years,_T,_T,CITY,City,_T,2024,24.8
+dataflow,AUS01C,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_GE65,65 years or over,_T,_T,CITY,City,_T,2024,21.6
+dataflow,AUS01F,Greater Sydney,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15_GE65,Less than 15 years or 65 years or over,_T,_T,FUA,FUA,_T,2023,49.0
+dataflow,AT001C,Vienna,A,DEPEND_RATIO,Dependency ratio,PT_POP_Y15T64,Percentage of population aged 15-64 years,Y_LT15_GE65,Less than 15 years or 65 years or over,_T,_T,CITY,City,_T,2024,48.0
+"""
+
+
+def test_normalize_fua_dependency_keeps_three_distinct_ratios():
+    adapter = OECDFUAAdapter(client=None)
+    try:
+        rows = adapter.normalize_dependency(
+            DEPENDENCY_CSV,
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+        )
+    finally:
+        adapter.close()
+
+    assert len(rows) == 4
+    city_rows = {
+        row["indicator_id"]: row
+        for row in rows
+        if row["geo_code"] == "AUS01C"
+    }
+    assert city_rows["urban_total_dependency_ratio"]["value"] == 46.4
+    assert city_rows["urban_youth_dependency_ratio"]["value"] == 24.8
+    assert city_rows["urban_old_age_dependency_ratio"]["value"] == 21.6
+    assert all(row["unit"] == "percent" for row in city_rows.values())
+
+    fua = next(
+        row
+        for row in rows
+        if row["geo_code"] == "AUS01F"
+    )
+    assert fua["indicator_id"] == "urban_total_dependency_ratio"
+    assert fua["geo_level"] == "fua"
+    assert fua["value"] == 49.0
+
+
+def test_sync_fua_dependency_persists_selected_ratios(monkeypatch):
+    stored = []
+    monkeypatch.setattr(
+        module,
+        "upsert_subnational_observations",
+        lambda rows: stored.extend(rows) or len(rows),
+    )
+
+    adapter = OECDFUAAdapter(client=None)
+    monkeypatch.setattr(
+        adapter,
+        "fetch_dependency",
+        lambda **kwargs: DEPENDENCY_CSV,
+    )
+
+    try:
+        result = adapter.sync_dependency(
+            countries=COUNTRIES,
+            allowed_country_iso3={"AUS"},
+            start_year=2021,
+        )
+    finally:
+        adapter.close()
+
+    assert result["rows"] == 4
+    assert result["country_count"] == 1
+    assert result["geography_count"] == 2
+    assert result["indicator_ids"] == [
+        "urban_old_age_dependency_ratio",
+        "urban_total_dependency_ratio",
+        "urban_youth_dependency_ratio",
+    ]
