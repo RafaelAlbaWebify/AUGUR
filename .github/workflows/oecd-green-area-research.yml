@@ -1,0 +1,37 @@
+name: AUGUR OECD Green Area Research
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/scripts/inspect_oecd_fua_green_area.py"
+      - ".github/workflows/oecd-green-area-research.yml"
+
+concurrency:
+  group: augur-oecd-green-area-research
+  cancel-in-progress: true
+
+jobs:
+  green-area:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Install backend dependencies
+        run: python -m pip install -r requirements.txt
+
+      - name: Inspect OECD Sydney FUA green-area measures
+        run: python -m scripts.inspect_oecd_fua_green_area
