@@ -1087,7 +1087,7 @@ export default function OverviewPage({
                   </div>
                 ) : null}
                 {selectedRegion && comparisonCandidates.length ? (
-                  <div className="geographyComparePanel" aria-label="Geography comparison">
+                  <div className="geographyComparePanel" role="region" aria-label="Geography comparison">
                     <div className="geographyCompareHeader">
                       <div>
                         <span>COMPARE LIKE-FOR-LIKE</span>
