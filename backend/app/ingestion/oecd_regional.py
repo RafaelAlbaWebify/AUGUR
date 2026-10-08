@@ -35,6 +35,8 @@ GDP_DATASET_ID = "DSD_REG_ECO@DF_GDP"
 GDP_DATASET_VERSION = "2.4"
 INCOME_DATASET_ID = "DSD_REG_ECO@DF_INC"
 INCOME_DATASET_VERSION = "2.4"
+SAFETY_DATASET_ID = "DSD_REG_SOC@DF_SAFETY"
+SAFETY_DATASET_VERSION = "2.4"
 LABOUR_BASE_URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_REG_LAB@DF_RATES,2.4"
@@ -47,6 +49,10 @@ INCOME_BASE_URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_REG_ECO@DF_INC,2.4"
 )
+SAFETY_BASE_URL = (
+    "https://sdmx.oecd.org/public/rest/data/"
+    "OECD.CFE.EDS,DSD_REG_SOC@DF_SAFETY,2.4"
+)
 
 DENSITY_DEFAULT_KEY = "A.TL2+TL3......PS_KM2"
 POPULATION_DEFAULT_KEY = "A.TL2+TL3...POP._T._T."
@@ -58,6 +64,9 @@ DEMOGRAPHY_DEFAULT_KEY = (
 LABOUR_DEFAULT_KEY = "A.TL2+TL3...EMP_RATIO+UNE_RATE.Y15T64._T."
 GDP_DEFAULT_KEY = "A.TL2+TL3...GDP..Q.USD_PPP_PS"
 INCOME_DEFAULT_KEY = "A.TL2+TL3...B6N..Q.USD_PPP_PS"
+SAFETY_DEFAULT_KEY = (
+    "A.TL2+TL3...HOMIC+VEH_THEFT...CS_10P5PS"
+)
 
 LABOUR_METRICS = {
     ("EMP_RATIO", "PT_POP_SUB"): {
@@ -67,6 +76,17 @@ LABOUR_METRICS = {
     ("UNE_RATE", "PT_LF_SUB"): {
         "indicator_id": "regional_unemployment_rate_oecd",
         "unit": "percent",
+    },
+}
+
+SAFETY_METRICS = {
+    ("HOMIC", "CS_10P5PS"): {
+        "indicator_id": "regional_homicide_rate_per_100k",
+        "unit": "per_100k_people",
+    },
+    ("VEH_THEFT", "CS_10P5PS"): {
+        "indicator_id": "regional_motor_vehicle_theft_rate_per_100k",
+        "unit": "per_100k_people",
     },
 }
 
@@ -478,6 +498,62 @@ class OECDRegionalAdapter:
             "OECD regional income request failed without an exception"
         )
 
+    def fetch_safety(
+        self,
+        *,
+        start_year: int = 2021,
+        end_year: int | None = None,
+        key: str = SAFETY_DEFAULT_KEY,
+    ) -> str:
+        params = {
+            **PARAMS,
+            "startPeriod": str(start_year),
+        }
+        if end_year is not None:
+            params["endPeriod"] = str(end_year)
+
+        last_error: Exception | None = None
+        for attempt in range(1, self.max_retries + 1):
+            try:
+                response = self.client.get(
+                    f"{SAFETY_BASE_URL}/{key}",
+                    params=params,
+                )
+                response.raise_for_status()
+                text = response.text
+                if (
+                    "REF_AREA" not in text
+                    or "OBS_VALUE" not in text
+                    or "MEASURE" not in text
+                    or "UNIT_MEASURE" not in text
+                    or "TERRITORIAL_LEVEL" not in text
+                ):
+                    raise ValueError(
+                        "Unexpected OECD regional safety CSV schema"
+                    )
+                return text
+            except (
+                httpx.TimeoutException,
+                httpx.TransportError,
+                httpx.HTTPStatusError,
+            ) as exc:
+                last_error = exc
+                if attempt >= self.max_retries:
+                    break
+                delay_seconds = 2 ** (attempt - 1)
+                print(
+                    f"   retry {attempt}/{self.max_retries - 1} "
+                    f"after {type(exc).__name__} "
+                    f"(waiting {delay_seconds}s)"
+                )
+                time.sleep(delay_seconds)
+
+        if last_error is not None:
+            raise last_error
+        raise RuntimeError(
+            "OECD regional safety request failed without an exception"
+        )
+
     def normalize_density(
         self,
         csv_text: str,
@@ -651,6 +727,109 @@ class OECDRegionalAdapter:
                 (row["period"] for row in rows),
                 default=None,
             ),
+            **_coverage_fields(rows, allowed_country_iso3),
+        }
+
+    def normalize_safety(
+        self,
+        csv_text: str,
+        *,
+        allowed_country_iso3: set[str] | None = None,
+    ) -> list[dict]:
+        reader = csv.DictReader(io.StringIO(csv_text))
+        retrieved_at = datetime.now(timezone.utc)
+        allowed = (
+            {code.upper() for code in allowed_country_iso3}
+            if allowed_country_iso3 is not None
+            else None
+        )
+        rows: list[dict] = []
+
+        for record in reader:
+            level = str(record.get("TERRITORIAL_LEVEL") or "").upper()
+            if level not in {"TL2", "TL3"}:
+                continue
+
+            measure = str(record.get("MEASURE") or "").upper()
+            unit_code = str(record.get("UNIT_MEASURE") or "").upper()
+            metric = SAFETY_METRICS.get((measure, unit_code))
+            if metric is None:
+                continue
+
+            age = str(record.get("AGE") or "").upper()
+            sex = str(record.get("SEX") or "").upper()
+            if age not in {"", "_T", "TOTAL", "_Z"}:
+                continue
+            if sex not in {"", "_T", "T", "TOTAL", "_Z"}:
+                continue
+
+            geo_code = str(record.get("REF_AREA") or "").upper()
+            country_iso3 = str(record.get("COUNTRY") or "").upper() or None
+            if not geo_code:
+                continue
+            if allowed is not None and country_iso3 not in allowed:
+                continue
+
+            period = str(record.get("TIME_PERIOD") or "")
+            raw_value = record.get("OBS_VALUE")
+            if not period.isdigit() or raw_value in (None, "", ".."):
+                continue
+
+            try:
+                value = float(raw_value)
+            except (TypeError, ValueError):
+                continue
+
+            rows.append({
+                "geo_code": geo_code,
+                "geo_name": _reference_name(record, geo_code),
+                "geo_level": level.lower(),
+                "indicator_id": metric["indicator_id"],
+                "period": int(period),
+                "value": value,
+                "unit": metric["unit"],
+                "source_id": SOURCE_ID,
+                "dataset_id": SAFETY_DATASET_ID,
+                "retrieved_at": retrieved_at,
+                "source_updated_at": SAFETY_DATASET_VERSION,
+                "country_iso3": country_iso3,
+                "country_iso2": geo_code[:2] if len(geo_code) >= 2 else None,
+                "geography_system": GEOGRAPHY_SYSTEM,
+                "source_geo_code": geo_code,
+            })
+
+        return rows
+
+    def sync_safety(
+        self,
+        *,
+        allowed_country_iso3: set[str] | None = None,
+        start_year: int = 2021,
+        end_year: int | None = None,
+        key: str = SAFETY_DEFAULT_KEY,
+    ) -> dict:
+        csv_text = self.fetch_safety(
+            start_year=start_year,
+            end_year=end_year,
+            key=key,
+        )
+        rows = self.normalize_safety(
+            csv_text,
+            allowed_country_iso3=allowed_country_iso3,
+        )
+        inserted = upsert_subnational_observations(rows)
+        return {
+            "source_id": SOURCE_ID,
+            "dataset_id": SAFETY_DATASET_ID,
+            "dataset_version": SAFETY_DATASET_VERSION,
+            "rows": inserted,
+            "geography_count": len({row["geo_code"] for row in rows}),
+            "indicator_ids": sorted({
+                row["indicator_id"]
+                for row in rows
+            }),
+            "period_min": min((row["period"] for row in rows), default=None),
+            "period_max": max((row["period"] for row in rows), default=None),
             **_coverage_fields(rows, allowed_country_iso3),
         }
 
