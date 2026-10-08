@@ -368,7 +368,7 @@ async function mockApi(page: Page) {
         ],
         notes: [],
       }
-    } else if (/^\/api\/regions\/[A-Z0-9]+\/evidence$/.test(path)) {
+    } else if (/^\/api\/(regions|geographies)\/[A-Z0-9]+\/evidence$/.test(path)) {
       const geoCode = path.split('/')[3]
       if (geoCode === 'AUS01C' || geoCode === 'AUS01F') {
         const isFua = geoCode.endsWith('F')
