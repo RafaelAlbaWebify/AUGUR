@@ -560,7 +560,6 @@ export default function OverviewPage({
       item.name,
       item.source_geo_code,
       item.geo_level,
-      item.geography_system,
     ].some((value) => String(value ?? '').toLowerCase().includes(regionSearchTerm))
   })
   const filteredSourceNativeUrbanAreas = sourceNativeUrbanAreas.filter((item) => {
@@ -569,7 +568,6 @@ export default function OverviewPage({
       item.name,
       item.source_geo_code,
       item.geo_level,
-      item.geography_system,
     ].some((value) => String(value ?? '').toLowerCase().includes(urbanSearchTerm))
   })
 
