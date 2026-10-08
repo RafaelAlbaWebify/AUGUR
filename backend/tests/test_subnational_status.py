@@ -153,7 +153,9 @@ def test_geography_registry_reports_provider_neutral_coverage(
             CREATE TABLE subnational_observations (
                 geography_system VARCHAR,
                 geo_code VARCHAR,
-                indicator_id VARCHAR
+                indicator_id VARCHAR,
+                dataset_id VARCHAR,
+                period INTEGER
             )
             """
         )
@@ -166,11 +168,11 @@ def test_geography_registry_reports_provider_neutral_coverage(
             ],
         )
         con.executemany(
-            "INSERT INTO subnational_observations VALUES (?, ?, ?)",
+            "INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?)",
             [
-                ("NUTS_2024", "ES12", "regional_population"),
-                ("URBAN_AUDIT_2024", "ES013C", "city_population"),
-                ("ISO_3166_2", "US-CA", "regional_population"),
+                ("NUTS_2024", "ES12", "regional_population", "demo_r_d2jan", 2024),
+                ("URBAN_AUDIT_2024", "ES013C", "city_population", "urb_cpop1", 2024),
+                ("ISO_3166_2", "US-CA", "regional_population", "TEST_REGIONAL", 2024),
             ],
         )
     finally:
