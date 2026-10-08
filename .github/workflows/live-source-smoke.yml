@@ -18,6 +18,7 @@ on:
       - "backend/scripts/inspect_oecd_fua_labour.py"
       - "backend/scripts/inspect_oecd_fua_economy.py"
       - "backend/scripts/inspect_oecd_fua_public_transport.py"
+      - "backend/scripts/inspect_oecd_fua_commute_mode.py"
       - "backend/scripts/inspect_oecd_fua_pollution.py"
       - "backend/scripts/inspect_oecd_regional_demography.py"
       - "backend/scripts/inspect_oecd_regional_population.py"
@@ -128,6 +129,9 @@ jobs:
 
       - name: Inspect OECD Australia FUA public transport access
         run: python -m scripts.inspect_oecd_fua_public_transport
+
+      - name: Inspect OECD Australia urban commute modes
+        run: python -m scripts.inspect_oecd_fua_commute_mode
 
       - name: Inspect OECD Australia FUA PM2.5 exposure
         run: python -m scripts.inspect_oecd_fua_pollution
