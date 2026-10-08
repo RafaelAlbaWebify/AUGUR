@@ -451,6 +451,18 @@ def upsert_calibration_case(case: dict) -> dict:
 
     con = sqlite3.connect(settings.sqlite_path)
     try:
+        existing = con.execute(
+            """
+            SELECT sample_role
+            FROM ttv_calibration_cases
+            WHERE case_id = ?
+            """,
+            [normalized["case_id"]],
+        ).fetchone()
+        if existing is not None and str(existing[0]).lower() == "holdout":
+            raise ValueError(
+                "holdout calibration cases are immutable once imported"
+            )
         con.execute(
             """
             INSERT OR REPLACE INTO ttv_calibration_cases (
@@ -515,9 +527,6 @@ def import_calibration_csv(path: str | Path) -> dict:
     if not source_path.exists():
         raise FileNotFoundError(source_path)
 
-    imported = 0
-    case_ids: list[str] = []
-
     with source_path.open(
         "r",
         encoding="utf-8-sig",
@@ -541,16 +550,33 @@ def import_calibration_csv(path: str | Path) -> dict:
                 + ", ".join(missing)
             )
 
-        for row_number, row in enumerate(reader, start=2):
-            try:
-                saved = upsert_calibration_case(row)
-            except Exception as exc:
-                raise ValueError(
-                    f"Invalid calibration row {row_number}: {exc}"
-                ) from exc
+        raw_rows = list(reader)
 
-            imported += 1
-            case_ids.append(saved["case_id"])
+    validated_rows = []
+    seen_case_ids = set()
+    for row_number, row in enumerate(raw_rows, start=2):
+        try:
+            normalized = validate_calibration_case(row)
+        except Exception as exc:
+            raise ValueError(
+                f"Invalid calibration row {row_number}: {exc}"
+            ) from exc
+
+        case_id = normalized["case_id"]
+        if case_id in seen_case_ids:
+            raise ValueError(
+                f"Invalid calibration row {row_number}: "
+                f"duplicate case_id in import batch: {case_id}"
+            )
+        seen_case_ids.add(case_id)
+        validated_rows.append(row)
+
+    imported = 0
+    case_ids: list[str] = []
+    for row in validated_rows:
+        saved = upsert_calibration_case(row)
+        imported += 1
+        case_ids.append(saved["case_id"])
 
     return {
         "schema_version": CALIBRATION_SCHEMA_VERSION,
@@ -561,7 +587,6 @@ def import_calibration_csv(path: str | Path) -> dict:
         "imported_count": imported,
         "case_ids": case_ids,
     }
-
 
 def _case_interval_metrics(cases: list[dict]) -> dict:
     if not cases:
