@@ -54,7 +54,7 @@ def test_normalize_fua_density_can_filter_non_eu_oecd_targets():
         rows = adapter.normalize_density(
             FUA_CSV,
             countries=COUNTRIES,
-            allowed_country_iso3={"AUS", "JPN"},
+            allowed_country_iso3={"AUS", "CAN"},
         )
     finally:
         adapter.close()
@@ -97,7 +97,7 @@ def test_sync_fua_density_persists_history(monkeypatch):
     try:
         result = adapter.sync_density(
             countries=COUNTRIES,
-            allowed_country_iso3={"AUS", "CAN"},
+            allowed_country_iso3={"AUS", "JPN"},
             start_year=2020,
         )
     finally:
