@@ -13,6 +13,7 @@ on:
       - "backend/scripts/inspect_oecd_regional_density.py"
       - "backend/scripts/inspect_oecd_fua_density.py"
       - "backend/scripts/inspect_oecd_fua_boundaries.py"
+      - "backend/scripts/inspect_oecd_fua_geometry_links.py"
       - "backend/scripts/inspect_oecd_fua_dependency.py"
       - "backend/scripts/inspect_oecd_fua_labour.py"
       - "backend/scripts/inspect_oecd_fua_economy.py"
@@ -102,6 +103,9 @@ jobs:
 
       - name: Inspect official OECD city and FUA boundaries
         run: python -m scripts.inspect_oecd_fua_boundaries
+
+      - name: Discover current OECD FUA geometry links
+        run: python -m scripts.inspect_oecd_fua_geometry_links
 
       - name: Sync representative OECD non-EU urban evidence
         run: >-
