@@ -334,6 +334,11 @@ def _regional_result_from_local(
     )
 
     return {
+        "geography_system": (
+            rows[0].get("geography_system")
+            if rows
+            else None
+        ),
         "geo_code": code,
         "geo_name": local_name,
         "geo_level": local_level,
@@ -556,15 +561,22 @@ def regional_evidence(
     geo_code: str,
     adapter: EurostatAdapter | None = None,
     force_refresh: bool = False,
+    geography_system: str | None = None,
 ) -> dict:
     code = geo_code.strip().upper()
+    system = geography_system.upper() if geography_system else None
+    cache_key = f"{system or '*'}:{code}"
 
     if adapter is None and not force_refresh:
-        cached = _REGIONAL_CACHE.get(code)
+        cached = _REGIONAL_CACHE.get(cache_key)
         if cached and monotonic() - cached[0] < CACHE_TTL_SECONDS:
             return cached[1]
 
-        bundle = regional_evidence_bundle(code, max_history_points=8)
+        bundle = regional_evidence_bundle(
+            code,
+            max_history_points=8,
+            geography_system=system,
+        )
         local_rows = bundle["latest"]
         local = _regional_result_from_local(
             code,
@@ -574,7 +586,7 @@ def regional_evidence(
             environmental_health_rows=bundle["environmental_health"],
         )
         if local:
-            _REGIONAL_CACHE[code] = (monotonic(), local)
+            _REGIONAL_CACHE[cache_key] = (monotonic(), local)
             return local
 
         # Interactive reads must never block on Eurostat. Missing local
@@ -593,8 +605,13 @@ def regional_evidence(
             for config in _indicator_configs_for_geo(code)
         ]
         result = {
+            "geography_system": system,
             "geo_code": code,
-            "geo_level": geographic_level(code),
+            "geo_level": (
+                geographic_level(code)
+                if system in {None, "NUTS_2024"}
+                else "unknown"
+            ),
             "source": "AUGUR local store · Eurostat regional statistics",
             "storage": "duckdb",
             "indicator_count": len(indicators),
@@ -609,7 +626,7 @@ def regional_evidence(
                 "Coverage varies by indicator and region; unavailable series remain explicit.",
             ],
         }
-        _REGIONAL_CACHE[code] = (monotonic(), result)
+        _REGIONAL_CACHE[cache_key] = (monotonic(), result)
         return result
 
     owns_adapter = adapter is None
@@ -666,7 +683,7 @@ def regional_evidence(
             if item["status"] == "available"
         ]
         upsert_subnational_observations(rows_to_store)
-        _REGIONAL_CACHE[code] = (monotonic(), result)
+        _REGIONAL_CACHE[cache_key] = (monotonic(), result)
 
     return result
 
@@ -750,9 +767,14 @@ def sync_regional_evidence_codes(
 def regional_comparison(
     geo_codes: list[str],
     adapter: EurostatAdapter | None = None,
+    geography_system: str | None = None,
 ) -> dict:
     evidence = [
-        regional_evidence(code, adapter=adapter)
+        regional_evidence(
+            code,
+            adapter=adapter,
+            geography_system=geography_system,
+        )
         for code in geo_codes
     ]
 
