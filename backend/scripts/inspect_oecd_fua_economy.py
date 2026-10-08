@@ -42,6 +42,18 @@ def main() -> int:
 
     if response.status_code >= 400:
         diagnostics["response_preview"] = response.text[:1200]
+        if (
+            response.status_code == 404
+            and "NoRecordsFound" in response.text
+        ):
+            diagnostics["status"] = "coverage_gap_for_probe_geographies"
+            diagnostics["ready_for_parser_design"] = False
+            diagnostics["notes"] = [
+                "The OECD FUA economy dataset is valid, but the probed Australian FUAs return no records.",
+                "AUGUR treats this as a source coverage gap and does not infer economic values from regional data.",
+            ]
+            print(json.dumps(diagnostics, indent=2))
+            return 0
         print(json.dumps(diagnostics, indent=2))
         return 2
 
