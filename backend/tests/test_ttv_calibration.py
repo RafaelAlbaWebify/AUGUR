@@ -276,6 +276,8 @@ def test_holdout_case_requires_frozen_protocol_and_definitions():
         "candidate_weeks_min": 8,
         "candidate_weeks_max": 18,
         "observed_weeks": 12,
+        "start_event_at": "2026-01-01T00:00:00+00:00",
+        "observed_at": "2026-03-26T00:00:00+00:00",
         "sample_role": "holdout",
         "start_event_definition_version": module.CALIBRATION_START_EVENT_DEFINITION_VERSION,
         "viability_outcome_definition_version": module.CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
@@ -522,6 +524,7 @@ def test_opt_in_observation_lifecycle_creates_development_case(
     assert completed["calibration_case"]["sample_role"] == "development"
     assert completed["calibration_case"]["employment_mode"] == "remote"
     assert completed["calibration_case"]["observed_weeks"] == 12.0
+    assert completed["calibration_case"]["start_event_at"] == started["started_at"]
     assert completed["calibration_case"]["stage_timings"]["language"] == {
         "candidate_weeks_min": 10.0,
         "candidate_weeks_max": 25.0,
@@ -943,6 +946,8 @@ def _valid_holdout_case(case_id="holdout-immutable-001"):
         "candidate_weeks_min": 10,
         "candidate_weeks_max": 25,
         "observed_weeks": 16,
+        "start_event_at": "2026-01-01T00:00:00+00:00",
+        "observed_at": "2026-04-23T00:00:00+00:00",
         "sample_role": "holdout",
         "start_event_definition_version": module.CALIBRATION_START_EVENT_DEFINITION_VERSION,
         "viability_outcome_definition_version": module.CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION,
@@ -1029,12 +1034,14 @@ def test_holdout_csv_import_requires_protocol_bound_holdout_rows(
         "case_id,country_iso3,employment_mode,engine_version,composition,"
         "candidate_weeks_min,candidate_weeks_max,observed_weeks,"
         "sample_role,start_event_definition_version,"
-        "viability_outcome_definition_version,calibration_protocol_version\n"
+        "viability_outcome_definition_version,calibration_protocol_version,"
+        "start_event_at,observed_at\n"
         "holdout-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
         "10,25,16,holdout,"
         "ttv-start-active-language-transition-v1,"
         "ttv-outcome-b2-remote-viability-v1,"
-        "ttv-calibration-protocol-v1\n",
+        "ttv-calibration-protocol-v1,"
+        "2026-01-01T00:00:00+00:00,2026-04-23T00:00:00+00:00\n",
         encoding="utf-8",
     )
 
@@ -1063,17 +1070,20 @@ def test_holdout_csv_import_rejects_mixed_development_rows_before_write(
         "case_id,country_iso3,employment_mode,engine_version,composition,"
         "candidate_weeks_min,candidate_weeks_max,observed_weeks,"
         "sample_role,start_event_definition_version,"
-        "viability_outcome_definition_version,calibration_protocol_version\n"
+        "viability_outcome_definition_version,calibration_protocol_version,"
+        "start_event_at,observed_at\n"
         "holdout-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
         "10,25,16,holdout,"
         "ttv-start-active-language-transition-v1,"
         "ttv-outcome-b2-remote-viability-v1,"
-        "ttv-calibration-protocol-v1\n"
+        "ttv-calibration-protocol-v1,"
+        "2026-01-01T00:00:00+00:00,2026-04-23T00:00:00+00:00\n"
         "dev-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
         "10,25,15,development,"
         "ttv-start-active-language-transition-v1,"
         "ttv-outcome-b2-remote-viability-v1,"
-        "ttv-calibration-protocol-v1\n",
+        "ttv-calibration-protocol-v1,"
+        "2026-01-01T00:00:00+00:00,2026-04-23T00:00:00+00:00\n",
         encoding="utf-8",
     )
 
@@ -1094,12 +1104,14 @@ def test_holdout_csv_import_rejects_wrong_protocol_before_write(
         "case_id,country_iso3,employment_mode,engine_version,composition,"
         "candidate_weeks_min,candidate_weeks_max,observed_weeks,"
         "sample_role,start_event_definition_version,"
-        "viability_outcome_definition_version,calibration_protocol_version\n"
+        "viability_outcome_definition_version,calibration_protocol_version,"
+        "start_event_at,observed_at\n"
         "holdout-001,IRL,remote,ttv-temporal-evidence-v1,critical_path_v1,"
         "10,25,16,holdout,"
         "ttv-start-active-language-transition-v1,"
         "ttv-outcome-b2-remote-viability-v1,"
-        "ttv-calibration-protocol-v0\n",
+        "ttv-calibration-protocol-v0,"
+        "2026-01-01T00:00:00+00:00,2026-04-23T00:00:00+00:00\n",
         encoding="utf-8",
     )
 
@@ -1307,3 +1319,39 @@ def test_empty_holdout_representativeness_diagnostics(monkeypatch, tmp_path):
     assert diagnostics["case_count"] == 0
     assert diagnostics["context_complete_pct"] is None
     assert diagnostics["largest_country_share_pct"] is None
+
+
+
+def test_holdout_case_rejects_timestamp_duration_mismatch():
+    case = {
+        **_valid_holdout_case("holdout-bad-duration"),
+        "observed_weeks": 15,
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="observed_weeks does not match",
+    ):
+        module.validate_calibration_case(case)
+
+
+def test_holdout_case_rejects_outcome_before_start():
+    case = {
+        **_valid_holdout_case("holdout-bad-time-order"),
+        "start_event_at": "2026-04-23T00:00:00+00:00",
+        "observed_at": "2026-01-01T00:00:00+00:00",
+    }
+
+    with pytest.raises(
+        ValueError,
+        match="must not be before start_event_at",
+    ):
+        module.validate_calibration_case(case)
+
+
+def test_holdout_case_requires_auditable_timestamps():
+    case = _valid_holdout_case("holdout-missing-start")
+    case.pop("start_event_at")
+
+    with pytest.raises(ValueError, match="require start_event_at"):
+        module.validate_calibration_case(case)
