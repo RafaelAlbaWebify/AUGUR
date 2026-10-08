@@ -2533,7 +2533,12 @@ def geography_coverage_status() -> dict:
                 g.geo_level,
                 COUNT(DISTINCT g.geo_id) AS geography_count,
                 COUNT(DISTINCT s.indicator_id) AS indicator_count,
-                COUNT(s.indicator_id) AS observation_count
+                COUNT(s.indicator_id) AS observation_count,
+                LIST(DISTINCT s.indicator_id ORDER BY s.indicator_id)
+                    FILTER (WHERE s.indicator_id IS NOT NULL) AS indicator_ids,
+                LIST(DISTINCT s.dataset_id ORDER BY s.dataset_id)
+                    FILTER (WHERE s.dataset_id IS NOT NULL) AS dataset_ids,
+                MAX(s.period) AS latest_period
             FROM geography_registry g
             LEFT JOIN subnational_observations s
               ON s.geo_code = g.source_geo_code
@@ -2560,6 +2565,9 @@ def geography_coverage_status() -> dict:
                 "geography_count": int(row[4]),
                 "indicator_count": int(row[5]),
                 "observation_count": int(row[6]),
+                "indicator_ids": list(row[7] or []),
+                "dataset_ids": list(row[8] or []),
+                "latest_period": int(row[9]) if row[9] is not None else None,
                 "analysis_status": (
                     "available"
                     if int(row[6]) > 0
