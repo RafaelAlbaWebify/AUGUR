@@ -300,3 +300,30 @@ def test_sync_labour_writes_oecd_tl2_rows(monkeypatch):
     assert result["indicator_ids"] == [
         "regional_employment_to_population_ratio"
     ]
+
+
+def test_fetch_labour_default_uses_validated_employment_ratio_key():
+    class Response:
+        text = LABOUR_CSV
+
+        def raise_for_status(self):
+            return None
+
+    class Client:
+        def __init__(self):
+            self.calls = []
+
+        def get(self, url, params):
+            self.calls.append((url, params))
+            return Response()
+
+    client = Client()
+    adapter = OECDRegionalAdapter(client=client)
+
+    result = adapter.fetch_labour(start_year=2021)
+
+    assert result == LABOUR_CSV
+    assert client.calls[0][0].endswith(
+        "/A.TL2+TL3...EMP_RATIO.Y15T64._T."
+    )
+    assert client.calls[0][1]["startPeriod"] == "2021"
