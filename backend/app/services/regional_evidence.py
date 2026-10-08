@@ -190,6 +190,51 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
 }
 
 
+OECD_TL_EXPECTED_INDICATORS = [
+    ("regional_population", "DSD_REG_DEMO@DF_POP_BROAD", "persons"),
+    ("regional_population_density", "DSD_REG_DEMO@DF_DENSITY", "people_per_km2"),
+    ("regional_international_inmigration_share", "DSD_REG_DEMO@DF_DEMO", "percent"),
+    ("regional_international_outmigration_share", "DSD_REG_DEMO@DF_DEMO", "percent"),
+    ("regional_net_internal_mobility_share", "DSD_REG_DEMO@DF_DEMO", "percent"),
+    ("regional_age_adjusted_mortality_per_1000", "DSD_REG_DEMO@DF_DEMO", "per_1000_people"),
+    ("regional_employment_to_population_ratio", "DSD_REG_LAB@DF_RATES", "percent"),
+]
+
+OECD_FUA_EXPECTED_INDICATORS = [
+    ("urban_population", "DSD_FUA_DEMO@DF_AGE_SEX", "persons"),
+    ("urban_population_density", "DSD_FUA_TERR@DF_DENSITY", "people_per_km2"),
+    ("urban_total_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
+    ("urban_youth_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
+    ("urban_old_age_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
+]
+
+
+def _source_native_expected_configs(
+    geography_system: str | None,
+) -> list[dict] | None:
+    system = str(geography_system or "").upper()
+    if system == "OECD_TL_2024":
+        definitions = OECD_TL_EXPECTED_INDICATORS
+    elif system == "OECD_FUA":
+        definitions = OECD_FUA_EXPECTED_INDICATORS
+    else:
+        return None
+
+    return [
+        {
+            "indicator_id": indicator_id,
+            "name": LOCAL_SUBNATIONAL_INDICATOR_META.get(
+                indicator_id,
+                {},
+            ).get("name", indicator_id.replace("_", " ").title()),
+            "dataset_id": dataset_id,
+            "unit": unit,
+            "source_id": "OECD",
+        }
+        for indicator_id, dataset_id, unit in definitions
+    ]
+
+
 NUTS3_SAFETY_INDICATORS = [
     {
         "indicator_id": "regional_intentional_homicide_rate",
@@ -264,6 +309,7 @@ def _regional_result_from_local(
     })
 
     by_id = {row["indicator_id"]: row for row in rows}
+    local_system = str(rows[0].get("geography_system") or "").upper()
     if history_rows is None:
         history_rows = subnational_indicator_series(code, max_points=8)
     history_by_id: dict[str, list[dict]] = {}
@@ -274,7 +320,10 @@ def _regional_result_from_local(
         })
 
     configured = _indicator_configs_for_geo(code)
-    if local_level not in {"nuts2", "nuts3"}:
+    source_native_expected = _source_native_expected_configs(local_system)
+    if source_native_expected is not None:
+        configured = source_native_expected
+    elif local_level not in {"nuts2", "nuts3"}:
         configured = [
             {
                 "indicator_id": indicator_id,
@@ -284,6 +333,7 @@ def _regional_result_from_local(
                 ).get("name", indicator_id.replace("_", " ").title()),
                 "dataset_id": row["dataset_id"],
                 "unit": row.get("unit"),
+                "source_id": row.get("source_id"),
             }
             for indicator_id, row in sorted(by_id.items())
         ]
@@ -304,14 +354,15 @@ def _regional_result_from_local(
                 "source_updated_at": row.get("source_updated_at"),
                 "history": history_by_id.get(config["indicator_id"], []),
             })
-        elif local_level in {"nuts2", "nuts3"}:
+        elif local_level in {"nuts2", "nuts3"} or source_native_expected is not None:
             indicators.append({
                 "indicator_id": config["indicator_id"],
                 "name": config["name"],
                 "status": "unavailable",
                 "dataset_id": config["dataset_id"],
-                "source_id": "EUROSTAT",
+                "source_id": config.get("source_id", "EUROSTAT"),
                 "reason": "not_cached",
+                "unit": config.get("unit"),
                 "history": [],
             })
 
