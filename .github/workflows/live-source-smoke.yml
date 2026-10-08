@@ -86,59 +86,11 @@ jobs:
       - name: Probe global UN WPP batch
         run: python -m scripts.inspect_global_country_baseline --source un_wpp
 
-      - name: Inspect OECD regional density
-        run: python -m scripts.inspect_oecd_regional_density
-
-      - name: Inspect OECD regional population
-        run: python -m scripts.inspect_oecd_regional_population
-
-      - name: Inspect OECD regional demography
-        run: python -m scripts.inspect_oecd_regional_demography
-
-      - name: Inspect OECD regional labour rates
-        run: python -m scripts.inspect_oecd_regional_labour
-
-      - name: Inspect OECD regional GDP per capita PPP
-        run: python -m scripts.inspect_oecd_regional_gdp
-
-      - name: Inspect OECD regional disposable income PPP
-        run: python -m scripts.inspect_oecd_regional_income
-
       - name: Sync OECD Australia regional demographics
         run: >-
           python -m scripts.sync_oecd_regional
           --countries AUS
           --start-year 2021
-
-      - name: Inspect OECD Australia FUA density
-        run: python -m scripts.inspect_oecd_fua_density
-
-      - name: Inspect official OECD city and FUA boundaries
-        run: python -m scripts.inspect_oecd_fua_boundaries
-
-      - name: Discover current OECD FUA geometry links
-        run: python -m scripts.inspect_oecd_fua_geometry_links
-
-      - name: Inspect OECD Australia urban dependency ratio
-        run: python -m scripts.inspect_oecd_fua_dependency
-
-      - name: Inspect OECD Sydney FUA green-area measures
-        run: python -m scripts.inspect_oecd_fua_green_area
-
-      - name: Inspect OECD Australia FUA labour market
-        run: python -m scripts.inspect_oecd_fua_labour
-
-      - name: Inspect OECD Australia FUA labour productivity
-        run: python -m scripts.inspect_oecd_fua_economy
-
-      - name: Inspect OECD Australia FUA public transport access
-        run: python -m scripts.inspect_oecd_fua_public_transport
-
-      - name: Inspect OECD Australia urban commute modes
-        run: python -m scripts.inspect_oecd_fua_commute_mode
-
-      - name: Inspect OECD Australia FUA PM2.5 exposure
-        run: python -m scripts.inspect_oecd_fua_pollution
 
       - name: Sync representative OECD non-EU urban evidence
         run: >-
