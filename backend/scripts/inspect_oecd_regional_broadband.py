@@ -55,30 +55,32 @@ def main() -> int:
         )
     ]
 
+    country_codes = sorted({
+        str(row.get("COUNTRY") or "").upper()
+        for row in rows
+        if str(row.get("COUNTRY") or "").strip()
+    })
     diagnostics.update({
         "headers": reader.fieldnames or [],
         "row_count": len(rows),
+        "country_count": len(country_codes),
+        "countries": country_codes,
         "australian_row_count": len(australian_rows),
         "levels": sorted({
             row.get("TERRITORIAL_LEVEL")
-            for row in australian_rows
+            for row in rows
             if row.get("TERRITORIAL_LEVEL")
         }),
         "measures": sorted({
             row.get("MEASURE")
-            for row in australian_rows
+            for row in rows
             if row.get("MEASURE")
         }),
         "units": sorted({
             row.get("UNIT_MEASURE")
-            for row in australian_rows
+            for row in rows
             if row.get("UNIT_MEASURE")
         }),
-        "references": sorted({
-            row.get("REF_AREA")
-            for row in australian_rows
-            if row.get("REF_AREA")
-        })[:50],
         "sample_rows": [
             {
                 "reference": row.get("REF_AREA"),
@@ -92,12 +94,17 @@ def main() -> int:
                 "time": row.get("TIME_PERIOD"),
                 "value": row.get("OBS_VALUE"),
             }
-            for row in australian_rows[:30]
+            for row in rows[:30]
         ],
-        "ready_for_parser_design": bool(australian_rows),
+        "australia_status": (
+            "available"
+            if australian_rows
+            else "coverage_gap"
+        ),
+        "ready_for_parser_design": bool(rows),
     })
     print(json.dumps(diagnostics, indent=2, default=str))
-    return 0 if australian_rows else 2
+    return 0 if rows else 2
 
 
 if __name__ == "__main__":
