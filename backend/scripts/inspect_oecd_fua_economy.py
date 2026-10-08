@@ -13,7 +13,7 @@ DATASET_VERSION = "1.1"
 URL = (
     "https://sdmx.oecd.org/public/rest/data/"
     "OECD.CFE.EDS,DSD_FUA_ECO@DF_ECONOMY,1.1/"
-    "AUS+AUS01F+AUS02F.A.LAB_PROD.."
+    "AUS01F+AUS02F.A..."
 )
 PARAMS = {
     "startPeriod": "2020",
