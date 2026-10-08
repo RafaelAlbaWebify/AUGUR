@@ -3084,9 +3084,14 @@ test('city evidence is grouped into demography mobility tourism and environment'
   const cityMarker = map.locator('.urbanAuditCity').first()
   await expect(cityMarker).toBeVisible()
 
-  await cityMarker.click({ force: true })
+  await page.evaluate(() => {
+    const marker = document.querySelector('.leafletAugurMap .urbanAuditCity')
+    marker?.dispatchEvent(new MouseEvent('click', { bubbles: true }))
+  })
 
+  await expect(page.getByText('CITY · Madrid · ES001C')).toBeVisible()
   const geographicEvidence = page.getByRole('region', { name: 'Selected geographic evidence' })
+  await expect(geographicEvidence.getByText('Urban Audit + EEA')).toBeVisible()
   await expect(geographicEvidence.getByText('9/9 series available')).toBeVisible()
   await expect(geographicEvidence.getByText('Demography', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('Mobility', { exact: true })).toBeVisible()
