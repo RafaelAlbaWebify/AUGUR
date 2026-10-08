@@ -369,6 +369,47 @@ def city_evidence_get(city_code: str):
     return city_evidence(city_code)
 
 
+@router.get("/geographies/{geo_code}/evidence")
+def geography_evidence_get(
+    geo_code: str,
+    system: str = Query(
+        ...,
+        description="Registered geography system, e.g. OECD_TL_2024 or OECD_FUA",
+    ),
+):
+    code = geo_code.strip().upper()
+    requested_system = system.strip().upper()
+
+    records = [
+        record
+        for record in geography_records_by_source_codes([code])
+        if str(record["geography_system"]).upper() == requested_system
+    ]
+
+    if not records:
+        raise HTTPException(
+            status_code=404,
+            detail=(
+                f"Geography {code} is not registered in "
+                f"{requested_system}"
+            ),
+        )
+
+    if len(records) > 1:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Geography {code} is ambiguous in "
+                f"{requested_system}"
+            ),
+        )
+
+    return regional_evidence(
+        code,
+        geography_system=requested_system,
+    )
+
+
 @router.get("/regions/{geo_code}/evidence")
 def region_evidence_get(
     geo_code: str,
