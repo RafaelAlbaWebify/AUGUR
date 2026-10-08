@@ -1258,16 +1258,7 @@ def calibration_status() -> dict:
                     ),
                     holdout_review=holdout_review,
                 ),
-                "activation_readiness": calibration_activation_readiness(
-                protocol_readiness=protocol_readiness,
-                holdout_seal=holdout_seal,
-                holdout_acceptance=evaluate_holdout_acceptance(
-                    [],
-                    holdout_sealed=holdout_seal["sealed"],
-                ),
-                holdout_review=holdout_review,
-            ),
-            "externally_calibrated": False,
+                "externally_calibrated": False,
                 "notes": [
                     "Calibration datastore has not been initialized.",
                 ],
@@ -1320,6 +1311,15 @@ def calibration_status() -> dict:
             "holdout_acceptance": evaluate_holdout_acceptance(
                 [],
                 holdout_sealed=holdout_seal["sealed"],
+            ),
+            "activation_readiness": calibration_activation_readiness(
+                protocol_readiness=protocol_readiness,
+                holdout_seal=holdout_seal,
+                holdout_acceptance=evaluate_holdout_acceptance(
+                    [],
+                    holdout_sealed=holdout_seal["sealed"],
+                ),
+                holdout_review=holdout_review,
             ),
             "externally_calibrated": False,
             "notes": [
