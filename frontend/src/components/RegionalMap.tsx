@@ -414,6 +414,20 @@ export default function RegionalMap({
         nuts3LayerRef.current = nuts3Layer
         cityLayerRef.current = cityLayer
 
+        const redrawProgressiveLayers = () => {
+          map.invalidateSize()
+
+          regionLayer.eachLayer((layer) => {
+            if (layer instanceof L.Path) layer.redraw()
+          })
+          nuts3Layer.eachLayer((layer) => {
+            if (layer instanceof L.Path) layer.redraw()
+          })
+          cityLayer.eachLayer((layer) => {
+            if (layer instanceof L.CircleMarker) layer.redraw()
+          })
+        }
+
         const applyProgressiveLayers = () => {
           const currentZoom = map.getZoom()
 
@@ -434,6 +448,8 @@ export default function RegionalMap({
           } else if (map.hasLayer(cityLayer)) {
             map.removeLayer(cityLayer)
           }
+
+          requestAnimationFrame(redrawProgressiveLayers)
         }
 
         progressiveHandler = applyProgressiveLayers
