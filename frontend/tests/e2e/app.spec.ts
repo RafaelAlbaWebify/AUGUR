@@ -2902,6 +2902,9 @@ test('city evidence is grouped into demography mobility tourism and environment'
   const map = page.getByTestId('regional-map')
   await expect(map).toHaveAttribute('data-map-status', 'ready')
 
+  await page.getByRole('button', { name: 'Focus country' }).click()
+  await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(4)
+
   const zoomIn = page.locator('.leaflet-control-zoom-in')
   await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(3)
 
