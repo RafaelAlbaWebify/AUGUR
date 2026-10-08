@@ -15,6 +15,7 @@ from app.ingestion.oecd_regional import (
     POPULATION_DEFAULT_KEY,
     DEMOGRAPHY_DEFAULT_KEY,
     LABOUR_DEFAULT_KEY,
+    GDP_DEFAULT_KEY,
     OECDRegionalAdapter,
 )
 from app.ingestion.world_bank import WorldBankAdapter
@@ -88,6 +89,11 @@ def main() -> int:
         default=LABOUR_DEFAULT_KEY,
         help="Optional OECD regional labour-rate SDMX key.",
     )
+    parser.add_argument(
+        "--gdp-key",
+        default=GDP_DEFAULT_KEY,
+        help="Optional OECD regional GDP-per-capita PPP SDMX key.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -127,6 +133,12 @@ def main() -> int:
             end_year=args.end_year,
             key=args.labour_key,
         )
+        gdp = adapter.sync_gdp(
+            allowed_country_iso3=targets,
+            start_year=args.start_year,
+            end_year=args.end_year,
+            key=args.gdp_key,
+        )
     finally:
         adapter.close()
 
@@ -135,6 +147,7 @@ def main() -> int:
         + population["rows"]
         + demography["rows"]
         + labour["rows"]
+        + gdp["rows"]
     )
     payload = {
         "source_id": "OECD",
@@ -146,6 +159,7 @@ def main() -> int:
             "population": population,
             "demography": demography,
             "labour": labour,
+            "gdp": gdp,
         },
         "geography_coverage": geography_coverage_status(),
     }
