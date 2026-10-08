@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import time
+
 import httpx
 
 
@@ -10,6 +12,28 @@ SWAGGER_URL = (
 API_BASE = "https://eeadmz1-downloads-api-appservice.azurewebsites.net"
 TARGET_COUNTRIES = ["ES", "PT", "IE"]
 PM25_URI = "http://dd.eionet.europa.eu/vocabulary/aq/pollutant/6001"
+
+
+def _post_with_retry(
+    client: httpx.Client,
+    url: str,
+    *,
+    json: object,
+    attempts: int = 3,
+) -> httpx.Response:
+    last_error: Exception | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return client.post(url, json=json)
+        except (httpx.TimeoutException, httpx.TransportError) as exc:
+            last_error = exc
+            if attempt >= attempts:
+                break
+            time.sleep(2 ** (attempt - 1))
+
+    if last_error is not None:
+        raise last_error
+    raise RuntimeError("EEA request failed without an exception")
 
 
 def _safe_json(response: httpx.Response):
@@ -169,11 +193,13 @@ def probe_verified_pm25_city(
     }
 
     try:
-        summary = active.post(
+        summary = _post_with_retry(
+            active,
             f"{API_BASE}/DownloadSummary",
             json=payload,
         )
-        urls = active.post(
+        urls = _post_with_retry(
+            active,
             f"{API_BASE}/ParquetFile/urls",
             json=payload,
         )
