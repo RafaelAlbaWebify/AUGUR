@@ -193,6 +193,7 @@ CREATE TABLE IF NOT EXISTS geography_registry (
 );
 
 CREATE TABLE IF NOT EXISTS subnational_observations (
+    geography_system VARCHAR NOT NULL,
     geo_code VARCHAR NOT NULL,
     geo_name VARCHAR,
     geo_level VARCHAR NOT NULL,
@@ -204,7 +205,9 @@ CREATE TABLE IF NOT EXISTS subnational_observations (
     dataset_id VARCHAR NOT NULL,
     retrieved_at TIMESTAMP NOT NULL,
     source_updated_at VARCHAR,
-    PRIMARY KEY (geo_code, indicator_id, period, source_id)
+    PRIMARY KEY (
+        geography_system, geo_code, indicator_id, period, source_id
+    )
 );
 
 CREATE TABLE IF NOT EXISTS environmental_health_burden (
@@ -299,6 +302,78 @@ def initialize_analytics_schema() -> None:
             con.execute(
                 "ALTER TABLE subnational_observations ADD COLUMN geo_name VARCHAR"
             )
+            subnational_columns.add("geo_name")
+
+        if "geography_system" not in subnational_columns:
+            con.execute(
+                """
+                CREATE TABLE subnational_observations_v2 (
+                    geography_system VARCHAR NOT NULL,
+                    geo_code VARCHAR NOT NULL,
+                    geo_name VARCHAR,
+                    geo_level VARCHAR NOT NULL,
+                    indicator_id VARCHAR NOT NULL,
+                    period INTEGER NOT NULL,
+                    value DOUBLE NOT NULL,
+                    unit VARCHAR,
+                    source_id VARCHAR NOT NULL,
+                    dataset_id VARCHAR NOT NULL,
+                    retrieved_at TIMESTAMP NOT NULL,
+                    source_updated_at VARCHAR,
+                    PRIMARY KEY (
+                        geography_system,
+                        geo_code,
+                        indicator_id,
+                        period,
+                        source_id
+                    )
+                )
+                """
+            )
+            con.execute(
+                """
+                INSERT OR REPLACE INTO subnational_observations_v2
+                SELECT
+                    COALESCE(
+                        (
+                            SELECT g.geography_system
+                            FROM geography_registry g
+                            WHERE g.source_geo_code = s.geo_code
+                              AND (
+                                g.source_id = s.source_id
+                                OR g.source_id IS NULL
+                              )
+                            ORDER BY g.geography_system
+                            LIMIT 1
+                        ),
+                        CASE
+                            WHEN LOWER(s.geo_level) IN ('nuts2', 'nuts3')
+                                THEN 'NUTS_2024'
+                            WHEN LOWER(s.geo_level) = 'city'
+                                THEN 'URBAN_AUDIT_2024'
+                            ELSE 'SOURCE_NATIVE'
+                        END
+                    ) AS geography_system,
+                    s.geo_code,
+                    s.geo_name,
+                    s.geo_level,
+                    s.indicator_id,
+                    s.period,
+                    s.value,
+                    s.unit,
+                    s.source_id,
+                    s.dataset_id,
+                    s.retrieved_at,
+                    s.source_updated_at
+                FROM subnational_observations s
+                """
+            )
+            con.execute("DROP TABLE subnational_observations")
+            con.execute(
+                "ALTER TABLE subnational_observations_v2 "
+                "RENAME TO subnational_observations"
+            )
+            subnational_columns.add("geography_system")
 
         # Backfill the provider-neutral geography registry from existing
         # NUTS/Urban Audit evidence. Country identity is resolved explicitly
@@ -312,27 +387,12 @@ def initialize_analytics_schema() -> None:
                 parent_geo_id, latitude, longitude
             )
             SELECT
-                (
-                    CASE
-                        WHEN LOWER(s.geo_level) IN ('nuts2', 'nuts3')
-                            THEN 'NUTS_2024'
-                        WHEN LOWER(s.geo_level) = 'city'
-                            THEN 'URBAN_AUDIT_2024'
-                        ELSE 'SOURCE_NATIVE'
-                    END
-                    || ':' || s.geo_code
-                ),
+                (s.geography_system || ':' || s.geo_code),
                 c.iso3,
                 SUBSTR(s.geo_code, 1, 2),
                 MAX(s.geo_name),
                 LOWER(s.geo_level),
-                CASE
-                    WHEN LOWER(s.geo_level) IN ('nuts2', 'nuts3')
-                        THEN 'NUTS_2024'
-                    WHEN LOWER(s.geo_level) = 'city'
-                        THEN 'URBAN_AUDIT_2024'
-                    ELSE 'SOURCE_NATIVE'
-                END,
+                s.geography_system,
                 MIN(s.source_id),
                 s.geo_code,
                 NULL,
@@ -345,7 +405,8 @@ def initialize_analytics_schema() -> None:
                 s.geo_code,
                 c.iso3,
                 SUBSTR(s.geo_code, 1, 2),
-                LOWER(s.geo_level)
+                LOWER(s.geo_level),
+                s.geography_system
             """
         )
 
