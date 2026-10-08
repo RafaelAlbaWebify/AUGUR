@@ -91,6 +91,20 @@ if (-not $SkipSync) {
     if ($OecdRegionalCode -eq 2) {
         Write-Warning "OECD regional demographic evidence is currently unavailable."
     }
+
+    $OecdUrbanCode = Invoke-Step "Synchronize OECD non-EU urban density evidence" {
+        Push-Location (Join-Path $Root "backend")
+        try {
+            & $BackendPython -m scripts.sync_oecd_fua
+        }
+        finally {
+            Pop-Location
+        }
+    } -AllowedExitCodes @(0, 2)
+
+    if ($OecdUrbanCode -eq 2) {
+        Write-Warning "OECD FUA/city density evidence is currently unavailable."
+    }
 }
 else {
     Write-Host ""
