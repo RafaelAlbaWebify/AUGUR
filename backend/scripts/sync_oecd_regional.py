@@ -8,6 +8,7 @@ from app.db.analytics import (
     country_record,
     country_registry,
     geography_coverage_status,
+    stale_geography_countries,
 )
 from app.db.bootstrap import initialize_datastores
 from app.ingestion.oecd_regional import (
@@ -71,6 +72,17 @@ def main() -> int:
     parser.add_argument("--start-year", type=int, default=2021)
     parser.add_argument("--end-year", type=int)
     parser.add_argument(
+        "--max-age-hours",
+        type=float,
+        default=24.0,
+        help="Skip countries with provider-native evidence newer than this many hours.",
+    )
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Ignore local freshness and force a provider refresh.",
+    )
+    parser.add_argument(
         "--density-key",
         default=DENSITY_DEFAULT_KEY,
         help="Optional OECD density SDMX key.",
@@ -109,6 +121,28 @@ def main() -> int:
         print(json.dumps({
             "source_id": "OECD",
             "status": "no_registered_non_eu_oecd_countries",
+            "rows": 0,
+        }, indent=2))
+        return 0
+
+    requested_targets = set(targets)
+    if not args.force:
+        targets = stale_geography_countries(
+            "OECD_TL_2024",
+            targets,
+            [],
+            max_age_hours=args.max_age_hours,
+        )
+
+    skipped_fresh = sorted(requested_targets - set(targets))
+    if not targets:
+        print(json.dumps({
+            "source_id": "OECD",
+            "geography_system": "OECD_TL_2024",
+            "status": "fresh_local_evidence",
+            "target_country_count": len(requested_targets),
+            "skipped_fresh_countries": skipped_fresh,
+            "max_age_hours": args.max_age_hours,
             "rows": 0,
         }, indent=2))
         return 0
@@ -164,8 +198,12 @@ def main() -> int:
     )
     payload = {
         "source_id": "OECD",
-        "target_country_count": len(targets),
-        "target_countries": sorted(targets),
+        "target_country_count": len(requested_targets),
+        "refreshed_country_count": len(targets),
+        "target_countries": sorted(requested_targets),
+        "refreshed_countries": sorted(targets),
+        "skipped_fresh_countries": skipped_fresh,
+        "max_age_hours": args.max_age_hours,
         "rows": total_rows,
         "datasets": {
             "density": density,
