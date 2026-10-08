@@ -4,6 +4,7 @@ import math
 
 from app.db.analytics import latest_labour_job_transition
 from app.models.profile import PersonalProfileResponse
+from app.services.ttv_calibration import calibration_status
 
 
 TEMPORAL_EVIDENCE_ENGINE_VERSION = "ttv-temporal-evidence-v1"
@@ -83,6 +84,28 @@ def temporal_model_validation_status() -> dict:
         gate_id: dict(config)
         for gate_id, config in TEMPORAL_MODEL_VALIDATION_GATES.items()
     }
+
+    calibration = calibration_status()
+    if calibration.get("externally_calibrated"):
+        gates["external_calibration"] = {
+            "state": "supported",
+            "reason": (
+                "sealed_holdout_passed_predeclared_criteria_and_"
+                "representativeness_review"
+            ),
+            "protocol_version": calibration.get("protocol_version"),
+            "holdout_sha256": (
+                calibration.get("holdout_seal") or {}
+            ).get("holdout_sha256"),
+        }
+    else:
+        gates["external_calibration"] = {
+            "state": "missing",
+            "reason": "external_calibration_requirements_not_complete",
+            "blockers": (
+                calibration.get("activation_readiness") or {}
+            ).get("blockers", []),
+        }
     accepted_states = {"supported", "scope_bounded"}
     blockers = [
         gate_id
@@ -114,6 +137,14 @@ def temporal_model_validation_status() -> dict:
         "missing": missing,
         "scope_bounded": scope_bounded,
         "model_scope": TTV_ESTIMATION_SCOPE_V1,
+        "calibration": {
+            "protocol_version": calibration.get("protocol_version"),
+            "externally_calibrated": calibration.get("externally_calibrated", False),
+            "holdout_seal": calibration.get("holdout_seal"),
+            "holdout_review": calibration.get("holdout_review"),
+            "holdout_acceptance": calibration.get("holdout_acceptance"),
+            "activation_readiness": calibration.get("activation_readiness"),
+        },
         "notes": [
             "Supported means the evidence path is implemented with an explicit basis; it does not imply external calibration.",
             "Scope-bounded means AUGUR deliberately excludes cases that would require an unvalidated duration assumption instead of inventing one.",
