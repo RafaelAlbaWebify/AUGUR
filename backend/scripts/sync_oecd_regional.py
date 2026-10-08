@@ -12,6 +12,7 @@ from app.db.bootstrap import initialize_datastores
 from app.ingestion.oecd_regional import (
     DENSITY_DEFAULT_KEY,
     POPULATION_DEFAULT_KEY,
+    DEMOGRAPHY_DEFAULT_KEY,
     OECDRegionalAdapter,
 )
 from app.ingestion.world_bank import WorldBankAdapter
@@ -62,6 +63,11 @@ def main() -> int:
         default=POPULATION_DEFAULT_KEY,
         help="Optional OECD population SDMX key.",
     )
+    parser.add_argument(
+        "--demography-key",
+        default=DEMOGRAPHY_DEFAULT_KEY,
+        help="Optional OECD demographic SDMX key.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -89,10 +95,16 @@ def main() -> int:
             end_year=args.end_year,
             key=args.population_key,
         )
+        demography = adapter.sync_demography(
+            allowed_country_iso3=targets,
+            start_year=args.start_year,
+            end_year=args.end_year,
+            key=args.demography_key,
+        )
     finally:
         adapter.close()
 
-    total_rows = density["rows"] + population["rows"]
+    total_rows = density["rows"] + population["rows"] + demography["rows"]
     payload = {
         "source_id": "OECD",
         "target_country_count": len(targets),
@@ -101,6 +113,7 @@ def main() -> int:
         "datasets": {
             "density": density,
             "population": population,
+            "demography": demography,
         },
         "geography_coverage": geography_coverage_status(),
     }
