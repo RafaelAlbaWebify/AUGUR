@@ -14,16 +14,20 @@ Current state:
 - opt-in development observation lifecycle implemented;
 - anonymized development exchange implemented;
 - calibration diagnostics implemented;
-- protocol state is definitions frozen / acceptance criteria pending.
+- acceptance criteria are frozen as `ttv-acceptance-criteria-v1`;
+- calibration protocol is frozen as `ttv-calibration-protocol-v1`;
+- holdout imports are protocol-gated and immutable once stored;
+- holdout CSV imports prevalidate the full batch before any write;
+- development evidence remains exploratory and cannot be retrospectively promoted into the holdout.
 
 Remaining:
 
-- collect a representative development sample;
-- use development evidence to predeclare acceptance criteria;
-- freeze immutable calibration protocol version;
-- collect a true untouched holdout under the frozen protocol;
-- evaluate holdout;
+- collect a representative prospective holdout under the frozen protocol;
+- review representativeness and cohort coverage;
+- evaluate the untouched holdout against the pre-declared criteria;
 - only if accepted, assign TEMPORAL_MODEL_VERSION and allow full ready=true.
+
+A development sample may continue to be collected for diagnostics, but changing v1 assumptions after holdout collection begins would require a new protocol/model version rather than tuning against the v1 holdout.
 
 This work cannot be honestly completed with synthetic or retrospectively tuned cases.
 
@@ -316,12 +320,7 @@ Current OECD_FUA production evidence also includes:
 
 Still withheld from production ingestion:
 
-- OECD FUA PM2.5 exposure remains research-only. A live probe confirms the published contract (`PM25_POP_EXP`, `MCG_M3`, CITY/FUA), but the Australian time series contains unexplained order-of-magnitude discontinuities. The production adapter, sync and UI intentionally exclude this metric until the discontinuity is resolved.
-- OECD FUA PM2.5 exposure. The current live source declares micrograms per
-  cubic metre with unit multiplier 0, but the Australian time series contains
-  abrupt order-of-magnitude discontinuities under otherwise identical
-  dimensions. AUGUR will not surface this series until the discontinuity is
-  understood.
+- OECD FUA PM2.5 exposure remains research-only. A live probe confirms the published contract (`PM25_POP_EXP`, `MCG_M3`, CITY/FUA), but the Australian time series contains unexplained order-of-magnitude discontinuities under otherwise identical dimensions. The production adapter, sync and UI intentionally exclude this metric until the discontinuity is resolved.
 - OECD FUA economy data for the probed Australian FUAs. The dataset is valid,
   but the probe returns no records; this remains a source coverage gap.
 
