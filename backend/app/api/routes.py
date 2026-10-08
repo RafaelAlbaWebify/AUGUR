@@ -15,6 +15,7 @@ from app.db.analytics import (
     environmental_health_burden_status,
     geography_coverage_status,
     geographies_for_country,
+    geography_records_by_source_codes,
 )
 from app.services.country import (
     country_snapshot,
@@ -392,7 +393,7 @@ def region_evidence_get(geo_code: str):
 def regions_compare_get(
     regions: str = Query(
         ...,
-        description="Comma-separated NUTS 2 or NUTS 3 codes",
+        description="Comma-separated source-native regional geography codes",
     )
 ):
     requested = [
@@ -413,31 +414,70 @@ def regions_compare_get(
             detail="A maximum of five regions can be compared at once",
         )
 
-    levels = {geographic_level(code) for code in requested}
-    if "unknown" in levels:
-        raise HTTPException(
-            status_code=400,
-            detail="Only NUTS 2 and NUTS 3 region codes are supported",
-        )
+    records = geography_records_by_source_codes(requested)
+    matches_by_code: dict[str, list[dict]] = {
+        code: []
+        for code in requested
+    }
+    for record in records:
+        code = str(record["source_geo_code"]).upper()
+        if code in matches_by_code:
+            matches_by_code[code].append(record)
 
-    if len(levels) != 1:
-        raise HTTPException(
-            status_code=400,
-            detail="Regional comparison requires all regions to use the same NUTS level",
-        )
-
-    supported_iso2 = {country["iso2"] for country in list_countries()}
-    unsupported = [
-        code for code in requested
-        if code[:2] not in supported_iso2
+    missing = [
+        code
+        for code, matches in matches_by_code.items()
+        if not matches
     ]
-    if unsupported:
+    if missing:
         raise HTTPException(
             status_code=404,
-            detail=f"Regions are outside AUGUR's registered countries: {', '.join(unsupported)}",
+            detail=(
+                "Regions are not registered with analytical geography metadata: "
+                + ", ".join(missing)
+            ),
         )
 
-    return regional_comparison(requested)
+    ambiguous = [
+        code
+        for code, matches in matches_by_code.items()
+        if len(matches) > 1
+    ]
+    if ambiguous:
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                "Regional source codes are ambiguous across geography systems: "
+                + ", ".join(ambiguous)
+            ),
+        )
+
+    selected = [
+        matches_by_code[code][0]
+        for code in requested
+    ]
+    systems = {
+        str(record["geography_system"])
+        for record in selected
+    }
+    levels = {
+        str(record["geo_level"]).lower()
+        for record in selected
+    }
+
+    if len(systems) != 1 or len(levels) != 1:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Regional comparison requires the same geography system "
+                "and geographic level"
+            ),
+        )
+
+    result = regional_comparison(requested)
+    result["geography_system"] = selected[0]["geography_system"]
+    result["geo_level"] = selected[0]["geo_level"]
+    return result
 
 
 @router.get("/profile", response_model=PersonalProfileResponse)
