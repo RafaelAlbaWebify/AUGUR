@@ -379,8 +379,8 @@ async function mockApi(page: Page) {
           geo_level: isFua ? 'fua' : 'city',
           source: 'AUGUR local store · OECD urban statistics',
           source_ids: ['OECD'],
-          indicator_count: 5,
-          available_count: 5,
+          indicator_count: isFua ? 8 : 5,
+          available_count: isFua ? 8 : 5,
           complete: true,
           indicators: [
             {
@@ -438,6 +438,41 @@ async function mockApi(page: Page) {
               source_id: 'OECD',
               history: [],
             },
+            ...(isFua ? [
+              {
+                indicator_id: 'urban_employment_to_population_ratio',
+                name: 'Employment-to-population ratio, ages 15–64',
+                status: 'available',
+                period: 2023,
+                value: 75.8,
+                unit: 'percent',
+                dataset_id: 'DSD_FUA_LAB@DF_LABOUR',
+                source_id: 'OECD',
+                history: [],
+              },
+              {
+                indicator_id: 'urban_labour_force_participation_rate',
+                name: 'Labour force participation rate, ages 15–64',
+                status: 'available',
+                period: 2023,
+                value: 78.8,
+                unit: 'percent',
+                dataset_id: 'DSD_FUA_LAB@DF_LABOUR',
+                source_id: 'OECD',
+                history: [],
+              },
+              {
+                indicator_id: 'urban_unemployment_rate',
+                name: 'Unemployment rate, ages 15–64',
+                status: 'available',
+                period: 2023,
+                value: 3.8,
+                unit: 'percent',
+                dataset_id: 'DSD_FUA_LAB@DF_LABOUR',
+                source_id: 'OECD',
+                history: [],
+              },
+            ] : []),
           ],
           sector_structure: {
             status: 'unavailable',
@@ -1308,6 +1343,18 @@ test('source-native OECD urban area can be selected separately from regions', as
   await expect(geographicEvidence.getByText('Total dependency ratio', { exact: true })).toBeVisible()
   await expect(geographicEvidence.getByText('48.4%')).toBeVisible()
   await expect(geographicEvidence.getByText(/OECD urban statistics/)).toBeVisible()
+  await expect(geographicEvidence.getByText('Unemployment rate, ages 15–64')).toHaveCount(0)
+
+  await urbanSelect.selectOption('AUS01F')
+
+  await expect(geographicEvidence.getByText('FUA EVIDENCE')).toBeVisible()
+  await expect(geographicEvidence.locator('.radarPanelTopline strong')).toHaveText('Sydney FUA')
+  await expect(geographicEvidence.getByText('Employment-to-population ratio, ages 15–64')).toBeVisible()
+  await expect(geographicEvidence.getByText('75.8%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Labour force participation rate, ages 15–64')).toBeVisible()
+  await expect(geographicEvidence.getByText('78.8%')).toBeVisible()
+  await expect(geographicEvidence.getByText('Unemployment rate, ages 15–64')).toBeVisible()
+  await expect(geographicEvidence.getByText('3.8%')).toBeVisible()
 })
 
 test('Overview reveals and selects official NUTS 2 regions', async ({ page }) => {
