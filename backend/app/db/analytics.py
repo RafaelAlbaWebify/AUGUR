@@ -2747,7 +2747,11 @@ def latest_subnational_observations(
             WHERE rn = 1
             ORDER BY indicator_id
             """,
-            [geo_code.upper()],
+            [
+                geo_code.upper(),
+                geography_system,
+                geography_system,
+            ],
         )
         columns = [column[0] for column in result.description]
         return [dict(zip(columns, row)) for row in result.fetchall()]
