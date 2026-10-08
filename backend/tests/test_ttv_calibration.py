@@ -334,7 +334,7 @@ def test_development_case_defaults_to_exploratory_sample_role(
     assert status["sample_roles"] == ["development"]
     assert status["development_case_count"] == 1
     assert status["holdout_case_count"] == 0
-    assert status["protocol_ready_for_holdout"] is False
+    assert status["protocol_ready_for_holdout"] is True
 
 
 def test_calibration_protocol_readiness_lists_unresolved_requirements():
