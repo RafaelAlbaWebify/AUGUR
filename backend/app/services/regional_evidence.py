@@ -214,6 +214,24 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "urban_public_transport_access_15min": {
         "name": "Population within 15 min walk of public transport",
     },
+    "urban_commute_car_share": {
+        "name": "Commute share by car",
+    },
+    "urban_commute_public_transport_share": {
+        "name": "Commute share by public transport",
+    },
+    "urban_commute_bicycle_share": {
+        "name": "Commute share by bicycle",
+    },
+    "urban_commute_walk_share": {
+        "name": "Commute share by walking",
+    },
+    "urban_green_area_per_capita_m2": {
+        "name": "Green area per resident",
+    },
+    "urban_green_area_share": {
+        "name": "Green area share",
+    },
 }
 
 
@@ -243,6 +261,12 @@ OECD_FUA_ONLY_EXPECTED_INDICATORS = [
     ("urban_public_transport_access_5min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
     ("urban_public_transport_access_10min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
     ("urban_public_transport_access_15min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
+    ("urban_commute_car_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_commute_public_transport_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_commute_bicycle_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_commute_walk_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_green_area_per_capita_m2", "DSD_FUA_ENV@DF_GREEN_AREA", "m2_per_person"),
+    ("urban_green_area_share", "DSD_FUA_ENV@DF_GREEN_AREA", "percent"),
 ]
 
 
