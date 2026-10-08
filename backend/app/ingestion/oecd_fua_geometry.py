@@ -173,6 +173,107 @@ def fetch_archive(
     return response.content
 
 
+def sync_oecd_fua_geometries_for_countries(
+    country_iso3s: list[str] | set[str],
+    *,
+    client: httpx.Client | None = None,
+    city_payload: bytes | None = None,
+    fua_payload: bytes | None = None,
+) -> dict:
+    countries = sorted({
+        str(code).strip().upper()
+        for code in country_iso3s
+        if str(code).strip()
+    })
+    registered = []
+    for code in countries:
+        registered.extend(
+            item
+            for item in geographies_for_country(code)
+            if str(item.get("geography_system") or "").upper() == GEOGRAPHY_SYSTEM
+        )
+
+    if not registered:
+        return {
+            "geography_system": GEOGRAPHY_SYSTEM,
+            "target_country_count": len(countries),
+            "status": "no_registered_oecd_urban_geographies",
+            "rows": 0,
+            "city_rows": 0,
+            "fua_rows": 0,
+            "covered_countries": [],
+            "missing_countries": countries,
+            "complete": False,
+        }
+
+    owns_client = client is None
+    active_client = client or httpx.Client(
+        timeout=httpx.Timeout(180.0),
+        follow_redirects=True,
+        headers={"User-Agent": "AUGUR/0.1"},
+    )
+    try:
+        if city_payload is None:
+            city_payload = fetch_archive(
+                CITY_BOUNDARIES_URL,
+                client=active_client,
+            )
+        if fua_payload is None:
+            fua_payload = fetch_archive(
+                FUA_BOUNDARIES_URL,
+                client=active_client,
+            )
+    finally:
+        if owns_client:
+            active_client.close()
+
+    city_rows = geometry_rows_from_archive(
+        city_payload,
+        registered_geographies=registered,
+        expected_level="city",
+    )
+    fua_rows = geometry_rows_from_archive(
+        fua_payload,
+        registered_geographies=registered,
+        expected_level="fua",
+    )
+    all_rows = city_rows + fua_rows
+    stored = upsert_geography_geometries(all_rows)
+
+    registry_country_by_geo_id = {
+        item["geo_id"]: item.get("country_iso3")
+        for item in registered
+    }
+    covered_countries = sorted({
+        registry_country_by_geo_id.get(row["geo_id"])
+        for row in all_rows
+        if registry_country_by_geo_id.get(row["geo_id"])
+    })
+    missing_countries = sorted(set(countries) - set(covered_countries))
+
+    expected_codes = {
+        str(item["source_geo_code"]).upper()
+        for item in registered
+    }
+    matched_codes = {
+        row["source_geo_code"]
+        for row in all_rows
+    }
+
+    return {
+        "geography_system": GEOGRAPHY_SYSTEM,
+        "target_country_count": len(countries),
+        "status": "available" if all_rows else "no_matching_geometry",
+        "rows": stored,
+        "city_rows": len(city_rows),
+        "fua_rows": len(fua_rows),
+        "covered_countries": covered_countries,
+        "missing_countries": missing_countries,
+        "missing_geo_codes": sorted(expected_codes - matched_codes),
+        "complete": bool(all_rows) and expected_codes <= matched_codes,
+    }
+
+
 def sync_oecd_fua_geometries(
     country_iso3: str,
     *,
