@@ -9,7 +9,11 @@ from app.db.analytics import (
     geography_coverage_status,
 )
 from app.db.bootstrap import initialize_datastores
-from app.ingestion.oecd_fua import DEFAULT_KEY, OECDFUAAdapter
+from app.ingestion.oecd_fua import (
+    DEFAULT_KEY,
+    POPULATION_DEFAULT_KEY,
+    OECDFUAAdapter,
+)
 from app.ingestion.world_bank import WorldBankAdapter
 
 
@@ -55,6 +59,11 @@ def main() -> int:
         default=DEFAULT_KEY,
         help="Optional OECD FUA density SDMX key.",
     )
+    parser.add_argument(
+        "--population-key",
+        default=POPULATION_DEFAULT_KEY,
+        help="Optional OECD FUA population SDMX key.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -79,20 +88,31 @@ def main() -> int:
             end_year=args.end_year,
             key=args.density_key,
         )
+        population = adapter.sync_population(
+            countries=countries,
+            allowed_country_iso3=targets,
+            start_year=max(args.start_year, 2021),
+            end_year=args.end_year,
+            key=args.population_key,
+        )
     finally:
         adapter.close()
 
+    total_rows = density["rows"] + population["rows"]
     payload = {
         "source_id": "OECD",
         "geography_system": "OECD_FUA",
         "target_country_count": len(targets),
         "target_countries": sorted(targets),
-        "rows": density["rows"],
-        "dataset": density,
+        "rows": total_rows,
+        "datasets": {
+            "density": density,
+            "population": population,
+        },
         "geography_coverage": geography_coverage_status(),
     }
     print(json.dumps(payload, indent=2, default=str))
-    return 0 if density["rows"] > 0 else 2
+    return 0 if total_rows > 0 else 2
 
 
 if __name__ == "__main__":
