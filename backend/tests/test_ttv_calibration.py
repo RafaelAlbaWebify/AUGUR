@@ -1171,3 +1171,91 @@ def test_sealed_holdout_rejects_additional_cases(monkeypatch, tmp_path):
         )
 
     assert module.calibration_status()["holdout_case_count"] == 60
+
+
+
+def test_holdout_review_requires_sealed_holdout(monkeypatch, tmp_path):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    with pytest.raises(ValueError, match="must be sealed"):
+        module.record_holdout_review(
+            representative=True,
+            cohort_coverage_adequate=True,
+        )
+
+
+def test_positive_holdout_review_clears_activation_readiness(
+    monkeypatch,
+    tmp_path,
+):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    for index in range(60):
+        module.upsert_calibration_case({
+            **_valid_holdout_case(f"holdout-review-{index:03d}"),
+            "candidate_weeks_min": 10,
+            "candidate_weeks_max": 20,
+            "observed_weeks": 15,
+        })
+
+    module.seal_holdout()
+    before = module.calibration_status()
+
+    assert before["holdout_acceptance"]["status"] == "passed"
+    assert before["holdout_review"]["reviewed"] is False
+    assert before["activation_readiness"][
+        "ready_for_temporal_model_version"
+    ] is False
+    assert before["activation_readiness"]["blockers"] == [
+        "representativeness_review_missing"
+    ]
+
+    review = module.record_holdout_review(
+        representative=True,
+        cohort_coverage_adequate=True,
+        reviewer_label="methodology-review-v1",
+        notes="Representative for the frozen bounded TTV v1 scope.",
+    )
+
+    assert review["reviewed"] is True
+    assert review["representative"] is True
+    assert review["cohort_coverage_adequate"] is True
+
+    after = module.calibration_status()
+    assert after["activation_readiness"][
+        "ready_for_temporal_model_version"
+    ] is True
+    assert after["activation_readiness"]["blockers"] == []
+    assert after["externally_calibrated"] is True
+
+    repeated = module.record_holdout_review(
+        representative=False,
+        cohort_coverage_adequate=False,
+    )
+    assert repeated["representative"] is True
+    assert repeated["cohort_coverage_adequate"] is True
+
+
+def test_negative_holdout_review_blocks_activation(monkeypatch, tmp_path):
+    _use_temp_store(monkeypatch, tmp_path)
+
+    for index in range(60):
+        module.upsert_calibration_case({
+            **_valid_holdout_case(f"holdout-negative-{index:03d}"),
+            "candidate_weeks_min": 10,
+            "candidate_weeks_max": 20,
+            "observed_weeks": 15,
+        })
+
+    module.seal_holdout()
+    module.record_holdout_review(
+        representative=False,
+        cohort_coverage_adequate=False,
+    )
+
+    status = module.calibration_status()
+    assert status["externally_calibrated"] is False
+    assert status["activation_readiness"]["blockers"] == [
+        "holdout_not_representative",
+        "holdout_cohort_coverage_inadequate",
+    ]
