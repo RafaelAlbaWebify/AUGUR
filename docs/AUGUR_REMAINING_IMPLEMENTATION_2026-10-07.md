@@ -267,7 +267,7 @@ Four-country live validation on 2026-10-08 used Australia, Canada, Japan and the
 
 Coverage is intentionally reported per dataset. A geography with density but without population or dependency evidence is not treated as complete, and country-level sync gaps remain explicit.
 
-Next urban expansion candidates must be inspected and validated before integration. OECD FUA labour-market, commuting and environmental datasets are candidates, but no values should be inferred into cities or FUAs from regional TL2/TL3 evidence.
+Urban expansion beyond the initial population/density/dependency baseline is now partially implemented and remains source-native. Labour-market, commuting, public-transport-access and green-area datasets are integrated where published. No values are inferred into cities or FUAs from regional TL2/TL3 evidence.
 
 
 ## OECD urban expansion status
@@ -316,6 +316,7 @@ Current OECD_FUA production evidence also includes:
 
 Still withheld from production ingestion:
 
+- OECD FUA PM2.5 exposure remains research-only. A live probe confirms the published contract (`PM25_POP_EXP`, `MCG_M3`, CITY/FUA), but the Australian time series contains unexplained order-of-magnitude discontinuities. The production adapter, sync and UI intentionally exclude this metric until the discontinuity is resolved.
 - OECD FUA PM2.5 exposure. The current live source declares micrograms per
   cubic metre with unit multiplier 0, but the Australian time series contains
   abrupt order-of-magnitude discontinuities under otherwise identical
