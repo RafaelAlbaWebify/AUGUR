@@ -2419,6 +2419,46 @@ def geographies_for_country(
         con.close()
 
 
+def geography_records_by_source_codes(
+    source_geo_codes: list[str],
+) -> list[dict]:
+    codes = sorted({
+        str(code).strip().upper()
+        for code in source_geo_codes
+        if str(code).strip()
+    })
+    if not codes:
+        return []
+
+    placeholders = ",".join("?" for _ in codes)
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        result = con.execute(
+            f"""
+            SELECT
+                geo_id,
+                country_iso3,
+                country_iso2,
+                name,
+                geo_level,
+                geography_system,
+                source_id,
+                source_geo_code,
+                parent_geo_id,
+                latitude,
+                longitude
+            FROM geography_registry
+            WHERE UPPER(source_geo_code) IN ({placeholders})
+            ORDER BY geography_system, geo_level, source_geo_code
+            """,
+            codes,
+        )
+        columns = [column[0] for column in result.description]
+        return [dict(zip(columns, row)) for row in result.fetchall()]
+    finally:
+        con.close()
+
+
 def geography_coverage_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
