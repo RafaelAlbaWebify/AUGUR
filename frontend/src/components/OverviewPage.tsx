@@ -714,7 +714,7 @@ export default function OverviewPage({
                 <option value="">Select a region…</option>
                 {filteredSourceNativeRegions.map((item) => (
                   <option key={item.geo_id} value={item.source_geo_code}>
-                    {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()}
+                    {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()} · {item.indicator_count} series
                   </option>
                 ))}
               </select>
