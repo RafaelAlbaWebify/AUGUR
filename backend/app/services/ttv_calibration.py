@@ -588,6 +588,63 @@ def import_calibration_csv(path: str | Path) -> dict:
         "case_ids": case_ids,
     }
 
+def import_holdout_calibration_csv(path: str | Path) -> dict:
+    source_path = Path(path).expanduser().resolve()
+    if not source_path.exists():
+        raise FileNotFoundError(source_path)
+
+    with source_path.open(
+        "r",
+        encoding="utf-8-sig",
+        newline="",
+    ) as handle:
+        reader = csv.DictReader(handle)
+        rows = list(reader)
+
+    if not rows:
+        raise ValueError("Holdout calibration CSV contains no cases")
+
+    for row_number, row in enumerate(rows, start=2):
+        role = str(row.get("sample_role") or "").strip().lower()
+        if role != "holdout":
+            raise ValueError(
+                f"Invalid holdout row {row_number}: sample_role must be holdout"
+            )
+        if (
+            str(row.get("calibration_protocol_version") or "").strip()
+            != CALIBRATION_PROTOCOL_VERSION
+        ):
+            raise ValueError(
+                f"Invalid holdout row {row_number}: "
+                "calibration_protocol_version must equal "
+                + str(CALIBRATION_PROTOCOL_VERSION)
+            )
+        if (
+            str(row.get("start_event_definition_version") or "").strip()
+            != CALIBRATION_START_EVENT_DEFINITION_VERSION
+        ):
+            raise ValueError(
+                f"Invalid holdout row {row_number}: "
+                "start_event_definition_version does not match the frozen protocol"
+            )
+        if (
+            str(row.get("viability_outcome_definition_version") or "").strip()
+            != CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION
+        ):
+            raise ValueError(
+                f"Invalid holdout row {row_number}: "
+                "viability_outcome_definition_version does not match the frozen protocol"
+            )
+
+    result = import_calibration_csv(source_path)
+    return {
+        **result,
+        "import_mode": "holdout",
+        "frozen_protocol_version": CALIBRATION_PROTOCOL_VERSION,
+        "acceptance_criteria_version": CALIBRATION_ACCEPTANCE_CRITERIA_VERSION,
+    }
+
+
 def _case_interval_metrics(cases: list[dict]) -> dict:
     if not cases:
         return {
