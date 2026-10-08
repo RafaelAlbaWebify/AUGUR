@@ -96,6 +96,29 @@ def _country_for_code(
     return None, None
 
 
+def _coverage_fields(
+    rows: list[dict],
+    allowed_country_iso3: set[str] | None,
+) -> dict:
+    covered = sorted({
+        str(row["country_iso3"]).upper()
+        for row in rows
+        if row.get("country_iso3")
+    })
+    requested = (
+        sorted({code.upper() for code in allowed_country_iso3})
+        if allowed_country_iso3 is not None
+        else covered
+    )
+    missing = sorted(set(requested) - set(covered))
+    return {
+        "country_count": len(covered),
+        "covered_countries": covered,
+        "missing_countries": missing,
+        "complete": bool(rows) and not missing,
+    }
+
+
 class OECDFUAAdapter:
     def __init__(
         self,
@@ -462,11 +485,7 @@ class OECDFUAAdapter:
             "dataset_version": POPULATION_DATASET_VERSION,
             "geography_system": GEOGRAPHY_SYSTEM,
             "rows": inserted,
-            "country_count": len({
-                row["country_iso3"]
-                for row in rows
-                if row.get("country_iso3")
-            }),
+            **_coverage_fields(rows, allowed_country_iso3),
             "geography_count": len({row["geo_code"] for row in rows}),
             "city_count": len({
                 row["geo_code"]
@@ -480,7 +499,6 @@ class OECDFUAAdapter:
             }),
             "period_min": min((row["period"] for row in rows), default=None),
             "period_max": max((row["period"] for row in rows), default=None),
-            "complete": bool(rows),
         }
 
     def normalize_dependency(
@@ -595,11 +613,7 @@ class OECDFUAAdapter:
             "dataset_version": DEPENDENCY_DATASET_VERSION,
             "geography_system": GEOGRAPHY_SYSTEM,
             "rows": inserted,
-            "country_count": len({
-                row["country_iso3"]
-                for row in rows
-                if row.get("country_iso3")
-            }),
+            **_coverage_fields(rows, allowed_country_iso3),
             "geography_count": len({row["geo_code"] for row in rows}),
             "city_count": len({
                 row["geo_code"]
@@ -617,7 +631,6 @@ class OECDFUAAdapter:
             }),
             "period_min": min((row["period"] for row in rows), default=None),
             "period_max": max((row["period"] for row in rows), default=None),
-            "complete": bool(rows),
         }
 
     def sync_density(
@@ -647,11 +660,7 @@ class OECDFUAAdapter:
             "dataset_version": DATASET_VERSION,
             "geography_system": GEOGRAPHY_SYSTEM,
             "rows": inserted,
-            "country_count": len({
-                row["country_iso3"]
-                for row in rows
-                if row.get("country_iso3")
-            }),
+            **_coverage_fields(rows, allowed_country_iso3),
             "geography_count": len({
                 row["geo_code"]
                 for row in rows
@@ -668,5 +677,4 @@ class OECDFUAAdapter:
             }),
             "period_min": min((row["period"] for row in rows), default=None),
             "period_max": max((row["period"] for row in rows), default=None),
-            "complete": bool(rows),
         }
