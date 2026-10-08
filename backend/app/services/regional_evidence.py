@@ -187,6 +187,12 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "regional_motor_vehicle_theft_rate_per_100k": {
         "name": "Motor vehicle theft rate",
     },
+    "regional_household_broadband_access": {
+        "name": "Households with broadband access",
+    },
+    "regional_daytime_land_surface_temperature": {
+        "name": "Daytime yearly land surface temperature",
+    },
     "urban_population": {
         "name": "Population",
     },
@@ -252,6 +258,8 @@ OECD_TL_EXPECTED_INDICATORS = [
     ("regional_unemployment_rate_oecd", "DSD_REG_LAB@DF_RATES", "percent"),
     ("regional_homicide_rate_per_100k", "DSD_REG_SOC@DF_SAFETY", "per_100k_people"),
     ("regional_motor_vehicle_theft_rate_per_100k", "DSD_REG_SOC@DF_SAFETY", "per_100k_people"),
+    ("regional_household_broadband_access", "DSD_REG_SOC@DF_BROADBAND", "percent"),
+    ("regional_daytime_land_surface_temperature", "DSD_REG_CLIM@DF_LAND_TEMP", "celsius"),
 ]
 
 OECD_FUA_CITY_EXPECTED_INDICATORS = [
