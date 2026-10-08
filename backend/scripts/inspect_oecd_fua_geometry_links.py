@@ -74,6 +74,21 @@ def main() -> int:
         headers={"User-Agent": "AUGUR/0.1"},
     ) as client:
         landing = client.get(LANDING_URL)
+        if landing.status_code in {401, 403}:
+            print(json.dumps({
+                "source_id": "OECD",
+                "geography_system": "OECD_FUA",
+                "landing_url": LANDING_URL,
+                "landing_http_status": landing.status_code,
+                "status": "source_access_restricted_in_ci",
+                "ready_for_geometry_download": False,
+                "notes": [
+                    "The official OECD landing page rejects the hosted runner.",
+                    "This is an access restriction, not evidence that the published geometry file is unavailable.",
+                ],
+            }, indent=2))
+            return 0
+
         landing.raise_for_status()
         candidates = _candidate_links(landing.text)
 
