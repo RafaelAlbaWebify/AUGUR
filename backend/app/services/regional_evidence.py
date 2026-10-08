@@ -252,6 +252,10 @@ OECD_FUA_CITY_EXPECTED_INDICATORS = [
     ("urban_total_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
     ("urban_youth_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
     ("urban_old_age_dependency_ratio", "DSD_FUA_DEMO@DF_DEPEND", "percent"),
+    ("urban_commute_car_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_commute_public_transport_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_commute_bicycle_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
+    ("urban_commute_walk_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
 ]
 
 OECD_FUA_ONLY_EXPECTED_INDICATORS = [
@@ -261,10 +265,6 @@ OECD_FUA_ONLY_EXPECTED_INDICATORS = [
     ("urban_public_transport_access_5min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
     ("urban_public_transport_access_10min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
     ("urban_public_transport_access_15min", "DSD_FUA_TRAN@DF_PT_ACCESS", "percent"),
-    ("urban_commute_car_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
-    ("urban_commute_public_transport_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
-    ("urban_commute_bicycle_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
-    ("urban_commute_walk_share", "DSD_FUA_TRAN@DF_TRAN_COMMUT", "percent"),
     ("urban_green_area_per_capita_m2", "DSD_FUA_ENV@DF_GREEN_AREA", "m2_per_person"),
     ("urban_green_area_share", "DSD_FUA_ENV@DF_GREEN_AREA", "percent"),
 ]
