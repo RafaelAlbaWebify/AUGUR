@@ -14,8 +14,8 @@ from app.core.config import settings
 
 CALIBRATION_SCHEMA_VERSION = "ttv-calibration-v1"
 CALIBRATION_EXCHANGE_VERSION = "ttv-development-exchange-v1"
-CALIBRATION_PROTOCOL_STATE = "definitions_and_acceptance_frozen_protocol_pending"
-CALIBRATION_PROTOCOL_VERSION = None
+CALIBRATION_PROTOCOL_STATE = "protocol_v1_frozen_holdout_collection_enabled"
+CALIBRATION_PROTOCOL_VERSION = "ttv-calibration-protocol-v1"
 CALIBRATION_PROTOCOL_DOCUMENT = "docs/TTV_CALIBRATION_PROTOCOL.md"
 CALIBRATION_START_EVENT_DEFINITION_VERSION = "ttv-start-active-language-transition-v1"
 CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION = "ttv-outcome-b2-remote-viability-v1"
@@ -334,6 +334,9 @@ def validate_calibration_case(case: dict) -> dict:
     viability_outcome_definition_version = str(
         case.get("viability_outcome_definition_version") or ""
     ).strip() or None
+    calibration_protocol_version = str(
+        case.get("calibration_protocol_version") or ""
+    ).strip() or None
 
     if not case_id:
         raise ValueError("case_id is required")
@@ -356,18 +359,29 @@ def validate_calibration_case(case: dict) -> dict:
             "sample_role must be one of: "
             + ", ".join(sorted(SUPPORTED_SAMPLE_ROLES))
         )
-    if sample_role == "holdout" and CALIBRATION_PROTOCOL_VERSION is None:
-        raise ValueError(
-            "holdout cases require an approved calibration protocol version"
-        )
     if sample_role == "holdout":
-        if not start_event_definition_version:
+        if CALIBRATION_PROTOCOL_VERSION is None:
             raise ValueError(
-                "holdout cases require start_event_definition_version"
+                "holdout cases require an approved calibration protocol version"
             )
-        if not viability_outcome_definition_version:
+        if calibration_protocol_version != CALIBRATION_PROTOCOL_VERSION:
             raise ValueError(
-                "holdout cases require viability_outcome_definition_version"
+                "holdout cases require calibration_protocol_version="
+                + CALIBRATION_PROTOCOL_VERSION
+            )
+        if (
+            start_event_definition_version
+            != CALIBRATION_START_EVENT_DEFINITION_VERSION
+        ):
+            raise ValueError(
+                "holdout cases require the frozen start-event definition version"
+            )
+        if (
+            viability_outcome_definition_version
+            != CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION
+        ):
+            raise ValueError(
+                "holdout cases require the frozen viability-outcome definition version"
             )
         scope = calibration_case_scope_status(case)
         if not scope["eligible_for_v1_holdout"]:
@@ -425,6 +439,7 @@ def validate_calibration_case(case: dict) -> dict:
         "sample_role": sample_role,
         "start_event_definition_version": start_event_definition_version,
         "viability_outcome_definition_version": viability_outcome_definition_version,
+        "calibration_protocol_version": calibration_protocol_version,
         "stage_timings": stage_timings,
         "context": context,
     }
@@ -452,11 +467,12 @@ def upsert_calibration_case(case: dict) -> dict:
                 sample_role,
                 start_event_definition_version,
                 viability_outcome_definition_version,
+                calibration_protocol_version,
                 stage_timings_json,
                 context_json,
                 imported_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             (
                 normalized["case_id"],
@@ -472,6 +488,7 @@ def upsert_calibration_case(case: dict) -> dict:
                 normalized["sample_role"],
                 normalized["start_event_definition_version"],
                 normalized["viability_outcome_definition_version"],
+                normalized["calibration_protocol_version"],
                 json.dumps(
                     normalized["stage_timings"],
                     sort_keys=True,
@@ -779,6 +796,7 @@ def calibration_status() -> dict:
                     sample_role,
                     start_event_definition_version,
                     viability_outcome_definition_version,
+                    calibration_protocol_version,
                     stage_timings_json,
                     context_json,
                     imported_at
@@ -1328,6 +1346,7 @@ def export_development_calibration_package() -> dict:
                 sample_role,
                 start_event_definition_version,
                 viability_outcome_definition_version,
+                calibration_protocol_version,
                 stage_timings_json,
                 context_json
             FROM ttv_calibration_cases
