@@ -2468,8 +2468,10 @@ def geographies_for_country(
                     WHEN 'nuts3' THEN 2
                     WHEN 'admin2' THEN 2
                     WHEN 'city' THEN 3
+                    WHEN 'fua' THEN 4
                     ELSE 9
                 END,
+                COUNT(DISTINCT s.indicator_id) DESC,
                 COALESCE(g.name, g.source_geo_code),
                 g.source_geo_code
             """,
