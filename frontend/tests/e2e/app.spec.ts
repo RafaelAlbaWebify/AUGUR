@@ -864,6 +864,42 @@ async function mockApi(page: Page) {
       }
     } else if (path === '/api/countries') {
       body = { countries }
+    } else if (path === '/api/geographies/geometry') {
+      const requestedCountry = url.searchParams.get('country_iso3')
+      body = {
+        type: 'FeatureCollection',
+        country_iso3: requestedCountry,
+        geography_system: null,
+        feature_count: requestedCountry === 'AUS' ? 1 : 0,
+        features: requestedCountry === 'AUS'
+          ? [
+              {
+                type: 'Feature',
+                id: 'OECD_FUA:AUS01F',
+                properties: {
+                  geo_id: 'OECD_FUA:AUS01F',
+                  country_iso3: 'AUS',
+                  geography_system: 'OECD_FUA',
+                  geo_level: 'fua',
+                  source_geo_code: 'AUS01F',
+                  name: 'Sydney FUA',
+                  source_id: 'OECD',
+                  dataset_version: 'official-boundaries',
+                },
+                geometry: {
+                  type: 'Polygon',
+                  coordinates: [[
+                    [150.7, -34.2],
+                    [151.5, -34.2],
+                    [151.5, -33.5],
+                    [150.7, -33.5],
+                    [150.7, -34.2],
+                  ]],
+                },
+              },
+            ]
+          : [],
+      }
     } else if (path === '/api/geographies') {
       const requestedCountry = url.searchParams.get('country_iso3')
       body = {
@@ -1329,6 +1365,29 @@ test('source-native OECD region can be selected without GISCO geometry', async (
   await expect(geographicEvidence.getByText('$62,150 PPP/person')).toBeVisible()
   await expect(geographicEvidence.getByText('Disposable income per capita, constant PPP USD')).toBeVisible()
   await expect(geographicEvidence.getByText('$36,200 PPP/person')).toBeVisible()
+})
+
+test('provider-native OECD geometry renders and selects the FUA', async ({ page }) => {
+  await page.goto('/country/AUS/overview')
+
+  const map = page.getByTestId('regional-map')
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
+
+  const zoomIn = page.locator('.leaflet-control-zoom-in')
+  while (Number(await map.getAttribute('data-map-zoom')) < 5.5) {
+    await zoomIn.click()
+    await page.waitForTimeout(25)
+  }
+
+  await expect.poll(async () => map.locator('.sourceNativeBoundary').count()).toBeGreaterThan(0)
+
+  const boundary = map.locator('.sourceNativeBoundary').first()
+  await expect(boundary).toBeVisible()
+  await boundary.click({ force: true })
+
+  const evidence = page.getByRole('region', { name: 'Selected geographic evidence' })
+  await expect(evidence.locator('.radarPanelTopline strong')).toHaveText('Sydney FUA')
+  await expect(evidence.getByText('FUA EVIDENCE')).toBeVisible()
 })
 
 test('source-native OECD urban area can be selected separately from regions', async ({ page }) => {
