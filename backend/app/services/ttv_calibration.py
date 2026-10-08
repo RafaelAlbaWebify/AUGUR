@@ -14,13 +14,30 @@ from app.core.config import settings
 
 CALIBRATION_SCHEMA_VERSION = "ttv-calibration-v1"
 CALIBRATION_EXCHANGE_VERSION = "ttv-development-exchange-v1"
-CALIBRATION_PROTOCOL_STATE = "definitions_frozen_acceptance_pending"
+CALIBRATION_PROTOCOL_STATE = "definitions_and_acceptance_frozen_protocol_pending"
 CALIBRATION_PROTOCOL_VERSION = None
 CALIBRATION_PROTOCOL_DOCUMENT = "docs/TTV_CALIBRATION_PROTOCOL.md"
 CALIBRATION_START_EVENT_DEFINITION_VERSION = "ttv-start-active-language-transition-v1"
 CALIBRATION_VIABILITY_OUTCOME_DEFINITION_VERSION = "ttv-outcome-b2-remote-viability-v1"
 CALIBRATION_INCLUSION_EXCLUSION_RULES_VERSION = "ttv-inclusion-remote-scope-v1"
-CALIBRATION_ACCEPTANCE_CRITERIA_VERSION = None
+CALIBRATION_ACCEPTANCE_CRITERIA_VERSION = "ttv-acceptance-criteria-v1"
+
+CALIBRATION_ACCEPTANCE_CRITERIA = {
+    "minimum_holdout_cases": 60,
+    "minimum_interval_coverage_pct": 80.0,
+    "maximum_median_interval_width_weeks": 20.0,
+    "maximum_mean_absolute_midpoint_error_weeks": 8.0,
+    "maximum_absolute_mean_signed_midpoint_error_weeks": 4.0,
+    "maximum_mean_miss_distance_weeks": 6.0,
+    "maximum_below_interval_rate_pct": 15.0,
+    "maximum_above_interval_rate_pct": 15.0,
+    "minimum_cases_for_cohort_claim": 15,
+    "notes": [
+        "These are pre-declared product acceptance thresholds, not thresholds fitted to development or holdout outcomes.",
+        "Cohort-specific pass/fail claims require at least 15 holdout cases in that cohort.",
+        "Representative-sample review remains a separate gate and cannot be inferred from sample size alone.",
+    ],
+}
 SUPPORTED_EMPLOYMENT_MODES = {"remote", "local"}
 SUPPORTED_SAMPLE_ROLES = {"development", "holdout"}
 SUPPORTED_COMPOSITIONS = {"critical_path_v1"}
@@ -137,6 +154,7 @@ def calibration_protocol_readiness() -> dict:
         "blockers": blockers,
         "ready_for_holdout_collection": len(blockers) == 0,
         "holdout_scope": TTV_V1_CALIBRATION_SCOPE,
+        "acceptance_criteria": CALIBRATION_ACCEPTANCE_CRITERIA,
     }
 
 
@@ -602,6 +620,139 @@ def _case_interval_metrics(cases: list[dict]) -> dict:
             if miss_distances
             else 0.0
         ),
+    }
+
+
+def evaluate_holdout_acceptance(cases: list[dict]) -> dict:
+    eligible = [
+        case
+        for case in cases
+        if (
+            str(case.get("sample_role") or "").lower() == "holdout"
+            and calibration_case_scope_status(case)["eligible_for_v1_holdout"]
+        )
+    ]
+    metrics = _case_interval_metrics(eligible)
+    criteria = CALIBRATION_ACCEPTANCE_CRITERIA
+    case_count = metrics["case_count"]
+
+    checks = {
+        "minimum_holdout_cases": {
+            "passed": case_count >= criteria["minimum_holdout_cases"],
+            "observed": case_count,
+            "threshold": criteria["minimum_holdout_cases"],
+            "operator": ">=",
+        },
+    }
+
+    if case_count:
+        below_rate = round(
+            metrics["below_interval_count"] / case_count * 100.0,
+            2,
+        )
+        above_rate = round(
+            metrics["above_interval_count"] / case_count * 100.0,
+            2,
+        )
+        checks.update({
+            "interval_coverage_pct": {
+                "passed": (
+                    metrics["interval_coverage_pct"]
+                    >= criteria["minimum_interval_coverage_pct"]
+                ),
+                "observed": metrics["interval_coverage_pct"],
+                "threshold": criteria["minimum_interval_coverage_pct"],
+                "operator": ">=",
+            },
+            "median_interval_width_weeks": {
+                "passed": (
+                    metrics["median_interval_width_weeks"]
+                    <= criteria["maximum_median_interval_width_weeks"]
+                ),
+                "observed": metrics["median_interval_width_weeks"],
+                "threshold": criteria["maximum_median_interval_width_weeks"],
+                "operator": "<=",
+            },
+            "mean_absolute_midpoint_error_weeks": {
+                "passed": (
+                    metrics["mean_absolute_midpoint_error_weeks"]
+                    <= criteria["maximum_mean_absolute_midpoint_error_weeks"]
+                ),
+                "observed": metrics["mean_absolute_midpoint_error_weeks"],
+                "threshold": criteria["maximum_mean_absolute_midpoint_error_weeks"],
+                "operator": "<=",
+            },
+            "absolute_mean_signed_midpoint_error_weeks": {
+                "passed": (
+                    abs(metrics["mean_signed_midpoint_error_weeks"])
+                    <= criteria["maximum_absolute_mean_signed_midpoint_error_weeks"]
+                ),
+                "observed": round(
+                    abs(metrics["mean_signed_midpoint_error_weeks"]),
+                    2,
+                ),
+                "threshold": criteria["maximum_absolute_mean_signed_midpoint_error_weeks"],
+                "operator": "<=",
+            },
+            "mean_miss_distance_weeks": {
+                "passed": (
+                    metrics["mean_miss_distance_weeks"]
+                    <= criteria["maximum_mean_miss_distance_weeks"]
+                ),
+                "observed": metrics["mean_miss_distance_weeks"],
+                "threshold": criteria["maximum_mean_miss_distance_weeks"],
+                "operator": "<=",
+            },
+            "below_interval_rate_pct": {
+                "passed": (
+                    below_rate
+                    <= criteria["maximum_below_interval_rate_pct"]
+                ),
+                "observed": below_rate,
+                "threshold": criteria["maximum_below_interval_rate_pct"],
+                "operator": "<=",
+            },
+            "above_interval_rate_pct": {
+                "passed": (
+                    above_rate
+                    <= criteria["maximum_above_interval_rate_pct"]
+                ),
+                "observed": above_rate,
+                "threshold": criteria["maximum_above_interval_rate_pct"],
+                "operator": "<=",
+            },
+        })
+
+    sample_ready = case_count >= criteria["minimum_holdout_cases"]
+    evaluated_checks = (
+        checks.values()
+        if sample_ready
+        else [checks["minimum_holdout_cases"]]
+    )
+    passed = sample_ready and all(
+        item["passed"]
+        for item in evaluated_checks
+    )
+
+    return {
+        "criteria_version": CALIBRATION_ACCEPTANCE_CRITERIA_VERSION,
+        "scope_id": TTV_V1_CALIBRATION_SCOPE["scope_id"],
+        "status": (
+            "passed"
+            if passed
+            else "failed"
+            if sample_ready
+            else "insufficient_sample"
+        ),
+        "passed": passed,
+        "eligible_holdout_case_count": case_count,
+        "metrics": metrics,
+        "checks": checks,
+        "representativeness_review_required": True,
+        "notes": [
+            "Passing numerical thresholds does not by itself establish sample representativeness.",
+            "The final holdout must remain untouched by model design and tuning.",
+        ],
     }
 
 
