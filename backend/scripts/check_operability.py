@@ -221,6 +221,22 @@ def main() -> int:
         f"passed={holdout_acceptance.get('passed', False)} "
         f"eligible_cases={holdout_acceptance.get('eligible_holdout_case_count', 0)}"
     )
+    representativeness = (
+        calibration.get("representativeness_diagnostics") or {}
+    )
+    print(
+        "holdout_sample_distribution: "
+        f"countries={representativeness.get('country_counts', {})} "
+        f"cefr={representativeness.get('current_cefr_counts', {})} "
+        f"study_hours={representativeness.get('weekly_study_hours_counts', {})} "
+        f"context_complete={representativeness.get('context_complete_pct')}%"
+    )
+    print(
+        "holdout_concentration: "
+        f"largest_country_share={representativeness.get('largest_country_share_pct')}% "
+        f"largest_cefr_share={representativeness.get('largest_cefr_share_pct')}% "
+        f"largest_study_hours_share={representativeness.get('largest_study_hours_share_pct')}%"
+    )
     holdout_review = calibration.get("holdout_review") or {}
     print(
         "holdout_review: "
