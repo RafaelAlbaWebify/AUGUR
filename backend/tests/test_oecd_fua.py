@@ -105,6 +105,9 @@ def test_sync_fua_density_persists_history(monkeypatch):
 
     assert result["rows"] == 2
     assert result["country_count"] == 1
+    assert result["covered_countries"] == ["AUS"]
+    assert result["missing_countries"] == ["CAN"]
+    assert result["complete"] is False
     assert result["geography_count"] == 2
     assert result["city_count"] == 1
     assert result["fua_count"] == 1
@@ -155,7 +158,7 @@ def test_sync_fua_population_persists_history(monkeypatch):
     try:
         result = adapter.sync_population(
             countries=COUNTRIES,
-            allowed_country_iso3={"AUS"},
+            allowed_country_iso3={"AUS", "CAN"},
             start_year=2021,
         )
     finally:
@@ -235,6 +238,9 @@ def test_sync_fua_dependency_persists_selected_ratios(monkeypatch):
 
     assert result["rows"] == 4
     assert result["country_count"] == 1
+    assert result["covered_countries"] == ["AUS"]
+    assert result["missing_countries"] == []
+    assert result["complete"] is True
     assert result["geography_count"] == 2
     assert result["indicator_ids"] == [
         "urban_old_age_dependency_ratio",
