@@ -190,6 +190,15 @@ LOCAL_SUBNATIONAL_INDICATOR_META = {
     "urban_old_age_dependency_ratio": {
         "name": "Old-age dependency ratio",
     },
+    "urban_employment_to_population_ratio": {
+        "name": "Employment-to-population ratio, ages 15–64",
+    },
+    "urban_labour_force_participation_rate": {
+        "name": "Labour force participation rate, ages 15–64",
+    },
+    "urban_unemployment_rate": {
+        "name": "Unemployment rate, ages 15–64",
+    },
 }
 
 
