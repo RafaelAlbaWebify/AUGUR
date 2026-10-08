@@ -105,6 +105,20 @@ if (-not $SkipSync) {
     if ($OecdUrbanCode -eq 2) {
         Write-Warning "OECD FUA/city density evidence is currently unavailable."
     }
+
+    $OecdUrbanGeometryCode = Invoke-Step "Synchronize OECD urban boundary geometry" {
+        Push-Location (Join-Path $Root "backend")
+        try {
+            & $BackendPython -m scripts.sync_oecd_fua_geometry
+        }
+        finally {
+            Pop-Location
+        }
+    } -AllowedExitCodes @(0, 2)
+
+    if ($OecdUrbanGeometryCode -eq 2) {
+        Write-Warning "OECD city/FUA boundary geometry is currently unavailable."
+    }
 }
 else {
     Write-Host ""
