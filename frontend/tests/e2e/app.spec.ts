@@ -1279,10 +1279,22 @@ test('source-native OECD urban area can be selected separately from regions', as
   await expect(regionSelect).toContainText('New South Wales · TL2')
   await expect(regionSelect).not.toContainText('Greater Sydney')
 
+  const regionFilter = page.getByRole('searchbox', { name: 'Filter available source-native region' })
+  await regionFilter.fill('Victoria')
+  await expect(regionSelect).toContainText('Victoria · TL2')
+  await expect(regionSelect).not.toContainText('New South Wales · TL2')
+  await regionFilter.fill('')
+
   const urbanSelect = page.getByRole('combobox', { name: 'Available source-native urban area' })
   await expect(urbanSelect).toBeVisible()
   await expect(urbanSelect).toContainText('Greater Sydney · CITY')
   await expect(urbanSelect).toContainText('Sydney FUA · FUA')
+
+  const urbanFilter = page.getByRole('searchbox', { name: 'Filter available source-native urban area' })
+  await urbanFilter.fill('FUA')
+  await expect(urbanSelect).toContainText('Sydney FUA · FUA')
+  await expect(urbanSelect).not.toContainText('Greater Sydney · CITY')
+  await urbanFilter.fill('Sydney')
 
   await urbanSelect.selectOption('AUS01C')
 
