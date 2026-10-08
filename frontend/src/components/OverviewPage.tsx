@@ -396,6 +396,8 @@ export default function OverviewPage({
   const [cityEvidence, setCityEvidence] = useState<CityEvidenceResponse | null>(null)
   const [cityEvidenceState, setCityEvidenceState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
   const [countryGeographies, setCountryGeographies] = useState<CountryGeography[]>([])
+  const [regionSearch, setRegionSearch] = useState('')
+  const [urbanSearch, setUrbanSearch] = useState('')
 
   useEffect(() => {
     setSelectedRegion(null)
@@ -405,6 +407,8 @@ export default function OverviewPage({
     setCityEvidence(null)
     setCityEvidenceState('idle')
     setCountryGeographies([])
+    setRegionSearch('')
+    setUrbanSearch('')
   }, [selectedCountry])
 
   useEffect(() => {
@@ -548,6 +552,27 @@ export default function OverviewPage({
     && ['city', 'fua'].includes(item.geo_level.toLowerCase())
   ))
 
+  const regionSearchTerm = regionSearch.trim().toLowerCase()
+  const urbanSearchTerm = urbanSearch.trim().toLowerCase()
+  const filteredSourceNativeRegions = sourceNativeRegions.filter((item) => {
+    if (!regionSearchTerm) return true
+    return [
+      item.name,
+      item.source_geo_code,
+      item.geo_level,
+      item.geography_system,
+    ].some((value) => String(value ?? '').toLowerCase().includes(regionSearchTerm))
+  })
+  const filteredSourceNativeUrbanAreas = sourceNativeUrbanAreas.filter((item) => {
+    if (!urbanSearchTerm) return true
+    return [
+      item.name,
+      item.source_geo_code,
+      item.geo_level,
+      item.geography_system,
+    ].some((value) => String(value ?? '').toLowerCase().includes(urbanSearchTerm))
+  })
+
   const representative = RADAR_DOMAINS.map((domain) => {
     const preferred = domain.indicators
       .map((indicatorId) => currentIndicators.find((item) => item.indicator_id === indicatorId))
@@ -651,7 +676,15 @@ export default function OverviewPage({
               <div>
                 <span>AVAILABLE REGIONS</span>
                 <strong>Official source-native geography</strong>
+                <small>{filteredSourceNativeRegions.length}/{sourceNativeRegions.length} shown</small>
               </div>
+              <input
+                type="search"
+                aria-label="Filter available source-native region"
+                value={regionSearch}
+                placeholder="Filter by name or code…"
+                onChange={(event) => setRegionSearch(event.target.value)}
+              />
               <select
                 aria-label="Available source-native region"
                 value={
@@ -677,10 +710,11 @@ export default function OverviewPage({
                     level: geography.geo_level.toUpperCase(),
                     system: geography.geography_system,
                   })
+                  setRegionSearch('')
                 }}
               >
                 <option value="">Select a region…</option>
-                {sourceNativeRegions.map((item) => (
+                {filteredSourceNativeRegions.map((item) => (
                   <option key={item.geo_id} value={item.source_geo_code}>
                     {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()}
                   </option>
@@ -694,7 +728,15 @@ export default function OverviewPage({
               <div>
                 <span>AVAILABLE URBAN AREAS</span>
                 <strong>OECD city / Functional Urban Area evidence</strong>
+                <small>{filteredSourceNativeUrbanAreas.length}/{sourceNativeUrbanAreas.length} shown</small>
               </div>
+              <input
+                type="search"
+                aria-label="Filter available source-native urban area"
+                value={urbanSearch}
+                placeholder="Filter by name or code…"
+                onChange={(event) => setUrbanSearch(event.target.value)}
+              />
               <select
                 aria-label="Available source-native urban area"
                 value={
@@ -720,10 +762,11 @@ export default function OverviewPage({
                     level: geography.geo_level.toUpperCase(),
                     system: geography.geography_system,
                   })
+                  setUrbanSearch('')
                 }}
               >
                 <option value="">Select an urban area…</option>
-                {sourceNativeUrbanAreas.map((item) => (
+                {filteredSourceNativeUrbanAreas.map((item) => (
                   <option key={item.geo_id} value={item.source_geo_code}>
                     {item.name ?? item.source_geo_code} · {item.geo_level.toUpperCase()}
                   </option>
