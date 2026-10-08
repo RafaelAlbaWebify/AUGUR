@@ -2283,7 +2283,7 @@
 
 .sourceNativeGeographyPicker {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(190px, 280px);
+  grid-template-columns: minmax(0, 1fr) minmax(150px, 220px) minmax(190px, 280px);
   gap: 12px;
   align-items: center;
   padding: 10px 12px;
@@ -2306,6 +2306,26 @@
 .sourceNativeGeographyPicker strong {
   color: #e3f3fb;
   font-size: 11px;
+}
+
+.sourceNativeGeographyPicker small {
+  color: #658395;
+  font-size: 9px;
+}
+
+.sourceNativeGeographyPicker input[type="search"] {
+  min-height: 32px;
+  width: 100%;
+  border: 1px solid rgba(116, 169, 198, .24);
+  border-radius: 6px;
+  background: #081923;
+  color: #dff3fc;
+  padding: 0 9px;
+  font: 500 11px/1.2 Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+.sourceNativeGeographyPicker input[type="search"]::placeholder {
+  color: #607d8f;
 }
 
 .sourceNativeGeographyPicker select {
