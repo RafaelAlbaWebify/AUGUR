@@ -305,6 +305,15 @@ Provider-native geometry architecture is also implemented:
   GitHub-hosted runners, so geometry availability is reported separately from
   analytical evidence and does not block urban analysis.
 
+Current OECD_FUA production evidence also includes:
+
+- CITY and FUA commute-mode shares for car, public transport, bicycle and walking where published;
+- FUA green-area evidence from `DSD_FUA_ENV@DF_GREEN_AREA` v1.2:
+  - green area per resident (`M2_PS`, square metres per person);
+  - green area share (`PT_LAR`, percentage of land area);
+- live validation for Greater Sydney FUA (`AUS01F`) returned **146 m²/person** and **47.3%** green area in 2021;
+- green-area metrics remain separate descriptive evidence and are not collapsed into an environmental score.
+
 Still withheld from production ingestion:
 
 - OECD FUA PM2.5 exposure. The current live source declares micrograms per
