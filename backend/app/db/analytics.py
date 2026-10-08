@@ -2539,6 +2539,84 @@ def geography_records_by_source_codes(
         con.close()
 
 
+def stale_geography_countries(
+    geography_system: str,
+    country_iso3s: set[str] | list[str] | tuple[str, ...],
+    required_indicator_ids: set[str] | list[str] | tuple[str, ...],
+    *,
+    max_age_hours: float = 24.0,
+) -> set[str]:
+    """Return countries whose provider-native geography evidence is missing or stale."""
+    from datetime import datetime, timedelta, timezone
+
+    countries = {
+        str(code).upper()
+        for code in country_iso3s
+        if str(code).strip()
+    }
+    required = {
+        str(indicator_id)
+        for indicator_id in required_indicator_ids
+        if str(indicator_id).strip()
+    }
+    if not countries:
+        return set()
+    if max_age_hours < 0:
+        return set(countries)
+
+    placeholders = ",".join("?" for _ in countries)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=max_age_hours)
+
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        rows = con.execute(
+            f"""
+            SELECT
+                g.country_iso3,
+                s.indicator_id,
+                MAX(s.retrieved_at) AS latest_retrieved_at
+            FROM subnational_observations s
+            JOIN geography_registry g
+              ON g.geography_system = s.geography_system
+             AND g.source_geo_code = s.geo_code
+            WHERE s.geography_system = ?
+              AND g.country_iso3 IN ({placeholders})
+            GROUP BY g.country_iso3, s.indicator_id
+            """,
+            [geography_system, *sorted(countries)],
+        ).fetchall()
+    finally:
+        con.close()
+
+    fresh_by_country: dict[str, set[str]] = {
+        code: set()
+        for code in countries
+    }
+    for country_iso3, indicator_id, retrieved_at in rows:
+        if retrieved_at is None:
+            continue
+        timestamp = retrieved_at
+        if timestamp.tzinfo is None:
+            timestamp = timestamp.replace(tzinfo=timezone.utc)
+        if timestamp >= cutoff:
+            fresh_by_country.setdefault(str(country_iso3).upper(), set()).add(
+                str(indicator_id)
+            )
+
+    if not required:
+        return {
+            code
+            for code in countries
+            if not fresh_by_country.get(code)
+        }
+
+    return {
+        code
+        for code in countries
+        if not required.issubset(fresh_by_country.get(code, set()))
+    }
+
+
 def geography_coverage_status() -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
