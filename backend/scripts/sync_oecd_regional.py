@@ -18,6 +18,7 @@ from app.ingestion.oecd_regional import (
     LABOUR_DEFAULT_KEY,
     GDP_DEFAULT_KEY,
     INCOME_DEFAULT_KEY,
+    SAFETY_DEFAULT_KEY,
     OECDRegionalAdapter,
 )
 from app.ingestion.world_bank import WorldBankAdapter
@@ -112,6 +113,11 @@ def main() -> int:
         default=INCOME_DEFAULT_KEY,
         help="Optional OECD regional disposable-income PPP SDMX key.",
     )
+    parser.add_argument(
+        "--safety-key",
+        default=SAFETY_DEFAULT_KEY,
+        help="Optional OECD regional safety SDMX key.",
+    )
     args = parser.parse_args()
 
     initialize_datastores()
@@ -185,6 +191,12 @@ def main() -> int:
             end_year=args.end_year,
             key=args.income_key,
         )
+        safety = adapter.sync_safety(
+            allowed_country_iso3=targets,
+            start_year=args.start_year,
+            end_year=args.end_year,
+            key=args.safety_key,
+        )
     finally:
         adapter.close()
 
@@ -195,6 +207,7 @@ def main() -> int:
         + labour["rows"]
         + gdp["rows"]
         + income["rows"]
+        + safety["rows"]
     )
     payload = {
         "source_id": "OECD",
@@ -212,6 +225,7 @@ def main() -> int:
             "labour": labour,
             "gdp": gdp,
             "income": income,
+            "safety": safety,
         },
         "geography_coverage": geography_coverage_status(),
     }
