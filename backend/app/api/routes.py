@@ -51,6 +51,7 @@ from app.services.ttv_calibration import (
 from app.services.operability import operability_status
 from app.services.regional_evidence import regional_evidence, regional_comparison, geographic_level
 from app.services.city_evidence import city_evidence
+from app.services.geography_indicator_coverage import indicator_geography_coverage
 
 router = APIRouter()
 
@@ -114,6 +115,19 @@ def countries_coverage():
 @router.get("/geographies/coverage")
 def geographies_coverage():
     return geography_coverage_status()
+
+
+@router.get("/geographies/coverage/indicators")
+def geographies_coverage_indicators(
+    country_iso3: str | None = Query(default=None, min_length=3, max_length=3),
+    geography_system: str | None = Query(default=None),
+    geo_level: str | None = Query(default=None),
+):
+    return indicator_geography_coverage(
+        country_iso3=country_iso3,
+        geography_system=geography_system,
+        geo_level=geo_level,
+    )
 
 
 @router.get("/geographies/geometry")
