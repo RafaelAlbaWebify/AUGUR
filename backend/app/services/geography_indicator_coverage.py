@@ -64,6 +64,24 @@ def indicator_geography_coverage(
              AND l.geo_level = d.geo_level
             GROUP BY 1, 2, 3, 4, 5 ORDER BY 1, 2, 3, 5
         """, params).fetchall()
+        yearly_rows = con.execute(f"""
+            WITH registered AS (
+                SELECT DISTINCT g.country_iso3, g.geography_system,
+                    g.geo_level, g.source_geo_code
+                FROM geography_registry g
+                {where}
+            )
+            SELECT r.country_iso3, r.geography_system, r.geo_level,
+                s.indicator_id, s.period,
+                COUNT(DISTINCT r.source_geo_code) AS geography_count
+            FROM registered r
+            JOIN subnational_observations s
+              ON s.geography_system = r.geography_system
+             AND s.geo_code = r.source_geo_code
+             AND LOWER(s.geo_level) = LOWER(r.geo_level)
+            GROUP BY 1, 2, 3, 4, 5
+            ORDER BY 1, 2, 3, 4, 5
+        """, params).fetchall()
     finally:
         con.close()
 
@@ -78,6 +96,12 @@ def indicator_geography_coverage(
         for country, system, level, total, indicator, *_ in rows
         if indicator is None
     ]
+    by_period: dict[tuple, list[dict]] = {}
+    for country, system, level, indicator, period, count in yearly_rows:
+        by_period.setdefault((country, system, level, indicator), []).append({
+            "period": int(period),
+            "geography_count": int(count),
+        })
     items = []
     for country, system, level, total, indicator, observed, oldest, newest, earliest_retrieval, latest_retrieval, periods in rows:
         if indicator is None:
@@ -98,6 +122,13 @@ def indicator_geography_coverage(
             "coverage_ratio": ratio,
             "oldest_latest_period": oldest,
             "newest_latest_period": newest,
+            "same_period_coverage": [
+                {
+                    **entry,
+                    "coverage_ratio": entry["geography_count"] / total,
+                }
+                for entry in by_period.get((country, system, level, indicator), [])
+            ],
             "latest_period_distribution": [
                 {"period": period, "geography_count": count}
                 for period, count in sorted(period_counts.items())
@@ -113,7 +144,9 @@ def indicator_geography_coverage(
             "provider universe. Period range does not establish freshness "
             "or cross-geography comparability. The latest-period distribution "
             "reflects each geography\u0027s latest imported observation, not synchronized "
-            "common-period availability. Retrieval timestamps indicate "
+            "common-period availability. Same-period counts represent stored "
+            "observations for each specific year without interpolation. "
+            "Retrieval timestamps indicate "
             "ingestion activity, not source observation freshness."
         ),
         "indicator_count": len(items),
