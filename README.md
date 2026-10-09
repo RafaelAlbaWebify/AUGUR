@@ -199,6 +199,15 @@ Invoke-RestMethod 'http://127.0.0.1:8020/api/geographies/coverage/indicators?cou
 
 The response is based only on the local DuckDB store; it does not trigger a provider fetch, and an empty result does not prove the OECD has no data.
 
+To export this real local coverage evidence as JSON or CSV, run from the repository root:
+
+```powershell
+.\export-geography-coverage.ps1 -Output "exports\oecd_esp_tl2_coverage.json" -Country ESP -System OECD_TL_2024 -Level tl2
+.\export-geography-coverage.ps1 -Output "exports\all_geography_coverage.csv"
+```
+
+Exports contain **only the data already stored in the local DuckDB analytical database**. Synthetic test fixtures never enter these exports. No missing geography or period is filled with a fabricated observation. Output paths are resolved relative to the backend working directory when relative paths are used. Exported coverage ratios use registered-geography denominators, so an empty or partial export must not be mistaken for an authoritative OECD availability statement.
+
 
 NUTS 2024 and Urban Audit remain European geography providers, not AUGUR's universal geography model. Non-European regional/city providers register their own native geography system and level through the provider-neutral geography registry.
 
