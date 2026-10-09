@@ -60,6 +60,9 @@ def test_csv_export_keeps_observation_periods(tmp_path, monkeypatch, observed_re
     assert len(rows) == 1
     assert rows[0]["indicator_id"] == "regional_population"
     assert json.loads(rows[0]["same_period_coverage"])[0]["period"] == 2023
+    metadata = json.loads(output.with_suffix(".metadata.json").read_text(encoding="utf-8"))
+    assert metadata["denominator"] == "registered_geographies"
+    assert metadata["groups_without_observations"] == []
 
 
 def test_export_refuses_unsupported_file_type_without_writing(tmp_path, monkeypatch, observed_response):
@@ -68,3 +71,21 @@ def test_export_refuses_unsupported_file_type_without_writing(tmp_path, monkeypa
     with pytest.raises(ValueError, match="Only .json and .csv"):
         module.export_coverage(output=output)
     assert not output.exists()
+
+
+def test_empty_groups_survive_csv_export(tmp_path, monkeypatch, observed_response):
+    response = dict(observed_response)
+    response["items"] = []
+    response["indicator_count"] = 0
+    response["groups_without_observations"] = [{
+        "country_iso3": "ESP", "geography_system": "OECD_TL_2024",
+        "geo_level": "tl2", "registered_geographies": 3,
+        "has_observed_indicators": False,
+    }]
+    monkeypatch.setattr(module, "indicator_geography_coverage", lambda **kwargs: response)
+    output = tmp_path / "empty.csv"
+    module.export_coverage(output=output)
+    with output.open(encoding="utf-8", newline="") as stream:
+        assert list(csv.DictReader(stream)) == []
+    metadata = json.loads(output.with_suffix(".metadata.json").read_text(encoding="utf-8"))
+    assert metadata["groups_without_observations"] == response["groups_without_observations"]
