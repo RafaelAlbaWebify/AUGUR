@@ -1,0 +1,26 @@
+# AUGUR — Validation and Evidence Register
+
+Updated: 2026-10-09. **A green test is only a tested behavior; it is not a real-data acceptance certificate.**
+
+| Capability | Implementation evidence | CI / automated evidence | Real-data evidence | Product acceptance |
+|---|---|---|---|---|
+| Geographic indicator coverage | PR #1, merged `cd2bfbf` | Green PR CI + merge CI | Local JSON of 2026-10-09: 26 rows across ESP/IRL/PRT; version mismatch concerns | **Pending** |
+| Per-geography local provenance | PR #2, merged `c2392e3` | Green CI | Export has **not** been provided | **Pending** |
+| Official GISCO 2024 code catalog | PR #3, merged `61e7028` | Official workflow run [37924620862](https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/37924620862) succeeded and uploaded artifact | Actual GISCO 2024 retrieval: ES 19/59, IE 3/8, PT 9/26 (NUTS2/NUTS3) | Catalog retrieval accepted; matching to local **pending** |
+| Local-to-official code comparison | Draft PR #4 | Green CI observed; check at merge | No joined local data result yet | **Pending** |
+| Frontend country journey | Existing Playwright mocks and UI audit | Mocked browser suite green on reviewed PRs | No full fresh-real-data walkthrough accepted here | **Pending** |
+| TTV prediction publishing | Bounded model and tests per existing TTV docs | Existing automated tests | Prospective representative holdout not verified | **Blocked** |
+
+### Key methodological hazards
+1. Local registered-code denominator is **not** provider's official geographical universe.
+2. Latest imported period of each geography is **not** same-year availability.
+3. Actual `retrieved_at` reflects *ingestion*, not publication age of source.
+4. Historical NUTS codes with 2011/2018 end periods cannot be relabeled “current 2024” without source version audit.
+5. Comparing exact codes does not by itself establish boundary/indicator methodological comparability.
+6. OECD regional/FUA series and Eurostat NUTS/Urban Audit are different geographic systems; do not merge silently.
+7. Counts from GitHub official catalog job represent **catalog identities**, not observed stats.
+
+### Acceptance evidence for new work
+- Code/PR and changed paths; automated test URL/commit; actual provider or local evidence reference; schema and provenance checks; negative/empty cases; explicit unresolved limitations; reviewer decision.
+- For local-only evidence, record that a human supplied export was inspected; never claim GitHub Actions validated the local database.
+- A failed real-world command is a defect signal even if CI was green. Example: first geography export failed on an uninitialized schema; initialization resolved it locally; consider schema preflight UX separately.
