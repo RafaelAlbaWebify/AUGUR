@@ -206,6 +206,14 @@ To export this real local coverage evidence as JSON or CSV, run from the reposit
 .\export-geography-coverage.ps1 -Output "exports\all_geography_coverage.csv"
 ```
 
+To identify the **specific stored geography codes** behind missing/old observations, run:
+
+```powershell
+.\export-geography-provenance.ps1 -Output "$HOME\Downloads\AUGUR_GEOGRAPHY_PROVENANCE.json"
+```
+
+This is a read-only, per-geography audit listing registry IDs, source-native codes, parent IDs, datasets, indicator IDs, and first/last observed periods. It does **not** certify that all stored codes belong to the current official boundary release; such validation requires comparison with the source's versioned geography catalog.
+
 CSV exports additionally write a matching `.metadata.json` file containing geography groups with no observations and the coverage-denominator warning. Keep both files together during analysis; an empty CSV alone cannot distinguish zero indicators from an empty registered catalog.
 
 Exports contain **only the data already stored in the local DuckDB analytical database**. Synthetic test fixtures never enter these exports. No missing geography or period is filled with a fabricated observation. Output paths are resolved relative to the backend working directory when relative paths are used. Exported coverage ratios use registered-geography denominators, so an empty or partial export must not be mistaken for an authoritative OECD availability statement.
