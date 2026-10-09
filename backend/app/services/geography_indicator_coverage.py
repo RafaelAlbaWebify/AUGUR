@@ -39,7 +39,8 @@ def indicator_geography_coverage(
             latest AS (
                 SELECT r.country_iso3, r.geography_system, r.geo_level,
                     r.source_geo_code, s.indicator_id,
-                    MAX(s.period) AS latest_period
+                    MAX(s.period) AS latest_period,
+                    MAX(s.retrieved_at) AS latest_retrieved_at
                 FROM registered r
                 JOIN subnational_observations s
                   ON s.geography_system = r.geography_system
@@ -51,7 +52,9 @@ def indicator_geography_coverage(
                 d.registered_geographies, l.indicator_id,
                 COUNT(l.source_geo_code) AS covered_geographies,
                 MIN(l.latest_period) AS oldest_latest_period,
-                MAX(l.latest_period) AS newest_latest_period
+                MAX(l.latest_period) AS newest_latest_period,
+                MIN(l.latest_retrieved_at) AS earliest_latest_retrieval,
+                MAX(l.latest_retrieved_at) AS latest_retrieval
             FROM denominators d
             LEFT JOIN latest l
               ON l.country_iso3 IS NOT DISTINCT FROM d.country_iso3
@@ -74,7 +77,7 @@ def indicator_geography_coverage(
         if indicator is None
     ]
     items = []
-    for country, system, level, total, indicator, observed, oldest, newest in rows:
+    for country, system, level, total, indicator, observed, oldest, newest, earliest_retrieval, latest_retrieval in rows:
         if indicator is None:
             continue
         total, observed = int(total), int(observed)
@@ -90,6 +93,8 @@ def indicator_geography_coverage(
             "coverage_ratio": ratio,
             "oldest_latest_period": oldest,
             "newest_latest_period": newest,
+            "earliest_latest_retrieval": earliest_retrieval.isoformat() if earliest_retrieval else None,
+            "latest_retrieval": latest_retrieval.isoformat() if latest_retrieval else None,
         })
     return {
         "denominator": "registered_geographies",
@@ -97,7 +102,8 @@ def indicator_geography_coverage(
         "warning": (
             "Coverage is relative to registered geographies, not the external "
             "provider universe. Period range does not establish freshness "
-            "or cross-geography comparability."
+            "or cross-geography comparability. Retrieval timestamps indicate "
+            "ingestion activity, not source observation freshness."
         ),
         "indicator_count": len(items),
         "groups_without_observations": groups,
