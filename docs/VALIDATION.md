@@ -7,7 +7,7 @@ Updated: 2026-10-09. **A green test is only a tested behavior; it is not a real-
 | Geographic indicator coverage | PR #1, merged `cd2bfbf` | Green PR CI + merge CI | Local JSON of 2026-10-09: 26 rows across ESP/IRL/PRT; version mismatch concerns | **Pending** |
 | Per-geography local provenance | PR #2, merged `c2392e3` | Green CI | Export has **not** been provided | **Pending** |
 | Official GISCO 2024 code catalog | PR #3, merged `61e7028` | Official workflow run [37924620862](https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/37924620862) succeeded and uploaded artifact | Actual GISCO 2024 retrieval: ES 19/59, IE 3/8, PT 9/26 (NUTS2/NUTS3) | Catalog retrieval accepted; matching to local **pending** |
-| Local-to-official code comparison | Draft PR #4 | Green CI observed; check at merge | No joined local data result yet | **Pending** |
+| Local-to-official code comparison | PR #4 merged `ff3766e8` | CI green incl. negative tests for malformed catalog and duplicate local codes | No joined local data result yet | **Pending** |
 | Frontend country journey | Existing Playwright mocks and UI audit | Mocked browser suite green on reviewed PRs | No full fresh-real-data walkthrough accepted here | **Pending** |
 | TTV prediction publishing | Bounded model and tests per existing TTV docs | Existing automated tests | Prospective representative holdout not verified | **Blocked** |
 

@@ -7,8 +7,8 @@ Establish repository-anchored project-control protocol and stop context degradat
 
 ## Repository snapshot at creation
 - Main includes PR #1 coverage + exporter, PR #2 geo provenance, PR #3 official GISCO audit.
-- PR #4 `feature/compare-official-local-nuts` remains open **draft**, with green CI at inspection. Do not merge blindly; review source-contract validation and actual evidence requirements first.
-- Project-control documents were prepared on `docs/project-control-system` (PR #5). Confirm whether merged before starting any new work; documentation-only changes may not trigger the path-filtered CI workflow.
+- PR #4 `feature/compare-official-local-nuts` merged as `ff3766e8`; exact-code comparison now rejects incomplete official catalogs and duplicate local codes. Actual private local matching is still unverified.
+- Project-control documents were merged via PR #5 as `9ebe6484`. Documentation-only changes may not trigger path-filtered CI.
 - No new numeric completion percentage is justified.
 
 ## Known real evidence
@@ -18,10 +18,10 @@ Establish repository-anchored project-control protocol and stop context degradat
 - Existing detailed worklist: [AUGUR_REMAINING_IMPLEMENTATION_2026-10-07.md](AUGUR_REMAINING_IMPLEMENTATION_2026-10-07.md).
 
 ## Next actions, in order
-1. Confirm PR #5 merge status; if open, review the six documentation-only changed files and merge once valid. GitHub path-filtered CI may not trigger for docs-only changes.
-2. Review PR #4 code and CI; add checks for malformed/missing/incomplete official catalog and duplicated local codes before merging.
+1. Confirm PR #5 (project control) and PR #4 (strict code comparison) are merged; recheck GitHub live state before further changes.
+2. Inspect actual local per-geography provenance when available; execute exact-code membership against GISCO 2024 and classify historical/unknown codes, rather than assuming count differences are corruptions.
 3. Prefer independent GitHub-accessible official-source audits; if local codes are indispensable, request only the smallest necessary export.
-4. Convert identified G2 mismatches into concrete accepted source-backed corrections; never delete historical codes on count disparity alone.
+4. Confirm versioned boundary membership before altering registration; protect historical observations, and never delete records based solely on count disparity.
 5. Start explicit G3 regional source/unit/period acceptance inventory; then C1/P1 product acceptance.
 6. Maintain decision/evidence/handover docs with each milestone. Stop claiming “42% complete”.
 
