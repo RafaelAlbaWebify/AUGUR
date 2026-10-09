@@ -40,7 +40,7 @@ def indicator_geography_coverage(
                 SELECT r.country_iso3, r.geography_system, r.geo_level,
                     r.source_geo_code, s.indicator_id,
                     MAX(s.period) AS latest_period,
-                    MAX(s.retrieved_at) AS latest_retrieved_at
+                    MAX(s.retrieved_at) AS most_recent_ingestion
                 FROM registered r
                 JOIN subnational_observations s
                   ON s.geography_system = r.geography_system
@@ -53,8 +53,8 @@ def indicator_geography_coverage(
                 COUNT(l.source_geo_code) AS covered_geographies,
                 MIN(l.latest_period) AS oldest_latest_period,
                 MAX(l.latest_period) AS newest_latest_period,
-                MIN(l.latest_retrieved_at) AS earliest_latest_retrieval,
-                MAX(l.latest_retrieved_at) AS latest_retrieval,
+                MIN(l.most_recent_ingestion) AS earliest_ingestion_by_geography,
+                MAX(l.most_recent_ingestion) AS most_recent_ingestion,
                 LIST(l.latest_period ORDER BY l.latest_period)
                     FILTER (WHERE l.latest_period IS NOT NULL) AS geography_latest_periods
             FROM denominators d
@@ -103,7 +103,7 @@ def indicator_geography_coverage(
             "geography_count": int(count),
         })
     items = []
-    for country, system, level, total, indicator, observed, oldest, newest, earliest_retrieval, latest_retrieval, periods in rows:
+    for country, system, level, total, indicator, observed, oldest, newest, earliest_ingestion, most_recent_ingestion, periods in rows:
         if indicator is None:
             continue
         total, observed = int(total), int(observed)
@@ -133,8 +133,8 @@ def indicator_geography_coverage(
                 {"period": period, "geography_count": count}
                 for period, count in sorted(period_counts.items())
             ],
-            "earliest_latest_retrieval": earliest_retrieval.isoformat() if earliest_retrieval else None,
-            "latest_retrieval": latest_retrieval.isoformat() if latest_retrieval else None,
+            "earliest_ingestion_by_geography": earliest_ingestion.isoformat() if earliest_ingestion else None,
+            "most_recent_ingestion": most_recent_ingestion.isoformat() if most_recent_ingestion else None,
         })
     return {
         "denominator": "registered_geographies",
@@ -147,7 +147,8 @@ def indicator_geography_coverage(
             "common-period availability. Same-period counts represent stored "
             "observations for each specific year without interpolation. "
             "Retrieval timestamps indicate "
-            "ingestion activity, not source observation freshness."
+            "ingestion activity, not source observation freshness. No missing "
+            "year or geography is interpreted as zero."
         ),
         "indicator_count": len(items),
         "groups_without_observations": groups,
