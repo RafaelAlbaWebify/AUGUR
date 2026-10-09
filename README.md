@@ -378,3 +378,14 @@ The calibration store is local and excluded from git. Importing cases does not a
 ### Official NUTS territorial catalog audit
 
 GitHub Actions workflow **AUGUR Official NUTS Catalog Audit** downloads GISCO's 2024 NUTS 2/3 geography catalogs for Spain (ES), Ireland (IE) and Portugal (PT). It exports `nuts_catalog_audit.json` as an artifact containing the retrieved source URLs and country-specific territorial codes. The job can be run manually using **Run workflow** after this branch is merged. This audit does not use any private local DuckDB and **does not establish statistical observation coverage**. For comparison with locally stored evidence, use `export-geography-provenance.ps1` and match exact geography system, level and code against the official source inventory; never silently drop unmatched codes.
+
+
+### Compare official NUTS codes to local registry
+
+The reproducible `nuts_catalog_audit.json` GitHub Actions artifact can be compared with a local `AUGUR_GEOGRAPHY_PROVENANCE.json` export by running from `backend/`:
+
+```powershell
+python -m scripts.compare_official_local_nuts --official ../nuts_catalog_audit.json --local ../AUGUR_GEOGRAPHY_PROVENANCE.json --output ../nuts_membership_comparison.json
+```
+
+This is an exact-code membership check for ES/IE/PT NUTS2/NUTS3; it distinguishes unregistered official codes, locally stored codes absent from the fetched GISCO catalog, and registered codes lacking local indicator evidence. It never treats a catalog match as proof of statistical completeness or code-version validity, and it never deletes observations.
