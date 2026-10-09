@@ -1,5 +1,10 @@
 # AUGUR
 
+## Project control and continuity
+
+**Start each development session with [Project State](docs/PROJECT_STATE.md)**, then [Roadmap](docs/ROADMAP.md), [Validation](docs/VALIDATION.md), [Decisions](docs/DECISIONS.md), and [Handover](docs/HANDOVER.md). These are persistent GitHub-based coordination records; technical detail remains in the existing architecture, methodology and backlog documents. Any substantive PR must update status, validation evidence and the next handover. No progress percentage or production-acceptance claim without an auditable acceptance basis.
+
+
 Explore where countries are heading — and what those futures mean for you.
 
 AUGUR is a local-first country trajectory and personal-fit analysis platform.
