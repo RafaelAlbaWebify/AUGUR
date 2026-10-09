@@ -1,6 +1,6 @@
 """Read-only export of real locally stored subnational indicator coverage.
 
-Run from backend/: python scripts/export_geography_coverage.py --output exports/coverage.json
+Run from backend/: python -m scripts.export_geography_coverage --output exports/coverage.json
 No remote fetch, synthetic observations, or write to analytical storage.
 """
 from __future__ import annotations
