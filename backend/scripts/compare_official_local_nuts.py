@@ -16,17 +16,37 @@ def compare_catalogs(official: dict, local: dict) -> dict:
         raise ValueError("Official catalog has unexpected scope")
     if local.get("status") != "observed_local_registry_only":
         raise ValueError("Local provenance has unexpected scope")
+    if not isinstance(local.get("items"), list):
+        raise ValueError("Local provenance items must be a list")
+    if not isinstance(official.get("catalogs"), dict):
+        raise ValueError("Official catalog entries are missing")
     results = []
     for iso3, iso2 in COUNTRIES.items():
         for level in ("nuts2", "nuts3"):
-            official_codes = set(official["catalogs"][level][iso2]["codes"])
-            stored = {
-                entry["source_geo_code"]: entry
-                for entry in local["items"]
-                if entry["country_iso3"] == iso3
-                and entry["geo_level"].lower() == level
-                and entry["geography_system"] == "NUTS_2024"
-            }
+            try:
+                catalog = official["catalogs"][level][iso2]
+                codes = catalog["codes"]
+                declared_count = catalog["count"]
+            except (KeyError, TypeError) as exc:
+                raise ValueError(f"Missing official catalog for {iso2}/{level}") from exc
+            if (not isinstance(codes, list) or not codes
+                    or not all(isinstance(code, str) and code for code in codes)
+                    or not isinstance(declared_count, int)
+                    or declared_count != len(set(codes))):
+                raise ValueError(f"Incomplete official catalog for {iso2}/{level}")
+            official_codes = set(codes)
+            matching = [
+                entry for entry in local["items"]
+                if entry.get("country_iso3") == iso3
+                and str(entry.get("geo_level", "")).lower() == level
+                and entry.get("geography_system") == "NUTS_2024"
+            ]
+            local_codes_list = [entry.get("source_geo_code") for entry in matching]
+            if any(not isinstance(code, str) or not code for code in local_codes_list):
+                raise ValueError(f"Invalid local geo code for {iso3}/{level}")
+            if len(local_codes_list) != len(set(local_codes_list)):
+                raise ValueError(f"Duplicate local geo code for {iso3}/{level}")
+            stored = {entry["source_geo_code"]: entry for entry in matching}
             local_codes = set(stored)
             results.append({
                 "country_iso3": iso3,
