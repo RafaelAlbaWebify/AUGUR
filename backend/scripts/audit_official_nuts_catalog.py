@@ -6,10 +6,8 @@ official GISCO geography catalog. No synthetic statistical observations.
 from __future__ import annotations
 import argparse
 import json
-import tempfile
 from pathlib import Path
 import httpx
-import duckdb
 
 GISCO_NUTS2 = "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326_LEVL_2.geojson"
 GISCO_NUTS3 = "https://gisco-services.ec.europa.eu/distribution/v2/nuts/geojson/NUTS_RG_20M_2024_4326_LEVL_3.geojson"
