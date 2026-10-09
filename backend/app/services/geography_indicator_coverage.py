@@ -40,7 +40,11 @@ def indicator_geography_coverage(
                 SELECT r.country_iso3, r.geography_system, r.geo_level,
                     r.source_geo_code, s.indicator_id,
                     MAX(s.period) AS latest_period,
-                    MAX(s.retrieved_at) AS most_recent_ingestion
+                    MAX(s.retrieved_at) AS most_recent_ingestion,
+                    COUNT(DISTINCT s.source_id) AS source_count,
+                    LIST(DISTINCT s.source_id ORDER BY s.source_id) AS source_ids,
+                    COUNT(DISTINCT s.unit) AS unit_count,
+                    LIST(DISTINCT s.unit ORDER BY s.unit) FILTER (WHERE s.unit IS NOT NULL) AS units
                 FROM registered r
                 JOIN subnational_observations s
                   ON s.geography_system = r.geography_system
@@ -55,6 +59,10 @@ def indicator_geography_coverage(
                 MAX(l.latest_period) AS newest_latest_period,
                 MIN(l.most_recent_ingestion) AS earliest_ingestion_by_geography,
                 MAX(l.most_recent_ingestion) AS most_recent_ingestion,
+                MAX(l.source_count) AS max_sources_per_geography,
+                LIST(DISTINCT l.source_ids) AS source_id_groups,
+                MAX(l.unit_count) AS max_units_per_geography,
+                LIST(DISTINCT l.units) AS unit_groups,
                 LIST(l.latest_period ORDER BY l.latest_period)
                     FILTER (WHERE l.latest_period IS NOT NULL) AS geography_latest_periods
             FROM denominators d
@@ -103,7 +111,7 @@ def indicator_geography_coverage(
             "geography_count": int(count),
         })
     items = []
-    for country, system, level, total, indicator, observed, oldest, newest, earliest_ingestion, most_recent_ingestion, periods in rows:
+    for country, system, level, total, indicator, observed, oldest, newest, earliest_ingestion, most_recent_ingestion, max_sources, source_groups, max_units, unit_groups, periods in rows:
         if indicator is None:
             continue
         total, observed = int(total), int(observed)
@@ -129,6 +137,8 @@ def indicator_geography_coverage(
                 }
                 for entry in by_period.get((country, system, level, indicator), [])
             ],
+            "max_sources_per_geography": int(max_sources or 0),
+            "max_units_per_geography": int(max_units or 0),
             "latest_period_distribution": [
                 {"period": period, "geography_count": count}
                 for period, count in sorted(period_counts.items())
