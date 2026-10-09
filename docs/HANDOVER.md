@@ -34,3 +34,7 @@ G3 source/unit/period provenance audit is merged via PR #7 (`aa10370c`). This br
 **Finish:** update current status, evidence, decisions, and exact next action in the same PR; merge after acceptance appropriate to milestone; leave external blockers visible.
 
 **Never** repeat full repository recaps by speculation; use stable documents and live GitHub results.
+
+## G3 source audit evidence — 2026-10-09
+
+Real local ES/IE/PT coverage export was contrasted with configured Eurostat datasets and official dataset descriptions. See [G3 source audit](G3_REAL_SOURCE_AUDIT_2026-10-09.md). Confirmed important qualification: 3/3 ESP NUTS3 registered crime regions is not nationwide coverage; IRL/PRT NUTS2 historical-vintage mixing is suspected but exact codes remain unverified. The comparison establishes source contracts and observation-period discrepancies, **not a completed per-code reconciliation or repair**.

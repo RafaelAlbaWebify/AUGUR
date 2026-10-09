@@ -33,3 +33,7 @@ The earlier **42%** is an unsupported historical estimate, **retired** from prog
 
 ## Source of truth
 Code/tests/workflows = implementation truth; [METHODOLOGY.md](METHODOLOGY.md) = methodological contract; source inventories = provider evidence; this file = current coordination snapshot. If there is a conflict, verify and record it in [DECISIONS.md](DECISIONS.md), do not silently overwrite.
+
+## G3 source audit evidence — 2026-10-09
+
+Real local ES/IE/PT coverage export was contrasted with configured Eurostat datasets and official dataset descriptions. See [G3 source audit](G3_REAL_SOURCE_AUDIT_2026-10-09.md). Confirmed important qualification: 3/3 ESP NUTS3 registered crime regions is not nationwide coverage; IRL/PRT NUTS2 historical-vintage mixing is suspected but exact codes remain unverified. The comparison establishes source contracts and observation-period discrepancies, **not a completed per-code reconciliation or repair**.

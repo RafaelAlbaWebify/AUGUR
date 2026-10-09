@@ -25,3 +25,7 @@ Updated: 2026-10-09. **A green test is only a tested behavior; it is not a real-
 - Code/PR and changed paths; automated test URL/commit; actual provider or local evidence reference; schema and provenance checks; negative/empty cases; explicit unresolved limitations; reviewer decision.
 - For local-only evidence, record that a human supplied export was inspected; never claim GitHub Actions validated the local database.
 - A failed real-world command is a defect signal even if CI was green. Example: first geography export failed on an uninitialized schema; initialization resolved it locally; consider schema preflight UX separately.
+
+## G3 source audit evidence — 2026-10-09
+
+Real local ES/IE/PT coverage export was contrasted with configured Eurostat datasets and official dataset descriptions. See [G3 source audit](G3_REAL_SOURCE_AUDIT_2026-10-09.md). Confirmed important qualification: 3/3 ESP NUTS3 registered crime regions is not nationwide coverage; IRL/PRT NUTS2 historical-vintage mixing is suspected but exact codes remain unverified. The comparison establishes source contracts and observation-period discrepancies, **not a completed per-code reconciliation or repair**.
