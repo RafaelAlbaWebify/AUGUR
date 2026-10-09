@@ -368,3 +368,8 @@ Observed development cases can be imported locally with:
 ```
 
 The calibration store is local and excluded from git. Importing cases does not activate the TTV external-calibration gate. Holdout cases are rejected while the calibration protocol remains unapproved.
+
+
+### Official NUTS territorial catalog audit
+
+GitHub Actions workflow **AUGUR Official NUTS Catalog Audit** downloads GISCO's 2024 NUTS 2/3 geography catalogs for Spain (ES), Ireland (IE) and Portugal (PT). It exports `nuts_catalog_audit.json` as an artifact containing the retrieved source URLs and country-specific territorial codes. The job can be run manually using **Run workflow** after this branch is merged. This audit does not use any private local DuckDB and **does not establish statistical observation coverage**. For comparison with locally stored evidence, use `export-geography-provenance.ps1` and match exact geography system, level and code against the official source inventory; never silently drop unmatched codes.

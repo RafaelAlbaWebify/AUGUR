@@ -1,0 +1,37 @@
+name: AUGUR Official NUTS Catalog Audit
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "backend/scripts/audit_official_nuts_catalog.py"
+      - ".github/workflows/official-nuts-catalog-audit.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - name: Download official 2024 NUTS catalog and export codes
+        run: python -m scripts.audit_official_nuts_catalog --output ../nuts_catalog_audit.json
+      - name: Upload source-grounded catalog
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-nuts-2024-catalog
+          path: nuts_catalog_audit.json
+          if-no-files-found: warn
