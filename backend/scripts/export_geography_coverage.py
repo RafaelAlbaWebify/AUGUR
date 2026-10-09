@@ -20,6 +20,8 @@ def export_coverage(*, output: Path, country: str | None = None,
         geography_system=system,
         geo_level=level,
     )
+    if output.suffix.lower() not in {".csv", ".json"}:
+        raise ValueError("Only .json and .csv exports are supported")
     output.parent.mkdir(parents=True, exist_ok=True)
     if output.suffix.lower() == ".csv":
         fields = [
@@ -44,8 +46,6 @@ def export_coverage(*, output: Path, country: str | None = None,
             json.dumps(result, ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
-    else:
-        raise ValueError("Only .json and .csv exports are supported")
     return result
 
 
