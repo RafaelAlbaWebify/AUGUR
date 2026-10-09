@@ -59,7 +59,8 @@ def test_observed_geography_reach_uses_distinct_geographies_not_years(
         {"period": 2021, "geography_count": 1},
         {"period": 2023, "geography_count": 1},
     ]
-    assert row["latest_retrieval"].startswith("2026-10-03")
+    assert row["most_recent_ingestion"].startswith("2026-10-03")
+    assert row["earliest_ingestion_by_geography"].startswith("2026-10-02")
     assert row["same_period_coverage"] == [
         {"period": 2021, "geography_count": 1, "coverage_ratio": 1 / 3},
         {"period": 2022, "geography_count": 1, "coverage_ratio": 1 / 3},
