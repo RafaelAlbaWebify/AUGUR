@@ -189,7 +189,7 @@ Coverage can be inspected through:
 - `GET /api/geographies/coverage` for provider-neutral regional/city coverage.
 - `GET /api/geographies/coverage/indicators` for **observed** per-indicator reach among registered geographies. Optional query parameters: `country_iso3`, `geography_system`, and `geo_level`.
 
-The indicator-coverage endpoint reports distinct geographies with an actual stored observation, registered-geography denominators, per-geography latest-observation period ranges, and retrieval timestamp ranges. It does not invent absent indicator rows when no verified expected-indicator catalog is available. Coverage ratios are descriptive and are **not** provider-universe completeness percentages, data quality scores or evidence freshness guarantees. Dataset ingestion timestamps must never be presented as the year of the underlying source observation.
+The indicator-coverage endpoint reports distinct geographies with an actual stored observation, registered-geography denominators, per-geography latest-observation period ranges, **same-period coverage by observed year**, and retrieval timestamp ranges. It does not invent absent indicator rows when no verified expected-indicator catalog is available. Coverage ratios are descriptive and are **not** provider-universe completeness percentages, data quality scores or evidence freshness guarantees. Dataset ingestion timestamps must never be presented as the year of the underlying source observation.
 
 For example, with AUGUR running locally:
 
