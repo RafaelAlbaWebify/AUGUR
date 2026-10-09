@@ -1,6 +1,7 @@
 import duckdb
+from types import SimpleNamespace
 
-from app.core.config import settings
+from app.services import geography_indicator_coverage as coverage_module
 from app.services.geography_indicator_coverage import indicator_geography_coverage
 
 
@@ -42,7 +43,7 @@ def test_observed_geography_reach_uses_distinct_geographies_not_years(
         ],
     )
     con.close()
-    monkeypatch.setattr(settings, "duckdb_path", db_path)
+    monkeypatch.setattr(coverage_module, "settings", SimpleNamespace(duckdb_path=db_path))
     response = indicator_geography_coverage(
         country_iso3="esp", geography_system="OECD_TL", geo_level="TL2"
     )
@@ -79,7 +80,7 @@ def test_registered_group_without_evidence_is_not_claimed_absent_by_indicator(
         "INSERT INTO geography_registry VALUES ('x', 'ESP', 'OECD_FUA', 'fua', 'FUA1')"
     )
     con.close()
-    monkeypatch.setattr(settings, "duckdb_path", db_path)
+    monkeypatch.setattr(coverage_module, "settings", SimpleNamespace(duckdb_path=db_path))
     response = indicator_geography_coverage(country_iso3="ESP")
     assert response["items"] == []
     assert response["groups_without_observations"][0]["geo_level"] == "fua"
