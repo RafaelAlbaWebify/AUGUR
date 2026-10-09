@@ -12,6 +12,7 @@ Local-first country/region trajectory, employment intelligence, and personal fit
 - Geographic coverage endpoint and local JSON/CSV exporter merged via PR #1; per-geo provenance exporter via PR #2; standalone official GISCO NUTS 2024 workflow via PR #3.
 - Real local coverage export supplied on 2026-10-09: **26 country/system/level/indicator rows across ESP, IRL, PRT**. This is a local evidence inventory, not official provider universe coverage. OECD geographic systems were absent from that export; do not infer absence from OECD itself.
 - Official GISCO 2024 catalog workflow completed and uploaded a source-grounded artifact in run [37924620862](https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/37924620862). Log counts: ES NUTS2=19/NUTS3=59; IE=3/8; PT=9/26. These are catalog identities, **not observations**.
+- PR #7 regional observation provenance inventory **merged** as `aa10370c` (CI green). No user local G3 export has been evaluated; acceptance remains pending.
 - PR #4 exact-code local-vs-official comparison **merged** in `ff3766e8` after extending validation for malformed official catalogs and duplicate local codes. End-to-end comparison with the user's private geography provenance export remains unverified.
 
 ## Known discrepancies requiring investigation
