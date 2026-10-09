@@ -41,6 +41,19 @@ def export_coverage(*, output: Path, country: str | None = None,
                     if isinstance(row.get(key), list) else row.get(key)
                     for key in fields
                 })
+        # CSV cannot represent registered groups without indicator rows.
+        # Preserve those groups and denominator caveats in a sidecar JSON.
+        manifest = output.with_suffix(".metadata.json")
+        manifest.write_text(
+            json.dumps({
+                "denominator": result["denominator"],
+                "warning": result.get("warning"),
+                "coverage_classification": result.get("coverage_classification"),
+                "groups_without_observations": result["groups_without_observations"],
+                "indicator_count": result["indicator_count"],
+            }, ensure_ascii=False, indent=2) + "\n",
+            encoding="utf-8",
+        )
     elif output.suffix.lower() == ".json":
         output.write_text(
             json.dumps(result, ensure_ascii=False, indent=2) + "\n",
