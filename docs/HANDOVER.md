@@ -3,7 +3,7 @@
 Updated: 2026-10-09. **Read first on resumption, then revalidate live GitHub state.**
 
 ## Active task
-Establish repository-anchored project-control protocol and stop context degradation; do **not** start new product work until baseline status has been published.
+G3 regional source/unit/period provenance audit. Project-control docs are merged; preserve distinction between code-level CI and actual local-data acceptance.
 
 ## Repository snapshot at creation
 - Main includes PR #1 coverage + exporter, PR #2 geo provenance, PR #3 official GISCO audit.
@@ -22,7 +22,7 @@ Establish repository-anchored project-control protocol and stop context degradat
 2. Inspect actual local per-geography provenance when available; execute exact-code membership against GISCO 2024 and classify historical/unknown codes, rather than assuming count differences are corruptions.
 3. Prefer independent GitHub-accessible official-source audits; if local codes are indispensable, request only the smallest necessary export.
 4. Confirm versioned boundary membership before altering registration; protect historical observations, and never delete records based solely on count disparity.
-5. Start explicit G3 regional source/unit/period acceptance inventory; then C1/P1 product acceptance.
+5. Validate G3 regional source/unit/period audit: grouped by indicator, source, dataset, unit, temporal range; identify orphaned observation codes. Inspect CI and obtain real-data evidence separately, then continue C1/P1 acceptance.
 6. Maintain decision/evidence/handover docs with each milestone. Stop claiming “42% complete”.
 
 ## Standard workflow
