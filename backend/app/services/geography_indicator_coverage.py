@@ -54,7 +54,9 @@ def indicator_geography_coverage(
                 MIN(l.latest_period) AS oldest_latest_period,
                 MAX(l.latest_period) AS newest_latest_period,
                 MIN(l.latest_retrieved_at) AS earliest_latest_retrieval,
-                MAX(l.latest_retrieved_at) AS latest_retrieval
+                MAX(l.latest_retrieved_at) AS latest_retrieval,
+                LIST(l.latest_period ORDER BY l.latest_period)
+                    FILTER (WHERE l.latest_period IS NOT NULL) AS geography_latest_periods
             FROM denominators d
             LEFT JOIN latest l
               ON l.country_iso3 IS NOT DISTINCT FROM d.country_iso3
@@ -77,11 +79,14 @@ def indicator_geography_coverage(
         if indicator is None
     ]
     items = []
-    for country, system, level, total, indicator, observed, oldest, newest, earliest_retrieval, latest_retrieval in rows:
+    for country, system, level, total, indicator, observed, oldest, newest, earliest_retrieval, latest_retrieval, periods in rows:
         if indicator is None:
             continue
         total, observed = int(total), int(observed)
         ratio = observed / total if total else 0.0
+        period_counts: dict[int, int] = {}
+        for period in periods or []:
+            period_counts[int(period)] = period_counts.get(int(period), 0) + 1
         items.append({
             "country_iso3": country,
             "geography_system": system,
@@ -93,6 +98,10 @@ def indicator_geography_coverage(
             "coverage_ratio": ratio,
             "oldest_latest_period": oldest,
             "newest_latest_period": newest,
+            "latest_period_distribution": [
+                {"period": period, "geography_count": count}
+                for period, count in sorted(period_counts.items())
+            ],
             "earliest_latest_retrieval": earliest_retrieval.isoformat() if earliest_retrieval else None,
             "latest_retrieval": latest_retrieval.isoformat() if latest_retrieval else None,
         })
@@ -102,7 +111,9 @@ def indicator_geography_coverage(
         "warning": (
             "Coverage is relative to registered geographies, not the external "
             "provider universe. Period range does not establish freshness "
-            "or cross-geography comparability. Retrieval timestamps indicate "
+            "or cross-geography comparability. The latest-period distribution "
+            "reflects each geography\u0027s latest imported observation, not synchronized "
+            "common-period availability. Retrieval timestamps indicate "
             "ingestion activity, not source observation freshness."
         ),
         "indicator_count": len(items),
