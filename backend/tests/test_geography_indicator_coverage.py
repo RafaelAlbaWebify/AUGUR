@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import duckdb
 
 from app.core.config import settings
