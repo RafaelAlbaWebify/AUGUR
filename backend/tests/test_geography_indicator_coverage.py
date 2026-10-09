@@ -19,7 +19,7 @@ def test_observed_geography_reach_uses_distinct_geographies_not_years(
     con.execute("""
         CREATE TABLE subnational_observations (
             geography_system VARCHAR, geo_code VARCHAR, geo_level VARCHAR,
-            indicator_id VARCHAR, period INTEGER
+            indicator_id VARCHAR, period INTEGER, retrieved_at TIMESTAMP
         )
     """)
     con.executemany(
@@ -33,13 +33,13 @@ def test_observed_geography_reach_uses_distinct_geographies_not_years(
         ],
     )
     con.executemany(
-        "INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?)",
+        "INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?, ?)",
         [
-            ("OECD_TL", "R1", "tl2", "regional_population", 2022),
-            ("OECD_TL", "R1", "tl2", "regional_population", 2023),
-            ("OECD_TL", "R2", "tl2", "regional_population", 2021),
-            ("NUTS_2024", "R1", "nuts2", "regional_population", 2023),
-            ("OECD_TL", "R4", "tl2", "regional_population", 2024),
+            ("OECD_TL", "R1", "tl2", "regional_population", 2022, "2026-10-01"),
+            ("OECD_TL", "R1", "tl2", "regional_population", 2023, "2026-10-02"),
+            ("OECD_TL", "R2", "tl2", "regional_population", 2021, "2026-10-03"),
+            ("NUTS_2024", "R1", "nuts2", "regional_population", 2023, "2026-10-04"),
+            ("OECD_TL", "R4", "tl2", "regional_population", 2024, "2026-10-05"),
         ],
     )
     con.close()
@@ -55,6 +55,7 @@ def test_observed_geography_reach_uses_distinct_geographies_not_years(
     assert row["coverage_ratio"] == 2 / 3
     assert row["oldest_latest_period"] == 2021
     assert row["newest_latest_period"] == 2023
+    assert row["latest_retrieval"].startswith("2026-10-03")
     assert "coverage_band" not in row
     assert response["groups_without_observations"] == []
 
@@ -73,7 +74,7 @@ def test_registered_group_without_evidence_is_not_claimed_absent_by_indicator(
     con.execute("""
         CREATE TABLE subnational_observations (
             geography_system VARCHAR, geo_code VARCHAR, geo_level VARCHAR,
-            indicator_id VARCHAR, period INTEGER
+            indicator_id VARCHAR, period INTEGER, retrieved_at TIMESTAMP
         )
     """)
     con.execute(
