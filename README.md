@@ -187,6 +187,29 @@ Coverage can be inspected through:
 
 - `GET /api/countries/coverage` for national registration and analyzability;
 - `GET /api/geographies/coverage` for provider-neutral regional/city coverage.
+- `GET /api/geographies/coverage/indicators` for **observed** per-indicator reach among registered geographies. Optional query parameters: `country_iso3`, `geography_system`, and `geo_level`.
+
+The indicator-coverage endpoint reports distinct geographies with an actual stored observation, registered-geography denominators, per-geography latest-observation period ranges, **same-period coverage by observed year**, and ingestion timestamp ranges (under the explicit `earliest_ingestion_by_geography` and `most_recent_ingestion` fields). It does not invent absent indicator rows when no verified expected-indicator catalog is available. Coverage ratios are descriptive and are **not** provider-universe completeness percentages, data quality scores or evidence freshness guarantees. Dataset ingestion timestamps must never be presented as the year of the underlying source observation.
+
+For example, with AUGUR running locally:
+
+```powershell
+Invoke-RestMethod 'http://127.0.0.1:8020/api/geographies/coverage/indicators?country_iso3=ESP&geography_system=OECD_TL_2024&geo_level=tl2' | ConvertTo-Json -Depth 8
+```
+
+The response is based only on the local DuckDB store; it does not trigger a provider fetch, and an empty result does not prove the OECD has no data.
+
+To export this real local coverage evidence as JSON or CSV, run from the repository root:
+
+```powershell
+.\export-geography-coverage.ps1 -Output "exports\oecd_esp_tl2_coverage.json" -Country ESP -System OECD_TL_2024 -Level tl2
+.\export-geography-coverage.ps1 -Output "exports\all_geography_coverage.csv"
+```
+
+CSV exports additionally write a matching `.metadata.json` file containing geography groups with no observations and the coverage-denominator warning. Keep both files together during analysis; an empty CSV alone cannot distinguish zero indicators from an empty registered catalog.
+
+Exports contain **only the data already stored in the local DuckDB analytical database**. Synthetic test fixtures never enter these exports. No missing geography or period is filled with a fabricated observation. Output paths are resolved relative to the backend working directory when relative paths are used. Exported coverage ratios use registered-geography denominators, so an empty or partial export must not be mistaken for an authoritative OECD availability statement.
+
 
 NUTS 2024 and Urban Audit remain European geography providers, not AUGUR's universal geography model. Non-European regional/city providers register their own native geography system and level through the provider-neutral geography registry.
 
