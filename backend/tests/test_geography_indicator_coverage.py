@@ -55,6 +55,10 @@ def test_observed_geography_reach_uses_distinct_geographies_not_years(
     assert row["coverage_ratio"] == 2 / 3
     assert row["oldest_latest_period"] == 2021
     assert row["newest_latest_period"] == 2023
+    assert row["latest_period_distribution"] == [
+        {"period": 2021, "geography_count": 1},
+        {"period": 2023, "geography_count": 1},
+    ]
     assert row["latest_retrieval"].startswith("2026-10-03")
     assert "coverage_band" not in row
     assert response["groups_without_observations"] == []
