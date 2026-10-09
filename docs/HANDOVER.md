@@ -3,9 +3,10 @@
 Updated: 2026-10-09. **Read first on resumption, then revalidate live GitHub state.**
 
 ## Active task
-G3 regional source/unit/period provenance audit. Project-control docs are merged; preserve distinction between code-level CI and actual local-data acceptance.
+G3 source/unit/period provenance audit is merged via PR #7 (`aa10370c`). This branch improves uninitialized-database diagnostics and tests. Project-control docs are merged; preserve distinction between code-level CI and actual local-data acceptance.
 
 ## Repository snapshot at creation
+- PR #7 source/unit/period grouping and orphan-code report merged `aa10370c` after backend/frontend/ops CI passed; real-store acceptance remains pending.
 - Main includes PR #1 coverage + exporter, PR #2 geo provenance, PR #3 official GISCO audit.
 - PR #4 `feature/compare-official-local-nuts` merged as `ff3766e8`; exact-code comparison now rejects incomplete official catalogs and duplicate local codes. Actual private local matching is still unverified.
 - Project-control documents were merged via PR #5 as `9ebe6484`. Documentation-only changes may not trigger path-filtered CI.

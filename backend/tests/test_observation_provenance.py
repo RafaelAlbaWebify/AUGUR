@@ -1,3 +1,4 @@
+import pytest
 from types import SimpleNamespace
 import duckdb
 from app.services import observation_provenance as module
@@ -31,3 +32,12 @@ def test_source_unit_periods_not_silently_combined(tmp_path, monkeypatch):
     assert output["items"][0]["distinct_periods"] == 2
     assert output["items"][1]["distinct_periods"] == 1
     assert output["unregistered_observations"][0]["geo_code"] == "ES99"
+
+
+def test_uninitialized_schema_gives_actionable_error(tmp_path, monkeypatch):
+    path = tmp_path / "empty.duckdb"
+    con = duckdb.connect(str(path))
+    con.close()
+    monkeypatch.setattr(module, "settings", SimpleNamespace(duckdb_path=path))
+    with pytest.raises(RuntimeError, match="schema is not initialized"):
+        module.observation_provenance()

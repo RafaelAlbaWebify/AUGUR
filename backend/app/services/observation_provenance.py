@@ -11,6 +11,18 @@ from app.core.config import settings
 def observation_provenance(country_iso3: str | None = None) -> dict:
     con = duckdb.connect(str(settings.duckdb_path), read_only=True)
     try:
+        existing = {
+            row[0] for row in con.execute(
+                "SELECT table_name FROM information_schema.tables WHERE table_schema = 'main'"
+            ).fetchall()
+        }
+        missing = {"geography_registry", "subnational_observations"} - existing
+        if missing:
+            raise RuntimeError(
+                "AUGUR analytical schema is not initialized; missing "
+                + ", ".join(sorted(missing))
+                + ". Initialize datastores explicitly before exporting."
+            )
         rows = con.execute("""
             WITH registered AS (
                 SELECT DISTINCT country_iso3, geography_system, geo_level,
