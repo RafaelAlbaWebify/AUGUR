@@ -5,17 +5,6 @@ import duckdb
 from app.core.config import settings
 
 
-def coverage_band(ratio: float) -> str:
-    """Descriptive only; not a quality or publication gate."""
-    if ratio >= 0.90:
-        return "strong"
-    if ratio >= 0.50:
-        return "partial"
-    if ratio > 0:
-        return "sparse"
-    return "absent"
-
-
 def indicator_geography_coverage(
     country_iso3: str | None = None,
     geography_system: str | None = None,
@@ -73,6 +62,17 @@ def indicator_geography_coverage(
     finally:
         con.close()
 
+    groups = [
+        {
+            "country_iso3": country,
+            "geography_system": system,
+            "geo_level": level,
+            "registered_geographies": int(total),
+            "has_observed_indicators": indicator is not None,
+        }
+        for country, system, level, total, indicator, *_ in rows
+        if indicator is None
+    ]
     items = []
     for country, system, level, total, indicator, observed, oldest, newest in rows:
         if indicator is None:
@@ -87,18 +87,19 @@ def indicator_geography_coverage(
             "registered_geographies": total,
             "covered_geographies": observed,
             "missing_geographies": total - observed,
-            "coverage_ratio": round(ratio, 4),
-            "coverage_band": coverage_band(ratio),
+            "coverage_ratio": ratio,
             "oldest_latest_period": oldest,
             "newest_latest_period": newest,
         })
     return {
         "denominator": "registered_geographies",
+        "coverage_classification": "none",
         "warning": (
             "Coverage is relative to registered geographies, not the external "
             "provider universe. Period range does not establish freshness "
             "or cross-geography comparability."
         ),
         "indicator_count": len(items),
+        "groups_without_observations": groups,
         "items": items,
     }
