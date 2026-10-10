@@ -38,7 +38,7 @@ def housing_affordability_evidence(indicators: list[dict]) -> dict:
         "rent_to_net_income_pct": None,
         "affordability_complete": False,
         "limitations": [
-            "Eurostat housing cost overburden is a survey-defined proportion of people; it is not average rent or the share of salary paid by an individual.",
+            "Eurostat housing cost overburden is the percentage of people in households whose net housing costs exceed 40% of disposable household income (net of housing allowances), not average rent or an individual salary share.",
             "Regional disposable income in PPS per inhabitant is not an individual net wage, monthly household cash income or rent denominator.",
             "Market rent, purchase prices and comparable disposable household cash income require separate official observations at matched geography and time.",
         ],
