@@ -18,14 +18,30 @@ REQUIRED = {"REF_AREA", "MEASURE", "HH_TYPE", "EARN_PRINCIPAL", "EARN_SPOUSE", "
 
 
 def fetch_tax_wedge_csv(client: httpx.Client, start_year: int = 2010) -> str:
-    response = client.get(
-        TAX_WEDGE_CONTRACT["api_url"],
-        params={"startPeriod": str(start_year), "format": "csvfile", "dimensionAtObservation": "AllDimensions"},
-        headers={"Accept": "csvfile"},
-        timeout=90.0,
-    )
-    response.raise_for_status()
-    return response.text
+    """Fetch narrowly scoped country records; do not mask upstream failures."""
+    chunks = []
+    for country in ("ESP", "IRL", "PRT"):
+        url = TAX_WEDGE_CONTRACT["api_url"].replace(
+            "/.AV_TW..S_C0.AW100._Z.A",
+            f"/{country}.AV_TW..S_C0.AW100._Z.A",
+        )
+        response = client.get(
+            url,
+            params={"startPeriod": str(start_year), "format": "csvfile",
+                    "dimensionAtObservation": "AllDimensions"},
+            timeout=90.0,
+        )
+        response.raise_for_status()
+        text = response.text
+        lines = text.splitlines()
+        if len(lines) < 2:
+            raise ValueError(f"Empty OECD source response for {country}")
+        if not chunks:
+            chunks.append(lines[0])
+        elif lines[0] != chunks[0]:
+            raise ValueError(f"Inconsistent OECD country CSV columns for {country}")
+        chunks.extend(lines[1:])
+    return "\\n".join(chunks) + "\\n"
 
 
 def normalize_tax_wedge(csv_text: str) -> list[dict]:
