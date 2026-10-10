@@ -49,6 +49,10 @@ def test_live_coverage_assessment_requires_observed_official_regions_per_dataset
                 "status":"available",
                 "official_nuts2024_observed_region_count":2,
                 "outside_nuts2024_observed_region_count":1,
+                "countries":{"XX":[
+                    {"geo_code":"XX99","observation_status":"observed","nuts_2024_status":"not_in_nuts2_2024"},
+                    {"geo_code":"XX01","observation_status":"observed","nuts_2024_status":"official_nuts2_2024"},
+                ]},
             },
             {
                 "dataset_id":"empty",
@@ -60,6 +64,7 @@ def test_live_coverage_assessment_requires_observed_official_regions_per_dataset
     result=assess_reconciled_live_coverage(report)
     assert result["ready"] is False
     assert result["datasets"][0]["outside_nuts2024_observed_region_count"] == 1
+    assert result["datasets"][0]["outside_nuts2024_observed_codes"] == ["XX99"]
     assert result["failures"] == ["empty: no observed official NUTS2 2024 regions"]
 
 
