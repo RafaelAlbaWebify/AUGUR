@@ -49,3 +49,7 @@ The live source gate passed against real Eurostat and GISCO responses. GISCO exp
 ## Boundary-vintage separation — 2026-10-10
 
 Current territorial membership and observation boundary vintage are now separate concerns. GISCO is the authority for current NUTS 2024 membership. Eurostat observations that do not declare a boundary vintage remain `NUTS_UNSPECIFIED`, even when their source code also exists in NUTS 2024. This preserves historical evidence while preventing unsupported current-vintage claims. A later migration/audit may identify legacy local rows that were written under the former implicit-`NUTS_2024` rule; such rows must not be deleted or rewritten without an explicit evidence-based migration rule.
+
+## G2 legacy-vintage audit path — 2026-10-10
+
+Repository support now exists for the remaining private-local G2 check: run the read-only legacy NUTS audit against the persistent AUGUR DuckDB, preserve the JSON artifact, then decide any migration from exact evidence. Definite non-2024 codes can be identified without deleting history; rows whose codes also exist in NUTS 2024 remain vintage-unverified and must not be mass-relabelled merely from code equality.
