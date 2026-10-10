@@ -743,6 +743,17 @@ def regional_evidence(
             geography_system=system,
         )
         local_rows = bundle["latest"]
+        used_unverified_nuts_vintage = False
+        if not local_rows and system == "NUTS_2024":
+            fallback = regional_evidence_bundle(
+                code,
+                max_history_points=8,
+                geography_system="NUTS_UNSPECIFIED",
+            )
+            if fallback["latest"]:
+                bundle = fallback
+                local_rows = fallback["latest"]
+                used_unverified_nuts_vintage = True
         local = _regional_result_from_local(
             code,
             local_rows,
@@ -751,6 +762,14 @@ def regional_evidence(
             environmental_health_rows=bundle["environmental_health"],
         )
         if local:
+            if used_unverified_nuts_vintage:
+                local["requested_geography_system"] = "NUTS_2024"
+                local["geography_compatibility"] = "same_code_vintage_unverified"
+                local.setdefault("notes", []).append(
+                    "This current NUTS 2024 territory is displaying Eurostat "
+                    "observations published under the same code, but the "
+                    "observation boundary vintage is not asserted as NUTS 2024."
+                )
             _REGIONAL_CACHE[cache_key] = (monotonic(), local)
             return local
 
@@ -835,6 +854,7 @@ def regional_evidence(
     if adapter is None:
         rows_to_store = [
             {
+                "geography_system": "NUTS_UNSPECIFIED",
                 "geo_code": code,
                 "geo_level": geographic_level(code),
                 "indicator_id": item["indicator_id"],
