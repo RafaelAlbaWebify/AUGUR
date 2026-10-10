@@ -7,7 +7,7 @@ import httpx
 
 from app.catalog import COUNTRIES
 from app.db.bootstrap import initialize_datastores
-from app.db.analytics import subnational_storage_status
+from app.db.analytics import subnational_storage_status, upsert_geographies
 from app.services.city_evidence import sync_city_evidence_codes
 from app.services.regional_evidence import regional_evidence
 
@@ -83,12 +83,37 @@ def main() -> int:
         country = country_by_iso3[iso3]
         iso2 = country["iso2"]
 
-        region_codes = sorted({
-            str(feature.get("properties", {}).get("NUTS_ID", "")).upper()
+        region_features = [
+            feature
             for feature in nuts2.get("features", [])
             if feature.get("properties", {}).get("CNTR_CODE") == iso2
             and feature.get("properties", {}).get("NUTS_ID")
+        ]
+        region_codes = sorted({
+            str(feature.get("properties", {}).get("NUTS_ID", "")).upper()
+            for feature in region_features
         })
+        upsert_geographies([
+            {
+                "geo_id": f"NUTS_2024:{code}",
+                "country_iso3": iso3,
+                "country_iso2": iso2,
+                "name": next(
+                    (
+                        feature.get("properties", {}).get("NAME_LATN")
+                        or feature.get("properties", {}).get("NUTS_NAME")
+                        for feature in region_features
+                        if str(feature.get("properties", {}).get("NUTS_ID", "")).upper() == code
+                    ),
+                    code,
+                ),
+                "geo_level": "nuts2",
+                "geography_system": "NUTS_2024",
+                "source_id": "GISCO",
+                "source_geo_code": code,
+            }
+            for code in region_codes
+        ])
 
         city_codes = sorted({
             code
@@ -107,7 +132,11 @@ def main() -> int:
         region_with_data = 0
         region_observations = 0
         for index, code in enumerate(region_codes, start=1):
-            result = regional_evidence(code, force_refresh=True)
+            result = regional_evidence(
+                code,
+                force_refresh=True,
+                geography_system="NUTS_2024",
+            )
             available = int(result.get("available_count", 0))
             region_observations += available
             if available:
