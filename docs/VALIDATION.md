@@ -73,3 +73,7 @@ The live source gate passed against real Eurostat and GISCO responses. GISCO exp
 ## NUTS observation-vintage safety — 2026-10-10
 
 Regression coverage now requires: (1) an unversioned NUTS observation is stored as `NUTS_UNSPECIFIED`; (2) it does not create a `NUTS_2024` registry member; (3) an explicitly versioned row remains explicit; (4) a current GISCO NUTS 2024 registry member can report same-code unverified evidence without relabelling that evidence; and (5) the regional read path surfaces `same_code_vintage_unverified` when it falls back from current registry context to vintage-unverified observations.
+
+## Legacy NUTS_2024 audit — 2026-10-10
+
+The local-vintage auditor is intentionally read-only. Unit tests require it to distinguish: current code membership with unverified observation vintage; an observation code impossible under the official 2024 registry; and an invalid current-registry row. It must report `mutation_performed=false`. CI proves classification logic only; it does not inspect the user's private persistent DuckDB.
