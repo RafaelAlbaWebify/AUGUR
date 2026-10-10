@@ -45,3 +45,7 @@ The OECD regional **population-density** sync now checks the actual normalized o
 ## OECD global ingestion guard rollout — 2026-10-10
 
 Beyond density (PR #17), all other OECD regional sync methods (population, safety, demography, labour, GDP, income, broadband and land temperature) now invoke the common country-independent validation before writing observations. Tests verify Australian OECD TL2 rows and reject mismatched datasets, geography systems, non-finite values and missing country IDs. These guards do not establish authoritative world geography completeness or live OECD coverage outside validated pilots. Subsequent work must strengthen source-specific indicator/unit allowlists and validate live non-EU responses.
+
+## OECD global metric allowlist — 2026-10-10
+
+The OECD regional common guard is now **fail-closed** on nine explicit dataset-to-indicator-to-unit mappings; previously it instantiated contracts from the observation's own indicator/unit, allowing incorrect self-consistent values. The change remains country-agnostic, accepts correctly sourced non-EU territory rows, rejects unknown dataset/indicator, wrong unit, and cross-dataset substitution before DuckDB writes. This protects ingestion semantics but does **not** substitute for live non-EU end-to-end acceptance. Eurostat-specific datasets and global country/city discovery remain separate work.
