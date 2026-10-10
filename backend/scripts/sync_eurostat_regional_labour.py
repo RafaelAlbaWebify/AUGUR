@@ -3,9 +3,10 @@ from __future__ import annotations
 import json
 
 from app.db.bootstrap import initialize_datastores
+from app.ingestion.eurostat_regional_contract import validate_eurostat_regional_rows
 from app.db.analytics import upsert_subnational_observations
 from app.ingestion.eurostat import EurostatAdapter
-from app.ingestion.eurostat_regional_labour import fetch_regional_labour
+from app.ingestion.eurostat_regional_labour import fetch_regional_labour, REGIONAL_LABOUR_SERIES
 
 
 def main() -> int:
@@ -16,6 +17,7 @@ def main() -> int:
     finally:
         adapter.close()
 
+    validate_eurostat_regional_rows(rows, allowed_indicators={c["indicator_id"] for c in REGIONAL_LABOUR_SERIES})
     inserted = upsert_subnational_observations(rows)
     payload = {
         "status": "complete" if inserted else "empty",
