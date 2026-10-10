@@ -2652,7 +2652,13 @@ def geography_coverage_status() -> dict:
             FROM geography_registry g
             LEFT JOIN subnational_observations s
               ON s.geo_code = g.source_geo_code
-             AND s.geography_system = g.geography_system
+             AND (
+                    s.geography_system = g.geography_system
+                    OR (
+                        g.geography_system = 'NUTS_2024'
+                        AND s.geography_system = 'NUTS_UNSPECIFIED'
+                    )
+                 )
             GROUP BY
                 g.country_iso3,
                 g.country_iso2,
