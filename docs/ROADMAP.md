@@ -29,3 +29,7 @@ Actual OECD source smoke [38044771570](https://github.com/RafaelAlbaWebify/AUGUR
 ## World expansion compatibility — 2026-10-10
 
 [Global expansion contract](GLOBAL_EXPANSION_CONTRACT.md) introduces country-agnostic evidence compatibility checks and an explicit coverage matrix by indicator, provider, geographic level/system, and period. This is a reusable guardrail, not automatic world ingestion. New country onboarding is **not accepted** until official geography/source discovery, ingestion adapter compatibility, observed data and country+region+city acceptance are proven. Next priority: migrate source-specific ingest orchestration and test an actual non-EU country/region/city. No invented worldwide completion estimate.
+
+## Eurostat configurable country scope — 2026-10-10
+
+Regional housing and labour ingest scripts support `--countries BG FR` (ISO2) while keeping ES/PT/IE as default pilot. The common JSON-stat normalizer now distinguishes omitted selection (pilot) from an explicit empty set (no rows) and rejects invalid ISO2-like prefixes. This enables reusable NUTS2 ingestion across available Eurostat areas without a per-country code change. It does **not** establish official NUTS vintage, complete NUTS territory registration, or country/city coverage; the provider's actual availability remains authoritative. Run from `backend/`: `python -m scripts.sync_eurostat_regional_housing --countries BG FR` or corresponding labour script. Next integrate dynamically verified official geography catalog and source-specific coverage reports.

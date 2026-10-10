@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 
 from app.db.bootstrap import initialize_datastores
@@ -10,10 +11,16 @@ from app.ingestion.eurostat_regional_labour import fetch_regional_labour, REGION
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--countries", nargs="*", default=None, metavar="ISO2", help="ISO2 prefixes. Omit for ES/PT/IE pilot; explicitly pass codes to expand.")
+    args = parser.parse_args()
+    countries = None if args.countries is None else {code.upper() for code in args.countries}
+    if countries is not None and any(len(code) != 2 or not code.isalpha() for code in countries):
+        parser.error("Country prefixes must be two alphabetic characters")
     initialize_datastores()
     adapter = EurostatAdapter(timeout_seconds=120, max_retries=3)
     try:
-        rows, diagnostics = fetch_regional_labour(adapter)
+        rows, diagnostics = fetch_regional_labour(adapter, target_prefixes=countries)
     finally:
         adapter.close()
 
