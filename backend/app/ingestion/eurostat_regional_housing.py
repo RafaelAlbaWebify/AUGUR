@@ -135,6 +135,7 @@ def inspect_regional_housing_sources(
 
 def fetch_regional_housing_evidence(
     adapter: EurostatAdapter,
+    target_prefixes: set[str] | None = None,
 ) -> tuple[list[dict], list[dict]]:
     rows: list[dict] = []
     diagnostics: list[dict] = []
@@ -148,6 +149,7 @@ def fetch_regional_housing_evidence(
             adapter,
             config,
             payload,
+            target_prefixes=target_prefixes,
         )
         rows.extend(normalized)
         diagnostics.append({
