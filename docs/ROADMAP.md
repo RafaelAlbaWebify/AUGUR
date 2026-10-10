@@ -53,3 +53,15 @@ Current territorial membership and observation boundary vintage are now separate
 ## G2 legacy-vintage audit path — 2026-10-10
 
 Repository support now exists for the remaining private-local G2 check: run the read-only legacy NUTS audit against the persistent AUGUR DuckDB, preserve the JSON artifact, then decide any migration from exact evidence. Definite non-2024 codes can be identified without deleting history; rows whose codes also exist in NUTS 2024 remain vintage-unverified and must not be mass-relabelled merely from code equality.
+
+## G2 local legacy reconciliation — evidence snapshot 2026-10-10
+
+The user's read-only DuckDB audit found 199 legacy `NUTS_2024` observation groups, including **10 demonstrably invalid groups / 172 stored observations** on five retired NUTS2 codes (`IE01`, `IE02` in 1999–2011; `PT16`, `PT17`, `PT18` in 1999–2018), and **five invalid current registry rows** matching those codes. The remaining 189 observation groups have current code membership but **unverified boundary vintage**. No NUTS vintage may be inferred from code equality alone.
+
+A copy-only reconciler is available, from `backend/` using the project venv:
+
+```powershell
+.\.venv\Scripts\python.exe -m scripts.reconcile_legacy_nuts_vintage --report "$HOME\Downloads\AUGUR_NUTS_VINTAGE_AUDIT_20261010.json"
+```
+
+This defaults to a **read-only dry run**, re-checks GISCO, matches the local audit snapshot and aborts on observation primary-key collisions. Optional `--output-db "$HOME\Downloads\augur_analytics_reconciled.duckdb"` makes a **new file**, relabels only the definitively invalid observation rows to `NUTS_UNSPECIFIED`, removes only corresponding invalid current-registry rows from **the copy**, and verifies total observation preservation in a transaction. Source database remains unchanged. Run while AUGUR's writer is stopped to obtain a consistent file snapshot. **Do not replace the active database automatically.** Validate the copy, examine application read behavior, preserve a backup, and perform operator-controlled adoption separately. Audit/CI alone does not close G2.
