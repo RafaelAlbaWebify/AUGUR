@@ -25,3 +25,7 @@ Updated: 2026-10-09. **No arbitrary completion percentages.** Each milestone is 
 ## OECD fiscal source milestone — 2026-10-10
 
 Actual OECD source smoke [38044771570](https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/38044771570) **passed** after schema correction, reporting exactly six genuine ESP/IRL/PRT 2024/2025 records. PR #13 merged as `349ab1ba`. Registered `oecd_tax_wedge_average_wage` in the national catalog and added an explicit local sync script, which verifies all three country responses before writing and does not fabricate missing data. The script is **not yet executed against the user's local database**, and personalized tax/net income remains future work. Next: validate persistent storage in CI, confirm country-level UI exposure, then expand to net earnings and housing affordability. The indicator is not a personal tax rate.
+
+## World expansion compatibility — 2026-10-10
+
+[Global expansion contract](GLOBAL_EXPANSION_CONTRACT.md) introduces country-agnostic evidence compatibility checks and an explicit coverage matrix by indicator, provider, geographic level/system, and period. This is a reusable guardrail, not automatic world ingestion. New country onboarding is **not accepted** until official geography/source discovery, ingestion adapter compatibility, observed data and country+region+city acceptance are proven. Next priority: migrate source-specific ingest orchestration and test an actual non-EU country/region/city. No invented worldwide completion estimate.
