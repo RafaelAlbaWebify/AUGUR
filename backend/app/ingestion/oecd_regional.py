@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import httpx
 
 from app.db.analytics import upsert_subnational_observations
+from app.services.global_evidence_contract import EvidenceContract, validate_observation
 
 
 SOURCE_ID = "OECD"
@@ -1570,6 +1571,21 @@ class OECDRegionalAdapter:
             csv_text,
             allowed_country_iso3=allowed_country_iso3,
         )
+        contract = EvidenceContract(
+            indicator_id="regional_population_density",
+            unit="people_per_km2",
+            levels=("tl2", "tl3"),
+            source_id=SOURCE_ID,
+            dataset_id=DATASET_ID,
+            geography_system=GEOGRAPHY_SYSTEM,
+        )
+        for row in rows:
+            failures = validate_observation(contract, row)
+            if failures or not row.get("country_iso3"):
+                raise ValueError(
+                    f"OECD density source contract failed for {row.get('geo_code')}: "
+                    + ", ".join(failures + (["country_missing"] if not row.get("country_iso3") else []))
+                )
         inserted = upsert_subnational_observations(rows)
 
         countries = sorted({
