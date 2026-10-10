@@ -33,7 +33,7 @@ def test_country_scoped_fetch_assembles_only_real_responses():
     def handler(request):
         urls.append(str(request.url))
         country = request.url.path.rsplit("/", 1)[-1].split(".")[0]
-        return httpx.Response(200, text=HEAD + f"{country},AV_TW,S_C0,AW100,_Z,A,2025,40.0,A\\n")
+        return httpx.Response(200, text=HEAD + f"{country},AV_TW,S_C0,AW100,_Z,A,2025,40.0,A\n")
     with httpx.Client(transport=httpx.MockTransport(handler)) as client:
         rows = normalize_tax_wedge(fetch_tax_wedge_csv(client, start_year=2024))
     assert {r["country_iso3"] for r in rows} == {"ESP", "IRL", "PRT"}
