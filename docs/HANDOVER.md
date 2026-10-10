@@ -42,3 +42,11 @@ Real local ES/IE/PT coverage export was contrasted with configured Eurostat data
 ## Master indicator inventory (2026-10-10)
 
 [Master indicator matrix](MASTER_INDICATOR_MATRIX.md) maps economic development, fiscal burden, housing, migration, institutional quality, freedom and living conditions across country/region/city scales. A deterministic generator `backend/scripts/export_indicator_inventory.py` inventories national indicator declarations but does **not** prove source coverage. Product priority shifts to completing P0 fiscal feasibility and actual housing affordability with authoritative source contracts and real observation acceptance. Existing G2/G3 local evidence gaps remain open; no invented readiness percentage.
+
+## 2026-10-10 fiscal scope
+
+PR #10 master indicator matrix merged `42498287`. OECD comparative tax-wedge contract added on `feature/oecd-tax-wedge-contract`, with fixed OECD `DSD_TAX_WAGES_COMP@DF_TW_COMP` v2.1 and single/no-children/100% average-wage scenario. This contract does **not** import tax observations or calculate personalized net pay. Next: verify actual SDMX country responses and integrate source-backed series without inferring tax residency or personal liability. Maintain separate housing and personal tax workstreams.
+
+## OECD fiscal ingestion progress (2026-10-10)
+
+Added `app/ingestion/oecd_tax_wedge.py` to fetch OECD SDMX CSV and normalize only exact AV_TW / S_C0 / AW100 / _Z / annual scenario; isolated negative tests reject conflicting dimensions and do not manufacture missing values. **IMPORTANT:** OAuth-free actual CSV schema/headers and 2025 values have not been directly verified from the runtime; CI tests use contract fixtures. The OECD Data Explorer identifies source v2.1 and the selected query, but a live CSV smoke is required before enabling persistence or calling this product-ready. No automatic sync yet. Next: run external live smoke on GitHub Actions and reconcile column names with actual SDMX response, then wire dataset storage/API/UX.
