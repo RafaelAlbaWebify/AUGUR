@@ -41,7 +41,7 @@ def fetch_tax_wedge_csv(client: httpx.Client, start_year: int = 2010) -> str:
         elif lines[0] != chunks[0]:
             raise ValueError(f"Inconsistent OECD country CSV columns for {country}")
         chunks.extend(lines[1:])
-    return "\\n".join(chunks) + "\\n"
+    return "\n".join(chunks) + "\n"
 
 
 def normalize_tax_wedge(csv_text: str) -> list[dict]:
