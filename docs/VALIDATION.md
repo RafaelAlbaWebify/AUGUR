@@ -41,3 +41,7 @@ Regional responses now expose a separate housing-affordability evidence block: E
 ## Global contract integration — 2026-10-10
 
 The OECD regional **population-density** sync now checks the actual normalized observations against the reusable source/unit/geography contract **before DuckDB writes**. Regression tests include an OECD Australian TL2 row and a rejected boundary-system mismatch. This is a first production-path integration, **not** general worldwide onboarding or proof of fresh Australian observations from the live provider. Next migrate other OECD indicators and Eurostat adapters and run a live non-EU regional/city acceptance without assuming geographic coverage.
+
+## OECD global ingestion guard rollout — 2026-10-10
+
+Beyond density (PR #17), all other OECD regional sync methods (population, safety, demography, labour, GDP, income, broadband and land temperature) now invoke the common country-independent validation before writing observations. Tests verify Australian OECD TL2 rows and reject mismatched datasets, geography systems, non-finite values and missing country IDs. These guards do not establish authoritative world geography completeness or live OECD coverage outside validated pilots. Subsequent work must strengthen source-specific indicator/unit allowlists and validate live non-EU responses.
