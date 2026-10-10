@@ -2467,7 +2467,13 @@ def geographies_for_country(
             FROM geography_registry g
             LEFT JOIN subnational_observations s
               ON s.geo_code = g.source_geo_code
-             AND s.geography_system = g.geography_system
+             AND (
+                    s.geography_system = g.geography_system
+                    OR (
+                        g.geography_system = 'NUTS_2024'
+                        AND s.geography_system = 'NUTS_UNSPECIFIED'
+                    )
+                 )
             WHERE g.country_iso3 = ?
               {level_filter}
             GROUP BY
@@ -2974,6 +2980,20 @@ def geography_geometry_coverage_status() -> dict:
         con.close()
 
 
+def _subnational_geography_system(row: dict) -> str:
+    explicit = row.get("geography_system")
+    if explicit:
+        return str(explicit).upper()
+    level = str(row.get("geo_level") or "").lower()
+    if level in {"nuts2", "nuts3"}:
+        # A NUTS-shaped code does not establish the boundary vintage used by
+        # the observation. Current registry membership is stored separately.
+        return "NUTS_UNSPECIFIED"
+    if level == "city":
+        return "URBAN_AUDIT_2024"
+    return "SOURCE_NATIVE"
+
+
 def upsert_subnational_observations(rows: list[dict]) -> int:
     if not rows:
         return 0
@@ -3001,27 +3021,25 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                 if country_iso2
                 else None
             )
-            system = row.get("geography_system") or (
-                "NUTS_2024"
-                if level in {"nuts2", "nuts3"}
-                else "URBAN_AUDIT_2024"
-                if level == "city"
-                else "SOURCE_NATIVE"
-            )
-            registry_id = row.get("geo_id") or f"{system}:{code}"
-            geography_rows[registry_id] = {
-                "geo_id": registry_id,
-                "country_iso3": country_iso3,
-                "country_iso2": country_iso2,
-                "name": row.get("geo_name"),
-                "geo_level": level,
-                "geography_system": system,
-                "source_id": row.get("source_id"),
-                "source_geo_code": row.get("source_geo_code", code),
-                "parent_geo_id": row.get("parent_geo_id"),
-                "latitude": row.get("latitude"),
-                "longitude": row.get("longitude"),
-            }
+            system = _subnational_geography_system(row)
+            # Vintage-unverified NUTS observations are evidence, not a current
+            # geography registry. Authoritative registry rows are inserted
+            # separately from GISCO (or another explicit boundary source).
+            if system != "NUTS_UNSPECIFIED":
+                registry_id = row.get("geo_id") or f"{system}:{code}"
+                geography_rows[registry_id] = {
+                    "geo_id": registry_id,
+                    "country_iso3": country_iso3,
+                    "country_iso2": country_iso2,
+                    "name": row.get("geo_name"),
+                    "geo_level": level,
+                    "geography_system": system,
+                    "source_id": row.get("source_id"),
+                    "source_geo_code": row.get("source_geo_code", code),
+                    "parent_geo_id": row.get("parent_geo_id"),
+                    "latitude": row.get("latitude"),
+                    "longitude": row.get("longitude"),
+                }
 
         if geography_rows:
             con.executemany(
@@ -3072,16 +3090,7 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
             """,
             [
                 [
-                    (
-                        row.get("geography_system")
-                        or (
-                            "NUTS_2024"
-                            if str(row["geo_level"]).lower() in {"nuts2", "nuts3"}
-                            else "URBAN_AUDIT_2024"
-                            if str(row["geo_level"]).lower() == "city"
-                            else "SOURCE_NATIVE"
-                        )
-                    ),
+                    _subnational_geography_system(row),
                     row["geo_code"].upper(),
                     row.get("geo_name"),
                     row["geo_level"],
