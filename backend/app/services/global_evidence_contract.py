@@ -8,7 +8,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 
-Level = Literal["country", "region", "city", "fua"]
+Level = Literal["country", "region", "city", "fua", "tl2", "tl3", "nuts2", "nuts3"]
 
 
 @dataclass(frozen=True)
