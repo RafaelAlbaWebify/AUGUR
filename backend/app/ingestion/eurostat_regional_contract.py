@@ -22,9 +22,8 @@ def validate_eurostat_regional_rows(rows: list[dict], *, allowed_indicators: set
         dataset, unit = CONTRACTS[indicator]
         normalized = dict(row)
         normalized["geo_level"] = str(row.get("geo_level") or "").lower()
-        normalized["geography_system"] = "NUTS_2024"
         errors = validate_observation(
-            EvidenceContract(indicator, unit, ("nuts2",), "EUROSTAT", dataset, "NUTS_2024"),
+            EvidenceContract(indicator, unit, ("nuts2",), "EUROSTAT", dataset),
             normalized,
         )
         code = str(row.get("geo_code") or "")
