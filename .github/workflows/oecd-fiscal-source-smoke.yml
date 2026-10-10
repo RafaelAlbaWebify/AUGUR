@@ -1,5 +1,11 @@
 name: OECD Fiscal Source Smoke
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/app/ingestion/oecd_tax_wedge.py'
+      - 'backend/app/services/tax_wedge_contract.py'
+      - '.github/workflows/oecd-fiscal-source-smoke.yml'
   workflow_dispatch:
   schedule:
     - cron: "25 6 * * 1"
