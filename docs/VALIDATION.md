@@ -61,3 +61,7 @@ Dataset region membership is now differentiated from actual finite numeric obser
 ## Official GISCO NUTS 2024 reconciliation — 2026-10-10
 
 The read-only Eurostat geography discovery CLI now supports `--reconcile-nuts2024`, fetching GISCO NUTS2 2024 GeoJSON and annotating each dataset region's official-vintage membership separately from finite-value availability. A PR-triggered live official registry smoke validates actual GeoJSON fields and country coverage before merging. This **does not** assert that a historical observation was collected under 2024 boundaries or establish equivalence between vintages. Non-registry codes remain visible as unmatched; errors fail closed. This is GISCO NUTS-only; global cities and non-European geographic systems require their own authoritative registries.
+
+## Live Eurostat regional coverage gate — 2026-10-10
+
+Added an external-source smoke for the four configured regional housing/labour datasets. It requires each dataset to respond and to expose at least one finite numeric observation on a GISCO NUTS2 2024 code. The summary separately reports dataset regions, observed regions, official-2024 matches, and observed codes outside NUTS 2024. The first successful GitHub Actions run is required before marking this gate real-data validated.
