@@ -1,5 +1,11 @@
 name: OECD Fiscal Source Smoke
 on:
+  pull_request:
+    paths:
+      - 'backend/scripts/smoke_oecd_tax_wedge.py'
+      - 'backend/app/ingestion/oecd_tax_wedge.py'
+      - 'backend/app/services/tax_wedge_contract.py'
+      - '.github/workflows/oecd-fiscal-source-smoke.yml'
   push:
     branches: [main]
     paths:
