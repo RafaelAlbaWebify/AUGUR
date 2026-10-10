@@ -94,3 +94,7 @@ Added read-only `python -m scripts.discover_eurostat_regions --output /path/to/c
 ## Eurostat true observation coverage — 2026-10-10
 
 Dataset region membership is now differentiated from actual finite numeric observations in the Eurostat read-only discovery report. The parser maps JSON-stat flattened values using dimension order/size, treats numeric zero as an observation, excludes null/bool/nonfinite values and reports observed regions separately from listed regions. Coverage is restricted to the selected dataset/filters/time periods, not official NUTS completeness or latest series reliability. Real official NUTS vintage reconciliation and live dataset smoke remain outstanding.
+
+## Official GISCO NUTS 2024 reconciliation — 2026-10-10
+
+The read-only Eurostat geography discovery CLI now supports `--reconcile-nuts2024`, fetching GISCO NUTS2 2024 GeoJSON and annotating each dataset region's official-vintage membership separately from finite-value availability. A PR-triggered live official registry smoke validates actual GeoJSON fields and country coverage before merging. This **does not** assert that a historical observation was collected under 2024 boundaries or establish equivalence between vintages. Non-registry codes remain visible as unmatched; errors fail closed. This is GISCO NUTS-only; global cities and non-European geographic systems require their own authoritative registries.
