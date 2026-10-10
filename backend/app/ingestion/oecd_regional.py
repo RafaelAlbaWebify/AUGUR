@@ -171,12 +171,36 @@ def _coverage_fields(
     }
 
 
+# Explicit dataset/indicator/unit pairs, independent of the country being imported.
+# Unknown data is rejected before persistence instead of trusting self-described units.
+OECD_REGIONAL_ALLOWED_METRICS = {
+    DATASET_ID: {"regional_population_density": "people_per_km2"},
+    POPULATION_DATASET_ID: {"regional_population": "persons"},
+    DEMOGRAPHY_DATASET_ID: {v["indicator_id"]: v["unit"] for v in DEMOGRAPHY_METRICS.values()},
+    LABOUR_DATASET_ID: {v["indicator_id"]: v["unit"] for v in LABOUR_METRICS.values()},
+    GDP_DATASET_ID: {"regional_gdp_per_capita_ppp_usd": "usd_ppp_per_person"},
+    INCOME_DATASET_ID: {"regional_disposable_income_ppp_usd": "usd_ppp_per_person"},
+    SAFETY_DATASET_ID: {v["indicator_id"]: v["unit"] for v in SAFETY_METRICS.values()},
+    BROADBAND_DATASET_ID: {"regional_household_broadband_access": "percent"},
+    LAND_TEMP_DATASET_ID: {"regional_daytime_land_surface_temperature": "celsius"},
+}
+
+
 def _validate_oecd_rows_before_write(rows: list[dict], dataset_id: str) -> None:
-    """Validate every incoming OECD regional metric against its own source contract."""
+    """Fail closed on unknown OECD dataset/indicator/unit combinations."""
+    allowed = OECD_REGIONAL_ALLOWED_METRICS.get(dataset_id)
+    if allowed is None:
+        raise ValueError(f"OECD regional dataset not registered: {dataset_id}")
     for row in rows:
+        indicator_id = row.get("indicator_id")
+        expected_unit = allowed.get(indicator_id)
+        if expected_unit is None:
+            raise ValueError(
+                f"OECD regional indicator not registered in {dataset_id}: {indicator_id}"
+            )
         contract = EvidenceContract(
-            indicator_id=row["indicator_id"],
-            unit=row["unit"],
+            indicator_id=indicator_id,
+            unit=expected_unit,
             levels=("tl2", "tl3"),
             source_id=SOURCE_ID,
             dataset_id=dataset_id,
@@ -188,7 +212,7 @@ def _validate_oecd_rows_before_write(rows: list[dict], dataset_id: str) -> None:
         if errors:
             raise ValueError(
                 f"OECD regional contract failure {row.get('geo_code')} "
-                f"{row.get('indicator_id')}: {', '.join(errors)}"
+                f"{indicator_id}: {', '.join(errors)}"
             )
 
 
