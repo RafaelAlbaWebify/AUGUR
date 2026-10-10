@@ -40,22 +40,25 @@ def reconcile_nuts2024(report: dict, official_codes: set[str]) -> dict:
         item = dict(dataset)
         if item.get("status") == "available":
             by_country = {}
-            matched = unmatched = observed_matched = 0
+            matched = unmatched = observed_matched = observed_unmatched = 0
             for country, entries in item.get("countries", {}).items():
                 rows = []
                 for entry in entries:
                     row = dict(entry)
                     is_member = row["geo_code"] in official_codes
+                    observed = row.get("observation_status") == "observed"
                     row["nuts_2024_status"] = "official_nuts2_2024" if is_member else "not_in_nuts2_2024"
                     matched += int(is_member)
                     unmatched += int(not is_member)
-                    observed_matched += int(is_member and row.get("observation_status") == "observed")
+                    observed_matched += int(is_member and observed)
+                    observed_unmatched += int((not is_member) and observed)
                     rows.append(row)
                 by_country[country] = rows
             item["countries"] = by_country
             item["official_nuts2024_region_count"] = matched
             item["outside_nuts2024_count"] = unmatched
             item["official_nuts2024_observed_region_count"] = observed_matched
+            item["outside_nuts2024_observed_region_count"] = observed_unmatched
         results.append(item)
     return {
         **report,
@@ -64,4 +67,41 @@ def reconcile_nuts2024(report: dict, official_codes: set[str]) -> dict:
                           "registry_count": len(official_codes)},
         "datasets": results,
         "registry_reconciled": True,
+    }
+
+
+def assess_reconciled_live_coverage(report: dict) -> dict:
+    """Fail closed unless every configured dataset has observed official NUTS2 data."""
+    if report.get("registry_reconciled") is not True:
+        raise ValueError("Coverage report must be reconciled with the official NUTS registry")
+
+    datasets = []
+    failures = []
+    for item in report.get("datasets", []):
+        summary = {
+            "dataset_id": item.get("dataset_id"),
+            "status": item.get("status"),
+            "country_count": item.get("country_count", 0),
+            "region_count": item.get("region_count", 0),
+            "observed_region_count": item.get("observed_region_count", 0),
+            "official_nuts2024_region_count": item.get("official_nuts2024_region_count", 0),
+            "official_nuts2024_observed_region_count": item.get("official_nuts2024_observed_region_count", 0),
+            "outside_nuts2024_count": item.get("outside_nuts2024_count", 0),
+            "outside_nuts2024_observed_region_count": item.get("outside_nuts2024_observed_region_count", 0),
+            "source_updated_at": item.get("source_updated_at"),
+        }
+        datasets.append(summary)
+        if item.get("status") != "available":
+            failures.append(f"{item.get('dataset_id')}: source unavailable")
+        elif summary["official_nuts2024_observed_region_count"] <= 0:
+            failures.append(f"{item.get('dataset_id')}: no observed official NUTS2 2024 regions")
+
+    if not datasets:
+        failures.append("no datasets were evaluated")
+
+    return {
+        "ready": not failures,
+        "registry": report.get("nuts_registry"),
+        "datasets": datasets,
+        "failures": failures,
     }
