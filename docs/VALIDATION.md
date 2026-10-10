@@ -65,3 +65,7 @@ The read-only Eurostat geography discovery CLI now supports `--reconcile-nuts202
 ## Live Eurostat regional coverage gate — 2026-10-10
 
 Added an external-source smoke for the four configured regional housing/labour datasets. It requires each dataset to respond and to expose at least one finite numeric observation on a GISCO NUTS2 2024 code. The summary separately reports dataset regions, observed regions, official-2024 matches, and observed codes outside NUTS 2024. The first successful GitHub Actions run is required before marking this gate real-data validated.
+
+### Live acceptance evidence — run 38063341094
+
+The live source gate passed against real Eurostat and GISCO responses. GISCO exposed 299 official NUTS2 2024 codes. Dataset results: `nama_10r_2hhinc` 259 published / 250 observed / 250 observed official-2024; `ilc_lvho07_r` 217 / 217 / 214; `lfst_r_lfe2emprt` 351 / 351 / 290; `lfst_r_lfu3rt` 351 / 350 / 289. The housing-overburden source still has observed historical Portuguese codes `PT16`, `PT17`, `PT18`; both labour datasets also expose 61 observed non-2024 codes, including historical IE/PT/HR/HU/LT/NL/NO/SI codes and UK NUTS codes. This proves that source membership cannot be used as a current-region registry. Automatic current-region onboarding must therefore be gated by an authoritative vintage, while historical observations remain visible and must not be deleted merely for failing NUTS 2024 membership. Live workflow: https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/38063341094
