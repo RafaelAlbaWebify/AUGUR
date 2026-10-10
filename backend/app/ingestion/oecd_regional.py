@@ -171,6 +171,27 @@ def _coverage_fields(
     }
 
 
+def _validate_oecd_rows_before_write(rows: list[dict], dataset_id: str) -> None:
+    """Validate every incoming OECD regional metric against its own source contract."""
+    for row in rows:
+        contract = EvidenceContract(
+            indicator_id=row["indicator_id"],
+            unit=row["unit"],
+            levels=("tl2", "tl3"),
+            source_id=SOURCE_ID,
+            dataset_id=dataset_id,
+            geography_system=GEOGRAPHY_SYSTEM,
+        )
+        errors = validate_observation(contract, row)
+        if not row.get("country_iso3"):
+            errors.append("country_missing")
+        if errors:
+            raise ValueError(
+                f"OECD regional contract failure {row.get('geo_code')} "
+                f"{row.get('indicator_id')}: {', '.join(errors)}"
+            )
+
+
 class OECDRegionalAdapter:
     def __init__(
         self,
@@ -819,6 +840,7 @@ class OECDRegionalAdapter:
             csv_text,
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, POPULATION_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
@@ -936,6 +958,7 @@ class OECDRegionalAdapter:
             csv_text,
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, SAFETY_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
@@ -1038,6 +1061,7 @@ class OECDRegionalAdapter:
             csv_text,
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, DEMOGRAPHY_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
@@ -1155,6 +1179,7 @@ class OECDRegionalAdapter:
             csv_text,
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, LABOUR_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
@@ -1254,6 +1279,7 @@ class OECDRegionalAdapter:
             csv_text,
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, GDP_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
@@ -1353,6 +1379,7 @@ class OECDRegionalAdapter:
             csv_text,
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, INCOME_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
@@ -1448,6 +1475,7 @@ class OECDRegionalAdapter:
             ),
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, BROADBAND_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
@@ -1539,6 +1567,7 @@ class OECDRegionalAdapter:
             ),
             allowed_country_iso3=allowed_country_iso3,
         )
+        _validate_oecd_rows_before_write(rows, LAND_TEMP_DATASET_ID)
         inserted = upsert_subnational_observations(rows)
         return {
             "source_id": SOURCE_ID,
