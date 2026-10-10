@@ -37,3 +37,7 @@ Actual OECD source smoke [38044771570](https://github.com/RafaelAlbaWebify/AUGUR
 ## Housing evidence contract (2026-10-10)
 
 Regional responses now expose a separate housing-affordability evidence block: Eurostat regional housing-cost-overburden proportion (`ilc_lvho07_r`) and disposable income per person in PPS (`nama_10r_2hhinc`), each preserving source and observation period. No market rent or net-income ratio is fabricated; `affordability_complete=false` until official actual rent/net cash-income series align by territory and time. Tests cover mismatched units and stale-period separation. CI and real local data acceptance are distinct.
+
+## Global contract integration — 2026-10-10
+
+The OECD regional **population-density** sync now checks the actual normalized observations against the reusable source/unit/geography contract **before DuckDB writes**. Regression tests include an OECD Australian TL2 row and a rejected boundary-system mismatch. This is a first production-path integration, **not** general worldwide onboarding or proof of fresh Australian observations from the live provider. Next migrate other OECD indicators and Eurostat adapters and run a live non-EU regional/city acceptance without assuming geographic coverage.
