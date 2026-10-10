@@ -14,7 +14,7 @@ import httpx
 from app.services.tax_wedge_contract import TAX_WEDGE_CONTRACT
 
 COUNTRIES = {"ESP", "IRL", "PRT"}
-REQUIRED = {"REF_AREA", "MEASURE", "HH_TYPE", "EARN_PRINCIPAL", "EARN_SPOUSE", "FREQ", "TIME_PERIOD", "OBS_VALUE"}
+REQUIRED = {"REF_AREA", "MEASURE", "HH_TYPE", "EARN_PRINCIPAL", "EARN_SPOUSE", "FREQ", "TIME_PERIOD", "OBS_VALUE", "UNIT_MEASURE"}
 
 
 def fetch_tax_wedge_csv(client: httpx.Client, start_year: int = 2010) -> str:
@@ -42,7 +42,7 @@ def normalize_tax_wedge(csv_text: str) -> list[dict]:
             continue
         if (row["MEASURE"] != "AV_TW" or row["HH_TYPE"] != "S_C0"
                 or row["EARN_PRINCIPAL"] != "AW100" or row["EARN_SPOUSE"] != "_Z"
-                or row["FREQ"] != "A"):
+                or row["FREQ"] != "A" or row["UNIT_MEASURE"] != "PT_LAB_COST"):
             raise ValueError("Unexpected OECD tax-wedge series dimensions for " + country)
         if not row["TIME_PERIOD"].isdigit() or not row["OBS_VALUE"]:
             continue
