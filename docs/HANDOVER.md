@@ -54,3 +54,7 @@ Added `app/ingestion/oecd_tax_wedge.py` to fetch OECD SDMX CSV and normalize onl
 ## 2026-10-10 OECD live-source failure
 
 PR #11 merged as `06e9d001`, with CI green. The automatically triggered official OECD source smoke [38044329238](https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/38044329238) failed with HTTP 500 on the broad tax-wedge query. This is **not** a validated observation ingest. Current branch `fix/oecd-tax-wedge-live-query` switches to three country-specific requests and tests assembly without generating data. Re-run live smoke after merge. If source still returns 500, classify upstream outage/API selection incompatibility; do not mark the fiscal indicator ready.
+
+## OECD fiscal source milestone — 2026-10-10
+
+Actual OECD source smoke [38044771570](https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/38044771570) **passed** after schema correction, reporting exactly six genuine ESP/IRL/PRT 2024/2025 records. PR #13 merged as `349ab1ba`. Registered `oecd_tax_wedge_average_wage` in the national catalog and added an explicit local sync script, which verifies all three country responses before writing and does not fabricate missing data. The script is **not yet executed against the user's local database**, and personalized tax/net income remains future work. Next: validate persistent storage in CI, confirm country-level UI exposure, then expand to net earnings and housing affordability. The indicator is not a personal tax rate.
