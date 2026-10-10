@@ -12,6 +12,7 @@ from app.db.analytics import (
     latest_environmental_health_burden_for_geo,
 )
 from app.ingestion.eurostat import EurostatAdapter
+from app.services.housing_affordability import housing_affordability_evidence
 
 
 CACHE_TTL_SECONDS = 15 * 60
@@ -503,6 +504,7 @@ def _regional_result_from_local(
         "available_count": available_count,
         "complete": available_count == len(indicators),
         "indicators": indicators,
+        "housing_affordability": housing_affordability_evidence(indicators),
         "sector_structure": sector_context,
         "environmental_health": environmental_context,
         "notes": (
@@ -781,6 +783,7 @@ def regional_evidence(
             "available_count": 0,
             "complete": False,
             "indicators": indicators,
+        "housing_affordability": housing_affordability_evidence(indicators),
             "sector_structure": _regional_sector_context(code, bundle["sectors"]),
             "environmental_health": _environmental_health_context(code, bundle["environmental_health"]),
             "notes": [
@@ -817,6 +820,7 @@ def regional_evidence(
         "available_count": available_count,
         "complete": available_count == len(indicators),
         "indicators": indicators,
+        "housing_affordability": housing_affordability_evidence(indicators),
         "sector_structure": _regional_sector_context(code),
         "environmental_health": _environmental_health_context(code),
         "notes": [
