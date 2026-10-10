@@ -1,7 +1,7 @@
 import pytest
 from app.ingestion.oecd_tax_wedge import normalize_tax_wedge, fetch_tax_wedge_csv
 
-HEAD = "REF_AREA,MEASURE,HH_TYPE,EARN_PRINCIPAL,EARN_SPOUSE,FREQ,TIME_PERIOD,OBS_VALUE,OBS_STATUS\n"
+HEAD = "REF_AREA,MEASURE,HOUSEHOLD_TYPE,INCOME_PRINCIPAL,INCOME_SPOUSE,FREQ,TIME_PERIOD,OBS_VALUE,OBS_STATUS\n"
 
 
 def test_retains_exact_household_scenario_and_real_period():
