@@ -50,3 +50,7 @@ PR #10 master indicator matrix merged `42498287`. OECD comparative tax-wedge con
 ## OECD fiscal ingestion progress (2026-10-10)
 
 Added `app/ingestion/oecd_tax_wedge.py` to fetch OECD SDMX CSV and normalize only exact AV_TW / S_C0 / AW100 / _Z / annual scenario; isolated negative tests reject conflicting dimensions and do not manufacture missing values. **IMPORTANT:** OAuth-free actual CSV schema/headers and 2025 values have not been directly verified from the runtime; CI tests use contract fixtures. The OECD Data Explorer identifies source v2.1 and the selected query, but a live CSV smoke is required before enabling persistence or calling this product-ready. No automatic sync yet. Next: run external live smoke on GitHub Actions and reconcile column names with actual SDMX response, then wire dataset storage/API/UX.
+
+## 2026-10-10 OECD live-source failure
+
+PR #11 merged as `06e9d001`, with CI green. The automatically triggered official OECD source smoke [38044329238](https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/38044329238) failed with HTTP 500 on the broad tax-wedge query. This is **not** a validated observation ingest. Current branch `fix/oecd-tax-wedge-live-query` switches to three country-specific requests and tests assembly without generating data. Re-run live smoke after merge. If source still returns 500, classify upstream outage/API selection incompatibility; do not mark the fiscal indicator ready.
