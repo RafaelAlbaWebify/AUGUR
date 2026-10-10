@@ -431,6 +431,18 @@ INDICATORS = [
         "target_max": None,
     },
     {
+        "indicator_id": "oecd_tax_wedge_average_wage",
+        "source_indicator": "OECD:DSD_TAX_WAGES_COMP@DF_TW_COMP:AV_TW:S_C0:AW100",
+        "name": "Average tax wedge — single worker, no children, 100% national average wage",
+        "dimension": "fiscal",
+        "unit": "percent_of_total_labour_cost",
+        "interpretation_policy": "lower",
+        "target_min": None,
+        "target_max": None,
+        "methodology_note": "OECD Taxing Wages annual tax wedge at 100% country-specific average wage. Includes personal income tax, employee and employer social contributions and relevant taxes/benefits in OECD definition.",
+        "comparability_note": "Share of total employer labour cost, not share of gross pay, personal effective tax rate, or net income. Uses different national average salaries; not a personal or city tax liability.",
+    },
+    {
         "indicator_id": "public_debt_gdp",
         "source_indicator": "EUROSTAT:GOV_10DD_EDPT1",
         "name": "General government gross debt (% of GDP)",
