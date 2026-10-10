@@ -66,3 +66,7 @@ Regional responses now expose a separate housing-affordability evidence block: E
 ## World expansion compatibility — 2026-10-10
 
 [Global expansion contract](GLOBAL_EXPANSION_CONTRACT.md) introduces country-agnostic evidence compatibility checks and an explicit coverage matrix by indicator, provider, geographic level/system, and period. This is a reusable guardrail, not automatic world ingestion. New country onboarding is **not accepted** until official geography/source discovery, ingestion adapter compatibility, observed data and country+region+city acceptance are proven. Next priority: migrate source-specific ingest orchestration and test an actual non-EU country/region/city. No invented worldwide completion estimate.
+
+## Global contract integration — 2026-10-10
+
+The OECD regional **population-density** sync now checks the actual normalized observations against the reusable source/unit/geography contract **before DuckDB writes**. Regression tests include an OECD Australian TL2 row and a rejected boundary-system mismatch. This is a first production-path integration, **not** general worldwide onboarding or proof of fresh Australian observations from the live provider. Next migrate other OECD indicators and Eurostat adapters and run a live non-EU regional/city acceptance without assuming geographic coverage.
