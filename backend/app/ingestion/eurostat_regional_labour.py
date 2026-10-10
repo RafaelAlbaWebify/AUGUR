@@ -44,7 +44,9 @@ def normalize_subnational(
     payload: dict,
     target_prefixes: set[str] | None = None,
 ) -> list[dict]:
-    prefixes = target_prefixes or TARGET_PREFIXES
+    prefixes = TARGET_PREFIXES if target_prefixes is None else {code.upper() for code in target_prefixes}
+    if any(len(code) != 2 or not code.isalpha() for code in prefixes):
+        raise ValueError('Country prefixes must be ISO2-like alphabetic codes')
     dimension_ids = payload["id"]
     dimension_sizes = payload["size"]
     dimensions = payload["dimension"]
@@ -117,6 +119,7 @@ def normalize_subnational(
 
 def fetch_regional_labour(
     adapter: EurostatAdapter,
+    target_prefixes: set[str] | None = None,
 ) -> tuple[list[dict], list[dict]]:
     rows: list[dict] = []
     diagnostics: list[dict] = []
@@ -126,7 +129,7 @@ def fetch_regional_labour(
             config["dataset_id"],
             config["filters"],
         )
-        normalized = normalize_subnational(adapter, config, payload)
+        normalized = normalize_subnational(adapter, config, payload, target_prefixes=target_prefixes)
         rows.extend(normalized)
         diagnostics.append(
             {
