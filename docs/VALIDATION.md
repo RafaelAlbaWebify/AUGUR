@@ -53,3 +53,7 @@ The OECD regional common guard is now **fail-closed** on nine explicit dataset-t
 ## Eurostat regional evidence validation — 2026-10-10
 
 The explicit source/dataset/unit/indicator guard is now called before DuckDB upsert in the Eurostat **regional housing and labour CLI syncs**. A valid Bulgarian NUTS2-shaped region passes the contract without ES/PT/IE-specific assumptions; wrong units, unexpected metrics, invalid values, or levels fail closed. This is scoped to these two CLI paths and does not modify the existing pilot-country filtering in the upstream normalizer. NUTS vintage is **not inferred from code shape** and still requires official catalog comparison. Remaining: centralize validation across all Eurostat write paths and remove pilot-only discovery restrictions with explicit input eligibility.
+
+## Eurostat true observation coverage — 2026-10-10
+
+Dataset region membership is now differentiated from actual finite numeric observations in the Eurostat read-only discovery report. The parser maps JSON-stat flattened values using dimension order/size, treats numeric zero as an observation, excludes null/bool/nonfinite values and reports observed regions separately from listed regions. Coverage is restricted to the selected dataset/filters/time periods, not official NUTS completeness or latest series reliability. Real official NUTS vintage reconciliation and live dataset smoke remain outstanding.

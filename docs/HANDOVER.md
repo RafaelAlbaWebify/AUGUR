@@ -90,3 +90,7 @@ Regional housing and labour ingest scripts support `--countries BG FR` (ISO2) wh
 ## Eurostat dataset territory discovery — 2026-10-10
 
 Added read-only `python -m scripts.discover_eurostat_regions --output /path/to/coverage.json` from `backend/`. It queries all four configured regional labour/housing datasets, enumerates published four-character NUTS2-shaped geography candidates by country, and preserves per-source error states and source update times. This works beyond ES/PT/IE without editing code. **Dataset membership is not certification of current NUTS vintage nor proof of nonmissing values or complete EU regional registry**. Next gate: compare against authoritative Eurostat NUTS version/registry and detect observed coverage at country/region level before automatic ingest; do not onboard using code shape alone.
+
+## Eurostat true observation coverage — 2026-10-10
+
+Dataset region membership is now differentiated from actual finite numeric observations in the Eurostat read-only discovery report. The parser maps JSON-stat flattened values using dimension order/size, treats numeric zero as an observation, excludes null/bool/nonfinite values and reports observed regions separately from listed regions. Coverage is restricted to the selected dataset/filters/time periods, not official NUTS completeness or latest series reliability. Real official NUTS vintage reconciliation and live dataset smoke remain outstanding.
