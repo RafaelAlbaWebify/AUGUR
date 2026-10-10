@@ -17,3 +17,7 @@ Updated: 2026-10-09. **No arbitrary completion percentages.** Each milestone is 
 **Priority order:** G2 → G3 → C1/P1 → O1. T1 and access-restricted sources run independently; do not pretend their blockers can be solved by repository-only changes.
 
 **Rules:** No invented observations; no forced coverage denominators; no conflation of geographies across boundary vintages; no declaring completion from CI alone. Prefer completing a milestone over accumulating one-file PRs.
+
+## Master indicator inventory (2026-10-10)
+
+[Master indicator matrix](MASTER_INDICATOR_MATRIX.md) maps economic development, fiscal burden, housing, migration, institutional quality, freedom and living conditions across country/region/city scales. A deterministic generator `backend/scripts/export_indicator_inventory.py` inventories national indicator declarations but does **not** prove source coverage. Product priority shifts to completing P0 fiscal feasibility and actual housing affordability with authoritative source contracts and real observation acceptance. Existing G2/G3 local evidence gaps remain open; no invented readiness percentage.
