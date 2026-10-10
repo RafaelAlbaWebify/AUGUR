@@ -69,3 +69,7 @@ Added an external-source smoke for the four configured regional housing/labour d
 ### Live acceptance evidence — run 38063341094
 
 The live source gate passed against real Eurostat and GISCO responses. GISCO exposed 299 official NUTS2 2024 codes. Dataset results: `nama_10r_2hhinc` 259 published / 250 observed / 250 observed official-2024; `ilc_lvho07_r` 217 / 217 / 214; `lfst_r_lfe2emprt` 351 / 351 / 290; `lfst_r_lfu3rt` 351 / 350 / 289. The housing-overburden source still has observed historical Portuguese codes `PT16`, `PT17`, `PT18`; both labour datasets also expose 61 observed non-2024 codes, including historical IE/PT/HR/HU/LT/NL/NO/SI codes and UK NUTS codes. This proves that source membership cannot be used as a current-region registry. Automatic current-region onboarding must therefore be gated by an authoritative vintage, while historical observations remain visible and must not be deleted merely for failing NUTS 2024 membership. Live workflow: https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/38063341094
+
+## NUTS observation-vintage safety — 2026-10-10
+
+Regression coverage now requires: (1) an unversioned NUTS observation is stored as `NUTS_UNSPECIFIED`; (2) it does not create a `NUTS_2024` registry member; (3) an explicitly versioned row remains explicit; (4) a current GISCO NUTS 2024 registry member can report same-code unverified evidence without relabelling that evidence; and (5) the regional read path surfaces `same_code_vintage_unverified` when it falls back from current registry context to vintage-unverified observations.

@@ -6,7 +6,7 @@ import httpx
 
 from app.catalog import COUNTRIES
 from app.db.bootstrap import initialize_datastores
-from app.db.analytics import subnational_storage_status
+from app.db.analytics import subnational_storage_status, upsert_geographies
 from app.services.regional_evidence import sync_regional_evidence_codes
 
 
@@ -49,12 +49,37 @@ def main() -> int:
 
     for iso3 in requested:
         iso2 = country_by_iso3[iso3]["iso2"]
-        codes = sorted({
-            str(feature.get("properties", {}).get("NUTS_ID", "")).upper()
+        features = [
+            feature
             for feature in payload.get("features", [])
             if feature.get("properties", {}).get("CNTR_CODE") == iso2
             and len(str(feature.get("properties", {}).get("NUTS_ID", ""))) == 5
+        ]
+        codes = sorted({
+            str(feature.get("properties", {}).get("NUTS_ID", "")).upper()
+            for feature in features
         })
+        upsert_geographies([
+            {
+                "geo_id": f"NUTS_2024:{code}",
+                "country_iso3": iso3,
+                "country_iso2": iso2,
+                "name": next(
+                    (
+                        feature.get("properties", {}).get("NAME_LATN")
+                        or feature.get("properties", {}).get("NUTS_NAME")
+                        for feature in features
+                        if str(feature.get("properties", {}).get("NUTS_ID", "")).upper() == code
+                    ),
+                    code,
+                ),
+                "geo_level": "nuts3",
+                "geography_system": "NUTS_2024",
+                "source_id": "GISCO",
+                "source_geo_code": code,
+            }
+            for code in codes
+        ])
 
         print()
         print("=" * 72)
