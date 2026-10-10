@@ -37,3 +37,11 @@ Regional housing and labour ingest scripts support `--countries BG FR` (ISO2) wh
 ## Eurostat dataset territory discovery — 2026-10-10
 
 Added read-only `python -m scripts.discover_eurostat_regions --output /path/to/coverage.json` from `backend/`. It queries all four configured regional labour/housing datasets, enumerates published four-character NUTS2-shaped geography candidates by country, and preserves per-source error states and source update times. This works beyond ES/PT/IE without editing code. **Dataset membership is not certification of current NUTS vintage nor proof of nonmissing values or complete EU regional registry**. Next gate: compare against authoritative Eurostat NUTS version/registry and detect observed coverage at country/region level before automatic ingest; do not onboard using code shape alone.
+
+## Live Eurostat coverage acceptance — 2026-10-10
+
+The next G2/G3 evidence gate is automated: execute the four configured Eurostat regional datasets against the official GISCO NUTS2 2024 registry, require real finite observations on current official codes, and retain historical/non-current observed codes as explicit evidence rather than deleting them. A green source workflow establishes provider-response evidence for this dataset/filter snapshot only; it does not prove complete EU coverage or boundary equivalence across vintages.
+
+### Live acceptance evidence — run 38063341094
+
+The live source gate passed against real Eurostat and GISCO responses. GISCO exposed 299 official NUTS2 2024 codes. Dataset results: `nama_10r_2hhinc` 259 published / 250 observed / 250 observed official-2024; `ilc_lvho07_r` 217 / 217 / 214; `lfst_r_lfe2emprt` 351 / 351 / 290; `lfst_r_lfu3rt` 351 / 350 / 289. The housing-overburden source still has observed historical Portuguese codes `PT16`, `PT17`, `PT18`; both labour datasets also expose 61 observed non-2024 codes, including historical IE/PT/HR/HU/LT/NL/NO/SI codes and UK NUTS codes. This proves that source membership cannot be used as a current-region registry. Automatic current-region onboarding must therefore be gated by an authoritative vintage, while historical observations remain visible and must not be deleted merely for failing NUTS 2024 membership. Live workflow: https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/38063341094
