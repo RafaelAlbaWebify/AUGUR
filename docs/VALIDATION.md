@@ -49,3 +49,7 @@ Beyond density (PR #17), all other OECD regional sync methods (population, safet
 ## OECD global metric allowlist — 2026-10-10
 
 The OECD regional common guard is now **fail-closed** on nine explicit dataset-to-indicator-to-unit mappings; previously it instantiated contracts from the observation's own indicator/unit, allowing incorrect self-consistent values. The change remains country-agnostic, accepts correctly sourced non-EU territory rows, rejects unknown dataset/indicator, wrong unit, and cross-dataset substitution before DuckDB writes. This protects ingestion semantics but does **not** substitute for live non-EU end-to-end acceptance. Eurostat-specific datasets and global country/city discovery remain separate work.
+
+## Eurostat regional evidence validation — 2026-10-10
+
+The explicit source/dataset/unit/indicator guard is now called before DuckDB upsert in the Eurostat **regional housing and labour CLI syncs**. A valid Bulgarian NUTS2-shaped region passes the contract without ES/PT/IE-specific assumptions; wrong units, unexpected metrics, invalid values, or levels fail closed. This is scoped to these two CLI paths and does not modify the existing pilot-country filtering in the upstream normalizer. NUTS vintage is **not inferred from code shape** and still requires official catalog comparison. Remaining: centralize validation across all Eurostat write paths and remove pilot-only discovery restrictions with explicit input eligibility.
