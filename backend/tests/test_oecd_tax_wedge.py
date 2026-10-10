@@ -1,5 +1,5 @@
 import pytest
-from app.ingestion.oecd_tax_wedge import normalize_tax_wedge
+from app.ingestion.oecd_tax_wedge import normalize_tax_wedge, fetch_tax_wedge_csv
 
 HEAD = "REF_AREA,MEASURE,HH_TYPE,EARN_PRINCIPAL,EARN_SPOUSE,FREQ,TIME_PERIOD,OBS_VALUE,OBS_STATUS\n"
 
@@ -25,3 +25,17 @@ def test_rejects_unexpected_column_contract():
 
 def test_no_synthetic_missing_values():
     assert normalize_tax_wedge(HEAD + "ESP,AV_TW,S_C0,AW100,_Z,A,2025,,M\n") == []
+
+
+def test_country_scoped_fetch_assembles_only_real_responses():
+    import httpx
+    urls = []
+    def handler(request):
+        urls.append(str(request.url))
+        country = request.url.path.rsplit("/", 1)[-1].split(".")[0]
+        return httpx.Response(200, text=HEAD + f"{country},AV_TW,S_C0,AW100,_Z,A,2025,40.0,A\n")
+    with httpx.Client(transport=httpx.MockTransport(handler)) as client:
+        rows = normalize_tax_wedge(fetch_tax_wedge_csv(client, start_year=2024))
+    assert {r["country_iso3"] for r in rows} == {"ESP", "IRL", "PRT"}
+    assert len(urls) == 3
+    assert all("startPeriod=2024" in url for url in urls)
