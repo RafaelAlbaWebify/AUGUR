@@ -78,16 +78,27 @@ def assess_reconciled_live_coverage(report: dict) -> dict:
     datasets = []
     failures = []
     for item in report.get("datasets", []):
+        outside_observed_codes = sorted(
+            row["geo_code"]
+            for entries in item.get("countries", {}).values()
+            for row in entries
+            if row.get("nuts_2024_status") == "not_in_nuts2_2024"
+            and row.get("observation_status") == "observed"
+        )
+        official_count = item.get("official_nuts2024_region_count", 0)
+        official_observed = item.get("official_nuts2024_observed_region_count", 0)
         summary = {
             "dataset_id": item.get("dataset_id"),
             "status": item.get("status"),
             "country_count": item.get("country_count", 0),
             "region_count": item.get("region_count", 0),
             "observed_region_count": item.get("observed_region_count", 0),
-            "official_nuts2024_region_count": item.get("official_nuts2024_region_count", 0),
-            "official_nuts2024_observed_region_count": item.get("official_nuts2024_observed_region_count", 0),
+            "official_nuts2024_region_count": official_count,
+            "official_nuts2024_observed_region_count": official_observed,
+            "official_nuts2024_without_observation_count": max(0, official_count - official_observed),
             "outside_nuts2024_count": item.get("outside_nuts2024_count", 0),
             "outside_nuts2024_observed_region_count": item.get("outside_nuts2024_observed_region_count", 0),
+            "outside_nuts2024_observed_codes": outside_observed_codes,
             "source_updated_at": item.get("source_updated_at"),
         }
         datasets.append(summary)
