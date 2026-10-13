@@ -2096,6 +2096,29 @@ test('Dimension Detail separates supporting opposing and contextual evidence', a
   await expect(page.locator('.dimensionSignalLane.contextual')).toBeVisible()
 })
 
+test('real-country viewport contracts center mainland Spain and Portugal', async ({ page }) => {
+  for (const [country, expectedLat, expectedLon] of [
+    ['ESP', 40.15, -3.7],
+    ['PRT', 39.55, -8.0],
+  ] as const) {
+    await page.goto(`/country/${country}/overview`)
+    const map = page.getByTestId('regional-map')
+    await expect(map).toHaveAttribute('data-map-status', 'ready')
+    await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(5.5)
+
+    const center = await map.getAttribute('data-map-center')
+    expect(center).not.toBeNull()
+    const [lat, lon] = center!.split(',').map(Number)
+    expect(Math.abs(lat - expectedLat)).toBeLessThan(0.4)
+    expect(Math.abs(lon - expectedLon)).toBeLessThan(0.4)
+
+    await page.getByRole('button', { name: 'Europe', exact: true }).click()
+    await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBe(3)
+    await page.getByRole('button', { name: 'Focus country' }).click()
+    await expect.poll(async () => map.getAttribute('data-map-center')).toBe(`${expectedLat.toFixed(2)},${expectedLon.toFixed(2)}`)
+  }
+})
+
 test('Country Radar focuses the country and keeps recent changes readable', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
