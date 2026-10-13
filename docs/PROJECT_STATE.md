@@ -49,3 +49,7 @@ Real local ES/IE/PT coverage export was contrasted with configured Eurostat data
 ## Current checkpoint — 2026-10-13
 
 G2 local geographic reconciliation **accepted** after exact 18-table comparison, zero invalid-current labels, user-run real data-layer acceptance, verified backup and controlled adoption. AUGUR booted afterwards; operability is partial only because TTV temporal model remains externally uncalibrated. PR #33 Country Radar copy cleanup merged with green CI. **Next: G3 observed source/unit/period coverage**, then national journeys and product release gates. Recheck local browser UX separately; 189 same-code territorial vintage groups remain unverified, not false-certified.
+
+## Country Radar real-browser findings — 2026-10-13
+
+PR #42 merged after green CI; operator-local Playwright audit of ESP/PRT/IRL showed functional page loading and no console/HTTP failures or clipped changes rail. Mainland framing of Spain and Portugal remained unsatisfactory because nationwide bounds include remote archipelagos; country-specific default cameras are under correction. No country-map UI release acceptance until real visual verification after the correction. Keep source observations and islands intact.
