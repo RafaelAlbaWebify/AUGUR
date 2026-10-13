@@ -77,3 +77,7 @@ Regression coverage now requires: (1) an unversioned NUTS observation is stored 
 ## Legacy NUTS_2024 audit — 2026-10-10
 
 The local-vintage auditor is intentionally read-only. Unit tests require it to distinguish: current code membership with unverified observation vintage; an observation code impossible under the official 2024 registry; and an invalid current-registry row. It must report `mutation_performed=false`. CI proves classification logic only; it does not inspect the user's private persistent DuckDB.
+
+## UI copy and interaction regression rule — 2026-10-13
+
+When a PR removes or rewrites visible UI copy or replaces static help with hover/contextual help, update the **corresponding Playwright assertions in the same commit/PR**. Never preserve deleted explanatory prose solely to satisfy an obsolete test. Assert the intended user-facing contract instead: removed elements absent, contextual help discoverable, existing navigation and metric cards still functional. CI frontend build alone is insufficient: wait for the browser-smoke job to pass before requesting merge. PR #33 initially failed only because `app.spec.ts` still asserted the deliberately removed `No single composite score.` sentence; the test has been updated to verify absence of the removed copy and presence of hover titles.
