@@ -2096,6 +2096,54 @@ test('Dimension Detail separates supporting opposing and contextual evidence', a
   await expect(page.locator('.dimensionSignalLane.contextual')).toBeVisible()
 })
 
+test('real-country viewport contracts center mainland Spain and Portugal', async ({ page }) => {
+  for (const [country, expectedLat, expectedLon] of [
+    ['ESP', 40.15, -3.7],
+    ['PRT', 39.55, -8.0],
+  ] as const) {
+    await page.goto(`/country/${country}/overview`)
+    const map = page.getByTestId('regional-map')
+    await expect(map).toHaveAttribute('data-map-status', 'ready')
+    await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(5.5)
+
+    const center = await map.getAttribute('data-map-center')
+    expect(center).not.toBeNull()
+    const [lat, lon] = center!.split(',').map(Number)
+    expect(Math.abs(lat - expectedLat)).toBeLessThan(0.4)
+    expect(Math.abs(lon - expectedLon)).toBeLessThan(0.4)
+
+    await page.getByRole('button', { name: 'Europe', exact: true }).click()
+    await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBe(3)
+    await page.getByRole('button', { name: 'Focus country' }).click()
+    await expect.poll(async () => map.getAttribute('data-map-center')).toBe(`${expectedLat.toFixed(2)},${expectedLon.toFixed(2)}`)
+  }
+})
+
+test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1650, height: 900 })
+  await page.goto('/country/ESP/overview')
+  await expect(page.getByTestId('regional-map')).toHaveAttribute('data-map-status', 'ready')
+  const geometry = await page.evaluate(() => {
+    const bounds = (selector: string) => document.querySelector(selector)?.getBoundingClientRect()
+    const panel = bounds('.countryRadarHero')
+    const metricGrid = bounds('.countryMetricGrid')
+    const cards = [...document.querySelectorAll('.countryMetricCard')]
+    const lastCard = cards.at(-1)?.getBoundingClientRect()
+    const changes = document.querySelector('.countryRadarHero > .recentChangesPanel')
+    const lastSignals = changes?.querySelector('.signalSplit')?.getBoundingClientRect()
+    const changesBox = changes?.getBoundingClientRect()
+    return {
+      heroBottom: panel?.bottom ?? Infinity,
+      gridTop: metricGrid?.top ?? -Infinity,
+      lastCardBottom: lastCard?.bottom ?? Infinity,
+      signalsVisible: !!lastSignals && !!changesBox && lastSignals.bottom <= changesBox.bottom + 2,
+    }
+  })
+  expect(geometry.gridTop).toBeGreaterThanOrEqual(geometry.heroBottom)
+  expect(geometry.lastCardBottom).toBeLessThanOrEqual(900)
+  expect(geometry.signalsVisible).toBe(true)
+})
+
 test('Country Radar focuses the country and keeps recent changes readable', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
