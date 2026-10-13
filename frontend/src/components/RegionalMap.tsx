@@ -167,7 +167,7 @@ export default function RegionalMap({
   const sourceNativeLayerRef = useRef<L.GeoJSON | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
-  const [mapCenter, setMapCenter] = useState(EUROPE_VIEW)
+  const [mapCenter, setMapCenter] = useState<[number, number]>([50.1, 10.0])
   const [subnationalAvailable, setSubnationalAvailable] = useState(true)
   const selectableCountryKey = selectableCountryIso2.join(',')
 
