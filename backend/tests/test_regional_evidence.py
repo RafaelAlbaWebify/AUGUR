@@ -781,3 +781,28 @@ def test_oecd_fua_green_and_commute_metrics_surface_when_cached(monkeypatch):
     assert by_id["urban_green_area_per_capita_m2"]["value"] == 146.0
     assert by_id["urban_green_area_share"]["status"] == "available"
     assert by_id["urban_green_area_share"]["value"] == 47.3
+
+
+def test_eurostat_regional_display_contract_matches_ingestion():
+    """Do not let dashboard source semantics drift from stored ingestion values."""
+    from app.ingestion.eurostat_regional_health import REGIONAL_HEALTH_SERIES
+    from app.ingestion.eurostat_regional_housing import REGIONAL_HOUSING_SERIES
+
+    display = {item["indicator_id"]: item for item in REGIONAL_INDICATORS}
+    for config in [*REGIONAL_HEALTH_SERIES, *REGIONAL_HOUSING_SERIES]:
+        rendered = display[config["indicator_id"]]
+        assert rendered["dataset_id"] == config["dataset_id"]
+        assert rendered["unit"] == config["unit"]
+        assert rendered["filters"] == {
+            key: value for key, value in config["filters"].items()
+            if key != "geoLevel"
+        }
+
+
+def test_unmet_health_uses_selected_barrier_reason_not_any_need():
+    unmet = next(item for item in REGIONAL_INDICATORS
+                 if item["indicator_id"] == "regional_unmet_medical_needs")
+    assert unmet["filters"]["reason"] == "TXP_TFAR_WLIST"
+    assert "cost" in unmet["name"].lower()
+    assert "distance" in unmet["name"].lower()
+    assert "waiting list" in unmet["name"].lower()
