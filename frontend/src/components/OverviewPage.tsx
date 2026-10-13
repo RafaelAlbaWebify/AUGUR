@@ -1,4 +1,4 @@
-import { useEffect, useState, type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type PointerEvent as ReactPointerEvent } from 'react'
 import RegionalMap from './RegionalMap'
 import { countryVisual } from '../lib/countryVisuals'
 import './overview-page.css'
@@ -458,6 +458,34 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
+  const workspaceRef = useRef<HTMLDivElement | null>(null)
+  const activeResize = useRef<'left' | 'right' | null>(null)
+
+  const resizeWorkspace = (event: ReactPointerEvent<HTMLButtonElement>, side: 'left' | 'right') => {
+    if (event.type === 'pointerdown') {
+      activeResize.current = side
+      event.currentTarget.setPointerCapture(event.pointerId)
+      return
+    }
+    if (event.type === 'pointerup' || event.type === 'pointercancel') {
+      activeResize.current = null
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId)
+      }
+      return
+    }
+    if (event.type !== 'pointermove' || activeResize.current !== side) return
+    const bounds = workspaceRef.current?.getBoundingClientRect()
+    if (!bounds || bounds.width <= 0) return
+    const pct = ((event.clientX - bounds.left) / bounds.width) * 100
+    setWorkspaceLayout((previous) => {
+      if (side === 'left') {
+        return { ...previous, left: Math.max(18, Math.min(35, 70 - previous.right, pct)) }
+      }
+      return { ...previous, right: Math.max(22, Math.min(40, 70 - previous.left, 100 - pct)) }
+    })
+  }
+
   const [workspaceLayout, setWorkspaceLayout] = useState(() => {
     const defaults = { left: 25, right: 30 }
     try {
@@ -794,11 +822,41 @@ export default function OverviewPage({
         </div>
       </header>
 
-      <div className="countryRadarHero workspaceV2"
+      <div ref={workspaceRef} className="countryRadarHero workspaceV2"
         style={{
           '--workspace-left': `${workspaceLayout.left}%`,
           '--workspace-right': `${workspaceLayout.right}%`,
         } as CSSProperties}>
+        <button type="button" className="workspaceSplitter workspaceSplitterLeft"
+          aria-label="Resize country and map panels" aria-valuemin={18} aria-valuemax={35}
+          aria-valuenow={workspaceLayout.left} role="separator" aria-orientation="vertical"
+          onPointerDown={(event) => resizeWorkspace(event, 'left')}
+          onPointerMove={(event) => resizeWorkspace(event, 'left')}
+          onPointerUp={(event) => resizeWorkspace(event, 'left')}
+          onPointerCancel={(event) => resizeWorkspace(event, 'left')}
+          onKeyDown={(event) => {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+            event.preventDefault()
+            setWorkspaceLayout((previous) => ({
+              ...previous, left: Math.max(18, Math.min(35, 70 - previous.right,
+                previous.left + (event.key === 'ArrowRight' ? 1 : -1))),
+            }))
+          }} />
+        <button type="button" className="workspaceSplitter workspaceSplitterRight"
+          aria-label="Resize map and evidence panels" aria-valuemin={22} aria-valuemax={40}
+          aria-valuenow={workspaceLayout.right} role="separator" aria-orientation="vertical"
+          onPointerDown={(event) => resizeWorkspace(event, 'right')}
+          onPointerMove={(event) => resizeWorkspace(event, 'right')}
+          onPointerUp={(event) => resizeWorkspace(event, 'right')}
+          onPointerCancel={(event) => resizeWorkspace(event, 'right')}
+          onKeyDown={(event) => {
+            if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
+            event.preventDefault()
+            setWorkspaceLayout((previous) => ({
+              ...previous, right: Math.max(22, Math.min(40, 70 - previous.left,
+                previous.right + (event.key === 'ArrowLeft' ? 1 : -1))),
+            }))
+          }} />
         <section className="countryIdentityCard">
           <img
             className="countryHeroImage"
