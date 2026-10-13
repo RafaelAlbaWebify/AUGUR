@@ -45,3 +45,7 @@ Real local ES/IE/PT coverage export was contrasted with configured Eurostat data
 ## World expansion compatibility — 2026-10-10
 
 [Global expansion contract](GLOBAL_EXPANSION_CONTRACT.md) introduces country-agnostic evidence compatibility checks and an explicit coverage matrix by indicator, provider, geographic level/system, and period. This is a reusable guardrail, not automatic world ingestion. New country onboarding is **not accepted** until official geography/source discovery, ingestion adapter compatibility, observed data and country+region+city acceptance are proven. Next priority: migrate source-specific ingest orchestration and test an actual non-EU country/region/city. No invented worldwide completion estimate.
+
+## Current checkpoint — 2026-10-13
+
+G2 local geographic reconciliation **accepted** after exact 18-table comparison, zero invalid-current labels, user-run real data-layer acceptance, verified backup and controlled adoption. AUGUR booted afterwards; operability is partial only because TTV temporal model remains externally uncalibrated. PR #33 Country Radar copy cleanup merged with green CI. **Next: G3 observed source/unit/period coverage**, then national journeys and product release gates. Recheck local browser UX separately; 189 same-code territorial vintage groups remain unverified, not false-certified.
