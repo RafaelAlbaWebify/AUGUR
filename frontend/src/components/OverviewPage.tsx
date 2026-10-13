@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import RegionalMap from './RegionalMap'
 import { countryVisual } from '../lib/countryVisuals'
 import './overview-page.css'
@@ -458,6 +458,29 @@ export default function OverviewPage({
   formatValue,
   dimensionLabels,
 }: OverviewPageProps) {
+  const [workspaceLayout, setWorkspaceLayout] = useState(() => {
+    const defaults = { left: 25, right: 30 }
+    try {
+      const saved = JSON.parse(window.localStorage.getItem('augur.countryWorkspace.v2') ?? 'null') as Partial<typeof defaults> | null
+      if (saved && typeof saved.left === 'number' && typeof saved.right === 'number'
+        && saved.left >= 18 && saved.left <= 35 && saved.right >= 22 && saved.right <= 40
+        && saved.left + saved.right <= 70) {
+        return { left: saved.left, right: saved.right }
+      }
+    } catch {
+      // Invalid or inaccessible browser storage must not break Country Radar.
+    }
+    return defaults
+  })
+
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('augur.countryWorkspace.v2', JSON.stringify(workspaceLayout))
+    } catch {
+      // Private-browser storage can be unavailable. Layout remains usable.
+    }
+  }, [workspaceLayout])
+
   const [selectedRegion, setSelectedRegion] = useState<{
     id: string
     name: string
@@ -750,9 +773,32 @@ export default function OverviewPage({
           <span>1. COUNTRY RADAR / Overview</span>
           <h2>{selectedCountryName} — country trajectory</h2>
         </div>
+        <div className="workspaceControls" aria-label="Workspace panel sizing">
+          <label>Country
+            <input type="range" aria-label="Country panel width" min="18" max="35" value={workspaceLayout.left}
+              onChange={(event) => setWorkspaceLayout((previous) => ({
+                ...previous,
+                left: Math.min(Number(event.target.value), 70 - previous.right),
+              }))} />
+          </label>
+          <label>Evidence
+            <input type="range" aria-label="Evidence panel width" min="22" max="40" value={workspaceLayout.right}
+              onChange={(event) => setWorkspaceLayout((previous) => ({
+                ...previous,
+                right: Math.min(Number(event.target.value), 70 - previous.left),
+              }))} />
+          </label>
+          <button type="button" onClick={() => setWorkspaceLayout({ left: 25, right: 30 })}>
+            Reset layout
+          </button>
+        </div>
       </header>
 
-      <div className="countryRadarHero">
+      <div className="countryRadarHero workspaceV2"
+        style={{
+          '--workspace-left': `${workspaceLayout.left}%`,
+          '--workspace-right': `${workspaceLayout.right}%`,
+        } as CSSProperties}>
         <section className="countryIdentityCard">
           <img
             className="countryHeroImage"
