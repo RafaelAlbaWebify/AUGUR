@@ -3007,7 +3007,13 @@ test('Country Radar keeps country context and evidence cards visible', async ({ 
   await expect(page.getByTestId('regional-map')).toBeVisible()
   await expect(page.locator('.countryIdentityCard')).toBeVisible()
   await expect(page.locator('.countryMetricCard')).toHaveCount(10)
-  await expect(page.getByText('No single composite score.')).toBeVisible()
+  // Editorial helper copy is intentionally replaced by in-context hover help.
+  await expect(page.getByText('Key signals at a glance. No single composite score.')).toHaveCount(0)
+  await expect(page.getByText('WHAT THIS VIEW MEANS')).toHaveCount(0)
+  await expect(page.locator('.countryHeroMeta span[title*="indicators currently"]')).toBeVisible()
+  await expect(page.locator('.countryHeroMeta span[title*="Indicators classified"]')).toBeVisible()
+  await expect(page.locator('.countryMetricGrid button[title^="Open"]')).toHaveCount(10)
+  await expect(page.locator('.recentChangesPanel .radarPanelTopline [title*="Largest recorded changes"]')).toBeVisible()
 })
 
 test('Future Paths distinguishes official baseline from AUGUR model scenarios', async ({ page }) => {
