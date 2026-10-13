@@ -3288,3 +3288,101 @@ body:has(.countryRadarPage) .shell.view-overview {
     line-height: 1.2;
   }
 }
+
+/* Workspace v2: three independent panes with user-controlled proportions.
+   Overrides the legacy map-first two-column rules above this block. */
+.workspaceControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.workspaceControls label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #c7d6e0;
+  font-size: 11px;
+}
+.workspaceControls input[type="range"] {
+  width: 82px;
+  accent-color: #49c6ee;
+  cursor: ew-resize;
+}
+.workspaceControls button {
+  border: 1px solid var(--augur-border);
+  background: rgba(22, 55, 76, .8);
+  border-radius: 6px;
+  color: #dfedf4;
+  padding: 5px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+@media (min-width: 1400px) {
+  .countryRadarHero.workspaceV2 {
+    display: grid;
+    grid-template-columns:
+      minmax(0, var(--workspace-left))
+      minmax(0, calc(100% - var(--workspace-left) - var(--workspace-right) - 20px))
+      minmax(0, var(--workspace-right));
+    grid-template-rows: 350px;
+    gap: 10px;
+    align-items: stretch;
+  }
+  .countryRadarHero.workspaceV2 > .countryIdentityCard {
+    grid-column: 1;
+    grid-row: 1;
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+  }
+  .countryRadarHero.workspaceV2 > .countryRadarMap {
+    grid-column: 2;
+    grid-row: 1;
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+  }
+  .countryRadarHero.workspaceV2 > .recentChangesPanel,
+  .countryRadarHero.workspaceV2 > .geographicEvidencePanel {
+    grid-column: 3;
+    grid-row: 1;
+    height: 350px;
+    min-height: 350px;
+    max-height: 350px;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .countryRadarHero.workspaceV2 .regionalMapView,
+  .countryRadarHero.workspaceV2 .leafletAugurMap {
+    height: 290px !important;
+    min-height: 290px !important;
+  }
+  .countryRadarHero.workspaceV2 .recentChangeList {
+    display: grid;
+    grid-template-columns: 1fr;
+    max-height: none;
+    overflow: visible;
+  }
+  .countryRadarHero.workspaceV2 .recentChangeList article {
+    padding: 5px 8px;
+  }
+  .countryRadarHero.workspaceV2 .signalSplit {
+    padding: 5px;
+    gap: 5px;
+  }
+  .countryRadarHero.workspaceV2 .signalSplit > div {
+    padding: 5px;
+    gap: 3px;
+  }
+  .countryRadarHero.workspaceV2 .radarPanelTopline {
+    padding: 7px 9px;
+  }
+}
+@media (max-width: 1399px) {
+  .workspaceControls {
+    flex-wrap: wrap;
+  }
+  .workspaceControls input[type="range"] {
+    width: 60px;
+  }
+}
