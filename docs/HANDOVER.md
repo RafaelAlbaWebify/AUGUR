@@ -118,3 +118,7 @@ Added `python -m scripts.audit_legacy_nuts_vintage --output <file.json>`, a read
 ## Next session handover — 2026-10-13
 
 G2 local reconciliation and application data-layer acceptance finished and adopted with rollback backup. Full G2 details in ROADMAP/VALIDATION. Latest merged UI PR #33 removed redundant Country Radar copy and added hover help; CI green, fresh local visual acceptance pending. Next highest priority: G3 real source/unit/period audit on current local store; reuse existing G3 provenance exporter rather than inventing another standalone verification module. Do not repeat the 18-table diff or historical NUTS correction. Product launch status remains partial only due to externally gated TTV, with analysis readiness separately assessed.
+
+## Active Country Radar follow-up — 2026-10-13
+
+PR #42 merged. Local three-country screenshot audit identified mainland framing issue for ESP and PRT due to country bounds including archipelagos; IRL layout acceptable. Repair planned as camera-only defaults, preserving all geometries and data, with explicit browser zoom/center contract and renewed real-browser acceptance. No local DuckDB migration, setup, or extra worktree required. G3/C1 product acceptance remains pending; do not mistake GitHub CI for visual acceptance.
