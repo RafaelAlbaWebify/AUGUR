@@ -62,6 +62,14 @@ const GISCO_NUTS0_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_0.geojson`
 const GISCO_NUTS2_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_2.geojson`
 const GISCO_NUTS3_URL = `${GISCO_BASE}/NUTS_RG_20M_2024_4326_LEVL_3.geojson`
 const GISCO_URBAN_AUDIT_CITY_URL = 'https://gisco-services.ec.europa.eu/distribution/v2/urau/geojson/URAU_LB_2024_4326_CITIES.geojson'
+// A geographically dispersed country's full outline is not a useful default
+// viewport (e.g. mainland Portugal plus the Azores, or Spain plus the Canaries).
+// This changes the camera only: all country and regional geometries remain loaded.
+const MAINLAND_VIEWS: Record<string, { lat: number; lon: number; zoom: number }> = {
+  ES: { lat: 40.15, lon: -3.7, zoom: 6 },
+  PT: { lat: 39.55, lon: -8.0, zoom: 6 },
+}
+
 const REGIONS_VISIBLE_ZOOM = 5.5
 const NUTS3_VISIBLE_ZOOM = 7
 const CITIES_VISIBLE_ZOOM = 8.5
@@ -572,7 +580,10 @@ export default function RegionalMap({
 
         // Initial country view must match the enlarged map workspace, not the
         // continent-level fallback. Keep the Europe control for broad context.
-        if (hasCountryGeometry) {
+        if (hasCountryGeometry && MAINLAND_VIEWS[countryIso2]) {
+          const view = MAINLAND_VIEWS[countryIso2]
+          map.setView([view.lat, view.lon], view.zoom, { animate: false })
+        } else if (hasCountryGeometry) {
           const selectedCountryLayers = countryLayer.getLayers().filter((layer) => {
             const feature = (layer as L.Layer & { feature?: CountryFeature }).feature
             return feature?.properties?.CNTR_CODE === countryIso2
@@ -721,6 +732,13 @@ export default function RegionalMap({
     }
 
     map.once('moveend', redrawRegions)
+
+    const mainland = MAINLAND_VIEWS[countryIso2]
+    if (mainland) {
+      map.setView([mainland.lat, mainland.lon], mainland.zoom, { animate: false })
+      requestAnimationFrame(redrawRegions)
+      return
+    }
 
     const group = L.featureGroup(selectedLayers as L.Layer[])
     map.fitBounds(group.getBounds(), {
