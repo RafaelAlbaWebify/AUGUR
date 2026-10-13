@@ -167,6 +167,7 @@ export default function RegionalMap({
   const sourceNativeLayerRef = useRef<L.GeoJSON | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [zoom, setZoom] = useState(3)
+  const [mapCenter, setMapCenter] = useState(EUROPE_VIEW)
   const [subnationalAvailable, setSubnationalAvailable] = useState(true)
   const selectableCountryKey = selectableCountryIso2.join(',')
 
@@ -205,7 +206,12 @@ export default function RegionalMap({
 
     map.attributionControl.setPrefix('Leaflet')
     const syncZoom = () => setZoom(map.getZoom())
+    const syncCenter = () => {
+      const center = map.getCenter()
+      setMapCenter([center.lat, center.lng])
+    }
     map.on('zoomend', syncZoom)
+    map.on('moveend', syncCenter)
 
     mapRef.current = map
 
@@ -215,6 +221,7 @@ export default function RegionalMap({
     return () => {
       resizeObserver.disconnect()
       map.off('zoomend', syncZoom)
+      map.off('moveend', syncCenter)
       map.remove()
       mapRef.current = null
     }
@@ -782,6 +789,7 @@ export default function RegionalMap({
         data-testid="regional-map"
         data-map-status={status}
         data-map-zoom={zoom.toFixed(1)}
+        data-map-center={`${mapCenter[0].toFixed(2)},${mapCenter[1].toFixed(2)}`}
         aria-label="Interactive map with progressive regional detail"
       />
 
