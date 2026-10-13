@@ -5,6 +5,7 @@ from time import monotonic
 
 from app.db.analytics import (
     latest_subnational_observations,
+    stored_regional_indicator_coverage,
     subnational_indicator_series,
     regional_evidence_bundle,
     upsert_subnational_observations,
@@ -449,6 +450,16 @@ def _regional_result_from_local(
                 "unit": config.get("unit"),
                 "history": [],
             })
+
+    if local_level in {"nuts2", "nuts3"} and local_system:
+        coverage_by_id = stored_regional_indicator_coverage(
+            local_system, local_level, code,
+            [item["indicator_id"] for item in indicators],
+        )
+        for item in indicators:
+            coverage = coverage_by_id.get(item["indicator_id"])
+            if coverage:
+                item["regional_coverage"] = coverage
 
     available_count = sum(
         1
