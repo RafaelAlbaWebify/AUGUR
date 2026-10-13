@@ -1700,8 +1700,8 @@ test('Overview reveals and selects official NUTS 2 regions', async ({ page }) =>
   const map = page.getByTestId('regional-map')
   await expect(map).toBeVisible()
   await expect(map.locator('.leaflet-control-zoom-in')).toBeVisible()
-  await expect(page.getByText('Zoom in to reveal available regional detail')).toBeVisible()
   await expect(map).toHaveAttribute('data-map-status', 'ready')
+  await expect(page.getByText('NUTS 2 regions visible')).toBeVisible()
 
   await page.getByRole('button', { name: 'Focus country' }).click()
 
@@ -2722,16 +2722,17 @@ test('TTV development exchange can export and import from My Fit', async ({ page
   })
 })
 
-test('map starts broad and exposes regional detail when country is focused', async ({ page }) => {
+test('map starts focused, returns to Europe, and restores regional detail', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
   const map = page.getByTestId('regional-map')
-  await expect(map).toBeVisible()
-  await expect(map.locator('.nuts2Boundary')).toHaveCount(0)
   await expect(map).toHaveAttribute('data-map-status', 'ready')
+  await expect.poll(async () => map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
+  await page.getByRole('button', { name: 'Europe', exact: true }).click()
+  await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBe(3)
+  await expect(map.locator('.nuts2Boundary')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Focus country' }).click()
-
   await expect.poll(async () => map.locator('.nuts2Boundary').count()).toBeGreaterThan(0)
 })
 
