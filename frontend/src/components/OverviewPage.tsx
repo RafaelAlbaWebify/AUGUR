@@ -133,6 +133,13 @@ type RegionalIndicator = {
   reason?: string
   category?: string
   history?: Array<{ period: number; value: number }>
+  regional_coverage?: {
+    observed: number
+    registered: number
+    period: number
+    scope: 'locally_registered_geographies'
+    country_iso3: string
+  }
 }
 
 type RegionalSector = {
@@ -1327,7 +1334,12 @@ export default function OverviewPage({
                 <span className="countryMetricPeerBadge">
                   {indicator.status === 'available' ? observationAgeLabel(indicator.period) : 'Coverage gap'}
                 </span>
-                <span>{indicator.source_id.replaceAll('_', ' ')} · {indicator.dataset_id}</span>
+                <span title={indicator.regional_coverage ? 'Same-year observations among locally registered regions; not official nationwide completeness.' : undefined}>
+                  {indicator.regional_coverage
+                    ? `${indicator.regional_coverage.observed}/${indicator.regional_coverage.registered} registered · ${indicator.regional_coverage.period} · `
+                    : ''}
+                  {indicator.source_id.replaceAll('_', ' ')} · {indicator.dataset_id}
+                </span>
               </div>
             </article>
           ))}
