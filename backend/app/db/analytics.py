@@ -3275,6 +3275,70 @@ def city_evidence_bundle(
         con.close()
 
 
+
+def stored_regional_indicator_coverage(
+    geography_system: str,
+    geo_level: str,
+    geo_code: str,
+    indicator_ids: list[str],
+) -> dict[str, dict]:
+    """Registered-denominator coverage only; never claims official completeness.
+
+    Counts observed geographies for each indicator at its countrywide latest
+    stored period. The denominator is locally registered geographies in the
+    same system, level and country as the selected code.
+    """
+    if not indicator_ids:
+        return {}
+    con = duckdb.connect(str(settings.duckdb_path), read_only=True)
+    try:
+        country_row = con.execute("""
+            SELECT country_iso3 FROM geography_registry
+            WHERE geography_system = ? AND LOWER(geo_level) = LOWER(?)
+              AND source_geo_code = ?
+            LIMIT 1
+        """, [geography_system, geo_level, geo_code]).fetchone()
+        if not country_row:
+            return {}
+        country = country_row[0]
+        registered = [
+            row[0] for row in con.execute("""
+                SELECT DISTINCT source_geo_code FROM geography_registry
+                WHERE country_iso3 = ? AND geography_system = ?
+                  AND LOWER(geo_level) = LOWER(?)
+            """, [country, geography_system, geo_level]).fetchall()
+        ]
+        if not registered:
+            return {}
+        placeholders = ",".join("?" for _ in indicator_ids)
+        rows = con.execute(f"""
+            SELECT indicator_id, period, COUNT(DISTINCT geo_code)
+            FROM subnational_observations
+            WHERE geography_system = ? AND LOWER(geo_level) = LOWER(?)
+              AND indicator_id IN ({placeholders})
+              AND geo_code IN (
+                SELECT source_geo_code FROM geography_registry
+                WHERE country_iso3 = ? AND geography_system = ?
+                  AND LOWER(geo_level) = LOWER(?)
+              )
+            GROUP BY indicator_id, period
+        """, [geography_system, geo_level, *indicator_ids,
+              country, geography_system, geo_level]).fetchall()
+        out = {}
+        for indicator_id in indicator_ids:
+            periods = [(int(y), int(n)) for i, y, n in rows if i == indicator_id]
+            if periods:
+                latest, count = max(periods, key=lambda t: t[0])
+                out[indicator_id] = {
+                    "observed": count, "registered": len(registered),
+                    "period": latest, "scope": "locally_registered_geographies",
+                    "country_iso3": country,
+                }
+        return out
+    finally:
+        con.close()
+
+
 def regional_evidence_bundle(
     geo_code: str,
     max_history_points: int = 8,
