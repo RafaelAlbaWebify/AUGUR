@@ -734,7 +734,6 @@ export default function OverviewPage({
           <span>1. COUNTRY RADAR / Overview</span>
           <h2>{selectedCountryName} — country trajectory</h2>
         </div>
-        <p>Key signals at a glance. No single composite score.</p>
       </header>
 
       <div className="countryRadarHero">
@@ -754,8 +753,8 @@ export default function OverviewPage({
 
           <div className="countryHeroMeta">
             <span>{selectedCountry}</span>
-            <span>{currentIndicators.length} indicators</span>
-            <span>{directional}/{total || '—'} directional</span>
+            <span title="Number of indicators currently available in this country overview.">{currentIndicators.length} indicators</span>
+            <span title="Indicators classified as improving or deteriorating within the current country assessment.">{directional}/{total || '—'} directional</span>
           </div>
 
           <div className="countryHeroBottom">
@@ -1225,7 +1224,7 @@ export default function OverviewPage({
         ) : (
         <section className="recentChangesPanel">
           <div className="radarPanelTopline">
-            <div><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
+            <div title="Largest recorded changes among the indicators shown; the observation dates are shown below each signal."><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
           </div>
           <div className="recentChangeList">
             {recentChanges.map((item) => (
@@ -1353,6 +1352,7 @@ export default function OverviewPage({
               className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
               onClick={() => item ? onOpenDimension(item.dimension) : undefined}
               disabled={!item}
+              title={item ? `Open ${label} to inspect its indicators, sources and trends. This is not a composite country ranking.` : `${label}: evidence unavailable.`}
             >
               <div className="countryMetricTop">
                 <span>{label}</span>
@@ -1416,15 +1416,6 @@ export default function OverviewPage({
         </section>
       )}
 
-      <section className="countryRadarFooter">
-        <div>
-          <span>WHAT THIS VIEW MEANS</span>
-          <strong>Level + direction + evidence, not a universal ranking</strong>
-        </div>
-        <p>
-          Open any domain to inspect the contributing indicators, source quality and disagreements before treating a trajectory as decision evidence.
-        </p>
-      </section>
     </section>
   )
 }
