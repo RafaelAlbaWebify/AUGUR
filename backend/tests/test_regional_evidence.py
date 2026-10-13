@@ -811,7 +811,8 @@ def test_unmet_health_uses_selected_barrier_reason_not_any_need():
 def test_registered_regional_coverage_is_same_year_and_system_scoped(tmp_path, monkeypatch):
     """3/3 registered must not imply 3/3 observed at the latest same year."""
     import duckdb
-    from app.core.config import settings
+    from types import SimpleNamespace
+    from app.db import analytics as analytics_module
     from app.db.analytics import stored_regional_indicator_coverage
 
     db_path = tmp_path / "coverage.duckdb"
@@ -845,7 +846,7 @@ def test_registered_regional_coverage_is_same_year_and_system_scoped(tmp_path, m
     finally:
         con.close()
 
-    monkeypatch.setattr(settings, "duckdb_path", db_path)
+    monkeypatch.setattr(analytics_module, "settings", SimpleNamespace(duckdb_path=db_path))
     result = stored_regional_indicator_coverage(
         "NUTS_2024", "nuts3", "ES111", ["crime", "missing"]
     )
