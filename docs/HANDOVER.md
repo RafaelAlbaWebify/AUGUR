@@ -122,3 +122,7 @@ G2 local reconciliation and application data-layer acceptance finished and adopt
 ## Active Country Radar follow-up — 2026-10-13
 
 PR #42 merged. Local three-country screenshot audit identified mainland framing issue for ESP and PRT due to country bounds including archipelagos; IRL layout acceptable. Repair planned as camera-only defaults, preserving all geometries and data, with explicit browser zoom/center contract and renewed real-browser acceptance. No local DuckDB migration, setup, or extra worktree required. G3/C1 product acceptance remains pending; do not mistake GitHub CI for visual acceptance.
+
+## Country Workspace v2 implementation checkpoint — 2026-10-13
+
+A feature branch `feature/configurable-country-workspace-v2` now contains a three-pane desktop grid with bounded live width controls, browser-local persistence and reset; original country, regional evidence and map data paths are retained. A Playwright regression for pane ordering and persistence has been added. This is **implementation only**: no local TypeScript build, full Playwright preflight, CI, or real-world visual acceptance has been completed. The width controls are sliders, not yet direct-grab splitters. Visibility controls, indicator selection/order, and presets remain unimplemented; do not merge or claim that the configurable workbench is complete. The next step is to validate/refine layout against 1650×900 and actual ESP/PRT/IRL regional journeys before publishing a release candidate.
