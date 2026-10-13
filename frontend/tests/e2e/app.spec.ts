@@ -3075,8 +3075,9 @@ test('Country Radar stays readable at 1920x900', async ({ page }) => {
 
   for (const value of Object.values(boxes)) expect(value).not.toBeNull()
   expect(boxes.identity!.right).toBeLessThanOrEqual(boxes.map!.left)
-  expect(boxes.changes!.right).toBeLessThanOrEqual(boxes.map!.left)
-  expect(boxes.identity!.bottom).toBeLessThanOrEqual(boxes.changes!.top)
+  expect(boxes.map!.right).toBeLessThanOrEqual(boxes.changes!.left)
+  expect(Math.abs(boxes.identity!.top - boxes.map!.top)).toBeLessThanOrEqual(2)
+  expect(Math.abs(boxes.changes!.top - boxes.map!.top)).toBeLessThanOrEqual(2)
   expect(boxes.metrics!.top).toBeGreaterThan(boxes.map!.bottom)
 })
 
