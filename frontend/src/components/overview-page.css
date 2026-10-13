@@ -3265,7 +3265,26 @@ body:has(.countryRadarPage) .shell.view-overview {
   }
 
   .countryRadarHero > .recentChangesPanel .signalSplit {
-    margin-top: 4px;
-    padding-top: 5px;
+    margin-top: 2px;
+    padding: 3px 6px 5px;
+    gap: 5px;
+  }
+
+  .countryRadarHero > .recentChangesPanel .signalSplit > div {
+    padding: 5px;
+    gap: 2px;
+  }
+
+  .countryRadarHero > .recentChangesPanel .radarPanelTopline {
+    padding: 6px 9px;
+  }
+
+  .countryRadarHero > .recentChangesPanel .viewAllChanges {
+    margin: 4px 9px 0;
+  }
+
+  .countryRadarHero > .recentChangesPanel .signalSplit span {
+    font-size: 7px;
+    line-height: 1.2;
   }
 }
