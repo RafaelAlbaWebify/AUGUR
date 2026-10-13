@@ -2119,6 +2119,31 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
+test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page }) => {
+  await page.setViewportSize({ width: 1650, height: 900 })
+  await page.goto('/country/ESP/overview')
+  await expect(page.getByTestId('regional-map')).toHaveAttribute('data-map-status', 'ready')
+  const geometry = await page.evaluate(() => {
+    const bounds = (selector: string) => document.querySelector(selector)?.getBoundingClientRect()
+    const panel = bounds('.countryRadarHero')
+    const metricGrid = bounds('.countryMetricGrid')
+    const cards = [...document.querySelectorAll('.countryMetricCard')]
+    const lastCard = cards.at(-1)?.getBoundingClientRect()
+    const changes = document.querySelector('.countryRadarHero > .recentChangesPanel')
+    const lastSignals = changes?.querySelector('.signalSplit')?.getBoundingClientRect()
+    const changesBox = changes?.getBoundingClientRect()
+    return {
+      heroBottom: panel?.bottom ?? Infinity,
+      gridTop: metricGrid?.top ?? -Infinity,
+      lastCardBottom: lastCard?.bottom ?? Infinity,
+      signalsVisible: !!lastSignals && !!changesBox && lastSignals.bottom <= changesBox.bottom + 2,
+    }
+  })
+  expect(geometry.gridTop).toBeGreaterThanOrEqual(geometry.heroBottom)
+  expect(geometry.lastCardBottom).toBeLessThanOrEqual(900)
+  expect(geometry.signalsVisible).toBe(true)
+})
+
 test('Country Radar focuses the country and keeps recent changes readable', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
