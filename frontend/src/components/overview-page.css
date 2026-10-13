@@ -3128,3 +3128,64 @@ body:has(.countryRadarPage) .shell.view-overview {
     min-height: 0;
   }
 }
+
+
+/* Map-first Country Radar: the map is an interactive working surface, not a
+   thumbnail. Reuse the horizontal space previously spent on three hero
+   columns. The identity and change rail share the narrower left column.
+   Scrolling below the fold is intentional at short desktop heights. */
+@media (min-width: 1280px) {
+  .countryRadarHero {
+    display: grid;
+    grid-template-columns: minmax(260px, 28fr) minmax(0, 72fr);
+    grid-template-rows: 205px 205px;
+    gap: 10px;
+  }
+
+  .countryRadarHero > .countryIdentityCard {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .countryRadarHero > .recentChangesPanel {
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+    overflow: hidden;
+  }
+
+  .countryRadarHero > .countryRadarMap {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+
+  .countryRadarHero > .countryIdentityCard,
+  .countryRadarHero > .recentChangesPanel {
+    height: 205px;
+    min-height: 205px;
+    max-height: 205px;
+  }
+
+  .countryRadarHero > .countryRadarMap {
+    height: 420px;
+    min-height: 420px;
+    max-height: none;
+  }
+
+  .countryRadarMap .leafletAugurMap,
+  .countryRadarMap .regionalMapView {
+    height: 364px !important;
+    min-height: 364px !important;
+  }
+
+  .countryRadarHero .recentChangeList {
+    max-height: 145px;
+    overflow-y: auto;
+  }
+}
+
+@media (min-width: 1280px) and (max-width: 1450px) {
+  .countryRadarHero {
+    grid-template-columns: minmax(260px, 31fr) minmax(0, 69fr);
+  }
+}
