@@ -3189,3 +3189,15 @@ body:has(.countryRadarPage) .shell.view-overview {
     grid-template-columns: minmax(260px, 31fr) minmax(0, 69fr);
   }
 }
+
+/* Selected geography evidence belongs in its own row, not the changes rail. */
+@media (min-width: 1280px) {
+  .countryRadarHero > .geographicEvidencePanel {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+}
