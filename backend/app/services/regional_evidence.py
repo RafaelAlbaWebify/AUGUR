@@ -23,7 +23,7 @@ _REGIONAL_CACHE: dict[str, tuple[float, dict]] = {}
 REGIONAL_INDICATORS = [
     {
         "indicator_id": "regional_unmet_medical_needs",
-        "name": "Unmet medical examination needs",
+        "name": "Unmet medical examination needs — cost, distance or waiting list",
         "dataset_id": "hlth_silc_08_r",
         "filters": {
             "freq": "A",
