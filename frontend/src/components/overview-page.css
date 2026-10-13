@@ -3386,3 +3386,51 @@ body:has(.countryRadarPage) .shell.view-overview {
     width: 60px;
   }
 }
+
+/* Accessible drag separators: width changes invalidate Leaflet via ResizeObserver. */
+@media (min-width: 1400px) {
+  .countryRadarHero.workspaceV2 {
+    position: relative;
+  }
+  .workspaceV2 .workspaceSplitter {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    z-index: 450;
+    width: 12px;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: col-resize;
+    touch-action: none;
+    transform: translateX(-50%);
+  }
+  .workspaceV2 .workspaceSplitter::after {
+    content: '';
+    position: absolute;
+    top: 35%;
+    bottom: 35%;
+    left: 4px;
+    width: 4px;
+    border-radius: 8px;
+    background: #7ba4b9;
+  }
+  .workspaceV2 .workspaceSplitter:hover::after,
+  .workspaceV2 .workspaceSplitter:focus-visible::after {
+    background: #51d4f7;
+  }
+  .workspaceV2 .workspaceSplitter:focus-visible {
+    outline: 2px solid #51d4f7;
+  }
+  .workspaceV2 .workspaceSplitterLeft {
+    left: calc(var(--workspace-left) + 5px);
+  }
+  .workspaceV2 .workspaceSplitterRight {
+    left: calc(100% - var(--workspace-right) - 5px);
+  }
+}
+@media (max-width: 1399px) {
+  .workspaceV2 .workspaceSplitter { display: none; }
+}
