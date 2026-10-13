@@ -112,6 +112,15 @@ type ComparisonResponse = {
   indicators: ComparisonIndicator[]
 }
 
+/** Observation year is data time, never the 2026 ingestion timestamp. */
+function observationAgeLabel(period?: number): string {
+  if (period == null || !Number.isFinite(period)) return 'Period unavailable'
+  const age = new Date().getFullYear() - period
+  return age >= 5 ? `Historical observation · ${period} (${age} years old)`
+    : age >= 2 ? `Earlier observation · ${period}`
+    : `Observed ${period}`
+}
+
 type RegionalIndicator = {
   indicator_id: string
   name: string
@@ -1016,7 +1025,7 @@ export default function OverviewPage({
                                 </strong>
                                 <small>
                                   {indicator.status === 'available'
-                                    ? `${indicator.period} · ${indicator.source_id} · ${indicator.dataset_id}`
+                                    ? `${observationAgeLabel(indicator.period)} · ${indicator.source_id} · ${indicator.dataset_id}`
                                     : 'Official city observation unavailable'}
                                 </small>
                               </article>
@@ -1290,10 +1299,10 @@ export default function OverviewPage({
                       : '—'}
                   </div>
                   <div className="countryMetricTrend">
-                    <strong>{indicator.period ?? '—'}</strong>
+                    <strong title={observationAgeLabel(indicator.period)}>{indicator.period ?? '—'}</strong>
                     <span>
                       {indicator.status === 'available'
-                        ? regionalChangeLabel(indicator.history) ?? 'latest regional observation'
+                        ? regionalChangeLabel(indicator.history) ?? observationAgeLabel(indicator.period)
                         : 'regional evidence unavailable'}
                     </span>
                   </div>
@@ -1316,7 +1325,7 @@ export default function OverviewPage({
 
               <div className="countryMetricFooter">
                 <span className="countryMetricPeerBadge">
-                  {indicator.status === 'available' ? 'Regional evidence' : 'Coverage gap'}
+                  {indicator.status === 'available' ? observationAgeLabel(indicator.period) : 'Coverage gap'}
                 </span>
                 <span>{indicator.source_id.replaceAll('_', ' ')} · {indicator.dataset_id}</span>
               </div>
