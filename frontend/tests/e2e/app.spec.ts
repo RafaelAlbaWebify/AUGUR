@@ -2096,6 +2096,29 @@ test('Dimension Detail separates supporting opposing and contextual evidence', a
   await expect(page.locator('.dimensionSignalLane.contextual')).toBeVisible()
 })
 
+test('Country Radar focuses the country and keeps recent changes readable', async ({ page }) => {
+  await page.setViewportSize({ width: 1650, height: 900 })
+  await page.goto('/country/ESP/overview')
+
+  const map = page.getByTestId('regional-map')
+  await expect(map).toHaveAttribute('data-map-status', 'ready')
+  await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(5.5)
+
+  const changes = page.locator('.countryRadarHero > .recentChangesPanel')
+  await expect(changes).toBeVisible()
+  const isUnclipped = await changes.evaluate((element) => {
+    const panel = element.getBoundingClientRect()
+    const content = element.querySelector('.signalSplit')?.getBoundingClientRect()
+    return !!content && content.bottom <= panel.bottom + 2
+  })
+  expect(isUnclipped).toBe(true)
+
+  await page.getByRole('button', { name: 'Europe', exact: true }).click()
+  await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBe(3)
+  await page.getByRole('button', { name: 'Focus country' }).click()
+  await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(5.5)
+})
+
 test('regional map renders clickable country context and geographic controls', async ({ page }) => {
   await page.goto('/country/ESP/overview')
 
