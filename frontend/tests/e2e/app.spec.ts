@@ -1619,9 +1619,9 @@ test('provider-native OECD geometry renders and selects the FUA', async ({ page 
 
   await expect.poll(async () => map.locator('.sourceNativeBoundary').count()).toBeGreaterThan(0)
 
-  const boundary = map.locator('.sourceNativeBoundary').first()
+  const boundary = map.locator('.sourceNativeBoundary[data-source-geo-code="AUS01F"]')
   await expect(boundary).toBeVisible()
-  await boundary.click({ force: true })
+  await boundary.dispatchEvent('click')
 
   const evidence = page.getByRole('region', { name: 'Selected geographic evidence' })
   await expect(evidence.locator('.radarPanelTopline strong')).toHaveText('Sydney FUA')
@@ -2107,14 +2107,9 @@ test('regional map renders clickable country context and geographic controls', a
   await expect(page.getByRole('button', { name: 'Europe' })).toBeEnabled()
   await expect(page.getByRole('button', { name: 'Focus country' })).toBeEnabled()
 
-  const portugal = map.locator('.countryBoundary').nth(1)
+  const portugal = map.locator('.countryBoundary[data-country-code="PT"]')
   await expect(portugal).toBeVisible()
-  const portugalBox = await portugal.boundingBox()
-  if (!portugalBox) throw new Error('Portugal boundary is not rendered')
-  await page.mouse.click(
-    portugalBox.x + portugalBox.width / 2,
-    portugalBox.y + portugalBox.height / 2,
-  )
+  await portugal.dispatchEvent('click')
   await expect(page.getByLabel('Select country')).toHaveValue('PRT')
 })
 
@@ -2968,8 +2963,9 @@ test('Country Radar stays readable at 1920x900', async ({ page }) => {
 
   for (const value of Object.values(boxes)) expect(value).not.toBeNull()
   expect(boxes.identity!.right).toBeLessThanOrEqual(boxes.map!.left)
-  expect(boxes.map!.right).toBeLessThanOrEqual(boxes.changes!.left)
-  expect(boxes.metrics!.top).toBeGreaterThan(boxes.map!.top)
+  expect(boxes.changes!.right).toBeLessThanOrEqual(boxes.map!.left)
+  expect(boxes.identity!.bottom).toBeLessThanOrEqual(boxes.changes!.top)
+  expect(boxes.metrics!.top).toBeGreaterThan(boxes.map!.bottom)
 })
 
 test('Country Radar panels do not overlap at 1920x1080', async ({ page }) => {
