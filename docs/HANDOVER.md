@@ -114,3 +114,7 @@ The live Eurostat/GISCO reconciliation exposed a semantic storage risk: a NUTS-s
 ## Legacy NUTS_2024 local audit — 2026-10-10
 
 Added `python -m scripts.audit_legacy_nuts_vintage --output <file.json>`, a read-only operator audit for databases that may contain rows written before the implicit-vintage fix. It checks locally stored `NUTS_2024` NUTS2/NUTS3 observation groups and registry rows against live GISCO NUTS 2024. A code absent from GISCO is classified as a definite invalid current-vintage claim; a code present in GISCO remains `code_current_observation_vintage_unverified` because code membership alone cannot certify historical boundaries. The tool performs no mutation. Actual G2 local acceptance still requires running it against the user's persistent DuckDB and reviewing the generated JSON.
+
+## Next session handover — 2026-10-13
+
+G2 local reconciliation and application data-layer acceptance finished and adopted with rollback backup. Full G2 details in ROADMAP/VALIDATION. Latest merged UI PR #33 removed redundant Country Radar copy and added hover help; CI green, fresh local visual acceptance pending. Next highest priority: G3 real source/unit/period audit on current local store; reuse existing G3 provenance exporter rather than inventing another standalone verification module. Do not repeat the 18-table diff or historical NUTS correction. Product launch status remains partial only due to externally gated TTV, with analysis readiness separately assessed.
