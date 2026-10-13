@@ -570,6 +570,22 @@ export default function RegionalMap({
           requestAnimationFrame(redrawProgressiveLayers)
         }
 
+        // Initial country view must match the enlarged map workspace, not the
+        // continent-level fallback. Keep the Europe control for broad context.
+        if (hasCountryGeometry) {
+          const selectedCountryLayers = countryLayer.getLayers().filter((layer) => {
+            const feature = (layer as L.Layer & { feature?: CountryFeature }).feature
+            return feature?.properties?.CNTR_CODE === countryIso2
+          })
+          const selectedBounds = L.featureGroup(selectedCountryLayers).getBounds()
+          if (selectedBounds.isValid()) {
+            map.fitBounds(selectedBounds, { padding: [32, 32], maxZoom: 6, animate: false })
+            if (map.getZoom() < REGIONS_VISIBLE_ZOOM) {
+              map.setZoom(REGIONS_VISIBLE_ZOOM, { animate: false })
+            }
+          }
+        }
+
         progressiveHandler = applyProgressiveLayers
         map.on('zoomend', applyProgressiveLayers)
         applyProgressiveLayers()
