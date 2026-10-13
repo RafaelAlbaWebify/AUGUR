@@ -806,3 +806,55 @@ def test_unmet_health_uses_selected_barrier_reason_not_any_need():
     assert "cost" in unmet["name"].lower()
     assert "distance" in unmet["name"].lower()
     assert "waiting list" in unmet["name"].lower()
+
+
+def test_registered_regional_coverage_is_same_year_and_system_scoped(tmp_path, monkeypatch):
+    """3/3 registered must not imply 3/3 observed at the latest same year."""
+    import duckdb
+    from app.core.config import settings
+    from app.db.analytics import stored_regional_indicator_coverage
+
+    db_path = tmp_path / "coverage.duckdb"
+    con = duckdb.connect(str(db_path))
+    try:
+        con.execute("""
+            CREATE TABLE geography_registry (
+                country_iso3 VARCHAR, geography_system VARCHAR,
+                geo_level VARCHAR, source_geo_code VARCHAR
+            )
+        """)
+        con.execute("""
+            CREATE TABLE subnational_observations (
+                geography_system VARCHAR, geo_level VARCHAR,
+                geo_code VARCHAR, indicator_id VARCHAR, period INTEGER
+            )
+        """)
+        con.executemany("INSERT INTO geography_registry VALUES (?, ?, ?, ?)", [
+            ("ESP", "NUTS_2024", "nuts3", "ES111"),
+            ("ESP", "NUTS_2024", "nuts3", "ES112"),
+            ("ESP", "NUTS_2024", "nuts3", "ES113"),
+            ("PRT", "NUTS_2024", "nuts3", "PT111"),
+        ])
+        con.executemany("INSERT INTO subnational_observations VALUES (?, ?, ?, ?, ?)", [
+            ("NUTS_2024", "nuts3", "ES111", "crime", 2024),
+            ("NUTS_2024", "nuts3", "ES112", "crime", 2023),
+            ("NUTS_2024", "nuts3", "ES113", "crime", 2023),
+            ("NUTS_UNSPECIFIED", "nuts3", "ES113", "crime", 2024),
+            ("NUTS_2024", "nuts3", "PT111", "crime", 2024),
+        ])
+    finally:
+        con.close()
+
+    monkeypatch.setattr(settings, "duckdb_path", db_path)
+    result = stored_regional_indicator_coverage(
+        "NUTS_2024", "nuts3", "ES111", ["crime", "missing"]
+    )
+
+    assert result["crime"] == {
+        "observed": 1,
+        "registered": 3,
+        "period": 2024,
+        "scope": "locally_registered_geographies",
+        "country_iso3": "ESP",
+    }
+    assert "missing" not in result
