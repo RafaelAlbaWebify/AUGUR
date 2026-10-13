@@ -354,6 +354,9 @@ export default function RegionalMap({
               direction: 'top',
               className: 'augurMapTooltip',
             })
+            layer.on('add', () => {
+              (layer as L.Path).getElement()?.setAttribute('data-country-code', code)
+            })
             layer.on('click', () => {
               onSelectCountryRef.current?.(code)
             })
@@ -402,6 +405,9 @@ export default function RegionalMap({
                   className: 'augurMapTooltip',
                 },
               )
+              layer.on('add', () => {
+                (layer as L.Path).getElement()?.setAttribute('data-source-geo-code', id)
+              })
               layer.on('click', () => {
                 onSelectRegionRef.current(id, name, level, system)
                 const bounds = (layer as L.Polygon).getBounds()
