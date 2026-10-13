@@ -3045,3 +3045,15 @@
   color: #e8f6fb;
   font-size: 9px;
 }
+
+/* Country Radar must scroll naturally at desktop heights. Global dashboard
+   viewport-locking rules hide content below the fold at 1600x900 and similar. */
+body:has(.countryRadarPage) {
+  overflow-y: auto !important;
+}
+
+body:has(.countryRadarPage) .shell.view-overview {
+  height: auto !important;
+  min-height: 100vh;
+  overflow: visible !important;
+}
