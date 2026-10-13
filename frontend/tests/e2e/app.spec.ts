@@ -2119,6 +2119,29 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
+test('Workspace v2 resizes and restores persistent three-pane layout', async ({ page }) => {
+  await page.setViewportSize({ width: 1650, height: 900 })
+  await page.goto('/country/ESP/overview')
+  await expect(page.getByTestId('regional-map')).toHaveAttribute('data-map-status', 'ready')
+  const hero = page.locator('.countryRadarHero.workspaceV2')
+  await expect(hero).toBeVisible()
+  const layout = async () => hero.evaluate((element) => {
+    const panels = ['.countryIdentityCard', '.countryRadarMap', '.recentChangesPanel']
+      .map((selector) => element.querySelector(selector)?.getBoundingClientRect())
+    return panels.map((box) => ({ left: box?.left ?? 0, right: box?.right ?? 0 }))
+  })
+  const before = await layout()
+  expect(before[0].right).toBeLessThanOrEqual(before[1].left)
+  expect(before[1].right).toBeLessThanOrEqual(before[2].left)
+  await page.getByRole('slider', { name: 'Country panel width' }).fill('30')
+  const changed = await layout()
+  expect(changed[0].right - changed[0].left).toBeGreaterThan(before[0].right - before[0].left)
+  await page.reload()
+  await expect(page.getByRole('slider', { name: 'Country panel width' })).toHaveValue('30')
+  await page.getByRole('button', { name: 'Reset layout' }).click()
+  await expect(page.getByRole('slider', { name: 'Country panel width' })).toHaveValue('25')
+})
+
 test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
