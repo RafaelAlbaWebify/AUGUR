@@ -23,3 +23,7 @@ Operator exported `AUGUR_G3_OBSERVATIONS.json` and `AUGUR_G3_GEOGRAPHIES.json` f
 5. **No MVP mandate:** Import every city/indicator, repair provider non-availability, or externally calibrate TTV.
 
 Disposition: **G3 audit is complete at local inventory level; G3 functional mitigation implementation and real in-app acceptance remain open.**
+
+## Confirmed Eurostat semantic issue — 2026-10-13
+
+The `regional_unmet_medical_needs` indicator uses `hlth_silc_08_r` with `reason=TXP_TFAR_WLIST`, `unit=PC`, `freq=A`. Eurostat defines this reason as **too expensive, too far to travel, or waiting list**, not unmet medical needs for any reason (`ANY` is a distinct category). Regional evidence presentation now names the selected reason explicitly to avoid incorrect generalization. Primary sources: https://ec.europa.eu/eurostat/databrowser/view/hlth_silc_08_r/default/table and https://ec.europa.eu/eurostat/cache/metadata/en/hlth_silc_01_esms.htm . This checks *semantic interpretation*, not correctness of all stored values or every source dimension; broader upstream contracts require further audit.
