@@ -3206,3 +3206,66 @@ body:has(.countryRadarPage) .shell.view-overview {
     overflow: visible;
   }
 }
+
+/* At the operator's 1650×900 desktop, keep both metric rows in the viewport.
+   Present four recent movements in two columns rather than clipping them. */
+@media (min-width: 1400px) and (min-height: 820px) and (max-height: 940px) {
+  .countryRadarPage {
+    gap: 7px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .countryRadarHero {
+    grid-template-rows: 150px 240px;
+  }
+
+  .countryRadarHero > .countryIdentityCard {
+    height: 150px;
+    min-height: 150px;
+    max-height: 150px;
+  }
+
+  .countryRadarHero > .recentChangesPanel {
+    height: 240px;
+    min-height: 240px;
+    max-height: 240px;
+    overflow: hidden;
+  }
+
+  .countryRadarHero > .countryRadarMap {
+    height: 400px;
+    min-height: 400px;
+    max-height: 400px;
+  }
+
+  .countryRadarMap .leafletAugurMap,
+  .countryRadarMap .regionalMapView {
+    height: 344px !important;
+    min-height: 344px !important;
+  }
+
+  .countryRadarHero > .recentChangesPanel .recentChangeList {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-height: none;
+    overflow: visible;
+  }
+
+  .countryRadarHero > .recentChangesPanel .recentChangeList article {
+    min-width: 0;
+    grid-template-columns: 16px minmax(0, 1fr);
+    gap: 4px;
+    padding: 4px 6px;
+  }
+
+  .countryRadarHero > .recentChangesPanel .changeArrow {
+    width: 16px;
+    height: 16px;
+  }
+
+  .countryRadarHero > .recentChangesPanel .signalSplit {
+    margin-top: 4px;
+    padding-top: 5px;
+  }
+}
