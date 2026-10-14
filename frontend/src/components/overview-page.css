@@ -3434,3 +3434,9 @@ body:has(.countryRadarPage) .shell.view-overview {
 @media (max-width: 1399px) {
   .workspaceV2 .workspaceSplitter { display: none; }
 }
+
+/* The adjustable three-pane workspace only exists at desktop widths. Do not
+   expose inactive sizing controls when the responsive layout takes over. */
+@media (max-width: 1399px) {
+  .countryRadarHeader .workspaceControls label { display: none; }
+}
