@@ -571,12 +571,31 @@ export default function OverviewPage({
       return Object.fromEntries(order.map((key, position) => [key, { ...old[key], order: position }])) as typeof old
     })
   }
+  const [floatingWindows, setFloatingWindows] = useState<Record<string, { x: number; y: number }>>(() => {
+    try { return JSON.parse(localStorage.getItem('augur.floatingWindows.v1') ?? '{}') ?? {} }
+    catch { return {} }
+  })
+  useEffect(() => {
+    try { localStorage.setItem('augur.floatingWindows.v1', JSON.stringify(floatingWindows)) }
+    catch { /* Nonpersistent fallback. */ }
+  }, [floatingWindows])
+  const floatingDrag = useRef<{ id: DockId; x: number; y: number; startX: number; startY: number } | null>(null)
+  const toggleFloating = (id: DockId) => setFloatingWindows((old) => {
+    const next = { ...old }
+    if (next[id]) delete next[id]
+    else next[id] = { x: 30, y: 30 }
+    return next
+  })
   const dockStyle = (id: DockId): CSSProperties => ({
     order: dockWidgets[id].order,
     flex: `0 0 calc(${dockWidgets[id].width}% - 10px)`,
     height: dockWidgets[id].height,
     minHeight: 160,
     display: dockWidgets[id].visible ? undefined : 'none',
+    position: floatingWindows[id] ? 'absolute' : undefined,
+    left: floatingWindows[id]?.x,
+    top: floatingWindows[id]?.y,
+    zIndex: floatingWindows[id] ? 100 : undefined,
   })
   const dockResizeSession = useRef<{ id: DockId; pointerX: number; pointerY: number; width: number; height: number; containerWidth: number } | null>(null)
   const dockResizeGrip = (id: DockId, name: string) => (
@@ -639,6 +658,25 @@ export default function OverviewPage({
           [id]: { ...old[id], order: old[source].order },
         }))
       }}>
+      <button type="button" aria-label={floatingWindows[id] ? `Dock ${name}` : `Float ${name}`}
+        onClick={() => toggleFloating(id)}>{floatingWindows[id] ? '⇲' : '▣'}</button>
+      {floatingWindows[id] ? <span className="dockFloatDrag" aria-label={`Move floating ${name}`}
+        onPointerDown={(event) => {
+          const pos = floatingWindows[id]
+          floatingDrag.current = { id, x: pos.x, y: pos.y, startX: event.clientX, startY: event.clientY }
+          event.currentTarget.setPointerCapture(event.pointerId)
+        }}
+        onPointerMove={(event) => {
+          const drag = floatingDrag.current
+          if (!drag || drag.id !== id || !event.currentTarget.hasPointerCapture(event.pointerId)) return
+          setFloatingWindows((old) => ({
+            ...old,
+            [id]: { x: Math.max(0, Math.round(drag.x + event.clientX - drag.startX)),
+              y: Math.max(0, Math.round(drag.y + event.clientY - drag.startY)) },
+          }))
+        }}
+        onPointerUp={() => { floatingDrag.current = null }}
+        onPointerCancel={() => { floatingDrag.current = null }}>⠿ Move</span> : null}
       <span className="dockDragHandle" draggable
         aria-label={`Drag ${name} window to reorder`}
         title="Drag to another window header to swap positions"
