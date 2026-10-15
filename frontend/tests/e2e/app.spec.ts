@@ -2179,6 +2179,24 @@ test('Indicator selection persists and can be restored', async ({ page }) => {
   await expect(group.getByRole('checkbox', { name: 'Economy' })).toBeChecked()
 })
 
+test('Indicator toolbar remains clickable below dock windows at desktop widths', async ({ page }) => {
+  for (const width of [1650, 1920]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/country/ESP/overview')
+    const toggle = page.locator('.indicatorWorkspaceToolbar > button').first()
+    await toggle.scrollIntoViewIfNeeded()
+    await expect(toggle).toBeVisible()
+    await expect.poll(async () => toggle.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      return top === element || element.contains(top)
+    })).toBe(true)
+    await toggle.click()
+    await expect(page.getByRole('group', { name: 'Choose visible indicators' })).toBeVisible()
+    await toggle.click()
+  }
+})
+
 test('Dock map window can float and return without losing its dimensions', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
