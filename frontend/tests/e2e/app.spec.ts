@@ -3086,6 +3086,15 @@ test('Workspace v2 captures baseline country selection at 1920x900', async ({ pa
   await page.setViewportSize({ width: 1920, height: 900 })
   await page.goto('/country/ESP/overview')
   await expect(page.getByTestId('regional-map')).toHaveAttribute('data-map-status', 'ready')
+  const visibleMapActions = await page.evaluate(() => {
+    const panel = document.querySelector('.countryRadarMap')?.getBoundingClientRect()
+    const buttons = [...document.querySelectorAll('.countryRadarMap .regionalMapActions button')]
+    return !!panel && buttons.length === 2 && buttons.every((button) => {
+      const rect = button.getBoundingClientRect()
+      return rect.top >= panel.top && rect.bottom <= panel.bottom && rect.left >= panel.left && rect.right <= panel.right
+    })
+  })
+  expect(visibleMapActions).toBe(true)
   await page.screenshot({ path: 'test-results/workspace-v2-1920x900.png', fullPage: true })
 })
 
