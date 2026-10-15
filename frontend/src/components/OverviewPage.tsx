@@ -718,7 +718,7 @@ export default function OverviewPage({
     try { localStorage.setItem('augur.cardSizes.v1', JSON.stringify(cardSizes)) } catch { /* optional persistence */ }
   }, [cardSizes])
   const resizeCardGrip = (key: string, name: string) => (
-    <button type="button" className="metricCardResizeGrip" aria-label={`Resize ${name} indicator card`}
+    <span role="separator" tabIndex={0} className="metricCardResizeGrip" aria-label={`Resize ${name} indicator card`}
       title="Drag vertically to resize this card"
       onClick={(event) => event.stopPropagation()}
       onPointerDown={(event) => {
@@ -740,7 +740,12 @@ export default function OverviewPage({
         target.addEventListener('pointermove', move)
         target.addEventListener('pointerup', end)
         target.addEventListener('pointercancel', end)
-      }}>↘</button>
+      }} onKeyDown={(event) => {
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+        event.preventDefault()
+        event.stopPropagation()
+        setCardSizes((old) => ({ ...old, [key]: Math.max(160, Math.min(620, (old[key] ?? 240) + (event.key === 'ArrowDown' ? 10 : -10))) }))
+      }}>↘</span>
   )
   const [indicatorOrder, setIndicatorOrder] = useState<Record<string, string[]>>(() => {
     try {
