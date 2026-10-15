@@ -3815,3 +3815,10 @@ body:has(.countryRadarPage) .shell.view-overview {
     border: 2px solid #5c9bb9;
   }
 }
+
+/* Widget card corner supports height and grid-span width adjustment. */
+.metricCardResizeGrip { cursor: nwse-resize; }
+.countryMetricGrid > .countryMetricCard { box-sizing: border-box; }
+@media (max-width: 700px) {
+  .countryMetricGrid > .countryMetricCard[style*="grid-column: span 2"] { grid-column: 1 / -1 !important; }
+}
