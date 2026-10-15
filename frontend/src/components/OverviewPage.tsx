@@ -710,6 +710,13 @@ export default function OverviewPage({
       return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}
     } catch { return {} }
   })
+  const [cardWidths, setCardWidths] = useState<Record<string, boolean>>(() => {
+    try { return JSON.parse(localStorage.getItem('augur.cardWidths.v1') ?? '{}') ?? {} }
+    catch { return {} }
+  })
+  useEffect(() => {
+    try { localStorage.setItem('augur.cardWidths.v1', JSON.stringify(cardWidths)) } catch { /* optional */ }
+  }, [cardWidths])
   const [cardSizes, setCardSizes] = useState<Record<string, number>>(() => {
     try { return JSON.parse(localStorage.getItem('augur.cardSizes.v1') ?? '{}') ?? {} }
     catch { return {} }
@@ -726,11 +733,14 @@ export default function OverviewPage({
         const element = event.currentTarget.closest('.countryMetricCard')
         const originalHeight = element?.getBoundingClientRect().height ?? 240
         const originalY = event.clientY
+        const originalX = event.clientX
+        const initialWide = cardWidths[key] === true
         event.currentTarget.setPointerCapture(event.pointerId)
         const target = event.currentTarget
         const move = (next: PointerEvent) => {
           if (next.pointerId !== event.pointerId) return
           setCardSizes((old) => ({ ...old, [key]: Math.max(160, Math.min(620, Math.round(originalHeight + next.clientY - originalY))) }))
+          if (Math.abs(next.clientX - originalX) > 65) setCardWidths((old) => ({ ...old, [key]: next.clientX > originalX ? true : initialWide }))
         }
         const end = () => {
           target.removeEventListener('pointermove', move)
@@ -741,10 +751,11 @@ export default function OverviewPage({
         target.addEventListener('pointerup', end)
         target.addEventListener('pointercancel', end)
       }} onKeyDown={(event) => {
-        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+        if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown' && event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return
         event.preventDefault()
         event.stopPropagation()
-        setCardSizes((old) => ({ ...old, [key]: Math.max(160, Math.min(620, (old[key] ?? 240) + (event.key === 'ArrowDown' ? 10 : -10))) }))
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') setCardWidths((old) => ({ ...old, [key]: event.key === 'ArrowRight' }))
+        else setCardSizes((old) => ({ ...old, [key]: Math.max(160, Math.min(620, (old[key] ?? 240) + (event.key === 'ArrowDown' ? 10 : -10))) }))
       }}>↘</span>
   )
   const [indicatorOrder, setIndicatorOrder] = useState<Record<string, string[]>>(() => {
@@ -1780,7 +1791,7 @@ export default function OverviewPage({
           ).filter((indicator) => indicatorVisibility[`regional:${indicator.indicator_id}`] !== false).map((indicator) => (
             <article
               key={indicator.indicator_id}
-              style={{ order: indicatorPosition('regional', indicator.indicator_id, regionalEvidence?.indicators.map((item) => item.indicator_id) ?? []), height: cardSizes[`regional:${indicator.indicator_id}`] }}
+              style={{ order: indicatorPosition('regional', indicator.indicator_id, regionalEvidence?.indicators.map((item) => item.indicator_id) ?? []), height: cardSizes[`regional:${indicator.indicator_id}`], gridColumn: cardWidths[`regional:${indicator.indicator_id}`] ? 'span 2' : undefined }}
               className={`countryMetricCard regionalMetricCard ${indicator.status === 'available' ? 'neutral' : 'unavailable'}`}
             >
               {resizeCardGrip(`regional:${indicator.indicator_id}`, indicator.name)}
@@ -1866,7 +1877,7 @@ export default function OverviewPage({
             <button
               type="button"
               key={id}
-              style={{ order: indicatorPosition('country', id, representative.map((item) => item.id)), height: cardSizes[`country:${id}`] }}
+              style={{ order: indicatorPosition('country', id, representative.map((item) => item.id)), height: cardSizes[`country:${id}`], gridColumn: cardWidths[`country:${id}`] ? 'span 2' : undefined }}
               className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
               onClick={() => item ? onOpenDimension(item.dimension) : undefined}
               disabled={!item}
