@@ -1643,7 +1643,18 @@ export default function OverviewPage({
         </label>
         {indicatorOptionsOpen ? (
           <div className="indicatorOptions" role="group" aria-label="Choose visible indicators">
-            {representative.map((domain) => (
+            {selectedRegion && regionalEvidenceState === 'ready' && regionalEvidence
+              ? regionalEvidence.indicators.map((indicator) => (
+                <label key={indicator.indicator_id}>
+                  <input type="checkbox"
+                    checked={indicatorVisibility[`regional:${indicator.indicator_id}`] !== false}
+                    onChange={(event) => setIndicatorVisibility((old) => ({
+                      ...old, [`regional:${indicator.indicator_id}`]: event.target.checked,
+                    }))} />
+                  {indicator.name}
+                </label>
+              ))
+              : representative.map((domain) => (
               <label key={domain.id}>
                 <input type="checkbox" checked={indicatorVisibility[domain.id] !== false}
                   onChange={(event) => setIndicatorVisibility((old) => ({ ...old, [domain.id]: event.target.checked }))} />
@@ -1659,7 +1670,7 @@ export default function OverviewPage({
           {(regionalEvidenceState === 'ready' && regionalEvidence
             ? regionalEvidence.indicators
             : []
-          ).map((indicator) => (
+          ).filter((indicator) => indicatorVisibility[`regional:${indicator.indicator_id}`] !== false).map((indicator) => (
             <article
               key={indicator.indicator_id}
               className={`countryMetricCard regionalMetricCard ${indicator.status === 'available' ? 'neutral' : 'unavailable'}`}
