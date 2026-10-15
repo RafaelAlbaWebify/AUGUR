@@ -3736,3 +3736,13 @@ body:has(.countryRadarPage) .shell.view-overview {
 }
 .dockDragHandle:active { cursor: grabbing; }
 .dockWindowControls { flex-wrap: wrap; }
+
+@media (min-width: 1400px) {
+ .countryRadarHeader .workspaceControls { display: none; }
+ .countryRadarHero.workspaceV2.dockWorkspace > .dockWindow { flex-grow: 0 !important; flex-shrink: 0 !important; }
+}
+.indicatorWorkspaceToolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:8px; border:1px solid #345467; border-radius:8px; color:#dae8f3; }
+.indicatorWorkspaceToolbar strong { font-size:12px; }
+.indicatorWorkspaceToolbar label,.indicatorOptions label { display:flex; align-items:center; gap:5px; font-size:12px; }
+.indicatorWorkspaceToolbar button { background:#123246; color:#e6f4fc; border:1px solid #3a6578; border-radius:5px; padding:5px 8px; cursor:pointer; }
+.indicatorOptions { display:flex; flex-basis:100%; gap:10px; flex-wrap:wrap; border-top:1px solid #345467; padding:8px; }
