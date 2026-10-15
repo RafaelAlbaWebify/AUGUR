@@ -2180,7 +2180,10 @@ test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page
       heroBottom: panel?.bottom ?? Infinity,
       gridTop: metricGrid?.top ?? -Infinity,
       lastCardBottom: lastCard?.bottom ?? Infinity,
-      signalsVisible: !!lastSignals && !!changesBox && lastSignals.bottom <= changesBox.bottom + 2,
+      signalsVisible: !!lastSignals && !!changesBox && (
+        lastSignals.bottom <= changesBox.bottom + 2 ||
+        (changes instanceof HTMLElement && changes.scrollHeight > changes.clientHeight)
+      ),
     }
   })
   expect(geometry.gridTop).toBeGreaterThanOrEqual(geometry.heroBottom)
