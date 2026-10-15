@@ -672,6 +672,38 @@ export default function OverviewPage({
       return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}
     } catch { return {} }
   })
+  const [cardSizes, setCardSizes] = useState<Record<string, number>>(() => {
+    try { return JSON.parse(localStorage.getItem('augur.cardSizes.v1') ?? '{}') ?? {} }
+    catch { return {} }
+  })
+  useEffect(() => {
+    try { localStorage.setItem('augur.cardSizes.v1', JSON.stringify(cardSizes)) } catch { /* optional persistence */ }
+  }, [cardSizes])
+  const resizeCardGrip = (key: string, name: string) => (
+    <button type="button" className="metricCardResizeGrip" aria-label={`Resize ${name} indicator card`}
+      title="Drag vertically to resize this card"
+      onClick={(event) => event.stopPropagation()}
+      onPointerDown={(event) => {
+        event.stopPropagation()
+        const element = event.currentTarget.closest('.countryMetricCard')
+        const originalHeight = element?.getBoundingClientRect().height ?? 240
+        const originalY = event.clientY
+        event.currentTarget.setPointerCapture(event.pointerId)
+        const target = event.currentTarget
+        const move = (next: PointerEvent) => {
+          if (next.pointerId !== event.pointerId) return
+          setCardSizes((old) => ({ ...old, [key]: Math.max(160, Math.min(620, Math.round(originalHeight + next.clientY - originalY))) }))
+        }
+        const end = () => {
+          target.removeEventListener('pointermove', move)
+          target.removeEventListener('pointerup', end)
+          target.removeEventListener('pointercancel', end)
+        }
+        target.addEventListener('pointermove', move)
+        target.addEventListener('pointerup', end)
+        target.addEventListener('pointercancel', end)
+      }}>↘</button>
+  )
   const [indicatorOrder, setIndicatorOrder] = useState<Record<string, string[]>>(() => {
     try {
       const data = JSON.parse(window.localStorage.getItem('augur.indicatorOrder.v1') ?? '{}')
@@ -1705,9 +1737,10 @@ export default function OverviewPage({
           ).filter((indicator) => indicatorVisibility[`regional:${indicator.indicator_id}`] !== false).map((indicator) => (
             <article
               key={indicator.indicator_id}
-              style={{ order: indicatorPosition('regional', indicator.indicator_id, regionalEvidence?.indicators.map((item) => item.indicator_id) ?? []) }}
+              style={{ order: indicatorPosition('regional', indicator.indicator_id, regionalEvidence?.indicators.map((item) => item.indicator_id) ?? []), height: cardSizes[`regional:${indicator.indicator_id}`] }}
               className={`countryMetricCard regionalMetricCard ${indicator.status === 'available' ? 'neutral' : 'unavailable'}`}
             >
+              {resizeCardGrip(`regional:${indicator.indicator_id}`, indicator.name)}
               <div className="countryMetricTop">
                 <span>{selectedRegion.name}</span>
                 <small>{selectedRegionLevelLabel(selectedRegion.level)}</small>
@@ -1790,12 +1823,13 @@ export default function OverviewPage({
             <button
               type="button"
               key={id}
-              style={{ order: indicatorPosition('country', id, representative.map((item) => item.id)) }}
+              style={{ order: indicatorPosition('country', id, representative.map((item) => item.id)), height: cardSizes[`country:${id}`] }}
               className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
               onClick={() => item ? onOpenDimension(item.dimension) : undefined}
               disabled={!item}
               title={item ? `Open ${label} to inspect its indicators, sources and trends. This is not a composite country ranking.` : `${label}: evidence unavailable.`}
             >
+              {resizeCardGrip(`country:${id}`, label)}
               <div className="countryMetricTop">
                 <span>{label}</span>
                 <small>{item ? (dimensionState?.trajectory?.replaceAll('_', ' ') ?? 'contextual') : 'evidence gap'}</small>
