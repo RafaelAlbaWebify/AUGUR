@@ -578,6 +578,52 @@ export default function OverviewPage({
     minHeight: 160,
     display: dockWidgets[id].visible ? undefined : 'none',
   })
+  const dockResizeSession = useRef<{ id: DockId; pointerX: number; pointerY: number; width: number; height: number; containerWidth: number } | null>(null)
+  const dockResizeGrip = (id: DockId, name: string) => (
+    <button type="button" className="dockResizeGrip"
+      role="separator" aria-label={`Resize ${name} window`}
+      aria-valuemin={160} aria-valuemax={800} aria-valuenow={dockWidgets[id].height}
+      title="Drag diagonally to resize this window; arrow keys adjust its size"
+      onPointerDown={(event) => {
+        const containerWidth = workspaceRef.current?.getBoundingClientRect().width ?? 1
+        dockResizeSession.current = {
+          id, pointerX: event.clientX, pointerY: event.clientY,
+          width: dockWidgets[id].width, height: dockWidgets[id].height, containerWidth,
+        }
+        event.currentTarget.setPointerCapture(event.pointerId)
+        event.preventDefault()
+      }}
+      onPointerMove={(event) => {
+        const session = dockResizeSession.current
+        if (!session || session.id !== id || !event.currentTarget.hasPointerCapture(event.pointerId)) return
+        const width = Math.max(20, Math.min(100, Math.round(session.width + (event.clientX - session.pointerX) * 100 / session.containerWidth)))
+        const height = Math.max(160, Math.min(800, Math.round(session.height + event.clientY - session.pointerY)))
+        setDockWidgets((old) => ({ ...old, [id]: { ...old[id], width, height } }))
+      }}
+      onPointerUp={(event) => {
+        dockResizeSession.current = null
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+      }}
+      onPointerCancel={(event) => {
+        dockResizeSession.current = null
+        if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+      }}
+      onKeyDown={(event) => {
+        const delta = event.key === 'ArrowRight' ? { width: 2 } :
+          event.key === 'ArrowLeft' ? { width: -2 } :
+          event.key === 'ArrowDown' ? { height: 10 } :
+          event.key === 'ArrowUp' ? { height: -10 } : null
+        if (!delta) return
+        event.preventDefault()
+        setDockWidgets((old) => ({
+          ...old, [id]: {
+            ...old[id],
+            width: Math.max(20, Math.min(100, old[id].width + (delta.width ?? 0))),
+            height: Math.max(160, Math.min(800, old[id].height + (delta.height ?? 0))),
+          },
+        }))
+      }}>↘</button>
+  )
   const dockDragSource = useRef<DockId | null>(null)
   const dockControls = (id: DockId, name: string) => (
     <div className="dockWindowControls" aria-label={`${name} window controls`}
@@ -1016,6 +1062,7 @@ export default function OverviewPage({
           }} />
         <section className="countryIdentityCard dockWindow" style={dockStyle("country")}>
           {dockControls("country", "Country")}
+          {dockResizeGrip("country", "Country")}
           <img
             className="countryHeroImage"
             src={visual.heroImage}
@@ -1050,6 +1097,7 @@ export default function OverviewPage({
         </section>
         <div className="workspaceCountrySignals dockWindow" style={dockStyle("signals")}>
           {dockControls("signals", "Changes")}
+          {dockResizeGrip("signals", "Changes")}
         <section className="recentChangesPanel">
           <div className="radarPanelTopline">
             <div title="Largest recorded changes among the indicators shown; the observation dates are shown below each signal."><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
@@ -1090,6 +1138,7 @@ export default function OverviewPage({
 
         <section className="countryRadarMap dockWindow" style={dockStyle("map")}>
           {dockControls("map", "Map")}
+          {dockResizeGrip("map", "Map")}
           <div className="radarPanelTopline mapPanelHeader">
             <div>
               <span>MAP</span>
@@ -1272,6 +1321,7 @@ export default function OverviewPage({
         {(selectedRegion || selectedCity) ? (
           <section className="recentChangesPanel geographicEvidencePanel dockWindow" style={dockStyle("evidence")} aria-label="Selected geographic evidence">
             {dockControls("evidence", "Evidence")}
+          {dockResizeGrip("evidence", "Evidence")}
             <div className="radarPanelTopline">
               <div>
                 <span>
@@ -1543,6 +1593,7 @@ export default function OverviewPage({
         ) : (
         <section className="recentChangesPanel geographicEvidencePlaceholder dockWindow" style={dockStyle("evidence")} aria-label="Selected geographic evidence">
           {dockControls("evidence", "Evidence")}
+          {dockResizeGrip("evidence", "Evidence")}
           <div className="radarPanelTopline">
             <div><span>SELECTED GEOGRAPHY EVIDENCE</span><strong>Select a region or city</strong></div>
           </div>
