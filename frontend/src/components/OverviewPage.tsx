@@ -527,6 +527,69 @@ export default function OverviewPage({
     }
   }, [workspaceLayout])
 
+  type DockId = 'country' | 'signals' | 'map' | 'evidence'
+  const dockDefaults: Record<DockId, { visible: boolean; height: number; order: number }> = {
+    country: { visible: true, height: 210, order: 0 },
+    signals: { visible: true, height: 330, order: 1 },
+    map: { visible: true, height: 440, order: 2 },
+    evidence: { visible: true, height: 440, order: 3 },
+  }
+  const [dockWidgets, setDockWidgets] = useState<typeof dockDefaults>(() => {
+    try {
+      const stored = JSON.parse(window.localStorage.getItem('augur.dockWidgets.v1') ?? 'null')
+      if (stored && typeof stored === 'object') {
+        const next = { ...dockDefaults }
+        for (const id of Object.keys(next) as DockId[]) {
+          const value = stored[id]
+          if (!value || typeof value !== 'object') continue
+          next[id] = {
+            visible: typeof value.visible === 'boolean' ? value.visible : true,
+            height: Number.isFinite(value.height) ? Math.max(160, Math.min(800, value.height)) : next[id].height,
+            order: Number.isInteger(value.order) && value.order >= 0 && value.order <= 3 ? value.order : next[id].order,
+          }
+        }
+        return next
+      }
+    } catch { /* Corrupt user preferences fall back to the safe default. */ }
+    return dockDefaults
+  })
+  useEffect(() => {
+    try { window.localStorage.setItem('augur.dockWidgets.v1', JSON.stringify(dockWidgets)) }
+    catch { /* Storage disabled; UI still functional. */ }
+  }, [dockWidgets])
+  const updateDockWidget = (id: DockId, patch: Partial<(typeof dockWidgets)[DockId]>) => {
+    setDockWidgets((old) => ({ ...old, [id]: { ...old[id], ...patch } }))
+  }
+  const reorderDockWidget = (id: DockId, direction: -1 | 1) => {
+    setDockWidgets((old) => {
+      const order = (Object.keys(old) as DockId[]).sort((a, b) => old[a].order - old[b].order)
+      const index = order.indexOf(id)
+      const swap = index + direction
+      if (swap < 0 || swap >= order.length) return old
+      ;[order[index], order[swap]] = [order[swap], order[index]]
+      return Object.fromEntries(order.map((key, position) => [key, { ...old[key], order: position }])) as typeof old
+    })
+  }
+  const dockStyle = (id: DockId): CSSProperties => ({
+    order: dockWidgets[id].order,
+    height: dockWidgets[id].height,
+    minHeight: 160,
+    display: dockWidgets[id].visible ? undefined : 'none',
+  })
+  const dockControls = (id: DockId, name: string) => (
+    <div className="dockWindowControls" aria-label={`${name} window controls`}>
+      <button type="button" aria-label={`Move ${name} left`} onClick={() => reorderDockWidget(id, -1)}>←</button>
+      <button type="button" aria-label={`Move ${name} right`} onClick={() => reorderDockWidget(id, 1)}>→</button>
+      <label>
+        <span>Height</span>
+        <input type="range" aria-label={`${name} height`} min="160" max="800" step="10"
+          value={dockWidgets[id].height}
+          onChange={(event) => updateDockWidget(id, { height: Number(event.target.value) })} />
+      </label>
+      <button type="button" aria-label={`Hide ${name}`} onClick={() => updateDockWidget(id, { visible: false })}>×</button>
+    </div>
+  )
+
   const [selectedRegion, setSelectedRegion] = useState<{
     id: string
     name: string
@@ -849,7 +912,18 @@ export default function OverviewPage({
         </div>
       </header>
 
-      <div ref={workspaceRef} className="countryRadarHero workspaceV2"
+      <div className="dockToolbar" aria-label="Dock widget manager">
+        <strong>Workspace</strong>
+        {(Object.keys(dockWidgets) as DockId[]).map((id) => (
+          <label key={id}>
+            <input type="checkbox" checked={dockWidgets[id].visible}
+              onChange={(event) => updateDockWidget(id, { visible: event.target.checked })} />
+            {id === 'country' ? 'Country' : id === 'signals' ? 'Changes' : id === 'map' ? 'Map' : 'Evidence'}
+          </label>
+        ))}
+        <button type="button" onClick={() => setDockWidgets(dockDefaults)}>Restore windows</button>
+      </div>
+      <div ref={workspaceRef} className="countryRadarHero workspaceV2 dockWorkspace"
         style={{
           '--workspace-left': `${workspaceLayout.left}%`,
           '--workspace-right': `${workspaceLayout.right}%`,
@@ -899,7 +973,8 @@ export default function OverviewPage({
               ...previous, height: Math.max(310, Math.min(580, previous.height + (event.key === 'ArrowDown' ? 10 : -10))),
             }))
           }} />
-        <section className="countryIdentityCard">
+        <section className="countryIdentityCard dockWindow" style={dockStyle("country")}>
+          {dockControls("country", "Country")}
           <img
             className="countryHeroImage"
             src={visual.heroImage}
@@ -932,7 +1007,8 @@ export default function OverviewPage({
             <p>{visual.summary ?? 'Country evidence is active. Regional metrics appear only where verified subnational sources exist.'}</p>
           </div>
         </section>
-        <div className="workspaceCountrySignals">
+        <div className="workspaceCountrySignals dockWindow" style={dockStyle("signals")}>
+          {dockControls("signals", "Changes")}
         <section className="recentChangesPanel">
           <div className="radarPanelTopline">
             <div title="Largest recorded changes among the indicators shown; the observation dates are shown below each signal."><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
@@ -971,7 +1047,8 @@ export default function OverviewPage({
         </section>
         </div>
 
-        <section className="countryRadarMap">
+        <section className="countryRadarMap dockWindow" style={dockStyle("map")}>
+          {dockControls("map", "Map")}
           <div className="radarPanelTopline mapPanelHeader">
             <div>
               <span>MAP</span>
@@ -1152,7 +1229,8 @@ export default function OverviewPage({
         </section>
 
         {(selectedRegion || selectedCity) ? (
-          <section className="recentChangesPanel geographicEvidencePanel" aria-label="Selected geographic evidence">
+          <section className="recentChangesPanel geographicEvidencePanel dockWindow" style={dockStyle("evidence")} aria-label="Selected geographic evidence">
+            {dockControls("evidence", "Evidence")}
             <div className="radarPanelTopline">
               <div>
                 <span>
@@ -1422,7 +1500,8 @@ export default function OverviewPage({
             )}
           </section>
         ) : (
-        <section className="recentChangesPanel geographicEvidencePlaceholder" aria-label="Selected geographic evidence">
+        <section className="recentChangesPanel geographicEvidencePlaceholder dockWindow" style={dockStyle("evidence")} aria-label="Selected geographic evidence">
+          {dockControls("evidence", "Evidence")}
           <div className="radarPanelTopline">
             <div><span>SELECTED GEOGRAPHY EVIDENCE</span><strong>Select a region or city</strong></div>
           </div>
