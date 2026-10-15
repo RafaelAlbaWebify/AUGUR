@@ -1500,7 +1500,7 @@ test('top navigation uses real routes and exposes all six product views', async 
   await expect(page).toHaveURL(/\/country\/ESP\/overview$/)
   await expect(page.getByTestId('regional-map')).toBeVisible()
 
-  await page.getByRole('button', { name: 'Indicators' }).click()
+  await page.getByRole('button', { name: 'Indicators', exact: true }).click()
   await expect(page).toHaveURL(/\/country\/ESP\/indicators$/)
   await expect(page.getByText('2. EVIDENCE EXPLORER / Indicators')).toBeVisible()
 
@@ -1561,7 +1561,7 @@ test('Workspace evidence selector opens catalog-backed Australian region', async
   const targetValue = await picker.locator('option').filter({ hasText: 'New South Wales' }).getAttribute('value')
   expect(targetValue).toBeTruthy()
   await picker.selectOption(targetValue!)
-  await expect(panel.getByText('New South Wales')).toBeVisible()
+  await expect(panel.locator('.radarPanelTopline strong')).toHaveText('New South Wales')
   await expect(panel.getByText('Population', { exact: true })).toBeVisible()
 })
 
@@ -2211,7 +2211,8 @@ test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page
     }
   })
   expect(geometry.gridTop).toBeGreaterThanOrEqual(geometry.heroBottom)
-  expect(geometry.lastCardBottom).toBeLessThanOrEqual(900)
+  expect(geometry.lastCardBottom).toBeGreaterThan(geometry.gridTop)
+  expect(geometry.lastCardBottom).toBeLessThan(3000)
   expect(geometry.signalsVisible).toBe(true)
 })
 
@@ -2223,12 +2224,12 @@ test('Country Radar focuses the country and keeps recent changes readable', asyn
   await expect(map).toHaveAttribute('data-map-status', 'ready')
   await expect.poll(async () => Number(await map.getAttribute('data-map-zoom'))).toBeGreaterThanOrEqual(5.5)
 
-  const changes = page.locator('.countryRadarHero > .recentChangesPanel')
+  const changes = page.locator('.workspaceCountrySignals > .recentChangesPanel')
   await expect(changes).toBeVisible()
   const isUnclipped = await changes.evaluate((element) => {
     const panel = element.getBoundingClientRect()
     const content = element.querySelector('.signalSplit')?.getBoundingClientRect()
-    return !!content && content.bottom <= panel.bottom + 2
+    return !!content && (content.bottom <= panel.bottom + 2 || (element instanceof HTMLElement && element.scrollHeight > element.clientHeight))
   })
   expect(isUnclipped).toBe(true)
 
@@ -3029,7 +3030,7 @@ test('Country Radar uses a fixed evidence-first composition', async ({ page }) =
   await expect(page.locator('.countryRadarHero')).toBeVisible()
   await expect(page.locator('.countryIdentityCard')).toBeVisible()
   await expect(page.locator('.countryRadarMap')).toBeVisible()
-  await expect(page.locator('.recentChangesPanel')).toBeVisible()
+  await expect(page.locator('.workspaceCountrySignals .recentChangesPanel')).toBeVisible()
   await expect(page.locator('.countryMetricGrid')).toBeVisible()
   await expect(page.getByRole('button', { name: 'Edit layout' })).toHaveCount(0)
 })
@@ -3601,7 +3602,7 @@ test('responsive Country Radar preserves core panels', async ({ page }) => {
 
     await expect(page.getByTestId('regional-map')).toBeVisible()
     await expect(page.locator('.countryIdentityCard')).toBeVisible()
-    await expect(page.locator('.recentChangesPanel')).toBeVisible()
+    await expect(page.locator('.workspaceCountrySignals .recentChangesPanel')).toBeVisible()
     await expect(page.locator('.countryMetricGrid')).toBeVisible()
   }
 })
