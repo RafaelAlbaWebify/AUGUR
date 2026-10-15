@@ -158,3 +158,7 @@ Current feature branch includes individually persisted width/height/visibility/o
 ## 2026-10-15 — dock regression consolidation
 
 Replaced the obsolete Playwright contract for linked Country/Evidence/Height sliders with a dock preference persistence test and changed the 1920x900 no-overlap assertion to geometry-based collision checking rather than fixed panel order. Preserved existing tests for independent map dimensions, hide/re-show, reordering, and indicator selection. These test edits are committed but unexecuted; full TypeScript build, mock-browser test suite, real-data visual inspection and package audit remain pending. Do not merge this branch on the basis of source-only checks.
+
+## 2026-10-15 — PR #44 browser CI triage
+
+The first draft PR CI run 38725117093 completed: backend PASS, ops-scripts PASS, frontend 80/86 Playwright PASS (6 FAIL). Failures diagnosed from real frontend job logs: ambiguous navigation Indicators vs Manage indicators; ambiguous New South Wales match due nested comparison; old fixed 900px all-cards-visible viewport expectation incompatible with user-adjustable taller layout; recent-changes clipping assumption incompatible with scrollable widget; two legacy `.recentChangesPanel` selectors ambiguous after evidence panel separation. Commit 4f48b00 updates test assertions/selectors accordingly and triggers new CI run 38726453413. Build and full acceptance of that new run are pending, as is desktop screenshot review and authentic data inspection. PR #44 remains draft, no merge.
