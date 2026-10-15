@@ -890,6 +890,44 @@ export default function OverviewPage({
             <p>{visual.summary ?? 'Country evidence is active. Regional metrics appear only where verified subnational sources exist.'}</p>
           </div>
         </section>
+        <div className="workspaceCountrySignals">
+        <section className="recentChangesPanel">
+          <div className="radarPanelTopline">
+            <div title="Largest recorded changes among the indicators shown; the observation dates are shown below each signal."><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
+          </div>
+          <div className="recentChangeList">
+            {recentChanges.map((item) => (
+              <article key={item.indicator_id} className={trajectoryTone(item.trend?.interpretation)}>
+                <span className="changeArrow">{item.trend?.interpretation === 'improving' ? '↑' : item.trend?.interpretation === 'deteriorating' ? '↓' : '→'}</span>
+                <div>
+                  <strong>{item.name}</strong>
+                  <small>{changeLabel(item.trend?.pct_change_1y)} · {item.period} · {item.source_id.replaceAll('_', ' ')}</small>
+                </div>
+              </article>
+            ))}
+            {!recentChanges.length && <span className="radarEmpty">No directional one-year changes available.</span>}
+          </div>
+
+          <button type="button" className="viewAllChanges" onClick={onOpenIndicators}>
+            View all changes →
+          </button>
+
+          <div className="signalSplit">
+            <div>
+              <strong>Strengths / improving evidence</strong>
+              {improvingSignals.length
+                ? improvingSignals.map((item) => <span key={item.indicator_id}>+ {item.name}</span>)
+                : <span>None currently classified</span>}
+            </div>
+            <div>
+              <strong>Key risks / deteriorating evidence</strong>
+              {pressureSignals.length
+                ? pressureSignals.map((item) => <span key={item.indicator_id}>− {item.name}</span>)
+                : <span>None currently classified</span>}
+            </div>
+          </div>
+        </section>
+        </div>
 
         <section className="countryRadarMap">
           <div className="radarPanelTopline mapPanelHeader">
@@ -1342,40 +1380,16 @@ export default function OverviewPage({
             )}
           </section>
         ) : (
-        <section className="recentChangesPanel">
+        <section className="recentChangesPanel geographicEvidencePlaceholder" aria-label="Selected geographic evidence">
           <div className="radarPanelTopline">
-            <div title="Largest recorded changes among the indicators shown; the observation dates are shown below each signal."><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
+            <div><span>SELECTED GEOGRAPHY EVIDENCE</span><strong>Select a region or city</strong></div>
           </div>
-          <div className="recentChangeList">
-            {recentChanges.map((item) => (
-              <article key={item.indicator_id} className={trajectoryTone(item.trend?.interpretation)}>
-                <span className="changeArrow">{item.trend?.interpretation === 'improving' ? '↑' : item.trend?.interpretation === 'deteriorating' ? '↓' : '→'}</span>
-                <div>
-                  <strong>{item.name}</strong>
-                  <small>{changeLabel(item.trend?.pct_change_1y)} · {item.period} · {item.source_id.replaceAll('_', ' ')}</small>
-                </div>
-              </article>
-            ))}
-            {!recentChanges.length && <span className="radarEmpty">No directional one-year changes available.</span>}
-          </div>
-
-          <button type="button" className="viewAllChanges" onClick={onOpenIndicators}>
-            View all changes →
-          </button>
-
-          <div className="signalSplit">
-            <div>
-              <strong>Strengths / improving evidence</strong>
-              {improvingSignals.length
-                ? improvingSignals.map((item) => <span key={item.indicator_id}>+ {item.name}</span>)
-                : <span>None currently classified</span>}
-            </div>
-            <div>
-              <strong>Key risks / deteriorating evidence</strong>
-              {pressureSignals.length
-                ? pressureSignals.map((item) => <span key={item.indicator_id}>− {item.name}</span>)
-                : <span>None currently classified</span>}
-            </div>
+          <div className="geographyEvidenceEmpty">
+            <strong>No geography selected</strong>
+            <p>Choose a region on the map or in the available geography selectors to examine locally integrated evidence.</p>
+            <small>{geographyCoverage.total
+              ? `${geographyCoverage.total} geographies available for ${selectedCountryName}`
+              : 'No integrated subnational evidence for this country'}</small>
           </div>
         </section>
 
