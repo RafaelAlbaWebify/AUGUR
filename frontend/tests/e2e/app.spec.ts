@@ -2157,6 +2157,7 @@ test('Workspace v2 resizes and restores persistent three-pane layout', async ({ 
   await expect.poll(async () => Number(await page.getByRole('slider', { name: 'Country panel width' }).inputValue())).toBeLessThan(31)
   await page.getByRole('button', { name: 'Reset layout' }).click()
   await expect(page.getByRole('slider', { name: 'Country panel width' })).toHaveValue('25')
+  await page.screenshot({ path: 'test-results/workspace-v2-1650x900.png', fullPage: true })
 })
 
 test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page }) => {
@@ -3079,6 +3080,13 @@ test('Country Radar stays readable at 1920x900', async ({ page }) => {
   expect(Math.abs(boxes.identity!.top - boxes.map!.top)).toBeLessThanOrEqual(2)
   expect(Math.abs(boxes.changes!.top - boxes.map!.top)).toBeLessThanOrEqual(2)
   expect(boxes.metrics!.top).toBeGreaterThan(boxes.map!.bottom)
+})
+
+test('Workspace v2 captures baseline country selection at 1920x900', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 900 })
+  await page.goto('/country/ESP/overview')
+  await expect(page.getByTestId('regional-map')).toHaveAttribute('data-map-status', 'ready')
+  await page.screenshot({ path: 'test-results/workspace-v2-1920x900.png', fullPage: true })
 })
 
 test('Country Radar panels do not overlap at 1920x1080', async ({ page }) => {
