@@ -528,11 +528,11 @@ export default function OverviewPage({
   }, [workspaceLayout])
 
   type DockId = 'country' | 'signals' | 'map' | 'evidence'
-  const dockDefaults: Record<DockId, { visible: boolean; height: number; order: number }> = {
-    country: { visible: true, height: 210, order: 0 },
-    signals: { visible: true, height: 330, order: 1 },
-    map: { visible: true, height: 440, order: 2 },
-    evidence: { visible: true, height: 440, order: 3 },
+  const dockDefaults: Record<DockId, { visible: boolean; height: number; width: number; order: number }> = {
+    country: { visible: true, height: 210, width: 24, order: 0 },
+    signals: { visible: true, height: 330, width: 24, order: 1 },
+    map: { visible: true, height: 440, width: 44, order: 2 },
+    evidence: { visible: true, height: 440, width: 30, order: 3 },
   }
   const [dockWidgets, setDockWidgets] = useState<typeof dockDefaults>(() => {
     try {
@@ -545,6 +545,7 @@ export default function OverviewPage({
           next[id] = {
             visible: typeof value.visible === 'boolean' ? value.visible : true,
             height: Number.isFinite(value.height) ? Math.max(160, Math.min(800, value.height)) : next[id].height,
+            width: Number.isFinite(value.width) ? Math.max(20, Math.min(100, value.width)) : next[id].width,
             order: Number.isInteger(value.order) && value.order >= 0 && value.order <= 3 ? value.order : next[id].order,
           }
         }
@@ -572,6 +573,7 @@ export default function OverviewPage({
   }
   const dockStyle = (id: DockId): CSSProperties => ({
     order: dockWidgets[id].order,
+    flex: `0 0 calc(${dockWidgets[id].width}% - 10px)`,
     height: dockWidgets[id].height,
     minHeight: 160,
     display: dockWidgets[id].visible ? undefined : 'none',
@@ -580,6 +582,12 @@ export default function OverviewPage({
     <div className="dockWindowControls" aria-label={`${name} window controls`}>
       <button type="button" aria-label={`Move ${name} left`} onClick={() => reorderDockWidget(id, -1)}>←</button>
       <button type="button" aria-label={`Move ${name} right`} onClick={() => reorderDockWidget(id, 1)}>→</button>
+      <label>
+        <span>Width</span>
+        <input type="range" aria-label={`${name} width`} min="20" max="100" step="2"
+          value={dockWidgets[id].width}
+          onChange={(event) => updateDockWidget(id, { width: Number(event.target.value) })} />
+      </label>
       <label>
         <span>Height</span>
         <input type="range" aria-label={`${name} height`} min="160" max="800" step="10"
