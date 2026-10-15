@@ -3542,3 +3542,25 @@ body:has(.countryRadarPage) .shell.view-overview {
     scrollbar-color: #5d8ba3 #10293b;
   }
 }
+
+.workspaceGeographySelect {
+  display: grid;
+  gap: 7px;
+  color: #bdd8e6;
+  font-size: 12px;
+}
+.workspaceGeographySelect select {
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid #356277;
+  border-radius: 7px;
+  background: #0b2434;
+  color: #f0f8fc;
+  font: inherit;
+  font-size: 12px;
+}
+.workspaceGeographySelect select:focus-visible {
+  outline: 2px solid #51d4f7;
+  outline-offset: 2px;
+}
