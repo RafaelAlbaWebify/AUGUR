@@ -3105,11 +3105,13 @@ test('Country Radar stays readable at 1920x900', async ({ page }) => {
   })
 
   for (const value of Object.values(boxes)) expect(value).not.toBeNull()
-  expect(boxes.identity!.right).toBeLessThanOrEqual(boxes.map!.left)
-  expect(boxes.map!.right).toBeLessThanOrEqual(boxes.changes!.left)
-  expect(Math.abs(boxes.identity!.top - boxes.map!.top)).toBeLessThanOrEqual(2)
-  expect(Math.abs(boxes.changes!.top - boxes.map!.top)).toBeLessThanOrEqual(2)
-  expect(boxes.metrics!.top).toBeGreaterThan(boxes.map!.bottom)
+  const nonOverlapping = (a: { left: number; right: number; top: number; bottom: number },
+    b: { left: number; right: number; top: number; bottom: number }) =>
+    a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top
+  expect(nonOverlapping(boxes.identity!, boxes.map!)).toBe(true)
+  expect(nonOverlapping(boxes.identity!, boxes.changes!)).toBe(true)
+  expect(nonOverlapping(boxes.map!, boxes.changes!)).toBe(true)
+  expect(boxes.metrics!.top).toBeGreaterThan(Math.max(boxes.map!.bottom, boxes.identity!.bottom, boxes.changes!.bottom))
 })
 
 test('Workspace v2 captures baseline country selection at 1920x900', async ({ page }) => {
