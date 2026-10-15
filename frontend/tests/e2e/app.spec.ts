@@ -2132,6 +2132,21 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
+test('Country metric card ordering persists independently of visibility', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+  const cards = page.getByRole('region', { name: 'Country metric cards' })
+  const firstName = await cards.locator('.countryMetricCard .countryMetricTop span').first().textContent()
+  expect(firstName).toBeTruthy()
+  await page.getByRole('button', { name: 'Manage indicators' }).click()
+  const settings = page.getByRole('group', { name: 'Choose visible indicators' })
+  await settings.getByRole('button', { name: `Move ${firstName} later` }).click()
+  const firstCard = cards.locator('.countryMetricCard').first()
+  const firstOrder = await firstCard.evaluate((el) => getComputedStyle(el).order)
+  expect(firstOrder).toBe('1')
+  await page.reload()
+  await expect.poll(async () => cards.locator('.countryMetricCard').first().evaluate((el) => getComputedStyle(el).order)).toBe('1')
+})
+
 test('Regional indicator visibility is independently persisted', async ({ page }) => {
   await page.goto('/country/AUS/overview')
   await page.getByRole('combobox', { name: 'Available source-native region' }).selectOption('AU1')
