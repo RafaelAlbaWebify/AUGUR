@@ -3723,3 +3723,16 @@ body:has(.countryRadarPage) .shell.view-overview {
   overflow-y: auto;
   max-height: calc(100% - 32px);
 }
+
+.dockDragHandle {
+  flex: 1;
+  min-width: 50px;
+  padding: 4px 6px;
+  color: #c9e8f5;
+  font-weight: 700;
+  font-size: 11px;
+  cursor: grab;
+  user-select: none;
+}
+.dockDragHandle:active { cursor: grabbing; }
+.dockWindowControls { flex-wrap: wrap; }
