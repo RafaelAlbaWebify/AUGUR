@@ -1552,6 +1552,17 @@ test('Overview summarizes subnational coverage for a dynamic country', async ({ 
   await expect(coverage.locator('dd').nth(3)).toHaveText('4')
 })
 
+test('Workspace evidence selector opens catalog-backed Australian region', async ({ page }) => {
+  await page.goto('/country/AUS/overview')
+  const panel = page.getByRole('region', { name: 'Selected geographic evidence' })
+  const picker = panel.getByRole('combobox', { name: 'Select geography for evidence' })
+  await expect(picker).toBeVisible()
+  await expect(picker).toContainText('New South Wales')
+  await picker.selectOption({ index: 1 })
+  await expect(panel.getByText('New South Wales')).toBeVisible()
+  await expect(panel.getByText('Population', { exact: true })).toBeVisible()
+})
+
 test('Overview makes missing subnational coverage explicit', async ({ page }) => {
   await page.goto('/country/DEU/overview')
 
