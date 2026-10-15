@@ -738,6 +738,10 @@ export default function OverviewPage({
     && ['city', 'fua'].includes(item.geo_level.toLowerCase())
   ))
 
+  const geographyOptions = countryGeographies
+    .filter((item) => item.source_geo_code && item.geography_system)
+    .sort((a, b) => (a.name ?? a.source_geo_code).localeCompare(b.name ?? b.source_geo_code))
+
   const regionSearchTerm = regionSearch.trim().toLowerCase()
   const urbanSearchTerm = urbanSearch.trim().toLowerCase()
   const filteredSourceNativeRegions = sourceNativeRegions.filter((item) => {
@@ -1386,7 +1390,30 @@ export default function OverviewPage({
           </div>
           <div className="geographyEvidenceEmpty">
             <strong>No geography selected</strong>
-            <p>Choose a region on the map or in the available geography selectors to examine locally integrated evidence.</p>
+            <p>Choose an available geography to inspect verified local evidence, or select a region directly on the map.</p>
+            {geographyOptions.length ? (
+              <label className="workspaceGeographySelect">
+                <span>Available geographies</span>
+                <select aria-label="Select geography for evidence" defaultValue="" onChange={(event) => {
+                  const geography = geographyOptions.find((item) => item.geo_id === event.target.value)
+                  if (!geography) return
+                  setSelectedCity(null)
+                  setSelectedRegion({
+                    id: geography.source_geo_code,
+                    name: geography.name ?? geography.source_geo_code,
+                    level: geography.geo_level.toUpperCase(),
+                    system: geography.geography_system,
+                  })
+                }}>
+                  <option value="">Select a geography…</option>
+                  {geographyOptions.map((item) => (
+                    <option key={item.geo_id} value={item.geo_id}>
+                      {item.name ?? item.source_geo_code} · {item.source_geo_code} · {item.geo_level.toUpperCase()} · {item.indicator_count} series
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ) : null}
             <small>{geographyCoverage.total
               ? `${geographyCoverage.total} geographies available for ${selectedCountryName}`
               : 'No integrated subnational evidence for this country'}</small>
