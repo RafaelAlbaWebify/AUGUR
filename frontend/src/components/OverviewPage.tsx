@@ -459,7 +459,25 @@ export default function OverviewPage({
   dimensionLabels,
 }: OverviewPageProps) {
   const workspaceRef = useRef<HTMLDivElement | null>(null)
-  const activeResize = useRef<'left' | 'right' | null>(null)
+  const activeResize = useRef<'left' | 'right' | 'height' | null>(null)
+
+  const resizeWorkspaceHeight = (event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (event.type === 'pointerdown') {
+      activeResize.current = 'height'
+      event.currentTarget.setPointerCapture(event.pointerId)
+      return
+    }
+    if (event.type === 'pointerup' || event.type === 'pointercancel') {
+      activeResize.current = null
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
+      return
+    }
+    if (event.type !== 'pointermove' || activeResize.current !== 'height') return
+    const bounds = workspaceRef.current?.getBoundingClientRect()
+    if (!bounds) return
+    const height = Math.max(310, Math.min(580, Math.round(event.clientY - bounds.top)))
+    setWorkspaceLayout((previous) => ({ ...previous, height }))
+  }
 
   const resizeWorkspace = (event: ReactPointerEvent<HTMLButtonElement>, side: 'left' | 'right') => {
     if (event.type === 'pointerdown') {
@@ -487,13 +505,13 @@ export default function OverviewPage({
   }
 
   const [workspaceLayout, setWorkspaceLayout] = useState(() => {
-    const defaults = { left: 25, right: 30 }
+    const defaults = { left: 25, right: 30, height: 390 }
     try {
       const saved = JSON.parse(window.localStorage.getItem('augur.countryWorkspace.v2') ?? 'null') as Partial<typeof defaults> | null
       if (saved && typeof saved.left === 'number' && typeof saved.right === 'number'
         && saved.left >= 18 && saved.left <= 35 && saved.right >= 22 && saved.right <= 40
         && saved.left + saved.right <= 70) {
-        return { left: saved.left, right: saved.right }
+        return { left: saved.left, right: saved.right, height: typeof saved.height === 'number' && saved.height >= 310 && saved.height <= 580 ? saved.height : 390 }
       }
     } catch {
       // Invalid or inaccessible browser storage must not break Country Radar.
@@ -820,7 +838,12 @@ export default function OverviewPage({
                 right: Math.min(Number(event.target.value), 70 - previous.left),
               }))} />
           </label>
-          <button type="button" onClick={() => setWorkspaceLayout({ left: 25, right: 30 })}>
+          <label>Height
+            <input type="range" aria-label="Workspace height" min="310" max="580" step="10"
+              value={workspaceLayout.height}
+              onChange={(event) => setWorkspaceLayout((previous) => ({ ...previous, height: Number(event.target.value) }))} />
+          </label>
+          <button type="button" onClick={() => setWorkspaceLayout({ left: 25, right: 30, height: 390 })}>
             Reset layout
           </button>
         </div>
@@ -830,6 +853,7 @@ export default function OverviewPage({
         style={{
           '--workspace-left': `${workspaceLayout.left}%`,
           '--workspace-right': `${workspaceLayout.right}%`,
+          '--workspace-height': `${workspaceLayout.height}px`,
         } as CSSProperties}>
         <button type="button" className="workspaceSplitter workspaceSplitterLeft"
           aria-label="Resize country and map panels" aria-valuemin={18} aria-valuemax={35}
@@ -859,6 +883,20 @@ export default function OverviewPage({
             setWorkspaceLayout((previous) => ({
               ...previous, right: Math.max(22, Math.min(40, 70 - previous.left,
                 previous.right + (event.key === 'ArrowLeft' ? 1 : -1))),
+            }))
+          }} />
+        <button type="button" className="workspaceSplitterHeight"
+          role="separator" aria-label="Resize workspace height" aria-orientation="horizontal"
+          aria-valuemin={310} aria-valuemax={580} aria-valuenow={workspaceLayout.height}
+          onPointerDown={resizeWorkspaceHeight}
+          onPointerMove={resizeWorkspaceHeight}
+          onPointerUp={resizeWorkspaceHeight}
+          onPointerCancel={resizeWorkspaceHeight}
+          onKeyDown={(event) => {
+            if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') return
+            event.preventDefault()
+            setWorkspaceLayout((previous) => ({
+              ...previous, height: Math.max(310, Math.min(580, previous.height + (event.key === 'ArrowDown' ? 10 : -10))),
             }))
           }} />
         <section className="countryIdentityCard">
