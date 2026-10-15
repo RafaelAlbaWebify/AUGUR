@@ -2173,7 +2173,7 @@ test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page
     const metricGrid = bounds('.countryMetricGrid')
     const cards = [...document.querySelectorAll('.countryMetricCard')]
     const lastCard = cards.at(-1)?.getBoundingClientRect()
-    const changes = document.querySelector('.countryRadarHero > .recentChangesPanel')
+    const changes = document.querySelector('.workspaceCountrySignals > .recentChangesPanel')
     const lastSignals = changes?.querySelector('.signalSplit')?.getBoundingClientRect()
     const changesBox = changes?.getBoundingClientRect()
     return {
