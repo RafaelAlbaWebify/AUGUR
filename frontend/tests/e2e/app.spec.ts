@@ -2132,6 +2132,22 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
+test('Regional indicator visibility is independently persisted', async ({ page }) => {
+  await page.goto('/country/AUS/overview')
+  await page.getByRole('combobox', { name: 'Available source-native region' }).selectOption('AU1')
+  const regionCards = page.getByRole('region', { name: 'Regional metric cards' })
+  await expect(regionCards.getByText('Population density', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Manage indicators' }).click()
+  const options = page.getByRole('group', { name: 'Choose visible indicators' })
+  await options.getByRole('checkbox', { name: 'Population density', exact: true }).uncheck()
+  await expect(regionCards.getByText('Population density', { exact: true })).toHaveCount(0)
+  await page.getByRole('button', { name: 'Close indicator settings' }).click()
+  await page.getByRole('button', { name: 'Manage indicators' }).click()
+  await expect(options.getByRole('checkbox', { name: 'Population density', exact: true })).not.toBeChecked()
+  await options.getByRole('button', { name: 'Restore all indicators' }).click()
+  await expect(regionCards.getByText('Population density', { exact: true })).toBeVisible()
+})
+
 test('Indicator selection persists and can be restored', async ({ page }) => {
   await page.goto('/country/ESP/overview')
   await page.getByRole('button', { name: 'Manage indicators' }).click()
