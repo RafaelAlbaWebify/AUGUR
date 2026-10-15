@@ -3742,6 +3742,9 @@ body:has(.countryRadarPage) .shell.view-overview {
  .countryRadarHero.workspaceV2.dockWorkspace > .dockWindow { flex-grow: 0 !important; flex-shrink: 0 !important; }
 }
 .indicatorWorkspaceToolbar { display:flex; flex-wrap:wrap; align-items:center; gap:10px; padding:8px; border:1px solid #345467; border-radius:8px; color:#dae8f3; }
+/* Keep indicator controls clickable if an oversized docked widget paints beyond its row. */
+.indicatorWorkspaceToolbar { position: relative; z-index: 60; background: #0a2536; }
+
 .indicatorWorkspaceToolbar strong { font-size:12px; }
 .indicatorWorkspaceToolbar label,.indicatorOptions label { display:flex; align-items:center; gap:5px; font-size:12px; }
 .indicatorWorkspaceToolbar button { background:#123246; color:#e6f4fc; border:1px solid #3a6578; border-radius:5px; padding:5px 8px; cursor:pointer; }
