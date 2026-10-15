@@ -1677,9 +1677,9 @@ export default function OverviewPage({
                     }))} />
                   {indicator.name}
                   <button type="button" aria-label={`Move ${indicator.name} earlier`}
-                    onClick={() => moveIndicator('regional', indicator.indicator_id, -1, regionalEvidence.indicators.map((item) => item.indicator_id))}>↑</button>
+                    onClick={(event) => { event.preventDefault(); moveIndicator('regional', indicator.indicator_id, -1, regionalEvidence.indicators.map((item) => item.indicator_id)) }}>↑</button>
                   <button type="button" aria-label={`Move ${indicator.name} later`}
-                    onClick={() => moveIndicator('regional', indicator.indicator_id, 1, regionalEvidence.indicators.map((item) => item.indicator_id))}>↓</button>
+                    onClick={(event) => { event.preventDefault(); moveIndicator('regional', indicator.indicator_id, 1, regionalEvidence.indicators.map((item) => item.indicator_id)) }}>↓</button>
                 </label>
               ))
               : representative.map((domain) => (
@@ -1688,9 +1688,9 @@ export default function OverviewPage({
                   onChange={(event) => setIndicatorVisibility((old) => ({ ...old, [domain.id]: event.target.checked }))} />
                 {domain.label}
                 <button type="button" aria-label={`Move ${domain.label} earlier`}
-                  onClick={() => moveIndicator('country', domain.id, -1, representative.map((item) => item.id))}>↑</button>
+                  onClick={(event) => { event.preventDefault(); moveIndicator('country', domain.id, -1, representative.map((item) => item.id)) }}>↑</button>
                 <button type="button" aria-label={`Move ${domain.label} later`}
-                  onClick={() => moveIndicator('country', domain.id, 1, representative.map((item) => item.id))}>↓</button>
+                  onClick={(event) => { event.preventDefault(); moveIndicator('country', domain.id, 1, representative.map((item) => item.id)) }}>↓</button>
               </label>
             ))}
             <button type="button" onClick={() => setIndicatorVisibility({})}>Restore all indicators</button>
