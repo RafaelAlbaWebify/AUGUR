@@ -3456,3 +3456,60 @@ body:has(.countryRadarPage) .shell.view-overview {
   .countryRadarHero.workspaceV2 .signalSplit span { font-size: 9px; line-height: 1.3; }
   .countryRadarHero.workspaceV2 .signalSplit > div { overflow-wrap: anywhere; }
 }
+
+/* Workspace v2 composition: country summary and signal analysis share the left
+   column; geographical evidence always occupies the independent right panel. */
+@media (min-width: 1400px) {
+  .countryRadarHero.workspaceV2 {
+    grid-template-rows: 138px minmax(0, 202px);
+  }
+  .countryRadarHero.workspaceV2 > .countryIdentityCard {
+    grid-column: 1;
+    grid-row: 1;
+    height: 138px;
+    min-height: 138px;
+    max-height: 138px;
+  }
+  .countryRadarHero.workspaceV2 > .workspaceCountrySignals {
+    grid-column: 1;
+    grid-row: 2;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .countryRadarHero.workspaceV2 > .workspaceCountrySignals > .recentChangesPanel {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .countryRadarHero.workspaceV2 > .countryRadarMap,
+  .countryRadarHero.workspaceV2 > .recentChangesPanel {
+    grid-row: 1 / 3;
+  }
+  .countryRadarHero.workspaceV2 > .countryRadarMap { grid-column: 2; }
+  .countryRadarHero.workspaceV2 > .recentChangesPanel { grid-column: 3; }
+  .countryRadarHero.workspaceV2 > .countryIdentityCard .countryHeroBottom p {
+    font-size: 11px;
+    line-height: 1.35;
+  }
+  .countryRadarHero.workspaceV2 .workspaceCountrySignals .recentChangeList {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .countryRadarHero.workspaceV2 .workspaceCountrySignals .recentChangeList article {
+    padding: 6px 8px;
+  }
+}
+.geographyEvidenceEmpty {
+  padding: 18px 14px;
+  display: grid;
+  gap: 10px;
+}
+.geographyEvidenceEmpty strong { font-size: 14px; color: #e4f4fb; }
+.geographyEvidenceEmpty p { margin: 0; font-size: 12px; line-height: 1.5; color: #a8c1d1; }
+.geographyEvidenceEmpty small { font-size: 11px; color: #79c6df; }
+@media (max-width: 1399px) {
+  .workspaceCountrySignals { min-width: 0; }
+}
