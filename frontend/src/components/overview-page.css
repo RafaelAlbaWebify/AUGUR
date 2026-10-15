@@ -3629,3 +3629,97 @@ body:has(.countryRadarPage) .shell.view-overview {
   .countryRadarHero.workspaceV2 .workspaceSplitterHeight { display: none; }
   .countryRadarHeader .workspaceControls label:has(input[aria-label="Workspace height"]) { display: none; }
 }
+
+/* Dockable widget foundation. Deliberately overrides legacy split-column
+   dimensions: each widget owns its height and can be hidden/reordered. */
+@media (min-width: 1400px) {
+  .countryRadarHero.workspaceV2.dockWorkspace {
+    display: flex !important;
+    flex-wrap: wrap;
+    align-content: flex-start;
+    align-items: flex-start;
+    gap: 10px;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    grid-template-columns: none !important;
+    grid-template-rows: none !important;
+  }
+  .countryRadarHero.workspaceV2.dockWorkspace > .dockWindow {
+    position: relative;
+    flex: 1 1 calc(25% - 10px);
+    box-sizing: border-box;
+    grid-column: auto !important;
+    grid-row: auto !important;
+    min-width: 220px;
+    max-width: none !important;
+    min-height: 160px !important;
+    overflow: auto;
+  }
+  .countryRadarHero.workspaceV2.dockWorkspace > .countryRadarMap {
+    flex-basis: calc(40% - 10px);
+  }
+  .countryRadarHero.workspaceV2.dockWorkspace > .workspaceCountrySignals {
+    flex-basis: calc(25% - 10px);
+  }
+  .countryRadarHero.workspaceV2.dockWorkspace > .geographicEvidencePanel,
+  .countryRadarHero.workspaceV2.dockWorkspace > .geographicEvidencePlaceholder {
+    flex-basis: calc(30% - 10px);
+  }
+  .countryRadarHero.workspaceV2.dockWorkspace > .countryIdentityCard {
+    flex-basis: calc(25% - 10px);
+    height: auto;
+  }
+  .countryRadarHero.workspaceV2.dockWorkspace .regionalMapView,
+  .countryRadarHero.workspaceV2.dockWorkspace .leafletAugurMap {
+    height: calc(100% - 110px) !important;
+    min-height: 150px !important;
+  }
+  .countryRadarHero.workspaceV2.dockWorkspace .workspaceSplitter,
+  .countryRadarHero.workspaceV2.dockWorkspace .workspaceSplitterHeight {
+    display: none;
+  }
+}
+.dockToolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid var(--augur-border-soft);
+  border-radius: 8px;
+  color: #dae8f3;
+}
+.dockToolbar strong { font-size: 12px; }
+.dockToolbar label { display: flex; align-items: center; gap: 5px; font-size: 12px; }
+.dockToolbar button, .dockWindowControls button {
+  background: #123246;
+  border: 1px solid #3a6578;
+  border-radius: 5px;
+  color: #e6f4fc;
+  cursor: pointer;
+  min-width: 24px;
+  min-height: 24px;
+}
+.dockWindowControls {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: end;
+  gap: 5px;
+  padding: 4px 6px;
+  background: #0a2536;
+}
+.dockWindowControls label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10px;
+  color: #d1e4ef;
+}
+.dockWindowControls input[type="range"] { width: 70px; accent-color: #4fd8ff; }
+.countryRadarHero.workspaceV2.dockWorkspace .workspaceCountrySignals > .recentChangesPanel {
+  overflow-y: auto;
+  max-height: calc(100% - 32px);
+}
