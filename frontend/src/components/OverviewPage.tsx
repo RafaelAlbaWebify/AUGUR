@@ -578,8 +578,30 @@ export default function OverviewPage({
     minHeight: 160,
     display: dockWidgets[id].visible ? undefined : 'none',
   })
+  const dockDragSource = useRef<DockId | null>(null)
   const dockControls = (id: DockId, name: string) => (
-    <div className="dockWindowControls" aria-label={`${name} window controls`}>
+    <div className="dockWindowControls" aria-label={`${name} window controls`}
+      onDragOver={(event) => event.preventDefault()}
+      onDrop={(event) => {
+        event.preventDefault()
+        const source = dockDragSource.current
+        dockDragSource.current = null
+        if (!source || source === id) return
+        setDockWidgets((old) => ({
+          ...old,
+          [source]: { ...old[source], order: old[id].order },
+          [id]: { ...old[id], order: old[source].order },
+        }))
+      }}>
+      <span className="dockDragHandle" draggable
+        aria-label={`Drag ${name} window to reorder`}
+        title="Drag to another window header to swap positions"
+        onDragStart={(event) => {
+          dockDragSource.current = id
+          event.dataTransfer.setData('text/plain', id)
+          event.dataTransfer.effectAllowed = 'move'
+        }}
+        onDragEnd={() => { dockDragSource.current = null }}>⠿ {name}</span>
       <button type="button" aria-label={`Move ${name} left`} onClick={() => reorderDockWidget(id, -1)}>←</button>
       <button type="button" aria-label={`Move ${name} right`} onClick={() => reorderDockWidget(id, 1)}>→</button>
       <label>
