@@ -3822,3 +3822,9 @@ body:has(.countryRadarPage) .shell.view-overview {
 @media (max-width: 700px) {
   .countryMetricGrid > .countryMetricCard[style*="grid-column: span 2"] { grid-column: 1 / -1 !important; }
 }
+
+/* Explicit user-sized cards must not inherit the compact dashboard height cap. */
+.countryMetricGrid .countryMetricCard[style*="height:"] {
+  max-height: none !important;
+  min-height: 0 !important;
+}
