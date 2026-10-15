@@ -3564,3 +3564,68 @@ body:has(.countryRadarPage) .shell.view-overview {
   outline: 2px solid #51d4f7;
   outline-offset: 2px;
 }
+
+/* User-controlled vertical divider: override fixed 350/390px legacy heights. */
+@media (min-width: 1400px) {
+  .countryRadarHero.workspaceV2 {
+    position: relative;
+    grid-template-rows: 42.5% minmax(0, 1fr);
+    height: var(--workspace-height);
+    min-height: var(--workspace-height);
+    max-height: var(--workspace-height);
+  }
+  .countryRadarHero.workspaceV2 > .countryIdentityCard {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+  .countryRadarHero.workspaceV2 > .countryRadarMap,
+  .countryRadarHero.workspaceV2 > .recentChangesPanel {
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+  .countryRadarHero.workspaceV2 .regionalMapView,
+  .countryRadarHero.workspaceV2 .leafletAugurMap {
+    height: max(180px, calc(var(--workspace-height) - 123px)) !important;
+    min-height: max(180px, calc(var(--workspace-height) - 123px)) !important;
+  }
+  .countryRadarHero.workspaceV2 .regionalMapCanvas {
+    min-height: 0;
+  }
+  .countryRadarHero.workspaceV2 .workspaceSplitterHeight {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -6px;
+    height: 12px;
+    width: 100%;
+    z-index: 460;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    cursor: row-resize;
+    touch-action: none;
+  }
+  .countryRadarHero.workspaceV2 .workspaceSplitterHeight::after {
+    content: '';
+    position: absolute;
+    width: 90px;
+    height: 4px;
+    bottom: 4px;
+    left: calc(50% - 45px);
+    border-radius: 8px;
+    background: #7ba4b9;
+  }
+  .countryRadarHero.workspaceV2 .workspaceSplitterHeight:hover::after,
+  .countryRadarHero.workspaceV2 .workspaceSplitterHeight:focus-visible::after {
+    background: #51d4f7;
+  }
+  .countryRadarHero.workspaceV2 .workspaceSplitterHeight:focus-visible {
+    outline: 2px solid #51d4f7;
+  }
+}
+@media (max-width: 1399px) {
+  .countryRadarHero.workspaceV2 .workspaceSplitterHeight { display: none; }
+  .countryRadarHeader .workspaceControls label:has(input[aria-label="Workspace height"]) { display: none; }
+}
