@@ -2132,6 +2132,28 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
+test('Dock widgets resize independently and retain visibility and order', async ({ page }) => {
+  await page.setViewportSize({ width: 1650, height: 900 })
+  await page.goto('/country/ESP/overview')
+  const map = page.locator('.dockWorkspace > .countryRadarMap')
+  const country = page.locator('.dockWorkspace > .countryIdentityCard')
+  await expect(map).toBeVisible()
+  const countryHeight = await country.evaluate((node) => node.getBoundingClientRect().height)
+  await page.getByRole('slider', { name: 'Map height' }).fill('550')
+  await expect.poll(async () => map.evaluate((node) => node.getBoundingClientRect().height)).toBeGreaterThan(500)
+  expect(await country.evaluate((node) => node.getBoundingClientRect().height)).toBeCloseTo(countryHeight, 0)
+  await page.getByRole('button', { name: 'Hide Map' }).click()
+  await expect(map).toBeHidden()
+  await page.getByRole('checkbox', { name: 'Map', exact: true }).check()
+  await expect(map).toBeVisible()
+  await page.reload()
+  await expect(page.getByRole('slider', { name: 'Map height' })).toHaveValue('550')
+  await page.getByRole('button', { name: 'Move Map left' }).click()
+  await expect.poll(async () => map.evaluate((node) => getComputedStyle(node).order)).toBe('1')
+  await page.getByRole('button', { name: 'Restore windows' }).click()
+  await expect(page.getByRole('slider', { name: 'Map height' })).toHaveValue('440')
+})
+
 test('Workspace v2 resizes and restores persistent three-pane layout', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
