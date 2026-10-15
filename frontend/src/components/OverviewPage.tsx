@@ -620,6 +620,17 @@ export default function OverviewPage({
     </div>
   )
 
+  const [indicatorVisibility, setIndicatorVisibility] = useState<Record<string, boolean>>(() => {
+    try {
+      const saved = JSON.parse(window.localStorage.getItem('augur.indicatorVisibility.v1') ?? '{}')
+      return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}
+    } catch { return {} }
+  })
+  const [indicatorOptionsOpen, setIndicatorOptionsOpen] = useState(false)
+  useEffect(() => {
+    try { window.localStorage.setItem('augur.indicatorVisibility.v1', JSON.stringify(indicatorVisibility)) }
+    catch { /* Storage disabled: continue with in-memory preferences. */ }
+  }, [indicatorVisibility])
   const [selectedRegion, setSelectedRegion] = useState<{
     id: string
     name: string
@@ -1570,8 +1581,30 @@ export default function OverviewPage({
         )}
       </div>
 
+      <div className="indicatorWorkspaceToolbar">
+        <strong>{selectedRegion ? 'Regional indicators' : 'Country indicators'}</strong>
+        <button type="button" onClick={() => setIndicatorOptionsOpen((open) => !open)}>
+          {indicatorOptionsOpen ? 'Close indicator settings' : 'Manage indicators'}
+        </button>
+        <label><input type="checkbox" checked={indicatorVisibility.__workspace !== false}
+          onChange={(event) => setIndicatorVisibility((old) => ({ ...old, __workspace: event.target.checked }))} />
+          Show indicator cards
+        </label>
+        {indicatorOptionsOpen ? (
+          <div className="indicatorOptions" role="group" aria-label="Choose visible indicators">
+            {representative.map((domain) => (
+              <label key={domain.id}>
+                <input type="checkbox" checked={indicatorVisibility[domain.id] !== false}
+                  onChange={(event) => setIndicatorVisibility((old) => ({ ...old, [domain.id]: event.target.checked }))} />
+                {domain.label}
+              </label>
+            ))}
+            <button type="button" onClick={() => setIndicatorVisibility({})}>Restore all indicators</button>
+          </div>
+        ) : null}
+      </div>
       {selectedRegion ? (
-        <section className="countryMetricGrid regionalMetricGrid" aria-label="Regional metric cards">
+        <section className="countryMetricGrid regionalMetricGrid" aria-label="Regional metric cards" style={{ display: indicatorVisibility.__workspace === false ? 'none' : undefined }}>
           {(regionalEvidenceState === 'ready' && regionalEvidence
             ? regionalEvidence.indicators
             : []
@@ -1657,8 +1690,8 @@ export default function OverviewPage({
           )}
         </section>
       ) : (
-        <section className="countryMetricGrid" aria-label="Country metric cards">
-          {representative.map(({ id, label, dimension, item, assessment: dimensionState }) => (
+        <section className="countryMetricGrid" aria-label="Country metric cards" style={{ display: indicatorVisibility.__workspace === false ? 'none' : undefined }}>
+          {representative.filter((domain) => indicatorVisibility[domain.id] !== false).map(({ id, label, dimension, item, assessment: dimensionState }) => (
             <button
               type="button"
               key={id}
