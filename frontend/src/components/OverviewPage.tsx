@@ -672,6 +672,30 @@ export default function OverviewPage({
       return saved && typeof saved === 'object' && !Array.isArray(saved) ? saved : {}
     } catch { return {} }
   })
+  const [indicatorOrder, setIndicatorOrder] = useState<Record<string, string[]>>(() => {
+    try {
+      const data = JSON.parse(window.localStorage.getItem('augur.indicatorOrder.v1') ?? '{}')
+      return data && typeof data === 'object' && !Array.isArray(data) ? data : {}
+    } catch { return {} }
+  })
+  useEffect(() => {
+    try { window.localStorage.setItem('augur.indicatorOrder.v1', JSON.stringify(indicatorOrder)) }
+    catch { /* Continue without persistent storage. */ }
+  }, [indicatorOrder])
+  const moveIndicator = (scope: string, key: string, direction: -1 | 1, sourceIds: string[]) => {
+    setIndicatorOrder((current) => {
+      const ordered = [...new Set([...(current[scope] ?? []).filter((id) => sourceIds.includes(id)), ...sourceIds])]
+      const index = ordered.indexOf(key)
+      const target = index + direction
+      if (index < 0 || target < 0 || target >= ordered.length) return current
+      ;[ordered[index], ordered[target]] = [ordered[target], ordered[index]]
+      return { ...current, [scope]: ordered }
+    })
+  }
+  const indicatorPosition = (scope: string, key: string, sourceIds: string[]) => {
+    const ordered = [...new Set([...(indicatorOrder[scope] ?? []).filter((id) => sourceIds.includes(id)), ...sourceIds])]
+    return ordered.indexOf(key)
+  }
   const [indicatorOptionsOpen, setIndicatorOptionsOpen] = useState(false)
   useEffect(() => {
     try { window.localStorage.setItem('augur.indicatorVisibility.v1', JSON.stringify(indicatorVisibility)) }
@@ -1652,6 +1676,10 @@ export default function OverviewPage({
                       ...old, [`regional:${indicator.indicator_id}`]: event.target.checked,
                     }))} />
                   {indicator.name}
+                  <button type="button" aria-label={`Move ${indicator.name} earlier`}
+                    onClick={() => moveIndicator('regional', indicator.indicator_id, -1, regionalEvidence.indicators.map((item) => item.indicator_id))}>↑</button>
+                  <button type="button" aria-label={`Move ${indicator.name} later`}
+                    onClick={() => moveIndicator('regional', indicator.indicator_id, 1, regionalEvidence.indicators.map((item) => item.indicator_id))}>↓</button>
                 </label>
               ))
               : representative.map((domain) => (
@@ -1659,6 +1687,10 @@ export default function OverviewPage({
                 <input type="checkbox" checked={indicatorVisibility[domain.id] !== false}
                   onChange={(event) => setIndicatorVisibility((old) => ({ ...old, [domain.id]: event.target.checked }))} />
                 {domain.label}
+                <button type="button" aria-label={`Move ${domain.label} earlier`}
+                  onClick={() => moveIndicator('country', domain.id, -1, representative.map((item) => item.id))}>↑</button>
+                <button type="button" aria-label={`Move ${domain.label} later`}
+                  onClick={() => moveIndicator('country', domain.id, 1, representative.map((item) => item.id))}>↓</button>
               </label>
             ))}
             <button type="button" onClick={() => setIndicatorVisibility({})}>Restore all indicators</button>
@@ -1673,6 +1705,7 @@ export default function OverviewPage({
           ).filter((indicator) => indicatorVisibility[`regional:${indicator.indicator_id}`] !== false).map((indicator) => (
             <article
               key={indicator.indicator_id}
+              style={{ order: indicatorPosition('regional', indicator.indicator_id, regionalEvidence?.indicators.map((item) => item.indicator_id) ?? []) }}
               className={`countryMetricCard regionalMetricCard ${indicator.status === 'available' ? 'neutral' : 'unavailable'}`}
             >
               <div className="countryMetricTop">
@@ -1757,6 +1790,7 @@ export default function OverviewPage({
             <button
               type="button"
               key={id}
+              style={{ order: indicatorPosition('country', id, representative.map((item) => item.id)) }}
               className={`countryMetricCard ${item ? trajectoryTone(dimensionState?.trajectory) : 'unavailable'}`}
               onClick={() => item ? onOpenDimension(item.dimension) : undefined}
               disabled={!item}
