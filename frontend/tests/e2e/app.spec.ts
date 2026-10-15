@@ -2132,6 +2132,21 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
+test('Indicator selection persists and can be restored', async ({ page }) => {
+  await page.goto('/country/ESP/overview')
+  await page.getByRole('button', { name: 'Manage indicators' }).click()
+  const group = page.getByRole('group', { name: 'Choose visible indicators' })
+  await expect(group).toBeVisible()
+  const economy = group.getByRole('checkbox', { name: 'Economy' })
+  await economy.uncheck()
+  await expect(page.getByRole('region', { name: 'Country metric cards' }).getByText('Economy', { exact: true })).toHaveCount(0)
+  await page.reload()
+  await page.getByRole('button', { name: 'Manage indicators' }).click()
+  await expect(group.getByRole('checkbox', { name: 'Economy' })).not.toBeChecked()
+  await group.getByRole('button', { name: 'Restore all indicators' }).click()
+  await expect(group.getByRole('checkbox', { name: 'Economy' })).toBeChecked()
+})
+
 test('Dock widgets resize independently and retain visibility and order', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
