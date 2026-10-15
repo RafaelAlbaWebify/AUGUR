@@ -3513,3 +3513,32 @@ body:has(.countryRadarPage) .shell.view-overview {
 @media (max-width: 1399px) {
   .workspaceCountrySignals { min-width: 0; }
 }
+
+/* Workspace v2 visual review: restore enough room for the country narrative.
+   The right panel remains independent; metric cards stay below the workspace. */
+@media (min-width: 1400px) and (min-height: 850px) {
+  .countryRadarHero.workspaceV2 {
+    grid-template-rows: 166px minmax(0, 214px);
+  }
+  .countryRadarHero.workspaceV2 > .countryIdentityCard {
+    height: 166px;
+    min-height: 166px;
+    max-height: 166px;
+  }
+  .countryRadarHero.workspaceV2 > .countryRadarMap,
+  .countryRadarHero.workspaceV2 > .recentChangesPanel {
+    height: 390px;
+    min-height: 390px;
+    max-height: 390px;
+  }
+  .countryRadarHero.workspaceV2 .regionalMapView,
+  .countryRadarHero.workspaceV2 .leafletAugurMap {
+    height: 267px !important;
+    min-height: 267px !important;
+  }
+  .countryRadarHero.workspaceV2 .regionalMapCanvas { min-height: 267px; }
+  .countryRadarHero.workspaceV2 .workspaceCountrySignals .recentChangesPanel {
+    scrollbar-width: thin;
+    scrollbar-color: #5d8ba3 #10293b;
+  }
+}
