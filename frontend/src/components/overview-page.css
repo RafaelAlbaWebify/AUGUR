@@ -3773,3 +3773,45 @@ body:has(.countryRadarPage) .shell.view-overview {
 @media (max-width: 1399px) {
   .dockResizeGrip { display: none; }
 }
+
+/* Per-metric card grip and floating dock windows. */
+.countryMetricCard { position: relative; }
+.metricCardResizeGrip {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  color: #9fdcf2;
+  background: #123449;
+  border: 1px solid #51778c;
+  border-radius: 5px;
+  cursor: ns-resize;
+  touch-action: none;
+  user-select: none;
+}
+.metricCardResizeGrip:focus-visible { outline: 2px solid #58d8fb; }
+.countryMetricCard:has(.metricCardResizeGrip) { overflow: auto; }
+.countryRadarHero.workspaceV2.dockWorkspace { position: relative; }
+.dockFloatDrag {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 6px;
+  font-size: 11px;
+  color: #dcf6ff;
+  border: 1px dashed #6593a8;
+  border-radius: 5px;
+  cursor: move;
+  touch-action: none;
+  user-select: none;
+}
+@media (min-width: 1400px) {
+  .countryRadarHero.workspaceV2.dockWorkspace > .dockWindow[style*="position: absolute"] {
+    box-shadow: 0 12px 36px rgba(0,0,0,.45);
+    border: 2px solid #5c9bb9;
+  }
+}
