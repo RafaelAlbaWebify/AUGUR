@@ -2126,7 +2126,7 @@ test('Workspace v2 resizes and restores persistent three-pane layout', async ({ 
   const hero = page.locator('.countryRadarHero.workspaceV2')
   await expect(hero).toBeVisible()
   const layout = async () => hero.evaluate((element) => {
-    const panels = ['.countryIdentityCard', '.countryRadarMap', '.recentChangesPanel']
+    const panels = ['.countryIdentityCard', '.countryRadarMap', '.countryRadarHero > .geographicEvidencePlaceholder']
       .map((selector) => element.querySelector(selector)?.getBoundingClientRect())
     return panels.map((box) => ({ left: box?.left ?? 0, right: box?.right ?? 0 }))
   })
@@ -3075,7 +3075,7 @@ test('Country Radar stays readable at 1920x900', async ({ page }) => {
     return {
       identity: box('.countryIdentityCard'),
       map: box('.countryRadarMap'),
-      changes: box('.recentChangesPanel'),
+      changes: box('.countryRadarHero > .geographicEvidencePlaceholder'),
       metrics: box('.countryMetricGrid'),
     }
   })
@@ -3118,7 +3118,7 @@ test('Country Radar panels do not overlap at 1920x1080', async ({ page }) => {
     return [
       box('.countryIdentityCard'),
       box('.countryRadarMap'),
-      box('.recentChangesPanel'),
+      box('.countryRadarHero > .geographicEvidencePlaceholder'),
     ]
   })
 
