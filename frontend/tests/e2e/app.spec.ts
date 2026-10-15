@@ -2199,9 +2199,12 @@ test('Individual country metric card height persists across reloads', async ({ p
   const handle = card.getByRole('separator', { name: /Resize .* indicator card/ })
   await handle.focus()
   await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('ArrowRight')
+  await expect(card).toHaveCSS('grid-column-start', 'span 2')
   await page.reload()
   const restored = page.getByRole('region', { name: 'Country metric cards' }).locator('.countryMetricCard').first()
   await expect.poll(async () => restored.evaluate((element) => element.getAttribute('style') ?? '')).toContain('height:')
+  await expect(restored).toHaveCSS('grid-column-start', 'span 2')
 })
 
 test('Dock window corner handle resizes independently and persists', async ({ page }) => {
