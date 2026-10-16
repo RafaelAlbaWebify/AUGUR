@@ -52,8 +52,27 @@ from app.services.operability import operability_status
 from app.services.regional_evidence import regional_evidence, regional_comparison, geographic_level
 from app.services.city_evidence import city_evidence
 from app.services.geography_indicator_coverage import indicator_geography_coverage
+from app.services.regional_rankings import regional_rankings
 
 router = APIRouter()
+
+
+@router.get("/rankings/regions")
+def region_rankings_get(
+    indicator_id: str = Query(...),
+    countries: str = Query(default="ESP,PRT,IRL"),
+    order: str = Query(default="asc", pattern="^(asc|desc)$"),
+    limit: int = Query(default=50, ge=1, le=200),
+    offset: int = Query(default=0, ge=0),
+):
+    """Conservative pilot: report real stored cohorts; do not certify vintages."""
+    selected = tuple(c.strip().upper() for c in countries.split(",") if c.strip())
+    try:
+        return regional_rankings(indicator_id, selected, descending=order == "desc",
+                                 limit=limit, offset=offset)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
 
 
 class TTVCalibrationCompleteRequest(BaseModel):
