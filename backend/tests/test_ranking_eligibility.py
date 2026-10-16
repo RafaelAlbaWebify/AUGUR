@@ -61,3 +61,11 @@ def test_no_implicit_semantic_or_unit_conversion():
     assert "unit_mismatch" in check_eligibility(
         candidate(unit="percentage_points"), CONTRACT, today=date(2026, 10, 16)
     )
+
+
+def test_duplicate_geography_excludes_all_ambiguous_rows():
+    x = candidate(geo_id="ES11", value=2)
+    y = candidate(geo_id="ES11", value=4)
+    ordered, rejected = ordered_eligible([x, y], CONTRACT, today=date(2026, 10, 16))
+    assert ordered == []
+    assert rejected == {"duplicate_geography": 2}
