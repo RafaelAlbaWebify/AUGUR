@@ -3294,7 +3294,7 @@ body:has(.countryRadarPage) .shell.view-overview {
 @media (min-width: 1100px) {
   .countryRadarHero {
     display: grid;
-    grid-template-columns: minmax(0, 26fr) minmax(0, 29fr) minmax(0, 45fr);
+    grid-template-columns: minmax(0, 24fr) minmax(0, 43fr) minmax(0, 33fr);
     grid-template-rows: minmax(390px, auto);
     align-items: stretch;
   }
@@ -3341,5 +3341,42 @@ body:has(.countryRadarPage) .shell.view-overview {
   .countryRadarHero .countryRadarMap .regionalMapView {
     height: 344px !important;
     min-height: 344px !important;
+  }
+}
+
+/* Operator-accepted desktop ordering and readable evidence summaries. */
+@media (min-width: 1100px) {
+  .countryRadarHero > .countryRadarMap { grid-column: 2; }
+  .countryRadarHero > .recentChangesPanel { grid-column: 3; }
+  .countryRadarHero > .recentChangesPanel .recentChangeList {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  .countryRadarHero > .recentChangesPanel .recentChangeList article {
+    padding: 5px 9px;
+    gap: 7px;
+  }
+  .countryRadarHero > .recentChangesPanel .recentChangeList article,
+  .countryRadarHero > .recentChangesPanel .recentChangeList article *,
+  .countryRadarHero > .recentChangesPanel .signalSplit span {
+    font-size: max(11px, 0.72rem);
+    line-height: 1.35;
+  }
+  .countryRadarHero > .recentChangesPanel .signalSplit {
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px;
+  }
+  .countryRadarHero > .recentChangesPanel .signalSplit > div {
+    padding: 8px;
+    gap: 5px;
+    min-width: 0;
+  }
+  .countryRadarHero > .recentChangesPanel .signalSplit strong {
+    font-size: 12px;
+    line-height: 1.35;
+  }
+  .countryRadarHero > .recentChangesPanel .signalSplit span {
+    overflow-wrap: anywhere;
   }
 }
