@@ -1,0 +1,54 @@
+# GR-0 — Current Geographic Ranking Readiness Audit
+
+Date: 2026-10-16. **Status: code-path audit complete; actual current local DuckDB observation export pending.** This is not ranking feature acceptance.
+
+## Existing system and reuse decisions
+
+| Function | Existing code / endpoint | Assessment |
+|---|---|---|
+| National comparison | `frontend/src/components/ComparePanel.tsx`; `GET /api/compare` | Country ISO3 selector and indicator comparisons exist; frontend has three slots, API allows up to five |
+| City evidence | `frontend/src/components/OverviewPage.tsx`; `GET /api/cities/{city_code}/evidence` | Detailed urban evidence available for supported stored city codes, not a city ranking |
+| Region evidence | `OverviewPage.tsx`; `/api/regions/{geo_code}/evidence`, `/api/geographies/{geo_code}/evidence` | Existing source-specific region details; retain geographic system |
+| Regional comparison | `OverviewPage.tsx`; `GET /api/geographies/compare` | Two same-system, same-level geographies from the selected country's catalog; no general 1–3 cross-country picker |
+| Catalog | `GET /api/geographies?country_iso3=...`, `geography_registry` | Reuse; unambiguous stable IDs and boundary contracts needed |
+| Coverage | `/api/geographies/coverage/indicators`; `geography_indicator_coverage.py` | Already reports registered coverage and same-period counts; does not group source/unit/dataset |
+| Provenance | `geography_provenance.py`, exporter | Registered identities, sources and datasets; not observation-level source/unit/year rows |
+| Defined metrics | `export_indicator_inventory.py` | National indicator declarations only; not proof of actual values |
+
+## GR-0 minimal addition
+
+`backend/scripts/export_ranking_evidence_audit.py` produces a JSON summary of **stored** national and registered subnational observation groups by country, geography system/level, indicator, exact year, unit, source and dataset. It connects read-only to DuckDB and does not export individual values or modify persistent data.
+
+Local execution (from the existing one-and-only AUGUR checkout):
+
+```powershell
+Set-Location "$HOME\Documents\GitHub\AUGUR\backend"
+.\.venv\Scripts\python.exe -m scripts.export_ranking_evidence_audit --countries ESP PRT IRL --output "$HOME\Downloads\AUGUR_GR0_RANKING_EVIDENCE.json"
+```
+
+Output fields include national and subnational observation groups and registered group denominators. The local evidence export is required to confirm **today's** data: no GitHub checkout has access to the user's persistent local DuckDB.
+
+## Known evidence caveats
+
+- G3 audit 2026-10-09 found ESP NUTS2 regional income/health/housing data incomplete (only four of nineteen registered for several series in the then-current snapshot); do not infer the latest local database remains at those counts.
+- Some Irish city population observations were 2011/2016; a city registry or historical observation does not establish current city rankings.
+- Historical Irish and Portuguese NUTS codes were present before the G2 reconciliation; a correct registry code does not prove every observation's boundary vintage.
+- One provider year, unit and source per geography still does not establish internationally harmonized indicator meaning; GR-1 must gate methodologically valid comparisons.
+
+## Candidate metrics for GR-1 evaluation (not yet accepted)
+
+| Candidate | Location level | Evidence to verify in local export | Potential blocker |
+|---|---|---|---|
+| Unemployment rate | National / NUTS2 | Same-year cross-country coverage, compatible Eurostat source and unit | Old geographic vintage and mismatched periods |
+| Employment rate | National / NUTS2 | Population denominator and age bracket match | Indicator semantic divergence |
+| Household disposable income | National / NUTS2 | Comparable PPS per capita and same periods | Incomplete regional coverage and source dimension contracts |
+| Housing cost overburden | NUTS2 | Actual common-year recorded values and regional scope | Limited observed countries/regions and methodology |
+| City population | Urban Audit city | Same city definition/vintage and common year | Stale urban observations; not affordability |
+| Actual city house purchase price | City | Find real source-backed, compatible observed series | No accepted cross-country city price observation established yet |
+| Occupation-specific city jobs | City | Verifiable occupation+city coverage, period and provenance | Not yet proven from current provider data |
+
+## GR-0 acceptance checkpoint and GR-1 handoff
+
+**Verified now:** existing paths, source schema (`observations`, `subnational_observations`, `geography_registry`), missing rank API and the existing G3 exporter limitations. **Not yet verified:** present local counts by source/unit/period and any eligible cross-country city ranking.
+
+Next: (a) CI-test the read-only exporter; (b) inspect user's sanitized JSON export when available; (c) enumerate candidate rankable same-year source+unit cohorts and flagged exclusions, leading to GR-1 comparability contract. Do not start public ranking UI with misleading sample numbers.

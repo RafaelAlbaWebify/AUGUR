@@ -47,6 +47,8 @@
 - Local Git recovery: HEAD and ORIG_HEAD repaired; backed-up staged changes archived.
   Single AUGUR worktree restored to main at dce469c; local pull of merged PR #46 still needed.
 - PR #47 merged after green CI as cf13757: Country | Map | Changes ordering and larger evidence text.
-- NEXT: fast-forward the single local AUGUR/main checkout and visually inspect merged PR #47; real operator acceptance pending.
+- PR #47 Country Radar visually accepted by operator on 2026-10-16; preserve layout.
+- Rankings and unified 1–3-location Compare planned in docs/GEOGRAPHIC_RANKINGS_ROADMAP.md; no ranking implementation or real-data validation claimed.
+- NEXT: GR-0 actual evidence/code-path coverage audit, batched; then GR-1 comparability contract and GR-2 ranking API.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
