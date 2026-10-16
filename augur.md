@@ -1,6 +1,8 @@
 # AUGUR — Operating Context
 
 ## GUARDRAILS
+- Local checkout policy: maintain ONE permanent repository folder per project (the canonical main working directory). Do not create another clone, worktree, or PR-specific folder unless strictly necessary AND explicitly approved by the user beforehand. Prefer branches and CI on GitHub for isolated development.
+- Temporary checkout lifecycle: document its reason and path, preserve local data and uncommitted changes, and remove it promptly once its approved purpose ends. Verify no orphan folders/worktrees remain. Never force-remove, reset, or clean user data.
 - Respond in concise, natural English; prioritize verified results, paths, actions and blockers.
 - When the user's English could sound more natural, suggest a correction and explain it in one short paragraph.
 - At the start of each chat, read this file; verify GitHub repository, branch, HEAD commit, open PRs and CI.
