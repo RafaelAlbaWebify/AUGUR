@@ -19,6 +19,7 @@ def check_provider_metadata(
     *,
     geo_code: str,
     period: int,
+    indicator_id: str | None = None,
 ) -> tuple[str, ...]:
     reasons = []
     if not response_dimensions_json:
@@ -31,6 +32,8 @@ def check_provider_metadata(
         return ("invalid_response_dimensions",)
     if any(str(dimensions.get(key)) != value for key, value in PILOT_DIMENSIONS.items()):
         reasons.append("provider_dimension_mismatch")
+    if indicator_id == "regional_unemployment_rate" and dimensions.get("isced11") != "TOTAL":
+        reasons.append("provider_education_mismatch")
     if str(dimensions.get("geo")) != geo_code:
         reasons.append("provider_geo_mismatch")
     if str(dimensions.get("time")) != str(period):
