@@ -118,6 +118,7 @@ REGIONAL_INDICATORS = [
             "freq": "A",
             "age": "Y20-64",
             "sex": "T",
+            "isced11": "TOTAL",
             "unit": "PC",
         },
         "unit": "percent",
