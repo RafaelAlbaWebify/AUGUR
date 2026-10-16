@@ -50,6 +50,7 @@
 - PR #47 Country Radar visually accepted by operator on 2026-10-16; preserve layout.
 - Rankings and unified 1–3-location Compare planned in docs/GEOGRAPHIC_RANKINGS_ROADMAP.md; no ranking implementation or real-data validation claimed.
 - GR-0 local evidence audit reviewed 2026-10-16: 2025 NUTS2 employment/unemployment stored for ESP19 + PRT9 + IRL3; 2024 Urban Audit city population ESP112 + PRT16. Statistical and boundary comparability pending. See docs/GR0_RANKING_READINESS_AUDIT.md.
-- NEXT: GR-1 comparability/forecast separation contract and tests, then GR-2 read-only ranking API.
+- GR-1 initial fail-closed eligibility module + tests merged in PR #49 as 3282c5f; CI backend/frontend/ops green. Actual geographic-vintage certification and methodological acceptance not yet proven.
+- NEXT: GR-2 read-only ranking API using GR-1 contract; never set boundary_verified=true from labels alone.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
