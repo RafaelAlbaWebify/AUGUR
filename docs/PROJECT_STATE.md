@@ -53,3 +53,7 @@ G2 local geographic reconciliation **accepted** after exact 18-table comparison,
 ## Country Radar real-browser findings — 2026-10-13
 
 PR #42 merged after green CI; operator-local Playwright audit of ESP/PRT/IRL showed functional page loading and no console/HTTP failures or clipped changes rail. Mainland framing of Spain and Portugal remained unsatisfactory because nationwide bounds include remote archipelagos; country-specific default cameras are under correction. No country-map UI release acceptance until real visual verification after the correction. Keep source observations and islands intact.
+
+## Geographic Rankings product decision — 2026-10-16
+
+Operator confirmed Country Radar visually fixed and accepted after PR #47. New priority: evidence-backed geographic ranking by metric, integrated with cross-country 1–3 location Compare and later personalized housing/employment decisions. Delivery plan: [GEOGRAPHIC_RANKINGS_ROADMAP.md](GEOGRAPHIC_RANKINGS_ROADMAP.md), GR-0 through GR-7. These milestones are **planned**, not complete. First task GR-0: map existing APIs/models and produce read-only real-coverage matrix before building ranking UI; preserve G3, P1 and T1 independent evidence gates.
