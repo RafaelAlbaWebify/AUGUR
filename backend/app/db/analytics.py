@@ -323,10 +323,6 @@ def initialize_analytics_schema() -> None:
                 "PRAGMA table_info('subnational_observations')"
             ).fetchall()
         }
-        if "request_filters_json" not in subnational_columns:
-            con.execute("ALTER TABLE subnational_observations ADD COLUMN request_filters_json VARCHAR")
-            subnational_columns.add("request_filters_json")
-
         if "geo_name" not in subnational_columns:
             con.execute(
                 "ALTER TABLE subnational_observations ADD COLUMN geo_name VARCHAR"
@@ -403,6 +399,11 @@ def initialize_analytics_schema() -> None:
                 "RENAME TO subnational_observations"
             )
             subnational_columns.add("geography_system")
+
+        if "request_filters_json" not in subnational_columns:
+            con.execute("ALTER TABLE subnational_observations ADD COLUMN request_filters_json VARCHAR")
+            subnational_columns.add("request_filters_json")
+
 
         # Backfill the provider-neutral geography registry from existing
         # NUTS/Urban Audit evidence. Country identity is resolved explicitly
