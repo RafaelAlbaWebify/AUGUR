@@ -54,11 +54,27 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                     }, response):
                         dimensions = row.get("source_dimensions") or {}
                         geo = dimensions.get("geo")
-                        if geo and row["period"] == contract.period:
-                            if geo in actual:
-                                errors[geo] = "multiple_provider_rows"
-                            else:
-                                actual[geo] = row
+                        if not geo or row["period"] != contract.period:
+                            continue
+                        checks = check_provider_metadata(
+                            json.dumps(dimensions),
+                            row.get("source_observation_status"),
+                            geo_code=geo, period=contract.period,
+                        )
+                        # A multi-valued Eurostat response may contain additional
+                        # dimensional slices. Only compare the exact configured
+                        # cohort, never the first row received.
+                        incompatible = tuple(reason for reason in checks
+                                             if reason != "provider_status_review_required")
+                        if incompatible:
+                            errors.setdefault(geo, "provider_dimension_mismatch")
+                            continue
+                        if geo in actual:
+                            errors[geo] = "multiple_matching_provider_rows"
+                        else:
+                            actual[geo] = row
+                            if errors.get(geo) == "provider_dimension_mismatch":
+                                errors.pop(geo, None)
                 except Exception as exc:
                     for geo in group:
                         errors[geo] = type(exc).__name__
@@ -76,12 +92,6 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                     reason = "local_source_contract_mismatch"
                 elif fresh is None:
                     reason = "missing_provider_observation"
-                elif check_provider_metadata(
-                    json.dumps(fresh.get("source_dimensions")),
-                    fresh.get("source_observation_status"),
-                    geo_code=geo, period=contract.period,
-                ):
-                    reason = "provider_dimensions_or_status_review_required"
                 elif abs(value - fresh["value"]) > tolerance:
                     reason = "value_discrepancy"
                 elif fresh.get("source_observation_status") not in (None, ""):
