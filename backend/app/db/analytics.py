@@ -230,6 +230,8 @@ CREATE TABLE IF NOT EXISTS subnational_observations (
     retrieved_at TIMESTAMP NOT NULL,
     source_updated_at VARCHAR,
     request_filters_json VARCHAR,
+    response_dimensions_json VARCHAR,
+    source_observation_status VARCHAR,
     PRIMARY KEY (
         geography_system, geo_code, indicator_id, period, source_id
     )
@@ -403,6 +405,10 @@ def initialize_analytics_schema() -> None:
         if "request_filters_json" not in subnational_columns:
             con.execute("ALTER TABLE subnational_observations ADD COLUMN request_filters_json VARCHAR")
             subnational_columns.add("request_filters_json")
+        for column in ("response_dimensions_json", "source_observation_status"):
+            if column not in subnational_columns:
+                con.execute(f"ALTER TABLE subnational_observations ADD COLUMN {column} VARCHAR")
+                subnational_columns.add(column)
 
 
         # Backfill the provider-neutral geography registry from existing
@@ -3098,9 +3104,11 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                 dataset_id,
                 retrieved_at,
                 source_updated_at,
-                request_filters_json
+                request_filters_json,
+                response_dimensions_json,
+                source_observation_status
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 [
@@ -3117,6 +3125,8 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                     row["retrieved_at"],
                     row.get("source_updated_at"),
                     row.get("request_filters_json"),
+                    row.get("response_dimensions_json"),
+                    row.get("source_observation_status"),
                 ]
                 for row in rows
             ],
