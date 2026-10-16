@@ -53,6 +53,7 @@
 - GR-1 initial fail-closed eligibility module + tests merged in PR #49 as 3282c5f; CI backend/frontend/ops green. Actual geographic-vintage certification and methodological acceptance not yet proven.
 - GR-2 read-only regional ranking service and /api/rankings/regions merged in PR #50 as 7a133e4, with backend/frontend/ops CI green; API deliberately blocks ranking rows pending independent observation-vintage certification.
 - PR #51 merged as 26d5731 with green backend/frontend/ops CI: exact-code read-only GR2 vintage exporter and source-grounded validation plan (docs/GR2_BOUNDARY_VINTAGE_ACCEPTANCE.md).
-- NEXT: run the two local GR2 read-only vintage exports and reconcile their exact codes and source dimensions with authoritative Eurostat NUTS2024 evidence; only then unlock numerical rankings and GR3 UX.
+- GR-2 local evidence exports reviewed: 31 matching 2025 NUTS2 regions for each Eurostat employment/unemployment cohort (ESP19/PRT9/IRL3). PR #52 (15c6ba4) merged with CI green, testing exact configured source filters (annual, ages20-64, both sexes, percentages). See docs/GR2_PILOT_RECONCILIATION_20261016.md.
+- NEXT: preserve original source dimension/status provenance at ingestion and independently validate observation-vintage, then unlock actual numeric ranking and GR3 UX. Do not set boundary_verified from registry labels alone.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
