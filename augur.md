@@ -46,6 +46,7 @@
 - PR #46 CI at 2116c8d: passed; merged to main as 030e802. Local visual acceptance of merged dashboard is still pending.
 - Local Git recovery: HEAD and ORIG_HEAD repaired; backed-up staged changes archived.
   Single AUGUR worktree restored to main at dce469c; local pull of merged PR #46 still needed.
-- NEXT: fast-forward the single local AUGUR/main checkout and visually inspect merged PR #46.
+- PR #47 merged after green CI as cf13757: Country | Map | Changes ordering and larger evidence text.
+- NEXT: fast-forward the single local AUGUR/main checkout and visually inspect merged PR #47; real operator acceptance pending.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
