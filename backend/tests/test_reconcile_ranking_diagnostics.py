@@ -15,7 +15,7 @@ class DiagnosticProvider:
             if response["dataset"] == "lfst_r_lfu3rt":
                 for duration in ("TOTAL", "LT12"):
                     rows.append({"period": 2025, "value": 6.0,
-                                 "source_dimensions": {**base, "duration": duration},
+                                 "source_dimensions": {**base, "isced11": "TOTAL", "duration": duration},
                                  "source_observation_status": None})
             else:
                 rows.append({"period": 2025, "value": 8.0,
