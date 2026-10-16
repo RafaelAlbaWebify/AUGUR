@@ -57,6 +57,7 @@
 - PR #53 merged as 88581d8 (CI backend/frontend/ops passed): additive nullable `request_filters_json` on subnational observations, future regional Eurostat requests preserve exact requested dimensions. Historical rows remain unverified; not full response tuple/status/vintage certification. See docs/GR2_REQUEST_PROVENANCE_CAPTURE.md.
 - PR #54 merged as 9f6cd99; backend/frontend/ops CI green: actual Eurostat provider-response dimensions + observation status captured in new nullable regional observation columns for future ingestions. Existing rows not retroactively verified.
 - PR #55 merged as 489e334 (green backend/frontend/ops CI): GR2 read-only ranking now reports provider dimension mismatch, missing response metadata, geographic/time mismatch and status flags; all remain blocked absent independently verified vintage. Legacy fixtures supported with explicit missing metadata.
-- NEXT: use validated source-vintage evidence and refresh/reconcile pilot observations before exposing numerical ranks. Then GR3 UI.
+- PR #56 merged as dadeaa5 with green backend/frontend/ops CI: added read-only live Eurostat source-replay reconciler for both 2025 NUTS2 labour metrics, mismatch reasons and fixture tests; no DB writes or automatic boundary certification. See docs/GR2_LIVE_SOURCE_RECONCILIATION.md.
+- NEXT: run source-replay reconciliation against the operator's local DuckDB, resolve any code/value/response-dimension differences, independently confirm vintage, then unlock accepted numerical rankings and GR3 UX.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
