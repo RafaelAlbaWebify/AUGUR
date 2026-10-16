@@ -23,7 +23,7 @@
   React/TypeScript/Vite frontend; pytest, build and Playwright via GitHub Actions.
 - Maintain separation of actual observations, official forecasts, analytical scenarios and personal fit.
 - Repository: RafaelAlbaWebify/AUGUR; release target: main.
-- Working branch: docs/controlled-development-system-20261016; active documentation PR: #45 (draft; unmerged).
+- Operating-context PR #45 merged to main; active dashboard layout PR #46 remains open and unmerged.
 - Rejected configurable/floating workspace: PR #44 closed unmerged; preserve proven main UI.
 - Windows repository: ~/Documents/GitHub/AUGUR; start-augur.ps1, stop-augur.ps1,
   check-operability.ps1, refresh-augur.ps1, export-geography-provenance.ps1.
@@ -31,8 +31,8 @@
 - ESP/PRT/IRL are regression countries, not a global-coverage claim.
 
 ## STATE
-- Last verified main HEAD: b06b9b114ce7cf85d98e1a4f874e0e852554daa5 (PR #43 merged).
-- At baseline: no open PRs; PR #44 closed without merge. No current main-head CI verified.
+- Main includes merged PR #45 and this operating-context file; current main HEAD not independently recorded here.
+- PR #44 closed unmerged (rejected docking workspace); PR #46 open draft (three-column dashboard).
 - Previous PR #44 branch CI: 92/92 Playwright passed, but real visual acceptance FAILED;
   passing synthetic tests did not make the docking workspace usable.
 - Implemented on main: national/regional evidence flows, provenance tooling, country UI,
@@ -40,7 +40,10 @@
 - Previously locally accepted: G2 ES/PT/IE data-layer reconciliation; wider release not accepted.
 - Local operator last reported AUGUR operability partial: ttv_temporal_model blocker.
 - Blockers: G3 real source/unit/period audit; genuine country journeys; external TTV holdout.
-- NEXT: check PR #45 CI and documentation acceptance; merge only with explicit approval.
-- AFTER: conduct source/unit/period acceptance using existing G3 exporter, then real-data
-  ESP/PRT/IRL country workflow validation, without reopening the rejected dock experiment.
+- PR #46 CI at 2116c8d: passed; local screenshot showed old layout because working checkout
+  lacked PR #46 CSS. Clean AUGUR-PR46 worktree was proposed; visual acceptance not yet evidenced.
+- Local Git recovery: .git/HEAD contained null bytes; HEAD restored to local feature branch.
+  Local main worktree contains staged changes; do not reset/discard or switch it without review.
+- NEXT: launch and visually inspect clean PR #46 checkout; merge only after explicit approval.
+- AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
