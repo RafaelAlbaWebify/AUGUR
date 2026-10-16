@@ -23,7 +23,7 @@
   React/TypeScript/Vite frontend; pytest, build and Playwright via GitHub Actions.
 - Maintain separation of actual observations, official forecasts, analytical scenarios and personal fit.
 - Repository: RafaelAlbaWebify/AUGUR; release target: main.
-- Working branch: docs/controlled-development-system-20261016; active documentation PR: pending creation.
+- Working branch: docs/controlled-development-system-20261016; active documentation PR: #45 (draft; unmerged).
 - Rejected configurable/floating workspace: PR #44 closed unmerged; preserve proven main UI.
 - Windows repository: ~/Documents/GitHub/AUGUR; start-augur.ps1, stop-augur.ps1,
   check-operability.ps1, refresh-augur.ps1, export-geography-provenance.ps1.
@@ -40,7 +40,7 @@
 - Previously locally accepted: G2 ES/PT/IE data-layer reconciliation; wider release not accepted.
 - Local operator last reported AUGUR operability partial: ttv_temporal_model blocker.
 - Blockers: G3 real source/unit/period audit; genuine country journeys; external TTV holdout.
-- NEXT: validate and merge this documentation-only control-system PR after checks/review.
+- NEXT: check PR #45 CI and documentation acceptance; merge only with explicit approval.
 - AFTER: conduct source/unit/period acceptance using existing G3 exporter, then real-data
   ESP/PRT/IRL country workflow validation, without reopening the rejected dock experiment.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
