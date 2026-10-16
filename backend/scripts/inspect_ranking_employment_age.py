@@ -87,15 +87,58 @@ def inspect(db_path: Path, adapter: EurostatAdapter, codes=SAMPLE_CODES) -> dict
     }
 
 
+def registered_pilot_codes(db_path: Path) -> tuple[str, ...]:
+    """Read all locally registered 2025 pilot employment regions, without writes."""
+    conn = duckdb.connect(str(db_path), read_only=True)
+    try:
+        return tuple(row[0] for row in conn.execute(
+            """SELECT DISTINCT s.geo_code
+               FROM subnational_observations s
+               JOIN geography_registry g
+                 ON g.source_geo_code=s.geo_code
+                AND g.geography_system=s.geography_system
+                AND LOWER(g.geo_level)=LOWER(s.geo_level)
+               WHERE s.indicator_id='regional_employment_rate'
+                 AND s.period=2025 AND s.geography_system='NUTS_2024'
+                 AND g.country_iso3 IN ('ESP','IRL','PRT')
+               ORDER BY s.geo_code"""
+        ).fetchall())
+    finally:
+        conn.close()
+
+
+def summarize(report: dict) -> dict:
+    counts = {"total": len(report["records"]),
+              "matches_15_64": 0, "matches_20_64": 0,
+              "unresolved": 0}
+    for record in report["records"]:
+        cohorts = {entry["age"]: entry for entry in record.get("age_cohorts", [])}
+        if record.get("status") != "diagnostic_only" or any(
+            cohorts.get(age, {}).get("status") != "paired_unverified"
+            for age in AGES
+        ):
+            counts["unresolved"] += 1
+            continue
+        if cohorts["Y15-64"]["within_tolerance"]:
+            counts["matches_15_64"] += 1
+        if cohorts["Y20-64"]["within_tolerance"]:
+            counts["matches_20_64"] += 1
+    return counts
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--all-registered", action="store_true",
+                        help="Audit every locally registered 2025 ESP/IRL/PRT NUTS2 employment region")
     args = parser.parse_args()
+    codes = registered_pilot_codes(settings.duckdb_path) if args.all_registered else SAMPLE_CODES
     adapter = EurostatAdapter(timeout_seconds=90.0, max_retries=2)
     try:
-        result = inspect(settings.duckdb_path, adapter)
+        result = inspect(settings.duckdb_path, adapter, codes=codes)
     finally:
         adapter.close()
+    result["summary"] = summarize(result)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     print(json.dumps({"output": str(args.output), "regions": len(result["records"])}))
