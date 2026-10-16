@@ -3116,6 +3116,7 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                     row["dataset_id"],
                     row["retrieved_at"],
                     row.get("source_updated_at"),
+                    row.get("request_filters_json"),
                 ]
                 for row in rows
             ],
