@@ -52,6 +52,7 @@
 - GR-0 local evidence audit reviewed 2026-10-16: 2025 NUTS2 employment/unemployment stored for ESP19 + PRT9 + IRL3; 2024 Urban Audit city population ESP112 + PRT16. Statistical and boundary comparability pending. See docs/GR0_RANKING_READINESS_AUDIT.md.
 - GR-1 initial fail-closed eligibility module + tests merged in PR #49 as 3282c5f; CI backend/frontend/ops green. Actual geographic-vintage certification and methodological acceptance not yet proven.
 - GR-2 read-only regional ranking service and /api/rankings/regions merged in PR #50 as 7a133e4, with backend/frontend/ops CI green; API deliberately blocks ranking rows pending independent observation-vintage certification.
-- NEXT: authoritative geography/observation vintage and source-semantic validation to unlock GR-2 numerical results, then GR-3 ranking UX.
+- PR #51 merged as 26d5731 with green backend/frontend/ops CI: exact-code read-only GR2 vintage exporter and source-grounded validation plan (docs/GR2_BOUNDARY_VINTAGE_ACCEPTANCE.md).
+- NEXT: run the two local GR2 read-only vintage exports and reconcile their exact codes and source dimensions with authoritative Eurostat NUTS2024 evidence; only then unlock numerical rankings and GR3 UX.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
