@@ -62,7 +62,7 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                         checks = check_provider_metadata(
                             json.dumps(dimensions),
                             row.get("source_observation_status"),
-                            geo_code=geo, period=contract.period,
+                            geo_code=geo, period=contract.period, indicator_id=indicator_id,
                         )
                         # A multi-valued Eurostat response may contain additional
                         # dimensional slices. Only compare the exact configured
