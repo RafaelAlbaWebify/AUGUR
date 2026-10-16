@@ -52,3 +52,18 @@ Output fields include national and subnational observation groups and registered
 **Verified now:** existing paths, source schema (`observations`, `subnational_observations`, `geography_registry`), missing rank API and the existing G3 exporter limitations. **Not yet verified:** present local counts by source/unit/period and any eligible cross-country city ranking.
 
 Next: (a) CI-test the read-only exporter; (b) inspect user's sanitized JSON export when available; (c) enumerate candidate rankable same-year source+unit cohorts and flagged exclusions, leading to GR-1 comparability contract. Do not start public ranking UI with misleading sample numbers.
+
+## Real local export results — 2026-10-16 (GR-0 observation gate)
+
+Evidence artifact: operator-supplied `AUGUR_GR0_RANKING_EVIDENCE.json`, generated from persistent local DuckDB with the read-only exporter. **This artifact is user-local, not checked into GitHub**. Counts below are stored rows/registered evidence, not official provider-universe completeness or semantic approval.
+
+- Countries: ESP, PRT, IRL. **29 distinct national indicator IDs**, **21 distinct registered subnational indicator IDs**; 4,491 national aggregate groups and 488 subnational aggregate groups from this export. Aggregated groups are not equivalent to unique locations or values.
+- Registered Urban Audit cities: ESP 112, PRT 16, IRL 5; registered NUTS2024 level-2 geographies: ESP 19, PRT 9, IRL 3.
+- Exact 2025 same-year NUTS2024/EUROSTAT cohorts: `regional_unemployment_rate` / `lfst_r_lfu3rt` / percent: ESP 19, PRT 9, IRL 3 = **31**; `regional_employment_rate` / `lfst_r_lfe2emprt` / percent: ESP 19, PRT 9, IRL 3 = **31**. These are the GR-2 pilot candidates, conditional on GR-1 methodological/vintage validation.
+- Cross-country Urban Audit city `city_population` / `urb_cpop1` / persons / 2024: ESP 112 + PRT 16 = **128**; Ireland has no 2024 city cohort in the export. `city_median_age` / `urb_cpopstr` / years / 2023: ESP 92 + PRT 16 = **108**. Descriptive city rankings only; not a proxy for cost of living or job opportunity.
+- Irish city population records are historical (latest 2016 in this scope). NUTS_UNSPECIFIED legacy observations persist for IRL/PRT; do not silently mix vintages.
+- Some national records extend beyond 2026 while labelled `observation_type=observed` (UN_WPP and/or IMF time horizons). **GR-1 must explicitly separate projection/forecast series from historical observations**, irrespective of the stored label, and not accept a future period in the observed-only ranking.
+- The export contains counts, units, years, dataset names and source IDs, **not numerical values**. Therefore an independently reproduced ordering and final national/regional/city ranking **remain unaccepted** until the ranking query is run against local observations and source meaning verified.
+- No verified harmonized city house purchase price, city occupation-specific vacancy, or city disposable income ranking demonstrated by this export.
+
+**Next:** GR-1 eligibility/comparability contract and tests (especially geographic vintage, official dataset semantics, future-year status); then implement GR-2 for the verified 2025 regional pilot. GR-0 code-path + local evidence inventory achieved; the statistical comparability acceptance gate remains explicit.
