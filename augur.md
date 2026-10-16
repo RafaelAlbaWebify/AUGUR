@@ -56,6 +56,7 @@
 - GR-2 local evidence exports reviewed: 31 matching 2025 NUTS2 regions for each Eurostat employment/unemployment cohort (ESP19/PRT9/IRL3). PR #52 (15c6ba4) merged with CI green, testing exact configured source filters (annual, ages20-64, both sexes, percentages). See docs/GR2_PILOT_RECONCILIATION_20261016.md.
 - PR #53 merged as 88581d8 (CI backend/frontend/ops passed): additive nullable `request_filters_json` on subnational observations, future regional Eurostat requests preserve exact requested dimensions. Historical rows remain unverified; not full response tuple/status/vintage certification. See docs/GR2_REQUEST_PROVENANCE_CAPTURE.md.
 - PR #54 merged as 9f6cd99; backend/frontend/ops CI green: actual Eurostat provider-response dimensions + observation status captured in new nullable regional observation columns for future ingestions. Existing rows not retroactively verified.
-- NEXT: source-vintage and numerical validation of actual 2025 pilot cohorts; do not release numerical rankings or claim city readiness until data quality acceptance.
+- PR #55 merged as 489e334 (green backend/frontend/ops CI): GR2 read-only ranking now reports provider dimension mismatch, missing response metadata, geographic/time mismatch and status flags; all remain blocked absent independently verified vintage. Legacy fixtures supported with explicit missing metadata.
+- NEXT: use validated source-vintage evidence and refresh/reconcile pilot observations before exposing numerical ranks. Then GR3 UI.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
