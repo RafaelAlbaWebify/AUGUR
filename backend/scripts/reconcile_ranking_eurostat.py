@@ -40,6 +40,9 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
             codes = sorted(by_geo)
             actual = {}
             errors = {}
+            matching_counts = {}
+            matching_tuples = {}
+            extra_dimensions = {}
             # One request per metric and country; no per-geo network hammering.
             for country in sorted({v[0] for v in by_geo.values()}):
                 group = sorted(k for k,v in by_geo.items() if v[0] == country)
@@ -70,6 +73,14 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                             if geo not in actual:
                                 errors.setdefault(geo, "provider_dimension_mismatch")
                             continue
+                        matching_counts[geo] = matching_counts.get(geo, 0) + 1
+                        canonical_tuple = json.dumps(dimensions, sort_keys=True)
+                        matching_tuples.setdefault(geo, set()).add(canonical_tuple)
+                        extras = tuple(sorted(set(dimensions) - {
+                            "geo", "time", "freq", "age", "sex", "unit"
+                        }))
+                        if extras:
+                            extra_dimensions.setdefault(geo, set()).update(extras)
                         if geo in actual:
                             errors[geo] = "multiple_matching_provider_rows"
                         else:
@@ -81,6 +92,8 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                         errors[geo] = type(exc).__name__
             issues = []
             matched = 0
+            duplicate_details = []
+            discrepancy_details = []
             for geo in codes:
                 country, value, unit, source, dataset = by_geo[geo]
                 reason = None
@@ -97,6 +110,18 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                     reason = "value_discrepancy"
                 elif fresh.get("source_observation_status") not in (None, ""):
                     reason = "provider_quality_flag_review_required"
+                if reason == "multiple_matching_provider_rows":
+                    duplicate_details.append({
+                        "geo_code": geo,
+                        "candidate_rows": matching_counts.get(geo, 0),
+                        "distinct_dimension_tuples": len(matching_tuples.get(geo, ())),
+                        "extra_dimension_keys": sorted(extra_dimensions.get(geo, ())),
+                    })
+                elif reason == "value_discrepancy" and fresh is not None:
+                    discrepancy_details.append({
+                        "geo_code": geo,
+                        "absolute_delta_percentage_points": round(abs(value - fresh["value"]), 4),
+                    })
                 if reason:
                     issues.append({"geo_code": geo, "country_iso3": country, "reason": reason})
                 else:
@@ -107,6 +132,8 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                 "provider_returned_geographies": len(actual),
                 "value_matches_within_tolerance": matched,
                 "issue_count": len(issues), "issues": issues,
+                "duplicate_diagnostics": duplicate_details,
+                "discrepancy_diagnostics": discrepancy_details,
             }
     finally:
         conn.close()
