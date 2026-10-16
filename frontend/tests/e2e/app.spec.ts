@@ -2119,32 +2119,31 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
-test('Country Radar preserves map-first composition at 1200px', async ({ page }) => {
-  await page.setViewportSize({ width: 1200, height: 900 })
-  await page.goto('/country/ESP/overview')
-  const layout = await page.evaluate(() => {
-    const rect = (selector: string) => document.querySelector(selector)?.getBoundingClientRect()
-    const identity = rect('.countryRadarHero > .countryIdentityCard')
-    const changes = rect('.countryRadarHero > .recentChangesPanel')
-    const map = rect('.countryRadarHero > .countryRadarMap')
-    const cards = rect('.countryMetricGrid')
-    if (!identity || !changes || !map || !cards) return null
-    return {
-      countryAboveChanges: identity.bottom <= changes.top + 2,
-      mapBesideRail: map.left >= identity.right - 2,
-      mapSpansRail: map.top <= identity.top + 2 && map.bottom >= changes.bottom - 2,
-      cardsBelowHero: cards.top >= Math.max(changes.bottom, map.bottom) - 2,
-      noOverflow: document.documentElement.scrollWidth <= window.innerWidth + 2,
-    }
-  })
-  expect(layout).not.toBeNull()
-  expect(layout).toEqual({
-    countryAboveChanges: true,
-    mapBesideRail: true,
-    mapSpansRail: true,
-    cardsBelowHero: true,
-    noOverflow: true,
-  })
+test('Country Radar uses three side-by-side hero columns on desktop', async ({ page }) => {
+  for (const width of [1200, 1650, 1920]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/country/ESP/overview')
+    const layout = await page.evaluate(() => {
+      const rect = (selector: string) => document.querySelector(selector)?.getBoundingClientRect()
+      const country = rect('.countryRadarHero > .countryIdentityCard')
+      const changes = rect('.countryRadarHero > .recentChangesPanel')
+      const map = rect('.countryRadarHero > .countryRadarMap')
+      const cards = rect('.countryMetricGrid')
+      if (!country || !changes || !map || !cards) return null
+      return {
+        leftToRight: country.right <= changes.left + 2 && changes.right <= map.left + 2,
+        sameTop: Math.abs(country.top - changes.top) <= 2 && Math.abs(changes.top - map.top) <= 2,
+        sameHeight: Math.abs(country.height - changes.height) <= 2 && Math.abs(changes.height - map.height) <= 2,
+        cardsBelow: cards.top >= Math.max(country.bottom, changes.bottom, map.bottom) - 2,
+        mapUnderHalf: map.width < window.innerWidth * 0.5,
+        noHorizontalOverflow: document.documentElement.scrollWidth <= window.innerWidth + 2,
+      }
+    })
+    expect(layout).toEqual({
+      leftToRight: true, sameTop: true, sameHeight: true,
+      cardsBelow: true, mapUnderHalf: true, noHorizontalOverflow: true,
+    })
+  }
 })
 
 test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page }) => {
