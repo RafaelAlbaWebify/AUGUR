@@ -12,6 +12,7 @@ from app.core.config import settings
 from app.ingestion.eurostat import EurostatAdapter
 from app.services.regional_evidence import REGIONAL_INDICATORS
 from app.services.ranking_eligibility import PILOT_CONTRACTS
+from app.services.ranking_provider_metadata import check_provider_metadata
 
 
 def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051) -> dict:
@@ -75,6 +76,12 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                     reason = "local_source_contract_mismatch"
                 elif fresh is None:
                     reason = "missing_provider_observation"
+                elif check_provider_metadata(
+                    json.dumps(fresh.get("source_dimensions")),
+                    fresh.get("source_observation_status"),
+                    geo_code=geo, period=contract.period,
+                ):
+                    reason = "provider_dimensions_or_status_review_required"
                 elif abs(value - fresh["value"]) > tolerance:
                     reason = "value_discrepancy"
                 elif fresh.get("source_observation_status") not in (None, ""):
