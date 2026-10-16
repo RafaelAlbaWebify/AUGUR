@@ -5,6 +5,7 @@ from pathlib import Path
 import duckdb
 from app.core.config import settings
 from app.services.ranking_eligibility import PILOT_CONTRACTS, RankingCandidate, ordered_eligible
+from app.services.ranking_provider_metadata import check_provider_metadata
 
 
 def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
@@ -21,10 +22,13 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
     marks = ",".join("?" for _ in codes)
     con = duckdb.connect(str(db_path or settings.duckdb_path), read_only=True)
     try:
+        available_columns = {row[1] for row in con.execute("PRAGMA table_info('subnational_observations')").fetchall()}
+        dimensions_expr = "s.response_dimensions_json" if "response_dimensions_json" in available_columns else "NULL"
+        status_expr = "s.source_observation_status" if "source_observation_status" in available_columns else "NULL"
         rows = con.execute(f"""
             SELECT g.geo_id, g.country_iso3, g.name, s.indicator_id, s.geo_level,
                    s.geography_system, s.unit, s.source_id, s.dataset_id,
-                   s.period, s.value
+                   s.period, s.value, {dimensions_expr}, {status_expr}, s.geo_code
             FROM geography_registry g JOIN subnational_observations s
               ON g.geography_system=s.geography_system
              AND g.source_geo_code=s.geo_code
@@ -36,8 +40,12 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
         con.close()
     labels = {}
     candidates = []
-    for geo_id, country, name, indicator, level, system, unit, source, dataset, period, value in rows:
+    metadata_rejections = {}
+    for geo_id, country, name, indicator, level, system, unit, source, dataset, period, value, dimensions, status, source_geo_code in rows:
         labels[geo_id] = (country, name)
+        metadata_rejections.setdefault(geo_id, []).extend(check_provider_metadata(
+            dimensions, status, geo_code=source_geo_code, period=period
+        ))
         candidates.append(RankingCandidate(
             geo_id=geo_id, indicator_id=indicator, geo_level=level,
             geography_system=system, unit=unit, source_id=source,
@@ -45,6 +53,11 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
             boundary_verified=geo_id in verified_geo_ids,
         ))
     ranked, exclusions = ordered_eligible(candidates, contract, descending=descending)
+    metadata_counts = {}
+    for reasons in metadata_rejections.values():
+        for reason in reasons:
+            metadata_counts[reason] = metadata_counts.get(reason, 0) + 1
+    ranked = [item for item in ranked if not metadata_rejections.get(item.geo_id)]
     page = ranked[offset:offset + limit]
     return {
         "status": "ready" if ranked else ("blocked_unverified_evidence" if rows else "no_observations"),
@@ -52,6 +65,7 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
         "indicator_id": indicator_id, "period": contract.period,
         "countries": list(codes), "observed_rows": len(rows),
         "eligible_total": len(ranked), "excluded_reasons": exclusions,
+        "provider_metadata_issues": dict(sorted(metadata_counts.items())),
         "limit": limit, "offset": offset,
         "has_more": offset + limit < len(ranked),
         "items": [
