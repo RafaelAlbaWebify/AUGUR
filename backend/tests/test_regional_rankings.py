@@ -28,7 +28,7 @@ def make_db(path):
             ('NUTS_2024', ?, 'nuts2', 'regional_unemployment_rate',
              2025, 'percent', 'EUROSTAT', 'lfst_r_lfu3rt', ?, ?, NULL)""",
                     [geo_code, val, json.dumps({"geo": geo_code, "time": "2025",
-                        "freq": "A", "age": "Y20-64", "sex": "T", "unit": "PC"})])
+                        "freq": "A", "age": "Y20-64", "sex": "T", "unit": "PC", "isced11": "TOTAL"})])
     con.close()
 
 

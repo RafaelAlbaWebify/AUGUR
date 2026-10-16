@@ -5,7 +5,7 @@ from scripts.reconcile_ranking_eurostat import reconcile
 
 class MultiSliceProvider:
     def fetch_dataset(self, dataset_id, filters):
-        return {"geo": filters["geo"]}
+        return {"geo": filters["geo"], "dataset": dataset_id}
 
     def normalize(self, country, config, response):
         rows = []
@@ -16,6 +16,7 @@ class MultiSliceProvider:
                     "source_dimensions": {
                         "geo": geo, "time": "2025", "age": age,
                         "freq": "A", "sex": "T", "unit": "PC",
+                        **({"isced11": "TOTAL"} if response["dataset"] == "lfst_r_lfu3rt" else {}),
                     },
                     "source_observation_status": None,
                 })

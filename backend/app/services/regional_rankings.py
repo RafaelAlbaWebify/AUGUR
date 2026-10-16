@@ -44,7 +44,8 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
     for geo_id, country, name, indicator, level, system, unit, source, dataset, period, value, dimensions, status, source_geo_code in rows:
         labels[geo_id] = (country, name)
         metadata_rejections.setdefault(geo_id, []).extend(check_provider_metadata(
-            dimensions, status, geo_code=source_geo_code, period=period
+            dimensions, status, geo_code=source_geo_code, period=period,
+            indicator_id=indicator
         ))
         candidates.append(RankingCandidate(
             geo_id=geo_id, indicator_id=indicator, geo_level=level,

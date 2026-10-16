@@ -10,7 +10,8 @@ class FakeEurostat:
         return [
             {"period": 2025, "value": 6.0,
              "source_dimensions": {"geo": code, "freq": "A", "age": "Y20-64",
-                                   "sex": "T", "unit": "PC", "time": "2025"},
+                                   "sex": "T", "unit": "PC", "time": "2025",
+                                   **({"isced11": "TOTAL"} if payload["dataset"] == "lfst_r_lfu3rt" else {})},
              "source_observation_status": None}
             for code in payload["filters"]["geo"]
         ]

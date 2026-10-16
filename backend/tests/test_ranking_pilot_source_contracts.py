@@ -12,6 +12,7 @@ def test_pilot_contracts_match_existing_eurostat_ingestion_filters():
         assert config["unit"] == contract.unit == "percent"
         assert config["filters"] == {
             "freq": "A", "age": "Y20-64", "sex": "T", "unit": "PC",
+            **({"isced11": "TOTAL"} if identifier == "regional_unemployment_rate" else {}),
         }
         assert contract.source_id == "EUROSTAT"
         assert contract.geography_system == "NUTS_2024"

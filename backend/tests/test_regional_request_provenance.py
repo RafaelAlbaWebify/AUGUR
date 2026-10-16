@@ -26,7 +26,7 @@ def test_request_provenance_retains_exact_pilot_dimensions():
     assert result["status"] == "available"
     saved = json.loads(result["request_filters_json"])
     assert saved == {"geo": "ES11", "freq": "A",
-                     "age": "Y20-64", "sex": "T", "unit": "PC"}
+                     "age": "Y20-64", "sex": "T", "unit": "PC", "isced11": "TOTAL"}
     assert saved == adapter.filters
 
 
