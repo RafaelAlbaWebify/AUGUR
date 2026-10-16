@@ -692,6 +692,7 @@ def _latest_regional_indicator(
                 "indicator_id": config["indicator_id"],
                 "dataset_id": config["dataset_id"],
                 "unit": config["unit"],
+                "dimension_values": filters,
             },
             payload,
         )
@@ -715,6 +716,18 @@ def _latest_regional_indicator(
             "reason": "no_observation",
         }
 
+    # Never persist arbitrary first/last category when the provider returns
+    # multiple observations for the same period.
+    periods = [row["period"] for row in rows]
+    if len(periods) != len(set(periods)):
+        return {
+            "indicator_id": config["indicator_id"],
+            "name": config["name"],
+            "status": "unavailable",
+            "dataset_id": config["dataset_id"],
+            "source_id": "EUROSTAT",
+            "reason": "ambiguous_provider_dimensions",
+        }
     latest = max(rows, key=lambda row: row["period"])
     return {
         "indicator_id": config["indicator_id"],
