@@ -2119,6 +2119,33 @@ test('real-country viewport contracts center mainland Spain and Portugal', async
   }
 })
 
+test('Country Radar uses three side-by-side hero columns on desktop', async ({ page }) => {
+  for (const width of [1200, 1650, 1920]) {
+    await page.setViewportSize({ width, height: 900 })
+    await page.goto('/country/ESP/overview')
+    const layout = await page.evaluate(() => {
+      const rect = (selector: string) => document.querySelector(selector)?.getBoundingClientRect()
+      const country = rect('.countryRadarHero > .countryIdentityCard')
+      const changes = rect('.countryRadarHero > .recentChangesPanel')
+      const map = rect('.countryRadarHero > .countryRadarMap')
+      const cards = rect('.countryMetricGrid')
+      if (!country || !changes || !map || !cards) return null
+      return {
+        leftToRight: country.right <= changes.left + 2 && changes.right <= map.left + 2,
+        sameTop: Math.abs(country.top - changes.top) <= 2 && Math.abs(changes.top - map.top) <= 2,
+        sameHeight: Math.abs(country.height - changes.height) <= 2 && Math.abs(changes.height - map.height) <= 2,
+        cardsBelow: cards.top >= Math.max(country.bottom, changes.bottom, map.bottom) - 2,
+        mapUnderHalf: map.width < window.innerWidth * 0.5,
+        noHorizontalOverflow: document.documentElement.scrollWidth <= window.innerWidth + 2,
+      }
+    })
+    expect(layout).toEqual({
+      leftToRight: true, sameTop: true, sameHeight: true,
+      cardsBelow: true, mapUnderHalf: true, noHorizontalOverflow: true,
+    })
+  }
+})
+
 test('Country Radar shows both metric rows on a 1650x900 desktop', async ({ page }) => {
   await page.setViewportSize({ width: 1650, height: 900 })
   await page.goto('/country/ESP/overview')
@@ -3034,10 +3061,11 @@ test('Country Radar stays readable at 1920x900', async ({ page }) => {
   })
 
   for (const value of Object.values(boxes)) expect(value).not.toBeNull()
-  expect(boxes.identity!.right).toBeLessThanOrEqual(boxes.map!.left)
-  expect(boxes.changes!.right).toBeLessThanOrEqual(boxes.map!.left)
-  expect(boxes.identity!.bottom).toBeLessThanOrEqual(boxes.changes!.top)
-  expect(boxes.metrics!.top).toBeGreaterThan(boxes.map!.bottom)
+  expect(boxes.identity!.right).toBeLessThanOrEqual(boxes.changes!.left + 2)
+  expect(boxes.changes!.right).toBeLessThanOrEqual(boxes.map!.left + 2)
+  expect(Math.abs(boxes.identity!.top - boxes.changes!.top)).toBeLessThanOrEqual(2)
+  expect(Math.abs(boxes.changes!.top - boxes.map!.top)).toBeLessThanOrEqual(2)
+  expect(boxes.metrics!.top).toBeGreaterThanOrEqual(boxes.map!.bottom - 2)
 })
 
 test('Country Radar panels do not overlap at 1920x1080', async ({ page }) => {

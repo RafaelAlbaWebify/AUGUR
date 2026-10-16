@@ -3134,7 +3134,7 @@ body:has(.countryRadarPage) .shell.view-overview {
    thumbnail. Reuse the horizontal space previously spent on three hero
    columns. The identity and change rail share the narrower left column.
    Scrolling below the fold is intentional at short desktop heights. */
-@media (min-width: 1280px) {
+@media (min-width: 1100px) {
   .countryRadarHero {
     display: grid;
     grid-template-columns: minmax(260px, 28fr) minmax(0, 72fr);
@@ -3189,14 +3189,14 @@ body:has(.countryRadarPage) .shell.view-overview {
   }
 }
 
-@media (min-width: 1280px) and (max-width: 1450px) {
+@media (min-width: 1100px) and (max-width: 1450px) {
   .countryRadarHero {
     grid-template-columns: minmax(260px, 31fr) minmax(0, 69fr);
   }
 }
 
 /* Selected geography evidence belongs in its own row, not the changes rail. */
-@media (min-width: 1280px) {
+@media (min-width: 1100px) {
   .countryRadarHero > .geographicEvidencePanel {
     grid-column: 1 / -1;
     grid-row: 3;
@@ -3286,5 +3286,60 @@ body:has(.countryRadarPage) .shell.view-overview {
   .countryRadarHero > .recentChangesPanel .signalSplit span {
     font-size: 7px;
     line-height: 1.2;
+  }
+}
+
+/* Country Radar: three equal-height panels on desktop. The earlier map-first
+   two-column override wrongly stacked Changes below Country and oversized Map. */
+@media (min-width: 1100px) {
+  .countryRadarHero {
+    display: grid;
+    grid-template-columns: minmax(0, 26fr) minmax(0, 29fr) minmax(0, 45fr);
+    grid-template-rows: minmax(390px, auto);
+    align-items: stretch;
+  }
+  .countryRadarHero > .countryIdentityCard,
+  .countryRadarHero > .recentChangesPanel,
+  .countryRadarHero > .countryRadarMap {
+    grid-row: 1;
+    min-width: 0;
+    height: 100%;
+    min-height: 390px;
+    max-height: none;
+    box-sizing: border-box;
+  }
+  .countryRadarHero > .countryIdentityCard { grid-column: 1; }
+  .countryRadarHero > .recentChangesPanel {
+    grid-column: 2;
+    overflow: hidden;
+  }
+  .countryRadarHero > .countryRadarMap { grid-column: 3; }
+  .countryRadarHero .recentChangeList { max-height: none; }
+  .countryRadarHero > .geographicEvidencePanel {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+  .countryRadarHero .countryRadarMap .leafletAugurMap,
+  .countryRadarHero .countryRadarMap .regionalMapView {
+    height: 330px !important;
+    min-height: 330px !important;
+  }
+}
+@media (min-width: 1400px) and (min-height: 820px) and (max-height: 940px) {
+  .countryRadarHero { grid-template-rows: 400px; }
+  .countryRadarHero > .countryIdentityCard,
+  .countryRadarHero > .recentChangesPanel,
+  .countryRadarHero > .countryRadarMap {
+    height: 400px;
+    min-height: 400px;
+    max-height: 400px;
+  }
+  .countryRadarHero > .recentChangesPanel .recentChangeList {
+    display: block;
+  }
+  .countryRadarHero .countryRadarMap .leafletAugurMap,
+  .countryRadarHero .countryRadarMap .regionalMapView {
+    height: 344px !important;
+    min-height: 344px !important;
   }
 }
