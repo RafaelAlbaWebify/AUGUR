@@ -58,6 +58,7 @@
 - PR #54 merged as 9f6cd99; backend/frontend/ops CI green: actual Eurostat provider-response dimensions + observation status captured in new nullable regional observation columns for future ingestions. Existing rows not retroactively verified.
 - PR #55 merged as 489e334 (green backend/frontend/ops CI): GR2 read-only ranking now reports provider dimension mismatch, missing response metadata, geographic/time mismatch and status flags; all remain blocked absent independently verified vintage. Legacy fixtures supported with explicit missing metadata.
 - PR #56 merged as dadeaa5 with green backend/frontend/ops CI: added read-only live Eurostat source-replay reconciler for both 2025 NUTS2 labour metrics, mismatch reasons and fixture tests; no DB writes or automatic boundary certification. See docs/GR2_LIVE_SOURCE_RECONCILIATION.md.
-- NEXT: run source-replay reconciliation against the operator's local DuckDB, resolve any code/value/response-dimension differences, independently confirm vintage, then unlock accepted numerical rankings and GR3 UX.
+- PR #57 merged as 61c85a2 (backend/frontend/ops CI green): first local source replay found 0/62 accepted (29 apparent duplicates, 21 dimension/status review, 12 reported employment discrepancies). Fixed exact Eurostat response slice selection before duplicate detection. See docs/GR2_SOURCE_REPLAY_DIAGNOSTIC_20261016.md.
+- NEXT: operator runs read-only GR2 live source replay v2 and uploads report; analyze true numerical differences, status flags and source-vintage acceptance before enabling rankings.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
