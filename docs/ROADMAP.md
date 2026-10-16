@@ -18,6 +18,11 @@ Updated: 2026-10-09. **No arbitrary completion percentages.** Each milestone is 
 
 **Rules:** No invented observations; no forced coverage denominators; no conflation of geographies across boundary vintages; no declaring completion from CI alone. Prefer completing a milestone over accumulating one-file PRs.
 
+
+## Geographic rankings and location discovery — 2026-10-16
+
+The agreed task-first UX roadmap is tracked in [GEOGRAPHIC_RANKINGS_ROADMAP.md](GEOGRAPHIC_RANKINGS_ROADMAP.md): **GR-0 evidence audit → GR-1 comparability contracts → GR-2 backend rankings → GR-3 Rankings UX → GR-4 unified 1–3-location Compare → GR-5 real-data/operator acceptance → GR-6 personalized recommendations → GR-7 source-accepted geographic expansion**. All GR milestones remain planned; implementation has not been claimed. Preserve operator-accepted Country Radar; next actionable task is **GR-0**, batched as an auditable code and read-only actual coverage investigation. This works alongside existing G3/P1/T1 gates; never substitute synthetic data for unavailable city observations.
+
 ## Master indicator inventory (2026-10-10)
 
 [Master indicator matrix](MASTER_INDICATOR_MATRIX.md) maps economic development, fiscal burden, housing, migration, institutional quality, freedom and living conditions across country/region/city scales. A deterministic generator `backend/scripts/export_indicator_inventory.py` inventories national indicator declarations but does **not** prove source coverage. Product priority shifts to completing P0 fiscal feasibility and actual housing affordability with authoritative source contracts and real observation acceptance. Existing G2/G3 local evidence gaps remain open; no invented readiness percentage.
