@@ -17,7 +17,7 @@ Owner: AUGUR. Product intent: discover, rank, compare and eventually recommend l
 | ID | Priority | Deliverable | Dependency | Status | Product acceptance evidence |
 |---|---|---|---|---|---|
 | GR-0 | P0 | Real evidence and existing API/code audit | None | Planned | Inventory for ESP/PRT/IRL with exact indicator×geo level×source×period×unit×vintage counts and blocked use cases; no DB write |
-| GR-1 | P0 | Geographic identity, indicator catalog and comparability contract | GR-0 | Planned | Reviewed documented eligibility policy; tests cover valid, incompatible and ambiguous cases |
+| GR-1 | P0 | Geographic identity, indicator catalog and comparability contract | GR-0 | Eligibility prototype implemented; CI and provider-vintage acceptance pending | Reviewed documented eligibility policy; tests cover valid, incompatible and ambiguous cases |
 | GR-2 | P0 | Read-only ranking backend/API | GR-1 | Planned | Stable sorted outputs, deterministic ties, eligible denominator, exclusions, pagination and provenance; tests |
 | GR-3 | P1 | Rankings page and discoverable navigation | GR-2 | Planned | Operator can filter, sort, inspect a source, share URL, and interpret missing/partial data |
 | GR-4 | P1 | Unified 1–3 location Compare workflow | GR-1, GR-3 | Planned | Same/different countries supported for eligible cities, regions and countries; mixed-level context explicitly separated |
@@ -109,3 +109,7 @@ Onboard source-by-source and geography-by-geography under the [global expansion 
 ## Immediate next action
 
 Execute **GR-0** as a single coherent audit PR: code-path map + read-only coverage matrix + acceptance blockers + first eligible indicator shortlist. Evaluate existing G3 exporters first; do not require user to run diagnostics that can be executed or tested on GitHub. After audit, use results to narrow GR-1/GR-2 implementation and determine whether a sanitized local export is essential.
+
+## GR-1 implementation checkpoint — 2026-10-16
+
+Initial conservative Python contract added at `backend/app/services/ranking_eligibility.py` with exact source/dataset, indicator, units, year, geography level/system, observed-only and explicit externally-verified boundary flag. Stable order and exclusion reasons are covered by `backend/tests/test_ranking_eligibility.py`. **This is not source-methodology acceptance**: the boundary-verified boolean cannot be set just because a stored label reads NUTS_2024, and GR-2 must derive it from authoritative evidence rather than hardcode true. The exposed ranking API, generalized indicator catalog, pagination and real-data numerical acceptance remain open.
