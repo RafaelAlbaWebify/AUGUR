@@ -93,12 +93,12 @@ def ordered_eligible(
     """Stable order and auditable exclusion reasons; fail closed on duplicates."""
     accepted: list[RankingCandidate] = []
     excluded: dict[str, int] = {}
-    seen: set[str] = set()
+    from collections import Counter
+    counts = Counter(c.geo_id for c in candidates)
     for candidate in candidates:
         reasons = list(check_eligibility(candidate, contract, today=today))
-        if candidate.geo_id in seen:
+        if counts[candidate.geo_id] > 1:
             reasons.append("duplicate_geography")
-        seen.add(candidate.geo_id)
         if reasons:
             for reason in reasons:
                 excluded[reason] = excluded.get(reason, 0) + 1
