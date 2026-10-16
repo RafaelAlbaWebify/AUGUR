@@ -39,7 +39,7 @@ def test_diagnostics_redact_values_and_preserve_read_only_db(tmp_path):
     unemp = data["metrics"]["regional_unemployment_rate"]
     assert unemp["duplicate_diagnostics"] == [{
         "geo_code": "ES11", "candidate_rows": 2,
-        "distinct_dimension_tuples": 2, "extra_dimension_keys": ["duration"]
+        "distinct_dimension_tuples": 2, "extra_dimension_keys": ["duration", "isced11"]
     }]
     emp = data["metrics"]["regional_employment_rate"]
     assert emp["discrepancy_diagnostics"] == [{
