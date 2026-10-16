@@ -11,7 +11,8 @@
 - Separate implemented, locally tested, CI-pending, CI-passed, merged and real-data accepted states.
 - Never invent functionality, evidence, country/source coverage, operability or completion percentages.
 - Protect local DuckDB/SQLite, ESCO data, secrets, user profiles, backups and existing installations.
-- Do not delete data, force-reset worktrees, switch a dirty checkout or merge important branches without approval.
+- Do not delete data, force-reset worktrees or switch dirty checkouts without approval.
+- Routine PR merges are pre-authorized when CI succeeds, GitHub reports mergeable, and scope is reviewed; merge without repeated permission requests. Obtain approval for destructive, security-sensitive, high-risk, or irreversible changes.
 - Update STATE after meaningful work; include a direct PR link and live check status after each commit.
 - Keep this file concise; replace obsolete status instead of accumulating history.
 - Follow docs/operations/controlled-development-roadmap.md; EA reports every fixed weighted subphase.
@@ -25,7 +26,7 @@
   React/TypeScript/Vite frontend; pytest, build and Playwright via GitHub Actions.
 - Maintain separation of actual observations, official forecasts, analytical scenarios and personal fit.
 - Repository: RafaelAlbaWebify/AUGUR; release target: main.
-- Operating-context PR #45 merged to main; active dashboard layout PR #46 remains open and unmerged.
+- Operating-context PR #45 merged to main; dashboard layout PR #46 merged to main.
 - Rejected configurable/floating workspace: PR #44 closed unmerged; preserve proven main UI.
 - Windows repository: ~/Documents/GitHub/AUGUR; start-augur.ps1, stop-augur.ps1,
   check-operability.ps1, refresh-augur.ps1, export-geography-provenance.ps1.
@@ -34,7 +35,7 @@
 
 ## STATE
 - Main includes merged PR #45 and this operating-context file; current main HEAD not independently recorded here.
-- PR #44 closed unmerged (rejected docking workspace); PR #46 open draft (three-column dashboard).
+- PR #44 closed unmerged (rejected docking workspace); PR #46 merged (three-column dashboard).
 - Previous PR #44 branch CI: 92/92 Playwright passed, but real visual acceptance FAILED;
   passing synthetic tests did not make the docking workspace usable.
 - Implemented on main: national/regional evidence flows, provenance tooling, country UI,
@@ -42,10 +43,9 @@
 - Previously locally accepted: G2 ES/PT/IE data-layer reconciliation; wider release not accepted.
 - Local operator last reported AUGUR operability partial: ttv_temporal_model blocker.
 - Blockers: G3 real source/unit/period audit; genuine country journeys; external TTV holdout.
-- PR #46 CI at 2116c8d: passed; local screenshot showed old layout because working checkout
-  lacked PR #46 CSS. Clean AUGUR-PR46 worktree was proposed; visual acceptance not yet evidenced.
-- Local Git recovery: .git/HEAD contained null bytes; HEAD restored to local feature branch.
-  Local main worktree contains staged changes; do not reset/discard or switch it without review.
-- NEXT: launch and visually inspect clean PR #46 checkout; merge only after explicit approval.
+- PR #46 CI at 2116c8d: passed; merged to main as 030e802. Local visual acceptance of merged dashboard is still pending.
+- Local Git recovery: HEAD and ORIG_HEAD repaired; backed-up staged changes archived.
+  Single AUGUR worktree restored to main at dce469c; local pull of merged PR #46 still needed.
+- NEXT: fast-forward the single local AUGUR/main checkout and visually inspect merged PR #46.
 - AFTER: G3 source/unit/period audit and real-data ESP/PRT/IRL country workflow validation.
 - Progress begins at 0% merged for NEW roadmap deliverables until their acceptance is evidenced.
