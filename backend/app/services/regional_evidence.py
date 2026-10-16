@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import json
+
 from datetime import datetime, timezone
 from time import monotonic
 
@@ -723,6 +725,7 @@ def _latest_regional_indicator(
         "dataset_id": config["dataset_id"],
         "source_id": "EUROSTAT",
         "source_updated_at": latest.get("source_updated_at"),
+        "request_filters_json": json.dumps(filters, sort_keys=True),
         "history": [
             {
                 "period": row["period"],
@@ -876,6 +879,7 @@ def regional_evidence(
                 "dataset_id": item["dataset_id"],
                 "retrieved_at": datetime.now(timezone.utc),
                 "source_updated_at": item.get("source_updated_at"),
+                "request_filters_json": item.get("request_filters_json"),
             }
             for item in indicators
             if item["status"] == "available"
@@ -939,6 +943,7 @@ def sync_regional_evidence_codes(
                     "dataset_id": item["dataset_id"],
                     "retrieved_at": datetime.now(timezone.utc),
                     "source_updated_at": item.get("source_updated_at"),
+                "request_filters_json": item.get("request_filters_json"),
                 }
                 for item in indicators
                 if item["status"] == "available"
