@@ -229,6 +229,7 @@ CREATE TABLE IF NOT EXISTS subnational_observations (
     dataset_id VARCHAR NOT NULL,
     retrieved_at TIMESTAMP NOT NULL,
     source_updated_at VARCHAR,
+    request_filters_json VARCHAR,
     PRIMARY KEY (
         geography_system, geo_code, indicator_id, period, source_id
     )
@@ -398,6 +399,11 @@ def initialize_analytics_schema() -> None:
                 "RENAME TO subnational_observations"
             )
             subnational_columns.add("geography_system")
+
+        if "request_filters_json" not in subnational_columns:
+            con.execute("ALTER TABLE subnational_observations ADD COLUMN request_filters_json VARCHAR")
+            subnational_columns.add("request_filters_json")
+
 
         # Backfill the provider-neutral geography registry from existing
         # NUTS/Urban Audit evidence. Country identity is resolved explicitly
@@ -637,6 +643,7 @@ def upsert_labour_earnings(rows: list[dict]) -> int:
                     row["dataset_id"],
                     row["retrieved_at"],
                     row.get("source_updated_at"),
+                    row.get("request_filters_json"),
                 ]
                 for row in rows
             ],
@@ -3090,9 +3097,10 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                 source_id,
                 dataset_id,
                 retrieved_at,
-                source_updated_at
+                source_updated_at,
+                request_filters_json
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 [
@@ -3108,6 +3116,7 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                     row["dataset_id"],
                     row["retrieved_at"],
                     row.get("source_updated_at"),
+                    row.get("request_filters_json"),
                 ]
                 for row in rows
             ],
