@@ -67,7 +67,8 @@ def reconcile(db_path: Path, adapter: EurostatAdapter, tolerance: float = 0.051)
                         incompatible = tuple(reason for reason in checks
                                              if reason != "provider_status_review_required")
                         if incompatible:
-                            errors.setdefault(geo, "provider_dimension_mismatch")
+                            if geo not in actual:
+                                errors.setdefault(geo, "provider_dimension_mismatch")
                             continue
                         if geo in actual:
                             errors[geo] = "multiple_matching_provider_rows"
