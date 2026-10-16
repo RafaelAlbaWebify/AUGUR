@@ -726,6 +726,8 @@ def _latest_regional_indicator(
         "source_id": "EUROSTAT",
         "source_updated_at": latest.get("source_updated_at"),
         "request_filters_json": json.dumps(filters, sort_keys=True),
+        "response_dimensions_json": json.dumps(latest.get("source_dimensions"), sort_keys=True) if latest.get("source_dimensions") else None,
+        "source_observation_status": latest.get("source_observation_status"),
         "history": [
             {
                 "period": row["period"],
@@ -880,6 +882,8 @@ def regional_evidence(
                 "retrieved_at": datetime.now(timezone.utc),
                 "source_updated_at": item.get("source_updated_at"),
                 "request_filters_json": item.get("request_filters_json"),
+                "response_dimensions_json": item.get("response_dimensions_json"),
+                "source_observation_status": item.get("source_observation_status"),
             }
             for item in indicators
             if item["status"] == "available"
@@ -944,6 +948,8 @@ def sync_regional_evidence_codes(
                     "retrieved_at": datetime.now(timezone.utc),
                     "source_updated_at": item.get("source_updated_at"),
                 "request_filters_json": item.get("request_filters_json"),
+                "response_dimensions_json": item.get("response_dimensions_json"),
+                "source_observation_status": item.get("source_observation_status"),
                 }
                 for item in indicators
                 if item["status"] == "available"
