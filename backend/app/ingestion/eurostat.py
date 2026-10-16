@@ -449,8 +449,18 @@ class EurostatAdapter:
                     "observation_type": "observed",
                     "retrieved_at": retrieved_at,
                     "source_updated_at": payload.get("updated"),
-                    "source_observation_status": None,
-                    "source_decimal": None,
+                    "source_observation_status": (
+                        payload.get("status", {}).get(str(flat_index))
+                        if isinstance(payload.get("status"), dict)
+                        else (
+                            payload["status"][flat_index]
+                            if isinstance(payload.get("status"), list)
+                            and flat_index < len(payload["status"])
+                            else None
+                        )
+                    ),
+                    "source_decimal": payload.get("extension", {}).get("decimal"),
+                    "source_dimensions": labels,
                 }
             )
 
