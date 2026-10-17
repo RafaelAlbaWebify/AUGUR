@@ -59,3 +59,7 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 - Five further service modules reviewed: assessment, compare, country, eea_city_catalog, profile_readiness, with source-SHA evidence and findings AUD-B03-008 through AUD-B03-011.
 - Current audit register before refreshed changed-source hashes: **51/348 files = 14.66%**; automatic `inventory.json` remains authoritative after merges. B02 remains 35/35 reviewed.
 - B03 change package indexes coverage candidates once, preserving observed/incompatible/missing semantics; housing service now rejects nonfinite/boolean data. Acceptance requires backend, frontend and scripts CI; neither change authorizes numerical rankings.
+
+## B03 additional source review — 2026-10-17
+- `legal_fit.py` and `language_fit.py` fully read and recorded at immutable blob hashes with their source-level definitions and importer counts. Record adds AUD-B03-012/013 consumer verification leads, without treating a generic B2 heuristic as legal or professional qualification.
+- Audit register 53/350 files (15.14%) in this snapshot; `inventory.json` SHA-valid counts remain definitive after merging source changes. The registry also contains two temporarily stale files from recently merged service fixes; those must be re-reviewed before they count again.
