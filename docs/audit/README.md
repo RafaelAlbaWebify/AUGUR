@@ -68,3 +68,8 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 - New SHA-backed review of legal_fit.py, language_fit.py and post-PR110 financial_fit.py. Findings AUD-B03-012 through -015 preserve open consumer, provider-value and cross-vintage comparability risks.
 - Audit ledger **57/351 reviewed (16.24%)** at the current branch snapshot; the GitHub-generated inventory remains the canonical SHA-fresh coverage after each merge. B02 remains completed 35/35.
 - PR #110 guards zero/nonfinite income and price indices; the additional observed-income benchmark and legal/language presentation issues remain separate acceptance gates.
+
+## B03 follow-on checkpoint (2026-10-17)
+- Latest inventory baseline: 351 in-scope source files. Audited file register rises from 57 to **61/351 (17.38%)** in this batch, with four additional SHA-stable modules (`trends.py`, `geography_indicator_coverage.py`, `ttv.py`, `tax_wedge_contract.py`).
+- `scenarios.py` explicit empty-horizon bug corrected and regression-tested in this batch, but **not counted reviewed** until its new SHA is generated and its consumer impact is reverified after merge.
+- Source coverage and completion are separate; findings AUD-B03-020 through AUD-B03-023 record concrete contract risks for later remediation.
