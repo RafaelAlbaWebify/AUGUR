@@ -28,7 +28,7 @@ jobs:
         run: python -m pip install -r requirements.txt
       - name: Validate ingestion regression tests
         working-directory: backend
-        run: python -m pytest -q tests/test_eurostat_fail_closed_values.py tests/test_regional_ingestion_dimension_safety.py tests/test_eurostat_regional_contract.py
+        run: python -m pytest -q tests/test_eurostat_fail_closed_values.py tests/test_regional_ingestion_dimension_safety.py tests/test_eurostat_regional_contract.py tests/test_official_reference_db_audit.py
       - name: Build independent official-source DuckDB
         working-directory: backend
         run: python -m scripts.build_official_reference_db --db ../reference-output/official_eurostat_reference.duckdb --report ../reference-output/reference_report.json
