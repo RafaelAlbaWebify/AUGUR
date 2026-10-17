@@ -49,6 +49,22 @@ def main():
         result["official_contract"]=contract
         result["official_contract"]["parsed_rows"]=len(rows)
         result["disposable_db_acceptance"]=verify_weo_roundtrip(rows)
+        source=load_workbook(io.BytesIO(r.content),read_only=True,data_only=True)
+        try:
+            all_countries={str(record[2]).upper() for record in source["Countries"].iter_rows(min_row=2,values_only=True)
+                           if record[4] in {"NGDP_RPCH","PCPIPCH"} and isinstance(record[2],str)
+                           and len(record[2])==3 and record[2].isalpha()}
+        finally:
+            source.close()
+        all_rows,all_contract=normalize_official_weo(r.content,all_countries)
+        result["complete_official_source_audit"]={
+            "source_country_count":len(all_countries),
+            "parsed_country_count":len(all_contract["countries_with_data"]),
+            "source_rows":len(all_rows),
+            "missing_latest_actual_series":all_contract["missing_latest_actual_series"],
+            "storage":verify_weo_roundtrip(all_rows),
+            "unverified_unit_indicators":all_contract["blocked_indicator_ids"],
+        }
     print(json.dumps(result,ensure_ascii=False,indent=2))
 
 
