@@ -1,12 +1,13 @@
 import { useEffect, useMemo, useState } from 'react'
 import ProfilePanel from './components/ProfilePanel'
 import ComparePanel from './components/ComparePanel'
+import RankingsPage from './components/RankingsPage'
 import CountrySelect from './components/CountrySelect'
 import OverviewPage from './components/OverviewPage'
 import IndicatorsPage from './components/IndicatorsPage'
 import SkillsLanguagesPage from './components/SkillsLanguagesPage'
 import FuturePathsPage from './components/FuturePathsPage'
-import { countryRoute, compareRoute, dimensionRoute, useAugurRoute, type CountryView } from './lib/routing'
+import { countryRoute, compareRoute, dimensionRoute, rankingsRoute, useAugurRoute, type CountryView } from './lib/routing'
 
 type Country = {
   iso2: string
@@ -369,7 +370,7 @@ export default function App() {
   const { route, navigate } = useAugurRoute()
   const [countries, setCountries] = useState<Country[]>([])
   const [selectedCountry, setSelectedCountry] = useState(
-    route.kind === 'compare' ? 'ESP' : route.countryIso3,
+    route.kind === 'country' || route.kind === 'dimension' ? route.countryIso3 : 'ESP',
   )
   const [health, setHealth] = useState<Health | null>(null)
   const [operability, setOperability] = useState<Operability | null>(null)
@@ -398,7 +399,7 @@ export default function App() {
   useEffect(() => {
     if (route.kind === 'compare') {
       setCompareCountries(route.countries)
-    } else {
+    } else if (route.kind === 'country' || route.kind === 'dimension') {
       setSelectedCountry(route.countryIso3)
     }
   }, [route])
@@ -569,7 +570,11 @@ export default function App() {
     }
   }
 
-  function navigateView(view: CountryView | 'compare') {
+  function navigateView(view: CountryView | 'compare' | 'rankings') {
+    if (view === 'rankings') {
+      navigate(rankingsRoute())
+      return
+    }
     if (view === 'compare') {
       navigate(compareRoute(compareCountries))
       return
@@ -579,7 +584,7 @@ export default function App() {
   }
 
   useEffect(() => {
-    if (activeView === 'compare') return
+    if (activeView === 'compare' || activeView === 'rankings') return
 
     const controller = new AbortController()
     const signal = controller.signal
@@ -719,6 +724,7 @@ export default function App() {
             ['indicators', 'Indicators'],
             ['outlook', 'Outlook'],
             ['compare', 'Compare'],
+            ['rankings', 'Rankings'],
             ['profile', 'Profile'],
             ['skills', 'Skills & Languages'],
           ].map(([id, label]) => (
@@ -726,7 +732,7 @@ export default function App() {
               key={id}
               type="button"
               className={activeView === id || (activeView === 'dimension' && id === 'indicators') ? 'active' : ''}
-              onClick={() => navigateView(id as CountryView | 'compare')}
+              onClick={() => navigateView(id as CountryView | 'compare' | 'rankings')}
             >
               {label}
             </button>
@@ -808,6 +814,8 @@ export default function App() {
           dimensionLabels={dimensionLabels}
         />
       )}
+
+      {activeView === 'rankings' && <RankingsPage apiBase={API_BASE} />}
 
       {activeView === 'profile' && (
         <ProfilePanel apiBase={API_BASE} targetCountry={selectedCountry} />
