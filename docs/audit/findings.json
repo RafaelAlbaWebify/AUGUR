@@ -46,23 +46,25 @@
     },
     {
       "path": "backend/app/ingestion/eea_air_quality.py",
-      "sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "sha256": "40518d8db6019444a79bea59df5003269af4e3351884ee9acb89a022e400e984",
       "lines_reviewed": "1-117",
       "definitions_reviewed": 1,
       "batch": "B02",
       "status": "reviewed_findings_open",
       "reviewed_on": "2026-10-17",
-      "method": "full source read and adjacent contract inspection"
+      "method": "full source read and adjacent contract inspection",
+      "review_note": "Source re-reviewed after PR #90 fail-closed tests"
     },
     {
       "path": "backend/app/ingestion/eurostat_geography_discovery.py",
-      "sha256": "5700fe1ff16656436e535ca3edb5906142ae00ec72e8148858f846070b6a1153",
+      "sha256": "4528caa7fa0338fb797cc4b4f12a61530386803b3a8df9ebe2171b830bfdd601",
       "lines_reviewed": "1-100",
       "definitions_reviewed": 5,
       "batch": "B02",
       "status": "reviewed_findings_open",
       "reviewed_on": "2026-10-17",
-      "method": "full source read and adjacent contract inspection"
+      "method": "full source read and adjacent contract inspection",
+      "review_note": "Source re-reviewed after PR #90 fail-closed tests"
     },
     {
       "path": "backend/app/ingestion/eurostat_nuts_registry.py",
@@ -86,13 +88,14 @@
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_sector.py",
-      "sha256": "75aea64b6150b52f1240bf3c317a248e32fee11959ab975eaa6ce3641c64d79e",
+      "sha256": "d67a62ef69cbf64816babf8ab1b2f9028a1560a1d2fb30ef7b1ddeae2037383f",
       "lines_reviewed": "1-117",
       "definitions_reviewed": 2,
       "batch": "B02",
       "status": "reviewed_findings_open",
       "reviewed_on": "2026-10-17",
-      "method": "full source read and adjacent contract inspection"
+      "method": "full source read and adjacent contract inspection",
+      "review_note": "Source re-reviewed after PR #90 fail-closed tests"
     },
     {
       "path": "backend/app/ingestion/oecd_tax_wedge.py",
@@ -212,13 +215,15 @@
     },
     {
       "id": "AUD-B02-008",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_90_requires_followup_edge_cases",
       "severity": "high",
       "component": "backend/app/ingestion/eurostat_geography_discovery.py",
-      "sha256": "5700fe1ff16656436e535ca3edb5906142ae00ec72e8148858f846070b6a1153",
+      "sha256": "4528caa7fa0338fb797cc4b4f12a61530386803b3a8df9ebe2171b830bfdd601",
       "line_range": "44-62",
       "description": "Sparse JSON-stat values mapping may not be a dict; .get is used without type/flat-index enforcement and negative or malformed keys can create false observed-region coverage.",
-      "test_required": "Add sparse shape/negative index adversarial fixtures"
+      "test_required": "Add sparse shape/negative index adversarial fixtures",
+      "previous_sha256": "5700fe1ff16656436e535ca3edb5906142ae00ec72e8148858f846070b6a1153",
+      "resolution_pr": 90
     },
     {
       "id": "AUD-B02-009",
@@ -232,23 +237,27 @@
     },
     {
       "id": "AUD-B02-010",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_90_requires_followup_edge_cases",
       "severity": "high",
       "component": "backend/app/ingestion/eea_air_quality.py",
-      "sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "sha256": "40518d8db6019444a79bea59df5003269af4e3351884ee9acb89a022e400e984",
       "line_range": "25-113",
       "description": "EEA inspection caps source results to 2000 and marks aggregation ready based only on sampled latest records and coordinate completeness; a partial page can masquerade as full station coverage.",
-      "test_required": "ArcGIS exceededTransferLimit and paging/total-count negative test"
+      "test_required": "ArcGIS exceededTransferLimit and paging/total-count negative test",
+      "previous_sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "resolution_pr": 90
     },
     {
       "id": "AUD-B02-011",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_90_requires_followup_edge_cases",
       "severity": "medium",
       "component": "backend/app/ingestion/eea_air_quality.py",
-      "sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "sha256": "40518d8db6019444a79bea59df5003269af4e3351884ee9acb89a022e400e984",
       "line_range": "72-97",
       "description": "Statistics values converted to float without finite-number or unit-consistency validation; NaN and inconsistent years/units risk false summary min/max.",
-      "test_required": "Reject non-finite/statistical unit conflicts"
+      "test_required": "Reject non-finite/statistical unit conflicts",
+      "previous_sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "resolution_pr": 90
     },
     {
       "id": "AUD-B02-012",
@@ -262,13 +271,15 @@
     },
     {
       "id": "AUD-B02-013",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_90_requires_followup_edge_cases",
       "severity": "high",
       "component": "backend/app/ingestion/eurostat_regional_sector.py",
-      "sha256": "75aea64b6150b52f1240bf3c317a248e32fee11959ab975eaa6ce3641c64d79e",
+      "sha256": "d67a62ef69cbf64816babf8ab1b2f9028a1560a1d2fb30ef7b1ddeae2037383f",
       "line_range": "21-116",
       "description": "Sector adapter trusts JSON-stat dimension cardinality and values; converts booleans/nonfinite to float and does not verify returned freq/unit/age/sex are the requested dimensions.",
-      "test_required": "Returned extra/wrong dimension and NaN/boolean regression"
+      "test_required": "Returned extra/wrong dimension and NaN/boolean regression",
+      "previous_sha256": "75aea64b6150b52f1240bf3c317a248e32fee11959ab975eaa6ce3641c64d79e",
+      "resolution_pr": 90
     },
     {
       "id": "AUD-B02-014",
@@ -291,6 +302,6 @@
       "test_required": "Mixed-case regional duplicate identity test"
     }
   ],
-  "denominator_inventoried_files": 339,
+  "denominator_inventoried_files": 340,
   "certified_line_by_line_review_percent": 3.24
 }
