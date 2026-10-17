@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from app.ingestion.eurostat import EurostatAdapter
 from app.ingestion.eurostat_regional_labour import normalize_subnational
+from app.services.regional_evidence import REGIONAL_INDICATORS
 
 
 REGIONAL_HOUSING_SERIES = [
@@ -133,10 +134,23 @@ def inspect_regional_housing_sources(
     }
 
 
+def validate_housing_indicator_contracts() -> None:
+    """Reject source, unit or returned-dimension drift against canonical housing definitions."""
+    canonical = {item["indicator_id"]: item for item in REGIONAL_INDICATORS}
+    for item in REGIONAL_HOUSING_SERIES:
+        reference = canonical[item["indicator_id"]]
+        if item["dataset_id"] != reference["dataset_id"] or item["unit"] != reference["unit"]:
+            raise ValueError(f"Regional housing dataset/unit mismatch: {item['indicator_id']}")
+        for key, expected in reference["filters"].items():
+            if item["filters"].get(key) != expected:
+                raise ValueError(f"Regional housing dimension mismatch: {item['indicator_id']} {key}")
+
+
 def fetch_regional_housing_evidence(
     adapter: EurostatAdapter,
     target_prefixes: set[str] | None = None,
 ) -> tuple[list[dict], list[dict]]:
+    validate_housing_indicator_contracts()
     rows: list[dict] = []
     diagnostics: list[dict] = []
 
