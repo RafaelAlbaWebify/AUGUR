@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 348,
-  "python_count": 310,
-  "definition_count": 1617,
-  "reviewed_file_count": 51,
-  "stale_review_file_count": 0,
-  "line_by_line_review_percent": 14.66,
+  "file_count": 350,
+  "python_count": 312,
+  "definition_count": 1622,
+  "reviewed_file_count": 49,
+  "stale_review_file_count": 2,
+  "line_by_line_review_percent": 14.0,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 126,
+    "backend/tests": 128,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -8310,9 +8310,9 @@
     {
       "path": "backend/app/services/global_evidence_contract.py",
       "bucket": "backend/app/services",
-      "sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
-      "bytes": 3793,
-      "review_status": "verified_reviewed",
+      "sha256": "fd6c170c8250e53044279d3a8dc1aad85017c714018f92464f1f912ea2a1642e",
+      "bytes": 4093,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "EvidenceContract",
@@ -8335,7 +8335,7 @@
           "symbol": "coverage_matrix",
           "kind": "function",
           "line_start": 55,
-          "line_end": 89,
+          "line_end": 96,
           "signature_arguments": [
             "contracts",
             "observations",
@@ -8359,38 +8359,44 @@
         {
           "module": "math",
           "line": 47
+        },
+        {
+          "module": "collections",
+          "line": 64
         }
       ],
       "called_names": [
         "append",
         "dataclass",
+        "defaultdict",
         "get",
         "isfinite",
         "isinstance",
         "sorted",
         "validate_observation"
       ],
-      "lines": 89,
+      "lines": 96,
       "resolved_local_imports": [],
       "imported_by": [
         "backend/app/ingestion/eurostat_regional_contract.py",
         "backend/app/ingestion/oecd_regional.py",
         "backend/scripts/audit_global_evidence.py",
+        "backend/tests/test_global_coverage_index_parity.py",
         "backend/tests/test_global_evidence_contract.py"
       ]
     },
     {
       "path": "backend/app/services/housing_affordability.py",
       "bucket": "backend/app/services",
-      "sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
-      "bytes": 2686,
-      "review_status": "verified_reviewed",
+      "sha256": "e1faae19c55baf9e196fa2e653a5d34788b864728e01231b55bc270a274a3369",
+      "bytes": 2754,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "housing_affordability_evidence",
           "kind": "function",
-          "line_start": 8,
-          "line_end": 45,
+          "line_start": 9,
+          "line_end": 46,
           "signature_arguments": [
             "indicators"
           ]
@@ -8400,18 +8406,24 @@
         {
           "module": "__future__",
           "line": 2
+        },
+        {
+          "module": "math",
+          "line": 3
         }
       ],
       "called_names": [
         "bool",
         "get",
-        "isinstance"
+        "isfinite",
+        "type"
       ],
-      "lines": 45,
+      "lines": 46,
       "resolved_local_imports": [],
       "imported_by": [
         "backend/app/services/regional_evidence.py",
-        "backend/tests/test_housing_affordability.py"
+        "backend/tests/test_housing_affordability.py",
+        "backend/tests/test_housing_affordability_nonnumeric.py"
       ]
     },
     {
@@ -23577,6 +23589,54 @@
       "imported_by": []
     },
     {
+      "path": "backend/tests/test_global_coverage_index_parity.py",
+      "bucket": "backend/tests",
+      "sha256": "e5f2984afd8664dac7fc8031c1ccc3a7a5c46cf4441f0096096df05fc46a807b",
+      "bytes": 1875,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_indexed_coverage_distinguishes_observed_missing_and_incompatible",
+          "kind": "function",
+          "line_start": 15,
+          "line_end": 21,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_duplicate_observed_rows_and_geo_system_remain_separate",
+          "kind": "function",
+          "line_start": 23,
+          "line_end": 28,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_empty_observations_preserve_missing_values",
+          "kind": "function",
+          "line_start": 30,
+          "line_end": 31,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "app.services.global_evidence_contract",
+          "line": 2
+        }
+      ],
+      "called_names": [
+        "EvidenceContract",
+        "all",
+        "coverage_matrix",
+        "dict",
+        "len"
+      ],
+      "lines": 31,
+      "resolved_local_imports": [
+        "backend/app/services/global_evidence_contract.py"
+      ],
+      "imported_by": []
+    },
+    {
       "path": "backend/tests/test_global_evidence_contract.py",
       "bucket": "backend/tests",
       "sha256": "1ae6f97254cbdaee75ba3b27e9c39844ab4cd5ae9ccec7975812774a3db5baec",
@@ -23784,6 +23844,53 @@
         "housing_affordability_evidence"
       ],
       "lines": 21,
+      "resolved_local_imports": [
+        "backend/app/services/housing_affordability.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_housing_affordability_nonnumeric.py",
+      "bucket": "backend/tests",
+      "sha256": "5530d3e0d393fc069fa2221ff319e79087bd7df1c81161d007628425a387fc2f",
+      "bytes": 1034,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_invalid_housing_overburden_is_unavailable",
+          "kind": "function",
+          "line_start": 6,
+          "line_end": 9,
+          "signature_arguments": [
+            "value"
+          ]
+        },
+        {
+          "symbol": "test_invalid_pps_income_is_unavailable",
+          "kind": "function",
+          "line_start": 12,
+          "line_end": 15,
+          "signature_arguments": [
+            "value"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "pytest",
+          "line": 2
+        },
+        {
+          "module": "app.services.housing_affordability",
+          "line": 3
+        }
+      ],
+      "called_names": [
+        "float",
+        "housing_affordability_evidence",
+        "parametrize"
+      ],
+      "lines": 15,
       "resolved_local_imports": [
         "backend/app/services/housing_affordability.py"
       ],
