@@ -195,7 +195,10 @@
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "imported_by_count": 4,
-      "method": "full module inspection and dependency evidence"
+      "method": "full module inspection and dependency evidence",
+      "previous_sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
+      "review_status": "needs_snapshot_revalidation",
+      "revalidated_after_pr": 96
     },
     {
       "path": "backend/app/ingestion/eea_air_quality_api.py",
@@ -228,7 +231,10 @@
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "imported_by_count": 3,
-      "method": "full module inspection and dependency evidence"
+      "method": "full module inspection and dependency evidence",
+      "previous_sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
+      "review_status": "needs_snapshot_revalidation",
+      "revalidated_after_pr": 96
     },
     {
       "path": "backend/app/ingestion/eures_annex_pdf.py",
@@ -605,25 +611,27 @@
     },
     {
       "id": "AUD-B02-028",
-      "state": "open_requires_regression",
+      "state": "candidate_fix_PR_96_pending_CI",
       "severity": "high",
       "component": "backend/app/ingestion/eea_health_burden.py",
       "sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
       "line_range": "106-186",
       "description": "EEA health burden parser permits float('nan')/infinite source values and arbitrary source unit strings while reporting a normalized burden row; missing finite and metric/unit validation.",
       "test_required": "Malformed CSV numeric and noncomparable unit regression",
-      "imported_by_count": 3
+      "imported_by_count": 3,
+      "resolution_pr": 96
     },
     {
       "id": "AUD-B02-029",
-      "state": "open_requires_regression",
+      "state": "candidate_fix_PR_96_pending_CI",
       "severity": "high",
       "component": "backend/app/ingestion/cedefop_oja_imbalance.py",
       "sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
       "line_range": "108-164,180-231",
       "description": "detect_schema reports ready when occupation_code and score exist, but parse_csv unconditionally accesses matches['occupation_label']; a schema declared ready can raise KeyError.",
       "test_required": "Missing occupation label must be rejected in schema readiness tests",
-      "imported_by_count": 4
+      "imported_by_count": 4,
+      "resolution_pr": 96
     },
     {
       "id": "AUD-B02-030",
