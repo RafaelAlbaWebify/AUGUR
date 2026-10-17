@@ -1,0 +1,35 @@
+name: Persist AUGUR source inventory
+on:
+  push:
+    branches:
+      - audit/persistent-code-inventory-20261017
+    paths:
+      - "backend/scripts/audit_repository_inventory.py"
+      - ".github/workflows/audit-repository-inventory.yml"
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          ref: ${{ github.head_ref || github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Generate exhaustive static inventory and module-call index
+        run: python backend/scripts/audit_repository_inventory.py
+      - name: Verify deterministic snapshot
+        run: python backend/scripts/audit_repository_inventory.py --check
+      - name: Persist inventory to same working branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add docs/audit/inventory.json
+          if ! git diff --cached --quiet; then
+            git commit -m "audit: persist reproducible module and function inventory [skip ci]"
+            git push
+          fi
