@@ -89,3 +89,52 @@ def normalize_official_weo(workbook: bytes, country_iso3s: set[str]) -> tuple[li
         return rows,stats
     finally:
         book.close()
+
+
+
+class OfficialWEOAdapter:
+    """Explicitly selected, metadata-constrained official WEO source adapter."""
+
+    def __init__(self, client=None):
+        import httpx
+        self._owns_client = client is None
+        self.client = client or httpx.Client(timeout=120,follow_redirects=True)
+
+    def close(self) -> None:
+        if self._owns_client:
+            self.client.close()
+
+    def fetch_workbook(self) -> bytes:
+        from scripts.probe_imf_weo_workbook import URL
+        response=self.client.get(URL,headers={"User-Agent":"AUGUR-OfficialWEO/1.0"})
+        response.raise_for_status()
+        if not response.content.startswith(b"PK"):
+            raise ValueError("Official WEO workbook did not return XLSX")
+        return response.content
+
+    def sync_countries(self, country_iso3s: list[str], *, workbook: bytes | None = None,
+                       persist: bool = False) -> dict:
+        payload=workbook if workbook is not None else self.fetch_workbook()
+        rows,stats=normalize_official_weo(payload,set(country_iso3s))
+        if not rows:
+            raise ValueError("No eligible official IMF WEO rows")
+        inserted=0
+        if persist:
+            from app.db.analytics import upsert_observations
+            inserted=upsert_observations(rows)
+        return {
+            "countries":sorted({r["country_iso3"] for r in rows}),
+            "country_count":len({r["country_iso3"] for r in rows}),
+            "source":"IMF",
+            "vintage":"October 2026",
+            "rows":inserted if persist else len(rows),
+            "persisted":persist,
+            "complete":False,
+            "failure_count":len(UNVERIFIED_UNIT_METRICS),
+            "failures":[{"indicator_id":name,"reason":stats["blocked_reason"]}
+                        for name in UNVERIFIED_UNIT_METRICS.values()],
+            "series":[{"indicator_id":indicator,
+                       "rows":sum(r["indicator_id"]==indicator for r in rows)}
+                      for indicator in METRICS.values()],
+            "source_contract":stats,
+        }
