@@ -1365,9 +1365,64 @@
       "status": "reviewed_findings_open",
       "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
       "imported_by_count": 2
+    },
+    {
+      "path": "backend/scripts/inspect_eea_pm25_parquet.py",
+      "sha256": "187d708132338fec1cc050e3dde0e2a668e6be39dbe55572fb0c33957defc496",
+      "lines_reviewed": "1-83",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file source review with side effects and caller contracts; no runtime tests executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eurostat_city_evidence.py",
+      "sha256": "93728470542bff6e92efda1d3f9bb404cf1629c68e98053f21ce0aae9bb0d038",
+      "lines_reviewed": "1-117",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file source review with side effects and caller contracts; no runtime tests executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_oecd_regional_density.py",
+      "sha256": "73527c6f68069c3623fed278a3d2c833e7338f6ac4736edcd1683e73586f4740",
+      "lines_reviewed": "1-102",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file source review with side effects and caller contracts; no runtime tests executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_global_baseline.py",
+      "sha256": "df81e5de5ac8f7b74a5d79b2e8bb0e8cbe34e805e6edc63551bef91ba270ed30",
+      "lines_reviewed": "1-114",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file source review with side effects and caller contracts; no runtime tests executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_core.py",
+      "sha256": "0dbb24029519451f1bd3a2329fde3a3eaa746a9e4b42293367cc24144b180bf2",
+      "lines_reviewed": "1-111",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file source review with side effects and caller contracts; no runtime tests executed",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 124,
+  "certified_line_by_line_review_count": 129,
   "findings": [
     {
       "id": "LEAD-001",
@@ -2413,8 +2468,38 @@
       "line_range": "13-22",
       "description": "Regional health sync upserts provider rows without explicit validate_eurostat_regional_rows call used by regional labour/housing peers; compare upstream adapter and write contract guarantees.",
       "test_required": "Malformed Eurostat metadata fixture, ensure missing/unknown dimensions and status fail before upsert."
+    },
+    {
+      "id": "AUD-B04-018",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_core.py",
+      "sha256": "0dbb24029519451f1bd3a2329fde3a3eaa746a9e4b42293367cc24144b180bf2",
+      "line_range": "90-95",
+      "description": "Source sync uses result.get('complete', True) so a provider result lacking a complete key is automatically treated as complete and can yield exit 0.",
+      "test_required": "Missing-complete and malformed provider-result mock should fail closed."
+    },
+    {
+      "id": "AUD-B04-019",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_global_baseline.py",
+      "sha256": "df81e5de5ac8f7b74a5d79b2e8bb0e8cbe34e805e6edc63551bef91ba270ed30",
+      "line_range": "89-111",
+      "description": "Baseline acceptance reports operator_production_writes:0 despite using datastore initialization and real sync writes. The declaration is ambiguous or misleading without enforcing isolated storage.",
+      "test_required": "Record DB path and actual write target; staging-only acceptance checks to disallow operator DB mutations."
+    },
+    {
+      "id": "AUD-B04-020",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_eea_pm25_parquet.py",
+      "sha256": "187d708132338fec1cc050e3dde0e2a668e6be39dbe55572fb0c33957defc496",
+      "line_range": "15-31",
+      "description": "Parquet probe trusts unvalidated HTTP URLs extracted from a provider response and downloads entire first file without size limits; possible SSRF/large-memory risk if source response can be influenced.",
+      "test_required": "Strict official host allowlist, stream size cap, content verification and malicious/oversized URL fixtures."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 35.33
+  "certified_line_by_line_review_percent": 36.75
 }
