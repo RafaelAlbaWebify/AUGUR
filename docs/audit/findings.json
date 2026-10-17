@@ -672,9 +672,86 @@
       "status": "reviewed_findings_open",
       "method": "full source read, static reverse dependency inventory and cross-service contract examination",
       "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty_file_0_lines",
+      "definitions_reviewed": 0,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/api/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty_file_0_lines",
+      "definitions_reviewed": 0,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/app/core/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty_file_0_lines",
+      "definitions_reviewed": 0,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/app/engines/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty_file_0_lines",
+      "definitions_reviewed": 0,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/app/services/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty_file_0_lines",
+      "definitions_reviewed": 0,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
+      "imported_by_count": 20
+    },
+    {
+      "path": "backend/app/services/trends.py",
+      "sha256": "9e80a430ff04d608d43653e8b7bb6837c67bd5d0f51c745346d02cdbb01c813b",
+      "lines_reviewed": "1-117",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/geography_indicator_coverage.py",
+      "sha256": "e0fe9ec4a61af9b4e8d3a052750c75f07b3922d9bda4a264db3426f3d425a41e",
+      "lines_reviewed": "1-156",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
+      "imported_by_count": 3
     }
   ],
-  "certified_line_by_line_review_count": 61,
+  "certified_line_by_line_review_count": 68,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1520,8 +1597,38 @@
       "line_range": "11-23",
       "description": "Profile model enforces current_country length but not ISO3/normalized codes; financial fields have nonnegative bounds but no explicit finite requirement in this model. Downstream consumers must not trust invalid country identity.",
       "test_required": "Reject or normalize invalid geography codes and nonfinite financial values at API/model boundary."
+    },
+    {
+      "id": "AUD-B03-023",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/geography_indicator_coverage.py",
+      "sha256": "e0fe9ec4a61af9b4e8d3a052750c75f07b3922d9bda4a264db3426f3d425a41e",
+      "line_range": "36-77",
+      "description": "Both geographic coverage SQL queries join on system/code/level but lack country identity. Storage schema lacks an observation country column. Registry key reuse across countries can attribute one observation to multiple countries. Current test fixtures only use unique per-country codes.",
+      "test_required": "Add cross-country same-code isolation test; introduce/verify unique geographic observation identity before reinterpreting coverage."
+    },
+    {
+      "id": "AUD-B03-024",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/geography_indicator_coverage.py",
+      "sha256": "e0fe9ec4a61af9b4e8d3a052750c75f07b3922d9bda4a264db3426f3d425a41e",
+      "line_range": "40-96",
+      "description": "Latest observation period and latest ingestion timestamp use independent MAX aggregations. Output most_recent_ingestion is not necessarily the fetch timestamp of the latest-year observation.",
+      "test_required": "Add earlier-period-later-ingest fixture and clarify provenance naming/pairing."
+    },
+    {
+      "id": "AUD-B03-025",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/trends.py",
+      "sha256": "9e80a430ff04d608d43653e8b7bb6837c67bd5d0f51c745346d02cdbb01c813b",
+      "line_range": "28-50",
+      "description": "Trend service assumes SQL indicator_series rows ordered with newest last and embeds numeric peer reference without service-level source comparability verification.",
+      "test_required": "Assert DB ordering contract and mixed-source historical fixtures; block incompatible peer ranks."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 17.38
+  "certified_line_by_line_review_percent": 19.37
 }
