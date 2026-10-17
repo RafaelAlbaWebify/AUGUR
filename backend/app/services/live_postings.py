@@ -96,6 +96,11 @@ def validate_live_postings_snapshot(snapshot: dict) -> dict:
     posting_count = snapshot.get("posting_count")
     if posting_count is None:
         raise ValueError("live postings snapshot requires posting_count")
+    if isinstance(posting_count, bool) or (
+        not isinstance(posting_count, int)
+        and (not isinstance(posting_count, str) or not posting_count.isdecimal())
+    ):
+        raise ValueError("posting_count must be a non-negative whole integer")
     posting_count = int(posting_count)
     if posting_count < 0:
         raise ValueError("posting_count must be non-negative")
