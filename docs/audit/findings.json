@@ -440,14 +440,16 @@
     },
     {
       "path": "backend/app/services/global_evidence_contract.py",
-      "sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
+      "sha256": "fd6c170c8250e53044279d3a8dc1aad85017c714018f92464f1f912ea2a1642e",
       "lines_reviewed": "1-89",
       "definitions_reviewed": 3,
       "batch": "B03",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "imported_by_count": 4,
-      "method": "full source review and source-to-API dependency cross-check"
+      "method": "Full code re-read after source-indexed coverage and finite numeric contract PR109",
+      "previous_sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
+      "revalidated_after_pr": 109
     },
     {
       "path": "backend/app/services/geography_provenance.py",
@@ -517,14 +519,16 @@
     },
     {
       "path": "backend/app/services/housing_affordability.py",
-      "sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
+      "sha256": "e1faae19c55baf9e196fa2e653a5d34788b864728e01231b55bc270a274a3369",
       "lines_reviewed": "1-45",
       "definitions_reviewed": 1,
       "batch": "B03",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
-      "method": "full service code review with referenced source/SQL consumers",
-      "imported_by_count": 2
+      "method": "Full code re-read after source-indexed coverage and finite numeric contract PR109",
+      "imported_by_count": 2,
+      "previous_sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
+      "revalidated_after_pr": 109
     },
     {
       "path": "backend/app/services/profile_readiness.py",
@@ -1205,13 +1209,15 @@
     },
     {
       "id": "AUD-B03-003",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_109",
       "severity": "medium",
       "component": "backend/app/services/global_evidence_contract.py",
-      "sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
+      "sha256": "fd6c170c8250e53044279d3a8dc1aad85017c714018f92464f1f912ea2a1642e",
       "line_range": "48-89",
       "description": "coverage_matrix performs nested scans for every geography/contract, O(G*C*O), not indexed; large global expansion risks heavy latency.",
-      "test_required": "Indexed reference parity benchmark and 1000+ geographies"
+      "test_required": "Indexed reference parity benchmark and 1000+ geographies",
+      "previous_sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
+      "resolution_pr": 109
     },
     {
       "id": "AUD-B03-004",
@@ -1265,13 +1271,15 @@
     },
     {
       "id": "AUD-B03-009",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_109",
       "severity": "medium",
       "component": "backend/app/services/housing_affordability.py",
-      "sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
+      "sha256": "e1faae19c55baf9e196fa2e653a5d34788b864728e01231b55bc270a274a3369",
       "line_range": "9-45",
       "description": "Housing affordability accepts boolean source values as numeric through isinstance(bool,(int,float)); NaN generally fails its range comparisons, but finite-number and type checks should be explicit and harmonized with source contracts.",
-      "test_required": "Boolean housing metric must not report available, plus nonfinite source fixtures"
+      "test_required": "Boolean housing metric must not report available, plus nonfinite source fixtures",
+      "previous_sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
+      "resolution_pr": 109
     },
     {
       "id": "AUD-B03-010",
@@ -1314,6 +1322,6 @@
       "test_required": "Catalog versus persisted source precedence audit"
     }
   ],
-  "denominator_inventoried_files": 348,
-  "certified_line_by_line_review_percent": 14.66
+  "denominator_inventoried_files": 350,
+  "certified_line_by_line_review_percent": 14.57
 }
