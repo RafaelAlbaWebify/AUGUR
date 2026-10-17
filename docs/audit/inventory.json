@@ -13,9 +13,9 @@
   "file_count": 340,
   "python_count": 302,
   "definition_count": 1570,
-  "reviewed_file_count": 11,
+  "reviewed_file_count": 18,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 3.24,
+  "line_by_line_review_percent": 5.29,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -4285,7 +4285,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "728ee78c8537926e0b64270812a091056147671bfc18367a53f1d1a6719ad162",
       "bytes": 4325,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_ordered_codes",
@@ -4418,7 +4418,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "5573e839ebab8b0214366bd07c9443a3d29db27cc35265308df25c684f540851",
       "bytes": 4938,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_ordered_codes",
@@ -4499,7 +4499,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "cb685a41513ddbf76820a8b7b95581e736214fd778555b2bef66afc3fcb7df2b",
       "bytes": 5840,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_ordered_codes",
@@ -4599,7 +4599,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "ad8a9146bdb01ce770f48314635d3bc4c450c29be4614d6f6f7061cf3297d682",
       "bytes": 4160,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_ordered_codes",
@@ -4666,7 +4666,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "8681dc40a44623b1045b3fa4159fa6ec72666b07f458829139e57470aa983310",
       "bytes": 6787,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "normalize_subnational",
@@ -4875,7 +4875,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "d1dc60f248901f8e23dd370cccc686742fad0e9147f5025fd548245328a78141",
       "bytes": 3892,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "normalize_city_name",
@@ -5277,7 +5277,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
       "bytes": 4031,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "OECDAdapter",
