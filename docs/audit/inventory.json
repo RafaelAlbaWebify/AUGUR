@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 340,
-  "python_count": 302,
-  "definition_count": 1570,
-  "reviewed_file_count": 18,
-  "stale_review_file_count": 0,
-  "line_by_line_review_percent": 5.29,
+  "file_count": 341,
+  "python_count": 303,
+  "definition_count": 1574,
+  "reviewed_file_count": 17,
+  "stale_review_file_count": 1,
+  "line_by_line_review_percent": 4.99,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 118,
+    "backend/tests": 119,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -5275,15 +5275,15 @@
     {
       "path": "backend/app/ingestion/oecd.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
-      "bytes": 4031,
-      "review_status": "verified_reviewed",
+      "sha256": "2eedff61ea6fa5ea76c01ddf9595fe82ef582ea6c66a0bb112feec9811cae746",
+      "bytes": 4665,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "OECDAdapter",
           "kind": "class",
           "line_start": 26,
-          "line_end": 127,
+          "line_end": 140,
           "signature_arguments": []
         },
         {
@@ -5321,7 +5321,7 @@
           "symbol": "OECDAdapter.normalize",
           "kind": "function",
           "line_start": 78,
-          "line_end": 112,
+          "line_end": 125,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -5331,8 +5331,8 @@
         {
           "symbol": "OECDAdapter.sync_country",
           "kind": "function",
-          "line_start": 114,
-          "line_end": 127,
+          "line_start": 127,
+          "line_end": 140,
           "signature_arguments": [
             "self",
             "country_iso3"
@@ -5376,6 +5376,7 @@
         "StringIO",
         "Timeout",
         "ValueError",
+        "any",
         "append",
         "close",
         "fetch_productivity",
@@ -5383,25 +5384,29 @@
         "get",
         "int",
         "isdigit",
+        "items",
+        "keys",
         "normalize",
         "now",
         "print",
         "raise_for_status",
         "range",
+        "set",
         "sleep",
         "str",
         "type",
         "upper",
         "upsert_observations"
       ],
-      "lines": 127,
+      "lines": 140,
       "resolved_local_imports": [
         "backend/app/db/analytics.py"
       ],
       "imported_by": [
         "backend/app/providers.py",
         "backend/scripts/sync_oecd.py",
-        "backend/tests/test_oecd.py"
+        "backend/tests/test_oecd.py",
+        "backend/tests/test_oecd_productivity_dimension_contract.py"
       ]
     },
     {
@@ -25114,6 +25119,72 @@
       "lines": 45,
       "resolved_local_imports": [
         "backend/app/ingestion/oecd_regional.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_oecd_productivity_dimension_contract.py",
+      "bucket": "backend/tests",
+      "sha256": "b0d54c49b5bca402966be29fd0aec5ecda832de495b2098214679576ec06c633",
+      "bytes": 1274,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "normalize",
+          "kind": "function",
+          "line_start": 12,
+          "line_end": 17,
+          "signature_arguments": [
+            "text"
+          ]
+        },
+        {
+          "symbol": "test_valid_source_tuple_preserved",
+          "kind": "function",
+          "line_start": 20,
+          "line_end": 24,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_wrong_country_metric_unit_or_frequency_rejected",
+          "kind": "function",
+          "line_start": 35,
+          "line_end": 37,
+          "signature_arguments": [
+            "before",
+            "after"
+          ]
+        },
+        {
+          "symbol": "test_missing_contract_column_rejected",
+          "kind": "function",
+          "line_start": 40,
+          "line_end": 42,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "pytest",
+          "line": 2
+        },
+        {
+          "module": "app.ingestion.oecd",
+          "line": 3
+        }
+      ],
+      "called_names": [
+        "OECDAdapter",
+        "close",
+        "len",
+        "normalize",
+        "parametrize",
+        "raises",
+        "replace"
+      ],
+      "lines": 42,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd.py"
       ],
       "imported_by": []
     },
