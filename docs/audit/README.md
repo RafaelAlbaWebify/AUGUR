@@ -16,10 +16,10 @@ Canonical operational context: [augur.md](../../augur.md). The tracked machine-r
 | Repository tree catalog | 100% of 426 paths enumerated from GitHub main tree at baseline | GitHub canonical list; current scoped source count is reported in inventory.json and changes after merges |
 | Python AST symbols/dependencies | 100% inventory of eligible Python files; exact current totals in inventory.json | GitHub job 39032334227 and committed inventory.json |
 | JS/TS/PowerShell semantic symbol indexing | 0% | Language-specific parser required |
-| Manual per-file line-by-line code review | **35/347 files = 10.09%** (14,069 lines, 283 definitions) | SHA-verified lines and evolving findings.json register; validated against source on main |
+| Manual per-file line-by-line code review | **43/347 files = 12.39%** (14,669 lines, 308 definitions) | SHA-verified lines and evolving findings.json register; validated against source on main |
 | Module/function redesign or removal | 0% approved for this audit | Tests + source acceptance on candidate PR |
 
-In this baseline B02 has **35/35** eligible files reviewed (DB 5 + ingestion 30): **100% of B02 source review**, and the overall total is **10.09%**. The other B02 files remain pending. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
+In this baseline B02 has **35/35** eligible files reviewed (DB 5 + ingestion 30): **100% of B02 source review**, and the overall total is **12.39%**. The other B02 files remain pending. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
 
 ## Work packages
 1. **B01 — Source inventory and interdependencies:** reproducible AST graph, file hashes, invalidation rules, buckets and review matrix.
@@ -45,3 +45,8 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 ## B02 full source review completed — 2026-10-17
 - 35/35 DB and ingestion modules reviewed at immutable source hashes. This is **code review coverage only**, not endorsement of implementation, provider data or production migration. SHA-verified total 35/347 files (10.09%), 14069 lines and 283 Python definitions. See findings AUD-B02-041 through -054 for high-risk source/SQL invariants and test requirements.
 - Next audit B03: backend API/services/models and their query/read-through consumers. Product fixes should prioritize geography registry startup metadata preservation, unapproved NUTS migration labelling, and geometry transaction rollback. No local/operator database writes.
+
+## B03 first audit batch — 2026-10-17
+- 8 API/provider/core/provenance modules reviewed at exact SHA; **8/47 B03-source candidates**. The B03 denominator may change if review scope expands beyond app modules; see inventory for total source count.
+- Critical integration discrepancy: single-country ProviderSpec still registers legacy DataMapper April 2026, unlike official global WEO October 2026, and ranking_eligibility lacks quality-status metadata in candidate. These are findings, not certified releases.
+- No automatic ranking unlock or production DB modification. Continue B03 service contracts and route-level consumers.
