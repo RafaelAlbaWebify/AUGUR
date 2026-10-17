@@ -77,3 +77,40 @@ def test_missing_response_dimensions_block_certified_rows(tmp_path):
                                verified_geo_ids=frozenset({"ES11", "PT11", "IE04"}))
     assert result["eligible_total"] == 0
     assert result["provider_metadata_issues"] == {"missing_response_dimensions": 3}
+
+
+def test_stored_unregistered_nuts_evidence_is_blocked_not_missing(tmp_path):
+    db=tmp_path/"unregistered.duckdb"
+    make_db(db)
+    con=duckdb.connect(str(db))
+    con.execute("DELETE FROM geography_registry")
+    con.execute("DELETE FROM subnational_observations")
+    dimensions=json.dumps({"geo":"ES11","time":"2025","freq":"A",
+          "age":"Y20-64","sex":"T","unit":"PC","isced11":"TOTAL"})
+    con.execute("""INSERT INTO subnational_observations VALUES
+      ('NUTS_UNSPECIFIED','ES11','nuts2','regional_unemployment_rate',
+       2025,'percent','EUROSTAT','lfst_r_lfu3rt',7.1,?,NULL)""",[dimensions])
+    con.close()
+    result=regional_rankings("regional_unemployment_rate",
+                countries=("ESP",),db_path=db)
+    assert result["status"]=="blocked_unverified_evidence"
+    assert result["observed_rows"]==1
+    assert result["unregistered_evidence_rows"]==1
+    assert result["excluded_reasons"]=={"unregistered_boundary_vintage":1}
+    assert result["items"]==[]
+
+
+def test_unregistered_evidence_respects_requested_country_and_period(tmp_path):
+    db=tmp_path/"unregistered.duckdb"
+    make_db(db)
+    con=duckdb.connect(str(db))
+    con.execute("DELETE FROM geography_registry")
+    con.execute("DELETE FROM subnational_observations")
+    con.execute("""INSERT INTO subnational_observations VALUES
+      ('NUTS_UNSPECIFIED','PT11','nuts2','regional_unemployment_rate',
+       2024,'percent','EUROSTAT','lfst_r_lfu3rt',4.0,NULL,NULL)""")
+    con.close()
+    result=regional_rankings("regional_unemployment_rate",
+                countries=("ESP",),db_path=db)
+    assert result["status"]=="no_observations"
+    assert result["observed_rows"]==0

@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 import duckdb
 from app.core.config import settings
+from app.catalog import COUNTRIES
 from app.services.ranking_eligibility import PILOT_CONTRACTS, RankingCandidate, ordered_eligible
 from app.services.ranking_provider_metadata import check_provider_metadata
 
@@ -25,6 +26,22 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
         available_columns = {row[1] for row in con.execute("PRAGMA table_info('subnational_observations')").fetchall()}
         dimensions_expr = "s.response_dimensions_json" if "response_dimensions_json" in available_columns else "NULL"
         status_expr = "s.source_observation_status" if "source_observation_status" in available_columns else "NULL"
+        # Source-native observations with unknown NUTS vintage are deliberately
+        # NOT promoted to current geography registry. Count them as blocked
+        # evidence rather than incorrectly claiming no observations exist.
+        prefixes = tuple(sorted({str(c["iso2"]).upper() for c in COUNTRIES
+                                 if c["iso3"] in codes and c.get("iso2")}))
+        unregistered_evidence_rows = 0
+        if prefixes:
+            prefix_marks = ",".join("?" for _ in prefixes)
+            unregistered_evidence_rows = con.execute(f"""
+                SELECT COUNT(*)
+                FROM subnational_observations
+                WHERE geography_system='NUTS_UNSPECIFIED'
+                  AND LOWER(geo_level)='nuts2'
+                  AND SUBSTR(UPPER(geo_code),1,2) IN ({prefix_marks})
+                  AND indicator_id=? AND period=?
+            """, [*prefixes, indicator_id, contract.period]).fetchone()[0]
         rows = con.execute(f"""
             SELECT g.geo_id, g.country_iso3, g.name, s.indicator_id, s.geo_level,
                    s.geography_system, s.unit, s.source_id, s.dataset_id,
@@ -54,6 +71,9 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
             boundary_verified=geo_id in verified_geo_ids,
         ))
     ranked, exclusions = ordered_eligible(candidates, contract, descending=descending)
+    exclusions = dict(exclusions)
+    if unregistered_evidence_rows:
+        exclusions['unregistered_boundary_vintage'] = unregistered_evidence_rows
     metadata_counts = {}
     for reasons in metadata_rejections.values():
         for reason in reasons:
@@ -61,10 +81,11 @@ def regional_rankings(indicator_id: str, countries=("ESP", "PRT", "IRL"), *,
     ranked = [item for item in ranked if not metadata_rejections.get(item.geo_id)]
     page = ranked[offset:offset + limit]
     return {
-        "status": "ready" if ranked else ("blocked_unverified_evidence" if rows else "no_observations"),
+        "status": "ready" if ranked else ("blocked_unverified_evidence" if (rows or unregistered_evidence_rows) else "no_observations"),
         "scope": "locally_registered_only",
         "indicator_id": indicator_id, "period": contract.period,
-        "countries": list(codes), "observed_rows": len(rows),
+        "countries": list(codes), "observed_rows": len(rows) + unregistered_evidence_rows,
+        "unregistered_evidence_rows": unregistered_evidence_rows,
         "eligible_total": len(ranked), "excluded_reasons": exclusions,
         "provider_metadata_issues": dict(sorted(metadata_counts.items())),
         "limit": limit, "offset": offset,

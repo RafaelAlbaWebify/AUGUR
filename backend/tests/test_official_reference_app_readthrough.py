@@ -38,6 +38,7 @@ def test_official_reference_reaches_app_storage_and_http_with_no_vintage_release
     assert result["source_rows"]==result["app_rows"]==62
     assert result["service_geographies"]==31
     assert result["ranking_api_exposed_items"]==0
+    assert result["ranking_api_status"]=="blocked_unverified_evidence"
     assert result["registered_geographies"]==0
     assert result["source_flag_counts"]["d"]==38
     assert result["production_writes"]==0
