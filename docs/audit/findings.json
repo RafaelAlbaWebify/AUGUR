@@ -562,9 +562,31 @@
       "status": "reviewed_findings_open",
       "method": "full service code review with referenced source/SQL consumers",
       "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/legal_fit.py",
+      "sha256": "646c3668df41ff7f8cd310fde0da6c1e0b513f831f894759cd95150b743373b0",
+      "lines_reviewed": "1-110",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source with conservative behavior check",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/language_fit.py",
+      "sha256": "4e2a4a72fb7426afe5153b2d941261bbb7685f993569336539b4c79664332c67",
+      "lines_reviewed": "1-188",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source with conservative behavior check",
+      "imported_by_count": 3
     }
   ],
-  "certified_line_by_line_review_count": 51,
+  "certified_line_by_line_review_count": 53,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1323,5 +1345,5 @@
     }
   ],
   "denominator_inventoried_files": 350,
-  "certified_line_by_line_review_percent": 14.57
+  "certified_line_by_line_review_percent": 15.14
 }
