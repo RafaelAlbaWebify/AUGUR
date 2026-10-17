@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 345,
-  "python_count": 307,
-  "definition_count": 1605,
-  "reviewed_file_count": 24,
-  "stale_review_file_count": 2,
-  "line_by_line_review_percent": 6.96,
+  "file_count": 346,
+  "python_count": 308,
+  "definition_count": 1607,
+  "reviewed_file_count": 23,
+  "stale_review_file_count": 3,
+  "line_by_line_review_percent": 6.65,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 123,
+    "backend/tests": 124,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -1010,6 +1010,7 @@
         "backend/scripts/verify_weo_disposable_readthrough.py",
         "backend/tests/test_accept_g2_local_data_layer.py",
         "backend/tests/test_atomic_upsert_api_integration.py",
+        "backend/tests/test_datastore_status_read_only.py",
         "backend/tests/test_national_bulk_ingestion.py",
         "backend/tests/test_nuts_vintage_write_safety.py",
         "backend/tests/test_regional_evidence.py",
@@ -1759,9 +1760,9 @@
     {
       "path": "backend/app/db/bootstrap.py",
       "bucket": "backend/app/db",
-      "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
-      "bytes": 9701,
-      "review_status": "verified_reviewed",
+      "sha256": "8a9d2863b2776572e5f9f5cec7d2f1617e48201550b14e04c9e64383f5ea884b",
+      "bytes": 9775,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "initialize_sqlite",
@@ -1792,7 +1793,7 @@
           "symbol": "datastore_status",
           "kind": "function",
           "line_start": 255,
-          "line_end": 289,
+          "line_end": 290,
           "signature_arguments": []
         }
       ],
@@ -1823,6 +1824,7 @@
         }
       ],
       "called_names": [
+        "as_uri",
         "close",
         "commit",
         "connect",
@@ -1833,10 +1835,11 @@
         "initialize_analytics_schema",
         "initialize_duckdb",
         "initialize_sqlite",
+        "resolve",
         "seed_esco_partial",
         "str"
       ],
-      "lines": 289,
+      "lines": 290,
       "resolved_local_imports": [
         "backend/app/core/config.py",
         "backend/app/db/analytics.py",
@@ -20511,6 +20514,64 @@
       "lines": 63,
       "resolved_local_imports": [
         "backend/scripts/compare_official_local_nuts.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_datastore_status_read_only.py",
+      "bucket": "backend/tests",
+      "sha256": "1d975bcf6c661ec5fed7d39fe9255b1ba0269b6fa3fc848a4608f9d7d00ff3cc",
+      "bytes": 1234,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_missing_sqlite_is_not_created_by_health_check",
+          "kind": "function",
+          "line_start": 7,
+          "line_end": 15,
+          "signature_arguments": [
+            "tmp_path",
+            "monkeypatch"
+          ]
+        },
+        {
+          "symbol": "test_health_check_reads_existing_sqlite_schema",
+          "kind": "function",
+          "line_start": 18,
+          "line_end": 31,
+          "signature_arguments": [
+            "tmp_path",
+            "monkeypatch"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "sqlite3",
+          "line": 2
+        },
+        {
+          "module": "types",
+          "line": 3
+        },
+        {
+          "module": "app.db",
+          "line": 4
+        }
+      ],
+      "called_names": [
+        "SimpleNamespace",
+        "close",
+        "commit",
+        "connect",
+        "datastore_status",
+        "execute",
+        "exists",
+        "setattr"
+      ],
+      "lines": 31,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py"
       ],
       "imported_by": []
     },
