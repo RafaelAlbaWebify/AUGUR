@@ -609,7 +609,7 @@ def upsert_observations(rows: list[dict]) -> int:
     with tempfile.TemporaryDirectory(prefix="augur-ingest-") as directory:
         path = Path(directory) / "observations.csv"
         with path.open("w", newline="", encoding="utf-8") as handle:
-            writer = csv.writer(handle, lineterminator="\\n")
+            writer = csv.writer(handle, lineterminator="\n")
             for row in rows:
                 writer.writerow([
                     r"\\N" if row.get(column) is None else row[column]
