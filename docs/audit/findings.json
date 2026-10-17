@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "baseline_date": "2026-10-17",
+  "reviewed_files": [],
+  "certified_line_by_line_review_count": 0,
+  "findings": [
+    {
+      "id": "LEAD-001",
+      "state": "historical_resolved_needs_review",
+      "severity": "high",
+      "component": "backend/app/ingestion/oecd_regional.py",
+      "description": "Observed OECD population PS_KM2 vs PS collision corrected in PR #85; include regressions and call sites in formal review.",
+      "evidence": "https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/39030260361",
+      "resolution_pr": 85
+    },
+    {
+      "id": "LEAD-002",
+      "state": "open_provider_semantics",
+      "severity": "medium",
+      "component": "backend/app/ingestion/imf_weo_official.py",
+      "description": "LUR unit metadata unresolved; 35 WEO country-series have no latest actual annual year. No unwarranted observed/forecast inference.",
+      "evidence": "https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/39031119342"
+    },
+    {
+      "id": "LEAD-003",
+      "state": "open_operator_approval",
+      "severity": "critical",
+      "component": "backend/app/db/analytics.py",
+      "description": "31 historical 2025 region employment rows in local original came from wrong age dimension. No production rewrite without verified backup, vintage, source quality policy and operator authorization.",
+      "evidence": "docs/GR2_ACCEPTANCE_AND_REMEDIATION.md"
+    },
+    {
+      "id": "LEAD-004",
+      "state": "pending_code_review",
+      "severity": "medium",
+      "component": "backend/scripts/sync_global_baseline.py",
+      "description": "Global baseline accepts partial provider coverage whenever any countries analyzable; flag semantics and release policy must be audited to avoid interpreting workflow success as full-source certification.",
+      "evidence": "https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/39031300201"
+    }
+  ]
+}
