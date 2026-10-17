@@ -16,10 +16,10 @@ Canonical operational context: [augur.md](../../augur.md). The tracked machine-r
 | Repository tree catalog | 100% of 426 paths enumerated from GitHub main tree at baseline | GitHub canonical list; current scoped source count is reported in inventory.json and changes after merges |
 | Python AST symbols/dependencies | 100% inventory of eligible Python files; exact current totals in inventory.json | GitHub job 39032334227 and committed inventory.json |
 | JS/TS/PowerShell semantic symbol indexing | 0% | Language-specific parser required |
-| Manual per-file line-by-line code review | **62/351 files = 17.66%** (SHA-reviewed; exact line/definition totals in inventory/findings) | SHA-verified lines and evolving findings.json register; validated against source on main |
+| Manual per-file line-by-line code review | **63/351 files = 17.95%** (SHA-reviewed; exact line/definition totals in inventory/findings) | SHA-verified lines and evolving findings.json register; validated against source on main |
 | Module/function redesign or removal | 0% approved for this audit | Tests + source acceptance on candidate PR |
 
-In this baseline B02 has **35/35** eligible files reviewed (DB 5 + ingestion 30): **100% of B02 source review**. Overall SHA-verified progress is **62/351 = 17.66%**; B03 remains incomplete. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
+In this baseline B02 has **35/35** eligible files reviewed (DB 5 + ingestion 30): **100% of B02 source review**. Overall SHA-verified progress is **63/351 = 17.95%**; B03 remains incomplete. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
 
 ## Work packages
 1. **B01 — Source inventory and interdependencies:** reproducible AST graph, file hashes, invalidation rules, buckets and review matrix.
@@ -70,6 +70,6 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 - PR #110 guards zero/nonfinite income and price indices; the additional observed-income benchmark and legal/language presentation issues remain separate acceptance gates.
 
 ## B03 follow-on checkpoint (2026-10-17)
-- Latest inventory baseline: 351 in-scope source files. Audited file register rises from 57 to **62/351 (17.66%)** in this batch, with five additional SHA-stable modules (`trends.py`, `geography_indicator_coverage.py`, `ttv.py`, `tax_wedge_contract.py`).
+- Latest inventory baseline: 351 in-scope source files. Audited file register rises from 57 to **63/351 (17.95%)** in this batch, with six additional SHA-stable modules (`trends.py`, `geography_indicator_coverage.py`, `ttv.py`, `tax_wedge_contract.py`).
 - `scenarios.py` explicit empty-horizon bug corrected and regression-tested in this batch, but **not counted reviewed** until its new SHA is generated and its consumer impact is reverified after merge.
 - Source coverage and completion are separate; findings AUD-B03-020 through AUD-B03-023 record concrete contract risks for later remediation.
