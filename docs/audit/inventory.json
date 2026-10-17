@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 342,
-  "python_count": 304,
-  "definition_count": 1579,
+  "file_count": 343,
+  "python_count": 305,
+  "definition_count": 1588,
   "reviewed_file_count": 24,
   "stale_review_file_count": 2,
-  "line_by_line_review_percent": 7.02,
+  "line_by_line_review_percent": 7.0,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 120,
+    "backend/tests": 121,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -6651,8 +6651,8 @@
     {
       "path": "backend/app/ingestion/world_bank.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "f7f909961fe13548b8e26a179728745f27aad80a354b4801eb958f5e611824a3",
-      "bytes": 16901,
+      "sha256": "85378f97a3773280275d20f6fee169c5a115b7ee7f8f9a530231749e1f073091",
+      "bytes": 17149,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -6668,7 +6668,7 @@
           "symbol": "WorldBankAdapter",
           "kind": "class",
           "line_start": 23,
-          "line_end": 515,
+          "line_end": 518,
           "signature_arguments": []
         },
         {
@@ -6747,7 +6747,7 @@
           "symbol": "WorldBankAdapter.fetch_indicator_many",
           "kind": "function",
           "line_start": 221,
-          "line_end": 301,
+          "line_end": 304,
           "signature_arguments": [
             "self",
             "country_iso3s",
@@ -6759,8 +6759,8 @@
         {
           "symbol": "WorldBankAdapter.normalize_many",
           "kind": "function",
-          "line_start": 303,
-          "line_end": 338,
+          "line_start": 306,
+          "line_end": 341,
           "signature_arguments": [
             "self",
             "country_iso3s",
@@ -6772,8 +6772,8 @@
         {
           "symbol": "WorldBankAdapter.sync_countries",
           "kind": "function",
-          "line_start": 340,
-          "line_end": 410,
+          "line_start": 343,
+          "line_end": 413,
           "signature_arguments": [
             "self",
             "country_iso3s",
@@ -6784,8 +6784,8 @@
         {
           "symbol": "WorldBankAdapter.normalize",
           "kind": "function",
-          "line_start": 412,
-          "line_end": 449,
+          "line_start": 415,
+          "line_end": 452,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -6797,8 +6797,8 @@
         {
           "symbol": "WorldBankAdapter.sync_country",
           "kind": "function",
-          "line_start": 451,
-          "line_end": 515,
+          "line_start": 454,
+          "line_end": 518,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -6870,7 +6870,7 @@
         "upsert_observations",
         "world_bank_indicators"
       ],
-      "lines": 515,
+      "lines": 518,
       "resolved_local_imports": [
         "backend/app/catalog.py",
         "backend/app/db/analytics.py"
@@ -6886,7 +6886,8 @@
         "backend/scripts/sync_oecd_regional_density.py",
         "backend/scripts/sync_phase1.py",
         "backend/tests/test_dynamic_country_registry.py",
-        "backend/tests/test_world_bank_batch.py"
+        "backend/tests/test_world_bank_batch.py",
+        "backend/tests/test_world_bank_pagination_contract.py"
       ]
     },
     {
@@ -30195,6 +30196,119 @@
       "lines": 106,
       "resolved_local_imports": [
         "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_world_bank_pagination_contract.py",
+      "bucket": "backend/tests",
+      "sha256": "595d9e4bdbc2de36acbfb9623858bf6cd278157eea2303ee66d3c1f36e683d71",
+      "bytes": 1208,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "Response",
+          "kind": "class",
+          "line_start": 6,
+          "line_end": 9,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "Response.__init__",
+          "kind": "function",
+          "line_start": 7,
+          "line_end": 7,
+          "signature_arguments": [
+            "self",
+            "data"
+          ]
+        },
+        {
+          "symbol": "Response.raise_for_status",
+          "kind": "function",
+          "line_start": 8,
+          "line_end": 8,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "Response.json",
+          "kind": "function",
+          "line_start": 9,
+          "line_end": 9,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "Client",
+          "kind": "class",
+          "line_start": 12,
+          "line_end": 16,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "Client.__init__",
+          "kind": "function",
+          "line_start": 13,
+          "line_end": 13,
+          "signature_arguments": [
+            "self",
+            "second"
+          ]
+        },
+        {
+          "symbol": "Client.get",
+          "kind": "function",
+          "line_start": 14,
+          "line_end": 16,
+          "signature_arguments": [
+            "self",
+            "url",
+            "params"
+          ]
+        },
+        {
+          "symbol": "test_missing_or_malformed_second_page_rejected",
+          "kind": "function",
+          "line_start": 24,
+          "line_end": 27,
+          "signature_arguments": [
+            "second"
+          ]
+        },
+        {
+          "symbol": "test_valid_second_page_combines_only_verified_data",
+          "kind": "function",
+          "line_start": 30,
+          "line_end": 33,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "pytest",
+          "line": 2
+        },
+        {
+          "module": "app.ingestion.world_bank",
+          "line": 3
+        }
+      ],
+      "called_names": [
+        "Client",
+        "Response",
+        "WorldBankAdapter",
+        "fetch_indicator_many",
+        "get",
+        "len",
+        "parametrize",
+        "raises"
+      ],
+      "lines": 33,
+      "resolved_local_imports": [
         "backend/app/ingestion/world_bank.py"
       ],
       "imported_by": []
