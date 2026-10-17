@@ -6,6 +6,7 @@ on:
     branches: [main]
     paths:
       - 'backend/scripts/build_official_reference_db.py'
+      - 'backend/scripts/audit_official_reference_db.py'
       - '.github/workflows/private-official-reference.yml'
 
 permissions:
@@ -31,6 +32,9 @@ jobs:
       - name: Build independent official-source DuckDB
         working-directory: backend
         run: python -m scripts.build_official_reference_db --db ../reference-output/official_eurostat_reference.duckdb --report ../reference-output/reference_report.json
+      - name: Independently audit persisted DuckDB observations
+        working-directory: backend
+        run: python -m scripts.audit_official_reference_db --db ../reference-output/official_eurostat_reference.duckdb --report ../reference-output/database_audit.json
       - name: Upload public-source reference data and acceptance report
         uses: actions/upload-artifact@v4
         with:
