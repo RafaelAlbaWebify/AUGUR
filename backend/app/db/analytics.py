@@ -657,7 +657,6 @@ def upsert_labour_earnings(rows: list[dict]) -> int:
                     row["dataset_id"],
                     row["retrieved_at"],
                     row.get("source_updated_at"),
-                    row.get("request_filters_json"),
                 ]
                 for row in rows
             ],
@@ -1604,8 +1603,19 @@ def upsert_regional_sector_employment(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from math import isfinite
+    seen = set()
+    for i, row in enumerate(rows):
+        key = (str(row['geo_code']).upper(), row['period'], row['nace_code'], row['source_id'])
+        if key in seen:
+            raise ValueError(f'Duplicate sector employment key at row {i}')
+        seen.add(key)
+        value = row['employment_thousands']
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not isfinite(value):
+            raise ValueError(f'Invalid sector employment value at row {i}')
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO regional_sector_employment
@@ -1633,7 +1643,11 @@ def upsert_regional_sector_employment(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
