@@ -628,9 +628,69 @@
       "status": "reviewed_findings_open",
       "method": "full service audit and downstream model/query provenance check",
       "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/geography_indicator_coverage.py",
+      "sha256": "e0fe9ec4a61af9b4e8d3a052750c75f07b3922d9bda4a264db3426f3d425a41e",
+      "lines_reviewed": "1-156",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read and dependency context"
+    },
+    {
+      "path": "backend/app/services/tax_wedge_contract.py",
+      "sha256": "05d708ba238c0968dd71d55ccb5894b25318c1171332f57199fe79526b3779b7",
+      "lines_reviewed": "1-38",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read and dependency context"
+    },
+    {
+      "path": "backend/app/services/trends.py",
+      "sha256": "9e80a430ff04d608d43653e8b7bb6837c67bd5d0f51c745346d02cdbb01c813b",
+      "lines_reviewed": "1-117",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read and dependency context"
+    },
+    {
+      "path": "backend/app/services/ttv.py",
+      "sha256": "cf47d4165801fe21220d57cc700508feb97dd250602193c43edbad0b6cc5ecd1",
+      "lines_reviewed": "1-177",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read and dependency context"
+    },
+    {
+      "path": "backend/app/services/operability.py",
+      "sha256": "23d37467b9ae79480f6c9c031acaaa76a96ba8196fef5aacc274f594e50107e3",
+      "lines_reviewed": "1-306",
+      "definitions_reviewed": 4,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection and country/provider release gate cross-check"
+    },
+    {
+      "path": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "lines_reviewed": "1-545",
+      "definitions_reviewed": 14,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read and temporal model safety review"
     }
   ],
-  "certified_line_by_line_review_count": 57,
+  "certified_line_by_line_review_count": 63,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1446,8 +1506,68 @@
       "line_range": "17-107",
       "description": "Peer positional rank computes across observed values without validating source unit, dataset identity or matched period semantics; descriptive result may suggest comparability not established.",
       "test_required": "Mixed-unit multi-provider peer observations must be marked noncomparable or blocked"
+    },
+    {
+      "id": "AUD-B03-020",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/geography_indicator_coverage.py",
+      "sha256": "e0fe9ec4a61af9b4e8d3a052750c75f07b3922d9bda4a264db3426f3d425a41e",
+      "line_range": "35-125",
+      "description": "Coverage join lacks s.country_iso3 and latest grouping source semantics; same geo code/system can mix different source IDs/periods. Explicit report remains noncertifying; ensure consumers do not infer comparability.",
+      "test_required": "Mixed-source same-code coverage fixture."
+    },
+    {
+      "id": "AUD-B03-021",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/app/services/tax_wedge_contract.py",
+      "sha256": "05d708ba238c0968dd71d55ccb5894b25318c1171332f57199fe79526b3779b7",
+      "line_range": "28-38",
+      "description": "Returns shallow copy of versioned contract; scalar fields/tuples currently immutable, but any future mutable nested metadata would be externally modifiable.",
+      "test_required": "Explicit immutable contract expectation."
+    },
+    {
+      "id": "AUD-B03-022",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/trends.py",
+      "sha256": "9e80a430ff04d608d43653e8b7bb6837c67bd5d0f51c745346d02cdbb01c813b",
+      "line_range": "38-108",
+      "description": "Service assumes series[-1] is latest and maps catalog indicator via direct key; enforce DB ordering and catalog/reference concordance for unknown stored indicators.",
+      "test_required": "Unsorted source periods and unknown indicator fixtures."
+    },
+    {
+      "id": "AUD-B03-023",
+      "state": "informational_release_gate",
+      "severity": "low",
+      "component": "backend/app/services/ttv.py",
+      "sha256": "cf47d4165801fe21220d57cc700508feb97dd250602193c43edbad0b6cc5ecd1",
+      "line_range": "14-177",
+      "description": "TEMPORAL_MODEL_VERSION None deliberately blocks numeric time estimates; do not mistake candidate time range for accepted forecasts.",
+      "test_required": "Negative release-gate test retained."
+    },
+    {
+      "id": "AUD-B03-024",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/services/operability.py",
+      "sha256": "23d37467b9ae79480f6c9c031acaaa76a96ba8196fef5aacc274f594e50107e3",
+      "line_range": "97-149",
+      "description": "Provider coverage completeness is defined as expected source IDs being present and retrieved recently; a partial accepted provider with missing requested indicators can still look complete. Country analysis readiness must distinguish provider transport presence from per-indicator source completeness and methodological coverage.",
+      "test_required": "Provider with partially covered data must not count complete; global coverage report cross-check."
+    },
+    {
+      "id": "AUD-B03-025",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "line_range": "155-192",
+      "description": "_declared_target_cefr chooses the maximum declared CEFR among language matches, potentially using a high level in a different language instead of the actual target work language, understating preparation time. Cross-check language_fit target-language matching and block duration extrapolation until language-specific evidence is retained.",
+      "test_required": "Different target/source languages with B2 versus A1 and inverted ordering should not overstate target proficiency."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 16.24
+  "certified_line_by_line_review_percent": 17.95
 }

@@ -10,7 +10,7 @@ def country_scenarios(
     country_iso3: str,
     horizons: list[int] | None = None,
 ) -> dict:
-    selected_horizons = horizons or DEFAULT_HORIZONS
+    selected_horizons = DEFAULT_HORIZONS if horizons is None else horizons
     rows = future_trajectory(country_iso3, selected_horizons)
     catalog = {item["indicator_id"]: item for item in INDICATORS}
 
