@@ -3,10 +3,10 @@ import io
 import json
 import httpx
 from openpyxl import load_workbook
-from app.ingestion.imf_weo_official import normalize_official_weo
+from app.ingestion.imf_weo_official import normalize_official_weo,OFFICIAL_WORKBOOK_URL
 from scripts.verify_weo_disposable_readthrough import verify_weo_roundtrip
 
-URL="https://data.imf.org/-/media/iData/External-Storage/Documents/0FA3DC49A04D446E9D69DBEB29979E1C/en/WEOOct2026all.xlsx"
+URL=OFFICIAL_WORKBOOK_URL
 
 
 def inspect_workbook(payload: bytes) -> dict:
