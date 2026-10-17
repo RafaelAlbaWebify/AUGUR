@@ -749,9 +749,86 @@
       "status": "reviewed_findings_open",
       "method": "complete file read; static importer mapping; API and targeted test inspection; acceptance tests outstanding for identified findings",
       "imported_by_count": 3
+    },
+    {
+      "path": "backend/scripts/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty_file_0_lines",
+      "definitions_reviewed": 0,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
+      "imported_by_count": 9
+    },
+    {
+      "path": "backend/scripts/aggregate_eea_city_pm25.py",
+      "sha256": "7be50c4bf915d75948eea094f5f4bff97c46cc260c88f2072e8b2298d73d5efa",
+      "lines_reviewed": "1-26",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/audit_global_evidence.py",
+      "sha256": "02d04e56fd6533bbddcba5b17ee5edb166e939be5ff5a48cd8208e9d79a48369",
+      "lines_reviewed": "1-21",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/discover_country_catalog.py",
+      "sha256": "8d8f3b2c27cdfd89e36e38fe2b20a0c0343fb25e3550832eda6dd22f35f30360",
+      "lines_reviewed": "1-32",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/discover_eurostat_regions.py",
+      "sha256": "ad64457c06874472241cb7d46f71f6827e33d4a7a41a525e014a4b8b1c32852d",
+      "lines_reviewed": "1-42",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/export_geography_provenance.py",
+      "sha256": "96c846cd1f0ba8b179323b268470ab1e98170c27dcf7b23ad00ffe983b837c5b",
+      "lines_reviewed": "1-24",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/export_observation_provenance.py",
+      "sha256": "c17aac4e4b3fa59c8d7fef2822b9c9a6c0d1cdf3f45c2be433cade9622dd2b7e",
+      "lines_reviewed": "1-24",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 68,
+  "certified_line_by_line_review_count": 75,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1627,8 +1704,18 @@
       "line_range": "28-50",
       "description": "Trend service assumes SQL indicator_series rows ordered with newest last and embeds numeric peer reference without service-level source comparability verification.",
       "test_required": "Assert DB ordering contract and mixed-source historical fixtures; block incompatible peer ranks."
+    },
+    {
+      "id": "AUD-B04-001",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/scripts/discover_country_catalog.py",
+      "sha256": "8d8f3b2c27cdfd89e36e38fe2b20a0c0343fb25e3550832eda6dd22f35f30360",
+      "line_range": "9-15",
+      "description": "A script named discover_country_catalog calls initialize_datastores and register_country_catalog and can write operator data despite discovery-sounding name. It is not read-only; safety and preflight contract should be explicit.",
+      "test_required": "Require opt-in write flag or explicit staging protection; verify no DB writes under default discovery/dry-run invocation."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 19.37
+  "certified_line_by_line_review_percent": 21.37
 }
