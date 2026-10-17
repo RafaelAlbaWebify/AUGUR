@@ -13,9 +13,9 @@
   "file_count": 341,
   "python_count": 303,
   "definition_count": 1574,
-  "reviewed_file_count": 17,
-  "stale_review_file_count": 1,
-  "line_by_line_review_percent": 4.99,
+  "reviewed_file_count": 26,
+  "stale_review_file_count": 0,
+  "line_by_line_review_percent": 7.62,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -2748,7 +2748,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
       "bytes": 6754,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_norm",
@@ -3290,7 +3290,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "9ac098c84819f321fc31feb97db7ca20130bb4a1ed2e53cf4c1bb3f437f055c1",
       "bytes": 6793,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_post_with_retry",
@@ -3388,7 +3388,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "bb940ac3a7a4121f246dc861ce6d3833ea9f01c826f6ed6fbb3903cf67de4dfd",
       "bytes": 6660,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_urls_from_probe",
@@ -3532,7 +3532,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
       "bytes": 7269,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_sample_delimited_file",
@@ -3680,7 +3680,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "1119ec114652ca63cfe70d47325f5b0554ccd3e21f9ae2cb1258b30d6438e4a2",
       "bytes": 5885,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_clean_cell",
@@ -4991,7 +4991,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "ce282fabf79561ae49d22e6e4c24ed882da76173a120c1bd01143c9bae35bdfa",
       "bytes": 11192,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "IMFAdapter",
@@ -5277,7 +5277,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "2eedff61ea6fa5ea76c01ddf9595fe82ef582ea6c66a0bb112feec9811cae746",
       "bytes": 4665,
-      "review_status": "stale_review",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "OECDAdapter",
@@ -5787,7 +5787,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "e363d9519ddcef4ac3e3010e62f5211fc9832edaae6f8977d1130a1d12d692d9",
       "bytes": 10827,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "GeometrySourceRestricted",
@@ -6474,7 +6474,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "1328ed5cdf5fb53266d63b8e9df1e52a7d17b104e293b8666258fcd7142a02e2",
       "bytes": 9767,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "UNWPPAdapter",
