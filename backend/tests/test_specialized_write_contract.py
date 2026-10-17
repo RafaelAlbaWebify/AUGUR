@@ -21,7 +21,7 @@ def test_specialized_batch_accepts_valid_nullable_outlook():
 def test_specialized_rejects_corruption_before_database_access(broken,error):
     base={"isco08":"2","source_id":"CEDEFOP","release_version":"2026","score":7.0}
     with pytest.raises(ValueError,match=error):
-        validate_specialized_batch([base,{**base,**broken}],
+        validate_specialized_batch([{**base,**broken}],
             key_fields=("isco08","source_id","release_version"),
             required_numeric_fields=("score",))
 
