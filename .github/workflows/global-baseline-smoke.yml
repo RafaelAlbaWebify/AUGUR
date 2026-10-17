@@ -9,6 +9,7 @@ on:
       - "backend/app/db/analytics.py"
       - "backend/app/ingestion/world_bank.py"
       - "backend/app/ingestion/imf.py"
+      - "backend/app/ingestion/imf_weo_official.py"
       - "backend/app/ingestion/un_wpp.py"
       - "backend/scripts/sync_global_baseline.py"
       - ".github/workflows/global-baseline-smoke.yml"
@@ -39,4 +40,4 @@ jobs:
         run: python -m pip install -r requirements.txt
 
       - name: Sync full global country baseline
-        run: python -m scripts.sync_global_baseline
+        run: python -m scripts.sync_global_baseline --imf-official-weo
