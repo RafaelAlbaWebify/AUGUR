@@ -380,9 +380,97 @@
       "status": "reviewed_findings_open",
       "method": "complete source and SQL/provider normalizer inspection with static importers",
       "imported_by_count": 8
+    },
+    {
+      "path": "backend/app/main.py",
+      "sha256": "922a655fb9392723f11775ed635baab9f4539fd220af3da68a5676e6e2fe148e",
+      "lines_reviewed": "1-44",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 2,
+      "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/core/config.py",
+      "sha256": "92c0ff69e723f621272744f7eec9d800a7c44a3b3a8daa1062e5548cd8d2f0fc",
+      "lines_reviewed": "1-34",
+      "definitions_reviewed": 5,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 27,
+      "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/providers.py",
+      "sha256": "7ebc222b5c0920a01d7eca6d4ccbe3ebf513a98f2f8179dc31bf92f5560182a0",
+      "lines_reviewed": "1-119",
+      "definitions_reviewed": 8,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 4,
+      "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/services/ranking_eligibility.py",
+      "sha256": "3cb902b17cb9b107b4e83b7e5b63323c04c09c4c7ba330b961346a1570438ad4",
+      "lines_reviewed": "1-110",
+      "definitions_reviewed": 4,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 7,
+      "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/services/ranking_provider_metadata.py",
+      "sha256": "c75ac3ddde3f8cb637cca5c725d337a256b0feedd4ef6fc1047ee54c478e5a43",
+      "lines_reviewed": "1-45",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 6,
+      "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/services/global_evidence_contract.py",
+      "sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
+      "lines_reviewed": "1-89",
+      "definitions_reviewed": 3,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 4,
+      "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/services/geography_provenance.py",
+      "sha256": "39f76baad127fee4073898caef38bde10087480df16d6b25e0b038ef6421cea1",
+      "lines_reviewed": "1-72",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 1,
+      "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/services/observation_provenance.py",
+      "sha256": "6007dad5969d8871610e3059cf80b2277e78de90a10a0bb68b66a2a3dd446ab4",
+      "lines_reviewed": "1-87",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 1,
+      "method": "full source review and source-to-API dependency cross-check"
     }
   ],
-  "certified_line_by_line_review_count": 35,
+  "certified_line_by_line_review_count": 43,
   "findings": [
     {
       "id": "LEAD-001",
@@ -994,8 +1082,78 @@
       "line_range": "151-171,874-1689",
       "description": "_coverage_fields with no explicit country allowlist equates observed/requested universe and claims complete, unlike proven source coverage.",
       "test_required": "Unknown country scope should not claim complete source coverage"
+    },
+    {
+      "id": "AUD-B03-001",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/providers.py",
+      "sha256": "7ebc222b5c0920a01d7eca6d4ccbe3ebf513a98f2f8179dc31bf92f5560182a0",
+      "line_range": "1-119",
+      "description": "Country provider registry still uses legacy April 2026 IMFAdapter DataMapper by default, although globally accepted WEO October 2026 opt-in path exists. Country-specific sync may return HTTP 403 or hardcoded forecast boundary.",
+      "test_required": "Provider registry migration/country endpoint integration fixture"
+    },
+    {
+      "id": "AUD-B03-002",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/services/ranking_eligibility.py",
+      "sha256": "3cb902b17cb9b107b4e83b7e5b63323c04c09c4c7ba330b961346a1570438ad4",
+      "line_range": "33-110",
+      "description": "RankingCandidate lacks source_observation_status and response dimensions; check_eligibility may report eligible from boundary_verified=True even with d/u provider status unless separately guarded in caller.",
+      "test_required": "Flagged quality metadata candidate must not be rankable without status-specific policy"
+    },
+    {
+      "id": "AUD-B03-003",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/global_evidence_contract.py",
+      "sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
+      "line_range": "48-89",
+      "description": "coverage_matrix performs nested scans for every geography/contract, O(G*C*O), not indexed; large global expansion risks heavy latency.",
+      "test_required": "Indexed reference parity benchmark and 1000+ geographies"
+    },
+    {
+      "id": "AUD-B03-004",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/core/config.py",
+      "sha256": "92c0ff69e723f621272744f7eec9d800a7c44a3b3a8daa1062e5548cd8d2f0fc",
+      "line_range": "20-34",
+      "description": "Accessing Settings.data_dir creates filesystem directory even during a purported read-only probe; dependency and CLI call sites must avoid implying zero side effects.",
+      "test_required": "Read-only command with absent data root must create no directory"
+    },
+    {
+      "id": "AUD-B03-005",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/observation_provenance.py",
+      "sha256": "6007dad5969d8871610e3059cf80b2277e78de90a10a0bb68b66a2a3dd446ab4",
+      "line_range": "52-87",
+      "description": "unregistered_observations query returns global rows even when country filter is supplied; report labels global scope but callers might misinterpret as country-specific.",
+      "test_required": "API contract requires explicit global unregistered_scope and separate count"
+    },
+    {
+      "id": "AUD-B03-006",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/main.py",
+      "sha256": "922a655fb9392723f11775ed635baab9f4539fd220af3da68a5676e6e2fe148e",
+      "line_range": "9-13",
+      "description": "Every FastAPI startup initializes/updates both datastores, so merely starting the API is not read-only. Audited bootstrap may seed catalogs and migrate geography schema on service launch.",
+      "test_required": "Startup dry-run/status cannot mutate source DB before authorization"
+    },
+    {
+      "id": "AUD-B03-007",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ranking_provider_metadata.py",
+      "sha256": "c75ac3ddde3f8cb637cca5c725d337a256b0feedd4ef6fc1047ee54c478e5a43",
+      "line_range": "18-45",
+      "description": "Source status d/u are blocked conservatively but no edition-specific official Eurostat quality-flag policy accepted; rankings remain correctly blocked.",
+      "test_required": "Official flag acceptance matrix provider evidence"
     }
   ],
   "denominator_inventoried_files": 347,
-  "certified_line_by_line_review_percent": 10.09
+  "certified_line_by_line_review_percent": 12.39
 }
