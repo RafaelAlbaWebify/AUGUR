@@ -1728,9 +1728,53 @@
       "status": "reviewed_findings_open",
       "method": "complete source inspection with static import map and pipeline/SQL contract cross-check; execution tests pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_global_country_baseline.py",
+      "sha256": "8f411bb3dae1d79739551b9d8365377723463433c645ad4252f5c72de249aed6",
+      "lines_reviewed": "1-165",
+      "definitions_reviewed": 4,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection of query, reconciliation and persisted-write boundaries; runtime tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_fua_geometry_links.py",
+      "sha256": "646d1b36039600d906cf2cf828ac8d7e7f023c9a917ea2fbbf768195badc892d",
+      "lines_reviewed": "1-161",
+      "definitions_reviewed": 7,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection of query, reconciliation and persisted-write boundaries; runtime tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/reconcile_legacy_nuts_vintage.py",
+      "sha256": "c07d45565f32196b6f607ca4dc326da7c044a2d59492f8342cd2f1bcb11ef76e",
+      "lines_reviewed": "1-175",
+      "definitions_reviewed": 4,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection of query, reconciliation and persisted-write boundaries; runtime tests pending",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/reconcile_ranking_eurostat.py",
+      "sha256": "2ef8a8939e29a50461de0161b0b590114132d9c581b9edab1e9015423d914459",
+      "lines_reviewed": "1-167",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection of query, reconciliation and persisted-write boundaries; runtime tests pending",
+      "imported_by_count": 4
     }
   ],
-  "certified_line_by_line_review_count": 157,
+  "certified_line_by_line_review_count": 161,
   "findings": [
     {
       "id": "LEAD-001",
@@ -2946,8 +2990,48 @@
       "line_range": "26-40",
       "description": "Employment-age source comparison fetches NUTS_2024 local rows and compare provider cohorts, but does not prove the boundary vintage or source status compatibility; script correctly labels forensic-only yet result may be mistaken for acceptance.",
       "test_required": "Regression for same-code different-vintage and flagged provider observations; require explicit consumer gate."
+    },
+    {
+      "id": "AUD-B04-035",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/reconcile_legacy_nuts_vintage.py",
+      "sha256": "c07d45565f32196b6f607ca4dc326da7c044a2d59492f8342cd2f1bcb11ef76e",
+      "line_range": "120-164",
+      "description": "Copy reconciliation snapshots DuckDB through shutil.copy2; file-level copying may be inconsistent for a live WAL database despite comment acknowledging writer should be stopped. It also leaves output database after exception rather than cleanup.",
+      "test_required": "Test source WAL/live writer and failed transaction; require verified consistent snapshot and delete/mark incomplete outputs."
+    },
+    {
+      "id": "AUD-B04-036",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/reconcile_ranking_eurostat.py",
+      "sha256": "2ef8a8939e29a50461de0161b0b590114132d9c581b9edab1e9015423d914459",
+      "line_range": "29-51",
+      "description": "Country attributed via source geo code join and by_geo keyed only by code; duplicate matched registry identities overwrite prior country before grouped provider replay. Duplicates are flagged but country/source provenance can already be lost in diagnostics.",
+      "test_required": "Collision fixture with duplicate geo code across country; preserve composite keys and ambiguous provenance."
+    },
+    {
+      "id": "AUD-B04-037",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_global_country_baseline.py",
+      "sha256": "8f411bb3dae1d79739551b9d8365377723463433c645ad4252f5c72de249aed6",
+      "line_range": "64-86",
+      "description": "IMF probe treats HTTP 403 access restriction as ok: True (explicit CI informational policy); consumers checking only exit code can mistake inaccessible IMF data for successful coverage.",
+      "test_required": "Distinct transport-restricted exit/status and CI acceptance that distinguishes unavailable from verified evidence."
+    },
+    {
+      "id": "AUD-B04-038",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_oecd_fua_geometry_links.py",
+      "sha256": "646d1b36039600d906cf2cf828ac8d7e7f023c9a917ea2fbbf768195badc892d",
+      "line_range": "75-99",
+      "description": "Geometry-link inspector follows and probes candidate URLs directly from parsed HTML without official-host allowlist; if the OECD page contains external links this may contact unintended hosts.",
+      "test_required": "Restrict candidate probe to official trusted hosts and verify redirect destinations; external-link fixture."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 44.73
+  "certified_line_by_line_review_percent": 45.87
 }
