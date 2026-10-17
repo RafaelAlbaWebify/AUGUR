@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 347,
-  "python_count": 309,
-  "definition_count": 1612,
-  "reviewed_file_count": 43,
-  "stale_review_file_count": 0,
-  "line_by_line_review_percent": 12.39,
+  "file_count": 348,
+  "python_count": 310,
+  "definition_count": 1617,
+  "reviewed_file_count": 42,
+  "stale_review_file_count": 1,
+  "line_by_line_review_percent": 12.07,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 125,
+    "backend/tests": 126,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -1011,6 +1011,7 @@
         "backend/tests/test_accept_g2_local_data_layer.py",
         "backend/tests/test_atomic_upsert_api_integration.py",
         "backend/tests/test_datastore_status_read_only.py",
+        "backend/tests/test_geography_atomic_backfill.py",
         "backend/tests/test_national_bulk_ingestion.py",
         "backend/tests/test_nuts_vintage_write_safety.py",
         "backend/tests/test_regional_evidence.py",
@@ -1020,22 +1021,22 @@
     {
       "path": "backend/app/db/analytics.py",
       "bucket": "backend/app/db",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
-      "bytes": 122579,
-      "review_status": "verified_reviewed",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
+      "bytes": 122890,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "initialize_analytics_schema",
           "kind": "function",
           "line_start": 262,
-          "line_end": 478,
+          "line_end": 479,
           "signature_arguments": []
         },
         {
           "symbol": "upsert_country",
           "kind": "function",
-          "line_start": 481,
-          "line_end": 510,
+          "line_start": 482,
+          "line_end": 511,
           "signature_arguments": [
             "country"
           ]
@@ -1043,8 +1044,8 @@
         {
           "symbol": "country_record",
           "kind": "function",
-          "line_start": 513,
-          "line_end": 533,
+          "line_start": 514,
+          "line_end": 534,
           "signature_arguments": [
             "country_iso3"
           ]
@@ -1052,15 +1053,15 @@
         {
           "symbol": "country_analysis_coverage",
           "kind": "function",
-          "line_start": 536,
-          "line_end": 583,
+          "line_start": 537,
+          "line_end": 584,
           "signature_arguments": []
         },
         {
           "symbol": "upsert_observations",
           "kind": "function",
-          "line_start": 586,
-          "line_end": 657,
+          "line_start": 587,
+          "line_end": 658,
           "signature_arguments": [
             "rows"
           ]
@@ -1068,8 +1069,8 @@
         {
           "symbol": "upsert_labour_earnings",
           "kind": "function",
-          "line_start": 660,
-          "line_end": 701,
+          "line_start": 661,
+          "line_end": 702,
           "signature_arguments": [
             "rows"
           ]
@@ -1077,8 +1078,8 @@
         {
           "symbol": "latest_labour_earnings",
           "kind": "function",
-          "line_start": 704,
-          "line_end": 740,
+          "line_start": 705,
+          "line_end": 741,
           "signature_arguments": [
             "country_iso3",
             "isco08"
@@ -1087,8 +1088,8 @@
         {
           "symbol": "upsert_labour_net_earnings_reference",
           "kind": "function",
-          "line_start": 743,
-          "line_end": 783,
+          "line_start": 744,
+          "line_end": 784,
           "signature_arguments": [
             "rows"
           ]
@@ -1096,8 +1097,8 @@
         {
           "symbol": "latest_labour_net_earnings_reference",
           "kind": "function",
-          "line_start": 786,
-          "line_end": 811,
+          "line_start": 787,
+          "line_end": 812,
           "signature_arguments": [
             "country_iso3",
             "earnings_case"
@@ -1106,8 +1107,8 @@
         {
           "symbol": "upsert_labour_job_vacancy_rates",
           "kind": "function",
-          "line_start": 814,
-          "line_end": 856,
+          "line_start": 815,
+          "line_end": 857,
           "signature_arguments": [
             "rows"
           ]
@@ -1115,8 +1116,8 @@
         {
           "symbol": "latest_labour_job_vacancy_rate",
           "kind": "function",
-          "line_start": 859,
-          "line_end": 885,
+          "line_start": 860,
+          "line_end": 886,
           "signature_arguments": [
             "country_iso3",
             "isco08"
@@ -1125,8 +1126,8 @@
         {
           "symbol": "upsert_labour_oja_imbalance_eu27",
           "kind": "function",
-          "line_start": 892,
-          "line_end": 934,
+          "line_start": 893,
+          "line_end": 935,
           "signature_arguments": [
             "rows"
           ]
@@ -1134,8 +1135,8 @@
         {
           "symbol": "latest_labour_oja_imbalance_eu27",
           "kind": "function",
-          "line_start": 937,
-          "line_end": 969,
+          "line_start": 938,
+          "line_end": 970,
           "signature_arguments": [
             "isco08"
           ]
@@ -1143,15 +1144,15 @@
         {
           "symbol": "labour_oja_imbalance_eu27_status",
           "kind": "function",
-          "line_start": 972,
-          "line_end": 1010,
+          "line_start": 973,
+          "line_end": 1011,
           "signature_arguments": []
         },
         {
           "symbol": "upsert_labour_shortage_index",
           "kind": "function",
-          "line_start": 1012,
-          "line_end": 1062,
+          "line_start": 1013,
+          "line_end": 1063,
           "signature_arguments": [
             "rows"
           ]
@@ -1159,8 +1160,8 @@
         {
           "symbol": "latest_labour_shortage_index",
           "kind": "function",
-          "line_start": 1065,
-          "line_end": 1102,
+          "line_start": 1066,
+          "line_end": 1103,
           "signature_arguments": [
             "country_iso3",
             "isco08"
@@ -1169,15 +1170,15 @@
         {
           "symbol": "labour_shortage_index_status",
           "kind": "function",
-          "line_start": 1105,
-          "line_end": 1157,
+          "line_start": 1106,
+          "line_end": 1158,
           "signature_arguments": []
         },
         {
           "symbol": "upsert_labour_occupation_outlook",
           "kind": "function",
-          "line_start": 1160,
-          "line_end": 1207,
+          "line_start": 1161,
+          "line_end": 1208,
           "signature_arguments": [
             "rows"
           ]
@@ -1185,8 +1186,8 @@
         {
           "symbol": "latest_labour_occupation_outlook",
           "kind": "function",
-          "line_start": 1210,
-          "line_end": 1246,
+          "line_start": 1211,
+          "line_end": 1247,
           "signature_arguments": [
             "country_iso3",
             "isco08",
@@ -1196,15 +1197,15 @@
         {
           "symbol": "labour_occupation_outlook_status",
           "kind": "function",
-          "line_start": 1248,
-          "line_end": 1311,
+          "line_start": 1249,
+          "line_end": 1312,
           "signature_arguments": []
         },
         {
           "symbol": "upsert_labour_job_transitions",
           "kind": "function",
-          "line_start": 1314,
-          "line_end": 1356,
+          "line_start": 1315,
+          "line_end": 1357,
           "signature_arguments": [
             "rows"
           ]
@@ -1212,8 +1213,8 @@
         {
           "symbol": "latest_labour_job_transition",
           "kind": "function",
-          "line_start": 1359,
-          "line_end": 1387,
+          "line_start": 1360,
+          "line_end": 1388,
           "signature_arguments": [
             "country_iso3",
             "age_group",
@@ -1223,8 +1224,8 @@
         {
           "symbol": "upsert_environmental_health_burden",
           "kind": "function",
-          "line_start": 1389,
-          "line_end": 1436,
+          "line_start": 1390,
+          "line_end": 1437,
           "signature_arguments": [
             "rows"
           ]
@@ -1232,8 +1233,8 @@
         {
           "symbol": "latest_environmental_health_burden_for_geo",
           "kind": "function",
-          "line_start": 1439,
-          "line_end": 1478,
+          "line_start": 1440,
+          "line_end": 1479,
           "signature_arguments": [
             "geo_code"
           ]
@@ -1241,29 +1242,29 @@
         {
           "symbol": "environmental_health_burden_status",
           "kind": "function",
-          "line_start": 1481,
-          "line_end": 1543,
+          "line_start": 1482,
+          "line_end": 1544,
           "signature_arguments": []
         },
         {
           "symbol": "subnational_evidence_status",
           "kind": "function",
-          "line_start": 1546,
-          "line_end": 1610,
+          "line_start": 1547,
+          "line_end": 1611,
           "signature_arguments": []
         },
         {
           "symbol": "subnational_evidence_by_level_status",
           "kind": "function",
-          "line_start": 1614,
-          "line_end": 1697,
+          "line_start": 1615,
+          "line_end": 1698,
           "signature_arguments": []
         },
         {
           "symbol": "upsert_regional_sector_employment",
           "kind": "function",
-          "line_start": 1700,
-          "line_end": 1750,
+          "line_start": 1701,
+          "line_end": 1751,
           "signature_arguments": [
             "rows"
           ]
@@ -1271,8 +1272,8 @@
         {
           "symbol": "latest_regional_sector_employment",
           "kind": "function",
-          "line_start": 1753,
-          "line_end": 1781,
+          "line_start": 1754,
+          "line_end": 1782,
           "signature_arguments": [
             "country_iso2"
           ]
@@ -1280,8 +1281,8 @@
         {
           "symbol": "latest_regional_sector_employment_for_geo",
           "kind": "function",
-          "line_start": 1784,
-          "line_end": 1827,
+          "line_start": 1785,
+          "line_end": 1828,
           "signature_arguments": [
             "geo_code"
           ]
@@ -1289,15 +1290,15 @@
         {
           "symbol": "regional_sector_employment_status",
           "kind": "function",
-          "line_start": 1830,
-          "line_end": 1889,
+          "line_start": 1831,
+          "line_end": 1890,
           "signature_arguments": []
         },
         {
           "symbol": "latest_observations",
           "kind": "function",
-          "line_start": 1892,
-          "line_end": 1931,
+          "line_start": 1893,
+          "line_end": 1932,
           "signature_arguments": [
             "country_iso3"
           ]
@@ -1305,22 +1306,22 @@
         {
           "symbol": "country_registry",
           "kind": "function",
-          "line_start": 1934,
-          "line_end": 1949,
+          "line_start": 1935,
+          "line_end": 1950,
           "signature_arguments": []
         },
         {
           "symbol": "indicator_registry",
           "kind": "function",
-          "line_start": 1952,
-          "line_end": 1966,
+          "line_start": 1953,
+          "line_end": 1967,
           "signature_arguments": []
         },
         {
           "symbol": "indicator_series",
           "kind": "function",
-          "line_start": 1969,
-          "line_end": 2003,
+          "line_start": 1970,
+          "line_end": 2004,
           "signature_arguments": [
             "country_iso3",
             "indicator_id"
@@ -1329,8 +1330,8 @@
         {
           "symbol": "indicator_peer_series",
           "kind": "function",
-          "line_start": 2006,
-          "line_end": 2045,
+          "line_start": 2007,
+          "line_end": 2046,
           "signature_arguments": [
             "indicator_id"
           ]
@@ -1338,8 +1339,8 @@
         {
           "symbol": "country_indicator_series",
           "kind": "function",
-          "line_start": 2048,
-          "line_end": 2108,
+          "line_start": 2049,
+          "line_end": 2109,
           "signature_arguments": [
             "country_iso3",
             "max_points"
@@ -1348,8 +1349,8 @@
         {
           "symbol": "indicator_source_comparison",
           "kind": "function",
-          "line_start": 2111,
-          "line_end": 2154,
+          "line_start": 2112,
+          "line_end": 2155,
           "signature_arguments": [
             "country_iso3"
           ]
@@ -1357,8 +1358,8 @@
         {
           "symbol": "source_quality_summary",
           "kind": "function",
-          "line_start": 2157,
-          "line_end": 2270,
+          "line_start": 2158,
+          "line_end": 2271,
           "signature_arguments": [
             "country_iso3"
           ]
@@ -1366,8 +1367,8 @@
         {
           "symbol": "official_forecasts",
           "kind": "function",
-          "line_start": 2273,
-          "line_end": 2302,
+          "line_start": 2274,
+          "line_end": 2303,
           "signature_arguments": [
             "country_iso3"
           ]
@@ -1375,8 +1376,8 @@
         {
           "symbol": "future_trajectory",
           "kind": "function",
-          "line_start": 2305,
-          "line_end": 2340,
+          "line_start": 2306,
+          "line_end": 2341,
           "signature_arguments": [
             "country_iso3",
             "horizons"
@@ -1385,15 +1386,15 @@
         {
           "symbol": "analytical_evidence_status",
           "kind": "function",
-          "line_start": 2343,
-          "line_end": 2531,
+          "line_start": 2344,
+          "line_end": 2532,
           "signature_arguments": []
         },
         {
           "symbol": "upsert_geographies",
           "kind": "function",
-          "line_start": 2534,
-          "line_end": 2569,
+          "line_start": 2535,
+          "line_end": 2575,
           "signature_arguments": [
             "rows"
           ]
@@ -1401,8 +1402,8 @@
         {
           "symbol": "geographies_for_country",
           "kind": "function",
-          "line_start": 2572,
-          "line_end": 2646,
+          "line_start": 2578,
+          "line_end": 2652,
           "signature_arguments": [
             "country_iso3",
             "geo_level"
@@ -1411,8 +1412,8 @@
         {
           "symbol": "geography_records_by_source_codes",
           "kind": "function",
-          "line_start": 2649,
-          "line_end": 2686,
+          "line_start": 2655,
+          "line_end": 2692,
           "signature_arguments": [
             "source_geo_codes"
           ]
@@ -1420,8 +1421,8 @@
         {
           "symbol": "stale_geography_countries",
           "kind": "function",
-          "line_start": 2689,
-          "line_end": 2764,
+          "line_start": 2695,
+          "line_end": 2770,
           "signature_arguments": [
             "geography_system",
             "country_iso3s",
@@ -1431,15 +1432,15 @@
         {
           "symbol": "geography_coverage_status",
           "kind": "function",
-          "line_start": 2767,
-          "line_end": 2929,
+          "line_start": 2773,
+          "line_end": 2935,
           "signature_arguments": []
         },
         {
           "symbol": "provider_access_state",
           "kind": "function",
-          "line_start": 2932,
-          "line_end": 2955,
+          "line_start": 2938,
+          "line_end": 2961,
           "signature_arguments": [
             "state_key"
           ]
@@ -1447,8 +1448,8 @@
         {
           "symbol": "record_provider_access_state",
           "kind": "function",
-          "line_start": 2958,
-          "line_end": 2990,
+          "line_start": 2964,
+          "line_end": 2996,
           "signature_arguments": [
             "state_key",
             "status"
@@ -1457,8 +1458,8 @@
         {
           "symbol": "upsert_geography_geometries",
           "kind": "function",
-          "line_start": 2993,
-          "line_end": 3031,
+          "line_start": 2999,
+          "line_end": 3042,
           "signature_arguments": [
             "rows"
           ]
@@ -1466,8 +1467,8 @@
         {
           "symbol": "geography_geometries_for_country",
           "kind": "function",
-          "line_start": 3034,
-          "line_end": 3075,
+          "line_start": 3045,
+          "line_end": 3086,
           "signature_arguments": [
             "country_iso3",
             "geography_system"
@@ -1476,15 +1477,15 @@
         {
           "symbol": "geography_geometry_coverage_status",
           "kind": "function",
-          "line_start": 3078,
-          "line_end": 3119,
+          "line_start": 3089,
+          "line_end": 3130,
           "signature_arguments": []
         },
         {
           "symbol": "_subnational_geography_system",
           "kind": "function",
-          "line_start": 3122,
-          "line_end": 3133,
+          "line_start": 3133,
+          "line_end": 3144,
           "signature_arguments": [
             "row"
           ]
@@ -1492,8 +1493,8 @@
         {
           "symbol": "upsert_subnational_observations",
           "kind": "function",
-          "line_start": 3136,
-          "line_end": 3264,
+          "line_start": 3147,
+          "line_end": 3275,
           "signature_arguments": [
             "rows"
           ]
@@ -1501,8 +1502,8 @@
         {
           "symbol": "latest_subnational_observations",
           "kind": "function",
-          "line_start": 3267,
-          "line_end": 3302,
+          "line_start": 3278,
+          "line_end": 3313,
           "signature_arguments": [
             "geo_code",
             "geography_system"
@@ -1511,8 +1512,8 @@
         {
           "symbol": "subnational_indicator_series",
           "kind": "function",
-          "line_start": 3305,
-          "line_end": 3342,
+          "line_start": 3316,
+          "line_end": 3353,
           "signature_arguments": [
             "geo_code",
             "max_points",
@@ -1522,8 +1523,8 @@
         {
           "symbol": "city_evidence_bundle",
           "kind": "function",
-          "line_start": 3345,
-          "line_end": 3422,
+          "line_start": 3356,
+          "line_end": 3433,
           "signature_arguments": [
             "city_code",
             "max_history_points",
@@ -1533,8 +1534,8 @@
         {
           "symbol": "stored_regional_indicator_coverage",
           "kind": "function",
-          "line_start": 3426,
-          "line_end": 3486,
+          "line_start": 3437,
+          "line_end": 3497,
           "signature_arguments": [
             "geography_system",
             "geo_level",
@@ -1545,8 +1546,8 @@
         {
           "symbol": "regional_evidence_bundle",
           "kind": "function",
-          "line_start": 3489,
-          "line_end": 3622,
+          "line_start": 3500,
+          "line_end": 3633,
           "signature_arguments": [
             "geo_code",
             "max_history_points",
@@ -1556,8 +1557,8 @@
         {
           "symbol": "subnational_geography_codes",
           "kind": "function",
-          "line_start": 3625,
-          "line_end": 3650,
+          "line_start": 3636,
+          "line_end": 3661,
           "signature_arguments": [
             "geo_level",
             "indicator_ids"
@@ -1566,8 +1567,8 @@
         {
           "symbol": "subnational_storage_status",
           "kind": "function",
-          "line_start": 3653,
-          "line_end": 3689,
+          "line_start": 3664,
+          "line_end": 3700,
           "signature_arguments": []
         }
       ],
@@ -1590,67 +1591,67 @@
         },
         {
           "module": "csv",
-          "line": 596
-        },
-        {
-          "module": "tempfile",
           "line": 597
         },
         {
-          "module": "pathlib",
+          "module": "tempfile",
           "line": 598
         },
         {
-          "module": "app.db.write_contract",
+          "module": "pathlib",
           "line": 599
         },
         {
           "module": "app.db.write_contract",
-          "line": 664
+          "line": 600
         },
         {
           "module": "app.db.write_contract",
-          "line": 747
+          "line": 665
         },
         {
           "module": "app.db.write_contract",
-          "line": 818
+          "line": 748
         },
         {
           "module": "app.db.write_contract",
-          "line": 896
+          "line": 819
         },
         {
           "module": "app.db.write_contract",
-          "line": 1016
+          "line": 897
         },
         {
           "module": "app.db.write_contract",
-          "line": 1164
+          "line": 1017
         },
         {
           "module": "app.db.write_contract",
-          "line": 1318
+          "line": 1165
         },
         {
           "module": "app.db.write_contract",
-          "line": 1393
+          "line": 1319
+        },
+        {
+          "module": "app.db.write_contract",
+          "line": 1394
         },
         {
           "module": "math",
-          "line": 1704
+          "line": 1705
         },
         {
           "module": "datetime",
-          "line": 2697
+          "line": 2703
         },
         {
           "module": "datetime",
-          "line": 2965
+          "line": 2971
         },
         {
           "module": "app.db.write_contract",
-          "line": 3140
+          "line": 3151
         }
       ],
       "called_names": [
@@ -1701,7 +1702,7 @@
         "writerow",
         "zip"
       ],
-      "lines": 3689,
+      "lines": 3700,
       "resolved_local_imports": [
         "backend/app/catalog.py",
         "backend/app/core/config.py",
@@ -23015,6 +23016,104 @@
       "resolved_local_imports": [
         "backend/app/models/profile.py",
         "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_geography_atomic_backfill.py",
+      "bucket": "backend/tests",
+      "sha256": "72a7dc6538b1cf849c727b3fd23444ebbcd312a62e595820924cd916c8e82251",
+      "bytes": 2890,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "isolated_db",
+          "kind": "function",
+          "line_start": 10,
+          "line_end": 14,
+          "signature_arguments": [
+            "tmp_path",
+            "monkeypatch"
+          ]
+        },
+        {
+          "symbol": "geography",
+          "kind": "function",
+          "line_start": 17,
+          "line_end": 21,
+          "signature_arguments": [
+            "code"
+          ]
+        },
+        {
+          "symbol": "test_geography_bulk_write_rolls_back_if_later_row_invalid",
+          "kind": "function",
+          "line_start": 24,
+          "line_end": 32,
+          "signature_arguments": [
+            "isolated_db"
+          ]
+        },
+        {
+          "symbol": "test_geometry_bulk_write_rolls_back_if_later_row_invalid",
+          "kind": "function",
+          "line_start": 35,
+          "line_end": 46,
+          "signature_arguments": [
+            "isolated_db"
+          ]
+        },
+        {
+          "symbol": "test_repeated_bootstrap_preserves_enriched_geography",
+          "kind": "function",
+          "line_start": 49,
+          "line_end": 65,
+          "signature_arguments": [
+            "isolated_db"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "datetime",
+          "line": 2
+        },
+        {
+          "module": "types",
+          "line": 3
+        },
+        {
+          "module": "duckdb",
+          "line": 4
+        },
+        {
+          "module": "pytest",
+          "line": 5
+        },
+        {
+          "module": "app.db",
+          "line": 6
+        }
+      ],
+      "called_names": [
+        "SimpleNamespace",
+        "append",
+        "close",
+        "connect",
+        "execute",
+        "fetchone",
+        "geography",
+        "initialize_analytics_schema",
+        "now",
+        "raises",
+        "setattr",
+        "str",
+        "upsert_geographies",
+        "upsert_geography_geometries"
+      ],
+      "lines": 65,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py"
       ],
       "imported_by": []
     },
