@@ -272,11 +272,14 @@ class WorldBankAdapter:
                     page_response.raise_for_status()
                     page_payload = page_response.json()
                     if (
-                        isinstance(page_payload, list)
-                        and len(page_payload) >= 2
-                        and isinstance(page_payload[1], list)
+                        not isinstance(page_payload, list)
+                        or len(page_payload) < 2
+                        or not isinstance(page_payload[1], list)
+                        or not isinstance(page_payload[0], dict)
+                        or int(page_payload[0].get("page") or -1) != page
                     ):
-                        observations.extend(page_payload[1])
+                        raise ValueError(f"Invalid World Bank response page {page} for {source_indicator}")
+                    observations.extend(page_payload[1])
 
                 return metadata, observations
 
