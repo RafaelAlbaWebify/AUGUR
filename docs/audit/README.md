@@ -16,10 +16,10 @@ Canonical operational context: [augur.md](../../augur.md). The tracked machine-r
 | Repository tree catalog | 100% of 426 paths enumerated from GitHub main tree at baseline | GitHub canonical list; current scoped source count is reported in inventory.json and changes after merges |
 | Python AST symbols/dependencies | 100% inventory of eligible Python files; exact current totals in inventory.json | GitHub job 39032334227 and committed inventory.json |
 | JS/TS/PowerShell semantic symbol indexing | 0% | Language-specific parser required |
-| Manual per-file line-by-line code review | **32/346 files = 9.25%** (7,192 lines, 158 definitions) | SHA-verified lines and evolving findings.json register; validated against source on main |
+| Manual per-file line-by-line code review | **35/347 files = 10.09%** (14,069 lines, 283 definitions) | SHA-verified lines and evolving findings.json register; validated against source on main |
 | Module/function redesign or removal | 0% approved for this audit | Tests + source acceptance on candidate PR |
 
-In this baseline B02 has **32/35** eligible files reviewed (DB 5 + ingestion 30): **91.43% of B02**, and the overall total is **9.25%**. The other B02 files remain pending. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
+In this baseline B02 has **35/35** eligible files reviewed (DB 5 + ingestion 30): **100% of B02 source review**, and the overall total is **10.09%**. The other B02 files remain pending. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
 
 ## Work packages
 1. **B01 — Source inventory and interdependencies:** reproducible AST graph, file hashes, invalidation rules, buckets and review matrix.
@@ -41,3 +41,7 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 - Every push on main affecting source, tests, workflows, CLI or the review findings regenerates the inventory with hash-based review invalidation; the bot commits an updated snapshot. Do not rely on an old inventory commit while the refresh workflow is running.
 - `reviewed_file_count` and `stale_review_file_count` come from matching each audited SHA to the actual source SHA in that same snapshot, not from a manually maintained percent. The counts will fluctuate when files change until formally re-reviewed.
 - `resolved_local_imports` and `imported_by` show statically resolvable Python module edges, **not** a complete runtime call graph. Frontend JS/TS, dynamically loaded modules and external services are separate review gates.
+
+## B02 full source review completed — 2026-10-17
+- 35/35 DB and ingestion modules reviewed at immutable source hashes. This is **code review coverage only**, not endorsement of implementation, provider data or production migration. SHA-verified total 35/347 files (10.09%), 14069 lines and 283 Python definitions. See findings AUD-B02-041 through -054 for high-risk source/SQL invariants and test requirements.
+- Next audit B03: backend API/services/models and their query/read-through consumers. Product fixes should prioritize geography registry startup metadata preservation, unapproved NUTS migration labelling, and geometry transaction rollback. No local/operator database writes.

@@ -337,17 +337,52 @@
     },
     {
       "path": "backend/app/ingestion/eurostat.py",
-      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
-      "lines_reviewed": "1-1060",
-      "definitions_reviewed": 13,
+      "sha256": "e125e07c8c1417fd2be4e294113a27602a23839dfe7f751e4a342bcca57e6b9d",
+      "lines_reviewed": "1-1074",
+      "definitions_reviewed": 14,
       "batch": "B02",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "method": "entire Eurostat adapter and specialized earnings/vacancies/transition read and code-path audit",
-      "imported_by_count": 38
+      "imported_by_count": 38,
+      "previous_sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "revalidated_after_pr": 102
+    },
+    {
+      "path": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "lines_reviewed": "1-3689",
+      "definitions_reviewed": 61,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source and SQL/provider normalizer inspection with static importers",
+      "imported_by_count": 47
+    },
+    {
+      "path": "backend/app/ingestion/oecd_fua.py",
+      "sha256": "3f877a6fa8be7b90e1f917cf5fbbf22aa473d7fc34abe624c873b142dad7bf4a",
+      "lines_reviewed": "1-1485",
+      "definitions_reviewed": 29,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source and SQL/provider normalizer inspection with static importers",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/ingestion/oecd_regional.py",
+      "sha256": "f11264525dcdd4220a6a11182d4577f15202843b77e2837589e146daac048fd3",
+      "lines_reviewed": "1-1689",
+      "definitions_reviewed": 34,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source and SQL/provider normalizer inspection with static importers",
+      "imported_by_count": 8
     }
   ],
-  "certified_line_by_line_review_count": 32,
+  "certified_line_by_line_review_count": 35,
   "findings": [
     {
       "id": "LEAD-001",
@@ -780,42 +815,187 @@
       "state": "open_requires_regression",
       "severity": "high",
       "component": "backend/app/ingestion/eurostat.py",
-      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "sha256": "e125e07c8c1417fd2be4e294113a27602a23839dfe7f751e4a342bcca57e6b9d",
       "line_range": "301-448",
       "description": "The general Eurostat normalize() checks dimension_values and label_contains but does not verify config.filters values against returned labels before assigning indicators and units. A provider returning multiple or unexpected populations/units could be mislabeled.",
-      "test_required": "Returned wrong unit/sex/age/freq and multiple-dimension fixture"
+      "test_required": "Returned wrong unit/sex/age/freq and multiple-dimension fixture",
+      "previous_sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159"
     },
     {
       "id": "AUD-B02-038",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_102",
       "severity": "high",
       "component": "backend/app/ingestion/eurostat.py",
-      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "sha256": "e125e07c8c1417fd2be4e294113a27602a23839dfe7f751e4a342bcca57e6b9d",
       "line_range": "451-797",
       "description": "Specialized earnings/net earnings/job vacancies/job transition normalizers reuse Cartesian JSON-stat expansion but omit the strict cardinality and nonfinite checks present in normalize(). Bool, NaN or infinity can flow to persistent numeric facts.",
-      "test_required": "Adversarial specialized-numeric and dimension cardinality tests"
+      "test_required": "Adversarial specialized-numeric and dimension cardinality tests",
+      "previous_sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "resolution_pr": 102
     },
     {
       "id": "AUD-B02-039",
       "state": "open_requires_regression",
       "severity": "medium",
       "component": "backend/app/ingestion/eurostat.py",
-      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "sha256": "e125e07c8c1417fd2be4e294113a27602a23839dfe7f751e4a342bcca57e6b9d",
       "line_range": "302-794",
       "description": "Numerous specialized Eurostat normalizers iterate full Cartesian dimensions even when source JSON-stat values are sparse; expensive broad provider responses may incur unnecessary CPU/memory. Replace after measured parity benchmark.",
-      "test_required": "Sparse million-cell canonical parity benchmark"
+      "test_required": "Sparse million-cell canonical parity benchmark",
+      "previous_sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159"
     },
     {
       "id": "AUD-B02-040",
       "state": "open_requires_regression",
       "severity": "medium",
       "component": "backend/app/ingestion/eurostat.py",
-      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "sha256": "e125e07c8c1417fd2be4e294113a27602a23839dfe7f751e4a342bcca57e6b9d",
       "line_range": "330-448",
       "description": "General Eurostat normalization labels every returned valid numeric datum as observed without dataset-specific source quality policy; provider status flags are persisted but must remain visible to rankings and forecast/revision rules.",
-      "test_required": "Source flags d/u versus numeric ranking release tests"
+      "test_required": "Source flags d/u versus numeric ranking release tests",
+      "previous_sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159"
+    },
+    {
+      "id": "AUD-B02-041",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "line_range": "360-408",
+      "description": "Database bootstrap backfill REPLACEs geography_registry records with NULL for parent_geo_id and lat/long on subsequent startup; may erase enriched geographies.",
+      "test_required": "Existing seeded geo enrichment persists across repeated initialize_analytics_schema calls"
+    },
+    {
+      "id": "AUD-B02-042",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "line_range": "286-357",
+      "description": "Historical migration infers NUTS_2024 from NUTS2/3 level without source-vintage proof, contrary to explicit unverified NUTS ranking gates.",
+      "test_required": "Legacy NUTS2 rows migrate as NUTS_UNSPECIFIED unless official per-source vintage proof"
+    },
+    {
+      "id": "AUD-B02-043",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "line_range": "2534-2569,2993-3031",
+      "description": "upsert_geographies and upsert_geography_geometries execute batch writes without explicit BEGIN/COMMIT/ROLLBACK, unlike observation writes.",
+      "test_required": "Injected failure in second row leaves no partial registry/geometry writes"
+    },
+    {
+      "id": "AUD-B02-044",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "line_range": "1210-1246",
+      "description": "Latest labour occupation outlook returns rows from multiple release_versions for same period rather than selecting one current vintage.",
+      "test_required": "Two STAS release versions with same period should yield explicit unique release selection"
+    },
+    {
+      "id": "AUD-B02-045",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "line_range": "1546-1610,1700-1889,3489-3622",
+      "description": "Regional sector/health availability queries use exact upper-case geo_level='NUTS2' although geography rows may store lowercase 'nuts2'; risk hidden stored evidence.",
+      "test_required": "Mixed-case geo_level rows must appear consistently in regional API status and bundles"
+    },
+    {
+      "id": "AUD-B02-046",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "line_range": "3267-3342,3345-3422,3489-3622",
+      "description": "When geography_system omitted subnational query partitions by indicator only; multiple systems sharing geo_code could be mixed in regional and city evidence, including unverified vintage.",
+      "test_required": "Same-code two-systems fixture retains system-separated evidence or explicit ambiguity"
+    },
+    {
+      "id": "AUD-B02-047",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/db/analytics.py",
+      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "line_range": "1892-2154",
+      "description": "Country observation and indicators choose source by priority and observed flag without source_observation_status quality acceptance (d/u); do not treat these API values as ranking-certified.",
+      "test_required": "Eurostat flagged numeric series remains blocked in ranking API despite being readable as evidence"
+    },
+    {
+      "id": "AUD-B02-048",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_fua.py",
+      "sha256": "3f877a6fa8be7b90e1f917cf5fbbf22aa473d7fc34abe624c873b142dad7bf4a",
+      "line_range": "144-175,587-753",
+      "description": "FUA code suffix city/FUA can conflict with published TERRITORIAL_LEVEL and parser currently trusts declared value; source hierarchy and geography identities not independently verified.",
+      "test_required": "Contradictory suffix/declared level fixture must reject or explicitly remain unverified"
+    },
+    {
+      "id": "AUD-B02-049",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_fua.py",
+      "sha256": "3f877a6fa8be7b90e1f917cf5fbbf22aa473d7fc34abe624c873b142dad7bf4a",
+      "line_range": "587-1485",
+      "description": "Seven FUA normalizers repeat float parsing and per-row linear country lookups; source UNIT_MULT scaling and nonfinite/negative source semantics are not independently normalized.",
+      "test_required": "Source multiplier, NaN, and large country batch benchmark"
+    },
+    {
+      "id": "AUD-B02-050",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_fua.py",
+      "sha256": "3f877a6fa8be7b90e1f917cf5fbbf22aa473d7fc34abe624c873b142dad7bf4a",
+      "line_range": "178-198,755-1485",
+      "description": "Unrestricted _coverage_fields sets expected countries equal observed countries and marks complete with any rows, not complete source coverage.",
+      "test_required": "Unknown requested universe should be marked coverage_not_certified rather than complete"
+    },
+    {
+      "id": "AUD-B02-051",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_regional.py",
+      "sha256": "f11264525dcdd4220a6a11182d4577f15202843b77e2837589e146daac048fd3",
+      "line_range": "722-784,1634-1689",
+      "description": "Regional density normalizer filters UNIT_MEASURE PS_KM2 but not explicit MEASURE; extra measure with identical unit might be misidentified as population density.",
+      "test_required": "Wrong measure density source tuple rejection"
+    },
+    {
+      "id": "AUD-B02-052",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_regional.py",
+      "sha256": "f11264525dcdd4220a6a11182d4577f15202843b77e2837589e146daac048fd3",
+      "line_range": "238-720",
+      "description": "Nine regional fetch functions duplicate retry, schema and URL boilerplate; maintenance hotspot, not itself a correctness regression.",
+      "test_required": "Shared transport refactor preserves URLs and retries by provider fixture"
+    },
+    {
+      "id": "AUD-B02-053",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_regional.py",
+      "sha256": "f11264525dcdd4220a6a11182d4577f15202843b77e2837589e146daac048fd3",
+      "line_range": "722-1689",
+      "description": "Multiple regional normalize methods coerce floats including nonfinite before write; fail-closed write-contract likely guards persistence, but source contract and diagnostics need direct fixtures.",
+      "test_required": "Provider NaN/infinity rejected for all source series before any writes"
+    },
+    {
+      "id": "AUD-B02-054",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_regional.py",
+      "sha256": "f11264525dcdd4220a6a11182d4577f15202843b77e2837589e146daac048fd3",
+      "line_range": "151-171,874-1689",
+      "description": "_coverage_fields with no explicit country allowlist equates observed/requested universe and claims complete, unlike proven source coverage.",
+      "test_required": "Unknown country scope should not claim complete source coverage"
     }
   ],
-  "denominator_inventoried_files": 346,
-  "certified_line_by_line_review_percent": 9.25
+  "denominator_inventoried_files": 347,
+  "certified_line_by_line_review_percent": 10.09
 }
