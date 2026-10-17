@@ -9,6 +9,7 @@ import math
 from datetime import datetime, timezone
 from openpyxl import load_workbook
 
+OFFICIAL_WORKBOOK_URL = "https://data.imf.org/-/media/iData/External-Storage/Documents/0FA3DC49A04D446E9D69DBEB29979E1C/en/WEOOct2026all.xlsx"
 DATASET_VERSION = "IMF.RES:WEO(9.0.0)"
 DATASET_ID = "WEO_OCTOBER_2026"
 SOURCE_ID = "IMF"
@@ -105,8 +106,7 @@ class OfficialWEOAdapter:
             self.client.close()
 
     def fetch_workbook(self) -> bytes:
-        from scripts.probe_imf_weo_workbook import URL
-        response=self.client.get(URL,headers={"User-Agent":"AUGUR-OfficialWEO/1.0"})
+        response=self.client.get(OFFICIAL_WORKBOOK_URL,headers={"User-Agent":"AUGUR-OfficialWEO/1.0"})
         response.raise_for_status()
         if not response.content.startswith(b"PK"):
             raise ValueError("Official WEO workbook did not return XLSX")
