@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 341,
-  "python_count": 303,
-  "definition_count": 1574,
-  "reviewed_file_count": 26,
-  "stale_review_file_count": 0,
-  "line_by_line_review_percent": 7.62,
+  "file_count": 342,
+  "python_count": 304,
+  "definition_count": 1579,
+  "reviewed_file_count": 24,
+  "stale_review_file_count": 2,
+  "line_by_line_review_percent": 7.02,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 119,
+    "backend/tests": 120,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -2746,9 +2746,9 @@
     {
       "path": "backend/app/ingestion/cedefop_oja_imbalance.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
-      "bytes": 6754,
-      "review_status": "verified_reviewed",
+      "sha256": "48e4625e5ede175ec7e0ec9e9cf5018dd52d1e901bd562e2ba65a1425a0dee16",
+      "bytes": 6786,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "_norm",
@@ -2848,6 +2848,7 @@
         "ValueError",
         "_dialect",
         "_norm",
+        "all",
         "append",
         "close",
         "detect_schema",
@@ -2883,6 +2884,7 @@
         "backend/scripts/ensure_local_evidence.py",
         "backend/scripts/import_cedefop_oja_imbalance.py",
         "backend/scripts/inspect_cedefop_oja_imbalance.py",
+        "backend/tests/test_b02_cefedop_eea_integrity.py",
         "backend/tests/test_cedefop_oja_imbalance.py"
       ]
     },
@@ -3530,15 +3532,15 @@
     {
       "path": "backend/app/ingestion/eea_health_burden.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
-      "bytes": 7269,
-      "review_status": "verified_reviewed",
+      "sha256": "8670f2cdf8e82b65d1197f4d4f0ecb2fbb3532ebb06926de0efb67b88675abd6",
+      "bytes": 7546,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "_sample_delimited_file",
           "kind": "function",
-          "line_start": 19,
-          "line_end": 46,
+          "line_start": 20,
+          "line_end": 47,
           "signature_arguments": [
             "archive",
             "member",
@@ -3548,8 +3550,8 @@
         {
           "symbol": "_tabular_members",
           "kind": "function",
-          "line_start": 49,
-          "line_end": 55,
+          "line_start": 50,
+          "line_end": 56,
           "signature_arguments": [
             "archive"
           ]
@@ -3557,8 +3559,8 @@
         {
           "symbol": "_primary_csv_member",
           "kind": "function",
-          "line_start": 58,
-          "line_end": 73,
+          "line_start": 59,
+          "line_end": 74,
           "signature_arguments": [
             "archive"
           ]
@@ -3566,8 +3568,8 @@
         {
           "symbol": "download_eea_pm25_burden_dataset",
           "kind": "function",
-          "line_start": 76,
-          "line_end": 91,
+          "line_start": 77,
+          "line_end": 92,
           "signature_arguments": [
             "client"
           ]
@@ -3575,8 +3577,8 @@
         {
           "symbol": "parse_eea_pm25_burden_archive",
           "kind": "function",
-          "line_start": 94,
-          "line_end": 171,
+          "line_start": 95,
+          "line_end": 177,
           "signature_arguments": [
             "payload"
           ]
@@ -3584,15 +3586,15 @@
         {
           "symbol": "fetch_eea_pm25_burden_evidence",
           "kind": "function",
-          "line_start": 174,
-          "line_end": 197,
+          "line_start": 180,
+          "line_end": 203,
           "signature_arguments": []
         },
         {
           "symbol": "inspect_eea_pm25_burden_dataset",
           "kind": "function",
-          "line_start": 200,
-          "line_end": 235,
+          "line_start": 206,
+          "line_end": 241,
           "signature_arguments": [
             "client"
           ]
@@ -3612,20 +3614,24 @@
           "line": 4
         },
         {
-          "module": "zipfile",
+          "module": "math",
           "line": 5
         },
         {
-          "module": "datetime",
+          "module": "zipfile",
           "line": 6
         },
         {
-          "module": "pathlib",
+          "module": "datetime",
           "line": 7
         },
         {
+          "module": "pathlib",
+          "line": 8
+        },
+        {
           "module": "httpx",
-          "line": 9
+          "line": 10
         }
       ],
       "called_names": [
@@ -3650,6 +3656,7 @@
         "float",
         "get",
         "int",
+        "isfinite",
         "join",
         "len",
         "lower",
@@ -3667,12 +3674,13 @@
         "strip",
         "upper"
       ],
-      "lines": 235,
+      "lines": 241,
       "resolved_local_imports": [],
       "imported_by": [
         "backend/scripts/ensure_local_evidence.py",
         "backend/scripts/inspect_eea_health_burden.py",
-        "backend/scripts/sync_eea_health_burden.py"
+        "backend/scripts/sync_eea_health_burden.py",
+        "backend/tests/test_b02_cefedop_eea_integrity.py"
       ]
     },
     {
@@ -18538,6 +18546,98 @@
       "lines": 79,
       "resolved_local_imports": [
         "backend/scripts/audit_legacy_nuts_vintage.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_b02_cefedop_eea_integrity.py",
+      "bucket": "backend/tests",
+      "sha256": "311cafe3749788598ccd7c97f7c2386a4774801662d2cd35edf5615e713ad19d",
+      "bytes": 1655,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_cefedop_missing_occupation_label_not_parser_ready",
+          "kind": "function",
+          "line_start": 9,
+          "line_end": 15,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "make_archive",
+          "kind": "function",
+          "line_start": 18,
+          "line_end": 24,
+          "signature_arguments": [
+            "value",
+            "unit"
+          ]
+        },
+        {
+          "symbol": "test_health_burden_finite_number_preserved",
+          "kind": "function",
+          "line_start": 27,
+          "line_end": 29,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_health_burden_nonfinite_source_rejected",
+          "kind": "function",
+          "line_start": 33,
+          "line_end": 35,
+          "signature_arguments": [
+            "bad"
+          ]
+        },
+        {
+          "symbol": "test_health_burden_wrong_unit_rejected",
+          "kind": "function",
+          "line_start": 38,
+          "line_end": 40,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "io",
+          "line": 2
+        },
+        {
+          "module": "zipfile",
+          "line": 3
+        },
+        {
+          "module": "pytest",
+          "line": 4
+        },
+        {
+          "module": "app.ingestion.cedefop_oja_imbalance",
+          "line": 5
+        },
+        {
+          "module": "app.ingestion.eea_health_burden",
+          "line": 6
+        }
+      ],
+      "called_names": [
+        "BytesIO",
+        "ZipFile",
+        "detect_schema",
+        "getvalue",
+        "make_archive",
+        "parametrize",
+        "parse_csv",
+        "parse_eea_pm25_burden_archive",
+        "raises",
+        "write_text",
+        "writestr"
+      ],
+      "lines": 40,
+      "resolved_local_imports": [
+        "backend/app/ingestion/cedefop_oja_imbalance.py",
+        "backend/app/ingestion/eea_health_burden.py"
       ],
       "imported_by": []
     },
