@@ -67,11 +67,13 @@ def main() -> int:
                 "rows": imf_result["rows"],
                 "complete": imf_result["complete"],
                 "failure_count": len(imf_result["failures"]),
+                "availability": "complete" if imf_result["complete"] else "unavailable" if imf_result["rows"] == 0 else "partial",
             },
             "UN_WPP": {
                 "rows": wpp_result["rows"],
                 "complete": wpp_result["complete"],
                 "countries_with_data": wpp_result["countries_with_data"],
+                "missing_country_iso3": wpp_result["missing_country_iso3"],
             },
         },
     }
