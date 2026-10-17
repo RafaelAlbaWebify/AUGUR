@@ -75,7 +75,7 @@ def stage(source_path: Path, output_path: Path, adapter: EurostatAdapter) -> dic
             payload = adapter.fetch_dataset(config["dataset_id"], filters)
             observations = adapter.normalize(country, {
                 "indicator_id": INDICATOR, "dataset_id": config["dataset_id"],
-                "unit": config["unit"], "dimension_values": filters,
+                "unit": config["unit"], "dimension_values": {k: v for k, v in filters.items() if k != "geo"},
             }, payload)
             for row in observations:
                 dims = row.get("source_dimensions") or {}
@@ -92,7 +92,9 @@ def stage(source_path: Path, output_path: Path, adapter: EurostatAdapter) -> dic
                     raise ValueError(f"Duplicate exact-cohort source observation for {geo}")
                 new[geo] = row
         if set(new) != {code for code, _ in rows}:
-            raise ValueError("Provider source missing exact-cohort observations")
+            missing = sorted({code for code, _ in rows} - set(new))
+            extra = sorted(set(new) - {code for code, _ in rows})
+            raise ValueError(f"Provider source missing exact-cohort observations: missing={missing}, unexpected={extra}")
     finally:
         conn.close()
     if fingerprint(source_path) != before or Path(str(source_path) + ".wal").exists():
