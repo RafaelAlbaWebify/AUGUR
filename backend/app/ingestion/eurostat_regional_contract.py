@@ -15,7 +15,12 @@ def validate_eurostat_regional_rows(rows: list[dict], *, allowed_indicators: set
     """Raise before writing if source, dimension, unit or geography is wrong."""
     if not allowed_indicators or not allowed_indicators <= CONTRACTS.keys():
         raise ValueError("Unknown Eurostat regional indicator allowlist")
+    seen = set()
     for row in rows:
+        key = (row.get("geo_code"), row.get("indicator_id"), row.get("period"), row.get("source_id"))
+        if key in seen:
+            raise ValueError(f"Duplicate regional observation key before upsert: {key}")
+        seen.add(key)
         indicator = row.get("indicator_id")
         if indicator not in allowed_indicators:
             raise ValueError(f"Unexpected Eurostat regional indicator: {indicator}")
