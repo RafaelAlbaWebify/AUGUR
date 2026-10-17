@@ -136,7 +136,8 @@ def test_labour_earnings_sql_column_count_and_provenance(tmp_path, monkeypatch):
     con.execute("""CREATE TABLE labour_earnings (
       country_iso3 VARCHAR, period INTEGER, isco08 VARCHAR, value DOUBLE,
       unit VARCHAR, source_id VARCHAR, dataset_id VARCHAR,
-      retrieved_at TIMESTAMP, source_updated_at VARCHAR)""")
+      retrieved_at TIMESTAMP, source_updated_at VARCHAR,
+      PRIMARY KEY(country_iso3, period, isco08, source_id))""")
     con.close()
     monkeypatch.setattr(analytics,"settings",SimpleNamespace(duckdb_path=path))
     row={"country_iso3":"ESP","period":2025,"isco08":"2","value":34000.0,
