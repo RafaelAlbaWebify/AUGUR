@@ -16,10 +16,10 @@ Canonical operational context: [augur.md](../../augur.md). The tracked machine-r
 | Repository tree catalog | 100% of 426 paths enumerated from GitHub main tree at baseline | GitHub canonical list; 339 files currently qualify for scoped code inventory |
 | Python AST symbols/dependencies | **100% inventory of 301 Python files; 1,553 definitions** | GitHub job 39032334227 and committed inventory.json |
 | JS/TS/PowerShell semantic symbol indexing | 0% | Language-specific parser required |
-| Manual per-file line-by-line code review | **2/339 files = 0.59%** (208 lines, 8 definitions) | Immutable SHA hashes and four actionable findings in findings.json |
+| Manual per-file line-by-line code review | **4/339 files = 1.18%** (596 lines, 15 definitions) | Immutable SHA hashes and four actionable findings in findings.json |
 | Module/function redesign or removal | 0% approved for this audit | Tests + source acceptance on candidate PR |
 
-In this baseline B02 has **2/35** eligible files reviewed (DB 5 + ingestion 30): **5.71% of B02**, and the overall total is **0.59%**. The other B02 files remain pending. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
+In this baseline B02 has **4/35** eligible files reviewed (DB 5 + ingestion 30): **11.43% of B02**, and the overall total is **1.18%**. The other B02 files remain pending. Do not increase the manual review percentage on the strength of historical PR CI, partial scans, or fixes without a bounded review and stable source SHA.
 
 ## Work packages
 1. **B01 — Source inventory and interdependencies:** reproducible AST graph, file hashes, invalidation rules, buckets and review matrix.
