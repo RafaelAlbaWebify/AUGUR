@@ -628,9 +628,53 @@
       "status": "reviewed_findings_open",
       "method": "full service audit and downstream model/query provenance check",
       "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/tax_wedge_contract.py",
+      "sha256": "05d708ba238c0968dd71d55ccb5894b25318c1171332f57199fe79526b3779b7",
+      "lines_reviewed": "1-38",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static reverse dependency inventory and cross-service contract examination",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/models/profile.py",
+      "sha256": "0089e30ae3fdc6a2ffd4d97d19b38d5a38b2fe3fdacb318866f02cee28af9cfc",
+      "lines_reviewed": "1-27",
+      "definitions_reviewed": 3,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static reverse dependency inventory and cross-service contract examination",
+      "imported_by_count": 17
+    },
+    {
+      "path": "backend/app/services/scenarios.py",
+      "sha256": "fce8ccfc61db902c6d4633fcf5cf62e4caa26d1b439da2a8cc5fc39a0495e1b9",
+      "lines_reviewed": "1-69",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static reverse dependency inventory and cross-service contract examination",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/engines/scenario.py",
+      "sha256": "4b8c521c37d1ed25f28f7bf783206fa991bd45fc6ab6b4bc4937727e515c9286",
+      "lines_reviewed": "1-106",
+      "definitions_reviewed": 3,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static reverse dependency inventory and cross-service contract examination",
+      "imported_by_count": 2
     }
   ],
-  "certified_line_by_line_review_count": 57,
+  "certified_line_by_line_review_count": 61,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1446,8 +1490,38 @@
       "line_range": "17-107",
       "description": "Peer positional rank computes across observed values without validating source unit, dataset identity or matched period semantics; descriptive result may suggest comparability not established.",
       "test_required": "Mixed-unit multi-provider peer observations must be marked noncomparable or blocked"
+    },
+    {
+      "id": "AUD-B03-020",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/scenarios.py",
+      "sha256": "fce8ccfc61db902c6d4633fcf5cf62e4caa26d1b439da2a8cc5fc39a0495e1b9",
+      "line_range": "14-23",
+      "description": "Explicit empty horizons list defaults to DEFAULT_HORIZONS in current main; PR115 proposes fix; unknown forecast indicator accesses catalog by direct index and can raise KeyError.",
+      "test_required": "Test explicit empty vs None and unknown indicator with API and SQL consumers."
+    },
+    {
+      "id": "AUD-B03-021",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/engines/scenario.py",
+      "sha256": "4b8c521c37d1ed25f28f7bf783206fa991bd45fc6ab6b4bc4937727e515c9286",
+      "line_range": "27-31",
+      "description": "Scenario engine accepts nonfinite floating baseline or target values and propagates NaN/Infinity in generated scenarios; caller/DB validation must not be assumed.",
+      "test_required": "Reject nonfinite scenario baseline/targets with negative fixtures and output serialization check."
+    },
+    {
+      "id": "AUD-B03-022",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/models/profile.py",
+      "sha256": "0089e30ae3fdc6a2ffd4d97d19b38d5a38b2fe3fdacb318866f02cee28af9cfc",
+      "line_range": "11-23",
+      "description": "Profile model enforces current_country length but not ISO3/normalized codes; financial fields have nonnegative bounds but no explicit finite requirement in this model. Downstream consumers must not trust invalid country identity.",
+      "test_required": "Reject or normalize invalid geography codes and nonfinite financial values at API/model boundary."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 16.24
+  "certified_line_by_line_review_percent": 17.38
 }
