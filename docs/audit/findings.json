@@ -1145,9 +1145,86 @@
       "status": "reviewed_findings_open",
       "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eea_gisco_city_mapping.py",
+      "sha256": "278aa08ecc0b2f1d9988c319b147d05d644354eeec77be4fcc7db4d4c0c524c1",
+      "lines_reviewed": "1-67",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eurostat_regional_jvs.py",
+      "sha256": "fb8fccbdca0e0f0e3a59d8ff943ac21ec71eb36f339c12b970dff27dcee63de1",
+      "lines_reviewed": "1-35",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_cedefop_stas.py",
+      "sha256": "f0e67d415cd15ce1ccc552bc28a514c329520faf62c6999e28c93e4f99b35f0c",
+      "lines_reviewed": "1-93",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/probe_imf_weo_workbook.py",
+      "sha256": "cc4e86cd2bed6434aabbe4a7c824096dfb58bb00609528880dbafd17c4079cda",
+      "lines_reviewed": "1-72",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/review_ttv_holdout.py",
+      "sha256": "4b9a789ff92ff7136340c1891bee14acc7392f205ede9d2f172f3a7c2e08708d",
+      "lines_reviewed": "1-75",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_ranking_historical_sample.py",
+      "sha256": "c3092b2040e638c975d2cf94fe9c608e2e90f862188d05a9fac69a4747f6a375",
+      "lines_reviewed": "1-93",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/prepare_eures_manifest_candidate.py",
+      "sha256": "482563d86e0e1ff1ebd9a497241b4c8156b64e1e711735131ad74c2cd37628e6",
+      "lines_reviewed": "1-101",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 104,
+  "certified_line_by_line_review_count": 111,
   "findings": [
     {
       "id": "LEAD-001",
@@ -2123,8 +2200,38 @@
       "line_range": "10-14",
       "description": "Sealing command immediately initializes and seals persistent TTV holdout without dry-run/confirmation guard; impacts future calibration observations.",
       "test_required": "Require explicit confirmation/preflight and backup/restore rehearsal; assert dry-run does not write DB."
+    },
+    {
+      "id": "AUD-B04-011",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/probe_imf_weo_workbook.py",
+      "sha256": "cc4e86cd2bed6434aabbe4a7c824096dfb58bb00609528880dbafd17c4079cda",
+      "line_range": "25-38",
+      "description": "IMF spreadsheet probe relies on fixed positional record indexing and assumes sheet header/location schema; short or changed official rows can trigger IndexError or silently misinterpret columns.",
+      "test_required": "Test workbook schema permutations and short rows, use validated header-based mapping and explicit failure state."
+    },
+    {
+      "id": "AUD-B04-012",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/review_ttv_holdout.py",
+      "sha256": "4b9a789ff92ff7136340c1891bee14acc7392f205ede9d2f172f3a7c2e08708d",
+      "line_range": "36-47",
+      "description": "Holdout-review CLI writes an immutable representativeness decision with no separate explicit confirmation/dry-run. Mis-keyed yes/no values can commit consequential model audit state.",
+      "test_required": "Explicit irreversible-write confirmation, prepare-only preview, and mocked DB nonmutation acceptance."
+    },
+    {
+      "id": "AUD-B04-013",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_ranking_historical_sample.py",
+      "sha256": "c3092b2040e638c975d2cf94fe9c608e2e90f862188d05a9fac69a4747f6a375",
+      "line_range": "34-39",
+      "description": "Provider-local row matching filters geography system, geo code, indicator and period but not geo level, source id or dataset id; multiple stored versions are classified ambiguous, but a uniquely wrong-source row may be treated as paired.",
+      "test_required": "Verify contract source/unit/dataset and source-level dimensions before paired comparison; wrong-source and wrong-level fixtures."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 29.63
+  "certified_line_by_line_review_percent": 31.62
 }
