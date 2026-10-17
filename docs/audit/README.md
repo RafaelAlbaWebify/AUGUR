@@ -59,3 +59,7 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 - Five further service modules reviewed: assessment, compare, country, eea_city_catalog, profile_readiness, with source-SHA evidence and findings AUD-B03-008 through AUD-B03-011.
 - Current audit register before refreshed changed-source hashes: **51/348 files = 14.66%**; automatic `inventory.json` remains authoritative after merges. B02 remains 35/35 reviewed.
 - B03 change package indexes coverage candidates once, preserving observed/incompatible/missing semantics; housing service now rejects nonfinite/boolean data. Acceptance requires backend, frontend and scripts CI; neither change authorizes numerical rankings.
+
+## B03 third service review batch — 2026-10-17
+- Reviewed finance, legal, language, ESCO matching, live-postings contract and peer-reference service: 57/351 source files (16.24%); 16135 source lines and 344 definitions registered at exact SHA. Source review is not production validation.
+- Important unresolved: peer observation comparability across units/vintages and ESCO substring false positives; legal/language fitting is explicitly contextual rather than official visa or employment eligibility.
