@@ -59,6 +59,15 @@ def coverage_matrix(contracts: list[EvidenceContract], observations: list[dict],
     geography system, geo code and level; data from a country is not inherited
     by a city. No assumed globally complete geographical universe.
     """
+    # Index once by the exact geography and indicator identity. Preserve
+    # the original candidate ordering and source-level compatibility checks.
+    from collections import defaultdict
+    by_identity = defaultdict(list)
+    for row in observations:
+        by_identity[(
+            row.get("geography_system"), row.get("geo_code"),
+            row.get("geo_level"), row.get("indicator_id"),
+        )].append(row)
     result = []
     for geo in geographies:
         for contract in contracts:
@@ -66,14 +75,12 @@ def coverage_matrix(contracts: list[EvidenceContract], observations: list[dict],
                 continue
             if contract.geography_system and geo.get("geography_system") != contract.geography_system:
                 continue
-            candidates = [
-                row for row in observations
-                if row.get("geo_code") == geo.get("geo_code")
-                and row.get("geo_level") == geo.get("geo_level")
-                and row.get("geography_system") == geo.get("geography_system")
-                and row.get("indicator_id") == contract.indicator_id
-            ]
-            accepted = [row for row in candidates if not validate_observation(contract, row)]
+            candidates = by_identity.get((
+                geo.get("geography_system"), geo.get("geo_code"),
+                geo.get("geo_level"), contract.indicator_id,
+            ), [])
+            checked = [(row, validate_observation(contract, row)) for row in candidates]
+            accepted = [row for row, problems in checked if not problems]
             result.append({
                 "country_iso3": geo.get("country_iso3"),
                 "geo_code": geo.get("geo_code"),
@@ -83,7 +90,7 @@ def coverage_matrix(contracts: list[EvidenceContract], observations: list[dict],
                 "status": "observed" if accepted else "incompatible" if candidates else "missing",
                 "periods": sorted({row["period"] for row in accepted}),
                 "rejected_reasons": sorted({
-                    reason for row in candidates for reason in validate_observation(contract, row)
+                    reason for _row, problems in checked for reason in problems
                 }),
             })
     return result
