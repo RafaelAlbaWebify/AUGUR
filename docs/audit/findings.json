@@ -562,9 +562,75 @@
       "status": "reviewed_findings_open",
       "method": "full service code review with referenced source/SQL consumers",
       "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/financial_fit.py",
+      "sha256": "61a89b4f0f220e185e0d37c0b213566850245ce0855d26c4d9101707e57ef7e9",
+      "lines_reviewed": "1-234",
+      "definitions_reviewed": 4,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service audit and downstream model/query provenance check",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/legal_fit.py",
+      "sha256": "646c3668df41ff7f8cd310fde0da6c1e0b513f831f894759cd95150b743373b0",
+      "lines_reviewed": "1-110",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service audit and downstream model/query provenance check",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/language_fit.py",
+      "sha256": "4e2a4a72fb7426afe5153b2d941261bbb7685f993569336539b4c79664332c67",
+      "lines_reviewed": "1-188",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service audit and downstream model/query provenance check",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/esco_match.py",
+      "sha256": "4ed7d9bc4cc361cf8db7631fced3270b348512cde4bb127e78783dcc0ffd7c34",
+      "lines_reviewed": "1-119",
+      "definitions_reviewed": 3,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service audit and downstream model/query provenance check",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/app/services/live_postings.py",
+      "sha256": "f00a64663b7c19ac0e6f7832b0f1a42fc5b4c5620e3a5a522b9359d5ab8895d7",
+      "lines_reviewed": "1-152",
+      "definitions_reviewed": 8,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service audit and downstream model/query provenance check",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/peer_reference.py",
+      "sha256": "87b2145d80fdee573db266d4f3e267bbc7b6fbf3554928d92912913b9897e2c1",
+      "lines_reviewed": "1-137",
+      "definitions_reviewed": 3,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service audit and downstream model/query provenance check",
+      "imported_by_count": 2
     }
   ],
-  "certified_line_by_line_review_count": 51,
+  "certified_line_by_line_review_count": 57,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1320,8 +1386,68 @@
       "line_range": "33-65",
       "description": "country_metadata overlays saved DB country info with catalog nonempty values even when more recent authoritative country metadata was persisted; potential stale information.",
       "test_required": "Catalog versus persisted source precedence audit"
+    },
+    {
+      "id": "AUD-B03-014",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/financial_fit.py",
+      "sha256": "61a89b4f0f220e185e0d37c0b213566850245ce0855d26c4d9101707e57ef7e9",
+      "line_range": "151-209",
+      "description": "Country portable income comparison uses price-level observations from possibly different years/sources, and before PR110 could divide by zero and propagate nonfinite; newer patch must be revalidated against source SHA.",
+      "test_required": "Country pair matched-vintage currency/unit regression"
+    },
+    {
+      "id": "AUD-B03-015",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/legal_fit.py",
+      "sha256": "646c3668df41ff7f8cd310fde0da6c1e0b513f831f894759cd95150b743373b0",
+      "line_range": "27-110",
+      "description": "Legal fit bases EU mobility on citizenship and destination EU membership, but current jurisdiction-specific right-to-work and registration requirements aren't verified per country; status remains framework only.",
+      "test_required": "Country-specific legal eligibility must stay unresolved without official jurisdiction dataset"
+    },
+    {
+      "id": "AUD-B03-016",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/language_fit.py",
+      "sha256": "4e2a4a72fb7426afe5153b2d941261bbb7685f993569336539b4c79664332c67",
+      "line_range": "110-188",
+      "description": "Country work-ready heuristic returns success when any target language B2 even if occupation needs another official/regional language; explicitly labelled heuristic but consumers must not treat as visa/job eligibility.",
+      "test_required": "Multiple official languages and occupation-specific job constraints in API"
+    },
+    {
+      "id": "AUD-B03-017",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/esco_match.py",
+      "sha256": "4ed7d9bc4cc361cf8db7631fced3270b348512cde4bb127e78783dcc0ffd7c34",
+      "line_range": "14-119",
+      "description": "Substring-based ESCO skill matching can treat unrelated shorter tokens as strong matches (e.g. Java and JavaScript), inflating essential skill coverage.",
+      "test_required": "Token-level false-positive fixture and semantic-match provenance"
+    },
+    {
+      "id": "AUD-B03-018",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/live_postings.py",
+      "sha256": "f00a64663b7c19ac0e6f7832b0f1a42fc5b4c5620e3a5a522b9359d5ab8895d7",
+      "line_range": "96-152",
+      "description": "Live postings snapshot accepts int coercions such as fractional floats, booleans and arbitrary strings as posting_count; provider origin/capability proof not enforced at snapshot validation.",
+      "test_required": "Reject boolean/fractional/count malformed provider data"
+    },
+    {
+      "id": "AUD-B03-019",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/services/peer_reference.py",
+      "sha256": "87b2145d80fdee573db266d4f3e267bbc7b6fbf3554928d92912913b9897e2c1",
+      "line_range": "17-107",
+      "description": "Peer positional rank computes across observed values without validating source unit, dataset identity or matched period semantics; descriptive result may suggest comparability not established.",
+      "test_required": "Mixed-unit multi-provider peer observations must be marked noncomparable or blocked"
     }
   ],
-  "denominator_inventoried_files": 350,
-  "certified_line_by_line_review_percent": 14.57
+  "denominator_inventoried_files": 351,
+  "certified_line_by_line_review_percent": 16.24
 }
