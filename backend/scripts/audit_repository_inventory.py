@@ -83,13 +83,54 @@ def generate() -> dict:
                 errors.append({"path": rel, "error": str(exc)})
         modules.append(info)
     if errors: raise RuntimeError("Cannot certify inventory of unparsable source files: " + json.dumps(errors))
+    by_path = {item["path"]: item for item in modules}
+    imported_by: dict[str, set[str]] = {path: set() for path in by_path}
+    reviewed = {}
+    findings_path = ROOT / "docs" / "audit" / "findings.json"
+    if findings_path.exists():
+        findings = json.loads(findings_path.read_text(encoding="utf-8"))
+        reviewed = {entry["path"]: entry["sha256"] for entry in findings.get("reviewed_files", [])}
+    for item in modules:
+        path = item["path"]
+        original = reviewed.get(path)
+        item["review_status"] = (
+            "verified_reviewed" if original == item["sha256"] else
+            "stale_review" if original is not None else "not_reviewed"
+        )
+        if not path.endswith(".py"):
+            continue
+        targets = set()
+        for declaration in item.get("imports", []):
+            module_name = declaration["module"]
+            if module_name.startswith("."):
+                # Resolve relative import by the declaring module's package.
+                dots = len(module_name) - len(module_name.lstrip("."))
+                remainder = module_name[dots:]
+                location = path.removeprefix("backend/").removesuffix(".py").split(".")
+                parts = path.removeprefix("backend/").split("/")[:-1]
+                parent = parts[:max(0, len(parts) - (dots - 1))]
+                module_name = ".".join(parent + ([remainder] if remainder else []))
+            for candidate in (
+                "backend/" + module_name.replace(".", "/") + ".py",
+                "backend/" + module_name.replace(".", "/") + "/__init__.py",
+            ):
+                if candidate in by_path and candidate != path:
+                    targets.add(candidate)
+        item["resolved_local_imports"] = sorted(targets)
+        for target in targets:
+            imported_by[target].add(path)
+    for item in modules:
+        item["imported_by"] = sorted(imported_by[item["path"]])
     counts = Counter(item["bucket"] for item in modules)
-    return {"schema_version": 1, "scope": list(TOP), "generated_from": "current_worktree",
-            "method": "static AST inventory for Python; hash/path/size for other languages",
+    valid_review_count = sum(item["review_status"] == "verified_reviewed" for item in modules)
+    stale_review_count = sum(item["review_status"] == "stale_review" for item in modules)
+    return {"schema_version": 2, "scope": list(TOP), "generated_from": "current_worktree",
+            "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
             "file_count": len(modules), "python_count": sum(m["path"].endswith(".py") for m in modules),
             "definition_count": sum(len(m.get("definitions", [])) for m in modules),
-            "reviewed_file_count": 0,
-            "line_by_line_review_percent": 0,
+            "reviewed_file_count": valid_review_count,
+            "stale_review_file_count": stale_review_count,
+            "line_by_line_review_percent": round(100 * valid_review_count / len(modules), 2) if modules else 0,
             "bucket_counts": dict(sorted(counts.items())), "files": modules}
 
 def main() -> None:
