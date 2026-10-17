@@ -1,8 +1,25 @@
 {
   "schema_version": 1,
   "baseline_date": "2026-10-17",
-  "reviewed_files": [],
-  "certified_line_by_line_review_count": 0,
+  "reviewed_files": [
+    {
+      "path": "backend/app/db/write_contract.py",
+      "sha256": "bcb13044426625235f1084736447066f4f5e09d15f0b40effc04a9dc5a2ab52e",
+      "lines_reviewed": "1-68",
+      "definitions_reviewed": 2,
+      "batch": "B02",
+      "status": "reviewed_findings_open"
+    },
+    {
+      "path": "backend/app/ingestion/imf_weo_official.py",
+      "sha256": "87b97cf954040ff8f6f9ec1bb1299f6b3499470da5f06f8cb15df8151aef4f24",
+      "lines_reviewed": "1-140",
+      "definitions_reviewed": 6,
+      "batch": "B02",
+      "status": "reviewed_findings_open"
+    }
+  ],
+  "certified_line_by_line_review_count": 2,
   "findings": [
     {
       "id": "LEAD-001",
@@ -36,6 +53,48 @@
       "component": "backend/scripts/sync_global_baseline.py",
       "description": "Global baseline accepts partial provider coverage whenever any countries analyzable; flag semantics and release policy must be audited to avoid interpreting workflow success as full-source certification.",
       "evidence": "https://github.com/RafaelAlbaWebify/AUGUR/actions/runs/39031300201"
+    },
+    {
+      "id": "AUD-B02-001",
+      "state": "open",
+      "severity": "low",
+      "component": "backend/app/db/write_contract.py",
+      "sha256": "bcb13044426625235f1084736447066f4f5e09d15f0b40effc04a9dc5a2ab52e",
+      "line_range": "12-12",
+      "description": "Unused local variable keys is assigned but never referenced; dead code and maintainability. Remove after verifying no instrumentation depends on it.",
+      "test_required": "test_observation_write_contract.py"
+    },
+    {
+      "id": "AUD-B02-002",
+      "state": "open",
+      "severity": "medium",
+      "component": "backend/app/db/write_contract.py",
+      "sha256": "bcb13044426625235f1084736447066f4f5e09d15f0b40effc04a9dc5a2ab52e",
+      "line_range": "25-35",
+      "description": "Validation checks regional geo_code via strip but constructs the persistence identity with code.upper() (not strip()); likewise country_iso3 validated len and alpha but normalized identity assumes upper-case. Confirm actual SQL identity normalization matches the validation key and reject whitespace rather than merging silently.",
+      "test_required": "negative whitespace and geography case collision fixtures"
+    },
+    {
+      "id": "AUD-B02-003",
+      "state": "open",
+      "severity": "medium",
+      "component": "backend/app/ingestion/imf_weo_official.py",
+      "sha256": "87b97cf954040ff8f6f9ec1bb1299f6b3499470da5f06f8cb15df8151aef4f24",
+      "line_range": "52-59",
+      "description": "Country-series rows missing last-actual-year are skipped, but the metadata count doesn't retain their exact country/indicator pairs; source audit cannot tell which values were excluded without re-fetching the full workbook.",
+      "test_required": "missing-actual metadata identities and report fixture"
+    },
+    {
+      "id": "AUD-B02-004",
+      "state": "open",
+      "severity": "medium",
+      "component": "backend/app/ingestion/imf_weo_official.py",
+      "sha256": "87b97cf954040ff8f6f9ec1bb1299f6b3499470da5f06f8cb15df8151aef4f24",
+      "line_range": "114-139",
+      "description": "sync_countries always returns complete=False and failure_count=1 from the one blocked LUR metric regardless of source coverage, meaning completeness reporting conflates blocked metric scope with missing accepted metric coverage. Report separate blocked metrics and missing requested countries.",
+      "test_required": "partial source coverage and missing country fixtures"
     }
-  ]
+  ],
+  "denominator_inventoried_files": 339,
+  "certified_line_by_line_review_percent": 0.59
 }
