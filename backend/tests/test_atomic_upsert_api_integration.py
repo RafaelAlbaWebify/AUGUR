@@ -102,3 +102,29 @@ def test_invalid_later_batch_row_changes_nothing(tmp_path,monkeypatch):
         assert con.execute("SELECT COUNT(*) FROM subnational_observations").fetchone()[0]==0
     finally:
         con.close()
+
+
+def test_national_upsert_rolls_back_all_rows_on_sql_failure(tmp_path, monkeypatch):
+    path=tmp_path/"national.duckdb"
+    con=duckdb.connect(str(path))
+    con.execute("""CREATE TABLE observations (
+      country_iso3 VARCHAR, indicator_id VARCHAR, period INTEGER,
+      value DOUBLE CHECK(value < 50), unit VARCHAR, source_id VARCHAR,
+      dataset_id VARCHAR, observation_type VARCHAR, retrieved_at TIMESTAMP,
+      source_updated_at VARCHAR, source_observation_status VARCHAR,
+      source_decimal INTEGER,
+      PRIMARY KEY(country_iso3,indicator_id,period,source_id))""")
+    con.close()
+    monkeypatch.setattr(analytics,"settings",SimpleNamespace(duckdb_path=path))
+    now=datetime.now(timezone.utc)
+    base={"country_iso3":"ESP", "indicator_id":"test_rate", "period":2025,
+          "value":8.0, "unit":"percent", "source_id":"EUROSTAT",
+          "dataset_id":"test_dataset", "observation_type":"observed",
+          "retrieved_at":now}
+    with pytest.raises(Exception):
+        analytics.upsert_observations([base,dict(base,country_iso3="PRT",value=70.0)])
+    con=duckdb.connect(str(path),read_only=True)
+    try:
+        assert con.execute("SELECT COUNT(*) FROM observations").fetchone()[0]==0
+    finally:
+        con.close()
