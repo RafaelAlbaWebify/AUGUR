@@ -321,9 +321,20 @@
       "status": "reviewed_findings_open",
       "imported_by_count": 4,
       "method": "full code and consumer inspection"
+    },
+    {
+      "path": "backend/app/ingestion/world_bank.py",
+      "sha256": "ace9f2295522a8bdc2a8816064da001abb9da3e3e189871b58e59c56220c8479",
+      "lines_reviewed": "1-518",
+      "definitions_reviewed": 14,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source and tests review including PR97/99 paging and coverage changes",
+      "imported_by_count": 12
     }
   ],
-  "certified_line_by_line_review_count": 30,
+  "certified_line_by_line_review_count": 31,
   "findings": [
     {
       "id": "LEAD-001",
@@ -717,8 +728,38 @@
       "line_range": "120-245",
       "description": "STAS raw XLSX parser uses ZipFile and reads XML tree into memory for entire worksheets. Benchmark on official release and establish archive decompression/row limits before accepting untrusted uploads.",
       "test_required": "Large sparse worksheet and oversized archive negative tests"
+    },
+    {
+      "id": "AUD-B02-034",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/world_bank.py",
+      "sha256": "ace9f2295522a8bdc2a8816064da001abb9da3e3e189871b58e59c56220c8479",
+      "line_range": "20-89",
+      "description": "World Bank country catalog assumes a single response per_page 400, without checking provider pagination metadata; future country count increase or rate-limited partial page can suppress countries.",
+      "test_required": "Country catalog multi-page/truncated response fixture"
+    },
+    {
+      "id": "AUD-B02-035",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/world_bank.py",
+      "sha256": "ace9f2295522a8bdc2a8816064da001abb9da3e3e189871b58e59c56220c8479",
+      "line_range": "448-491",
+      "description": "World Bank single-country normalize labels observations using caller country and indicator without validating provider-returned country code and source indicator for each record; cross-country row leakage is possible if response is wrong.",
+      "test_required": "Provider mismatched country and indicator negative fixture"
+    },
+    {
+      "id": "AUD-B02-036",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/app/ingestion/world_bank.py",
+      "sha256": "ace9f2295522a8bdc2a8816064da001abb9da3e3e189871b58e59c56220c8479",
+      "line_range": "14-22",
+      "description": "Country metadata _optional_float() permits nonfinite coordinates, potentially confusing frontend/map consumers.",
+      "test_required": "NaN country coordinates and out-of-range latitude fixture"
     }
   ],
-  "denominator_inventoried_files": 344,
-  "certified_line_by_line_review_percent": 8.72
+  "denominator_inventoried_files": 345,
+  "certified_line_by_line_review_percent": 8.99
 }
