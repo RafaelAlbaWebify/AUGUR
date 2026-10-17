@@ -63,3 +63,8 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 ## B03 third service review batch — 2026-10-17
 - Reviewed finance, legal, language, ESCO matching, live-postings contract and peer-reference service: 57/351 source files (16.24%); 16135 source lines and 344 definitions registered at exact SHA. Source review is not production validation.
 - Important unresolved: peer observation comparability across units/vintages and ESCO substring false positives; legal/language fitting is explicitly contextual rather than official visa or employment eligibility.
+
+## B03 Fit services checkpoint — 2026-10-17
+- New SHA-backed review of legal_fit.py, language_fit.py and post-PR110 financial_fit.py. Findings AUD-B03-012 through -015 preserve open consumer, provider-value and cross-vintage comparability risks.
+- Audit ledger **57/351 reviewed (16.24%)** at the current branch snapshot; the GitHub-generated inventory remains the canonical SHA-fresh coverage after each merge. B02 remains completed 35/35.
+- PR #110 guards zero/nonfinite income and price indices; the additional observed-income benchmark and legal/language presentation issues remain separate acceptance gates.
