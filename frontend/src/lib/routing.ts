@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 
 export type CountryView = 'overview' | 'outlook' | 'profile' | 'indicators' | 'skills'
-export type AugurView = CountryView | 'dimension' | 'compare'
+export type AugurView = CountryView | 'dimension' | 'compare' | 'rankings'
 
 export type AugurRoute =
   | {
@@ -14,6 +14,10 @@ export type AugurRoute =
       view: 'dimension'
       countryIso3: string
       dimension: string
+    }
+  | {
+      kind: 'rankings'
+      view: 'rankings'
     }
   | {
       kind: 'compare'
@@ -59,6 +63,8 @@ export function parseAugurRoute(location: Location = window.location): AugurRout
     }
   }
 
+  if (path === '/rankings') return { kind: 'rankings', view: 'rankings' }
+
   if (path === '/compare') {
     const params = new URLSearchParams(location.search)
     const countries = (params.get('countries') ?? '')
@@ -83,6 +89,7 @@ export function parseAugurRoute(location: Location = window.location): AugurRout
 }
 
 export function routeHref(route: AugurRoute) {
+  if (route.kind === 'rankings') return '/rankings'
   if (route.kind === 'compare') {
     return `/compare?countries=${route.countries.join(',')}`
   }
@@ -115,6 +122,10 @@ export function dimensionRoute(
     view: 'dimension',
     dimension,
   }
+}
+
+export function rankingsRoute(): AugurRoute {
+  return { kind: 'rankings', view: 'rankings' }
 }
 
 export function compareRoute(countries: string[]): AugurRoute {
