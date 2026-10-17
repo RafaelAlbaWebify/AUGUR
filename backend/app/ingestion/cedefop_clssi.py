@@ -173,6 +173,8 @@ def download_workbook(
                 "CLSSI download did not return an XLSX payload: "
                 + (content_type or "unknown content type")
             )
+        if not response.content.startswith(b"PK\x03\x04"):
+            raise ValueError("CLSSI XLSX download has invalid ZIP signature")
         target_path.parent.mkdir(parents=True, exist_ok=True)
         target_path.write_bytes(response.content)
         return {
@@ -382,7 +384,7 @@ def parse_workbook(
 ) -> list[dict]:
     sheets = workbook_preview(
         path,
-        max_rows=500,
+        max_rows=100000,
     )
     retrieved = retrieved_at or datetime.now(timezone.utc)
     rows: list[dict] = []
@@ -394,6 +396,8 @@ def parse_workbook(
         if country_iso3 is None:
             continue
 
+        if len(sheet["rows"]) >= 100000:
+            raise ValueError("CLSSI country sheet may be truncated at 100000 rows")
         schema = detect_sheet_schema(
             sheet["rows"],
             sheet_name=sheet_name,

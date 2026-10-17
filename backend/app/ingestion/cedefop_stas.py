@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import html
+import math
 import re
 from datetime import datetime, timezone
 from pathlib import Path
@@ -143,6 +144,8 @@ def download_workbook(
             f"STAS download did not return an XLSX payload: {content_type or 'unknown content type'}"
         )
 
+    if not response.content.startswith(b"PK\x03\x04"):
+        raise ValueError("STAS XLSX download has invalid ZIP signature")
     target_path.parent.mkdir(parents=True, exist_ok=True)
     target_path.write_bytes(response.content)
 
@@ -465,6 +468,8 @@ def parse_stas_workbook(
             except (TypeError, ValueError):
                 continue
 
+            if numeric_isco < 0 or float(raw_isco) != numeric_isco or len(str(numeric_isco)) > isco_level:
+                raise ValueError(f"Invalid STAS ISCO code: {raw_isco!r}")
             isco08 = str(numeric_isco).zfill(isco_level)
 
             iso2 = None
@@ -507,6 +512,8 @@ def parse_stas_workbook(
                     isco_level,
                     scenario,
                 )
+                if not math.isfinite(value):
+                    raise ValueError(f"Invalid STAS source value for {key}")
                 target = combined.setdefault(
                     key,
                     {
@@ -526,10 +533,15 @@ def parse_stas_workbook(
                     },
                 )
 
-                if metric_kind == "employment_level_thousands":
-                    target["employment_level_thousands"] = value
-                elif metric_kind == "growth_pct":
-                    target["employment_growth_pct"] = value * 100.0
+                field = ("employment_level_thousands" if metric_kind == "employment_level_thousands"
+                         else "employment_growth_pct" if metric_kind == "growth_pct" else None)
+                if field is None:
+                    raise ValueError(f"Unknown STAS metric for {sheet_name}")
+                transformed = value * 100.0 if field == "employment_growth_pct" else value
+                previous = target[field]
+                if previous is not None and previous != transformed:
+                    raise ValueError(f"Conflicting STAS duplicate {key} {field}: {previous} vs {transformed}")
+                target[field] = transformed
 
     return sorted(
         combined.values(),
