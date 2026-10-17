@@ -175,17 +175,107 @@
     },
     {
       "path": "backend/app/ingestion/oecd.py",
-      "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "sha256": "2eedff61ea6fa5ea76c01ddf9595fe82ef582ea6c66a0bb112feec9811cae746",
       "lines_reviewed": "1-127",
       "definitions_reviewed": 6,
       "batch": "B02",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "imported_by_count": 3,
-      "method": "full source inspection and static importer cross-check"
+      "method": "full source inspection and static importer cross-check",
+      "previous_sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "revalidated_after_pr": 93
+    },
+    {
+      "path": "backend/app/ingestion/cedefop_oja_imbalance.py",
+      "sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
+      "lines_reviewed": "1-231",
+      "definitions_reviewed": 7,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 4,
+      "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/ingestion/eea_air_quality_api.py",
+      "sha256": "9ac098c84819f321fc31feb97db7ca20130bb4a1ed2e53cf4c1bb3f437f055c1",
+      "lines_reviewed": "1-216",
+      "definitions_reviewed": 4,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 6,
+      "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/ingestion/eea_city_air.py",
+      "sha256": "bb940ac3a7a4121f246dc861ce6d3833ea9f01c826f6ed6fbb3903cf67de4dfd",
+      "lines_reviewed": "1-235",
+      "definitions_reviewed": 5,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 3,
+      "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/ingestion/eea_health_burden.py",
+      "sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
+      "lines_reviewed": "1-235",
+      "definitions_reviewed": 7,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 3,
+      "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/ingestion/eures_annex_pdf.py",
+      "sha256": "1119ec114652ca63cfe70d47325f5b0554ccd3e21f9ae2cb1258b30d6438e4a2",
+      "lines_reviewed": "1-207",
+      "definitions_reviewed": 6,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 2,
+      "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/ingestion/imf.py",
+      "sha256": "ce282fabf79561ae49d22e6e4c24ed882da76173a120c1bd01143c9bae35bdfa",
+      "lines_reviewed": "1-327",
+      "definitions_reviewed": 7,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 6,
+      "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/ingestion/oecd_fua_geometry.py",
+      "sha256": "e363d9519ddcef4ac3e3010e62f5211fc9832edaae6f8977d1130a1d12d692d9",
+      "lines_reviewed": "1-363",
+      "definitions_reviewed": 7,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 1,
+      "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/ingestion/un_wpp.py",
+      "sha256": "1328ed5cdf5fb53266d63b8e9df1e52a7d17b104e293b8666258fcd7142a02e2",
+      "lines_reviewed": "1-307",
+      "definitions_reviewed": 8,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 6,
+      "method": "full module inspection and dependency evidence"
     }
   ],
-  "certified_line_by_line_review_count": 18,
+  "certified_line_by_line_review_count": 26,
   "findings": [
     {
       "id": "LEAD-001",
@@ -380,14 +470,17 @@
     },
     {
       "id": "AUD-B02-016",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_93",
       "severity": "high",
       "component": "backend/app/ingestion/oecd.py",
-      "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "sha256": "2eedff61ea6fa5ea76c01ddf9595fe82ef582ea6c66a0bb112feec9811cae746",
       "line_range": "65-108",
       "description": "GDP/hour adapter normalizes CSV by TIME_PERIOD and OBS_VALUE alone; does not check REF_AREA, FREQ, MEASURE, ACTIVITY, UNIT_MEASURE, PRICE_BASE or TRANSFORMATION, despite labeling every value as GDPHRS USD PPP/hour.",
       "test_required": "Wrong OECD country/measure/unit fixture should fail before upsert",
-      "imported_by_count": 3
+      "imported_by_count": 3,
+      "previous_sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "resolution_pr": 93,
+      "followup": "Official OECD live-source smoke remains required to accept observed transport values across supported countries."
     },
     {
       "id": "AUD-B02-017",
@@ -454,8 +547,96 @@
       "description": "Shared regional normalizer iterates full JSON-stat Cartesian dimension product even when values are sparse and filters are exact, potentially high CPU/memory on broad provider datasets; benchmark before optimization.",
       "test_required": "Sparse provider payload 1M Cartesian bins performance and output parity",
       "imported_by_count": 10
+    },
+    {
+      "id": "AUD-B02-023",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/imf.py",
+      "sha256": "ce282fabf79561ae49d22e6e4c24ed882da76173a120c1bd01143c9bae35bdfa",
+      "line_range": "9-19,122-178",
+      "description": "Legacy IMF DataMapper adapter remains with April 2026 dataset and one fixed forecast cutoff applied to every country/series, unlike accepted October WEO parser. Determine remaining consumers and mark legacy path explicitly unsafe for source-current global release.",
+      "test_required": "Legacy call path regression and deprecation transition",
+      "imported_by_count": 6
+    },
+    {
+      "id": "AUD-B02-024",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/un_wpp.py",
+      "sha256": "1328ed5cdf5fb53266d63b8e9df1e52a7d17b104e293b8666258fcd7142a02e2",
+      "line_range": "92-220",
+      "description": "Single-country and bulk-country WPP normalizers duplicate large projection/value parsing blocks, with maintenance drift risk; projection starts from global 2024 boundary which requires explicit edition-specific documentation.",
+      "test_required": "Prove row/metadata equality for single and bulk paths plus forecast vintage",
+      "imported_by_count": 6
+    },
+    {
+      "id": "AUD-B02-025",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eures_annex_pdf.py",
+      "sha256": "1119ec114652ca63cfe70d47325f5b0554ccd3e21f9ae2cb1258b30d6438e4a2",
+      "line_range": "175-204",
+      "description": "Annex download considers PDF content-type alone sufficient even when bytes lack PDF magic, and writes unvalidated bytes directly to target rather than staging and atomic replacement.",
+      "test_required": "Wrong-content-type body and existing-target preservation tests",
+      "imported_by_count": 2
+    },
+    {
+      "id": "AUD-B02-026",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eea_air_quality_api.py",
+      "sha256": "9ac098c84819f321fc31feb97db7ca20130bb4a1ed2e53cf4c1bb3f437f055c1",
+      "line_range": "63-150",
+      "description": "API inspector's ready_for_endpoint_design checks HTTP success and interesting Swagger routes but not whether summary payload contains valid PM2.5 data; avoid interpreting endpoint availability as statistical coverage.",
+      "test_required": "Empty/partial EEA summary should not certify data coverage",
+      "imported_by_count": 6
+    },
+    {
+      "id": "AUD-B02-027",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/eea_city_air.py",
+      "sha256": "bb940ac3a7a4121f246dc861ce6d3833ea9f01c826f6ed6fbb3903cf67de4dfd",
+      "line_range": "24-214",
+      "description": "Raw provider Parquet URL list accepts arbitrary http hosts and downloads all unbounded files; station coverage rule counts measurement records without proving unique valid hourly/day timestamps. Risk source authenticity, resource exhaustion and coverage inflation.",
+      "test_required": "Trusted EEA URLs, timestamp uniqueness, non-finite data and resource-limit tests",
+      "imported_by_count": 3
+    },
+    {
+      "id": "AUD-B02-028",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/eea_health_burden.py",
+      "sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
+      "line_range": "106-186",
+      "description": "EEA health burden parser permits float('nan')/infinite source values and arbitrary source unit strings while reporting a normalized burden row; missing finite and metric/unit validation.",
+      "test_required": "Malformed CSV numeric and noncomparable unit regression",
+      "imported_by_count": 3
+    },
+    {
+      "id": "AUD-B02-029",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/cedefop_oja_imbalance.py",
+      "sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
+      "line_range": "108-164,180-231",
+      "description": "detect_schema reports ready when occupation_code and score exist, but parse_csv unconditionally accesses matches['occupation_label']; a schema declared ready can raise KeyError.",
+      "test_required": "Missing occupation label must be rejected in schema readiness tests",
+      "imported_by_count": 4
+    },
+    {
+      "id": "AUD-B02-030",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/oecd_fua_geometry.py",
+      "sha256": "e363d9519ddcef4ac3e3010e62f5211fc9832edaae6f8977d1130a1d12d692d9",
+      "line_range": "50-136",
+      "description": "Shapefile geometry source identifies code by scanning all arbitrary string fields and first registry match; ambiguous multiple official-looking codes and repeated shapes require explicit dimension identity and duplicate policy.",
+      "test_required": "Ambiguous code-property and duplicate-shape negative fixtures",
+      "imported_by_count": 1
     }
   ],
   "denominator_inventoried_files": 340,
-  "certified_line_by_line_review_percent": 5.29
+  "certified_line_by_line_review_percent": 7.65
 }
