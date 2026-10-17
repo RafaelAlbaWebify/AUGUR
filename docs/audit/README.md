@@ -4,7 +4,7 @@ Canonical operational context: [augur.md](../../augur.md). The tracked machine-r
 
 ## Inventory scope and rules
 - Full tracked GitHub repository at audit start: **426 files**, including 13 GitHub workflow YAMLs, 101 backend scripts, 117 backend tests, 35 frontend files, 30 ingestors, 33 service files, and five DB files (directory counts, not all source-code files).
-- Snapshot scans Python source via AST without executing imports; records function/class names, signatures, exact first/last lines, import references, called function names, byte size and SHA-256 per file. JavaScript/TypeScript, JSX, PowerShell and workflows receive path/hash metadata but need language-specific parsers for precise symbol/call inventories.
+- **Actual reproducible snapshot:** 339 eligible source files, 301 Python source files and 1,553 class/function definitions; 14 workflow files and 102 scripts included in the working audit branch. Snapshot scans Python source via AST without executing imports; records function/class names, signatures, exact first/last lines, import references, called function names, byte size and SHA-256 per file. JavaScript/TypeScript, JSX, PowerShell and workflows receive path/hash metadata but need language-specific parsers for precise symbol/call inventories.
 - Dependencies = static declared imports and unqualified called-name candidates; no guarantee of resolving reflection, dynamic imports, runtime invocation, TS module graph, SQL references or API consumers.
 - **Source coverage %** = inventoried eligible source paths / all eligible source paths; **review coverage %** = human/assistant code-reviewed line-by-line source paths / all eligible source paths. These are different metrics. Coverage for the current static AST inventory cannot by itself be reported as line-by-line review.
 - Every reviewed file must have its exact blob SHA-256, line range(s), call/dependency context, acceptance tests, finding severity, and review date in `findings.json`. If its SHA changes, prior review is stale and must be reverified before counting.
@@ -13,8 +13,8 @@ Canonical operational context: [augur.md](../../augur.md). The tracked machine-r
 
 | Track | Completion | Gate |
 | --- | ---: | --- |
-| Repository tree catalog | 100% of 426 paths enumerated from GitHub tree at baseline | GitHub canonical list |
-| Python AST symbols/dependencies | 0% verified until workflow commits and checks the generated JSON | Same-branch CI artifact and committed inventory |
+| Repository tree catalog | 100% of 426 paths enumerated from GitHub main tree at baseline | GitHub canonical list; 339 files currently qualify for scoped code inventory |
+| Python AST symbols/dependencies | **100% inventory of 301 Python files; 1,553 definitions** | GitHub job 39032334227 and committed inventory.json |
 | JS/TS/PowerShell semantic symbol indexing | 0% | Language-specific parser required |
 | Manual per-file line-by-line code review | **0% certified** | Blob-linked findings and evidence |
 | Module/function redesign or removal | 0% approved for this audit | Tests + source acceptance on candidate PR |
