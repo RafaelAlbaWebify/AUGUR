@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import math
 from datetime import datetime, timezone
 from itertools import product
 
@@ -389,12 +390,18 @@ class EurostatAdapter:
         dimension_sizes = payload["size"]
         dimensions = payload["dimension"]
         raw_values = payload["value"]
+        if len(dimension_ids) != len(dimension_sizes) or len(set(dimension_ids)) != len(dimension_ids):
+            raise ValueError("Invalid Eurostat dimension layout")
+        if any(not isinstance(size, int) or isinstance(size, bool) or size <= 0 for size in dimension_sizes):
+            raise ValueError("Invalid Eurostat dimension sizes")
 
         dimension_codes = [
             self._ordered_codes(dimensions[dimension_id])
             for dimension_id in dimension_ids
         ]
 
+        if any(len(codes) != size for codes, size in zip(dimension_codes, dimension_sizes)):
+            raise ValueError("Eurostat dimension indexes do not match declared sizes")
         retrieved_at = datetime.now(timezone.utc)
         rows: list[dict] = []
 
@@ -424,6 +431,8 @@ class EurostatAdapter:
 
             if value is None:
                 continue
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ValueError(f"Invalid Eurostat observation value at index {flat_index}")
 
             labels = {
                 dimension_id: dimension_codes[index][coordinates[index]]
