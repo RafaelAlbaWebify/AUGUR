@@ -668,9 +668,19 @@
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "method": "complete source read and dependency context"
+    },
+    {
+      "path": "backend/app/services/operability.py",
+      "sha256": "23d37467b9ae79480f6c9c031acaaa76a96ba8196fef5aacc274f594e50107e3",
+      "lines_reviewed": "1-306",
+      "definitions_reviewed": 4,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection and country/provider release gate cross-check"
     }
   ],
-  "certified_line_by_line_review_count": 61,
+  "certified_line_by_line_review_count": 62,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1526,8 +1536,18 @@
       "line_range": "14-177",
       "description": "TEMPORAL_MODEL_VERSION None deliberately blocks numeric time estimates; do not mistake candidate time range for accepted forecasts.",
       "test_required": "Negative release-gate test retained."
+    },
+    {
+      "id": "AUD-B03-024",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/services/operability.py",
+      "sha256": "23d37467b9ae79480f6c9c031acaaa76a96ba8196fef5aacc274f594e50107e3",
+      "line_range": "97-149",
+      "description": "Provider coverage completeness is defined as expected source IDs being present and retrieved recently; a partial accepted provider with missing requested indicators can still look complete. Country analysis readiness must distinguish provider transport presence from per-indicator source completeness and methodological coverage.",
+      "test_required": "Provider with partially covered data must not count complete; global coverage report cross-check."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 17.38
+  "certified_line_by_line_review_percent": 17.66
 }
