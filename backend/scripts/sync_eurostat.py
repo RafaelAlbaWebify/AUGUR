@@ -9,6 +9,10 @@ from app.ingestion.eurostat_regional_labour import fetch_regional_labour
 from app.ingestion.eurostat_regional_sector import fetch_regional_sector_employment
 from app.ingestion.eurostat_regional_housing import fetch_regional_housing_evidence
 from app.ingestion.eurostat_regional_health import fetch_regional_health_evidence
+from app.ingestion.eurostat_regional_contract import validate_eurostat_regional_rows
+from app.ingestion.eurostat_regional_labour import REGIONAL_LABOUR_SERIES
+from app.ingestion.eurostat_regional_housing import REGIONAL_HOUSING_SERIES
+from app.db.write_contract import validate_write_batch
 from app.db.analytics import (
     upsert_subnational_observations,
     upsert_regional_sector_employment,
@@ -63,10 +67,22 @@ def main() -> int:
             health_rows, health_diagnostics = fetch_regional_health_evidence(adapter)
             sector_rows, sector_diagnostic = fetch_regional_sector_employment(adapter)
 
+            # Validate the complete shared observation batch before any regional write.
+            validate_eurostat_regional_rows(
+                regional_rows,
+                allowed_indicators={cfg["indicator_id"] for cfg in REGIONAL_LABOUR_SERIES},
+            )
+            validate_eurostat_regional_rows(
+                housing_rows,
+                allowed_indicators={cfg["indicator_id"] for cfg in REGIONAL_HOUSING_SERIES},
+            )
+            shared_rows = [*regional_rows, *housing_rows, *health_rows]
+            validate_write_batch(shared_rows, subnational=True)
+            upsert_subnational_observations(shared_rows)
             regional_summary = {
-                "labour_rows": upsert_subnational_observations(regional_rows),
-                "housing_rows": upsert_subnational_observations(housing_rows),
-                "health_rows": upsert_subnational_observations(health_rows),
+                "labour_rows": len(regional_rows),
+                "housing_rows": len(housing_rows),
+                "health_rows": len(health_rows),
                 "sector_rows": upsert_regional_sector_employment(sector_rows),
                 "labour_diagnostics": regional_diagnostics,
                 "housing_diagnostics": housing_diagnostics,
