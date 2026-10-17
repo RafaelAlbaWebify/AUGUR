@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from itertools import product
+import math
 
 from app.ingestion.eurostat import EurostatAdapter
 
@@ -26,10 +27,17 @@ def normalize_regional_sector_employment(
     dimensions = payload["dimension"]
     raw_values = payload["value"]
 
+    if len(dimension_ids) != len(dimension_sizes) or len(set(dimension_ids)) != len(dimension_ids):
+        raise ValueError("Invalid sector JSON-stat dimension layout")
+    if any(type(size) is not int or size <= 0 for size in dimension_sizes):
+        raise ValueError("Invalid sector JSON-stat dimension size")
+
     dimension_codes = [
         adapter._ordered_codes(dimensions[dimension_id])
         for dimension_id in dimension_ids
     ]
+    if any(len(codes) != size for codes, size in zip(dimension_codes, dimension_sizes)):
+        raise ValueError("Sector JSON-stat category cardinality mismatch")
     geo_labels = adapter._category_labels(dimensions.get("geo", {}))
     nace_labels = adapter._category_labels(dimensions.get("nace_r2", {}))
     retrieved_at = datetime.now(timezone.utc)
@@ -58,11 +66,16 @@ def normalize_regional_sector_employment(
 
         if value is None:
             continue
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+            raise ValueError(f"Invalid sector observation at flat index {flat_index}")
 
         labels = {
             dimension_id: dimension_codes[index][coordinates[index]]
             for index, dimension_id in enumerate(dimension_ids)
         }
+        required = {"freq": "A", "unit": "THS_PER", "age": "Y15-64", "sex": "T"}
+        if any(key in labels and labels[key] != expected for key, expected in required.items()):
+            continue
         geo_code = str(labels.get("geo") or "")
         period = str(labels.get("time") or "")
         nace_code = str(labels.get("nace_r2") or "")

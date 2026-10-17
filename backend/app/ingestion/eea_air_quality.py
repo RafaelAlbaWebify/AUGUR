@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import Counter
+import math
 import httpx
 
 
@@ -52,6 +53,7 @@ def inspect_eea_pm25(
 
     features = payload.get("features") or []
     records = [feature.get("attributes", {}) for feature in features]
+    potentially_truncated = payload.get("exceededTransferLimit") is True or len(features) >= params["resultRecordCount"]
 
     years = sorted(
         {
@@ -78,11 +80,15 @@ def inspect_eea_pm25(
         if row.get("station_longitude_deg") is not None
         and row.get("station_latitude_deg") is not None
     )
-    values = [
-        float(row["statistic_value"])
-        for row in latest
-        if row.get("statistic_value") is not None
-    ]
+    values = []
+    for row in latest:
+        value = row.get("statistic_value")
+        if value is None:
+            continue
+        numeric = float(value)
+        if not math.isfinite(numeric):
+            raise ValueError("EEA station statistic must be finite")
+        values.append(numeric)
 
     return {
         "status": "available" if latest else "empty",
@@ -99,6 +105,7 @@ def inspect_eea_pm25(
         "latest_year": latest_year,
         "available_years_sample": years[:10],
         "latest_record_count": len(latest),
+        "potentially_truncated": potentially_truncated,
         "latest_records_by_country": dict(sorted(countries.items())),
         "latest_valid_coordinate_count": valid_coordinates,
         "latest_value_min": min(values) if values else None,
@@ -106,6 +113,7 @@ def inspect_eea_pm25(
         "sample_records": latest[:5],
         "ready_for_aggregation_design": bool(
             latest
+            and not potentially_truncated
             and valid_coordinates == len(latest)
             and all(countries.get(code, 0) > 0 for code in TARGET_COUNTRIES)
         ),
