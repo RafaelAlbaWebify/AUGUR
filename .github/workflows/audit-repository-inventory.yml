@@ -2,10 +2,14 @@ name: Persist AUGUR source inventory
 on:
   push:
     branches:
-      - audit/persistent-code-inventory-20261017
+      - main
+      - audit/dependency-graph-and-freshness
     paths:
-      - "backend/scripts/audit_repository_inventory.py"
-      - ".github/workflows/audit-repository-inventory.yml"
+      - "backend/**"
+      - "frontend/**"
+      - "tools/**"
+      - ".github/workflows/**"
+      - "docs/audit/findings.json"
   workflow_dispatch:
 permissions:
   contents: write
