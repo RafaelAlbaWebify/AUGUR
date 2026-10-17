@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 68,
+  "reviewed_file_count": 87,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 19.37,
+  "line_by_line_review_percent": 24.79,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -10547,7 +10547,7 @@
       "bucket": "backend/scripts",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [],
       "imports": [],
       "called_names": [],
@@ -10796,7 +10796,7 @@
       "bucket": "backend/scripts",
       "sha256": "7be50c4bf915d75948eea094f5f4bff97c46cc260c88f2072e8b2298d73d5efa",
       "bytes": 653,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -10846,7 +10846,7 @@
       "bucket": "backend/scripts",
       "sha256": "02d04e56fd6533bbddcba5b17ee5edb166e939be5ff5a48cd8208e9d79a48369",
       "bytes": 905,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -11111,7 +11111,7 @@
       "bucket": "backend/scripts",
       "sha256": "034d0783f9bd533cf8faba841daf8c2dca82a9d0afddc7833945162714522611",
       "bytes": 2847,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "official_codes",
@@ -11208,7 +11208,7 @@
       "bucket": "backend/scripts",
       "sha256": "30d55411701c2485ba9235d75a7df52e575a5c75fdd43f1342e70e48d049681d",
       "bytes": 3491,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "audit",
@@ -11849,7 +11849,7 @@
       "bucket": "backend/scripts",
       "sha256": "cd12089d5aea6d584a04e4017e981ca710bffb8d74957f34212f23670e747371",
       "bytes": 2453,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "radar_evidence_status",
@@ -11981,7 +11981,7 @@
       "bucket": "backend/scripts",
       "sha256": "8d8f3b2c27cdfd89e36e38fe2b20a0c0343fb25e3550832eda6dd22f35f30360",
       "bytes": 933,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -12038,7 +12038,7 @@
       "bucket": "backend/scripts",
       "sha256": "ad64457c06874472241cb7d46f71f6827e33d4a7a41a525e014a4b8b1c32852d",
       "bytes": 1824,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -12376,7 +12376,7 @@
       "bucket": "backend/scripts",
       "sha256": "96c846cd1f0ba8b179323b268470ab1e98170c27dcf7b23ad00ffe983b837c5b",
       "bytes": 940,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -12433,7 +12433,7 @@
       "bucket": "backend/scripts",
       "sha256": "82f325f75a694756eb42e06c97549801067a9e4f2c9a014372e72390ab2ee059",
       "bytes": 1785,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "inventory",
@@ -12512,7 +12512,7 @@
       "bucket": "backend/scripts",
       "sha256": "c17aac4e4b3fa59c8d7fef2822b9c9a6c0d1cdf3f45c2be433cade9622dd2b7e",
       "bytes": 937,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -12570,7 +12570,7 @@
       "bucket": "backend/scripts",
       "sha256": "a2af7e6cf3cc22dade1ca261837be0338081a7aa08f36bf110098d8cae71b656",
       "bytes": 4488,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "audit",
@@ -12658,7 +12658,7 @@
       "bucket": "backend/scripts",
       "sha256": "713e7febb18a2e373c9fe8ad5d348449b34f75d804d48399ad26cad27e588475",
       "bytes": 3233,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "build_report",
@@ -12745,7 +12745,7 @@
       "bucket": "backend/scripts",
       "sha256": "aa5fa39ddffafc692b820fa4268c09c78500217b36d4828a4049675af9d4a238",
       "bytes": 1539,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -12822,7 +12822,7 @@
       "bucket": "backend/scripts",
       "sha256": "1ff42722acc432684582dc8eae2391cf8c65fe408da0cdd66f52d08827004676",
       "bytes": 1479,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -12899,7 +12899,7 @@
       "bucket": "backend/scripts",
       "sha256": "97229831ef3f56f9a6df0b60ef605ebd117c08605ef851d5d2ed37cba355b0d7",
       "bytes": 1400,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -12968,7 +12968,7 @@
       "bucket": "backend/scripts",
       "sha256": "17fbe49f8d08cb2eb0af3d2bc5514ca7f1b5e41dec4bc72f3fddd8738f3794c8",
       "bytes": 1181,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -13026,7 +13026,7 @@
       "bucket": "backend/scripts",
       "sha256": "17e0dc4ed6ca90e033aeaabfc66fb14c7ab4b25f0776e082fcb1301a378cf70f",
       "bytes": 1754,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -13077,7 +13077,7 @@
       "bucket": "backend/scripts",
       "sha256": "d3fd09c0c58ae77372f0d18438ddf013d6821319724da6ecbb4e5b685f931c60",
       "bytes": 1368,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
