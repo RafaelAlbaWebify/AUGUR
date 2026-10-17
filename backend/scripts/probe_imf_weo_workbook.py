@@ -3,6 +3,7 @@ import io
 import json
 import httpx
 from openpyxl import load_workbook
+from app.ingestion.imf_weo_official import normalize_official_weo
 
 URL="https://data.imf.org/-/media/iData/External-Storage/Documents/0FA3DC49A04D446E9D69DBEB29979E1C/en/WEOOct2026all.xlsx"
 
@@ -43,6 +44,9 @@ def main():
         print("IMF official workbook HTTP:",r.status_code,"size:",len(r.content))
         r.raise_for_status()
         result=inspect_workbook(r.content)
+        rows, contract=normalize_official_weo(r.content,{"ESP","PRT","IRL","USA"})
+        result["official_contract"]=contract
+        result["official_contract"]["parsed_rows"]=len(rows)
     print(json.dumps(result,ensure_ascii=False,indent=2))
 
 
