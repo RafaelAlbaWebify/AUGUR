@@ -587,8 +587,12 @@ def upsert_observations(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_write_batch
+    validate_write_batch(rows, subnational=False)
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO observations
@@ -617,7 +621,11 @@ def upsert_observations(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -3017,8 +3025,12 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_write_batch
+    validate_write_batch(rows, subnational=True)
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         iso2_to_iso3 = {
             row[0]: row[1]
             for row in con.execute(
@@ -3131,7 +3143,11 @@ def upsert_subnational_observations(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
