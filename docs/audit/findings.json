@@ -17,9 +17,25 @@
       "definitions_reviewed": 6,
       "batch": "B02",
       "status": "reviewed_findings_open"
+    },
+    {
+      "path": "backend/app/db/bootstrap.py",
+      "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "lines_reviewed": "1-289",
+      "definitions_reviewed": 4,
+      "batch": "B02",
+      "status": "reviewed_findings_open"
+    },
+    {
+      "path": "backend/app/db/profile.py",
+      "sha256": "c0a9e3c5f6f6bad962a603dc5bd03dc372a0c5cd9e0d30d95083cacaff76b999",
+      "lines_reviewed": "1-99",
+      "definitions_reviewed": 3,
+      "batch": "B02",
+      "status": "reviewed_findings_open"
     }
   ],
-  "certified_line_by_line_review_count": 2,
+  "certified_line_by_line_review_count": 4,
   "findings": [
     {
       "id": "LEAD-001",
@@ -93,8 +109,38 @@
       "line_range": "114-139",
       "description": "sync_countries always returns complete=False and failure_count=1 from the one blocked LUR metric regardless of source coverage, meaning completeness reporting conflates blocked metric scope with missing accepted metric coverage. Report separate blocked metrics and missing requested countries.",
       "test_required": "partial source coverage and missing country fixtures"
+    },
+    {
+      "id": "AUD-B02-005",
+      "state": "open",
+      "severity": "high",
+      "component": "backend/app/db/bootstrap.py",
+      "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "line_range": "251-286",
+      "description": "datastore_status() is intended as a status probe but uses sqlite3.connect on target path, which creates a new SQLite database when absent; status checks must not mutate operator state. Broad except Exception handlers also suppress actionable permission/schema failures.",
+      "test_required": "missing SQLite path status probe leaves filesystem untouched, reports reason"
+    },
+    {
+      "id": "AUD-B02-006",
+      "state": "open_needs_product_scope_decision",
+      "severity": "high",
+      "component": "backend/app/db/profile.py",
+      "sha256": "c0a9e3c5f6f6bad962a603dc5bd03dc372a0c5cd9e0d30d95083cacaff76b999",
+      "line_range": "1-99",
+      "description": "PersonalProfile persistence handles age, citizenships, household size, income, savings and preferences, while current operator states AUGUR has no personal data. Clarify intended application scope and prevent unintended upload, telemetry, CI fixtures or disclosure; do not delete without call-site audit.",
+      "test_required": "call graph and data-flow review of profile endpoints/storage/UI with privacy tests"
+    },
+    {
+      "id": "AUD-B02-007",
+      "state": "open",
+      "severity": "medium",
+      "component": "backend/app/db/bootstrap.py",
+      "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "line_range": "198-251",
+      "description": "initialize_datastores unconditionally invokes seed_esco_partial when mode none. CLI source-smokes rely on initialization; assess unexpected seeding/workload and separate schema bootstrap from optional data seeding.",
+      "test_required": "bootstrap idempotence and no-side-effect health probe integration"
     }
   ],
   "denominator_inventoried_files": 339,
-  "certified_line_by_line_review_percent": 0.59
+  "certified_line_by_line_review_percent": 1.18
 }
