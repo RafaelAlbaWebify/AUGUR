@@ -1,5 +1,6 @@
 """Grounded housing affordability evidence; never convert PPS to nominal rent ratios."""
 from __future__ import annotations
+from math import isfinite
 
 OVERBURDEN = "regional_housing_cost_overburden_rate"
 INCOME = "regional_disposable_income_pps_per_capita"
@@ -11,11 +12,11 @@ def housing_affordability_evidence(indicators: list[dict]) -> dict:
     i = by_id.get(INCOME)
     available_overburden = bool(o and o.get("status") == "available" and
                                 o.get("unit") == "percent" and
-                                isinstance(o.get("value"), (int, float)) and
+                                type(o.get("value")) in (int, float) and isfinite(o["value"]) and
                                 0 <= o["value"] <= 100)
     available_income = bool(i and i.get("status") == "available" and
                             i.get("unit") == "pps_per_person" and
-                            isinstance(i.get("value"), (int, float)) and
+                            type(i.get("value")) in (int, float) and isfinite(i["value"]) and
                             i["value"] >= 0)
     return {
         "scope": "regional_official_housing_context_not_market_rent_affordability",
