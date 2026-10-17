@@ -101,7 +101,7 @@ def main() -> int:
     }
     if args.report:
         args.report.parent.mkdir(parents=True, exist_ok=True)
-        args.report.write_text(json.dumps(payload, indent=2, default=str) + "\\n", encoding="utf-8")
+        args.report.write_text(json.dumps(payload, indent=2, default=str) + chr(10), encoding="utf-8")
     print(json.dumps(payload, indent=2, default=str))
 
     # Global coverage is expected to be heterogeneous. The command succeeds
