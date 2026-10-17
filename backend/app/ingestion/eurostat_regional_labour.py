@@ -132,7 +132,7 @@ def normalize_subnational(
         )
 
     if config.get("filters") and not rows:
-        raise ValueError(f"No matching exact-dimension observations for {config[\'indicator_id\']}")
+        raise ValueError(f"No matching exact-dimension observations for {config['indicator_id']}")
     return rows
 
 
