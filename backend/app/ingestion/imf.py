@@ -260,7 +260,7 @@ class IMFAdapter:
             "rows": total_rows,
             "series": details,
             "failures": failures,
-            "complete": all(
+            "complete": len(failures) == 0 and len(details) == len(SERIES) and all(
                 detail["countries_with_data"] == len(countries)
                 for detail in details
             ),
