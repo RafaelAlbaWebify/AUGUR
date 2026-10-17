@@ -20,11 +20,13 @@
     },
     {
       "path": "backend/app/db/bootstrap.py",
-      "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "sha256": "8a9d2863b2776572e5f9f5cec7d2f1617e48201550b14e04c9e64383f5ea884b",
       "lines_reviewed": "1-289",
       "definitions_reviewed": 4,
       "batch": "B02",
-      "status": "reviewed_findings_open"
+      "status": "reviewed_findings_open",
+      "previous_sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "revalidated_after_pr": 100
     },
     {
       "path": "backend/app/db/profile.py",
@@ -332,9 +334,20 @@
       "status": "reviewed_findings_open",
       "method": "complete source and tests review including PR97/99 paging and coverage changes",
       "imported_by_count": 12
+    },
+    {
+      "path": "backend/app/ingestion/eurostat.py",
+      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "lines_reviewed": "1-1060",
+      "definitions_reviewed": 13,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "entire Eurostat adapter and specialized earnings/vacancies/transition read and code-path audit",
+      "imported_by_count": 38
     }
   ],
-  "certified_line_by_line_review_count": 31,
+  "certified_line_by_line_review_count": 32,
   "findings": [
     {
       "id": "LEAD-001",
@@ -411,13 +424,15 @@
     },
     {
       "id": "AUD-B02-005",
-      "state": "open",
+      "state": "mitigated_by_pr_100",
       "severity": "high",
       "component": "backend/app/db/bootstrap.py",
-      "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "sha256": "8a9d2863b2776572e5f9f5cec7d2f1617e48201550b14e04c9e64383f5ea884b",
       "line_range": "251-286",
       "description": "datastore_status() is intended as a status probe but uses sqlite3.connect on target path, which creates a new SQLite database when absent; status checks must not mutate operator state. Broad except Exception handlers also suppress actionable permission/schema failures.",
-      "test_required": "missing SQLite path status probe leaves filesystem untouched, reports reason"
+      "test_required": "missing SQLite path status probe leaves filesystem untouched, reports reason",
+      "previous_sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "resolution_pr": 100
     },
     {
       "id": "AUD-B02-006",
@@ -434,10 +449,11 @@
       "state": "open",
       "severity": "medium",
       "component": "backend/app/db/bootstrap.py",
-      "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
+      "sha256": "8a9d2863b2776572e5f9f5cec7d2f1617e48201550b14e04c9e64383f5ea884b",
       "line_range": "198-251",
       "description": "initialize_datastores unconditionally invokes seed_esco_partial when mode none. CLI source-smokes rely on initialization; assess unexpected seeding/workload and separate schema bootstrap from optional data seeding.",
-      "test_required": "bootstrap idempotence and no-side-effect health probe integration"
+      "test_required": "bootstrap idempotence and no-side-effect health probe integration",
+      "previous_sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a"
     },
     {
       "id": "AUD-B02-008",
@@ -758,8 +774,48 @@
       "line_range": "14-22",
       "description": "Country metadata _optional_float() permits nonfinite coordinates, potentially confusing frontend/map consumers.",
       "test_required": "NaN country coordinates and out-of-range latitude fixture"
+    },
+    {
+      "id": "AUD-B02-037",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/eurostat.py",
+      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "line_range": "301-448",
+      "description": "The general Eurostat normalize() checks dimension_values and label_contains but does not verify config.filters values against returned labels before assigning indicators and units. A provider returning multiple or unexpected populations/units could be mislabeled.",
+      "test_required": "Returned wrong unit/sex/age/freq and multiple-dimension fixture"
+    },
+    {
+      "id": "AUD-B02-038",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/eurostat.py",
+      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "line_range": "451-797",
+      "description": "Specialized earnings/net earnings/job vacancies/job transition normalizers reuse Cartesian JSON-stat expansion but omit the strict cardinality and nonfinite checks present in normalize(). Bool, NaN or infinity can flow to persistent numeric facts.",
+      "test_required": "Adversarial specialized-numeric and dimension cardinality tests"
+    },
+    {
+      "id": "AUD-B02-039",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat.py",
+      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "line_range": "302-794",
+      "description": "Numerous specialized Eurostat normalizers iterate full Cartesian dimensions even when source JSON-stat values are sparse; expensive broad provider responses may incur unnecessary CPU/memory. Replace after measured parity benchmark.",
+      "test_required": "Sparse million-cell canonical parity benchmark"
+    },
+    {
+      "id": "AUD-B02-040",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat.py",
+      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
+      "line_range": "330-448",
+      "description": "General Eurostat normalization labels every returned valid numeric datum as observed without dataset-specific source quality policy; provider status flags are persisted but must remain visible to rankings and forecast/revision rules.",
+      "test_required": "Source flags d/u versus numeric ranking release tests"
     }
   ],
-  "denominator_inventoried_files": 345,
-  "certified_line_by_line_review_percent": 8.99
+  "denominator_inventoried_files": 346,
+  "certified_line_by_line_review_percent": 9.25
 }
