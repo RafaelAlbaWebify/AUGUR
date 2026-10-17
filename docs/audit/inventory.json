@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 344,
-  "python_count": 306,
-  "definition_count": 1599,
+  "file_count": 345,
+  "python_count": 307,
+  "definition_count": 1605,
   "reviewed_file_count": 24,
   "stale_review_file_count": 2,
-  "line_by_line_review_percent": 6.98,
+  "line_by_line_review_percent": 6.96,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 122,
+    "backend/tests": 123,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -2571,7 +2571,8 @@
         "backend/tests/test_regional_ingestion_batch_hardening.py",
         "backend/tests/test_regional_labour_canonical_contract.py",
         "backend/tests/test_un_wpp.py",
-        "backend/tests/test_world_bank_batch.py"
+        "backend/tests/test_world_bank_batch.py",
+        "backend/tests/test_world_bank_explicit_coverage.py"
       ]
     },
     {
@@ -6658,8 +6659,8 @@
     {
       "path": "backend/app/ingestion/world_bank.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "85378f97a3773280275d20f6fee169c5a115b7ee7f8f9a530231749e1f073091",
-      "bytes": 17149,
+      "sha256": "ace9f2295522a8bdc2a8816064da001abb9da3e3e189871b58e59c56220c8479",
+      "bytes": 17572,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -6675,7 +6676,7 @@
           "symbol": "WorldBankAdapter",
           "kind": "class",
           "line_start": 23,
-          "line_end": 518,
+          "line_end": 524,
           "signature_arguments": []
         },
         {
@@ -6780,7 +6781,7 @@
           "symbol": "WorldBankAdapter.sync_countries",
           "kind": "function",
           "line_start": 343,
-          "line_end": 413,
+          "line_end": 417,
           "signature_arguments": [
             "self",
             "country_iso3s",
@@ -6791,8 +6792,8 @@
         {
           "symbol": "WorldBankAdapter.normalize",
           "kind": "function",
-          "line_start": 415,
-          "line_end": 452,
+          "line_start": 419,
+          "line_end": 456,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -6804,8 +6805,8 @@
         {
           "symbol": "WorldBankAdapter.sync_country",
           "kind": "function",
-          "line_start": 454,
-          "line_end": 518,
+          "line_start": 458,
+          "line_end": 524,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -6842,6 +6843,7 @@
         "Timeout",
         "ValueError",
         "_optional_float",
+        "all",
         "append",
         "close",
         "country_membership_flags",
@@ -6867,6 +6869,7 @@
         "print",
         "raise_for_status",
         "range",
+        "set",
         "sleep",
         "sorted",
         "str",
@@ -6877,7 +6880,7 @@
         "upsert_observations",
         "world_bank_indicators"
       ],
-      "lines": 518,
+      "lines": 524,
       "resolved_local_imports": [
         "backend/app/catalog.py",
         "backend/app/db/analytics.py"
@@ -30351,6 +30354,83 @@
       "resolved_local_imports": [
         "backend/app/ingestion/__init__.py",
         "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_world_bank_explicit_coverage.py",
+      "bucket": "backend/tests",
+      "sha256": "165bb2595b1709d94a943c3dd8b3187f8e8598530e8b947f2babe58be74fe4c3",
+      "bytes": 1619,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_world_bank_partial_country_observations_not_complete",
+          "kind": "function",
+          "line_start": 5,
+          "line_end": 20,
+          "signature_arguments": [
+            "monkeypatch"
+          ]
+        },
+        {
+          "symbol": "test_world_bank_partial_country_observations_not_complete.Fake",
+          "kind": "class",
+          "line_start": 6,
+          "line_end": 10,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_world_bank_partial_country_observations_not_complete.Fake.fetch_indicator_many",
+          "kind": "function",
+          "line_start": 7,
+          "line_end": 10,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "test_world_bank_empty_success_response_cannot_be_complete",
+          "kind": "function",
+          "line_start": 23,
+          "line_end": 33,
+          "signature_arguments": [
+            "monkeypatch"
+          ]
+        },
+        {
+          "symbol": "test_world_bank_empty_success_response_cannot_be_complete.Fake",
+          "kind": "class",
+          "line_start": 24,
+          "line_end": 25,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_world_bank_empty_success_response_cannot_be_complete.Fake.fetch_indicator_many",
+          "kind": "function",
+          "line_start": 25,
+          "line_end": 25,
+          "signature_arguments": [
+            "self"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "app.ingestion",
+          "line": 2
+        }
+      ],
+      "called_names": [
+        "Fake",
+        "close",
+        "len",
+        "setattr",
+        "sync_countries"
+      ],
+      "lines": 33,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
       ],
       "imported_by": []
     },
