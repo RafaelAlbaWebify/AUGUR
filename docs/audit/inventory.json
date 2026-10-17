@@ -13,9 +13,9 @@
   "file_count": 347,
   "python_count": 309,
   "definition_count": 1612,
-  "reviewed_file_count": 31,
-  "stale_review_file_count": 1,
-  "line_by_line_review_percent": 8.93,
+  "reviewed_file_count": 35,
+  "stale_review_file_count": 0,
+  "line_by_line_review_percent": 10.09,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -1022,7 +1022,7 @@
       "bucket": "backend/app/db",
       "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
       "bytes": 122579,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "initialize_analytics_schema",
@@ -3834,7 +3834,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "e125e07c8c1417fd2be4e294113a27602a23839dfe7f751e4a342bcca57e6b9d",
       "bytes": 36061,
-      "review_status": "stale_review",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "EurostatAdapter",
@@ -5445,7 +5445,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "3f877a6fa8be7b90e1f917cf5fbbf22aa473d7fc34abe624c873b142dad7bf4a",
       "bytes": 48721,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_reference_name",
@@ -5979,7 +5979,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "f11264525dcdd4220a6a11182d4577f15202843b77e2837589e146daac048fd3",
       "bytes": 59609,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_first_present",
