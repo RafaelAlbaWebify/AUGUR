@@ -1,4 +1,5 @@
 from __future__ import annotations
+from math import isfinite
 
 from app.db.analytics import (
     latest_labour_earnings,
@@ -107,6 +108,18 @@ def financial_fit(
             ],
         }
 
+    if isinstance(profile.monthly_net_income, bool) or not isfinite(profile.monthly_net_income) or profile.monthly_net_income <= 0:
+        return {
+            "target_country_iso3": target,
+            "status": "insufficient_profile",
+            "reason": "monthly_net_income_invalid",
+            "evidence_state": "partial",
+            "evidence_complete": False,
+            "blockers": ["monthly_net_income"],
+            "portable_income_analysis": None,
+            "notes": ["Portable income must be finite and positive.", "No score is produced."],
+        }
+
     if not profile.remote_work:
         local_income_reference = _local_income_reference(profile, target)
         national_net_reference = _national_net_earnings_reference(target)
@@ -173,6 +186,18 @@ def financial_fit(
             ],
         }
 
+    prices = (origin_price.get("value"), target_price.get("value"))
+    if any(type(value) not in (int, float) or not isfinite(value) or value <= 0 for value in prices):
+        return {
+            "target_country_iso3": target,
+            "status": "insufficient_country_evidence",
+            "reason": "household_price_level_index_invalid",
+            "evidence_state": "partial",
+            "evidence_complete": False,
+            "blockers": ["household_price_level_index"],
+            "portable_income_analysis": None,
+            "notes": ["Price-level indices must be finite and positive.", "No score is produced."],
+        }
     cost_factor = target_price["value"] / origin_price["value"]
     purchasing_power_equivalent = profile.monthly_net_income / cost_factor
     purchasing_power_change_pct = (
