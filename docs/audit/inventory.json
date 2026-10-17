@@ -13,9 +13,9 @@
   "file_count": 346,
   "python_count": 308,
   "definition_count": 1607,
-  "reviewed_file_count": 23,
-  "stale_review_file_count": 3,
-  "line_by_line_review_percent": 6.65,
+  "reviewed_file_count": 32,
+  "stale_review_file_count": 0,
+  "line_by_line_review_percent": 9.25,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -998,7 +998,7 @@
       "bucket": "backend/app/db",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [],
       "imports": [],
       "called_names": [],
@@ -1762,7 +1762,7 @@
       "bucket": "backend/app/db",
       "sha256": "8a9d2863b2776572e5f9f5cec7d2f1617e48201550b14e04c9e64383f5ea884b",
       "bytes": 9775,
-      "review_status": "stale_review",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "initialize_sqlite",
@@ -2551,7 +2551,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "bytes": 0,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [],
       "imports": [],
       "called_names": [],
@@ -2583,7 +2583,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "184ddffe26de76f64cfb8b4dc02030cc1b4448256f5f52af94dfc289ac1d10d3",
       "bytes": 16871,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_normalise_header",
@@ -2753,7 +2753,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "48e4625e5ede175ec7e0ec9e9cf5018dd52d1e901bd562e2ba65a1425a0dee16",
       "bytes": 6786,
-      "review_status": "stale_review",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_norm",
@@ -2994,7 +2994,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "201f10f7f62d6beb5ad28aa54c27a4718c2dd0a78eaf62c4ff52ae0f893c7dfb",
       "bytes": 17662,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_normalise_header",
@@ -3545,7 +3545,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "8670f2cdf8e82b65d1197f4d4f0ecb2fbb3532ebb06926de0efb67b88675abd6",
       "bytes": 7546,
-      "review_status": "stale_review",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_sample_delimited_file",
@@ -3834,7 +3834,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
       "bytes": 34540,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "EurostatAdapter",
@@ -6664,7 +6664,7 @@
       "bucket": "backend/app/ingestion",
       "sha256": "ace9f2295522a8bdc2a8816064da001abb9da3e3e189871b58e59c56220c8479",
       "bytes": 17572,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_optional_float",
