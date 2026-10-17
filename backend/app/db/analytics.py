@@ -584,51 +584,77 @@ def country_analysis_coverage() -> list[dict]:
 
 
 def upsert_observations(rows: list[dict]) -> int:
+    """Bulk ingest a validated country batch in one atomic DuckDB transaction.
+
+    The CSV staging file is generated locally and removed on exit. A single
+    set-based INSERT OR REPLACE avoids the per-row index churn and memory growth
+    of executemany against a large primary-keyed observations table.
+    """
     if not rows:
         return 0
 
+    import csv
+    import tempfile
+    from pathlib import Path
     from app.db.write_contract import validate_write_batch
+
     validate_write_batch(rows, subnational=False)
+    columns = (
+        "country_iso3", "indicator_id", "period", "value", "unit",
+        "source_id", "dataset_id", "observation_type", "retrieved_at",
+        "source_updated_at", "source_observation_status", "source_decimal",
+    )
+    # Keep staging off the operator's DuckDB; the OS temp directory is
+    # intentionally short-lived and never committed or uploaded.
+    with tempfile.TemporaryDirectory(prefix="augur-ingest-") as directory:
+        path = Path(directory) / "observations.csv"
+        with path.open("w", newline="", encoding="utf-8") as handle:
+            writer = csv.writer(handle, lineterminator="\\n")
+            for row in rows:
+                writer.writerow([
+                    r"\\N" if row.get(column) is None else row[column]
+                    for column in columns
+                ])
 
-    con = duckdb.connect(str(settings.duckdb_path))
-    try:
-        con.execute('BEGIN TRANSACTION')
-        con.executemany(
-            """
-            INSERT OR REPLACE INTO observations
-            (
-                country_iso3, indicator_id, period, value, unit,
-                source_id, dataset_id, observation_type, retrieved_at,
-                source_updated_at, source_observation_status, source_decimal
+        con = duckdb.connect(str(settings.duckdb_path))
+        try:
+            con.execute("SET preserve_insertion_order=false")
+            con.execute("SET threads=2")
+            con.execute("BEGIN TRANSACTION")
+            con.execute("""
+                CREATE TEMP TABLE batch_observations AS
+                SELECT country_iso3, indicator_id, period, value, unit,
+                    source_id, dataset_id, observation_type, retrieved_at,
+                    source_updated_at, source_observation_status, source_decimal
+                FROM observations WHERE FALSE
+            """)
+            # Path is created by tempfile, not derived from provider payload.
+            escaped_path = str(path).replace("'", "''")
+            con.execute(
+                f"COPY batch_observations FROM '{escaped_path}' "
+                "(FORMAT CSV, HEADER FALSE, NULL '\\\\N')"
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """,
-            [
-                [
-                    row["country_iso3"],
-                    row["indicator_id"],
-                    row["period"],
-                    row["value"],
-                    row["unit"],
-                    row["source_id"],
-                    row["dataset_id"],
-                    row["observation_type"],
-                    row["retrieved_at"],
-                    row.get("source_updated_at"),
-                    row.get("source_observation_status"),
-                    row.get("source_decimal"),
-                ]
-                for row in rows
-            ],
-        )
-        con.execute('COMMIT')
-        return len(rows)
-    except Exception:
-        con.execute('ROLLBACK')
-        raise
-    finally:
-        con.close()
-
+            count = con.execute("SELECT COUNT(*) FROM batch_observations").fetchone()[0]
+            if count != len(rows):
+                raise ValueError(f"National observation bulk staging mismatch: {count}/{len(rows)}")
+            con.execute("""
+                INSERT OR REPLACE INTO observations (
+                    country_iso3, indicator_id, period, value, unit,
+                    source_id, dataset_id, observation_type, retrieved_at,
+                    source_updated_at, source_observation_status, source_decimal
+                )
+                SELECT country_iso3, indicator_id, period, value, unit,
+                    source_id, dataset_id, observation_type, retrieved_at,
+                    source_updated_at, source_observation_status, source_decimal
+                FROM batch_observations
+            """)
+            con.execute("COMMIT")
+            return count
+        except Exception:
+            con.execute("ROLLBACK")
+            raise
+        finally:
+            con.close()
 
 
 def upsert_labour_earnings(rows: list[dict]) -> int:
