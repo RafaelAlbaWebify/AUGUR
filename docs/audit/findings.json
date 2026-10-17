@@ -273,9 +273,53 @@
       "status": "reviewed_findings_open",
       "imported_by_count": 6,
       "method": "full module inspection and dependency evidence"
+    },
+    {
+      "path": "backend/app/db/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty",
+      "definitions_reviewed": 0,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 9,
+      "method": "verified empty Python package init"
+    },
+    {
+      "path": "backend/app/ingestion/__init__.py",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "lines_reviewed": "empty",
+      "definitions_reviewed": 0,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 17,
+      "method": "verified empty Python package init"
+    },
+    {
+      "path": "backend/app/ingestion/cedefop_clssi.py",
+      "sha256": "184ddffe26de76f64cfb8b4dc02030cc1b4448256f5f52af94dfc289ac1d10d3",
+      "lines_reviewed": "1-528",
+      "definitions_reviewed": 9,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 4,
+      "method": "full code and consumer inspection"
+    },
+    {
+      "path": "backend/app/ingestion/cedefop_stas.py",
+      "sha256": "201f10f7f62d6beb5ad28aa54c27a4718c2dd0a78eaf62c4ff52ae0f893c7dfb",
+      "lines_reviewed": "1-555",
+      "definitions_reviewed": 12,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 4,
+      "method": "full code and consumer inspection"
     }
   ],
-  "certified_line_by_line_review_count": 26,
+  "certified_line_by_line_review_count": 30,
   "findings": [
     {
       "id": "LEAD-001",
@@ -635,8 +679,38 @@
       "description": "Shapefile geometry source identifies code by scanning all arbitrary string fields and first registry match; ambiguous multiple official-looking codes and repeated shapes require explicit dimension identity and duplicate policy.",
       "test_required": "Ambiguous code-property and duplicate-shape negative fixtures",
       "imported_by_count": 1
+    },
+    {
+      "id": "AUD-B02-031",
+      "state": "open_requires_source_evidence",
+      "severity": "medium",
+      "component": "backend/app/ingestion/cedefop_stas.py",
+      "sha256": "201f10f7f62d6beb5ad28aa54c27a4718c2dd0a78eaf62c4ff52ae0f893c7dfb",
+      "line_range": "312-543",
+      "description": "STAS wide worksheet importer must validate that growth percentage units are fractional before multiplying by 100; current code accepts any finite value and scale is assumed from sheet naming. Needs source workbook dimensional/unit evidence.",
+      "test_required": "Official percentage source-value unit fixture"
+    },
+    {
+      "id": "AUD-B02-032",
+      "state": "open_requires_source_evidence",
+      "severity": "medium",
+      "component": "backend/app/ingestion/cedefop_clssi.py",
+      "sha256": "184ddffe26de76f64cfb8b4dc02030cc1b4448256f5f52af94dfc289ac1d10d3",
+      "line_range": "390-524",
+      "description": "CLSSI workbook parser validates three target countries but not the full expected occupation coverage by country, so unexpectedly truncated worksheets can look statistically complete despite some rows.",
+      "test_required": "Expected ISCO-2 coverage source manifest fixture"
+    },
+    {
+      "id": "AUD-B02-033",
+      "state": "open_requires_source_evidence",
+      "severity": "medium",
+      "component": "backend/app/ingestion/cedefop_stas.py",
+      "sha256": "201f10f7f62d6beb5ad28aa54c27a4718c2dd0a78eaf62c4ff52ae0f893c7dfb",
+      "line_range": "120-245",
+      "description": "STAS raw XLSX parser uses ZipFile and reads XML tree into memory for entire worksheets. Benchmark on official release and establish archive decompression/row limits before accepting untrusted uploads.",
+      "test_required": "Large sparse worksheet and oversized archive negative tests"
     }
   ],
-  "denominator_inventoried_files": 340,
-  "certified_line_by_line_review_percent": 7.65
+  "denominator_inventoried_files": 344,
+  "certified_line_by_line_review_percent": 8.72
 }
