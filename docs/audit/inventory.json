@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 343,
-  "python_count": 305,
-  "definition_count": 1588,
+  "file_count": 344,
+  "python_count": 306,
+  "definition_count": 1599,
   "reviewed_file_count": 24,
   "stale_review_file_count": 2,
-  "line_by_line_review_percent": 7.0,
+  "line_by_line_review_percent": 6.98,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 121,
+    "backend/tests": 122,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -2555,6 +2555,7 @@
       "lines": 0,
       "resolved_local_imports": [],
       "imported_by": [
+        "backend/tests/test_b02_cedefop_workbook_integrity.py",
         "backend/tests/test_cedefop_clssi.py",
         "backend/tests/test_cedefop_reset.py",
         "backend/tests/test_cedefop_stas.py",
@@ -2576,8 +2577,8 @@
     {
       "path": "backend/app/ingestion/cedefop_clssi.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "d25d364f3f02b7b89eb8083f2ee1596f7e3f1187354b89af39ef61e603a53d86",
-      "bytes": 16606,
+      "sha256": "184ddffe26de76f64cfb8b4dc02030cc1b4448256f5f52af94dfc289ac1d10d3",
+      "bytes": 16871,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -2611,7 +2612,7 @@
           "symbol": "download_workbook",
           "kind": "function",
           "line_start": 148,
-          "line_end": 186,
+          "line_end": 188,
           "signature_arguments": [
             "target_path"
           ]
@@ -2619,8 +2620,8 @@
         {
           "symbol": "detect_sheet_schema",
           "kind": "function",
-          "line_start": 189,
-          "line_end": 298,
+          "line_start": 191,
+          "line_end": 300,
           "signature_arguments": [
             "rows"
           ]
@@ -2628,8 +2629,8 @@
         {
           "symbol": "inspect_workbook",
           "kind": "function",
-          "line_start": 301,
-          "line_end": 353,
+          "line_start": 303,
+          "line_end": 355,
           "signature_arguments": [
             "path"
           ]
@@ -2637,8 +2638,8 @@
         {
           "symbol": "_as_float",
           "kind": "function",
-          "line_start": 357,
-          "line_end": 365,
+          "line_start": 359,
+          "line_end": 367,
           "signature_arguments": [
             "value",
             "field_name"
@@ -2647,8 +2648,8 @@
         {
           "symbol": "_as_score",
           "kind": "function",
-          "line_start": 368,
-          "line_end": 375,
+          "line_start": 370,
+          "line_end": 377,
           "signature_arguments": [
             "value",
             "field_name"
@@ -2657,8 +2658,8 @@
         {
           "symbol": "parse_workbook",
           "kind": "function",
-          "line_start": 378,
-          "line_end": 524,
+          "line_start": 380,
+          "line_end": 528,
           "signature_arguments": [
             "path"
           ]
@@ -2732,7 +2733,7 @@
         "workbook_preview",
         "write_bytes"
       ],
-      "lines": 524,
+      "lines": 528,
       "resolved_local_imports": [
         "backend/app/ingestion/cedefop_stas.py"
       ],
@@ -2987,15 +2988,15 @@
     {
       "path": "backend/app/ingestion/cedefop_stas.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "3c849a4b5e9e2208665494630015bad0eb8cd994e6a80ebcd130f31f05cb5372",
-      "bytes": 16801,
+      "sha256": "201f10f7f62d6beb5ad28aa54c27a4718c2dd0a78eaf62c4ff52ae0f893c7dfb",
+      "bytes": 17662,
       "review_status": "not_reviewed",
       "definitions": [
         {
           "symbol": "_normalise_header",
           "kind": "function",
-          "line_start": 80,
-          "line_end": 85,
+          "line_start": 81,
+          "line_end": 86,
           "signature_arguments": [
             "value"
           ]
@@ -3003,8 +3004,8 @@
         {
           "symbol": "resolve_latest_download_url",
           "kind": "function",
-          "line_start": 88,
-          "line_end": 128,
+          "line_start": 89,
+          "line_end": 129,
           "signature_arguments": [
             "client",
             "dataset_page_url"
@@ -3013,8 +3014,8 @@
         {
           "symbol": "download_workbook",
           "kind": "function",
-          "line_start": 131,
-          "line_end": 154,
+          "line_start": 132,
+          "line_end": 157,
           "signature_arguments": [
             "client",
             "target_path",
@@ -3024,8 +3025,8 @@
         {
           "symbol": "_column_index",
           "kind": "function",
-          "line_start": 157,
-          "line_end": 164,
+          "line_start": 160,
+          "line_end": 167,
           "signature_arguments": [
             "cell_ref"
           ]
@@ -3033,8 +3034,8 @@
         {
           "symbol": "_shared_strings",
           "kind": "function",
-          "line_start": 167,
-          "line_end": 180,
+          "line_start": 170,
+          "line_end": 183,
           "signature_arguments": [
             "archive"
           ]
@@ -3042,8 +3043,8 @@
         {
           "symbol": "_sheet_targets",
           "kind": "function",
-          "line_start": 183,
-          "line_end": 205,
+          "line_start": 186,
+          "line_end": 208,
           "signature_arguments": [
             "archive"
           ]
@@ -3051,8 +3052,8 @@
         {
           "symbol": "_read_sheet_rows",
           "kind": "function",
-          "line_start": 208,
-          "line_end": 262,
+          "line_start": 211,
+          "line_end": 265,
           "signature_arguments": [
             "archive",
             "sheet_path",
@@ -3063,8 +3064,8 @@
         {
           "symbol": "workbook_preview",
           "kind": "function",
-          "line_start": 265,
-          "line_end": 280,
+          "line_start": 268,
+          "line_end": 283,
           "signature_arguments": [
             "path",
             "max_rows"
@@ -3073,8 +3074,8 @@
         {
           "symbol": "_year_columns",
           "kind": "function",
-          "line_start": 283,
-          "line_end": 289,
+          "line_start": 286,
+          "line_end": 292,
           "signature_arguments": [
             "row"
           ]
@@ -3082,8 +3083,8 @@
         {
           "symbol": "detect_table_schema",
           "kind": "function",
-          "line_start": 292,
-          "line_end": 375,
+          "line_start": 295,
+          "line_end": 378,
           "signature_arguments": [
             "rows",
             "sheet_name"
@@ -3092,8 +3093,8 @@
         {
           "symbol": "inspect_workbook",
           "kind": "function",
-          "line_start": 378,
-          "line_end": 414,
+          "line_start": 381,
+          "line_end": 417,
           "signature_arguments": [
             "path",
             "max_rows"
@@ -3102,8 +3103,8 @@
         {
           "symbol": "parse_stas_workbook",
           "kind": "function",
-          "line_start": 417,
-          "line_end": 543,
+          "line_start": 420,
+          "line_end": 555,
           "signature_arguments": [
             "path",
             "release_version"
@@ -3120,40 +3121,45 @@
           "line": 3
         },
         {
-          "module": "re",
+          "module": "math",
           "line": 4
         },
         {
-          "module": "datetime",
+          "module": "re",
           "line": 5
         },
         {
-          "module": "pathlib",
+          "module": "datetime",
           "line": 6
         },
         {
-          "module": "urllib.parse",
+          "module": "pathlib",
           "line": 7
         },
         {
-          "module": "zipfile",
+          "module": "urllib.parse",
           "line": 8
         },
         {
-          "module": "xml.etree.ElementTree",
+          "module": "zipfile",
           "line": 9
         },
         {
+          "module": "xml.etree.ElementTree",
+          "line": 10
+        },
+        {
           "module": "httpx",
-          "line": 11
+          "line": 12
         },
         {
           "module": "app.catalog",
-          "line": 13
+          "line": 14
         }
       ],
       "called_names": [
         "RuntimeError",
+        "ValueError",
         "ZipFile",
         "_column_index",
         "_normalise_header",
@@ -3177,6 +3183,7 @@
         "group",
         "int",
         "is_integer",
+        "isfinite",
         "items",
         "iter",
         "join",
@@ -3210,7 +3217,7 @@
         "write_bytes",
         "zfill"
       ],
-      "lines": 543,
+      "lines": 555,
       "resolved_local_imports": [
         "backend/app/catalog.py"
       ],
@@ -18547,6 +18554,153 @@
       "lines": 79,
       "resolved_local_imports": [
         "backend/scripts/audit_legacy_nuts_vintage.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_b02_cedefop_workbook_integrity.py",
+      "bucket": "backend/tests",
+      "sha256": "9b4a06b9af33a443963437b72ff846d1228020379d295119406b059e03e98464",
+      "bytes": 2648,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "_sheets",
+          "kind": "function",
+          "line_start": 8,
+          "line_end": 12,
+          "signature_arguments": [
+            "values"
+          ]
+        },
+        {
+          "symbol": "test_stas_nonfinite_rejected",
+          "kind": "function",
+          "line_start": 16,
+          "line_end": 19,
+          "signature_arguments": [
+            "monkeypatch",
+            "tmp_path",
+            "value"
+          ]
+        },
+        {
+          "symbol": "test_stas_invalid_isco_rejected",
+          "kind": "function",
+          "line_start": 23,
+          "line_end": 26,
+          "signature_arguments": [
+            "monkeypatch",
+            "tmp_path",
+            "isco"
+          ]
+        },
+        {
+          "symbol": "test_stas_conflicting_duplicate_rejected",
+          "kind": "function",
+          "line_start": 29,
+          "line_end": 32,
+          "signature_arguments": [
+            "monkeypatch",
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_stas_identical_duplicate_keeps_one",
+          "kind": "function",
+          "line_start": 35,
+          "line_end": 38,
+          "signature_arguments": [
+            "monkeypatch",
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "Response",
+          "kind": "class",
+          "line_start": 41,
+          "line_end": 45,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "Response.raise_for_status",
+          "kind": "function",
+          "line_start": 45,
+          "line_end": 45,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "Client",
+          "kind": "class",
+          "line_start": 48,
+          "line_end": 49,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "Client.get",
+          "kind": "function",
+          "line_start": 49,
+          "line_end": 49,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "test_stas_html_disguised_as_xlsx_does_not_overwrite_existing",
+          "kind": "function",
+          "line_start": 52,
+          "line_end": 57,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_clssi_html_disguised_as_xlsx_does_not_overwrite_existing",
+          "kind": "function",
+          "line_start": 60,
+          "line_end": 65,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "pathlib",
+          "line": 2
+        },
+        {
+          "module": "pytest",
+          "line": 3
+        },
+        {
+          "module": "app.ingestion",
+          "line": 4
+        },
+        {
+          "module": "app.ingestion",
+          "line": 5
+        }
+      ],
+      "called_names": [
+        "Client",
+        "Response",
+        "_sheets",
+        "download_workbook",
+        "float",
+        "len",
+        "parametrize",
+        "parse_stas_workbook",
+        "raises",
+        "read_bytes",
+        "setattr",
+        "write_bytes"
+      ],
+      "lines": 65,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
       ],
       "imported_by": []
     },
