@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 129,
+  "reviewed_file_count": 135,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 36.75,
+  "line_by_line_review_percent": 38.46,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -10570,7 +10570,7 @@
       "bucket": "backend/scripts",
       "sha256": "2ce4fcf48d1963015b9ff807d299d1e76d1e0862810c82df88767ac176f28591",
       "bytes": 4694,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "verify",
@@ -10658,7 +10658,7 @@
       "bucket": "backend/scripts",
       "sha256": "89a3327678ef65a60007b0ab5945965a52a43412700529fedd08de26e2c6535a",
       "bytes": 5813,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "database_evidence",
@@ -11533,7 +11533,7 @@
       "bucket": "backend/scripts",
       "sha256": "3d619a35a68f4479eab59ac25bd87de48eb3498f5b4a2152ed56c6a211b45ee8",
       "bytes": 2953,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -11679,7 +11679,7 @@
       "bucket": "backend/scripts",
       "sha256": "6ec82cd2e71ee2b78a38db249f9a634b630b7ba049536adf8557666b77a72a59",
       "bytes": 6006,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "collect",
@@ -17926,7 +17926,7 @@
       "bucket": "backend/scripts",
       "sha256": "d96dd8073e7a42daec689918f5ec4b282c75a60e9c60d77c623e5bae75b15a65",
       "bytes": 5039,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "read_database",
@@ -18031,7 +18031,7 @@
       "bucket": "backend/scripts",
       "sha256": "e0d814c16624bd2d305050b20072a965c98c13be16116509c2527cfb91138b50",
       "bytes": 6069,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "verify",
