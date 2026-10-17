@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import SimpleNamespace
+from unittest.mock import patch
 
 import duckdb
 from fastapi import FastAPI
@@ -40,57 +41,56 @@ def verify(reference_path: Path) -> dict:
     with TemporaryDirectory(prefix="augur-reference-e2e-") as directory:
         ephemeral_db = Path(directory) / "app_evidence.duckdb"
         settings = SimpleNamespace(duckdb_path=ephemeral_db)
-        analytics.settings = settings
-        ranking_module.settings = settings
-        analytics.initialize_analytics_schema()
-        transformed = []
-        for (country, geo, indicator, period, value, unit, provider, dataset,
-             dimensions, status, updated, retrieved) in source_rows:
-            transformed.append({
-                "geo_code": geo, "geo_name": geo, "geo_level": "NUTS2",
-                "geography_system": "NUTS_UNSPECIFIED", "country_iso3": country,
-                "indicator_id": indicator, "period": period, "value": value,
-                "unit": unit, "source_id": provider, "dataset_id": dataset,
-                "retrieved_at": datetime.fromisoformat(retrieved),
-                "source_updated_at": updated, "response_dimensions_json": dimensions,
-                "source_observation_status": status,
-            })
-        inserted = analytics.upsert_subnational_observations(transformed)
-        if inserted != len(source_rows):
-            raise ValueError(f"Application ingestion count mismatch: {inserted}")
+        with patch.object(analytics, "settings", settings), patch.object(ranking_module, "settings", settings):
+            analytics.initialize_analytics_schema()
+            transformed = []
+            for (country, geo, indicator, period, value, unit, provider, dataset,
+                 dimensions, status, updated, retrieved) in source_rows:
+                transformed.append({
+                    "geo_code": geo, "geo_name": geo, "geo_level": "NUTS2",
+                    "geography_system": "NUTS_UNSPECIFIED", "country_iso3": country,
+                    "indicator_id": indicator, "period": period, "value": value,
+                    "unit": unit, "source_id": provider, "dataset_id": dataset,
+                    "retrieved_at": datetime.fromisoformat(retrieved),
+                    "source_updated_at": updated, "response_dimensions_json": dimensions,
+                    "source_observation_status": status,
+                })
+            inserted = analytics.upsert_subnational_observations(transformed)
+            if inserted != len(source_rows):
+                raise ValueError(f"Application ingestion count mismatch: {inserted}")
 
-        actual = duckdb.connect(str(ephemeral_db), read_only=True)
-        try:
-            app_rows = actual.execute("""
-                SELECT geo_code, indicator_id, period, value, unit, source_id,
-                       dataset_id, response_dimensions_json, source_observation_status
-                FROM subnational_observations
-                ORDER BY geo_code, indicator_id
-            """).fetchall()
-            registry_count = actual.execute("SELECT count(*) FROM geography_registry").fetchone()[0]
-        finally:
-            actual.close()
-        expected = [(geo, indicator, period, value, unit, provider, dataset, dimensions, status)
-                    for (_country, geo, indicator, period, value, unit, provider, dataset,
-                         dimensions, status, _updated, _retrieved) in source_rows]
-        if app_rows != expected:
-            raise ValueError("Official-source values/provenance differ from persisted app evidence")
-        for geo in sorted({item[1] for item in source_rows}):
-            stored = analytics.latest_subnational_observations(geo, geography_system="NUTS_UNSPECIFIED")
-            if len(stored) != 2:
-                raise ValueError(f"Application service read-through failed: {geo}")
+            actual = duckdb.connect(str(ephemeral_db), read_only=True)
+            try:
+                app_rows = actual.execute("""
+                    SELECT geo_code, indicator_id, period, value, unit, source_id,
+                           dataset_id, response_dimensions_json, source_observation_status
+                    FROM subnational_observations
+                    ORDER BY geo_code, indicator_id
+                """).fetchall()
+                registry_count = actual.execute("SELECT count(*) FROM geography_registry").fetchone()[0]
+            finally:
+                actual.close()
+            expected = [(geo, indicator, period, value, unit, provider, dataset, dimensions, status)
+                        for (_country, geo, indicator, period, value, unit, provider, dataset,
+                             dimensions, status, _updated, _retrieved) in source_rows]
+            if app_rows != expected:
+                raise ValueError("Official-source values/provenance differ from persisted app evidence")
+            for geo in sorted({item[1] for item in source_rows}):
+                stored = analytics.latest_subnational_observations(geo, geography_system="NUTS_UNSPECIFIED")
+                if len(stored) != 2:
+                    raise ValueError(f"Application service read-through failed: {geo}")
 
-        app = FastAPI()
-        app.include_router(router, prefix="/api")
-        response = TestClient(app).get("/api/rankings/regions",
-            params={"indicator_id":"regional_employment_rate", "countries":"ESP,PRT,IRL"})
-        if response.status_code != 200:
-            raise ValueError(f"Public ranking API failed: {response.status_code}")
-        payload = response.json()
-        if payload.get("items") or payload.get("eligible_total") or payload.get("status") == "ready":
-            raise ValueError("Ranking API exposed unverified NUTS observation vintage")
-        if registry_count:
-            raise ValueError("Reference import accidentally certified a geography registry")
+            app = FastAPI()
+            app.include_router(router, prefix="/api")
+            response = TestClient(app).get("/api/rankings/regions",
+                params={"indicator_id":"regional_employment_rate", "countries":"ESP,PRT,IRL"})
+            if response.status_code != 200:
+                raise ValueError(f"Public ranking API failed: {response.status_code}")
+            payload = response.json()
+            if payload.get("items") or payload.get("eligible_total") or payload.get("status") == "ready":
+                raise ValueError("Ranking API exposed unverified NUTS observation vintage")
+            if registry_count:
+                raise ValueError("Reference import accidentally certified a geography registry")
 
     return {
         "status":"official_reference_to_app_verified_without_vintage_certification",
