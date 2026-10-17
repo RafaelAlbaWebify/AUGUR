@@ -845,7 +845,23 @@ class OECDRegionalAdapter:
                 }
             )
 
-        return rows
+        # OECD can publish repeated CSV tuples. Preserve only *identical* rows;
+        # different levels, values or source definitions must fail closed.
+        unique: dict[tuple, dict] = {}
+        for row in rows:
+            key = (row["geography_system"], row["geo_code"],
+                   row["indicator_id"], row["period"], row["source_id"])
+            previous = unique.get(key)
+            if previous is None:
+                unique[key] = row
+            elif any(previous[field] != row[field] for field in
+                     ("geo_level", "value", "unit", "dataset_id", "country_iso3")):
+                raise ValueError(
+                    f"Conflicting OECD population source tuples for {key}: "
+                    f"{previous['geo_level']}={previous['value']} vs "
+                    f"{row['geo_level']}={row['value']}; no data written"
+                )
+        return list(unique.values())
 
     def sync_population(
         self,
