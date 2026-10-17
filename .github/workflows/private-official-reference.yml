@@ -2,6 +2,11 @@ name: Public official-data reference validation
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'backend/scripts/build_official_reference_db.py'
+      - '.github/workflows/private-official-reference.yml'
 
 permissions:
   contents: read
@@ -26,7 +31,7 @@ jobs:
       - name: Build independent official-source DuckDB
         working-directory: backend
         run: python -m scripts.build_official_reference_db --db ../reference-output/official_eurostat_reference.duckdb --report ../reference-output/reference_report.json
-      - name: Upload private reference data and acceptance report
+      - name: Upload public-source reference data and acceptance report
         uses: actions/upload-artifact@v4
         with:
           name: official-reference-${{ github.run_id }}
