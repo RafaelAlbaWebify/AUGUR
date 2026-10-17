@@ -19,7 +19,20 @@ def inspect_workbook(payload: bytes) -> dict:
                 samples.append([str(value)[:90] if value is not None else None for value in row])
             sheets.append({"name":sheet.title,"max_rows":sheet.max_row,"max_columns":sheet.max_column,
                            "sample":samples})
-        return {"status":"read_only_source_inspection","format":"xlsx","sheets":sheets}
+        countries=book["Countries"]
+        header=[str(v) if v is not None else "" for v in next(countries.iter_rows(min_row=1,max_row=1,values_only=True))]
+        representative=[]
+        for record in countries.iter_rows(min_row=2,values_only=True):
+            if (record[2] in {"ESP","IRL","PRT","USA"} and
+                record[4] in {"NGDP_RPCH","PCPIPCH","LUR"}):
+                representative.append({
+                    "country":record[2],"indicator":record[4],
+                    "latest_actual_annual_data":record[15],
+                    "unit":record[9],
+                    "values":{header[i]:record[i] for i in range(18,min(81,len(header))) if header[i] in {"2023","2024","2025","2026","2027"}},
+                })
+        return {"status":"read_only_source_inspection","format":"xlsx","sheets":sheets,
+                "country_sheet_headers":header,"representative":representative}
     finally:
         book.close()
 
