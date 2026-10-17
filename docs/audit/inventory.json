@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 157,
+  "reviewed_file_count": 164,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 44.73,
+  "line_by_line_review_percent": 46.72,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -13899,7 +13899,7 @@
       "bucket": "backend/scripts",
       "sha256": "8f411bb3dae1d79739551b9d8365377723463433c645ad4252f5c72de249aed6",
       "bytes": 4993,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "probe_world_bank",
@@ -14325,7 +14325,7 @@
       "bucket": "backend/scripts",
       "sha256": "646d1b36039600d906cf2cf828ac8d7e7f023c9a917ea2fbbf768195badc892d",
       "bytes": 5277,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "LinkCollector",
@@ -15789,7 +15789,7 @@
       "bucket": "backend/scripts",
       "sha256": "c07d45565f32196b6f607ca4dc326da7c044a2d59492f8342cd2f1bcb11ef76e",
       "bytes": 8411,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_keys",
@@ -15916,7 +15916,7 @@
       "bucket": "backend/scripts",
       "sha256": "2ef8a8939e29a50461de0161b0b590114132d9c581b9edab1e9015423d914459",
       "bytes": 8544,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "reconcile",
@@ -16314,7 +16314,7 @@
       "bucket": "backend/scripts",
       "sha256": "488193bb81f70786b800a8b6c25f64cce60b04cfca973f90446dd6053a9cb813",
       "bytes": 9420,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "fingerprint",
@@ -17369,7 +17369,7 @@
       "bucket": "backend/scripts",
       "sha256": "698c71bef019e83fc1db893abd8eb0d3e5d6ec63a2ee4309c25c079d7c037f3e",
       "bytes": 5125,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_targets",
@@ -17765,7 +17765,7 @@
       "bucket": "backend/scripts",
       "sha256": "5a72d70ef9a404de0afd76e18636795ee1c0d77bf3d553878f7138ed7670aceb",
       "bytes": 6796,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_fetch_geojson",
