@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 104,
+  "reviewed_file_count": 111,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 29.63,
+  "line_by_line_review_percent": 31.62,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -13299,7 +13299,7 @@
       "bucket": "backend/scripts",
       "sha256": "f0e67d415cd15ce1ccc552bc28a514c329520faf62c6999e28c93e4f99b35f0c",
       "bytes": 2943,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -13403,7 +13403,7 @@
       "bucket": "backend/scripts",
       "sha256": "278aa08ecc0b2f1d9988c319b147d05d644354eeec77be4fcc7db4d4c0c524c1",
       "bytes": 1824,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -13842,7 +13842,7 @@
       "bucket": "backend/scripts",
       "sha256": "fb8fccbdca0e0f0e3a59d8ff943ac21ec71eb36f339c12b970dff27dcee63de1",
       "bytes": 885,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -15364,7 +15364,7 @@
       "bucket": "backend/scripts",
       "sha256": "c3092b2040e638c975d2cf94fe9c608e2e90f862188d05a9fac69a4747f6a375",
       "bytes": 5211,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "inspect",
@@ -15476,7 +15476,7 @@
       "bucket": "backend/scripts",
       "sha256": "482563d86e0e1ff1ebd9a497241b4c8156b64e1e711735131ad74c2cd37628e6",
       "bytes": 2676,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -15642,7 +15642,7 @@
       "bucket": "backend/scripts",
       "sha256": "cc4e86cd2bed6434aabbe4a7c824096dfb58bb00609528880dbafd17c4079cda",
       "bytes": 3689,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "inspect_workbook",
@@ -16037,7 +16037,7 @@
       "bucket": "backend/scripts",
       "sha256": "4b9a789ff92ff7136340c1891bee14acc7392f205ede9d2f172f3a7c2e08708d",
       "bytes": 2173,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_yes_no",
