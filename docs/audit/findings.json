@@ -175,14 +175,16 @@
     },
     {
       "path": "backend/app/ingestion/oecd.py",
-      "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "sha256": "2eedff61ea6fa5ea76c01ddf9595fe82ef582ea6c66a0bb112feec9811cae746",
       "lines_reviewed": "1-127",
       "definitions_reviewed": 6,
       "batch": "B02",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "imported_by_count": 3,
-      "method": "full source inspection and static importer cross-check"
+      "method": "full source inspection and static importer cross-check",
+      "previous_sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "revalidated_after_pr": 93
     },
     {
       "path": "backend/app/ingestion/cedefop_oja_imbalance.py",
@@ -468,14 +470,17 @@
     },
     {
       "id": "AUD-B02-016",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_93",
       "severity": "high",
       "component": "backend/app/ingestion/oecd.py",
-      "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "sha256": "2eedff61ea6fa5ea76c01ddf9595fe82ef582ea6c66a0bb112feec9811cae746",
       "line_range": "65-108",
       "description": "GDP/hour adapter normalizes CSV by TIME_PERIOD and OBS_VALUE alone; does not check REF_AREA, FREQ, MEASURE, ACTIVITY, UNIT_MEASURE, PRICE_BASE or TRANSFORMATION, despite labeling every value as GDPHRS USD PPP/hour.",
       "test_required": "Wrong OECD country/measure/unit fixture should fail before upsert",
-      "imported_by_count": 3
+      "imported_by_count": 3,
+      "previous_sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "resolution_pr": 93,
+      "followup": "Official OECD live-source smoke remains required to accept observed transport values across supported countries."
     },
     {
       "id": "AUD-B02-017",
