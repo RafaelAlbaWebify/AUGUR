@@ -36,6 +36,7 @@
 - Session boundary: user may close PC immediately after confirmed remote GitHub merge. Remote repository state persists; unsaved local edits and uncommitted local DB changes do not magically sync. Do not imply scheduled/background work. On next "continue", read this file, check HEAD/PRs, begin next accepted work package and request a local run only when the consolidated evidence harness is genuinely needed.
 
 ## CURRENT ACCEPTANCE CHECKPOINT (2026-10-17)
+- LATEST ACCEPTED: PR #76 merged d8d2444; 615 backend tests passed and live official-reference-to-app 62/62 accepted in disposable CI, with 38 d and 2 u flags and 0 ranking numbers exposed. Production remains unchanged. PR #77 audits structural write-path coverage and schedules recurring source-to-HTTP acceptance; verify its merge/CI before declaring complete.
 - PR #68–#74 merged; verified official-reference CI produced 62 pilot employment/unemployment observations and completed independent persisted-data audit. This is source-data validation, **not local production reconciliation**.
 - Local original 2025 cohort mismatch remains historically present in the operator database until explicitly approved correction; staged rehearsal does not modify production. Source status 'd' and NUTS observation vintage remain unaccepted for numerical rankings.
 - PR #75 merged at 031e0a69; shared national/subnational write batch validation and DuckDB transactions CI passed. These are code protections, not production recovery certification.
