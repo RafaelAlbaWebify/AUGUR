@@ -1,0 +1,37 @@
+name: Private official-data reference validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  reference:
+    # Do not create downloadable data artifacts while repository is public.
+    if: ${{ github.event.repository.private == true }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install dependencies
+        working-directory: backend
+        run: python -m pip install -r requirements.txt
+      - name: Validate ingestion regression tests
+        working-directory: backend
+        run: python -m pytest -q tests/test_eurostat_fail_closed_values.py tests/test_regional_ingestion_dimension_safety.py tests/test_eurostat_regional_contract.py
+      - name: Build independent official-source DuckDB
+        working-directory: backend
+        run: python -m scripts.build_official_reference_db --db ../reference-output/official_eurostat_reference.duckdb --report ../reference-output/reference_report.json
+      - name: Upload private reference data and acceptance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: official-reference-${{ github.run_id }}
+          path: reference-output/
+          retention-days: 7
+          if-no-files-found: error
