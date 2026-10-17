@@ -144,7 +144,7 @@ def download_workbook(
             f"STAS download did not return an XLSX payload: {content_type or 'unknown content type'}"
         )
 
-    if not response.content.startswith(b"PK\\x03\\x04"):
+    if not response.content.startswith(b"PK\x03\x04"):
         raise ValueError("STAS XLSX download has invalid ZIP signature")
     target_path.parent.mkdir(parents=True, exist_ok=True)
     target_path.write_bytes(response.content)
