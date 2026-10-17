@@ -13,9 +13,9 @@
   "file_count": 348,
   "python_count": 310,
   "definition_count": 1617,
-  "reviewed_file_count": 42,
+  "reviewed_file_count": 50,
   "stale_review_file_count": 1,
-  "line_by_line_review_percent": 12.07,
+  "line_by_line_review_percent": 14.37,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -7239,7 +7239,7 @@
       "bucket": "backend/app/services",
       "sha256": "0308858e502f70de93b0d04ba72cbeaad0b3a94e73df98744e575654998f2918",
       "bytes": 988,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "country_assessment",
@@ -7665,7 +7665,7 @@
       "bucket": "backend/app/services",
       "sha256": "b81e5e04e678cd62d2dcc0d5f3cdd10e7f037504c3e13d9108bb4e8905eef175",
       "bytes": 2108,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "build_comparison",
@@ -7728,7 +7728,7 @@
       "bucket": "backend/app/services",
       "sha256": "1b55dae3cec165d938fb062a8cde58b5943053b32c4a1bed2479f2e0b278443a",
       "bytes": 1738,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "list_registered_countries",
@@ -7812,7 +7812,7 @@
       "bucket": "backend/app/services",
       "sha256": "fbfc6cc9229503a12db45844fda1cb7fcbb36cba31b6aefa9067223718d295ac",
       "bytes": 1809,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "eea_city_mapping",
@@ -8384,7 +8384,7 @@
       "bucket": "backend/app/services",
       "sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
       "bytes": 2686,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "housing_affordability_evidence",
@@ -9129,7 +9129,7 @@
       "bucket": "backend/app/services",
       "sha256": "47e1a3cc3e72798f17df9575f8996083ba406f02a54bd5d7565e35cd7e9645d9",
       "bytes": 1867,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_has_value",
@@ -9541,7 +9541,7 @@
       "bucket": "backend/app/services",
       "sha256": "a0a3854acc5bf2a97fe744866e2047b0a68da32fee37fbcfbf33ee341d87f646",
       "bytes": 5570,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "regional_rankings",
@@ -9723,7 +9723,7 @@
       "bucket": "backend/app/services",
       "sha256": "efac47f7f78e50b7d76033c5bfc2fedc6005c09964d94e102f86d1689b96617f",
       "bytes": 1304,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "country_future_trajectory",
