@@ -138,7 +138,7 @@ def detect_schema(headers: list[str]) -> dict:
                 matches[field] = index
                 break
 
-    core = "occupation_code" in matches and "score" in matches
+    core = all(field in matches for field in ("occupation_code", "occupation_label", "score"))
     if core:
         status = "recognised"
     elif matches:
