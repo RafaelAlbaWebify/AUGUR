@@ -41,3 +41,10 @@ Disposable DuckDB integration tests cover three independent failure modes: malfo
 The combined `sync_eurostat` regional path now validates exact labour and housing contracts plus duplicate/finite batch properties for labour, housing and health **before** executing a single regional observations upsert. Sector evidence still uses a specialized persistence routine and is outside this transaction. Country syncs still write separately and are not represented as an all-provider atomic import. Existing historical mislabelled cohorts, source flag policy, NUTS vintage and operator approval remain unresolved: no automatic release of rankings.
 
 Acceptance gate: full CI, migration-free isolated fixture regression, and checked merge. Broader specialized write paths and safe production reconciliation need separate validation; keep blocked states explicit.
+
+## Write-path inventory update — 2026-10-17
+- Generic `observations` and `subnational_observations`: batch identity/finite-value prevalidation, explicit DuckDB transaction (PR #75, merged).
+- Labour earnings, net earnings, job vacancy, OJA imbalance, shortage index, occupation outlook, job transitions, environmental health burden: dataset-key and field-specific numeric validation plus explicit transaction in PR #76; employment and forecast values may be nullable only where existing schema permits.
+- `regional_sector_employment`: composite-key/numeric guard and own atomic transaction in PR #76. **Not** in the same transaction as labour/housing/health upsert.
+- `sync_eurostat.py`: verify labour/housing contract and combined regional batch before a single generic observation upsert; earlier country syncs are not globally atomic.
+- Other geography/catalog maintenance writers and per-provider semantic/quality/vintage decisions remain excluded from universal certification and must be audited independently. Test assertions and green CI are not authorization to modify local production.

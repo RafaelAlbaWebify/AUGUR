@@ -82,3 +82,6 @@ This defaults to a **read-only dry run**, re-checks GISCO, matches the local aud
 - Remaining caveat: same-code `NUTS_UNSPECIFIED` observation evidence is compatible for discovery but does not certify historical boundaries; mixed-source per-indicator warning UX is deferred to G3 where relevant.
 
 **G2 data-layer gate closed.** No need to repeat reconciler/audits unless source ingestion or NUTS catalog rules materially change.
+
+## Ingestion integrity acceptance (2026-10-17 checkpoint)
+Scope: provider-dimension verification → before-write duplicate/numeric contract → rollback-safe DuckDB persistence → SQL/service/public HTTP evidence agreement. Verified official-source reference DB contains the 62 pilot regional employment/unemployment observations and independent source audit. PR #76 extends code/fixture acceptance; specialized writers are in-scope for atomicity, but unreviewed provider semantics, historical production remediation and observation boundary vintage stay **blocked**. Do not unlock numerical rankings because code or CI passes.

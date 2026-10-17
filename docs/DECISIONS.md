@@ -14,3 +14,6 @@ Updated: 2026-10-09. Record architectural and workflow decisions, rejected alter
 
 ### Decision process
 For any consequential change: identify problem → cite current evidence → state alternatives and trade-offs → decide → implement → run acceptance checks → link PR/commit/evidence → update project state/handover. Proposals awaiting verification must be labelled *proposed*, not accepted.
+
+### 2026-10-17 — Validate before writing; make each supported evidence write atomic
+**Decision:** treat public provider responses as untrusted until source-specific dimensions and a dataset-appropriate batch identity/numeric gate pass. In generic country/region and selected specialized evidence writers, wrap DuckDB replacements in a transaction with explicit rollback. Combine Eurostat regional labour/housing/health writes once after prevalidation; keep sector in a separately guarded transaction. **Rejected:** silent row-level partial writes, automatically treating NUTS current registry membership as historical vintage proof, or mutating the user's live DB without permission. **Trade-off:** compatibility tests and legitimate missing-measure rules differ by source; source-policy audit remains open. Implemented in PR #75 and proposed PR #76, acceptance dependent on CI/merge and external vintage/quality evidence.

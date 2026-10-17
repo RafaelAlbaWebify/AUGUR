@@ -89,3 +89,9 @@ Original and copy verified via `verify_g2_reconciliation`: 18 identical table sc
 ## Country-map geographic camera regression — 2026-10-13
 
 Local Playwright audit on ESP/PRT/IRL after PR #42 found no JS/HTTP failures or clipped changes panel, but ESP and PRT national polygon bounds included distant island groups, making mainland geography too small. The map now defaults to a mainland-focused camera for ESP and PRT without altering selectable geometry, regions, observations, or island availability; other countries keep geometry fit. Browser tests must assert both zoom and camera center for these country defaults and Europe/focus navigation. GitHub fixture CI is not a substitute for repeat visual acceptance against the operator's full local store.
+
+## Observation-write and API integration evidence (2026-10-17)
+- PR #75 merged with backend/frontend/ops CI green; generic national/subnational writes now fail-closed on batch duplicates and nonfinite input and run inside transactions.
+- PR #76 regression suite uses disposable real DuckDB connections: SQL constraint failures after the first write must roll back all rows and registry changes; invalid later rows must leave zero writes; SQL stored values must agree with test-certified ranking services while the actual public FastAPI HTTP route blocks unverified vintages. Separate regressions protect labour-earnings SQL arity, sector rollback and specialized evidence write gates.
+- The combined Eurostat orchestrator validates all labour/housing source rows and the full labour/housing/health observation batch before a shared write. Regional sector evidence is written in a *separate atomic transaction*, not one transaction spanning all ingestion families. Country-by-country provider syncs are not globally atomic.
+- These checks are **implemented in PR #76** and must not be labelled CI-validated or merged until live checks confirm. No claim that the operator's historical production DuckDB was reconciled.
