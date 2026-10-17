@@ -826,9 +826,141 @@
       "status": "reviewed_findings_open",
       "method": "full script read, import/callee and write-side-effect contract inspection; runtime tests pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/audit_official_nuts_catalog.py",
+      "sha256": "034d0783f9bd533cf8faba841daf8c2dca82a9d0afddc7833945162714522611",
+      "lines_reviewed": "1-74",
+      "definitions_reviewed": 4,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/audit_official_reference_db.py",
+      "sha256": "30d55411701c2485ba9235d75a7df52e575a5c75fdd43f1342e70e48d049681d",
+      "lines_reviewed": "1-72",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/check_radar_evidence.py",
+      "sha256": "cd12089d5aea6d584a04e4017e981ca710bffb8d74957f34212f23670e747371",
+      "lines_reviewed": "1-83",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/export_indicator_inventory.py",
+      "sha256": "82f325f75a694756eb42e06c97549801067a9e4f2c9a014372e72390ab2ee059",
+      "lines_reviewed": "1-47",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/export_ranking_evidence_audit.py",
+      "sha256": "a2af7e6cf3cc22dade1ca261837be0338081a7aa08f36bf110098d8cae71b656",
+      "lines_reviewed": "1-85",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/export_ranking_vintage_audit.py",
+      "sha256": "713e7febb18a2e373c9fe8ad5d348449b34f75d804d48399ad26cad27e588475",
+      "lines_reviewed": "1-79",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/import_cedefop_clssi.py",
+      "sha256": "aa5fa39ddffafc692b820fa4268c09c78500217b36d4828a4049675af9d4a238",
+      "lines_reviewed": "1-56",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/import_cedefop_oja_imbalance.py",
+      "sha256": "1ff42722acc432684582dc8eae2391cf8c65fe408da0cdd66f52d08827004676",
+      "lines_reviewed": "1-51",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/import_cedefop_stas.py",
+      "sha256": "97229831ef3f56f9a6df0b60ef605ebd117c08605ef851d5d2ed37cba355b0d7",
+      "lines_reviewed": "1-46",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/import_esco.py",
+      "sha256": "17fbe49f8d08cb2eb0af3d2bc5514ca7f1b5e41dec4bc72f3fddd8738f3794c8",
+      "lines_reviewed": "1-46",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/import_ttv_calibration.py",
+      "sha256": "17e0dc4ed6ca90e033aeaabfc66fb14c7ab4b25f0776e082fcb1301a378cf70f",
+      "lines_reviewed": "1-64",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/import_ttv_holdout.py",
+      "sha256": "d3fd09c0c58ae77372f0d18438ddf013d6821319724da6ecbb4e5b685f931c60",
+      "lines_reviewed": "1-50",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 75,
+  "certified_line_by_line_review_count": 87,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1714,8 +1846,48 @@
       "line_range": "9-15",
       "description": "A script named discover_country_catalog calls initialize_datastores and register_country_catalog and can write operator data despite discovery-sounding name. It is not read-only; safety and preflight contract should be explicit.",
       "test_required": "Require opt-in write flag or explicit staging protection; verify no DB writes under default discovery/dry-run invocation."
+    },
+    {
+      "id": "AUD-B04-002",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/check_radar_evidence.py",
+      "sha256": "cd12089d5aea6d584a04e4017e981ca710bffb8d74957f34212f23670e747371",
+      "line_range": "23-25",
+      "description": "Nominal evidence-check function invokes initialize_datastores, potentially mutating databases while intended as a read-only diagnostic.",
+      "test_required": "Use read-only datastore health preflight and test unchanged DB hashes after check."
+    },
+    {
+      "id": "AUD-B04-003",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/export_ranking_evidence_audit.py",
+      "sha256": "a2af7e6cf3cc22dade1ca261837be0338081a7aa08f36bf110098d8cae71b656",
+      "line_range": "43-53",
+      "description": "Subnational observation identity joins registered geography on system/code/level without namespace or source country key; ambiguous overlapping codes can attribute rows to wrong country.",
+      "test_required": "Cross-country duplicated-code test and explicit uniqueness/provenance contract."
+    },
+    {
+      "id": "AUD-B04-004",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/export_ranking_vintage_audit.py",
+      "sha256": "713e7febb18a2e373c9fe8ad5d348449b34f75d804d48399ad26cad27e588475",
+      "line_range": "26-35",
+      "description": "Vintage-audit export uses same geography join on code/system/level; historical boundary identity not independently proved and duplicated geo codes may map to multiple countries.",
+      "test_required": "Cross-country collision fixture; output explicit ambiguity and exclude uncertified matches."
+    },
+    {
+      "id": "AUD-B04-005",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/audit_official_nuts_catalog.py",
+      "sha256": "034d0783f9bd533cf8faba841daf8c2dca82a9d0afddc7833945162714522611",
+      "line_range": "18-25",
+      "description": "official_codes accepts all nonempty NUTS_ID properties without validating country/level/code structure; malformed but matching-country records can be counted as official.",
+      "test_required": "Fail-closed malformed feature fixtures and source geometry/version metadata checks."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 21.37
+  "certified_line_by_line_review_percent": 24.79
 }
