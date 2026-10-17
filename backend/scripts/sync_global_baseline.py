@@ -1,20 +1,25 @@
 from __future__ import annotations
 
 import json
+import argparse
 from time import perf_counter
 
 from app.db.bootstrap import initialize_datastores
 from app.ingestion.imf import IMFAdapter
+from app.ingestion.imf_weo_official import OfficialWEOAdapter
 from app.ingestion.un_wpp import UNWPPAdapter
 from app.ingestion.world_bank import WorldBankAdapter
 from app.services.country import country_coverage_summary
 
 
 def main() -> int:
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--imf-official-weo",action="store_true",help="Opt in to official October 2026 WEO; not for production remediation")
+    args=parser.parse_args()
     initialize_datastores()
 
     world_bank = WorldBankAdapter(timeout_seconds=120, max_retries=3)
-    imf = IMFAdapter(timeout_seconds=120, max_retries=3)
+    imf = OfficialWEOAdapter() if args.imf_official_weo else IMFAdapter(timeout_seconds=120, max_retries=3)
     un_wpp = UNWPPAdapter(timeout_seconds=180, max_retries=3)
 
     started_at = perf_counter()
@@ -33,7 +38,8 @@ def main() -> int:
 
         print("\n[IMF baseline]")
         imf_started = perf_counter()
-        imf_result = imf.sync_countries(codes)
+        imf_result = (imf.sync_countries(codes, persist=True)
+                      if args.imf_official_weo else imf.sync_countries(codes))
         imf_seconds = perf_counter() - imf_started
 
         print("\n[UN WPP baseline]")
@@ -68,6 +74,8 @@ def main() -> int:
                 "complete": imf_result["complete"],
                 "failure_count": len(imf_result["failures"]),
                 "availability": "complete" if imf_result["complete"] else "unavailable" if imf_result["rows"] == 0 else "partial",
+                "vintage": imf_result.get("vintage"),
+                "source_contract": imf_result.get("source_contract") if args.imf_official_weo else None,
             },
             "UN_WPP": {
                 "rows": wpp_result["rows"],
