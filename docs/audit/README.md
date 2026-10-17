@@ -50,3 +50,7 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 - 8 API/provider/core/provenance modules reviewed at exact SHA; **8/47 B03-source candidates**. The B03 denominator may change if review scope expands beyond app modules; see inventory for total source count.
 - Critical integration discrepancy: single-country ProviderSpec still registers legacy DataMapper April 2026, unlike official global WEO October 2026, and ranking_eligibility lacks quality-status metadata in candidate. These are findings, not certified releases.
 - No automatic ranking unlock or production DB modification. Continue B03 service contracts and route-level consumers.
+
+## B03 second service review batch
+- Eight more service modules reviewed with source SHA: country metadata, country comparisons, assessments, EEA city mapping, housing affordability, profile readiness, regional rankings and future trajectory. The total is 51/348 source files (14.66%), but recently changed analytics.py is **stale pending PR104 revalidation**, so effective verified count is one lower until merged.
+- The ranking service requires independent proof of exact historical boundary vintage. Caller-supplied verified_geo_ids are not an authoritative proof source. Housing/compare/provider semantics have evidence-linked risks in findings.json.

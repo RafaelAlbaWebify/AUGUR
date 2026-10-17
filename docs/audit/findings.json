@@ -468,9 +468,97 @@
       "status": "reviewed_findings_open",
       "imported_by_count": 1,
       "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/services/assessment.py",
+      "sha256": "0308858e502f70de93b0d04ba72cbeaad0b3a94e73df98744e575654998f2918",
+      "lines_reviewed": "1-30",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/app/services/compare.py",
+      "sha256": "b81e5e04e678cd62d2dcc0d5f3cdd10e7f037504c3e13d9108bb4e8905eef175",
+      "lines_reviewed": "1-74",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/country.py",
+      "sha256": "1b55dae3cec165d938fb062a8cde58b5943053b32c4a1bed2479f2e0b278443a",
+      "lines_reviewed": "1-65",
+      "definitions_reviewed": 5,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 7
+    },
+    {
+      "path": "backend/app/services/eea_city_catalog.py",
+      "sha256": "fbfc6cc9229503a12db45844fda1cb7fcbb36cba31b6aefa9067223718d295ac",
+      "lines_reviewed": "1-74",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/app/services/housing_affordability.py",
+      "sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
+      "lines_reviewed": "1-45",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/profile_readiness.py",
+      "sha256": "47e1a3cc3e72798f17df9575f8996083ba406f02a54bd5d7565e35cd7e9645d9",
+      "lines_reviewed": "1-72",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/regional_rankings.py",
+      "sha256": "a0a3854acc5bf2a97fe744866e2047b0a68da32fee37fbcfbf33ee341d87f646",
+      "lines_reviewed": "1-101",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/trajectory.py",
+      "sha256": "efac47f7f78e50b7d76033c5bfc2fedc6005c09964d94e102f86d1689b96617f",
+      "lines_reviewed": "1-46",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full service code review with referenced source/SQL consumers",
+      "imported_by_count": 3
     }
   ],
-  "certified_line_by_line_review_count": 43,
+  "certified_line_by_line_review_count": 51,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1152,8 +1240,68 @@
       "line_range": "18-45",
       "description": "Source status d/u are blocked conservatively but no edition-specific official Eurostat quality-flag policy accepted; rankings remain correctly blocked.",
       "test_required": "Official flag acceptance matrix provider evidence"
+    },
+    {
+      "id": "AUD-B03-008",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/services/regional_rankings.py",
+      "sha256": "a0a3854acc5bf2a97fe744866e2047b0a68da32fee37fbcfbf33ee341d87f646",
+      "line_range": "1-101",
+      "description": "Ranking service accepts caller-supplied verified_geo_ids as proof of historical boundary vintage, with no internally authenticated official reference binding; users/API callers could incorrectly enable numeric ranking if verification IDs trusted externally.",
+      "test_required": "Verified-geography IDs must be sourced from signed/proven registry not request-controlled"
+    },
+    {
+      "id": "AUD-B03-009",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/housing_affordability.py",
+      "sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
+      "line_range": "9-45",
+      "description": "Housing affordability accepts boolean source values as numeric through isinstance(bool,(int,float)); NaN generally fails its range comparisons, but finite-number and type checks should be explicit and harmonized with source contracts.",
+      "test_required": "Boolean housing metric must not report available, plus nonfinite source fixtures"
+    },
+    {
+      "id": "AUD-B03-010",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/eea_city_catalog.py",
+      "sha256": "fbfc6cc9229503a12db45844fda1cb7fcbb36cba31b6aefa9067223718d295ac",
+      "line_range": "16-74",
+      "description": "Global in-process EEA/GISCO cache is shared for all callers, including injected clients and force-refresh, without provider-version key. Fresh source mapping may be stale for 24h and ambiguous codes omitted.",
+      "test_required": "Cache provenance, ambiguity and invalidation tests"
+    },
+    {
+      "id": "AUD-B03-011",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/compare.py",
+      "sha256": "b81e5e04e678cd62d2dcc0d5f3cdd10e7f037504c3e13d9108bb4e8905eef175",
+      "line_range": "9-74",
+      "description": "Comparison groups same indicator across countries using the first observed unit, without verifying subsequent source units, periods or comparative semantics, while labeling aligned current observations.",
+      "test_required": "Mixed unit/dataset country fixture should flag incomparable rather than group silently"
+    },
+    {
+      "id": "AUD-B03-012",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/trajectory.py",
+      "sha256": "efac47f7f78e50b7d76033c5bfc2fedc6005c09964d94e102f86d1689b96617f",
+      "line_range": "10-46",
+      "description": "Use horizons or DEFAULT_HORIZONS silently replaces user-supplied empty horizons list with defaults; validate explicit intent.",
+      "test_required": "Explicit empty list should yield empty horizons"
+    },
+    {
+      "id": "AUD-B03-013",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/country.py",
+      "sha256": "1b55dae3cec165d938fb062a8cde58b5943053b32c4a1bed2479f2e0b278443a",
+      "line_range": "33-65",
+      "description": "country_metadata overlays saved DB country info with catalog nonempty values even when more recent authoritative country metadata was persisted; potential stale information.",
+      "test_required": "Catalog versus persisted source precedence audit"
     }
   ],
-  "denominator_inventoried_files": 347,
-  "certified_line_by_line_review_percent": 12.39
+  "denominator_inventoried_files": 348,
+  "certified_line_by_line_review_percent": 14.66
 }
