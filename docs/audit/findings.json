@@ -1684,9 +1684,53 @@
       "status": "reviewed_findings_open",
       "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/audit_repository_inventory.py",
+      "sha256": "834424ac1c99b0db7eeb5cdb5e292a74e36b2ff61181aec422d0b0722a235268",
+      "lines_reviewed": "1-149",
+      "definitions_reviewed": 13,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection with static import map and pipeline/SQL contract cross-check; execution tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_ranking_employment_age.py",
+      "sha256": "204ba0a434db5bd22ee0b818b503195d30bd2e7cfaec892cc2abe1ee3bfd36af",
+      "lines_reviewed": "1-148",
+      "definitions_reviewed": 4,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection with static import map and pipeline/SQL contract cross-check; execution tests pending",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/scripts/sync_eurostat.py",
+      "sha256": "663ec875f84e39578c378eb8233b3733555df5d692fae5569086a7ac58b48b75",
+      "lines_reviewed": "1-136",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection with static import map and pipeline/SQL contract cross-check; execution tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_eurostat_nuts3_safety.py",
+      "sha256": "f0f336b4d6290a264dd59843c55d244b54f1fbbb129e88b24c8b7f98068fb0a0",
+      "lines_reviewed": "1-123",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source inspection with static import map and pipeline/SQL contract cross-check; execution tests pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 153,
+  "certified_line_by_line_review_count": 157,
   "findings": [
     {
       "id": "LEAD-001",
@@ -2862,8 +2906,48 @@
       "line_range": "39-54",
       "description": "Density inspector caps parsed rows at 5000 only after response.text materializes entire HTTP payload; sampling first 5000 may omit requested geography from later CSV rows.",
       "test_required": "Bound network download and validate sample representativeness; targeted geography query."
+    },
+    {
+      "id": "AUD-B04-031",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_eurostat.py",
+      "sha256": "663ec875f84e39578c378eb8233b3733555df5d692fae5569086a7ac58b48b75",
+      "line_range": "69-99",
+      "description": "Eurostat sync performs national writes before collecting/validating full regional batch and performs sector writes after subnational writes; no cross-stage transaction, so later failure leaves partial sync despite command failure.",
+      "test_required": "Inject failure after national and after subnational writes; document partial-success/retry/idempotency policy and transaction barriers."
+    },
+    {
+      "id": "AUD-B04-032",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_eurostat_nuts3_safety.py",
+      "sha256": "f0f336b4d6290a264dd59843c55d244b54f1fbbb129e88b24c8b7f98068fb0a0",
+      "line_range": "54-113",
+      "description": "NUTS3 script registers geography identities under NUTS_2024, then calls sync_regional_evidence_codes which stores returned observations with unspecified NUTS vintage by default. Current registry existence is not statistical-vintage proof.",
+      "test_required": "Test NUTS_2024 registry with NUTS_UNSPECIFIED observations; preserve explicit boundary-compatibility warning and avoid release ranking."
+    },
+    {
+      "id": "AUD-B04-033",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/audit_repository_inventory.py",
+      "sha256": "834424ac1c99b0db7eeb5cdb5e292a74e36b2ff61181aec422d0b0722a235268",
+      "line_range": "73-100",
+      "description": "Inventory marks reviewed purely by path + SHA256 equality; it does not verify that all definitions, tests or external dependencies have actually been examined, despite status 'verified_reviewed'. Non-Python files are hash-only indexed.",
+      "test_required": "Reframe as hash-matched reviewer attestation rather than independently verified audit depth; add scoped JS/TS/PS1 semantic review and evidence trace checks."
+    },
+    {
+      "id": "AUD-B04-034",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_ranking_employment_age.py",
+      "sha256": "204ba0a434db5bd22ee0b818b503195d30bd2e7cfaec892cc2abe1ee3bfd36af",
+      "line_range": "26-40",
+      "description": "Employment-age source comparison fetches NUTS_2024 local rows and compare provider cohorts, but does not prove the boundary vintage or source status compatibility; script correctly labels forensic-only yet result may be mistaken for acceptance.",
+      "test_required": "Regression for same-code different-vintage and flagged provider observations; require explicit consumer gate."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 43.59
+  "certified_line_by_line_review_percent": 44.73
 }
