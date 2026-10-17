@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import io
 import math
+import math
 import zipfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -156,6 +157,11 @@ def parse_eea_pm25_burden_archive(
             raise ValueError(f"Invalid nonfinite EEA health-burden observation for {geo_code}:{dimension}:{period}")
         if unit_code != "NR":
             raise ValueError(f"Unexpected EEA health-burden unit: {unit_code}")
+
+        if not math.isfinite(value) or value < 0:
+            raise ValueError(f"Invalid EEA health burden value for {geo_code}: {value}")
+        if unit_code != "NR":
+            raise ValueError(f"Unexpected EEA health burden unit for {geo_code}: {unit_code}")
 
         rows.append({
             "geo_code": geo_code,
