@@ -2,6 +2,8 @@ name: AUGUR Global Baseline Smoke
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: "29 5 * * 1"
   push:
     branches: [main]
     paths:
@@ -40,4 +42,13 @@ jobs:
         run: python -m pip install -r requirements.txt
 
       - name: Sync full global country baseline
-        run: python -m scripts.sync_global_baseline --imf-official-weo
+        run: python -m scripts.sync_global_baseline --imf-official-weo --report ../reference-output/global-baseline-acceptance.json
+
+      - name: Upload provider-specific global acceptance evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: global-baseline-evidence-${{ github.run_id }}
+          path: reference-output/global-baseline-acceptance.json
+          retention-days: 7
+          if-no-files-found: warn

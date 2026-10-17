@@ -3,10 +3,12 @@
 Updated: 2026-10-09. **Canonical coordination entry point**, not a replacement for architectural or methodological specifications.
 
 ## Current verified checkpoint — 2026-10-17
-- PR #79 merged `b4cbee1` after passing PR CI; global live smoke run 39028369542 completed successfully with 217 analyzable countries, 47,434 WB rows, 130,464 WPP rows and 0 IMF rows after three HTTP 403 failures; memory issue not reproduced, full-source completion not achieved. PR #76–#78 merged and validated isolated database rollback, 62/62 Eurostat pilot read-through, structural write audit and correct API blocked/missing status.
-- Historic 2025 NUTS2 employment cohort mislabeling in local original remains unmodified; operator approval and verified rollback needed before remediation. Eurostat `d`/`u` quality policy and NUTS vintage remain blockers to numerical rankings.
-- IMF HTTP 403 is a separately evidenced global-provider problem. Partial-source coverage must not be represented as complete.
-- Canonical active instructions: root `augur.md`; this document retains historical October 9 evidence, not an up-to-date completion percentage.
+- PR #86 merged `844ad88`: confirmed GitHub Actions full-world run 39031300201 passed. 217 analyzable World Bank country codes; World Bank 47,434 rows, UN WPP 130,464 (missing country CHI), IMF official WEO Oct 2026 16,753 rows across 178 countries (14,627 observed and 2,126 forecasts) and explicitly partial. Global provider observation total 194,651; 16.028 seconds in isolated CI. Real WEO reference source-to-disposable-DuckDB check 16,979/16,979 rows in run 39031119342. 35 IMF series omit latest actual year; LUR unit unverified and excluded.
+- PR #85 merged `f7c36cf`: OECD `POP` unit `PS` now strictly distinguished from density `PS_KM2`. The complete live-source-smoke 39030260361 passed following this repair.
+- Accepted production-write safeguards: PR #75/#76 transactional DuckDB rollback and SQL/API checks, PR #77 guarded central paths. These do not certify user-held DB or unverified external provider coverage.
+- Active reliability improvement: machine-readable source-specific full global acceptance report + recurring checks, without falsely declaring country, vintage, quality or ranking completeness.
+- Regional numerical rankings remain blocked: operator's historical 31 NUTS2 2025 employment observations have wrong cohort, provider `d`/`u` statuses and observation boundary vintage unresolved. Do not mutate local original without explicit approval and restored-copy rehearsal. No automatic rankings unlock or universal availability claim.
+
 
 ## Product purpose
 Local-first country/region trajectory, employment intelligence, and personal fit. Separate *observations*, *official forecasts*, *candidate scenarios* and *personal fit*. Never invent or impute source observations to make a feature appear complete.

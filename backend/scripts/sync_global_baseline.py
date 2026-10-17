@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import argparse
+from pathlib import Path
 from time import perf_counter
 
 from app.db.bootstrap import initialize_datastores
@@ -15,6 +16,7 @@ from app.services.country import country_coverage_summary
 def main() -> int:
     parser=argparse.ArgumentParser()
     parser.add_argument("--imf-official-weo",action="store_true",help="Opt in to official October 2026 WEO; not for production remediation")
+    parser.add_argument("--report",type=Path,help="Save versioned source-coverage acceptance JSON (public data only)")
     args=parser.parse_args()
     initialize_datastores()
 
@@ -85,6 +87,21 @@ def main() -> int:
             },
         },
     }
+    payload["acceptance"] = {
+        "schema_version": 1,
+        "status": "passed_with_source_gaps" if coverage["analyzable_country_count"] > 0 else "blocked",
+        "production_database_certified": False,
+        "rankings_certified": False,
+        "operator_production_writes": 0,
+        "source_gaps": {
+            "imf_blocked_indicators": imf_result.get("source_contract", {}).get("blocked_indicator_ids", []) if args.imf_official_weo else [],
+            "imf_series_missing_actual_metadata": imf_result.get("source_contract", {}).get("missing_latest_actual_series") if args.imf_official_weo else None,
+            "un_wpp_missing_countries": wpp_result["missing_country_iso3"],
+        },
+    }
+    if args.report:
+        args.report.parent.mkdir(parents=True, exist_ok=True)
+        args.report.write_text(json.dumps(payload, indent=2, default=str) + chr(10), encoding="utf-8")
     print(json.dumps(payload, indent=2, default=str))
 
     # Global coverage is expected to be heterogeneous. The command succeeds
