@@ -27,3 +27,9 @@ Status: first fail-closed Eurostat parser hardening in progress. This is **not**
 Eurostat `normalize` now refuses malformed dimension layout and nonfinite/non-numeric actual observations. Tests cover zero, NaN, infinities, booleans, text, invalid dimension size and duplicate dimension identifiers. **This patch does not alter historical rows, enforce cross-provider contracts, or authorize rankings.**
 
 Next implementation should audit alternate normalizers (`normalize_earnings` and regional ingestion modules), generic `upsert_observations` / `upsert_subnational_observations`, OECD adapters, and all scripts that bypass common validation. A single automatic acceptance runner should report the results; do not require the user to repeat manual source audits.
+
+## 2026-10-17 observation-write transaction gate
+
+Source-to-database review found national and subnational generic upserts opening DuckDB before checking all rows, and subnational writes doing geography registry and observation replacements without an explicit transaction. This package adds a batch-level finite-value, identity, period and duplicate-key guard, plus explicit rollback on failure for those two entrypoints. This is *not* universal ingestion certification: alternate specialized write paths (OECD, ESCO, earnings etc.) still require independent inventory and source-specific dimension policy. Historical local DuckDB remains unchanged. A merged CI pass establishes code correctness, not NUTS vintage, source comparability or local recovery.
+
+Acceptance: invalid later rows rejected before opening DB; duplicate keys rejected; valid national/regional fixtures accepted; complete backend/frontend/ops CI; tests of atomic rollback are next independent integration gate.
