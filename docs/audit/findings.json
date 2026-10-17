@@ -350,14 +350,16 @@
     },
     {
       "path": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "lines_reviewed": "1-3689",
       "definitions_reviewed": 61,
       "batch": "B02",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
-      "method": "complete source and SQL/provider normalizer inspection with static importers",
-      "imported_by_count": 47
+      "method": "Complete original source review plus full changed-region diff revalidation of PR104 transactional and bootstrap changes",
+      "imported_by_count": 47,
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "revalidated_after_pr": 104
     },
     {
       "path": "backend/app/ingestion/oecd_fua.py",
@@ -583,7 +585,8 @@
       "severity": "critical",
       "component": "backend/app/db/analytics.py",
       "description": "31 historical 2025 region employment rows in local original came from wrong age dimension. No production rewrite without verified backup, vintage, source quality policy and operator authorization.",
-      "evidence": "docs/GR2_ACCEPTANCE_AND_REMEDIATION.md"
+      "evidence": "docs/GR2_ACCEPTANCE_AND_REMEDIATION.md",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4"
     },
     {
       "id": "LEAD-004",
@@ -1033,73 +1036,82 @@
     },
     {
       "id": "AUD-B02-041",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_104_with_disposable_db_tests",
       "severity": "high",
       "component": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "line_range": "360-408",
       "description": "Database bootstrap backfill REPLACEs geography_registry records with NULL for parent_geo_id and lat/long on subsequent startup; may erase enriched geographies.",
-      "test_required": "Existing seeded geo enrichment persists across repeated initialize_analytics_schema calls"
+      "test_required": "Existing seeded geo enrichment persists across repeated initialize_analytics_schema calls",
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "resolution_pr": 104
     },
     {
       "id": "AUD-B02-042",
       "state": "open_requires_regression",
       "severity": "high",
       "component": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "line_range": "286-357",
       "description": "Historical migration infers NUTS_2024 from NUTS2/3 level without source-vintage proof, contrary to explicit unverified NUTS ranking gates.",
-      "test_required": "Legacy NUTS2 rows migrate as NUTS_UNSPECIFIED unless official per-source vintage proof"
+      "test_required": "Legacy NUTS2 rows migrate as NUTS_UNSPECIFIED unless official per-source vintage proof",
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9"
     },
     {
       "id": "AUD-B02-043",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_104_with_disposable_db_tests",
       "severity": "high",
       "component": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "line_range": "2534-2569,2993-3031",
       "description": "upsert_geographies and upsert_geography_geometries execute batch writes without explicit BEGIN/COMMIT/ROLLBACK, unlike observation writes.",
-      "test_required": "Injected failure in second row leaves no partial registry/geometry writes"
+      "test_required": "Injected failure in second row leaves no partial registry/geometry writes",
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "resolution_pr": 104
     },
     {
       "id": "AUD-B02-044",
       "state": "open_requires_regression",
       "severity": "medium",
       "component": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "line_range": "1210-1246",
       "description": "Latest labour occupation outlook returns rows from multiple release_versions for same period rather than selecting one current vintage.",
-      "test_required": "Two STAS release versions with same period should yield explicit unique release selection"
+      "test_required": "Two STAS release versions with same period should yield explicit unique release selection",
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9"
     },
     {
       "id": "AUD-B02-045",
       "state": "open_requires_regression",
       "severity": "medium",
       "component": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "line_range": "1546-1610,1700-1889,3489-3622",
       "description": "Regional sector/health availability queries use exact upper-case geo_level='NUTS2' although geography rows may store lowercase 'nuts2'; risk hidden stored evidence.",
-      "test_required": "Mixed-case geo_level rows must appear consistently in regional API status and bundles"
+      "test_required": "Mixed-case geo_level rows must appear consistently in regional API status and bundles",
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9"
     },
     {
       "id": "AUD-B02-046",
       "state": "open_requires_regression",
       "severity": "medium",
       "component": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "line_range": "3267-3342,3345-3422,3489-3622",
       "description": "When geography_system omitted subnational query partitions by indicator only; multiple systems sharing geo_code could be mixed in regional and city evidence, including unverified vintage.",
-      "test_required": "Same-code two-systems fixture retains system-separated evidence or explicit ambiguity"
+      "test_required": "Same-code two-systems fixture retains system-separated evidence or explicit ambiguity",
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9"
     },
     {
       "id": "AUD-B02-047",
       "state": "open_requires_regression",
       "severity": "medium",
       "component": "backend/app/db/analytics.py",
-      "sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9",
+      "sha256": "65c8f2f9e83e7a96ed49f909a73dfe8efd9011f1f00b1254f921103e7cdb74d4",
       "line_range": "1892-2154",
       "description": "Country observation and indicators choose source by priority and observed flag without source_observation_status quality acceptance (d/u); do not treat these API values as ranking-certified.",
-      "test_required": "Eurostat flagged numeric series remains blocked in ranking API despite being readable as evidence"
+      "test_required": "Eurostat flagged numeric series remains blocked in ranking API despite being readable as evidence",
+      "previous_sha256": "2a8cf8018fd0660ce08fc24cdb2a90622399a806b077609fafd709d6f28087c9"
     },
     {
       "id": "AUD-B02-048",
