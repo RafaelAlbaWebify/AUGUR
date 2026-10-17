@@ -1,5 +1,5 @@
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "scope": [
     "backend/app/",
     "backend/scripts/",
@@ -9,12 +9,13 @@
     "tools/"
   ],
   "generated_from": "current_worktree",
-  "method": "static AST inventory for Python; hash/path/size for other languages",
-  "file_count": 339,
-  "python_count": 301,
-  "definition_count": 1553,
-  "reviewed_file_count": 0,
-  "line_by_line_review_percent": 0,
+  "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
+  "file_count": 340,
+  "python_count": 302,
+  "definition_count": 1570,
+  "reviewed_file_count": 8,
+  "stale_review_file_count": 3,
+  "line_by_line_review_percent": 2.35,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 117,
+    "backend/tests": 118,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -34,100 +35,114 @@
     {
       "path": ".github/workflows/audit-repository-inventory.yml",
       "bucket": "github/workflows",
-      "sha256": "953f1c93fe699b477e43a30e4106faba2c3c7c44e3c0113f51c5f8ae561a3513",
-      "bytes": 1262,
-      "review_status": "not_reviewed"
+      "sha256": "5ac457b08d3d9e4cee43961bec75f92dbc1ef41252434491fc9d559eaaef7258",
+      "bytes": 1284,
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/ci.yml",
       "bucket": "github/workflows",
       "sha256": "2cc936cc56cf7132a22d89ea652b7a0520bf81655fa140fcdb02077ff0cf7d76",
       "bytes": 2994,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/eurostat-regional-coverage-smoke.yml",
       "bucket": "github/workflows",
       "sha256": "ef05292254b3c0354ccb92f8494265f0d577c38e3c338687980f0d6527f1620f",
       "bytes": 1474,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/gisco-nuts2024-smoke.yml",
       "bucket": "github/workflows",
       "sha256": "8f9b686cbe98882a01393fee67a8139433e1dca588970b161760d24050a65e66",
       "bytes": 866,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/global-baseline-smoke.yml",
       "bucket": "github/workflows",
       "sha256": "e5b0694fb09e942048dc687cae0a594d08d05c582a0c03d5e64900037790efe6",
       "bytes": 1556,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/imf-official-source-probe.yml",
       "bucket": "github/workflows",
       "sha256": "6e49fde249a640d66b4ac26e1d0b193da50c9a19b703e8ae973e3249367e3d75",
       "bytes": 697,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/live-source-smoke.yml",
       "bucket": "github/workflows",
       "sha256": "2b8bd7d0204b8efd6cba1b72021784b0a8b49cb587f95b1158d13b65af446d50",
       "bytes": 6216,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/oecd-fiscal-source-smoke.yml",
       "bucket": "github/workflows",
       "sha256": "96cbe5f1f0e234e5e2964a0ce77cbf181dd06227bc3ba295a973a40f59071679",
       "bytes": 976,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/oecd-green-area-research.yml",
       "bucket": "github/workflows",
       "sha256": "92cff8272058ddedbc287b241fa906e64be53685683c7560a9f64c29d5971740",
       "bytes": 885,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/oecd-population-contract-probe.yml",
       "bucket": "github/workflows",
       "sha256": "0997817097cca8cb06e0ca52b77e9a5f24eb63db295224e9d7150bf0988fa3fa",
       "bytes": 714,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/oecd-regional-safety-research.yml",
       "bucket": "github/workflows",
       "sha256": "de39d25ca547ace41868bf2cfdc0fe3c511af7f6e2641501b81e6dc4a0e5cfaf",
       "bytes": 902,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/oecd-research-smoke.yml",
       "bucket": "github/workflows",
       "sha256": "4e763e4f6f6fdd4c6c8433ea2dd4fe95d46ffd2f9829fb84a78a23de14524a8c",
       "bytes": 1432,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/official-nuts-catalog-audit.yml",
       "bucket": "github/workflows",
       "sha256": "4d43d16927229ed4d0af3509415814e1b218640d35c9422260e119b885f64273",
       "bytes": 1047,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": ".github/workflows/private-official-reference.yml",
       "bucket": "github/workflows",
       "sha256": "f27d346b2ade90291db3b5498ca412235f0dc271d0b188006c825938a75627c8",
       "bytes": 2293,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "backend/app/__init__.py",
@@ -138,7 +153,12 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_esco_store.py",
+        "backend/tests/test_providers.py"
+      ]
     },
     {
       "path": "backend/app/api/__init__.py",
@@ -149,7 +169,11 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_health.py"
+      ]
     },
     {
       "path": "backend/app/api/routes.py",
@@ -748,7 +772,39 @@
         "upper",
         "values"
       ],
-      "lines": 837
+      "lines": 837,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/db/profile.py",
+        "backend/app/esco_store.py",
+        "backend/app/models/profile.py",
+        "backend/app/services/assessment.py",
+        "backend/app/services/career_fit.py",
+        "backend/app/services/city_evidence.py",
+        "backend/app/services/compare.py",
+        "backend/app/services/country.py",
+        "backend/app/services/financial_fit.py",
+        "backend/app/services/geography_indicator_coverage.py",
+        "backend/app/services/language_fit.py",
+        "backend/app/services/legal_fit.py",
+        "backend/app/services/operability.py",
+        "backend/app/services/personalized_compare.py",
+        "backend/app/services/profile_readiness.py",
+        "backend/app/services/regional_evidence.py",
+        "backend/app/services/regional_rankings.py",
+        "backend/app/services/scenarios.py",
+        "backend/app/services/trajectory.py",
+        "backend/app/services/trends.py",
+        "backend/app/services/ttv.py",
+        "backend/app/services/ttv_calibration.py"
+      ],
+      "imported_by": [
+        "backend/app/main.py",
+        "backend/scripts/verify_reference_app_readthrough.py",
+        "backend/tests/test_atomic_upsert_api_integration.py"
+      ]
     },
     {
       "path": "backend/app/catalog.py",
@@ -788,7 +844,41 @@
         "ValueError",
         "upper"
       ],
-      "lines": 530
+      "lines": 530,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/db/analytics.py",
+        "backend/app/ingestion/cedefop_stas.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/world_bank.py",
+        "backend/app/providers.py",
+        "backend/app/services/assessment.py",
+        "backend/app/services/country.py",
+        "backend/app/services/legal_fit.py",
+        "backend/app/services/operability.py",
+        "backend/app/services/personalized_compare.py",
+        "backend/app/services/regional_rankings.py",
+        "backend/app/services/scenarios.py",
+        "backend/app/services/trends.py",
+        "backend/scripts/check_radar_evidence.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/export_indicator_inventory.py",
+        "backend/scripts/inspect_global_country_baseline.py",
+        "backend/scripts/sync_core.py",
+        "backend/scripts/sync_eea_health_burden.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_nuts3_safety.py",
+        "backend/scripts/sync_oecd_fua.py",
+        "backend/scripts/sync_oecd_fua_geometry.py",
+        "backend/scripts/sync_oecd_regional.py",
+        "backend/scripts/sync_subnational.py",
+        "backend/tests/test_catalog.py",
+        "backend/tests/test_dynamic_country_registry.py",
+        "backend/tests/test_eurostat_catalog.py",
+        "backend/tests/test_indicator_inventory.py",
+        "backend/tests/test_oecd_tax_wedge_catalog.py",
+        "backend/tests/test_sync_subnational.py"
+      ]
     },
     {
       "path": "backend/app/core/__init__.py",
@@ -799,7 +889,9 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/app/core/config.py",
@@ -869,7 +961,37 @@
         "mkdir",
         "resolve"
       ],
-      "lines": 34
+      "lines": 34,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/db/profile.py",
+        "backend/app/esco_store.py",
+        "backend/app/services/geography_indicator_coverage.py",
+        "backend/app/services/geography_provenance.py",
+        "backend/app/services/observation_provenance.py",
+        "backend/app/services/regional_rankings.py",
+        "backend/app/services/ttv_calibration.py",
+        "backend/scripts/accept_gr2.py",
+        "backend/scripts/audit_legacy_nuts_vintage.py",
+        "backend/scripts/build_eures_market_evidence.py",
+        "backend/scripts/build_eures_market_evidence_from_annex.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/export_ranking_evidence_audit.py",
+        "backend/scripts/export_ranking_vintage_audit.py",
+        "backend/scripts/import_cedefop_clssi.py",
+        "backend/scripts/import_cedefop_oja_imbalance.py",
+        "backend/scripts/inspect_cedefop_clssi.py",
+        "backend/scripts/inspect_cedefop_reset.py",
+        "backend/scripts/inspect_ranking_employment_age.py",
+        "backend/scripts/inspect_ranking_historical_sample.py",
+        "backend/scripts/prepare_eures_manifest_candidate.py",
+        "backend/scripts/reconcile_legacy_nuts_vintage.py",
+        "backend/scripts/reconcile_ranking_eurostat.py",
+        "backend/scripts/stage_gr2_employment.py"
+      ]
     },
     {
       "path": "backend/app/db/__init__.py",
@@ -880,7 +1002,19 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/accept_g2_local_data_layer.py",
+        "backend/scripts/verify_reference_app_readthrough.py",
+        "backend/scripts/verify_weo_disposable_readthrough.py",
+        "backend/tests/test_accept_g2_local_data_layer.py",
+        "backend/tests/test_atomic_upsert_api_integration.py",
+        "backend/tests/test_national_bulk_ingestion.py",
+        "backend/tests/test_nuts_vintage_write_safety.py",
+        "backend/tests/test_regional_evidence.py",
+        "backend/tests/test_subnational_status.py"
+      ]
     },
     {
       "path": "backend/app/db/analytics.py",
@@ -1566,14 +1700,68 @@
         "writerow",
         "zip"
       ],
-      "lines": 3689
+      "lines": 3689,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/core/config.py",
+        "backend/app/db/write_contract.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/db/write_contract.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/imf.py",
+        "backend/app/ingestion/imf_weo_official.py",
+        "backend/app/ingestion/oecd.py",
+        "backend/app/ingestion/oecd_fua.py",
+        "backend/app/ingestion/oecd_fua_geometry.py",
+        "backend/app/ingestion/oecd_regional.py",
+        "backend/app/ingestion/un_wpp.py",
+        "backend/app/ingestion/world_bank.py",
+        "backend/app/providers.py",
+        "backend/app/services/career_fit.py",
+        "backend/app/services/city_evidence.py",
+        "backend/app/services/compare.py",
+        "backend/app/services/country.py",
+        "backend/app/services/financial_fit.py",
+        "backend/app/services/operability.py",
+        "backend/app/services/peer_reference.py",
+        "backend/app/services/personalized_compare.py",
+        "backend/app/services/regional_evidence.py",
+        "backend/app/services/scenarios.py",
+        "backend/app/services/trajectory.py",
+        "backend/app/services/trends.py",
+        "backend/app/services/ttv_temporal.py",
+        "backend/scripts/check_radar_evidence.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/import_cedefop_clssi.py",
+        "backend/scripts/import_cedefop_oja_imbalance.py",
+        "backend/scripts/import_cedefop_stas.py",
+        "backend/scripts/sync_core.py",
+        "backend/scripts/sync_eea_health_burden.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_nuts3_safety.py",
+        "backend/scripts/sync_eurostat_regional_health.py",
+        "backend/scripts/sync_eurostat_regional_housing.py",
+        "backend/scripts/sync_eurostat_regional_labour.py",
+        "backend/scripts/sync_eurostat_regional_sector.py",
+        "backend/scripts/sync_oecd_fua.py",
+        "backend/scripts/sync_oecd_fua_geometry.py",
+        "backend/scripts/sync_oecd_regional.py",
+        "backend/scripts/sync_oecd_regional_density.py",
+        "backend/scripts/sync_oecd_tax_wedge.py",
+        "backend/scripts/sync_subnational.py",
+        "backend/tests/test_regional_evidence.py",
+        "backend/tests/test_source_quality.py"
+      ]
     },
     {
       "path": "backend/app/db/bootstrap.py",
       "bucket": "backend/app/db",
       "sha256": "7eb9787c72f3cf0eede483cff1d2a78eec463d3c081a86b509d7a3478f63dc5a",
       "bytes": 9701,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "initialize_sqlite",
@@ -1648,14 +1836,59 @@
         "seed_esco_partial",
         "str"
       ],
-      "lines": 289
+      "lines": 289,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/db/analytics.py",
+        "backend/app/esco_store.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/main.py",
+        "backend/scripts/build_eures_market_evidence.py",
+        "backend/scripts/build_eures_market_evidence_from_annex.py",
+        "backend/scripts/check_operability.py",
+        "backend/scripts/check_radar_evidence.py",
+        "backend/scripts/discover_country_catalog.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/import_cedefop_clssi.py",
+        "backend/scripts/import_cedefop_oja_imbalance.py",
+        "backend/scripts/import_cedefop_stas.py",
+        "backend/scripts/import_esco.py",
+        "backend/scripts/import_ttv_calibration.py",
+        "backend/scripts/import_ttv_holdout.py",
+        "backend/scripts/review_ttv_holdout.py",
+        "backend/scripts/seal_ttv_holdout.py",
+        "backend/scripts/sync_core.py",
+        "backend/scripts/sync_eea_health_burden.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_nuts3_safety.py",
+        "backend/scripts/sync_eurostat_regional_health.py",
+        "backend/scripts/sync_eurostat_regional_housing.py",
+        "backend/scripts/sync_eurostat_regional_labour.py",
+        "backend/scripts/sync_eurostat_regional_sector.py",
+        "backend/scripts/sync_global_baseline.py",
+        "backend/scripts/sync_imf.py",
+        "backend/scripts/sync_oecd.py",
+        "backend/scripts/sync_oecd_fua.py",
+        "backend/scripts/sync_oecd_fua_geometry.py",
+        "backend/scripts/sync_oecd_regional.py",
+        "backend/scripts/sync_oecd_regional_density.py",
+        "backend/scripts/sync_oecd_tax_wedge.py",
+        "backend/scripts/sync_phase1.py",
+        "backend/scripts/sync_subnational.py",
+        "backend/scripts/sync_un_wpp.py",
+        "backend/tests/test_esco_store.py",
+        "backend/tests/test_source_quality.py",
+        "backend/tests/test_ttv_calibration.py"
+      ]
     },
     {
       "path": "backend/app/db/profile.py",
       "bucket": "backend/app/db",
       "sha256": "c0a9e3c5f6f6bad962a603dc5bd03dc372a0c5cd9e0d30d95083cacaff76b999",
       "bytes": 2952,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_loads",
@@ -1727,14 +1960,22 @@
         "now",
         "upper"
       ],
-      "lines": 99
+      "lines": 99,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/models/profile.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/personalized_compare.py"
+      ]
     },
     {
       "path": "backend/app/db/write_contract.py",
       "bucket": "backend/app/db",
       "sha256": "bcb13044426625235f1084736447066f4f5e09d15f0b40effc04a9dc5a2ab52e",
       "bytes": 3697,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "validate_write_batch",
@@ -1785,7 +2026,16 @@
         "tuple",
         "upper"
       ],
-      "lines": 68
+      "lines": 68,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/db/analytics.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/tests/test_observation_write_contract.py",
+        "backend/tests/test_specialized_write_contract.py"
+      ]
     },
     {
       "path": "backend/app/engines/__init__.py",
@@ -1796,7 +2046,9 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/app/engines/dimension.py",
@@ -1847,7 +2099,12 @@
         "sorted",
         "sum"
       ],
-      "lines": 229
+      "lines": 229,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/assessment.py",
+        "backend/tests/test_dimension.py"
+      ]
     },
     {
       "path": "backend/app/engines/scenario.py",
@@ -1904,7 +2161,12 @@
         "max",
         "min"
       ],
-      "lines": 106
+      "lines": 106,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/scenarios.py",
+        "backend/tests/test_scenario.py"
+      ]
     },
     {
       "path": "backend/app/engines/trend.py",
@@ -2067,7 +2329,12 @@
         "sum",
         "zip"
       ],
-      "lines": 294
+      "lines": 294,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/trends.py",
+        "backend/tests/test_trend.py"
+      ]
     },
     {
       "path": "backend/app/esco_store.py",
@@ -2261,7 +2528,20 @@
         "strip",
         "sub"
       ],
-      "lines": 498
+      "lines": 498,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/career_fit.py",
+        "backend/app/services/esco_match.py",
+        "backend/app/services/eures_evidence_builder.py",
+        "backend/app/services/language_fit.py",
+        "backend/app/services/operability.py",
+        "backend/scripts/import_esco.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/__init__.py",
@@ -2272,7 +2552,26 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_cedefop_clssi.py",
+        "backend/tests/test_cedefop_reset.py",
+        "backend/tests/test_cedefop_stas.py",
+        "backend/tests/test_dynamic_country_registry.py",
+        "backend/tests/test_eea_air_quality_api.py",
+        "backend/tests/test_eea_health_burden.py",
+        "backend/tests/test_imf.py",
+        "backend/tests/test_oecd_density_global_contract.py",
+        "backend/tests/test_oecd_fua.py",
+        "backend/tests/test_oecd_fua_geometry.py",
+        "backend/tests/test_oecd_global_sync_guards.py",
+        "backend/tests/test_oecd_regional.py",
+        "backend/tests/test_regional_ingestion_batch_hardening.py",
+        "backend/tests/test_regional_labour_canonical_contract.py",
+        "backend/tests/test_un_wpp.py",
+        "backend/tests/test_world_bank_batch.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/cedefop_clssi.py",
@@ -2433,7 +2732,16 @@
         "workbook_preview",
         "write_bytes"
       ],
-      "lines": 524
+      "lines": 524,
+      "resolved_local_imports": [
+        "backend/app/ingestion/cedefop_stas.py"
+      ],
+      "imported_by": [
+        "backend/app/ingestion/cedefop_reset.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/import_cedefop_clssi.py",
+        "backend/scripts/inspect_cedefop_clssi.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/cedefop_oja_imbalance.py",
@@ -2569,14 +2877,21 @@
         "unlink",
         "write_bytes"
       ],
-      "lines": 231
+      "lines": 231,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/import_cedefop_oja_imbalance.py",
+        "backend/scripts/inspect_cedefop_oja_imbalance.py",
+        "backend/tests/test_cedefop_oja_imbalance.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/cedefop_reset.py",
       "bucket": "backend/app/ingestion",
       "sha256": "ff1dceee44840f0966fe49479a813a77453ea5f9489ff1552c850f57d5d5d08f",
       "bytes": 3741,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "resolve_download_url",
@@ -2659,7 +2974,13 @@
         "workbook_preview",
         "write_bytes"
       ],
-      "lines": 133
+      "lines": 133,
+      "resolved_local_imports": [
+        "backend/app/ingestion/cedefop_clssi.py"
+      ],
+      "imported_by": [
+        "backend/scripts/inspect_cedefop_reset.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/cedefop_stas.py",
@@ -2887,20 +3208,29 @@
         "write_bytes",
         "zfill"
       ],
-      "lines": 543
+      "lines": 543,
+      "resolved_local_imports": [
+        "backend/app/catalog.py"
+      ],
+      "imported_by": [
+        "backend/app/ingestion/cedefop_clssi.py",
+        "backend/scripts/import_cedefop_stas.py",
+        "backend/scripts/inspect_cedefop_stas.py",
+        "backend/tests/test_cedefop_stas.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eea_air_quality.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
-      "bytes": 3719,
-      "review_status": "not_reviewed",
+      "sha256": "40518d8db6019444a79bea59df5003269af4e3351884ee9acb89a022e400e984",
+      "bytes": 4114,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "inspect_eea_pm25",
           "kind": "function",
-          "line_start": 14,
-          "line_end": 117,
+          "line_start": 15,
+          "line_end": 125,
           "signature_arguments": [
             "client"
           ]
@@ -2916,20 +3246,27 @@
           "line": 3
         },
         {
-          "module": "httpx",
+          "module": "math",
           "line": 4
+        },
+        {
+          "module": "httpx",
+          "line": 5
         }
       ],
       "called_names": [
         "Client",
         "Counter",
+        "ValueError",
         "all",
+        "append",
         "bool",
         "close",
         "dict",
         "float",
         "get",
         "int",
+        "isfinite",
         "items",
         "json",
         "len",
@@ -2940,7 +3277,13 @@
         "str",
         "sum"
       ],
-      "lines": 117
+      "lines": 125,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/inspect_eea_pm25.py",
+        "backend/tests/test_b02_source_evidence_gates.py",
+        "backend/tests/test_eea_air_quality.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eea_air_quality_api.py",
@@ -3029,7 +3372,16 @@
         "startswith",
         "values"
       ],
-      "lines": 216
+      "lines": 216,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/ingestion/eea_city_air.py",
+        "backend/app/services/eea_city_catalog.py",
+        "backend/scripts/inspect_eea_air_quality_api.py",
+        "backend/scripts/inspect_eea_gisco_city_mapping.py",
+        "backend/scripts/inspect_eea_pm25_parquet.py",
+        "backend/scripts/probe_eea_pm25_city.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eea_city_air.py",
@@ -3165,7 +3517,15 @@
         "sum",
         "write_bytes"
       ],
-      "lines": 235
+      "lines": 235,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality_api.py"
+      ],
+      "imported_by": [
+        "backend/app/services/city_evidence.py",
+        "backend/scripts/aggregate_eea_city_pm25.py",
+        "backend/tests/test_eea_city_air.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eea_health_burden.py",
@@ -3307,7 +3667,13 @@
         "strip",
         "upper"
       ],
-      "lines": 235
+      "lines": 235,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/inspect_eea_health_burden.py",
+        "backend/scripts/sync_eea_health_burden.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eures_annex_pdf.py",
@@ -3437,7 +3803,12 @@
         "writeheader",
         "writerows"
       ],
-      "lines": 207
+      "lines": 207,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/build_eures_market_evidence_from_annex.py",
+        "backend/tests/test_eures_annex_pdf.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat.py",
@@ -3668,14 +4039,58 @@
         "upsert_observations",
         "zip"
       ],
-      "lines": 1060
+      "lines": 1060,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/ingestion/eurostat_regional_access_safety.py",
+        "backend/app/ingestion/eurostat_regional_health.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/ingestion/eurostat_regional_jvs.py",
+        "backend/app/ingestion/eurostat_regional_labour.py",
+        "backend/app/ingestion/eurostat_regional_sector.py",
+        "backend/app/providers.py",
+        "backend/app/services/city_evidence.py",
+        "backend/app/services/regional_evidence.py",
+        "backend/scripts/accept_gr2.py",
+        "backend/scripts/build_official_reference_db.py",
+        "backend/scripts/discover_eurostat_regions.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/inspect_eurostat_city_evidence.py",
+        "backend/scripts/inspect_eurostat_regional_access_safety.py",
+        "backend/scripts/inspect_eurostat_regional_health.py",
+        "backend/scripts/inspect_eurostat_regional_housing.py",
+        "backend/scripts/inspect_eurostat_regional_jvs.py",
+        "backend/scripts/inspect_ranking_employment_age.py",
+        "backend/scripts/inspect_ranking_historical_sample.py",
+        "backend/scripts/probe_eurostat_nuts3_context.py",
+        "backend/scripts/reconcile_ranking_eurostat.py",
+        "backend/scripts/smoke_eurostat_regional_coverage.py",
+        "backend/scripts/stage_gr2_employment.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_regional_health.py",
+        "backend/scripts/sync_eurostat_regional_housing.py",
+        "backend/scripts/sync_eurostat_regional_labour.py",
+        "backend/scripts/sync_eurostat_regional_sector.py",
+        "backend/tests/test_b02_source_evidence_gates.py",
+        "backend/tests/test_eurostat.py",
+        "backend/tests/test_eurostat_catalog.py",
+        "backend/tests/test_eurostat_dynamic_country_scope.py",
+        "backend/tests/test_eurostat_fail_closed_values.py",
+        "backend/tests/test_eurostat_regional_labour.py",
+        "backend/tests/test_eurostat_regional_sector.py",
+        "backend/tests/test_regional_ingestion_batch_hardening.py",
+        "backend/tests/test_regional_response_provenance.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_geography_discovery.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "5700fe1ff16656436e535ca3edb5906142ae00ec72e8148858f846070b6a1153",
-      "bytes": 4122,
-      "review_status": "not_reviewed",
+      "sha256": "4528caa7fa0338fb797cc4b4f12a61530386803b3a8df9ebe2171b830bfdd601",
+      "bytes": 4218,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "_ordered_codes",
@@ -3700,7 +4115,7 @@
           "symbol": "observed_geo_codes",
           "kind": "function",
           "line_start": 26,
-          "line_end": 52,
+          "line_end": 54,
           "signature_arguments": [
             "payload"
           ]
@@ -3708,8 +4123,8 @@
         {
           "symbol": "discover_dataset_geographies",
           "kind": "function",
-          "line_start": 55,
-          "line_end": 80,
+          "line_start": 57,
+          "line_end": 82,
           "signature_arguments": [
             "payload",
             "dataset_id"
@@ -3718,8 +4133,8 @@
         {
           "symbol": "discover_regional_dataset_coverage",
           "kind": "function",
-          "line_start": 83,
-          "line_end": 100,
+          "line_start": 85,
+          "line_end": 102,
           "signature_arguments": [
             "adapter",
             "configurations"
@@ -3772,14 +4187,22 @@
         "upper",
         "values"
       ],
-      "lines": 100
+      "lines": 102,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/discover_eurostat_regions.py",
+        "backend/scripts/smoke_eurostat_regional_coverage.py",
+        "backend/tests/test_b02_source_evidence_gates.py",
+        "backend/tests/test_eurostat_geography_discovery.py",
+        "backend/tests/test_eurostat_observed_coverage.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_nuts_registry.py",
       "bucket": "backend/app/ingestion",
       "sha256": "e95d69df83b7adc8abd36fdeed58dc19278e6df9e4a865b76b8df6f5863e10d1",
       "bytes": 5331,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "extract_official_nuts2_codes",
@@ -3848,7 +4271,14 @@
         "str",
         "values"
       ],
-      "lines": 118
+      "lines": 118,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/discover_eurostat_regions.py",
+        "backend/scripts/smoke_eurostat_regional_coverage.py",
+        "backend/scripts/smoke_nuts2024_registry.py",
+        "backend/tests/test_eurostat_nuts_registry.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_access_safety.py",
@@ -3908,14 +4338,21 @@
         "type",
         "values"
       ],
-      "lines": 137
+      "lines": 137,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": [
+        "backend/scripts/inspect_eurostat_regional_access_safety.py",
+        "backend/tests/test_eurostat_regional_access_safety.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_contract.py",
       "bucket": "backend/app/ingestion",
       "sha256": "bbb53f390775d6ac102b584cc47884474d212bf3fa9e83b2609c1af1f4847be1",
       "bytes": 1874,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "validate_eurostat_regional_rows",
@@ -3962,7 +4399,19 @@
         "str",
         "validate_observation"
       ],
-      "lines": 38
+      "lines": 38,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/ingestion/eurostat_regional_labour.py",
+        "backend/app/services/global_evidence_contract.py"
+      ],
+      "imported_by": [
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_regional_housing.py",
+        "backend/scripts/sync_eurostat_regional_labour.py",
+        "backend/tests/test_eurostat_regional_contract.py",
+        "backend/tests/test_regional_ingestion_batch_hardening.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_health.py",
@@ -4032,7 +4481,18 @@
         "type",
         "values"
       ],
-      "lines": 163
+      "lines": 163,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_labour.py"
+      ],
+      "imported_by": [
+        "backend/scripts/inspect_eurostat_regional_health.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_regional_health.py",
+        "backend/tests/test_eurostat_regional_health.py",
+        "backend/tests/test_regional_evidence.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_housing.py",
@@ -4116,7 +4576,23 @@
         "validate_housing_indicator_contracts",
         "values"
       ],
-      "lines": 181
+      "lines": 181,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_labour.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": [
+        "backend/app/ingestion/eurostat_regional_contract.py",
+        "backend/scripts/discover_eurostat_regions.py",
+        "backend/scripts/inspect_eurostat_regional_housing.py",
+        "backend/scripts/smoke_eurostat_regional_coverage.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_regional_housing.py",
+        "backend/tests/test_eurostat_regional_housing.py",
+        "backend/tests/test_regional_evidence.py",
+        "backend/tests/test_regional_ingestion_batch_hardening.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_jvs.py",
@@ -4176,7 +4652,14 @@
         "startswith",
         "type"
       ],
-      "lines": 138
+      "lines": 138,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": [
+        "backend/scripts/inspect_eurostat_regional_jvs.py",
+        "backend/tests/test_eurostat_regional_jvs.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_labour.py",
@@ -4277,20 +4760,36 @@
         "validate_labour_indicator_contracts",
         "zip"
       ],
-      "lines": 180
+      "lines": 180,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": [
+        "backend/app/ingestion/eurostat_regional_contract.py",
+        "backend/app/ingestion/eurostat_regional_health.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/scripts/discover_eurostat_regions.py",
+        "backend/scripts/smoke_eurostat_regional_coverage.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_regional_labour.py",
+        "backend/tests/test_eurostat_dynamic_country_scope.py",
+        "backend/tests/test_eurostat_regional_labour.py",
+        "backend/tests/test_regional_ingestion_batch_hardening.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/eurostat_regional_sector.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "75aea64b6150b52f1240bf3c317a248e32fee11959ab975eaa6ce3641c64d79e",
-      "bytes": 3722,
-      "review_status": "not_reviewed",
+      "sha256": "d67a62ef69cbf64816babf8ab1b2f9028a1560a1d2fb30ef7b1ddeae2037383f",
+      "bytes": 4602,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "normalize_regional_sector_employment",
           "kind": "function",
-          "line_start": 18,
-          "line_end": 94,
+          "line_start": 19,
+          "line_end": 107,
           "signature_arguments": [
             "adapter",
             "payload",
@@ -4300,8 +4799,8 @@
         {
           "symbol": "fetch_regional_sector_employment",
           "kind": "function",
-          "line_start": 97,
-          "line_end": 117,
+          "line_start": 110,
+          "line_end": 130,
           "signature_arguments": [
             "adapter"
           ]
@@ -4321,13 +4820,19 @@
           "line": 4
         },
         {
+          "module": "math",
+          "line": 5
+        },
+        {
           "module": "app.ingestion.eurostat",
-          "line": 6
+          "line": 7
         }
       ],
       "called_names": [
+        "ValueError",
         "_category_labels",
         "_ordered_codes",
+        "any",
         "append",
         "chr",
         "enumerate",
@@ -4336,7 +4841,9 @@
         "get",
         "int",
         "isdigit",
+        "isfinite",
         "isinstance",
+        "items",
         "len",
         "max",
         "normalize_regional_sector_employment",
@@ -4345,11 +4852,23 @@
         "product",
         "range",
         "reversed",
+        "set",
         "sorted",
         "str",
+        "type",
         "zip"
       ],
-      "lines": 117
+      "lines": 130,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": [
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/sync_eurostat.py",
+        "backend/scripts/sync_eurostat_regional_sector.py",
+        "backend/tests/test_b02_source_evidence_gates.py",
+        "backend/tests/test_eurostat_regional_sector.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/gisco_cities.py",
@@ -4458,7 +4977,14 @@
         "upper",
         "values"
       ],
-      "lines": 135
+      "lines": 135,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/eea_city_catalog.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/inspect_eea_gisco_city_mapping.py",
+        "backend/tests/test_gisco_cities.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/imf.py",
@@ -4593,14 +5119,25 @@
         "upper",
         "upsert_observations"
       ],
-      "lines": 327
+      "lines": 327,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/providers.py",
+        "backend/scripts/inspect_global_country_baseline.py",
+        "backend/scripts/sync_global_baseline.py",
+        "backend/scripts/sync_imf.py",
+        "backend/tests/test_imf.py",
+        "backend/tests/test_imf_bulk_completion.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/imf_weo_official.py",
       "bucket": "backend/app/ingestion",
       "sha256": "87b97cf954040ff8f6f9ec1bb1299f6b3499470da5f06f8cb15df8151aef4f24",
       "bytes": 6916,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "normalize_official_weo",
@@ -4725,7 +5262,15 @@
         "upsert_observations",
         "values"
       ],
-      "lines": 140
+      "lines": 140,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/scripts/probe_imf_weo_workbook.py",
+        "backend/scripts/sync_global_baseline.py",
+        "backend/tests/test_imf_weo_official_source.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/oecd.py",
@@ -4849,7 +5394,15 @@
         "upper",
         "upsert_observations"
       ],
-      "lines": 127
+      "lines": 127,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/providers.py",
+        "backend/scripts/sync_oecd.py",
+        "backend/tests/test_oecd.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/oecd_fua.py",
@@ -5215,7 +5768,14 @@
         "upper",
         "upsert_subnational_observations"
       ],
-      "lines": 1485
+      "lines": 1485,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/scripts/sync_oecd_fua.py",
+        "backend/tests/test_oecd_fua.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/oecd_fua_geometry.py",
@@ -5370,7 +5930,13 @@
         "values",
         "zip"
       ],
-      "lines": 363
+      "lines": 363,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/scripts/sync_oecd_fua_geometry.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/oecd_regional.py",
@@ -5792,14 +6358,28 @@
         "validate_observation",
         "values"
       ],
-      "lines": 1689
+      "lines": 1689,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/services/global_evidence_contract.py"
+      ],
+      "imported_by": [
+        "backend/scripts/probe_oecd_population_contract.py",
+        "backend/scripts/sync_oecd_regional.py",
+        "backend/scripts/sync_oecd_regional_density.py",
+        "backend/tests/test_oecd_density_global_contract.py",
+        "backend/tests/test_oecd_explicit_metric_contracts.py",
+        "backend/tests/test_oecd_population_duplicate_integrity.py",
+        "backend/tests/test_oecd_population_unit_filter.py",
+        "backend/tests/test_oecd_regional.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/oecd_tax_wedge.py",
       "bucket": "backend/app/ingestion",
       "sha256": "13911d72ce98f8b820e832e750c55529255ccd493608451a1b49cd3dd905e9b3",
       "bytes": 3227,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "fetch_tax_wedge_csv",
@@ -5873,7 +6453,16 @@
         "splitlines",
         "str"
       ],
-      "lines": 81
+      "lines": 81,
+      "resolved_local_imports": [
+        "backend/app/services/tax_wedge_contract.py"
+      ],
+      "imported_by": [
+        "backend/scripts/smoke_oecd_tax_wedge.py",
+        "backend/scripts/sync_oecd_tax_wedge.py",
+        "backend/tests/test_oecd_tax_wedge.py",
+        "backend/tests/test_oecd_tax_wedge_catalog.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/un_wpp.py",
@@ -6033,7 +6622,18 @@
         "upper",
         "upsert_observations"
       ],
-      "lines": 307
+      "lines": 307,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/providers.py",
+        "backend/scripts/inspect_global_country_baseline.py",
+        "backend/scripts/sync_global_baseline.py",
+        "backend/scripts/sync_un_wpp.py",
+        "backend/tests/test_un_wpp.py",
+        "backend/tests/test_wpp_missing_country_reporting.py"
+      ]
     },
     {
       "path": "backend/app/ingestion/world_bank.py",
@@ -6257,7 +6857,24 @@
         "upsert_observations",
         "world_bank_indicators"
       ],
-      "lines": 515
+      "lines": 515,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/providers.py",
+        "backend/scripts/discover_country_catalog.py",
+        "backend/scripts/inspect_global_country_baseline.py",
+        "backend/scripts/sync_global_baseline.py",
+        "backend/scripts/sync_oecd_fua.py",
+        "backend/scripts/sync_oecd_fua_geometry.py",
+        "backend/scripts/sync_oecd_regional.py",
+        "backend/scripts/sync_oecd_regional_density.py",
+        "backend/scripts/sync_phase1.py",
+        "backend/tests/test_dynamic_country_registry.py",
+        "backend/tests/test_world_bank_batch.py"
+      ]
     },
     {
       "path": "backend/app/main.py",
@@ -6312,7 +6929,15 @@
         "include_router",
         "initialize_datastores"
       ],
-      "lines": 44
+      "lines": 44,
+      "resolved_local_imports": [
+        "backend/app/api/routes.py",
+        "backend/app/db/bootstrap.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_health.py",
+        "backend/tests/test_profile.py"
+      ]
     },
     {
       "path": "backend/app/models/profile.py",
@@ -6356,7 +6981,26 @@
       "called_names": [
         "Field"
       ],
-      "lines": 27
+      "lines": 27,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/db/profile.py",
+        "backend/app/services/career_fit.py",
+        "backend/app/services/financial_fit.py",
+        "backend/app/services/language_fit.py",
+        "backend/app/services/legal_fit.py",
+        "backend/app/services/profile_readiness.py",
+        "backend/app/services/ttv.py",
+        "backend/app/services/ttv_temporal.py",
+        "backend/tests/test_career_fit.py",
+        "backend/tests/test_financial_fit.py",
+        "backend/tests/test_language_fit.py",
+        "backend/tests/test_legal_fit.py",
+        "backend/tests/test_profile_readiness.py",
+        "backend/tests/test_ttv.py",
+        "backend/tests/test_ttv_temporal.py"
+      ]
     },
     {
       "path": "backend/app/providers.py",
@@ -6500,7 +7144,22 @@
         "supports",
         "sync_country"
       ],
-      "lines": 119
+      "lines": 119,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/imf.py",
+        "backend/app/ingestion/oecd.py",
+        "backend/app/ingestion/un_wpp.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": [
+        "backend/app/services/operability.py",
+        "backend/scripts/sync_core.py",
+        "backend/tests/test_dynamic_country_registry.py",
+        "backend/tests/test_providers.py"
+      ]
     },
     {
       "path": "backend/app/services/__init__.py",
@@ -6511,7 +7170,29 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/verify_reference_app_readthrough.py",
+        "backend/tests/test_atomic_upsert_api_integration.py",
+        "backend/tests/test_career_fit.py",
+        "backend/tests/test_city_evidence.py",
+        "backend/tests/test_dynamic_country_registry.py",
+        "backend/tests/test_eea_city_catalog.py",
+        "backend/tests/test_esco_store.py",
+        "backend/tests/test_eures_evidence_builder.py",
+        "backend/tests/test_financial_fit.py",
+        "backend/tests/test_geography_indicator_coverage.py",
+        "backend/tests/test_geography_provenance.py",
+        "backend/tests/test_language_fit.py",
+        "backend/tests/test_nuts_vintage_write_safety.py",
+        "backend/tests/test_observation_provenance.py",
+        "backend/tests/test_operability.py",
+        "backend/tests/test_regional_evidence.py",
+        "backend/tests/test_ttv.py",
+        "backend/tests/test_ttv_calibration.py",
+        "backend/tests/test_ttv_temporal.py"
+      ]
     },
     {
       "path": "backend/app/services/assessment.py",
@@ -6558,7 +7239,15 @@
         "summarize_dimension",
         "upper"
       ],
-      "lines": 30
+      "lines": 30,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/engines/dimension.py",
+        "backend/app/services/trends.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py"
+      ]
     },
     {
       "path": "backend/app/services/career_fit.py",
@@ -6779,7 +7468,22 @@
         "upper",
         "values"
       ],
-      "lines": 938
+      "lines": 938,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/esco_store.py",
+        "backend/app/models/profile.py",
+        "backend/app/services/esco_match.py",
+        "backend/app/services/live_postings.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/financial_fit.py",
+        "backend/app/services/language_fit.py",
+        "backend/app/services/operability.py",
+        "backend/app/services/ttv.py",
+        "backend/tests/test_career_fit.py"
+      ]
     },
     {
       "path": "backend/app/services/city_evidence.py",
@@ -6901,7 +7605,20 @@
         "upper",
         "upsert_subnational_observations"
       ],
-      "lines": 569
+      "lines": 569,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/ingestion/eea_city_air.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/eea_city_catalog.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/inspect_eurostat_city_evidence.py",
+        "backend/scripts/sync_subnational.py",
+        "backend/tests/test_city_evidence.py"
+      ]
     },
     {
       "path": "backend/app/services/compare.py",
@@ -6956,7 +7673,15 @@
         "upper",
         "values"
       ],
-      "lines": 74
+      "lines": 74,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/services/country.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/tests/test_compare.py"
+      ]
     },
     {
       "path": "backend/app/services/country.py",
@@ -7027,7 +7752,20 @@
         "set",
         "upper"
       ],
-      "lines": 65
+      "lines": 65,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/compare.py",
+        "backend/app/services/language_fit.py",
+        "backend/app/services/legal_fit.py",
+        "backend/app/services/operability.py",
+        "backend/scripts/discover_country_catalog.py",
+        "backend/scripts/sync_global_baseline.py"
+      ]
     },
     {
       "path": "backend/app/services/eea_city_catalog.py",
@@ -7093,7 +7831,14 @@
         "set",
         "upper"
       ],
-      "lines": 74
+      "lines": 74,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality_api.py",
+        "backend/app/ingestion/gisco_cities.py"
+      ],
+      "imported_by": [
+        "backend/app/services/city_evidence.py"
+      ]
     },
     {
       "path": "backend/app/services/esco_match.py",
@@ -7157,7 +7902,13 @@
         "sub",
         "sum"
       ],
-      "lines": 119
+      "lines": 119,
+      "resolved_local_imports": [
+        "backend/app/esco_store.py"
+      ],
+      "imported_by": [
+        "backend/app/services/career_fit.py"
+      ]
     },
     {
       "path": "backend/app/services/eures_evidence_builder.py",
@@ -7305,7 +8056,15 @@
         "upper",
         "write_text"
       ],
-      "lines": 517
+      "lines": 517,
+      "resolved_local_imports": [
+        "backend/app/esco_store.py"
+      ],
+      "imported_by": [
+        "backend/scripts/build_eures_market_evidence.py",
+        "backend/scripts/build_eures_market_evidence_from_annex.py",
+        "backend/scripts/prepare_eures_manifest_candidate.py"
+      ]
     },
     {
       "path": "backend/app/services/financial_fit.py",
@@ -7385,7 +8144,16 @@
         "str",
         "upper"
       ],
-      "lines": 209
+      "lines": 209,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/models/profile.py",
+        "backend/app/services/career_fit.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/ttv.py"
+      ]
     },
     {
       "path": "backend/app/services/geography_indicator_coverage.py",
@@ -7437,7 +8205,15 @@
         "str",
         "upper"
       ],
-      "lines": 156
+      "lines": 156,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/scripts/export_geography_coverage.py",
+        "backend/tests/test_geography_indicator_coverage.py"
+      ]
     },
     {
       "path": "backend/app/services/geography_provenance.py",
@@ -7483,7 +8259,13 @@
         "str",
         "upper"
       ],
-      "lines": 72
+      "lines": 72,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/scripts/export_geography_provenance.py"
+      ]
     },
     {
       "path": "backend/app/services/global_evidence_contract.py",
@@ -7548,7 +8330,14 @@
         "sorted",
         "validate_observation"
       ],
-      "lines": 89
+      "lines": 89,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/ingestion/eurostat_regional_contract.py",
+        "backend/app/ingestion/oecd_regional.py",
+        "backend/scripts/audit_global_evidence.py",
+        "backend/tests/test_global_evidence_contract.py"
+      ]
     },
     {
       "path": "backend/app/services/housing_affordability.py",
@@ -7578,7 +8367,12 @@
         "get",
         "isinstance"
       ],
-      "lines": 45
+      "lines": 45,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/regional_evidence.py",
+        "backend/tests/test_housing_affordability.py"
+      ]
     },
     {
       "path": "backend/app/services/language_fit.py",
@@ -7643,7 +8437,18 @@
         "sum",
         "upper"
       ],
-      "lines": 188
+      "lines": 188,
+      "resolved_local_imports": [
+        "backend/app/esco_store.py",
+        "backend/app/models/profile.py",
+        "backend/app/services/career_fit.py",
+        "backend/app/services/country.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/ttv.py",
+        "backend/tests/test_language_fit.py"
+      ]
     },
     {
       "path": "backend/app/services/legal_fit.py",
@@ -7687,7 +8492,17 @@
         "sorted",
         "upper"
       ],
-      "lines": 110
+      "lines": 110,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/models/profile.py",
+        "backend/app/services/country.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/ttv.py",
+        "backend/tests/test_legal_fit.py"
+      ]
     },
     {
       "path": "backend/app/services/live_postings.py",
@@ -7791,7 +8606,13 @@
         "strip",
         "upper"
       ],
-      "lines": 152
+      "lines": 152,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/career_fit.py",
+        "backend/app/services/operability.py",
+        "backend/tests/test_live_postings.py"
+      ]
     },
     {
       "path": "backend/app/services/observation_provenance.py",
@@ -7839,7 +8660,13 @@
         "str",
         "upper"
       ],
-      "lines": 87
+      "lines": 87,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/scripts/export_observation_provenance.py"
+      ]
     },
     {
       "path": "backend/app/services/operability.py",
@@ -7974,7 +8801,23 @@
         "total_seconds",
         "values"
       ],
-      "lines": 306
+      "lines": 306,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/esco_store.py",
+        "backend/app/providers.py",
+        "backend/app/services/career_fit.py",
+        "backend/app/services/country.py",
+        "backend/app/services/live_postings.py",
+        "backend/app/services/ttv.py",
+        "backend/app/services/ttv_calibration.py",
+        "backend/app/services/ttv_temporal.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/scripts/check_operability.py"
+      ]
     },
     {
       "path": "backend/app/services/peer_reference.py",
@@ -8043,7 +8886,14 @@
         "sum",
         "upper"
       ],
-      "lines": 137
+      "lines": 137,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/services/trends.py",
+        "backend/tests/test_peer_reference.py"
+      ]
     },
     {
       "path": "backend/app/services/personalized_compare.py",
@@ -8223,7 +9073,16 @@
         "values",
         "zip"
       ],
-      "lines": 621
+      "lines": 621,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/profile.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/tests/test_personalized_compare.py"
+      ]
     },
     {
       "path": "backend/app/services/profile_readiness.py",
@@ -8271,7 +9130,14 @@
         "sum",
         "values"
       ],
-      "lines": 72
+      "lines": 72,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/tests/test_profile_readiness.py"
+      ]
     },
     {
       "path": "backend/app/services/ranking_eligibility.py",
@@ -8354,7 +9220,17 @@
         "today",
         "tuple"
       ],
-      "lines": 110
+      "lines": 110,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/regional_rankings.py",
+        "backend/scripts/accept_gr2.py",
+        "backend/scripts/export_ranking_vintage_audit.py",
+        "backend/scripts/inspect_ranking_historical_sample.py",
+        "backend/scripts/reconcile_ranking_eurostat.py",
+        "backend/tests/test_ranking_eligibility.py",
+        "backend/tests/test_ranking_pilot_source_contracts.py"
+      ]
     },
     {
       "path": "backend/app/services/ranking_provider_metadata.py",
@@ -8394,7 +9270,16 @@
         "str",
         "tuple"
       ],
-      "lines": 45
+      "lines": 45,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/services/regional_rankings.py",
+        "backend/scripts/build_official_reference_db.py",
+        "backend/scripts/inspect_ranking_historical_sample.py",
+        "backend/scripts/reconcile_ranking_eurostat.py",
+        "backend/scripts/stage_gr2_employment.py",
+        "backend/tests/test_ranking_provider_metadata.py"
+      ]
     },
     {
       "path": "backend/app/services/regional_evidence.py",
@@ -8582,7 +9467,34 @@
         "upper",
         "upsert_subnational_observations"
       ],
-      "lines": 1092
+      "lines": 1092,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/housing_affordability.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/ingestion/eurostat_regional_labour.py",
+        "backend/scripts/audit_official_reference_db.py",
+        "backend/scripts/build_official_reference_db.py",
+        "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/inspect_ranking_employment_age.py",
+        "backend/scripts/inspect_ranking_historical_sample.py",
+        "backend/scripts/probe_eurostat_nuts3_context.py",
+        "backend/scripts/reconcile_ranking_eurostat.py",
+        "backend/scripts/stage_gr2_employment.py",
+        "backend/scripts/sync_eurostat_nuts3_safety.py",
+        "backend/scripts/sync_subnational.py",
+        "backend/tests/test_official_reference_app_readthrough.py",
+        "backend/tests/test_official_reference_db_audit.py",
+        "backend/tests/test_ranking_pilot_source_contracts.py",
+        "backend/tests/test_regional_evidence.py",
+        "backend/tests/test_regional_ingestion_dimension_safety.py",
+        "backend/tests/test_regional_request_provenance.py",
+        "backend/tests/test_regional_response_provenance.py"
+      ]
     },
     {
       "path": "backend/app/services/regional_rankings.py",
@@ -8663,7 +9575,18 @@
         "upper",
         "values"
       ],
-      "lines": 101
+      "lines": 101,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/core/config.py",
+        "backend/app/services/ranking_eligibility.py",
+        "backend/app/services/ranking_provider_metadata.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/tests/test_atomic_upsert_api_integration.py",
+        "backend/tests/test_regional_rankings.py"
+      ]
     },
     {
       "path": "backend/app/services/scenarios.py",
@@ -8712,7 +9635,17 @@
         "get",
         "upper"
       ],
-      "lines": 69
+      "lines": 69,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/engines/scenario.py",
+        "backend/app/services/trajectory.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/tests/test_scenario.py"
+      ]
     },
     {
       "path": "backend/app/services/tax_wedge_contract.py",
@@ -8738,7 +9671,12 @@
       "called_names": [
         "dict"
       ],
-      "lines": 38
+      "lines": 38,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/app/ingestion/oecd_tax_wedge.py",
+        "backend/tests/test_tax_wedge_contract.py"
+      ]
     },
     {
       "path": "backend/app/services/trajectory.py",
@@ -8781,7 +9719,15 @@
         "sorted",
         "upper"
       ],
-      "lines": 46
+      "lines": 46,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/scenarios.py",
+        "backend/tests/test_trajectory.py"
+      ]
     },
     {
       "path": "backend/app/services/trends.py",
@@ -8846,7 +9792,18 @@
         "now",
         "upper"
       ],
-      "lines": 117
+      "lines": 117,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/engines/trend.py",
+        "backend/app/services/peer_reference.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/assessment.py",
+        "backend/tests/test_trend.py"
+      ]
     },
     {
       "path": "backend/app/services/ttv.py",
@@ -8907,7 +9864,19 @@
         "temporal_evidence_graph",
         "upper"
       ],
-      "lines": 177
+      "lines": 177,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/career_fit.py",
+        "backend/app/services/financial_fit.py",
+        "backend/app/services/language_fit.py",
+        "backend/app/services/legal_fit.py",
+        "backend/app/services/ttv_temporal.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/operability.py"
+      ]
     },
     {
       "path": "backend/app/services/ttv_calibration.py",
@@ -9286,7 +10255,19 @@
         "validate_calibration_case",
         "values"
       ],
-      "lines": 2015
+      "lines": 2015,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/app/api/routes.py",
+        "backend/app/services/operability.py",
+        "backend/app/services/ttv_temporal.py",
+        "backend/scripts/import_ttv_calibration.py",
+        "backend/scripts/import_ttv_holdout.py",
+        "backend/scripts/review_ttv_holdout.py",
+        "backend/scripts/seal_ttv_holdout.py"
+      ]
     },
     {
       "path": "backend/app/services/ttv_temporal.py",
@@ -9487,7 +10468,17 @@
         "upper",
         "values"
       ],
-      "lines": 545
+      "lines": 545,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/models/profile.py",
+        "backend/app/services/ttv_calibration.py"
+      ],
+      "imported_by": [
+        "backend/app/services/operability.py",
+        "backend/app/services/ttv.py",
+        "backend/tests/test_ttv_temporal.py"
+      ]
     },
     {
       "path": "backend/scripts/__init__.py",
@@ -9498,7 +10489,19 @@
       "definitions": [],
       "imports": [],
       "called_names": [],
-      "lines": 0
+      "lines": 0,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_accept_g2_local_data_layer.py",
+        "backend/tests/test_build_eures_market_evidence_from_annex.py",
+        "backend/tests/test_ensure_local_evidence.py",
+        "backend/tests/test_geography_coverage_export.py",
+        "backend/tests/test_global_baseline_report_contract.py",
+        "backend/tests/test_oecd_fua_geometry.py",
+        "backend/tests/test_oecd_sync_discovery.py",
+        "backend/tests/test_sync_eurostat_atomic_regional.py",
+        "backend/tests/test_sync_subnational.py"
+      ]
     },
     {
       "path": "backend/scripts/accept_g2_local_data_layer.py",
@@ -9582,7 +10585,11 @@
         "verify",
         "write_text"
       ],
-      "lines": 109
+      "lines": 109,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/accept_gr2.py",
@@ -9710,7 +10717,17 @@
         "update",
         "write_text"
       ],
-      "lines": 129
+      "lines": 129,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/ranking_eligibility.py",
+        "backend/scripts/inspect_ranking_employment_age.py",
+        "backend/scripts/reconcile_ranking_eurostat.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_accept_gr2.py"
+      ]
     },
     {
       "path": "backend/scripts/aggregate_eea_city_pm25.py",
@@ -9756,7 +10773,11 @@
         "parse_args",
         "print"
       ],
-      "lines": 26
+      "lines": 26,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_city_air.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/audit_global_evidence.py",
@@ -9806,7 +10827,11 @@
         "read_text",
         "write_text"
       ],
-      "lines": 21
+      "lines": 21,
+      "resolved_local_imports": [
+        "backend/app/services/global_evidence_contract.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/audit_ingestion_write_paths.py",
@@ -9881,7 +10906,11 @@
         "values",
         "walk"
       ],
-      "lines": 87
+      "lines": 87,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_ingestion_write_path_audit.py"
+      ]
     },
     {
       "path": "backend/scripts/audit_legacy_nuts_vintage.py",
@@ -10005,7 +11034,15 @@
         "write_text",
         "zip"
       ],
-      "lines": 234
+      "lines": 234,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/scripts/reconcile_legacy_nuts_vintage.py",
+        "backend/tests/test_audit_legacy_nuts_vintage.py",
+        "backend/tests/test_reconcile_legacy_nuts_vintage.py"
+      ]
     },
     {
       "path": "backend/scripts/audit_official_nuts_catalog.py",
@@ -10098,7 +11135,11 @@
         "upper",
         "write_text"
       ],
-      "lines": 74
+      "lines": 74,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_official_nuts_catalog_audit.py"
+      ]
     },
     {
       "path": "backend/scripts/audit_official_reference_db.py",
@@ -10193,13 +11234,20 @@
         "values",
         "write_text"
       ],
-      "lines": 72
+      "lines": 72,
+      "resolved_local_imports": [
+        "backend/app/services/regional_evidence.py",
+        "backend/scripts/build_official_reference_db.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_official_reference_db_audit.py"
+      ]
     },
     {
       "path": "backend/scripts/audit_repository_inventory.py",
       "bucket": "backend/scripts",
-      "sha256": "79e512b5e956cf2661cc6443d3492f1c5ed1210c31889ab239adac3726ff454b",
-      "bytes": 5442,
+      "sha256": "834424ac1c99b0db7eeb5cdb5e292a74e36b2ff61181aec422d0b0722a235268",
+      "bytes": 7656,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -10312,14 +11360,14 @@
           "symbol": "generate",
           "kind": "function",
           "line_start": 68,
-          "line_end": 93,
+          "line_end": 133,
           "signature_arguments": []
         },
         {
           "symbol": "main",
           "kind": "function",
-          "line_start": 95,
-          "line_end": 106,
+          "line_start": 135,
+          "line_end": 146,
           "signature_arguments": []
         }
       ],
@@ -10359,6 +11407,7 @@
         "Path",
         "RuntimeError",
         "Visitor",
+        "add",
         "add_argument",
         "analyze_py",
         "append",
@@ -10367,6 +11416,7 @@
         "dict",
         "dumps",
         "endswith",
+        "exists",
         "extend",
         "generate",
         "generic_visit",
@@ -10382,7 +11432,9 @@
         "list",
         "loads",
         "lower",
+        "lstrip",
         "main",
+        "max",
         "mkdir",
         "parse",
         "parse_args",
@@ -10392,8 +11444,11 @@
         "read_text",
         "record",
         "relative_to",
+        "removeprefix",
+        "replace",
         "resolve",
         "rglob",
+        "round",
         "set",
         "sha256",
         "sorted",
@@ -10407,7 +11462,9 @@
         "visit",
         "write_text"
       ],
-      "lines": 109
+      "lines": 149,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/build_eures_market_evidence.py",
@@ -10464,7 +11521,13 @@
         "str",
         "write_eures_review_artifact"
       ],
-      "lines": 119
+      "lines": 119,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/eures_evidence_builder.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/build_eures_market_evidence_from_annex.py",
@@ -10540,7 +11603,14 @@
         "write_normalized_annex_csv",
         "write_text"
       ],
-      "lines": 243
+      "lines": 243,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/eures_annex_pdf.py",
+        "backend/app/services/eures_evidence_builder.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/build_official_reference_db.py",
@@ -10654,7 +11724,17 @@
         "write_reference",
         "write_text"
       ],
-      "lines": 132
+      "lines": 132,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/ranking_provider_metadata.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": [
+        "backend/scripts/audit_official_reference_db.py",
+        "backend/tests/test_official_reference_app_readthrough.py",
+        "backend/tests/test_official_reference_db_audit.py"
+      ]
     },
     {
       "path": "backend/scripts/check_operability.py",
@@ -10695,7 +11775,12 @@
         "operability_status",
         "print"
       ],
-      "lines": 339
+      "lines": 339,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/operability.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/check_radar_evidence.py",
@@ -10747,7 +11832,13 @@
         "print",
         "radar_evidence_status"
       ],
-      "lines": 83
+      "lines": 83,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/compare_official_local_nuts.py",
@@ -10817,7 +11908,11 @@
         "str",
         "write_text"
       ],
-      "lines": 94
+      "lines": 94,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_compare_official_local_nuts.py"
+      ]
     },
     {
       "path": "backend/scripts/discover_country_catalog.py",
@@ -10868,7 +11963,13 @@
         "print",
         "register_country_catalog"
       ],
-      "lines": 32
+      "lines": 32,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/world_bank.py",
+        "backend/app/services/country.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/discover_eurostat_regions.py",
@@ -10942,7 +12043,15 @@
         "str",
         "write_text"
       ],
-      "lines": 42
+      "lines": 42,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_geography_discovery.py",
+        "backend/app/ingestion/eurostat_nuts_registry.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/ingestion/eurostat_regional_labour.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/ensure_local_evidence.py",
@@ -11106,7 +12215,22 @@
         "upsert_labour_shortage_index",
         "upsert_regional_sector_employment"
       ],
-      "lines": 325
+      "lines": 325,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/core/config.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/cedefop_clssi.py",
+        "backend/app/ingestion/cedefop_oja_imbalance.py",
+        "backend/app/ingestion/eea_health_burden.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_sector.py",
+        "backend/app/ingestion/gisco_cities.py",
+        "backend/app/services/city_evidence.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/export_geography_coverage.py",
@@ -11179,7 +12303,11 @@
         "writeheader",
         "writerow"
       ],
-      "lines": 87
+      "lines": 87,
+      "resolved_local_imports": [
+        "backend/app/services/geography_indicator_coverage.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/export_geography_provenance.py",
@@ -11232,7 +12360,11 @@
         "str",
         "write_text"
       ],
-      "lines": 24
+      "lines": 24,
+      "resolved_local_imports": [
+        "backend/app/services/geography_provenance.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/export_indicator_inventory.py",
@@ -11305,7 +12437,13 @@
         "writeheader",
         "writerows"
       ],
-      "lines": 47
+      "lines": 47,
+      "resolved_local_imports": [
+        "backend/app/catalog.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_indicator_inventory.py"
+      ]
     },
     {
       "path": "backend/scripts/export_observation_provenance.py",
@@ -11359,7 +12497,11 @@
         "str",
         "write_text"
       ],
-      "lines": 24
+      "lines": 24,
+      "resolved_local_imports": [
+        "backend/app/services/observation_provenance.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/export_ranking_evidence_audit.py",
@@ -11441,7 +12583,13 @@
         "write_text",
         "zip"
       ],
-      "lines": 85
+      "lines": 85,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_ranking_evidence_audit.py"
+      ]
     },
     {
       "path": "backend/scripts/export_ranking_vintage_audit.py",
@@ -11521,7 +12669,14 @@
         "write_text",
         "zip"
       ],
-      "lines": 79
+      "lines": 79,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/services/ranking_eligibility.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_ranking_vintage_audit.py"
+      ]
     },
     {
       "path": "backend/scripts/import_cedefop_clssi.py",
@@ -11591,7 +12746,14 @@
         "str",
         "upsert_labour_shortage_index"
       ],
-      "lines": 56
+      "lines": 56,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/cedefop_clssi.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/import_cedefop_oja_imbalance.py",
@@ -11661,7 +12823,14 @@
         "str",
         "upsert_labour_oja_imbalance_eu27"
       ],
-      "lines": 51
+      "lines": 51,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/cedefop_oja_imbalance.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/import_cedefop_stas.py",
@@ -11724,7 +12893,13 @@
         "str",
         "upsert_labour_occupation_outlook"
       ],
-      "lines": 46
+      "lines": 46,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/cedefop_stas.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/import_esco.py",
@@ -11777,7 +12952,12 @@
         "print",
         "seed_esco_partial"
       ],
-      "lines": 46
+      "lines": 46,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/esco_store.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/import_ttv_calibration.py",
@@ -11823,7 +13003,12 @@
         "parse_args",
         "print"
       ],
-      "lines": 64
+      "lines": 64,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/ttv_calibration.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/import_ttv_holdout.py",
@@ -11869,7 +13054,12 @@
         "parse_args",
         "print"
       ],
-      "lines": 50
+      "lines": 50,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/ttv_calibration.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_cedefop_clssi.py",
@@ -11926,7 +13116,12 @@
         "print",
         "resolve"
       ],
-      "lines": 59
+      "lines": 59,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/ingestion/cedefop_clssi.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_cedefop_oja_imbalance.py",
@@ -11977,7 +13172,11 @@
         "print",
         "str"
       ],
-      "lines": 32
+      "lines": 32,
+      "resolved_local_imports": [
+        "backend/app/ingestion/cedefop_oja_imbalance.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_cedefop_reset.py",
@@ -12026,7 +13225,12 @@
         "print",
         "resolve_download_url"
       ],
-      "lines": 48
+      "lines": 48,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/ingestion/cedefop_reset.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_cedefop_stas.py",
@@ -12084,7 +13288,11 @@
         "print",
         "str"
       ],
-      "lines": 93
+      "lines": 93,
+      "resolved_local_imports": [
+        "backend/app/ingestion/cedefop_stas.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eea_air_quality_api.py",
@@ -12122,7 +13330,11 @@
         "main",
         "print"
       ],
-      "lines": 15
+      "lines": 15,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality_api.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eea_gisco_city_mapping.py",
@@ -12177,7 +13389,12 @@
         "raise_for_status",
         "set"
       ],
-      "lines": 67
+      "lines": 67,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality_api.py",
+        "backend/app/ingestion/gisco_cities.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eea_health_burden.py",
@@ -12216,7 +13433,11 @@
         "main",
         "print"
       ],
-      "lines": 15
+      "lines": 15,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_health_burden.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eea_pm25.py",
@@ -12254,7 +13475,11 @@
         "main",
         "print"
       ],
-      "lines": 15
+      "lines": 15,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eea_pm25_parquet.py",
@@ -12339,7 +13564,11 @@
         "write_bytes",
         "zip"
       ],
-      "lines": 83
+      "lines": 83,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality_api.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eurostat_city_evidence.py",
@@ -12392,7 +13621,12 @@
         "print",
         "values"
       ],
-      "lines": 117
+      "lines": 117,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/city_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eurostat_regional_access_safety.py",
@@ -12436,7 +13670,12 @@
         "main",
         "print"
       ],
-      "lines": 23
+      "lines": 23,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_access_safety.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eurostat_regional_health.py",
@@ -12480,7 +13719,12 @@
         "main",
         "print"
       ],
-      "lines": 21
+      "lines": 21,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_health.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eurostat_regional_housing.py",
@@ -12524,7 +13768,12 @@
         "main",
         "print"
       ],
-      "lines": 21
+      "lines": 21,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_housing.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_eurostat_regional_jvs.py",
@@ -12576,7 +13825,12 @@
         "parse_args",
         "print"
       ],
-      "lines": 35
+      "lines": 35,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_jvs.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_global_country_baseline.py",
@@ -12681,7 +13935,14 @@
         "sum",
         "values"
       ],
-      "lines": 165
+      "lines": 165,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/ingestion/imf.py",
+        "backend/app/ingestion/un_wpp.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_boundaries.py",
@@ -12754,7 +14015,9 @@
         "sorted",
         "str"
       ],
-      "lines": 142
+      "lines": 142,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_commute_mode.py",
@@ -12810,7 +14073,9 @@
         "str",
         "update"
       ],
-      "lines": 96
+      "lines": 96,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_density.py",
@@ -12871,7 +14136,9 @@
         "update",
         "upper"
       ],
-      "lines": 123
+      "lines": 123,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_dependency.py",
@@ -12929,7 +14196,9 @@
         "update",
         "upper"
       ],
-      "lines": 110
+      "lines": 110,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_economy.py",
@@ -12985,7 +14254,9 @@
         "str",
         "update"
       ],
-      "lines": 108
+      "lines": 108,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_geometry_links.py",
@@ -13110,7 +14381,9 @@
         "urljoin",
         "urlparse"
       ],
-      "lines": 161
+      "lines": 161,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_green_area.py",
@@ -13176,7 +14449,9 @@
         "sorted",
         "str"
       ],
-      "lines": 117
+      "lines": 117,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_labour.py",
@@ -13232,7 +14507,9 @@
         "str",
         "update"
       ],
-      "lines": 97
+      "lines": 97,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_pollution.py",
@@ -13288,7 +14565,9 @@
         "str",
         "update"
       ],
-      "lines": 126
+      "lines": 126,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_fua_public_transport.py",
@@ -13344,7 +14623,9 @@
         "str",
         "update"
       ],
-      "lines": 110
+      "lines": 110,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_broadband.py",
@@ -13403,7 +14684,9 @@
         "update",
         "upper"
       ],
-      "lines": 111
+      "lines": 111,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_demography.py",
@@ -13468,7 +14751,9 @@
         "str",
         "update"
       ],
-      "lines": 107
+      "lines": 107,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_density.py",
@@ -13536,7 +14821,9 @@
         "str",
         "update"
       ],
-      "lines": 131
+      "lines": 131,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_gdp.py",
@@ -13592,7 +14879,9 @@
         "str",
         "update"
       ],
-      "lines": 96
+      "lines": 96,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_income.py",
@@ -13648,7 +14937,9 @@
         "str",
         "update"
       ],
-      "lines": 97
+      "lines": 97,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_labour.py",
@@ -13704,7 +14995,9 @@
         "str",
         "update"
       ],
-      "lines": 103
+      "lines": 103,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_land_temperature.py",
@@ -13762,7 +15055,9 @@
         "update",
         "upper"
       ],
-      "lines": 102
+      "lines": 102,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_population.py",
@@ -13818,7 +15113,9 @@
         "str",
         "update"
       ],
-      "lines": 105
+      "lines": 105,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_oecd_regional_safety.py",
@@ -13874,7 +15171,9 @@
         "str",
         "update"
       ],
-      "lines": 96
+      "lines": 96,
+      "resolved_local_imports": [],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/inspect_ranking_employment_age.py",
@@ -13986,7 +15285,17 @@
         "type",
         "write_text"
       ],
-      "lines": 148
+      "lines": 148,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": [
+        "backend/scripts/accept_gr2.py",
+        "backend/tests/test_inspect_ranking_all_employment.py",
+        "backend/tests/test_inspect_ranking_employment_age.py"
+      ]
     },
     {
       "path": "backend/scripts/inspect_ranking_historical_sample.py",
@@ -14088,7 +15397,17 @@
         "type",
         "write_text"
       ],
-      "lines": 93
+      "lines": 93,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/ranking_eligibility.py",
+        "backend/app/services/ranking_provider_metadata.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_inspect_ranking_historical_sample.py"
+      ]
     },
     {
       "path": "backend/scripts/prepare_eures_manifest_candidate.py",
@@ -14149,7 +15468,12 @@
         "str",
         "write_text"
       ],
-      "lines": 101
+      "lines": 101,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/services/eures_evidence_builder.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/probe_eea_pm25_city.py",
@@ -14194,7 +15518,11 @@
         "print",
         "probe_verified_pm25_city"
       ],
-      "lines": 28
+      "lines": 28,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality_api.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/probe_eurostat_nuts3_context.py",
@@ -14240,7 +15568,12 @@
         "print",
         "regional_evidence"
       ],
-      "lines": 28
+      "lines": 28,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/probe_imf_weo_workbook.py",
@@ -14318,7 +15651,12 @@
         "upper",
         "verify_weo_roundtrip"
       ],
-      "lines": 72
+      "lines": 72,
+      "resolved_local_imports": [
+        "backend/app/ingestion/imf_weo_official.py",
+        "backend/scripts/verify_weo_disposable_readthrough.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/probe_oecd_population_contract.py",
@@ -14378,7 +15716,11 @@
         "print",
         "upper"
       ],
-      "lines": 34
+      "lines": 34,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd_regional.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/reconcile_legacy_nuts_vintage.py",
@@ -14498,7 +15840,14 @@
         "sum",
         "tuple"
       ],
-      "lines": 175
+      "lines": 175,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/scripts/audit_legacy_nuts_vintage.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_reconcile_legacy_nuts_vintage.py"
+      ]
     },
     {
       "path": "backend/scripts/reconcile_ranking_eurostat.py",
@@ -14606,7 +15955,20 @@
         "values",
         "write_text"
       ],
-      "lines": 167
+      "lines": 167,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/ranking_eligibility.py",
+        "backend/app/services/ranking_provider_metadata.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": [
+        "backend/scripts/accept_gr2.py",
+        "backend/tests/test_reconcile_ranking_diagnostics.py",
+        "backend/tests/test_reconcile_ranking_eurostat.py",
+        "backend/tests/test_reconcile_ranking_multislice.py"
+      ]
     },
     {
       "path": "backend/scripts/review_ttv_holdout.py",
@@ -14665,7 +16027,12 @@
         "str",
         "strip"
       ],
-      "lines": 75
+      "lines": 75,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/ttv_calibration.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/seal_ttv_holdout.py",
@@ -14704,7 +16071,12 @@
         "print",
         "seal_holdout"
       ],
-      "lines": 38
+      "lines": 38,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/ttv_calibration.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/smoke_eurostat_regional_coverage.py",
@@ -14764,7 +16136,15 @@
         "print",
         "reconcile_nuts2024"
       ],
-      "lines": 40
+      "lines": 40,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_geography_discovery.py",
+        "backend/app/ingestion/eurostat_nuts_registry.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/ingestion/eurostat_regional_labour.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/smoke_nuts2024_registry.py",
@@ -14808,7 +16188,11 @@
         "sum",
         "values"
       ],
-      "lines": 17
+      "lines": 17,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_nuts_registry.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/smoke_oecd_tax_wedge.py",
@@ -14857,7 +16241,11 @@
         "split",
         "splitlines"
       ],
-      "lines": 32
+      "lines": 32,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd_tax_wedge.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/stage_gr2_employment.py",
@@ -14999,7 +16387,16 @@
         "update",
         "write_text"
       ],
-      "lines": 190
+      "lines": 190,
+      "resolved_local_imports": [
+        "backend/app/core/config.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/ranking_provider_metadata.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_stage_gr2_employment.py"
+      ]
     },
     {
       "path": "backend/scripts/sync_core.py",
@@ -15067,7 +16464,14 @@
         "upper",
         "values"
       ],
-      "lines": 111
+      "lines": 111,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/providers.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_eea_health_burden.py",
@@ -15122,7 +16526,14 @@
         "print",
         "upsert_environmental_health_burden"
       ],
-      "lines": 44
+      "lines": 44,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/eea_health_burden.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_eurostat.py",
@@ -15223,7 +16634,20 @@
         "validate_eurostat_regional_rows",
         "validate_write_batch"
       ],
-      "lines": 136
+      "lines": 136,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/db/write_contract.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_contract.py",
+        "backend/app/ingestion/eurostat_regional_health.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/ingestion/eurostat_regional_labour.py",
+        "backend/app/ingestion/eurostat_regional_sector.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_eurostat_nuts3_safety.py",
@@ -15294,7 +16718,14 @@
         "upper",
         "upsert_geographies"
       ],
-      "lines": 123
+      "lines": 123,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_eurostat_regional_health.py",
@@ -15351,7 +16782,14 @@
         "sorted",
         "upsert_subnational_observations"
       ],
-      "lines": 35
+      "lines": 35,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_health.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_eurostat_regional_housing.py",
@@ -15424,7 +16862,15 @@
         "upsert_subnational_observations",
         "validate_eurostat_regional_rows"
       ],
-      "lines": 43
+      "lines": 43,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_contract.py",
+        "backend/app/ingestion/eurostat_regional_housing.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_eurostat_regional_labour.py",
@@ -15497,7 +16943,15 @@
         "upsert_subnational_observations",
         "validate_eurostat_regional_rows"
       ],
-      "lines": 44
+      "lines": 44,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_contract.py",
+        "backend/app/ingestion/eurostat_regional_labour.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_eurostat_regional_sector.py",
@@ -15554,7 +17008,14 @@
         "sorted",
         "upsert_regional_sector_employment"
       ],
-      "lines": 34
+      "lines": 34,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_sector.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_global_baseline.py",
@@ -15644,7 +17105,16 @@
         "sync_countries",
         "write_text"
       ],
-      "lines": 114
+      "lines": 114,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/imf.py",
+        "backend/app/ingestion/imf_weo_official.py",
+        "backend/app/ingestion/un_wpp.py",
+        "backend/app/ingestion/world_bank.py",
+        "backend/app/services/country.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_imf.py",
@@ -15681,7 +17151,12 @@
         "print",
         "sync_country"
       ],
-      "lines": 40
+      "lines": 40,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/imf.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_oecd.py",
@@ -15717,7 +17192,12 @@
         "print",
         "sync_country"
       ],
-      "lines": 26
+      "lines": 26,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/oecd.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_oecd_fua.py",
@@ -15812,7 +17292,15 @@
         "upper",
         "values"
       ],
-      "lines": 260
+      "lines": 260,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/oecd_fua.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_oecd_fua_geometry.py",
@@ -15910,7 +17398,15 @@
         "type",
         "upper"
       ],
-      "lines": 166
+      "lines": 166,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/oecd_fua_geometry.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_oecd_regional.py",
@@ -16004,7 +17500,15 @@
         "sync_safety",
         "upper"
       ],
-      "lines": 265
+      "lines": 265,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/oecd_regional.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_oecd_regional_density.py",
@@ -16073,7 +17577,14 @@
         "sync_density",
         "upper"
       ],
-      "lines": 102
+      "lines": 102,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/oecd_regional.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_oecd_tax_wedge.py",
@@ -16137,7 +17648,13 @@
         "upsert_observations",
         "values"
       ],
-      "lines": 35
+      "lines": 35,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/oecd_tax_wedge.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_phase1.py",
@@ -16174,7 +17691,12 @@
         "print",
         "sync_country"
       ],
-      "lines": 39
+      "lines": 39,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_subnational.py",
@@ -16285,7 +17807,15 @@
         "upsert_geographies",
         "values"
       ],
-      "lines": 198
+      "lines": 198,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/city_evidence.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/sync_un_wpp.py",
@@ -16322,7 +17852,12 @@
         "print",
         "sync_country"
       ],
-      "lines": 29
+      "lines": 29,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/ingestion/un_wpp.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/scripts/verify_g2_reconciliation.py",
@@ -16423,7 +17958,11 @@
         "values",
         "write_text"
       ],
-      "lines": 126
+      "lines": 126,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_verify_g2_reconciliation.py"
+      ]
     },
     {
       "path": "backend/scripts/verify_reference_app_readthrough.py",
@@ -16548,7 +18087,15 @@
         "verify",
         "write_text"
       ],
-      "lines": 122
+      "lines": 122,
+      "resolved_local_imports": [
+        "backend/app/api/routes.py",
+        "backend/app/db/__init__.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_official_reference_app_readthrough.py"
+      ]
     },
     {
       "path": "backend/scripts/verify_weo_disposable_readthrough.py",
@@ -16608,7 +18155,14 @@
         "sum",
         "upsert_observations"
       ],
-      "lines": 47
+      "lines": 47,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py"
+      ],
+      "imported_by": [
+        "backend/scripts/probe_imf_weo_workbook.py",
+        "backend/tests/test_imf_weo_official_source.py"
+      ]
     },
     {
       "path": "backend/tests/test_accept_g2_local_data_layer.py",
@@ -16679,7 +18233,12 @@
         "verify",
         "write_bytes"
       ],
-      "lines": 60
+      "lines": 60,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py",
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_accept_gr2.py",
@@ -16750,7 +18309,11 @@
         "isinstance",
         "str"
       ],
-      "lines": 42
+      "lines": 42,
+      "resolved_local_imports": [
+        "backend/scripts/accept_gr2.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_atomic_upsert_api_integration.py",
@@ -16913,7 +18476,14 @@
         "upsert_regional_sector_employment",
         "upsert_subnational_observations"
       ],
-      "lines": 175
+      "lines": 175,
+      "resolved_local_imports": [
+        "backend/app/api/routes.py",
+        "backend/app/db/__init__.py",
+        "backend/app/services/__init__.py",
+        "backend/app/services/regional_rankings.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_audit_legacy_nuts_vintage.py",
@@ -16960,7 +18530,212 @@
         "raises",
         "set"
       ],
-      "lines": 79
+      "lines": 79,
+      "resolved_local_imports": [
+        "backend/scripts/audit_legacy_nuts_vintage.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_b02_source_evidence_gates.py",
+      "bucket": "backend/tests",
+      "sha256": "90a93ab0c24475ccdd625bd5628a7f7c73804e2db2560e44fc9628be126a7c79",
+      "bytes": 3316,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "EEAResponse",
+          "kind": "class",
+          "line_start": 10,
+          "line_end": 13,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "EEAResponse.__init__",
+          "kind": "function",
+          "line_start": 11,
+          "line_end": 11,
+          "signature_arguments": [
+            "self",
+            "payload"
+          ]
+        },
+        {
+          "symbol": "EEAResponse.raise_for_status",
+          "kind": "function",
+          "line_start": 12,
+          "line_end": 12,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "EEAResponse.json",
+          "kind": "function",
+          "line_start": 13,
+          "line_end": 13,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "EEAClient",
+          "kind": "class",
+          "line_start": 16,
+          "line_end": 18,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "EEAClient.__init__",
+          "kind": "function",
+          "line_start": 17,
+          "line_end": 17,
+          "signature_arguments": [
+            "self",
+            "payload"
+          ]
+        },
+        {
+          "symbol": "EEAClient.get",
+          "kind": "function",
+          "line_start": 18,
+          "line_end": 18,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "station",
+          "kind": "function",
+          "line_start": 21,
+          "line_end": 24,
+          "signature_arguments": [
+            "country",
+            "value"
+          ]
+        },
+        {
+          "symbol": "test_partial_eea_page_cannot_be_aggregation_ready",
+          "kind": "function",
+          "line_start": 27,
+          "line_end": 31,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_complete_eea_sample_may_be_ready_for_design",
+          "kind": "function",
+          "line_start": 34,
+          "line_end": 38,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_nonfinite_eea_value_rejected",
+          "kind": "function",
+          "line_start": 41,
+          "line_end": 43,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "sparse_payload",
+          "kind": "function",
+          "line_start": 46,
+          "line_end": 50,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_malformed_geography_data_not_counted_as_observed",
+          "kind": "function",
+          "line_start": 58,
+          "line_end": 61,
+          "signature_arguments": [
+            "change"
+          ]
+        },
+        {
+          "symbol": "test_valid_sparse_eurostat_observation",
+          "kind": "function",
+          "line_start": 64,
+          "line_end": 65,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "sector_payload",
+          "kind": "function",
+          "line_start": 68,
+          "line_end": 73,
+          "signature_arguments": [
+            "value"
+          ]
+        },
+        {
+          "symbol": "test_invalid_sector_value_rejected",
+          "kind": "function",
+          "line_start": 77,
+          "line_end": 83,
+          "signature_arguments": [
+            "value"
+          ]
+        },
+        {
+          "symbol": "test_sector_cardinality_mismatch_rejected",
+          "kind": "function",
+          "line_start": 86,
+          "line_end": 94,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "copy",
+          "line": 2
+        },
+        {
+          "module": "pytest",
+          "line": 3
+        },
+        {
+          "module": "app.ingestion.eea_air_quality",
+          "line": 4
+        },
+        {
+          "module": "app.ingestion.eurostat_geography_discovery",
+          "line": 5
+        },
+        {
+          "module": "app.ingestion.eurostat",
+          "line": 6
+        },
+        {
+          "module": "app.ingestion.eurostat_regional_sector",
+          "line": 7
+        }
+      ],
+      "called_names": [
+        "EEAClient",
+        "EEAResponse",
+        "EurostatAdapter",
+        "change",
+        "close",
+        "float",
+        "inspect_eea_pm25",
+        "normalize_regional_sector_employment",
+        "observed_geo_codes",
+        "parametrize",
+        "raises",
+        "sector_payload",
+        "set",
+        "sparse_payload",
+        "station",
+        "update"
+      ],
+      "lines": 94,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_geography_discovery.py",
+        "backend/app/ingestion/eurostat_regional_sector.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_build_eures_market_evidence_from_annex.py",
@@ -17065,7 +18840,11 @@
         "write_bytes",
         "write_text"
       ],
-      "lines": 237
+      "lines": 237,
+      "resolved_local_imports": [
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_career_fit.py",
@@ -17462,7 +19241,13 @@
         "skill_demand_trend_evidence",
         "startswith"
       ],
-      "lines": 977
+      "lines": 977,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/__init__.py",
+        "backend/app/services/career_fit.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_catalog.py",
@@ -17542,7 +19327,11 @@
         "set",
         "world_bank_indicators"
       ],
-      "lines": 59
+      "lines": 59,
+      "resolved_local_imports": [
+        "backend/app/catalog.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_cedefop_clssi.py",
@@ -17739,7 +19528,11 @@
         "startswith",
         "str"
       ],
-      "lines": 264
+      "lines": 264,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_cedefop_oja_imbalance.py",
@@ -17890,7 +19683,11 @@
         "startswith",
         "write_text"
       ],
-      "lines": 98
+      "lines": 98,
+      "resolved_local_imports": [
+        "backend/app/ingestion/cedefop_oja_imbalance.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_cedefop_reset.py",
@@ -17984,7 +19781,11 @@
         "Response",
         "resolve_download_url"
       ],
-      "lines": 44
+      "lines": 44,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_cedefop_stas.py",
@@ -18069,7 +19870,12 @@
         "round",
         "setattr"
       ],
-      "lines": 119
+      "lines": 119,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/cedefop_stas.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_city_evidence.py",
@@ -18350,7 +20156,12 @@
         "sync_city_evidence_codes",
         "throw"
       ],
-      "lines": 364
+      "lines": 364,
+      "resolved_local_imports": [
+        "backend/app/services/__init__.py",
+        "backend/app/services/city_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_compare.py",
@@ -18376,7 +20187,11 @@
       "called_names": [
         "build_comparison"
       ],
-      "lines": 36
+      "lines": 36,
+      "resolved_local_imports": [
+        "backend/app/services/compare.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_compare_official_local_nuts.py",
@@ -18430,7 +20245,11 @@
         "len",
         "raises"
       ],
-      "lines": 63
+      "lines": 63,
+      "resolved_local_imports": [
+        "backend/scripts/compare_official_local_nuts.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_dimension.py",
@@ -18541,7 +20360,11 @@
         "make_indicator",
         "summarize_dimension"
       ],
-      "lines": 189
+      "lines": 189,
+      "resolved_local_imports": [
+        "backend/app/engines/dimension.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_dynamic_country_registry.py",
@@ -18690,7 +20513,15 @@
         "register_country_catalog",
         "setattr"
       ],
-      "lines": 175
+      "lines": 175,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/world_bank.py",
+        "backend/app/providers.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eea_air_quality.py",
@@ -18714,7 +20545,11 @@
         }
       ],
       "called_names": [],
-      "lines": 5
+      "lines": 5,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_air_quality.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eea_air_quality_api.py",
@@ -18777,7 +20612,11 @@
         "object",
         "setattr"
       ],
-      "lines": 28
+      "lines": 28,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eea_city_air.py",
@@ -18813,7 +20652,11 @@
         "len",
         "select_eligible_station_means"
       ],
-      "lines": 47
+      "lines": 47,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eea_city_air.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eea_city_catalog.py",
@@ -18843,7 +20686,11 @@
         "resolve_eea_city",
         "setattr"
       ],
-      "lines": 26
+      "lines": 26,
+      "resolved_local_imports": [
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eea_health_burden.py",
@@ -18969,7 +20816,11 @@
         "parse_eea_pm25_burden_archive",
         "writestr"
       ],
-      "lines": 111
+      "lines": 111,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ensure_local_evidence.py",
@@ -19426,7 +21277,11 @@
         "setdefault",
         "str"
       ],
-      "lines": 794
+      "lines": 794,
+      "resolved_local_imports": [
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_esco_store.py",
@@ -19532,7 +21387,13 @@
         "setattr",
         "write_text"
       ],
-      "lines": 137
+      "lines": 137,
+      "resolved_local_imports": [
+        "backend/app/__init__.py",
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eures_annex_pdf.py",
@@ -19576,7 +21437,11 @@
       "called_names": [
         "normalize_annex_table"
       ],
-      "lines": 69
+      "lines": 69,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eures_annex_pdf.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eures_evidence_builder.py",
@@ -19765,7 +21630,11 @@
         "write_eures_review_artifact",
         "write_text"
       ],
-      "lines": 518
+      "lines": 518,
+      "resolved_local_imports": [
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat.py",
@@ -19926,7 +21795,11 @@
         "normalize_net_earnings",
         "str"
       ],
-      "lines": 417
+      "lines": 417,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_catalog.py",
@@ -20021,7 +21894,12 @@
         }
       ],
       "called_names": [],
-      "lines": 144
+      "lines": 144,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_dynamic_country_scope.py",
@@ -20066,7 +21944,12 @@
         "raises",
         "set"
       ],
-      "lines": 30
+      "lines": 30,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_labour.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_fail_closed_values.py",
@@ -20138,7 +22021,11 @@
         "payload",
         "raises"
       ],
-      "lines": 46
+      "lines": 46,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_geography_discovery.py",
@@ -20192,7 +22079,11 @@
         "discover_dataset_geographies",
         "discover_regional_dataset_coverage"
       ],
-      "lines": 24
+      "lines": 24,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_geography_discovery.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_nuts_registry.py",
@@ -20254,7 +22145,11 @@
         "reconcile_nuts2024",
         "set"
       ],
-      "lines": 73
+      "lines": 73,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_nuts_registry.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_observed_coverage.py",
@@ -20296,7 +22191,11 @@
         "float",
         "observed_geo_codes"
       ],
-      "lines": 33
+      "lines": 33,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_geography_discovery.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_regional_access_safety.py",
@@ -20329,7 +22228,11 @@
       "called_names": [
         "_ordered_codes"
       ],
-      "lines": 20
+      "lines": 20,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_regional_access_safety.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_regional_contract.py",
@@ -20388,7 +22291,11 @@
         "update",
         "validate_eurostat_regional_rows"
       ],
-      "lines": 31
+      "lines": 31,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_regional_contract.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_regional_health.py",
@@ -20433,7 +22340,11 @@
         "_ordered_codes",
         "next"
       ],
-      "lines": 31
+      "lines": 31,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_regional_health.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_regional_housing.py",
@@ -20478,7 +22389,11 @@
         "_ordered_codes",
         "next"
       ],
-      "lines": 45
+      "lines": 45,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_regional_housing.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_regional_jvs.py",
@@ -20511,7 +22426,11 @@
       "called_names": [
         "_ordered_codes"
       ],
-      "lines": 24
+      "lines": 24,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat_regional_jvs.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_regional_labour.py",
@@ -20551,7 +22470,12 @@
         "close",
         "normalize_subnational"
       ],
-      "lines": 97
+      "lines": 97,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_labour.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_eurostat_regional_sector.py",
@@ -20592,7 +22516,12 @@
         "len",
         "normalize_regional_sector_employment"
       ],
-      "lines": 106
+      "lines": 106,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_sector.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_financial_fit.py",
@@ -20662,7 +22591,12 @@
         "round",
         "setattr"
       ],
-      "lines": 211
+      "lines": 211,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_geography_coverage_export.py",
@@ -20763,7 +22697,11 @@
         "update",
         "with_suffix"
       ],
-      "lines": 91
+      "lines": 91,
+      "resolved_local_imports": [
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_geography_indicator_coverage.py",
@@ -20822,7 +22760,12 @@
         "startswith",
         "str"
       ],
-      "lines": 98
+      "lines": 98,
+      "resolved_local_imports": [
+        "backend/app/services/__init__.py",
+        "backend/app/services/geography_indicator_coverage.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_geography_provenance.py",
@@ -20866,7 +22809,11 @@
         "setattr",
         "str"
       ],
-      "lines": 41
+      "lines": 41,
+      "resolved_local_imports": [
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_gisco_cities.py",
@@ -20931,7 +22878,11 @@
         "match_eea_cities_to_gisco",
         "normalize_city_name"
       ],
-      "lines": 120
+      "lines": 120,
+      "resolved_local_imports": [
+        "backend/app/ingestion/gisco_cities.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_global_baseline_report_contract.py",
@@ -21100,7 +23051,11 @@
         "setattr",
         "str"
       ],
-      "lines": 45
+      "lines": 45,
+      "resolved_local_imports": [
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_global_evidence_contract.py",
@@ -21135,7 +23090,11 @@
         "coverage_matrix",
         "len"
       ],
-      "lines": 22
+      "lines": 22,
+      "resolved_local_imports": [
+        "backend/app/services/global_evidence_contract.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_health.py",
@@ -21267,7 +23226,12 @@
         "setdefault",
         "sorted"
       ],
-      "lines": 323
+      "lines": 323,
+      "resolved_local_imports": [
+        "backend/app/api/__init__.py",
+        "backend/app/main.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_housing_affordability.py",
@@ -21300,7 +23264,11 @@
       "called_names": [
         "housing_affordability_evidence"
       ],
-      "lines": 21
+      "lines": 21,
+      "resolved_local_imports": [
+        "backend/app/services/housing_affordability.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_imf.py",
@@ -21439,7 +23407,12 @@
         "setattr",
         "sync_countries"
       ],
-      "lines": 212
+      "lines": 212,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/imf.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_imf_bulk_completion.py",
@@ -21474,7 +23447,11 @@
         "object",
         "sync_countries"
       ],
-      "lines": 16
+      "lines": 16,
+      "resolved_local_imports": [
+        "backend/app/ingestion/imf.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_imf_weo_official_source.py",
@@ -21568,7 +23545,12 @@
         "verify_weo_roundtrip",
         "workbook"
       ],
-      "lines": 63
+      "lines": 63,
+      "resolved_local_imports": [
+        "backend/app/ingestion/imf_weo_official.py",
+        "backend/scripts/verify_weo_disposable_readthrough.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_indicator_inventory.py",
@@ -21600,7 +23582,12 @@
         "inventory",
         "len"
       ],
-      "lines": 9
+      "lines": 9,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/scripts/export_indicator_inventory.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ingestion_write_path_audit.py",
@@ -21664,7 +23651,11 @@
         "replace",
         "resolve"
       ],
-      "lines": 37
+      "lines": 37,
+      "resolved_local_imports": [
+        "backend/scripts/audit_ingestion_write_paths.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_inspect_ranking_all_employment.py",
@@ -21709,7 +23700,11 @@
         "str",
         "summarize"
       ],
-      "lines": 25
+      "lines": 25,
+      "resolved_local_imports": [
+        "backend/scripts/inspect_ranking_employment_age.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_inspect_ranking_employment_age.py",
@@ -21777,7 +23772,11 @@
         "stat",
         "str"
       ],
-      "lines": 38
+      "lines": 38,
+      "resolved_local_imports": [
+        "backend/scripts/inspect_ranking_employment_age.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_inspect_ranking_historical_sample.py",
@@ -21846,7 +23845,11 @@
         "stat",
         "str"
       ],
-      "lines": 32
+      "lines": 32,
+      "resolved_local_imports": [
+        "backend/scripts/inspect_ranking_historical_sample.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_language_fit.py",
@@ -21922,7 +23925,13 @@
         "language_fit",
         "setattr"
       ],
-      "lines": 167
+      "lines": 167,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/__init__.py",
+        "backend/app/services/language_fit.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_legal_fit.py",
@@ -21974,7 +23983,12 @@
         "PersonalProfileResponse",
         "legal_fit"
       ],
-      "lines": 55
+      "lines": 55,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/legal_fit.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_live_postings.py",
@@ -22032,7 +24046,11 @@
         "raises",
         "validate_live_postings_snapshot"
       ],
-      "lines": 72
+      "lines": 72,
+      "resolved_local_imports": [
+        "backend/app/services/live_postings.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_national_bulk_ingestion.py",
@@ -22130,7 +24148,11 @@
         "str",
         "upsert_observations"
       ],
-      "lines": 76
+      "lines": 76,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_nuts_vintage_write_safety.py",
@@ -22237,7 +24259,12 @@
         "upsert_geographies",
         "upsert_subnational_observations"
       ],
-      "lines": 137
+      "lines": 137,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_observation_provenance.py",
@@ -22296,7 +24323,11 @@
         "setattr",
         "str"
       ],
-      "lines": 43
+      "lines": 43,
+      "resolved_local_imports": [
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_observation_write_contract.py",
@@ -22363,7 +24394,11 @@
         "raises",
         "validate_write_batch"
       ],
-      "lines": 36
+      "lines": 36,
+      "resolved_local_imports": [
+        "backend/app/db/write_contract.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd.py",
@@ -22392,7 +24427,11 @@
         "len",
         "normalize"
       ],
-      "lines": 24
+      "lines": 24,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_density_global_contract.py",
@@ -22452,7 +24491,12 @@
         "setattr",
         "sync_density"
       ],
-      "lines": 36
+      "lines": 36,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/oecd_regional.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_explicit_metric_contracts.py",
@@ -22529,7 +24573,11 @@
         "raises",
         "values"
       ],
-      "lines": 45
+      "lines": 45,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd_regional.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_fua.py",
@@ -22701,7 +24749,12 @@
         "sync_transport",
         "values"
       ],
-      "lines": 539
+      "lines": 539,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/oecd_fua.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_fua_geometry.py",
@@ -22849,7 +24902,12 @@
         "timedelta",
         "writestr"
       ],
-      "lines": 236
+      "lines": 236,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_global_sync_guards.py",
@@ -22893,7 +24951,11 @@
         "raises",
         "update"
       ],
-      "lines": 31
+      "lines": 31,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_population_duplicate_integrity.py",
@@ -22973,7 +25035,11 @@
         "writerow",
         "zip"
       ],
-      "lines": 38
+      "lines": 38,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd_regional.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_population_unit_filter.py",
@@ -23045,7 +25111,11 @@
         "writeheader",
         "writerow"
       ],
-      "lines": 45
+      "lines": 45,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd_regional.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_regional.py",
@@ -23350,7 +25420,12 @@
         "sync_land_temperature",
         "sync_population"
       ],
-      "lines": 568
+      "lines": 568,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/oecd_regional.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_sync_discovery.py",
@@ -23576,7 +25651,11 @@
         "set",
         "setattr"
       ],
-      "lines": 214
+      "lines": 214,
+      "resolved_local_imports": [
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_tax_wedge.py",
@@ -23658,7 +25737,11 @@
         "split",
         "str"
       ],
-      "lines": 41
+      "lines": 41,
+      "resolved_local_imports": [
+        "backend/app/ingestion/oecd_tax_wedge.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_oecd_tax_wedge_catalog.py",
@@ -23688,7 +25771,12 @@
       "called_names": [
         "len"
       ],
-      "lines": 10
+      "lines": 10,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/app/ingestion/oecd_tax_wedge.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_official_nuts_catalog_audit.py",
@@ -23714,7 +25802,11 @@
       "called_names": [
         "official_codes"
       ],
-      "lines": 13
+      "lines": 13,
+      "resolved_local_imports": [
+        "backend/scripts/audit_official_nuts_catalog.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_official_reference_app_readthrough.py",
@@ -23796,7 +25888,13 @@
         "str",
         "verify"
       ],
-      "lines": 51
+      "lines": 51,
+      "resolved_local_imports": [
+        "backend/app/services/regional_evidence.py",
+        "backend/scripts/build_official_reference_db.py",
+        "backend/scripts/verify_reference_app_readthrough.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_official_reference_db_audit.py",
@@ -23897,7 +25995,13 @@
         "parametrize",
         "str"
       ],
-      "lines": 65
+      "lines": 65,
+      "resolved_local_imports": [
+        "backend/app/services/regional_evidence.py",
+        "backend/scripts/audit_official_reference_db.py",
+        "backend/scripts/build_official_reference_db.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_operability.py",
@@ -24166,7 +26270,11 @@
         "setattr",
         "timedelta"
       ],
-      "lines": 1399
+      "lines": 1399,
+      "resolved_local_imports": [
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_peer_reference.py",
@@ -24214,7 +26322,11 @@
         "build_peer_reference",
         "set"
       ],
-      "lines": 81
+      "lines": 81,
+      "resolved_local_imports": [
+        "backend/app/services/peer_reference.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_personalized_compare.py",
@@ -24345,7 +26457,11 @@
         "round",
         "set"
       ],
-      "lines": 355
+      "lines": 355,
+      "resolved_local_imports": [
+        "backend/app/services/personalized_compare.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_profile.py",
@@ -24386,7 +26502,11 @@
         "json",
         "put"
       ],
-      "lines": 53
+      "lines": 53,
+      "resolved_local_imports": [
+        "backend/app/main.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_profile_readiness.py",
@@ -24427,7 +26547,12 @@
         "profile_readiness",
         "values"
       ],
-      "lines": 38
+      "lines": 38,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/profile_readiness.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_providers.py",
@@ -24491,7 +26616,12 @@
         "setattr",
         "upper"
       ],
-      "lines": 42
+      "lines": 42,
+      "resolved_local_imports": [
+        "backend/app/__init__.py",
+        "backend/app/providers.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ranking_eligibility.py",
@@ -24576,7 +26706,11 @@
         "ordered_eligible",
         "replace"
       ],
-      "lines": 71
+      "lines": 71,
+      "resolved_local_imports": [
+        "backend/app/services/ranking_eligibility.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ranking_evidence_audit.py",
@@ -24629,7 +26763,11 @@
         "stat",
         "str"
       ],
-      "lines": 30
+      "lines": 30,
+      "resolved_local_imports": [
+        "backend/scripts/export_ranking_evidence_audit.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ranking_pilot_source_contracts.py",
@@ -24660,7 +26798,12 @@
         "items",
         "set"
       ],
-      "lines": 19
+      "lines": 19,
+      "resolved_local_imports": [
+        "backend/app/services/ranking_eligibility.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ranking_provider_metadata.py",
@@ -24714,7 +26857,11 @@
         "sample",
         "update"
       ],
-      "lines": 25
+      "lines": 25,
+      "resolved_local_imports": [
+        "backend/app/services/ranking_provider_metadata.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ranking_vintage_audit.py",
@@ -24751,7 +26898,11 @@
         "stat",
         "str"
       ],
-      "lines": 20
+      "lines": 20,
+      "resolved_local_imports": [
+        "backend/scripts/export_ranking_vintage_audit.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_reconcile_legacy_nuts_vintage.py",
@@ -24855,7 +27006,12 @@
         "str",
         "write_text"
       ],
-      "lines": 113
+      "lines": 113,
+      "resolved_local_imports": [
+        "backend/scripts/audit_legacy_nuts_vintage.py",
+        "backend/scripts/reconcile_legacy_nuts_vintage.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_reconcile_ranking_diagnostics.py",
@@ -24924,7 +27080,11 @@
         "stat",
         "str"
       ],
-      "lines": 50
+      "lines": 50,
+      "resolved_local_imports": [
+        "backend/scripts/reconcile_ranking_eurostat.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_reconcile_ranking_eurostat.py",
@@ -24992,7 +27152,11 @@
         "stat",
         "str"
       ],
-      "lines": 36
+      "lines": 36,
+      "resolved_local_imports": [
+        "backend/scripts/reconcile_ranking_eurostat.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_reconcile_ranking_multislice.py",
@@ -25062,7 +27226,11 @@
         "str",
         "values"
       ],
-      "lines": 43
+      "lines": 43,
+      "resolved_local_imports": [
+        "backend/scripts/reconcile_ranking_eurostat.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_regional_evidence.py",
@@ -25381,7 +27549,16 @@
         "str",
         "subnational_indicator_series"
       ],
-      "lines": 861
+      "lines": 861,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py",
+        "backend/app/db/analytics.py",
+        "backend/app/ingestion/eurostat_regional_health.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/services/__init__.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_regional_ingestion_batch_hardening.py",
@@ -25491,7 +27668,15 @@
         "validate_eurostat_regional_rows",
         "validate_housing_indicator_contracts"
       ],
-      "lines": 78
+      "lines": 78,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/eurostat_regional_contract.py",
+        "backend/app/ingestion/eurostat_regional_housing.py",
+        "backend/app/ingestion/eurostat_regional_labour.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_regional_ingestion_dimension_safety.py",
@@ -25585,7 +27770,11 @@
         "_latest_regional_indicator",
         "next"
       ],
-      "lines": 45
+      "lines": 45,
+      "resolved_local_imports": [
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_regional_labour_canonical_contract.py",
@@ -25626,7 +27815,11 @@
         "setattr",
         "validate_labour_indicator_contracts"
       ],
-      "lines": 17
+      "lines": 17,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_regional_rankings.py",
@@ -25729,7 +27922,11 @@
         "stat",
         "str"
       ],
-      "lines": 116
+      "lines": 116,
+      "resolved_local_imports": [
+        "backend/app/services/regional_rankings.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_regional_request_provenance.py",
@@ -25809,7 +28006,11 @@
         "loads",
         "next"
       ],
-      "lines": 38
+      "lines": 38,
+      "resolved_local_imports": [
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_regional_response_provenance.py",
@@ -25897,7 +28098,12 @@
         "normalize",
         "payload"
       ],
-      "lines": 54
+      "lines": 54,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/services/regional_evidence.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_scenario.py",
@@ -25985,7 +28191,12 @@
         "horizon_uncertainty",
         "setattr"
       ],
-      "lines": 78
+      "lines": 78,
+      "resolved_local_imports": [
+        "backend/app/engines/scenario.py",
+        "backend/app/services/scenarios.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_source_quality.py",
@@ -26016,7 +28227,12 @@
         "initialize_datastores",
         "source_quality_summary"
       ],
-      "lines": 12
+      "lines": 12,
+      "resolved_local_imports": [
+        "backend/app/db/analytics.py",
+        "backend/app/db/bootstrap.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_specialized_write_contract.py",
@@ -26066,7 +28282,11 @@
         "raises",
         "validate_specialized_batch"
       ],
-      "lines": 35
+      "lines": 35,
+      "resolved_local_imports": [
+        "backend/app/db/write_contract.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_stage_gr2_employment.py",
@@ -26192,7 +28412,11 @@
         "str",
         "super"
       ],
-      "lines": 90
+      "lines": 90,
+      "resolved_local_imports": [
+        "backend/scripts/stage_gr2_employment.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_subnational_status.py",
@@ -26355,7 +28579,11 @@
         "timedelta",
         "upsert_geography_geometries"
       ],
-      "lines": 635
+      "lines": 635,
+      "resolved_local_imports": [
+        "backend/app/db/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_sync_eurostat_atomic_regional.py",
@@ -26479,7 +28707,11 @@
         "raises",
         "setattr"
       ],
-      "lines": 58
+      "lines": 58,
+      "resolved_local_imports": [
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_sync_subnational.py",
@@ -26509,7 +28741,12 @@
       "called_names": [
         "get"
       ],
-      "lines": 13
+      "lines": 13,
+      "resolved_local_imports": [
+        "backend/app/catalog.py",
+        "backend/scripts/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_tax_wedge_contract.py",
@@ -26535,7 +28772,11 @@
       "called_names": [
         "tax_wedge_contract"
       ],
-      "lines": 12
+      "lines": 12,
+      "resolved_local_imports": [
+        "backend/app/services/tax_wedge_contract.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_trajectory.py",
@@ -26559,7 +28800,11 @@
         }
       ],
       "called_names": [],
-      "lines": 5
+      "lines": 5,
+      "resolved_local_imports": [
+        "backend/app/services/trajectory.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_trend.py",
@@ -26700,7 +28945,12 @@
         "setattr",
         "str"
       ],
-      "lines": 258
+      "lines": 258,
+      "resolved_local_imports": [
+        "backend/app/engines/trend.py",
+        "backend/app/services/trends.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ttv.py",
@@ -26769,7 +29019,12 @@
         "setattr",
         "ttv_status"
       ],
-      "lines": 212
+      "lines": 212,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ttv_calibration.py",
@@ -27282,7 +29537,12 @@
         "values",
         "write_text"
       ],
-      "lines": 1370
+      "lines": 1370,
+      "resolved_local_imports": [
+        "backend/app/db/bootstrap.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_ttv_temporal.py",
@@ -27499,7 +29759,13 @@
         "temporal_evidence_graph",
         "temporal_model_validation_status"
       ],
-      "lines": 562
+      "lines": 562,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/__init__.py",
+        "backend/app/services/ttv_temporal.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_un_wpp.py",
@@ -27559,7 +29825,12 @@
         "setattr",
         "sync_countries"
       ],
-      "lines": 104
+      "lines": 104,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/un_wpp.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_verify_g2_reconciliation.py",
@@ -27633,7 +29904,11 @@
         "str",
         "validate"
       ],
-      "lines": 57
+      "lines": 57,
+      "resolved_local_imports": [
+        "backend/scripts/verify_g2_reconciliation.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_world_bank_batch.py",
@@ -27746,7 +30021,12 @@
         "setattr",
         "sync_countries"
       ],
-      "lines": 106
+      "lines": 106,
+      "resolved_local_imports": [
+        "backend/app/ingestion/__init__.py",
+        "backend/app/ingestion/world_bank.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "backend/tests/test_wpp_missing_country_reporting.py",
@@ -27780,175 +30060,203 @@
         "patch",
         "sync_countries"
       ],
-      "lines": 16
+      "lines": 16,
+      "resolved_local_imports": [
+        "backend/app/ingestion/un_wpp.py"
+      ],
+      "imported_by": []
     },
     {
       "path": "frontend/playwright.config.ts",
       "bucket": "frontend",
       "sha256": "8abd0802377bb6fc93c8247dc222a970ae6590b285046c48bc556d5eb6a615c8",
       "bytes": 539,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/App.tsx",
       "bucket": "frontend",
       "sha256": "c979cb4da6b48c46e07b7f34bfc8520bd661f1d2164da7e4ca9fc953ecd36ce7",
       "bytes": 25407,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/ComparePanel.tsx",
       "bucket": "frontend",
       "sha256": "0159cd9fc899f4e0132c80baa3b9a045a395ca52e7d25ff1be700d44e29d1c2e",
       "bytes": 24057,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/CountrySelect.tsx",
       "bucket": "frontend",
       "sha256": "6bf101356f942fdf7d801a1bd8d7acbb597122d3fc4fd285aece7eb19f54f3bb",
       "bytes": 971,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/DimensionSummaryCard.tsx",
       "bucket": "frontend",
       "sha256": "32e68f8f14c6db0f5cae2ee25fd60fbe7afd79ff2a29059b6860afe99c84f169",
       "bytes": 3513,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/FitSnapshot.tsx",
       "bucket": "frontend",
       "sha256": "3c0dccbfd9d53c3d2641c4a1330c492daf430d9c836fc105fef5706375dcf4bc",
       "bytes": 5216,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/FlagIcon.tsx",
       "bucket": "frontend",
       "sha256": "b4bc36d97e357fab51d1611b1ee2d8f51fd5f6b8224392eb89061b5b6d97ee6c",
       "bytes": 1320,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/FuturePathsPage.tsx",
       "bucket": "frontend",
       "sha256": "d60d61a6981e7982f9f8fc01d6432ebf60f8082aa928dfc596f8ad92a24c07ed",
       "bytes": 13082,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/IndicatorsPage.tsx",
       "bucket": "frontend",
       "sha256": "613e91e310c519dee801d8377fe694213c37bc4c848906a8651a0e47cb5b0616",
       "bytes": 20043,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/LayoutControls.tsx",
       "bucket": "frontend",
       "sha256": "773bdb3d4eba925e76ef8690d8a4699a3a58c05386e5c955c9bd945a1720e304",
       "bytes": 2272,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/OverallSignalBalance.tsx",
       "bucket": "frontend",
       "sha256": "40c9348e9b0418485357cdd926f6ee10874785414dd2dad779fea8fd2d8eb8e1",
       "bytes": 1480,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/OverviewPage.tsx",
       "bucket": "frontend",
       "sha256": "437a1fa251d2790a3ddf134e8939b359e719fc189ee8ee69e5f18d4a9184c561",
       "bytes": 57777,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/ProfilePanel.tsx",
       "bucket": "frontend",
       "sha256": "eae6b5ad2389f1034c91c20adfaf29557690a601c6abfeffa1409c8b41760470",
       "bytes": 50018,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/RankingsPage.tsx",
       "bucket": "frontend",
       "sha256": "939495273fa9967c923c5a6d401906eddd6b880752a4b7864708826087918b6d",
       "bytes": 6527,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/RegionalMap.tsx",
       "bucket": "frontend",
       "sha256": "eaba4be3b5c4136862375cf668aaab7fa3fcbebfcfa441e0ba8f91b0d41325e5",
       "bytes": 27809,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/SkillsLanguagesPage.tsx",
       "bucket": "frontend",
       "sha256": "821fc1a04245865adccd4be9d02396ad68b2f36491655aff66072833892339fd",
       "bytes": 28509,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/components/WorldMap.tsx",
       "bucket": "frontend",
       "sha256": "39264df4d0182c8fde6e602edb953f304dc4d7d7bcb2e7668f6d734322f7435e",
       "bytes": 8844,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/lib/countryFlag.ts",
       "bucket": "frontend",
       "sha256": "f99b66e57960d32cfebd17c3bc5c5ca195f58da7f6db456a9de4f0a954b68b86",
       "bytes": 377,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/lib/countryVisuals.ts",
       "bucket": "frontend",
       "sha256": "55b8e883fbeb39cb75757fa8667ca4a3ad18c282c75bb436666e4dd5e53d1838",
       "bytes": 2403,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/lib/routing.ts",
       "bucket": "frontend",
       "sha256": "dc97a5e2c7e5e085eebb6bf01f49b469e3b6ed9d90bba060f5ebdbdc77e46dc8",
       "bytes": 4441,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/src/main.tsx",
       "bucket": "frontend",
       "sha256": "bb4d2b1f013528c27092368ee321b685b2b32c534e6c2ef6c900f9e8f1432726",
       "bytes": 233,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/tests/e2e/app.spec.ts",
       "bucket": "frontend",
       "sha256": "d9da662e2ea4aa2f614ba8bb60a4a957428cc8e9f6f34b2b07aa53c1e79fcd7e",
       "bytes": 153786,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "frontend/vite.config.ts",
       "bucket": "frontend",
       "sha256": "a706b643cde05a912cd77532cab6aaa490ebbc140a54e0d2359fa45c0d0b9b7a",
       "bytes": 211,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     },
     {
       "path": "tools/acceptance.ps1",
       "bucket": "tools",
       "sha256": "4f464396a773bf864b462236b618cdd86d2ec528b15cdea1c84067ede4d4cee0",
       "bytes": 727,
-      "review_status": "not_reviewed"
+      "review_status": "not_reviewed",
+      "imported_by": []
     }
   ]
 }
