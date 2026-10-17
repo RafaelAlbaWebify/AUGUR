@@ -678,9 +678,19 @@
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "method": "full source inspection and country/provider release gate cross-check"
+    },
+    {
+      "path": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "lines_reviewed": "1-545",
+      "definitions_reviewed": 14,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read and temporal model safety review"
     }
   ],
-  "certified_line_by_line_review_count": 62,
+  "certified_line_by_line_review_count": 63,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1546,8 +1556,18 @@
       "line_range": "97-149",
       "description": "Provider coverage completeness is defined as expected source IDs being present and retrieved recently; a partial accepted provider with missing requested indicators can still look complete. Country analysis readiness must distinguish provider transport presence from per-indicator source completeness and methodological coverage.",
       "test_required": "Provider with partially covered data must not count complete; global coverage report cross-check."
+    },
+    {
+      "id": "AUD-B03-025",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "line_range": "155-192",
+      "description": "_declared_target_cefr chooses the maximum declared CEFR among language matches, potentially using a high level in a different language instead of the actual target work language, understating preparation time. Cross-check language_fit target-language matching and block duration extrapolation until language-specific evidence is retained.",
+      "test_required": "Different target/source languages with B2 versus A1 and inverted ordering should not overstate target proficiency."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 17.66
+  "certified_line_by_line_review_percent": 17.95
 }
