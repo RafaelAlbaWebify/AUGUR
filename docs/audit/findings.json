@@ -1420,9 +1420,75 @@
       "status": "reviewed_findings_open",
       "method": "complete file source review with side effects and caller contracts; no runtime tests executed",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/accept_g2_local_data_layer.py",
+      "sha256": "2ce4fcf48d1963015b9ff807d299d1e76d1e0862810c82df88767ac176f28591",
+      "lines_reviewed": "1-109",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection, downstream state and write safety review; execution tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/accept_gr2.py",
+      "sha256": "89a3327678ef65a60007b0ab5945965a52a43412700529fedd08de26e2c6535a",
+      "lines_reviewed": "1-129",
+      "definitions_reviewed": 3,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection, downstream state and write safety review; execution tests outstanding",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/build_official_reference_db.py",
+      "sha256": "6ec82cd2e71ee2b78a38db249f9a634b630b7ba049536adf8557666b77a72a59",
+      "lines_reviewed": "1-132",
+      "definitions_reviewed": 3,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection, downstream state and write safety review; execution tests outstanding",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/scripts/build_eures_market_evidence.py",
+      "sha256": "3d619a35a68f4479eab59ac25bd87de48eb3498f5b4a2152ed56c6a211b45ee8",
+      "lines_reviewed": "1-119",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection, downstream state and write safety review; execution tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/verify_g2_reconciliation.py",
+      "sha256": "d96dd8073e7a42daec689918f5ec4b282c75a60e9c60d77c623e5bae75b15a65",
+      "lines_reviewed": "1-126",
+      "definitions_reviewed": 3,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection, downstream state and write safety review; execution tests outstanding",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/verify_reference_app_readthrough.py",
+      "sha256": "e0d814c16624bd2d305050b20072a965c98c13be16116509c2527cfb91138b50",
+      "lines_reviewed": "1-122",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection, downstream state and write safety review; execution tests outstanding",
+      "imported_by_count": 1
     }
   ],
-  "certified_line_by_line_review_count": 129,
+  "certified_line_by_line_review_count": 135,
   "findings": [
     {
       "id": "LEAD-001",
@@ -2498,8 +2564,48 @@
       "line_range": "15-31",
       "description": "Parquet probe trusts unvalidated HTTP URLs extracted from a provider response and downloads entire first file without size limits; possible SSRF/large-memory risk if source response can be influenced.",
       "test_required": "Strict official host allowlist, stream size cap, content verification and malicious/oversized URL fixtures."
+    },
+    {
+      "id": "AUD-B04-021",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/accept_g2_local_data_layer.py",
+      "sha256": "2ce4fcf48d1963015b9ff807d299d1e76d1e0862810c82df88767ac176f28591",
+      "line_range": "22-28",
+      "description": "Read-only acceptance temporarily patches global analytics.settings for the target database; concurrent accesses can use a mismatched DB path. Same pattern as disposable WEO verifier.",
+      "test_required": "Check concurrency-safe explicit DB connection injection and parallel runtime fixture."
+    },
+    {
+      "id": "AUD-B04-022",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/build_eures_market_evidence.py",
+      "sha256": "3d619a35a68f4479eab59ac25bd87de48eb3498f5b4a2152ed56c6a211b45ee8",
+      "line_range": "61-81",
+      "description": "EURES report-building command initializes data stores even though producing a local review artifact. Calls can modify operational DB before CSV is validated.",
+      "test_required": "Use read-only ESCO preflight and no-write test for review-artifact mode."
+    },
+    {
+      "id": "AUD-B04-023",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/build_official_reference_db.py",
+      "sha256": "6ec82cd2e71ee2b78a38db249f9a634b630b7ba049536adf8557666b77a72a59",
+      "line_range": "87-124",
+      "description": "Official-reference writer permits arbitrary --db destination (aside from existence check) and creates DuckDB before separate report; interrupted report write can leave unverified reference artifact. Disposable path safety and atomic publication need test.",
+      "test_required": "Enforce disposable directory guard, atomic output/report staging and failure cleanup tests."
+    },
+    {
+      "id": "AUD-B04-024",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/verify_g2_reconciliation.py",
+      "sha256": "d96dd8073e7a42daec689918f5ec4b282c75a60e9c60d77c623e5bae75b15a65",
+      "line_range": "24-37",
+      "description": "G2 verifier materializes all rows from every database table in memory as Counters. Large local production databases can exhaust memory despite read-only connection.",
+      "test_required": "Benchmark against large data and use chunked external-hash comparison with exact multiset semantics."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 36.75
+  "certified_line_by_line_review_percent": 38.46
 }
