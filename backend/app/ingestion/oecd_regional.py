@@ -315,6 +315,7 @@ class OECDRegionalAdapter:
                     "REF_AREA" not in text
                     or "OBS_VALUE" not in text
                     or "MEASURE" not in text
+                    or "UNIT_MEASURE" not in text
                 ):
                     raise ValueError(
                         "Unexpected OECD regional population CSV schema"
@@ -803,6 +804,13 @@ class OECDRegionalAdapter:
                 continue
             if str(record.get("MEASURE") or "").upper() != "POP":
                 continue
+            # Official DF_POP_BROAD publishes POP in both PS (persons) and
+            # PS_KM2 (persons/km²). The latter is density, never population.
+            if str(record.get("UNIT_MEASURE") or "").upper() != "PS":
+                continue
+            multiplier = str(record.get("UNIT_MULT") or "0")
+            if multiplier != "0":
+                raise ValueError(f"Unexpected OECD population unit multiplier: {multiplier}")
             if str(record.get("AGE") or "").upper() not in {"_T", "TOTAL"}:
                 continue
             if str(record.get("SEX") or "").upper() not in {"_T", "T", "TOTAL"}:
