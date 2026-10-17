@@ -3,6 +3,7 @@ from io import BytesIO
 from openpyxl import Workbook
 import pytest
 from app.ingestion.imf_weo_official import normalize_official_weo,DATASET_VERSION
+from scripts.verify_weo_disposable_readthrough import verify_weo_roundtrip
 
 
 def workbook(*,unit="Percent",actual=2024,bad=False):
@@ -53,3 +54,11 @@ def test_missing_country_is_not_imputed():
     rows,report=normalize_official_weo(workbook(),{"IRL"})
     assert rows==[]
     assert report["countries_with_data"]==[]
+
+
+def test_official_weo_parser_roundtrips_through_real_disposable_duckdb():
+    rows,_=normalize_official_weo(workbook(),{"ESP"})
+    result=verify_weo_roundtrip(rows)
+    assert result["expected_rows"]==result["stored_rows"]==6
+    assert result["production_writes"]==0
+    assert result["ranking_eligible"] is False
