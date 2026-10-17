@@ -106,7 +106,6 @@ def generate() -> dict:
                 # Resolve relative import by the declaring module's package.
                 dots = len(module_name) - len(module_name.lstrip("."))
                 remainder = module_name[dots:]
-                location = path.removeprefix("backend/").removesuffix(".py").split(".")
                 parts = path.removeprefix("backend/").split("/")[:-1]
                 parent = parts[:max(0, len(parts) - (dots - 1))]
                 module_name = ".".join(parent + ([remainder] if remainder else []))
