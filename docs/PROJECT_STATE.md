@@ -2,6 +2,12 @@
 
 Updated: 2026-10-09. **Canonical coordination entry point**, not a replacement for architectural or methodological specifications.
 
+## Current verified checkpoint — 2026-10-17
+- PR #79 merged `b4cbee1` after passing PR CI; global live smoke run 39028369542 completed successfully with 217 analyzable countries, 47,434 WB rows, 130,464 WPP rows and 0 IMF rows after three HTTP 403 failures; memory issue not reproduced, full-source completion not achieved. PR #76–#78 merged and validated isolated database rollback, 62/62 Eurostat pilot read-through, structural write audit and correct API blocked/missing status.
+- Historic 2025 NUTS2 employment cohort mislabeling in local original remains unmodified; operator approval and verified rollback needed before remediation. Eurostat `d`/`u` quality policy and NUTS vintage remain blockers to numerical rankings.
+- IMF HTTP 403 is a separately evidenced global-provider problem. Partial-source coverage must not be represented as complete.
+- Canonical active instructions: root `augur.md`; this document retains historical October 9 evidence, not an up-to-date completion percentage.
+
 ## Product purpose
 Local-first country/region trajectory, employment intelligence, and personal fit. Separate *observations*, *official forecasts*, *candidate scenarios* and *personal fit*. Never invent or impute source observations to make a feature appear complete.
 
