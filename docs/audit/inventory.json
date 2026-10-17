@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 346,
-  "python_count": 308,
-  "definition_count": 1607,
-  "reviewed_file_count": 32,
-  "stale_review_file_count": 0,
-  "line_by_line_review_percent": 9.25,
+  "file_count": 347,
+  "python_count": 309,
+  "definition_count": 1612,
+  "reviewed_file_count": 31,
+  "stale_review_file_count": 1,
+  "line_by_line_review_percent": 8.93,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 124,
+    "backend/tests": 125,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -3832,15 +3832,15 @@
     {
       "path": "backend/app/ingestion/eurostat.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "f682a0be35e652f636b9574499dcc7af8d8c711360e32a07f3e4c4cb46905159",
-      "bytes": 34540,
-      "review_status": "verified_reviewed",
+      "sha256": "e125e07c8c1417fd2be4e294113a27602a23839dfe7f751e4a342bcca57e6b9d",
+      "bytes": 36061,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "EurostatAdapter",
           "kind": "class",
           "line_start": 280,
-          "line_end": 1060,
+          "line_end": 1074,
           "signature_arguments": []
         },
         {
@@ -3894,10 +3894,20 @@
           ]
         },
         {
-          "symbol": "EurostatAdapter._labels_match_config",
+          "symbol": "EurostatAdapter._validated_dimension_codes",
           "kind": "function",
           "line_start": 365,
-          "line_end": 386,
+          "line_end": 381,
+          "signature_arguments": [
+            "self",
+            "payload"
+          ]
+        },
+        {
+          "symbol": "EurostatAdapter._labels_match_config",
+          "kind": "function",
+          "line_start": 383,
+          "line_end": 404,
           "signature_arguments": [
             "self",
             "config",
@@ -3908,8 +3918,8 @@
         {
           "symbol": "EurostatAdapter.normalize",
           "kind": "function",
-          "line_start": 388,
-          "line_end": 476,
+          "line_start": 406,
+          "line_end": 494,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -3920,8 +3930,8 @@
         {
           "symbol": "EurostatAdapter.normalize_earnings",
           "kind": "function",
-          "line_start": 478,
-          "line_end": 553,
+          "line_start": 496,
+          "line_end": 570,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -3931,8 +3941,8 @@
         {
           "symbol": "EurostatAdapter.normalize_net_earnings",
           "kind": "function",
-          "line_start": 555,
-          "line_end": 624,
+          "line_start": 572,
+          "line_end": 640,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -3942,8 +3952,8 @@
         {
           "symbol": "EurostatAdapter.normalize_job_vacancy_rates",
           "kind": "function",
-          "line_start": 626,
-          "line_end": 762,
+          "line_start": 642,
+          "line_end": 777,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -3953,8 +3963,8 @@
         {
           "symbol": "EurostatAdapter.normalize_job_transitions",
           "kind": "function",
-          "line_start": 764,
-          "line_end": 843,
+          "line_start": 779,
+          "line_end": 857,
           "signature_arguments": [
             "self",
             "country_iso3",
@@ -3964,8 +3974,8 @@
         {
           "symbol": "EurostatAdapter.sync_country",
           "kind": "function",
-          "line_start": 845,
-          "line_end": 1060,
+          "line_start": 859,
+          "line_end": 1074,
           "signature_arguments": [
             "self",
             "country_iso3"
@@ -4013,6 +4023,7 @@
         "_category_labels",
         "_labels_match_config",
         "_ordered_codes",
+        "_validated_dimension_codes",
         "any",
         "append",
         "casefold",
@@ -4058,7 +4069,7 @@
         "upsert_observations",
         "zip"
       ],
-      "lines": 1060,
+      "lines": 1074,
       "resolved_local_imports": [
         "backend/app/catalog.py",
         "backend/app/db/analytics.py"
@@ -4100,6 +4111,7 @@
         "backend/tests/test_eurostat_fail_closed_values.py",
         "backend/tests/test_eurostat_regional_labour.py",
         "backend/tests/test_eurostat_regional_sector.py",
+        "backend/tests/test_eurostat_specialized_source_gates.py",
         "backend/tests/test_regional_ingestion_batch_hardening.py",
         "backend/tests/test_regional_response_provenance.py"
       ]
@@ -22844,6 +22856,90 @@
       "resolved_local_imports": [
         "backend/app/ingestion/eurostat.py",
         "backend/app/ingestion/eurostat_regional_sector.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_eurostat_specialized_source_gates.py",
+      "bucket": "backend/tests",
+      "sha256": "7a7fbef96739248c512079aa851d1b1a8994d1d5122b0879f3e1f4446734418f",
+      "bytes": 1785,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "make_payload",
+          "kind": "function",
+          "line_start": 15,
+          "line_end": 18,
+          "signature_arguments": [
+            "ids",
+            "codes",
+            "value"
+          ]
+        },
+        {
+          "symbol": "test_specialized_numeric_values_rejected",
+          "kind": "function",
+          "line_start": 23,
+          "line_end": 29,
+          "signature_arguments": [
+            "method",
+            "ids",
+            "codes",
+            "bad"
+          ]
+        },
+        {
+          "symbol": "test_specialized_category_cardinality_fail_closed",
+          "kind": "function",
+          "line_start": 33,
+          "line_end": 41,
+          "signature_arguments": [
+            "method",
+            "ids",
+            "codes"
+          ]
+        },
+        {
+          "symbol": "test_specialized_valid_numeric_values_preserved",
+          "kind": "function",
+          "line_start": 45,
+          "line_end": 51,
+          "signature_arguments": [
+            "method",
+            "ids",
+            "codes"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "copy",
+          "line": 2
+        },
+        {
+          "module": "pytest",
+          "line": 3
+        },
+        {
+          "module": "app.ingestion.eurostat",
+          "line": 4
+        }
+      ],
+      "called_names": [
+        "EurostatAdapter",
+        "close",
+        "float",
+        "getattr",
+        "len",
+        "make_payload",
+        "parametrize",
+        "raises",
+        "zip"
+      ],
+      "lines": 51,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py"
       ],
       "imported_by": []
     },
