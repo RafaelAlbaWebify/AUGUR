@@ -1002,9 +1002,152 @@
       "status": "reviewed_findings_open",
       "method": "full source read, static import mapping and read/write side-effect review; runtime contract tests pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/audit_ingestion_write_paths.py",
+      "sha256": "7efd125f8e9edea6d19060f53793e5b3ccb48269cb73ae1ca196499052f26473",
+      "lines_reviewed": "1-87",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/compare_official_local_nuts.py",
+      "sha256": "6ede01f29a4fce9682bf8eca9a9b2a5c4125a7a1d69b65d59a5451f2c0e25af1",
+      "lines_reviewed": "1-94",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/export_geography_coverage.py",
+      "sha256": "5af617a210934ca0fd8a59b96750ed6dbda1b98baad728fc5ce328afa65da443",
+      "lines_reviewed": "1-87",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eea_health_burden.py",
+      "sha256": "2c6446aeeecfc7724f4ceda0b77658bd9b0b1680a9da37d77d08871bc7fbb552",
+      "lines_reviewed": "1-15",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eea_pm25.py",
+      "sha256": "595ae15a22b55ea7ea0cd19e8efc38ed43292e1a2bd9718526d32dcdc1895f56",
+      "lines_reviewed": "1-15",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eurostat_regional_access_safety.py",
+      "sha256": "4743dc7a1cfcab238b3a0d75506ec446f1e6648b6b3851e0a247e0966c3a052c",
+      "lines_reviewed": "1-23",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eurostat_regional_health.py",
+      "sha256": "8ab970e6a41ad03e74783fbca56a9875b0b2d71e6fc3c7612c0ebfc9503b191e",
+      "lines_reviewed": "1-21",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eurostat_regional_housing.py",
+      "sha256": "6b261e02594e57f53d647286e538733e1eec308d37e8ff5fa531bd2adcff925d",
+      "lines_reviewed": "1-21",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/probe_eea_pm25_city.py",
+      "sha256": "194b2e101932a4f19646ff29ff1f0669a28440a3fdf1e40783ac8302997b7767",
+      "lines_reviewed": "1-28",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/probe_eurostat_nuts3_context.py",
+      "sha256": "fbc9800ad9c7b8e81234fd0e846b74cd68a4c560199f207516a4e8703d66ff18",
+      "lines_reviewed": "1-28",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/probe_oecd_population_contract.py",
+      "sha256": "471f9267ccb729afd39828f65661038844f5c6a2a8c25147c15365975da76c5d",
+      "lines_reviewed": "1-34",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/seal_ttv_holdout.py",
+      "sha256": "c530e07b67e57a704933575ed42b2c2e01d074acb23dddc5fef512f18ad2e405",
+      "lines_reviewed": "1-38",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/smoke_eurostat_regional_coverage.py",
+      "sha256": "70575e48e890a41ec4387bfd103b48ed14a2154559c690589b54026bf3322540",
+      "lines_reviewed": "1-40",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import/callee and observable side-effect inspection; runtime acceptance tests still required",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 91,
+  "certified_line_by_line_review_count": 104,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1950,8 +2093,38 @@
       "line_range": "20-40",
       "description": "Inspection CLI permits arbitrary max-rows including negative or zero values and may download/overwrite a source cache; actual parser handling and cache lifetime need verification.",
       "test_required": "Argument bounds and cache write semantics with invalid max-rows and existing-file fixtures."
+    },
+    {
+      "id": "AUD-B04-008",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/audit_ingestion_write_paths.py",
+      "sha256": "7efd125f8e9edea6d19060f53793e5b3ccb48269cb73ae1ca196499052f26473",
+      "line_range": "29-71",
+      "description": "AST guard scans only top-level upsert functions in analytics.py; it cannot establish that imported helpers, SQL from other modules, or nested writer paths use robust transaction protection. Report scope explicitly limits certification.",
+      "test_required": "Fixture introducing indirect or separate-module write path; ensure no global safe-write claim."
+    },
+    {
+      "id": "AUD-B04-009",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/compare_official_local_nuts.py",
+      "sha256": "6ede01f29a4fce9682bf8eca9a9b2a5c4125a7a1d69b65d59a5451f2c0e25af1",
+      "line_range": "27-46",
+      "description": "Official NUTS code list validation checks nonempty codes and declared unique count but does not check source provenance, actual code pattern or declared count equals raw list length when duplicates exist; duplicate raw codes may be accepted if declared count equals unique count.",
+      "test_required": "Malformed duplicate catalog and wrong-country-code fixtures; preserve official source checksum/vintage."
+    },
+    {
+      "id": "AUD-B04-010",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/seal_ttv_holdout.py",
+      "sha256": "c530e07b67e57a704933575ed42b2c2e01d074acb23dddc5fef512f18ad2e405",
+      "line_range": "10-14",
+      "description": "Sealing command immediately initializes and seals persistent TTV holdout without dry-run/confirmation guard; impacts future calibration observations.",
+      "test_required": "Require explicit confirmation/preflight and backup/restore rehearsal; assert dry-run does not write DB."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 25.93
+  "certified_line_by_line_review_percent": 29.63
 }
