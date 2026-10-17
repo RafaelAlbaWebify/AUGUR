@@ -416,7 +416,7 @@ def initialize_analytics_schema() -> None:
         # through the country table rather than inferred by API consumers.
         con.execute(
             """
-            INSERT OR REPLACE INTO geography_registry
+            INSERT INTO geography_registry
             (
                 geo_id, country_iso3, country_iso2, name, geo_level,
                 geography_system, source_id, source_geo_code,
@@ -443,6 +443,7 @@ def initialize_analytics_schema() -> None:
                 SUBSTR(s.geo_code, 1, 2),
                 LOWER(s.geo_level),
                 s.geography_system
+            ON CONFLICT (geo_id) DO NOTHING
             """
         )
 
@@ -2537,6 +2538,7 @@ def upsert_geographies(rows: list[dict]) -> int:
 
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO geography_registry
@@ -2564,7 +2566,11 @@ def upsert_geographies(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -2996,6 +3002,7 @@ def upsert_geography_geometries(rows: list[dict]) -> int:
 
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO geography_geometries
@@ -3026,7 +3033,11 @@ def upsert_geography_geometries(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
