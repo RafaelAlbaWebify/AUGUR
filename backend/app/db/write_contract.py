@@ -36,3 +36,33 @@ def validate_write_batch(rows: list[dict], *, subnational: bool) -> None:
         if identity in seen:
             raise ValueError(f"Duplicate observation write key at row {offset}: {identity}")
         seen.add(identity)
+
+
+def validate_specialized_batch(
+    rows: list[dict], *, key_fields: tuple[str, ...],
+    required_numeric_fields: tuple[str, ...] = (),
+    optional_numeric_fields: tuple[str, ...] = (),
+) -> None:
+    """Fail before DB access if a specialized source batch contains ambiguous keys or values.
+
+    Key tuple must match the actual DuckDB primary key; source-specific semantic
+    and quality policies remain the adapter's responsibility.
+    """
+    seen: set[tuple] = set()
+    for index, row in enumerate(rows):
+        key = []
+        for field in key_fields:
+            value = row.get(field)
+            if value is None or isinstance(value, bool) or (isinstance(value, str) and not value.strip()):
+                raise ValueError(f"Missing specialized key {field} at row {index}")
+            key.append(value.strip().upper() if isinstance(value, str) else value)
+        identity = tuple(key)
+        if identity in seen:
+            raise ValueError(f"Duplicate specialized write key at row {index}: {identity}")
+        seen.add(identity)
+        for field in (*required_numeric_fields, *optional_numeric_fields):
+            value = row.get(field)
+            if field in optional_numeric_fields and value is None:
+                continue
+            if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+                raise ValueError(f"Invalid specialized numeric field {field} at row {index}")

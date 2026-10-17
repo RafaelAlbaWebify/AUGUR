@@ -38,8 +38,9 @@
 ## CURRENT ACCEPTANCE CHECKPOINT (2026-10-17)
 - PR #68–#74 merged; verified official-reference CI produced 62 pilot employment/unemployment observations and completed independent persisted-data audit. This is source-data validation, **not local production reconciliation**.
 - Local original 2025 cohort mismatch remains historically present in the operator database until explicitly approved correction; staged rehearsal does not modify production. Source status 'd' and NUTS observation vintage remain unaccepted for numerical rankings.
-- Active bounded objective: common national/subnational observation-write batch checks and atomic DuckDB replacement, PR #75. Do not call it delivered until CI passes and merge is verified.
-- Next acceptance step: independently test transaction rollback and complete source-to-API consistency; broader specialized OECD/Eurostat writers remain an explicit gate. Do not claim overall ingestion reliability.
+- PR #75 merged at 031e0a69; shared national/subnational write batch validation and DuckDB transactions CI passed. These are code protections, not production recovery certification.
+- Current work package PR #76: real disposable DuckDB transaction rollback test, stored SQL-to-FastAPI route verification, combined Eurostat regional batch prevalidation and one regional atomic upsert; this is CI-pending until merged.
+- Current PR #76 includes integrated actual DuckDB rollback, SQL-to-HTTP verification, combined regional Eurostat batch checks, earnings SQL arity repair and specialized evidence write transactions; check live PR CI/merge before declaring acceptance. Remaining provider-specific definitions, historical local reconciliation and NUTS vintage are independent gates.
 - Work autonomously from GitHub, preserve repository public for free Actions, and do not request local repetition or production changes.
 
 ## NEXT ACCEPTANCE OBJECTIVE — GR-2 EVIDENCE & SAFE REMEDIATION

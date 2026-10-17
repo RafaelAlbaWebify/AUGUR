@@ -33,3 +33,18 @@ Next implementation should audit alternate normalizers (`normalize_earnings` and
 Source-to-database review found national and subnational generic upserts opening DuckDB before checking all rows, and subnational writes doing geography registry and observation replacements without an explicit transaction. This package adds a batch-level finite-value, identity, period and duplicate-key guard, plus explicit rollback on failure for those two entrypoints. This is *not* universal ingestion certification: alternate specialized write paths (OECD, ESCO, earnings etc.) still require independent inventory and source-specific dimension policy. Historical local DuckDB remains unchanged. A merged CI pass establishes code correctness, not NUTS vintage, source comparability or local recovery.
 
 Acceptance: invalid later rows rejected before opening DB; duplicate keys rejected; valid national/regional fixtures accepted; complete backend/frontend/ops CI; tests of atomic rollback are next independent integration gate.
+
+## 2026-10-17 database-to-HTTP acceptance batch
+
+Disposable DuckDB integration tests cover three independent failure modes: malformed *later* input rejects the entire batch before write; a SQL constraint failure after geography-registry replacement rolls back both geography and observation changes; an explicit verified fixture reproduces the stored SQL observation in the ranking service while the actual public HTTP route blocks a vintage-unverified observation. No test opens the operator's production file.
+
+The combined `sync_eurostat` regional path now validates exact labour and housing contracts plus duplicate/finite batch properties for labour, housing and health **before** executing a single regional observations upsert. Sector evidence still uses a specialized persistence routine and is outside this transaction. Country syncs still write separately and are not represented as an all-provider atomic import. Existing historical mislabelled cohorts, source flag policy, NUTS vintage and operator approval remain unresolved: no automatic release of rankings.
+
+Acceptance gate: full CI, migration-free isolated fixture regression, and checked merge. Broader specialized write paths and safe production reconciliation need separate validation; keep blocked states explicit.
+
+## Write-path inventory update — 2026-10-17
+- Generic `observations` and `subnational_observations`: batch identity/finite-value prevalidation, explicit DuckDB transaction (PR #75, merged).
+- Labour earnings, net earnings, job vacancy, OJA imbalance, shortage index, occupation outlook, job transitions, environmental health burden: dataset-key and field-specific numeric validation plus explicit transaction in PR #76; employment and forecast values may be nullable only where existing schema permits.
+- `regional_sector_employment`: composite-key/numeric guard and own atomic transaction in PR #76. **Not** in the same transaction as labour/housing/health upsert.
+- `sync_eurostat.py`: verify labour/housing contract and combined regional batch before a single generic observation upsert; earlier country syncs are not globally atomic.
+- Other geography/catalog maintenance writers and per-provider semantic/quality/vintage decisions remain excluded from universal certification and must be audited independently. Test assertions and green CI are not authorization to modify local production.

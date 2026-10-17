@@ -635,8 +635,13 @@ def upsert_labour_earnings(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("country_iso3", "period", "isco08", "source_id"),
+        required_numeric_fields=("value",), optional_numeric_fields=())
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO labour_earnings
@@ -657,12 +662,15 @@ def upsert_labour_earnings(rows: list[dict]) -> int:
                     row["dataset_id"],
                     row["retrieved_at"],
                     row.get("source_updated_at"),
-                    row.get("request_filters_json"),
                 ]
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -710,8 +718,13 @@ def upsert_labour_net_earnings_reference(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("country_iso3", "period", "earnings_case", "source_id"),
+        required_numeric_fields=("annual_net_eur",), optional_numeric_fields=())
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO labour_net_earnings_reference
@@ -735,7 +748,11 @@ def upsert_labour_net_earnings_reference(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -772,8 +789,13 @@ def upsert_labour_job_vacancy_rates(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("country_iso3", "period", "isco08", "source_id"),
+        required_numeric_fields=("vacancy_rate_pct",), optional_numeric_fields=())
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO labour_job_vacancy_rates
@@ -799,7 +821,11 @@ def upsert_labour_job_vacancy_rates(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -841,8 +867,13 @@ def upsert_labour_oja_imbalance_eu27(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("isco08", "source_id", "release_version"),
+        required_numeric_fields=("score",), optional_numeric_fields=())
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO labour_oja_imbalance_eu27
@@ -868,7 +899,11 @@ def upsert_labour_oja_imbalance_eu27(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -952,8 +987,13 @@ def upsert_labour_shortage_index(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("country_iso3", "horizon", "isco08", "source_id", "release_version"),
+        required_numeric_fields=("shortage_index",), optional_numeric_fields=("employment_growth_score", "replacement_demand_score", "imbalance_score"))
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO labour_shortage_index
@@ -987,7 +1027,11 @@ def upsert_labour_shortage_index(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -1091,8 +1135,13 @@ def upsert_labour_occupation_outlook(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("country_iso3", "period", "isco08", "scenario", "source_id", "release_version"),
+        required_numeric_fields=(), optional_numeric_fields=("employment_level_thousands", "employment_growth_pct"))
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO labour_occupation_outlook
@@ -1123,7 +1172,11 @@ def upsert_labour_occupation_outlook(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -1236,8 +1289,13 @@ def upsert_labour_job_transitions(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("country_iso3", "period", "age_group", "duration_group", "source_id"),
+        required_numeric_fields=("probability_pct",), optional_numeric_fields=())
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO labour_job_transitions
@@ -1263,7 +1321,11 @@ def upsert_labour_job_transitions(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -1302,8 +1364,13 @@ def upsert_environmental_health_burden(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from app.db.write_contract import validate_specialized_batch
+    validate_specialized_batch(rows, key_fields=("geo_code", "period", "burden_type", "unit_code", "source_id", "dataset_version"),
+        required_numeric_fields=("value",), optional_numeric_fields=())
+
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO environmental_health_burden
@@ -1334,7 +1401,11 @@ def upsert_environmental_health_burden(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 
@@ -1604,8 +1675,19 @@ def upsert_regional_sector_employment(rows: list[dict]) -> int:
     if not rows:
         return 0
 
+    from math import isfinite
+    seen = set()
+    for i, row in enumerate(rows):
+        key = (str(row['geo_code']).upper(), row['period'], row['nace_code'], row['source_id'])
+        if key in seen:
+            raise ValueError(f'Duplicate sector employment key at row {i}')
+        seen.add(key)
+        value = row['employment_thousands']
+        if isinstance(value, bool) or not isinstance(value, (int, float)) or not isfinite(value):
+            raise ValueError(f'Invalid sector employment value at row {i}')
     con = duckdb.connect(str(settings.duckdb_path))
     try:
+        con.execute('BEGIN TRANSACTION')
         con.executemany(
             """
             INSERT OR REPLACE INTO regional_sector_employment
@@ -1633,7 +1715,11 @@ def upsert_regional_sector_employment(rows: list[dict]) -> int:
                 for row in rows
             ],
         )
+        con.execute('COMMIT')
         return len(rows)
+    except Exception:
+        con.execute('ROLLBACK')
+        raise
     finally:
         con.close()
 

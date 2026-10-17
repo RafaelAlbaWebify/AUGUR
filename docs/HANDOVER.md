@@ -122,3 +122,6 @@ G2 local reconciliation and application data-layer acceptance finished and adopt
 ## Active Country Radar follow-up — 2026-10-13
 
 PR #42 merged. Local three-country screenshot audit identified mainland framing issue for ESP and PRT due to country bounds including archipelagos; IRL layout acceptable. Repair planned as camera-only defaults, preserving all geometries and data, with explicit browser zoom/center contract and renewed real-browser acceptance. No local DuckDB migration, setup, or extra worktree required. G3/C1 product acceptance remains pending; do not mistake GitHub CI for visual acceptance.
+
+## Latest integrity handover — 2026-10-17
+Read augur.md first and confirm current GitHub HEAD/PR/CI. PR #75 merged (031e0a69). PR #76 contains disposable DuckDB rollback and SQL→FastAPI assertions, combined Eurostat regional prevalidation/writes, repaired labour earnings SQL-value arity, and specialized write transactions with key/finite-value guards. Do not report PR #76 as merged without verifying. Production database **not touched**. Existing local staging is not source-policy or boundary-vintage certification. Resume autonomous source contract coverage and evidence equivalence only after CI; operator intervention only for approved live database corrections/visual acceptance.
