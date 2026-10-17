@@ -262,6 +262,7 @@ class UNWPPAdapter:
             "countries": countries,
             "country_count": len(countries),
             "countries_with_data": len(covered),
+            "missing_country_iso3": sorted(set(countries) - set(covered)),
             "source": SOURCE_ID,
             "vintage": "WPP 2024 medium variant",
             "rows": inserted,
