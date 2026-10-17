@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from itertools import product
+import json
+import math
 
 from app.ingestion.eurostat import EurostatAdapter
 from app.services.regional_evidence import REGIONAL_INDICATORS
@@ -52,11 +54,17 @@ def normalize_subnational(
     dimension_sizes = payload["size"]
     dimensions = payload["dimension"]
     raw_values = payload["value"]
+    if len(dimension_ids) != len(dimension_sizes) or len(set(dimension_ids)) != len(dimension_ids):
+        raise ValueError("Invalid regional JSON-stat dimension layout")
+    if any(not isinstance(size, int) or isinstance(size, bool) or size <= 0 for size in dimension_sizes):
+        raise ValueError("Invalid regional JSON-stat dimension sizes")
 
     dimension_codes = [
         adapter._ordered_codes(dimensions[dimension_id])
         for dimension_id in dimension_ids
     ]
+    if any(len(codes) != size for codes, size in zip(dimension_codes, dimension_sizes)):
+        raise ValueError("Regional JSON-stat index cardinality mismatch")
     geo_labels = adapter._category_labels(dimensions.get("geo", {}))
     retrieved_at = datetime.now(timezone.utc)
     rows: list[dict] = []
@@ -84,11 +92,16 @@ def normalize_subnational(
 
         if value is None:
             continue
+        if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value):
+            raise ValueError(f"Invalid regional observation value at {flat_index}")
 
         labels = {
             dimension_id: dimension_codes[index][coordinates[index]]
             for index, dimension_id in enumerate(dimension_ids)
         }
+        required = {k: v for k, v in config.get("filters", {}).items() if k != "geoLevel"}
+        if required and any(str(labels.get(k)) != str(v) for k, v in required.items()):
+            continue
         geo_code = str(labels.get("geo") or "")
         period = str(labels.get("time") or "")
 
@@ -112,9 +125,14 @@ def normalize_subnational(
                 "dataset_id": config["dataset_id"],
                 "retrieved_at": retrieved_at,
                 "source_updated_at": payload.get("updated"),
+                "request_filters_json": json.dumps(config.get("filters", {}), sort_keys=True),
+                "response_dimensions_json": json.dumps(labels, sort_keys=True),
+                "source_observation_status": (payload.get("status", {}).get(str(flat_index)) if isinstance(payload.get("status"), dict) else (payload["status"][flat_index] if isinstance(payload.get("status"), list) and flat_index < len(payload["status"]) else None)),
             }
         )
 
+    if config.get("filters") and not rows:
+        raise ValueError(f"No matching exact-dimension observations for {config[\'indicator_id\']}")
     return rows
 
 
