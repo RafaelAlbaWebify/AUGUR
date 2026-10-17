@@ -29,7 +29,7 @@ def observed_geo_codes(payload: dict) -> set[str]:
     sizes = payload.get("size", [])
     if not ids or len(ids) != len(sizes) or "geo" not in ids:
         return set()
-    if any(not isinstance(size, int) or size <= 0 for size in sizes):
+    if len(set(ids)) != len(ids) or any(type(size) is not int or size <= 0 for size in sizes):
         return set()
     geo_index = ids.index("geo")
     codes = _ordered_codes(payload.get("dimension", {}).get("geo", {}))
@@ -42,8 +42,10 @@ def observed_geo_codes(payload: dict) -> set[str]:
     for size in sizes:
         total *= size
     values = payload.get("value", {})
+    if not isinstance(values, (list, dict)):
+        return set()
     indices = range(min(total, len(values))) if isinstance(values, list) else (
-        int(k) for k in values if str(k).isdigit() and int(k) < total
+        int(k) for k in values if str(k).isdigit() and 0 <= int(k) < total
     )
     return {
         codes[(index // stride) % sizes[geo_index]]
