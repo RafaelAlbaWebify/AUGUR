@@ -80,7 +80,20 @@ class OECDAdapter:
         reader = csv.DictReader(io.StringIO(csv_text))
         rows: list[dict] = []
 
+        expected_dimensions = {
+            "REF_AREA": country_iso3.upper(),
+            "FREQ": "A",
+            "MEASURE": "GDPHRS",
+            "ACTIVITY": "_T",
+            "UNIT_MEASURE": "USD_PPP_H",
+            "PRICE_BASE": "LR",
+            "TRANSFORMATION": "N",
+        }
+        if not expected_dimensions.keys() <= set(reader.fieldnames or []):
+            raise ValueError("OECD productivity response is missing required source dimensions")
         for record in reader:
+            if any(record.get(key) != expected for key, expected in expected_dimensions.items()):
+                raise ValueError("OECD productivity source dimension mismatch")
             period = record.get("TIME_PERIOD")
             value = record.get("OBS_VALUE")
 
