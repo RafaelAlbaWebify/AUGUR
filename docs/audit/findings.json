@@ -468,9 +468,64 @@
       "status": "reviewed_findings_open",
       "imported_by_count": 1,
       "method": "full source review and source-to-API dependency cross-check"
+    },
+    {
+      "path": "backend/app/services/assessment.py",
+      "sha256": "0308858e502f70de93b0d04ba72cbeaad0b3a94e73df98744e575654998f2918",
+      "lines_reviewed": "1-30",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full code read and dependency review",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/app/services/compare.py",
+      "sha256": "b81e5e04e678cd62d2dcc0d5f3cdd10e7f037504c3e13d9108bb4e8905eef175",
+      "lines_reviewed": "1-74",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full code read and dependency review",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/country.py",
+      "sha256": "1b55dae3cec165d938fb062a8cde58b5943053b32c4a1bed2479f2e0b278443a",
+      "lines_reviewed": "1-65",
+      "definitions_reviewed": 5,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full code read and dependency review",
+      "imported_by_count": 7
+    },
+    {
+      "path": "backend/app/services/eea_city_catalog.py",
+      "sha256": "fbfc6cc9229503a12db45844fda1cb7fcbb36cba31b6aefa9067223718d295ac",
+      "lines_reviewed": "1-74",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full code read and dependency review",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/app/services/profile_readiness.py",
+      "sha256": "47e1a3cc3e72798f17df9575f8996083ba406f02a54bd5d7565e35cd7e9645d9",
+      "lines_reviewed": "1-72",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full code read and dependency review",
+      "imported_by_count": 2
     }
   ],
-  "certified_line_by_line_review_count": 43,
+  "certified_line_by_line_review_count": 48,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1152,8 +1207,48 @@
       "line_range": "18-45",
       "description": "Source status d/u are blocked conservatively but no edition-specific official Eurostat quality-flag policy accepted; rankings remain correctly blocked.",
       "test_required": "Official flag acceptance matrix provider evidence"
+    },
+    {
+      "id": "AUD-B03-008",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/compare.py",
+      "sha256": "b81e5e04e678cd62d2dcc0d5f3cdd10e7f037504c3e13d9108bb4e8905eef175",
+      "line_range": "10-43",
+      "description": "For a repeated country code or duplicate indicator rows within snapshots, the last entry silently replaces previous values; should define uniqueness and reject dimension/unit conflicts.",
+      "test_required": "Consumer fixture and contract regression"
+    },
+    {
+      "id": "AUD-B03-009",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/eea_city_catalog.py",
+      "sha256": "fbfc6cc9229503a12db45844fda1cb7fcbb36cba31b6aefa9067223718d295ac",
+      "line_range": "24-65",
+      "description": "Global in-memory cache is not keyed to injected client or source version, so a test/alternate source may receive stale city mappings until TTL expires.",
+      "test_required": "Consumer fixture and contract regression"
+    },
+    {
+      "id": "AUD-B03-010",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/app/services/profile_readiness.py",
+      "sha256": "47e1a3cc3e72798f17df9575f8996083ba406f02a54bd5d7565e35cd7e9645d9",
+      "line_range": "25-52",
+      "description": "Readiness only checks nonempty list and presence, allowing invalid or zero income values as 'ready'; confirm per-module input validation before treating readiness as eligibility.",
+      "test_required": "Consumer fixture and contract regression"
+    },
+    {
+      "id": "AUD-B03-011",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/app/services/country.py",
+      "sha256": "1b55dae3cec165d938fb062a8cde58b5943053b32c4a1bed2479f2e0b278443a",
+      "line_range": "37-53",
+      "description": "Catalog merge overrides stored metadata using truthiness-like exclusions; risk stale catalog membership/name obscuring database; document intended priority policy.",
+      "test_required": "Consumer fixture and contract regression"
     }
   ],
-  "denominator_inventoried_files": 347,
-  "certified_line_by_line_review_percent": 12.39
+  "denominator_inventoried_files": 348,
+  "certified_line_by_line_review_percent": 13.79
 }
