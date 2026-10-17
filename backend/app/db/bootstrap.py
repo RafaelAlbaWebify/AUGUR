@@ -256,7 +256,8 @@ def datastore_status() -> dict[str, bool]:
     result = {"sqlite": False, "duckdb": False}
 
     try:
-        con = sqlite3.connect(settings.sqlite_path)
+        status_uri = settings.sqlite_path.resolve().as_uri() + "?mode=ro"
+        con = sqlite3.connect(status_uri, uri=True)
         try:
             value = con.execute(
                 "SELECT value FROM app_metadata WHERE key='schema_version'"
