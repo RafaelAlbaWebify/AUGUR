@@ -54,3 +54,8 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 ## B03 second service review batch
 - Eight more service modules reviewed with source SHA: country metadata, country comparisons, assessments, EEA city mapping, housing affordability, profile readiness, regional rankings and future trajectory. The total is 51/348 source files (14.66%), but recently changed analytics.py is **stale pending PR104 revalidation**, so effective verified count is one lower until merged.
 - The ranking service requires independent proof of exact historical boundary vintage. Caller-supplied verified_geo_ids are not an authoritative proof source. Housing/compare/provider semantics have evidence-linked risks in findings.json.
+
+## B03 continued review checkpoint — 2026-10-17
+- Five further service modules reviewed: assessment, compare, country, eea_city_catalog, profile_readiness, with source-SHA evidence and findings AUD-B03-008 through AUD-B03-011.
+- Current audit register before refreshed changed-source hashes: **51/348 files = 14.66%**; automatic `inventory.json` remains authoritative after merges. B02 remains 35/35 reviewed.
+- B03 change package indexes coverage candidates once, preserving observed/incompatible/missing semantics; housing service now rejects nonfinite/boolean data. Acceptance requires backend, frontend and scripts CI; neither change authorizes numerical rankings.
