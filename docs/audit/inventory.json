@@ -13,9 +13,9 @@
   "file_count": 347,
   "python_count": 309,
   "definition_count": 1612,
-  "reviewed_file_count": 35,
+  "reviewed_file_count": 43,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 10.09,
+  "line_by_line_review_percent": 12.39,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -898,7 +898,7 @@
       "bucket": "backend/app/core",
       "sha256": "92c0ff69e723f621272744f7eec9d800a7c44a3b3a8daa1062e5548cd8d2f0fc",
       "bytes": 774,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "Settings",
@@ -6920,7 +6920,7 @@
       "bucket": "backend/app/_root",
       "sha256": "922a655fb9392723f11775ed635baab9f4539fd220af3da68a5676e6e2fe148e",
       "bytes": 890,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "lifespan",
@@ -7046,7 +7046,7 @@
       "bucket": "backend/app/_root",
       "sha256": "7ebc222b5c0920a01d7eca6d4ccbe3ebf513a98f2f8179dc31bf92f5560182a0",
       "bytes": 3131,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "ProviderSpec",
@@ -8259,7 +8259,7 @@
       "bucket": "backend/app/services",
       "sha256": "39f76baad127fee4073898caef38bde10087480df16d6b25e0b038ef6421cea1",
       "bytes": 3168,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "geography_provenance",
@@ -8311,7 +8311,7 @@
       "bucket": "backend/app/services",
       "sha256": "8b03cb5fb479737fb69d75548379be055aa32e4bf757e3dc4389fc9c6dceaecd",
       "bytes": 3793,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "EvidenceContract",
@@ -8658,7 +8658,7 @@
       "bucket": "backend/app/services",
       "sha256": "6007dad5969d8871610e3059cf80b2277e78de90a10a0bb68b66a2a3dd446ab4",
       "bytes": 3958,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "observation_provenance",
@@ -9183,7 +9183,7 @@
       "bucket": "backend/app/services",
       "sha256": "3cb902b17cb9b107b4e83b7e5b63323c04c09c4c7ba330b961346a1570438ad4",
       "bytes": 3873,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "RankingContract",
@@ -9276,7 +9276,7 @@
       "bucket": "backend/app/services",
       "sha256": "c75ac3ddde3f8cb637cca5c725d337a256b0feedd4ef6fc1047ee54c478e5a43",
       "bytes": 1632,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "check_provider_metadata",
