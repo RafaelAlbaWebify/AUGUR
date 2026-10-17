@@ -37,9 +37,9 @@
 
 ## OFFICIAL IMF WEO REPLACEMENT — acceptance in progress (2026-10-17)
 - Read-only GitHub probe PR #86 reached the original October 2026 WEO workbook (HTTP 200; 5,480,592 bytes), source ID IMF.RES:WEO(9.0.0), Countries 8,669 rows. Confirmed annual 1980–2031 columns and per-country/per-indicator LATEST_ACTUAL_ANNUAL_DATA metadata.
-- Verified pure-source parser for GDP growth NGDP_RPCH and average inflation PCPIPCH: 416 genuine observations across ESP/PRT/IRL/USA (368 observed, 48 official estimates), using individual source cutoff, not uniform year. This is source-only validation until fresh DuckDB readthrough completes.
+- Verified pure-source parser for GDP growth NGDP_RPCH and average inflation PCPIPCH: 416 genuine observations across ESP/PRT/IRL/USA (368 observed, 48 official estimates), using individual source cutoff, not uniform year. Official-source to temporary DuckDB round-trip independently verified 416/416 in CI, production writes 0.
 - LUR unemployment in current workbook has missing explicit UNIT metadata and is deliberately blocked by parser. Do not infer source unit or silently change historical vintage. Existing DataMapper path remains blocked by HTTP 403; new parser is not yet wired into default global sync, so user production DB cannot change unexpectedly.
-- Source-to-DuckDB equality in an isolated CI database is the next gate. Operator approval remains mandatory for any live local database promotion.
+- Opt-in `--imf-official-weo` flag added to the global baseline; GitHub global smoke uses ephemeral CI datastore. The global 217-country official WEO ingestion is still a pending live release gate until the post-merge workflow completes successfully. Operator approval remains mandatory for local production correction/promotion.
 
 ## LIVE SOURCE BLOCKERS — 2026-10-17
 - Live OECD AU203 2022 source dimensions independently verified in PR #85 read-only runner 39030025104: `POP/PS_KM2`=75.57 persons/km² and `POP/PS`=334683 persons, same TL3 code/year. Root cause: population normalizer previously ignored `UNIT_MEASURE`, then generic write contract correctly rejected conflicting rows. PR #85 filters population strictly to `PS` with unit multiplier 0 and regression tests; full live re-acceptance required after merge.
