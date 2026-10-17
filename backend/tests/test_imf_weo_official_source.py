@@ -17,9 +17,8 @@ def workbook(*,unit="Percent",actual=2024,bad=False):
         ("ESP","PCPIPCH",2025,"Percent"),
         ("ESP","LUR",2025,None),
     ]:
-        sheet.append([DATASET_VERSION,code,series,"Annual",u,"2026-10-13",] if False else
-                     [DATASET_VERSION,code,series,"Annual",u,cutoff,"2026-10-13T02:00:00Z",
-                      2.0,3.0,float("nan") if bad and series=="NGDP_RPCH" else 4.0])
+        sheet.append([DATASET_VERSION,code,series,"Annual",u,cutoff,"2026-10-13T02:00:00Z",
+                      2.0,3.0,"invalid" if bad and series=="NGDP_RPCH" else 4.0])
     mem=BytesIO();book.save(mem);book.close()
     return mem.getvalue()
 
