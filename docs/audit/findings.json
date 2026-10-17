@@ -33,9 +33,79 @@
       "definitions_reviewed": 3,
       "batch": "B02",
       "status": "reviewed_findings_open"
+    },
+    {
+      "path": "backend/app/ingestion/cedefop_reset.py",
+      "sha256": "ff1dceee44840f0966fe49479a813a77453ea5f9489ff1552c850f57d5d5d08f",
+      "lines_reviewed": "1-133",
+      "definitions_reviewed": 3,
+      "batch": "B02",
+      "status": "reviewed_findings_open",
+      "reviewed_on": "2026-10-17",
+      "method": "full source read and adjacent contract inspection"
+    },
+    {
+      "path": "backend/app/ingestion/eea_air_quality.py",
+      "sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "lines_reviewed": "1-117",
+      "definitions_reviewed": 1,
+      "batch": "B02",
+      "status": "reviewed_findings_open",
+      "reviewed_on": "2026-10-17",
+      "method": "full source read and adjacent contract inspection"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_geography_discovery.py",
+      "sha256": "5700fe1ff16656436e535ca3edb5906142ae00ec72e8148858f846070b6a1153",
+      "lines_reviewed": "1-100",
+      "definitions_reviewed": 5,
+      "batch": "B02",
+      "status": "reviewed_findings_open",
+      "reviewed_on": "2026-10-17",
+      "method": "full source read and adjacent contract inspection"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_nuts_registry.py",
+      "sha256": "e95d69df83b7adc8abd36fdeed58dc19278e6df9e4a865b76b8df6f5863e10d1",
+      "lines_reviewed": "1-118",
+      "definitions_reviewed": 4,
+      "batch": "B02",
+      "status": "reviewed_findings_open",
+      "reviewed_on": "2026-10-17",
+      "method": "full source read and adjacent contract inspection"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_regional_contract.py",
+      "sha256": "bbb53f390775d6ac102b584cc47884474d212bf3fa9e83b2609c1af1f4847be1",
+      "lines_reviewed": "1-38",
+      "definitions_reviewed": 1,
+      "batch": "B02",
+      "status": "reviewed_findings_open",
+      "reviewed_on": "2026-10-17",
+      "method": "full source read and adjacent contract inspection"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_regional_sector.py",
+      "sha256": "75aea64b6150b52f1240bf3c317a248e32fee11959ab975eaa6ce3641c64d79e",
+      "lines_reviewed": "1-117",
+      "definitions_reviewed": 2,
+      "batch": "B02",
+      "status": "reviewed_findings_open",
+      "reviewed_on": "2026-10-17",
+      "method": "full source read and adjacent contract inspection"
+    },
+    {
+      "path": "backend/app/ingestion/oecd_tax_wedge.py",
+      "sha256": "13911d72ce98f8b820e832e750c55529255ccd493608451a1b49cd3dd905e9b3",
+      "lines_reviewed": "1-81",
+      "definitions_reviewed": 2,
+      "batch": "B02",
+      "status": "reviewed_findings_open",
+      "reviewed_on": "2026-10-17",
+      "method": "full source read and adjacent contract inspection"
     }
   ],
-  "certified_line_by_line_review_count": 4,
+  "certified_line_by_line_review_count": 11,
   "findings": [
     {
       "id": "LEAD-001",
@@ -139,8 +209,88 @@
       "line_range": "198-251",
       "description": "initialize_datastores unconditionally invokes seed_esco_partial when mode none. CLI source-smokes rely on initialization; assess unexpected seeding/workload and separate schema bootstrap from optional data seeding.",
       "test_required": "bootstrap idempotence and no-side-effect health probe integration"
+    },
+    {
+      "id": "AUD-B02-008",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/eurostat_geography_discovery.py",
+      "sha256": "5700fe1ff16656436e535ca3edb5906142ae00ec72e8148858f846070b6a1153",
+      "line_range": "44-62",
+      "description": "Sparse JSON-stat values mapping may not be a dict; .get is used without type/flat-index enforcement and negative or malformed keys can create false observed-region coverage.",
+      "test_required": "Add sparse shape/negative index adversarial fixtures"
+    },
+    {
+      "id": "AUD-B02-009",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat_nuts_registry.py",
+      "sha256": "e95d69df83b7adc8abd36fdeed58dc19278e6df9e4a865b76b8df6f5863e10d1",
+      "line_range": "13-27",
+      "description": "GISCO extraction accepts duplicate geographic feature codes and does not enforce unique identifiers; this can distort registry trust and duplicate diagnostics.",
+      "test_required": "Duplicate-feature fail-closed test"
+    },
+    {
+      "id": "AUD-B02-010",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/eea_air_quality.py",
+      "sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "line_range": "25-113",
+      "description": "EEA inspection caps source results to 2000 and marks aggregation ready based only on sampled latest records and coordinate completeness; a partial page can masquerade as full station coverage.",
+      "test_required": "ArcGIS exceededTransferLimit and paging/total-count negative test"
+    },
+    {
+      "id": "AUD-B02-011",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eea_air_quality.py",
+      "sha256": "83435526b3abafe3f4bc11af8d382d925437dd328beee3803eed9891bae04727",
+      "line_range": "72-97",
+      "description": "Statistics values converted to float without finite-number or unit-consistency validation; NaN and inconsistent years/units risk false summary min/max.",
+      "test_required": "Reject non-finite/statistical unit conflicts"
+    },
+    {
+      "id": "AUD-B02-012",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/cedefop_reset.py",
+      "sha256": "ff1dceee44840f0966fe49479a813a77453ea5f9489ff1552c850f57d5d5d08f",
+      "line_range": "74-109",
+      "description": "Workbook download checks file extension or content-type but not XLSX PK/ZIP signature, and writes bytes to target without atomic staging.",
+      "test_required": "Malformed HTML disguised as XLSX + atomic file verification"
+    },
+    {
+      "id": "AUD-B02-013",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/eurostat_regional_sector.py",
+      "sha256": "75aea64b6150b52f1240bf3c317a248e32fee11959ab975eaa6ce3641c64d79e",
+      "line_range": "21-116",
+      "description": "Sector adapter trusts JSON-stat dimension cardinality and values; converts booleans/nonfinite to float and does not verify returned freq/unit/age/sex are the requested dimensions.",
+      "test_required": "Returned extra/wrong dimension and NaN/boolean regression"
+    },
+    {
+      "id": "AUD-B02-014",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/app/ingestion/oecd_tax_wedge.py",
+      "sha256": "13911d72ce98f8b820e832e750c55529255ccd493608451a1b49cd3dd905e9b3",
+      "line_range": "18-46",
+      "description": "Fetch builds URL via string replacement without asserting the target fragment exists; if contract URL changes, silently requests unfiltered dataset.",
+      "test_required": "URL contract assertion fixture"
+    },
+    {
+      "id": "AUD-B02-015",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat_regional_contract.py",
+      "sha256": "bbb53f390775d6ac102b584cc47884474d212bf3fa9e83b2609c1af1f4847be1",
+      "line_range": "15-38",
+      "description": "Duplicate identity key excludes geography_system/level and performs case-sensitive string comparison before downstream normalization; ensure constraints exactly match writer keys.",
+      "test_required": "Mixed-case regional duplicate identity test"
     }
   ],
   "denominator_inventoried_files": 339,
-  "certified_line_by_line_review_percent": 1.18
+  "certified_line_by_line_review_percent": 3.24
 }
