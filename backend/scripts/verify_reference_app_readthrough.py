@@ -87,8 +87,10 @@ def verify(reference_path: Path) -> dict:
             if response.status_code != 200:
                 raise ValueError(f"Public ranking API failed: {response.status_code}")
             payload = response.json()
-            if payload.get("items") or payload.get("eligible_total") or payload.get("status") == "ready":
+            if payload.get("items") or payload.get("eligible_total") or payload.get("status") != "blocked_unverified_evidence":
                 raise ValueError("Ranking API exposed unverified NUTS observation vintage")
+            if payload.get("unregistered_evidence_rows") != len(source_rows) // 2:
+                raise ValueError("Public ranking API did not report unregistered employment evidence")
             if registry_count:
                 raise ValueError("Reference import accidentally certified a geography registry")
 
