@@ -1258,8 +1258,8 @@
       "component": "backend/app/services/housing_affordability.py",
       "sha256": "6c6bb5724d62da77a27ce8d0067384dcdd7253a63cc14a3d22255b9b44d81b84",
       "line_range": "9-45",
-      "description": "Bool and non-finite numeric values pass current isinstance(int,float) and range comparisons in some cases; malformed upstream provider metrics may appear available.",
-      "test_required": "NaN/bool housing ratio guard"
+      "description": "Housing affordability accepts boolean source values as numeric through isinstance(bool,(int,float)); NaN generally fails its range comparisons, but finite-number and type checks should be explicit and harmonized with source contracts.",
+      "test_required": "Boolean housing metric must not report available, plus nonfinite source fixtures"
     },
     {
       "id": "AUD-B03-010",
