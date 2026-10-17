@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from itertools import product
 
 from app.ingestion.eurostat import EurostatAdapter
+from app.services.regional_evidence import REGIONAL_INDICATORS
 
 
 SOURCE_ID = "EUROSTAT"
@@ -16,7 +17,7 @@ REGIONAL_LABOUR_SERIES = [
         "filters": {
             "freq": "A",
             "unit": "PC",
-            "age": "Y15-64",
+            "age": "Y20-64",
             "sex": "T",
             "geoLevel": "nuts2",
         },
@@ -28,7 +29,7 @@ REGIONAL_LABOUR_SERIES = [
         "filters": {
             "freq": "A",
             "unit": "PC",
-            "age": "Y15-74",
+            "age": "Y20-64",
             "sex": "T",
             "isced11": "TOTAL",
             "geoLevel": "nuts2",
@@ -117,10 +118,23 @@ def normalize_subnational(
     return rows
 
 
+def validate_labour_indicator_contracts() -> None:
+    """Block silent drift from canonical indicator source/dimension definitions."""
+    canonical = {item["indicator_id"]: item for item in REGIONAL_INDICATORS}
+    for item in REGIONAL_LABOUR_SERIES:
+        reference = canonical[item["indicator_id"]]
+        if item["dataset_id"] != reference["dataset_id"] or item["unit"] != reference["unit"]:
+            raise ValueError("Regional labour dataset or unit differs from canonical indicator")
+        for key, expected in reference["filters"].items():
+            if item["filters"].get(key) != expected:
+                raise ValueError(f"Regional labour dimension contract mismatch: {item['indicator_id']} {key}")
+
+
 def fetch_regional_labour(
     adapter: EurostatAdapter,
     target_prefixes: set[str] | None = None,
 ) -> tuple[list[dict], list[dict]]:
+    validate_labour_indicator_contracts()
     rows: list[dict] = []
     diagnostics: list[dict] = []
 
