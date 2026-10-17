@@ -362,6 +362,24 @@ class EurostatAdapter:
         labels = dimension.get("category", {}).get("label", {})
         return labels if isinstance(labels, dict) else {}
 
+    def _validated_dimension_codes(self, payload: dict) -> list[list[str]]:
+        ids = payload.get("id")
+        sizes = payload.get("size")
+        dimensions = payload.get("dimension")
+        values = payload.get("value")
+        if not isinstance(ids, list) or not isinstance(sizes, list) or not isinstance(dimensions, dict):
+            raise ValueError("Invalid specialized Eurostat JSON-stat dimensions")
+        if not ids or len(ids) != len(sizes) or len(set(ids)) != len(ids):
+            raise ValueError("Invalid specialized Eurostat dimension identity")
+        if any(type(size) is not int or size <= 0 for size in sizes):
+            raise ValueError("Invalid specialized Eurostat dimension cardinality")
+        if not isinstance(values, (list, dict)):
+            raise ValueError("Invalid specialized Eurostat observation container")
+        codes = [self._ordered_codes(dimensions[item]) for item in ids]
+        if any(len(c) != size for c, size in zip(codes, sizes)):
+            raise ValueError("Specialized Eurostat source index cardinality mismatch")
+        return codes
+
     def _labels_match_config(
         self,
         config: dict,
@@ -485,10 +503,7 @@ class EurostatAdapter:
         dimensions = payload["dimension"]
         raw_values = payload["value"]
 
-        dimension_codes = [
-            self._ordered_codes(dimensions[dimension_id])
-            for dimension_id in dimension_ids
-        ]
+        dimension_codes = self._validated_dimension_codes(payload)
 
         retrieved_at = datetime.now(timezone.utc)
         rows: list[dict] = []
@@ -519,6 +534,8 @@ class EurostatAdapter:
 
             if value is None:
                 continue
+            if type(value) not in (int, float) or not math.isfinite(value):
+                raise ValueError(f"Invalid normalize_earnings source observation at {flat_index}")
 
             labels = {
                 dimension_id: dimension_codes[index][coordinates[index]]
@@ -562,10 +579,7 @@ class EurostatAdapter:
         dimensions = payload["dimension"]
         raw_values = payload["value"]
 
-        dimension_codes = [
-            self._ordered_codes(dimensions[dimension_id])
-            for dimension_id in dimension_ids
-        ]
+        dimension_codes = self._validated_dimension_codes(payload)
 
         retrieved_at = datetime.now(timezone.utc)
         rows: list[dict] = []
@@ -596,6 +610,8 @@ class EurostatAdapter:
 
             if value is None:
                 continue
+            if type(value) not in (int, float) or not math.isfinite(value):
+                raise ValueError(f"Invalid normalize_net_earnings source observation at {flat_index}")
 
             labels = {
                 dimension_id: dimension_codes[index][coordinates[index]]
@@ -633,10 +649,7 @@ class EurostatAdapter:
         dimensions = payload["dimension"]
         raw_values = payload["value"]
 
-        dimension_codes = [
-            self._ordered_codes(dimensions[dimension_id])
-            for dimension_id in dimension_ids
-        ]
+        dimension_codes = self._validated_dimension_codes(payload)
 
         isco_dimension_id = next(
             (
@@ -704,6 +717,8 @@ class EurostatAdapter:
 
             if value is None:
                 continue
+            if type(value) not in (int, float) or not math.isfinite(value):
+                raise ValueError(f"Invalid normalize_job_vacancy_rates source observation at {flat_index}")
 
             labels = {
                 dimension_id: dimension_codes[index][coordinates[index]]
@@ -771,10 +786,7 @@ class EurostatAdapter:
         dimensions = payload["dimension"]
         raw_values = payload["value"]
 
-        dimension_codes = [
-            self._ordered_codes(dimensions[dimension_id])
-            for dimension_id in dimension_ids
-        ]
+        dimension_codes = self._validated_dimension_codes(payload)
 
         retrieved_at = datetime.now(timezone.utc)
         rows: list[dict] = []
@@ -805,6 +817,8 @@ class EurostatAdapter:
 
             if value is None:
                 continue
+            if type(value) not in (int, float) or not math.isfinite(value):
+                raise ValueError(f"Invalid normalize_job_transitions source observation at {flat_index}")
 
             labels = {
                 dimension_id: dimension_codes[index][coordinates[index]]
