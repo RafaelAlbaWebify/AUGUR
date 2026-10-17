@@ -106,9 +106,86 @@
       "status": "reviewed_findings_open",
       "reviewed_on": "2026-10-17",
       "method": "full source read and adjacent contract inspection"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_regional_access_safety.py",
+      "sha256": "728ee78c8537926e0b64270812a091056147671bfc18367a53f1d1a6719ad162",
+      "lines_reviewed": "1-137",
+      "definitions_reviewed": 2,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 2,
+      "method": "full source inspection and static importer cross-check"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_regional_health.py",
+      "sha256": "5573e839ebab8b0214366bd07c9443a3d29db27cc35265308df25c684f540851",
+      "lines_reviewed": "1-163",
+      "definitions_reviewed": 3,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 5,
+      "method": "full source inspection and static importer cross-check"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_regional_housing.py",
+      "sha256": "cb685a41513ddbf76820a8b7b95581e736214fd778555b2bef66afc3fcb7df2b",
+      "lines_reviewed": "1-181",
+      "definitions_reviewed": 4,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 9,
+      "method": "full source inspection and static importer cross-check"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_regional_jvs.py",
+      "sha256": "ad8a9146bdb01ce770f48314635d3bc4c450c29be4614d6f6f7061cf3297d682",
+      "lines_reviewed": "1-138",
+      "definitions_reviewed": 2,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 2,
+      "method": "full source inspection and static importer cross-check"
+    },
+    {
+      "path": "backend/app/ingestion/eurostat_regional_labour.py",
+      "sha256": "8681dc40a44623b1045b3fa4159fa6ec72666b07f458829139e57470aa983310",
+      "lines_reviewed": "1-180",
+      "definitions_reviewed": 3,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 10,
+      "method": "full source inspection and static importer cross-check"
+    },
+    {
+      "path": "backend/app/ingestion/gisco_cities.py",
+      "sha256": "d1dc60f248901f8e23dd370cccc686742fad0e9147f5025fd548245328a78141",
+      "lines_reviewed": "1-135",
+      "definitions_reviewed": 6,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 4,
+      "method": "full source inspection and static importer cross-check"
+    },
+    {
+      "path": "backend/app/ingestion/oecd.py",
+      "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "lines_reviewed": "1-127",
+      "definitions_reviewed": 6,
+      "batch": "B02",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "imported_by_count": 3,
+      "method": "full source inspection and static importer cross-check"
     }
   ],
-  "certified_line_by_line_review_count": 11,
+  "certified_line_by_line_review_count": 18,
   "findings": [
     {
       "id": "LEAD-001",
@@ -300,8 +377,85 @@
       "line_range": "15-38",
       "description": "Duplicate identity key excludes geography_system/level and performs case-sensitive string comparison before downstream normalization; ensure constraints exactly match writer keys.",
       "test_required": "Mixed-case regional duplicate identity test"
+    },
+    {
+      "id": "AUD-B02-016",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/ingestion/oecd.py",
+      "sha256": "8ccebeb912972fd44220800e81a1fc1906821891cb866e7ae90880960ba6f343",
+      "line_range": "65-108",
+      "description": "GDP/hour adapter normalizes CSV by TIME_PERIOD and OBS_VALUE alone; does not check REF_AREA, FREQ, MEASURE, ACTIVITY, UNIT_MEASURE, PRICE_BASE or TRANSFORMATION, despite labeling every value as GDPHRS USD PPP/hour.",
+      "test_required": "Wrong OECD country/measure/unit fixture should fail before upsert",
+      "imported_by_count": 3
+    },
+    {
+      "id": "AUD-B02-017",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat_regional_access_safety.py",
+      "sha256": "728ee78c8537926e0b64270812a091056147671bfc18367a53f1d1a6719ad162",
+      "line_range": "82-136",
+      "description": "Inspector can mark ready_for_parser_design true when only one of three heterogeneous source datasets is available; ensure UI or downstream consumers never infer all access/safety measures are ready.",
+      "test_required": "Partial source report consumer semantics tests",
+      "imported_by_count": 2
+    },
+    {
+      "id": "AUD-B02-018",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat_regional_jvs.py",
+      "sha256": "ad8a9146bdb01ce770f48314635d3bc4c450c29be4614d6f6f7061cf3297d682",
+      "line_range": "23-138",
+      "description": "Inspector progressively relaxes requested dimension filters yet readiness is based on geographic and ISCO codes rather than exact returned statistical tuple/valid numeric observations. It is exploratory only.",
+      "test_required": "Return wrong indicator/time/source dimensions; readiness must remain false",
+      "imported_by_count": 2
+    },
+    {
+      "id": "AUD-B02-019",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/gisco_cities.py",
+      "sha256": "d1dc60f248901f8e23dd370cccc686742fad0e9147f5025fd548245328a78141",
+      "line_range": "28-80",
+      "description": "GISCO city catalogue lacks unique city_code check and scans arbitrary property values for city identifiers, permitting duplicate code rows that turn correct unique city matches into ambiguous results.",
+      "test_required": "Duplicate official features and conflicting code/name negative fixtures",
+      "imported_by_count": 4
+    },
+    {
+      "id": "AUD-B02-020",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat_regional_health.py",
+      "sha256": "5573e839ebab8b0214366bd07c9443a3d29db27cc35265308df25c684f540851",
+      "line_range": "14-158",
+      "description": "Health indicators use shared labour normalizer but unlike employment/housing lack a pre-fetch canonical metadata-contract check. Examine whether dataset dimensions match application descriptors; do not silently promote exploratory data.",
+      "test_required": "Health dataset source/filter/unit against canonical catalogue",
+      "imported_by_count": 5
+    },
+    {
+      "id": "AUD-B02-021",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/app/ingestion/eurostat_regional_housing.py",
+      "sha256": "cb685a41513ddbf76820a8b7b95581e736214fd778555b2bef66afc3fcb7df2b",
+      "line_range": "51-181",
+      "description": "Housing inspector duplicates source configuration separate from canonical fetch contracts; repeated country code and dimension summarizers are consolidation candidates, but deletion requires test/call-site check.",
+      "test_required": "Inspector vs canonical contract consistency regression",
+      "imported_by_count": 9
+    },
+    {
+      "id": "AUD-B02-022",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/ingestion/eurostat_regional_labour.py",
+      "sha256": "8681dc40a44623b1045b3fa4159fa6ec72666b07f458829139e57470aa983310",
+      "line_range": "47-129",
+      "description": "Shared regional normalizer iterates full JSON-stat Cartesian dimension product even when values are sparse and filters are exact, potentially high CPU/memory on broad provider datasets; benchmark before optimization.",
+      "test_required": "Sparse provider payload 1M Cartesian bins performance and output parity",
+      "imported_by_count": 10
     }
   ],
   "denominator_inventoried_files": 340,
-  "certified_line_by_line_review_percent": 3.24
+  "certified_line_by_line_review_percent": 5.29
 }
