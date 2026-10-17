@@ -1222,9 +1222,152 @@
       "status": "reviewed_findings_open",
       "method": "complete source inspection, import/dependency provenance checked; runtime acceptance still pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/smoke_nuts2024_registry.py",
+      "sha256": "fd4435918792d4bb16504200ffb6c38aabf9cdc4561e2ed6524d9dd7ce2b73c4",
+      "lines_reviewed": "1-17",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/smoke_oecd_tax_wedge.py",
+      "sha256": "62df1dbfc4f53de9672d82210969daf5eef0c026cc3ac119a88c775775a0858f",
+      "lines_reviewed": "1-32",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_eea_health_burden.py",
+      "sha256": "98107aa1828565451a3c7e6c27f50a55cde67a9c831a37024358f00147972cba",
+      "lines_reviewed": "1-44",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_eurostat_regional_health.py",
+      "sha256": "31d753943db009e5ad77218fd2c8400c49f790c2fa1b6b71c0899db85577c1f0",
+      "lines_reviewed": "1-35",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_eurostat_regional_housing.py",
+      "sha256": "c498fb04bdb407482c08e30ee04ed04ec7fb2bf276048968f26b60df999005e6",
+      "lines_reviewed": "1-43",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_eurostat_regional_labour.py",
+      "sha256": "27c5cd03b2d4a0d61f5eb2f635a686a0840f618d7e05a2f8ca6285fa76aa8efa",
+      "lines_reviewed": "1-44",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_eurostat_regional_sector.py",
+      "sha256": "ef26105d78f2ad4a76aca7a40ebc12a18d1fde7e7c017ed91744e74fc7bf10e4",
+      "lines_reviewed": "1-34",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_imf.py",
+      "sha256": "a95b8f77fc2c3a66a3f2cda68e0b2bafd80176f0553e6b5eed2033f9c19133dc",
+      "lines_reviewed": "1-40",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_oecd.py",
+      "sha256": "a5105ecf401466880f831b9dbfb863bad8e94dc020d7ad0bbbe137b2376259a7",
+      "lines_reviewed": "1-26",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_oecd_tax_wedge.py",
+      "sha256": "b29e7648a674c6645d108725edc89c45c0f56c439469ee1afd507fbadcbc8430",
+      "lines_reviewed": "1-35",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_phase1.py",
+      "sha256": "8fe932c87f4a024e994a3902e1f063d68c55a7ad7ff6bd77bfa4c9aa8bf54401",
+      "lines_reviewed": "1-39",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_un_wpp.py",
+      "sha256": "932c1996627b09f05a434a6b3cbdec4651900e798d743e26a7ec8006bd8e06a1",
+      "lines_reviewed": "1-29",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/verify_weo_disposable_readthrough.py",
+      "sha256": "bbc37ac4266ba4b9bc46450cfbb2fe60deab2f3c646a65f28b6429f9a0249c91",
+      "lines_reviewed": "1-47",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "complete source read, imported service contract and data-write side-effect inspection; end-to-end tests outstanding",
+      "imported_by_count": 2
     }
   ],
-  "certified_line_by_line_review_count": 111,
+  "certified_line_by_line_review_count": 124,
   "findings": [
     {
       "id": "LEAD-001",
@@ -2230,8 +2373,48 @@
       "line_range": "34-39",
       "description": "Provider-local row matching filters geography system, geo code, indicator and period but not geo level, source id or dataset id; multiple stored versions are classified ambiguous, but a uniquely wrong-source row may be treated as paired.",
       "test_required": "Verify contract source/unit/dataset and source-level dimensions before paired comparison; wrong-source and wrong-level fixtures."
+    },
+    {
+      "id": "AUD-B04-014",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_oecd.py",
+      "sha256": "a5105ecf401466880f831b9dbfb863bad8e94dc020d7ad0bbbe137b2376259a7",
+      "line_range": "9-25",
+      "description": "OECD sync returns exit code 0 unconditionally even if result['complete'] is false, so automation can classify partial sync as success.",
+      "test_required": "Mock incomplete adapter result; assert nonzero exit and failure details."
+    },
+    {
+      "id": "AUD-B04-015",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_un_wpp.py",
+      "sha256": "932c1996627b09f05a434a6b3cbdec4651900e798d743e26a7ec8006bd8e06a1",
+      "line_range": "9-27",
+      "description": "UN WPP sync returns exit code 0 regardless of adapter result['complete']; automation may record failed or partial import as success.",
+      "test_required": "Inject incomplete sync response and assert nonzero process exit."
+    },
+    {
+      "id": "AUD-B04-016",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/verify_weo_disposable_readthrough.py",
+      "sha256": "bbc37ac4266ba4b9bc46450cfbb2fe60deab2f3c646a65f28b6429f9a0249c91",
+      "line_range": "28-39",
+      "description": "Disposable WEO verifier mutates global analytics.settings temporarily; concurrency in the same interpreter can cause other threads or calls to access temporary DB. Finally restores but no isolation of concurrent operations.",
+      "test_required": "Parallel invocation with read-only analytics query; prefer injected DB path, not module-global reassignment."
+    },
+    {
+      "id": "AUD-B04-017",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_eurostat_regional_health.py",
+      "sha256": "31d753943db009e5ad77218fd2c8400c49f790c2fa1b6b71c0899db85577c1f0",
+      "line_range": "13-22",
+      "description": "Regional health sync upserts provider rows without explicit validate_eurostat_regional_rows call used by regional labour/housing peers; compare upstream adapter and write contract guarantees.",
+      "test_required": "Malformed Eurostat metadata fixture, ensure missing/unknown dimensions and status fail before upsert."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 31.62
+  "certified_line_by_line_review_percent": 35.33
 }
