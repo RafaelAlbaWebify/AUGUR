@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 350,
-  "python_count": 312,
-  "definition_count": 1622,
+  "file_count": 351,
+  "python_count": 313,
+  "definition_count": 1624,
   "reviewed_file_count": 51,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 14.57,
+  "line_by_line_review_percent": 14.53,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 102,
-    "backend/tests": 128,
+    "backend/tests": 129,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 1
@@ -7035,6 +7035,7 @@
         "backend/app/services/ttv_temporal.py",
         "backend/tests/test_career_fit.py",
         "backend/tests/test_financial_fit.py",
+        "backend/tests/test_financial_fit_invalid_inputs.py",
         "backend/tests/test_language_fit.py",
         "backend/tests/test_legal_fit.py",
         "backend/tests/test_profile_readiness.py",
@@ -7222,6 +7223,7 @@
         "backend/tests/test_esco_store.py",
         "backend/tests/test_eures_evidence_builder.py",
         "backend/tests/test_financial_fit.py",
+        "backend/tests/test_financial_fit_invalid_inputs.py",
         "backend/tests/test_geography_indicator_coverage.py",
         "backend/tests/test_geography_provenance.py",
         "backend/tests/test_language_fit.py",
@@ -8109,15 +8111,15 @@
     {
       "path": "backend/app/services/financial_fit.py",
       "bucket": "backend/app/services",
-      "sha256": "ca748a0f39c7752e696d903b7e43b218de1603bd4747f935047bd3580a2a6696",
-      "bytes": 8099,
+      "sha256": "61a89b4f0f220e185e0d37c0b213566850245ce0855d26c4d9101707e57ef7e9",
+      "bytes": 9337,
       "review_status": "not_reviewed",
       "definitions": [
         {
           "symbol": "_latest_price_level",
           "kind": "function",
-          "line_start": 15,
-          "line_end": 19,
+          "line_start": 16,
+          "line_end": 20,
           "signature_arguments": [
             "country_iso3"
           ]
@@ -8125,8 +8127,8 @@
         {
           "symbol": "_local_income_reference",
           "kind": "function",
-          "line_start": 22,
-          "line_end": 51,
+          "line_start": 23,
+          "line_end": 52,
           "signature_arguments": [
             "profile",
             "target_country_iso3"
@@ -8135,8 +8137,8 @@
         {
           "symbol": "_national_net_earnings_reference",
           "kind": "function",
-          "line_start": 54,
-          "line_end": 71,
+          "line_start": 55,
+          "line_end": 72,
           "signature_arguments": [
             "target_country_iso3"
           ]
@@ -8144,8 +8146,8 @@
         {
           "symbol": "financial_fit",
           "kind": "function",
-          "line_start": 74,
-          "line_end": 209,
+          "line_start": 75,
+          "line_end": 234,
           "signature_arguments": [
             "profile",
             "target_country_iso3"
@@ -8158,33 +8160,41 @@
           "line": 1
         },
         {
+          "module": "math",
+          "line": 2
+        },
+        {
           "module": "app.db.analytics",
-          "line": 3
+          "line": 4
         },
         {
           "module": "app.services.career_fit",
-          "line": 8
+          "line": 9
         },
         {
           "module": "app.models.profile",
-          "line": 9
+          "line": 10
         }
       ],
       "called_names": [
         "_latest_price_level",
         "_local_income_reference",
         "_national_net_earnings_reference",
+        "any",
         "float",
         "get",
         "isdigit",
+        "isfinite",
+        "isinstance",
         "latest_labour_earnings",
         "latest_labour_net_earnings_reference",
         "latest_observations",
         "resolve_esco_occupation",
         "str",
+        "type",
         "upper"
       ],
-      "lines": 209,
+      "lines": 234,
       "resolved_local_imports": [
         "backend/app/db/analytics.py",
         "backend/app/models/profile.py",
@@ -23025,6 +23035,62 @@
         "setattr"
       ],
       "lines": 211,
+      "resolved_local_imports": [
+        "backend/app/models/profile.py",
+        "backend/app/services/__init__.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_financial_fit_invalid_inputs.py",
+      "bucket": "backend/tests",
+      "sha256": "5c4a5098e2d1c5a27a147549d487d44752ef67cce9de4c76af708b0d69cacdab",
+      "bytes": 1440,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_invalid_price_level_rejected_without_division",
+          "kind": "function",
+          "line_start": 7,
+          "line_end": 16,
+          "signature_arguments": [
+            "monkeypatch",
+            "origin",
+            "target"
+          ]
+        },
+        {
+          "symbol": "test_zero_portable_income_is_not_divided",
+          "kind": "function",
+          "line_start": 18,
+          "line_end": 22,
+          "signature_arguments": [
+            "monkeypatch"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "pytest",
+          "line": 2
+        },
+        {
+          "module": "app.models.profile",
+          "line": 3
+        },
+        {
+          "module": "app.services",
+          "line": 4
+        }
+      ],
+      "called_names": [
+        "PersonalProfileResponse",
+        "financial_fit",
+        "float",
+        "parametrize",
+        "setattr"
+      ],
+      "lines": 22,
       "resolved_local_imports": [
         "backend/app/models/profile.py",
         "backend/app/services/__init__.py"
