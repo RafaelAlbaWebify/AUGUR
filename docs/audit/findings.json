@@ -188,14 +188,16 @@
     },
     {
       "path": "backend/app/ingestion/cedefop_oja_imbalance.py",
-      "sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
+      "sha256": "48e4625e5ede175ec7e0ec9e9cf5018dd52d1e901bd562e2ba65a1425a0dee16",
       "lines_reviewed": "1-231",
       "definitions_reviewed": 7,
       "batch": "B02",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "imported_by_count": 4,
-      "method": "full module inspection and dependency evidence"
+      "method": "full module inspection and dependency evidence",
+      "previous_sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
+      "revalidated_after_pr": 95
     },
     {
       "path": "backend/app/ingestion/eea_air_quality_api.py",
@@ -221,14 +223,16 @@
     },
     {
       "path": "backend/app/ingestion/eea_health_burden.py",
-      "sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
+      "sha256": "8670f2cdf8e82b65d1197f4d4f0ecb2fbb3532ebb06926de0efb67b88675abd6",
       "lines_reviewed": "1-235",
       "definitions_reviewed": 7,
       "batch": "B02",
       "reviewed_on": "2026-10-17",
       "status": "reviewed_findings_open",
       "imported_by_count": 3,
-      "method": "full module inspection and dependency evidence"
+      "method": "full module inspection and dependency evidence",
+      "previous_sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
+      "revalidated_after_pr": 95
     },
     {
       "path": "backend/app/ingestion/eures_annex_pdf.py",
@@ -649,25 +653,29 @@
     },
     {
       "id": "AUD-B02-028",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_95",
       "severity": "high",
       "component": "backend/app/ingestion/eea_health_burden.py",
-      "sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
+      "sha256": "8670f2cdf8e82b65d1197f4d4f0ecb2fbb3532ebb06926de0efb67b88675abd6",
       "line_range": "106-186",
       "description": "EEA health burden parser permits float('nan')/infinite source values and arbitrary source unit strings while reporting a normalized burden row; missing finite and metric/unit validation.",
       "test_required": "Malformed CSV numeric and noncomparable unit regression",
-      "imported_by_count": 3
+      "imported_by_count": 3,
+      "previous_sha256": "b5f9e9d6fafc51939a1664070b00abd96d6287f52c181e73510cfcc2afb25079",
+      "resolution_pr": 95
     },
     {
       "id": "AUD-B02-029",
-      "state": "open_requires_regression",
+      "state": "mitigated_by_pr_95",
       "severity": "high",
       "component": "backend/app/ingestion/cedefop_oja_imbalance.py",
-      "sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
+      "sha256": "48e4625e5ede175ec7e0ec9e9cf5018dd52d1e901bd562e2ba65a1425a0dee16",
       "line_range": "108-164,180-231",
       "description": "detect_schema reports ready when occupation_code and score exist, but parse_csv unconditionally accesses matches['occupation_label']; a schema declared ready can raise KeyError.",
       "test_required": "Missing occupation label must be rejected in schema readiness tests",
-      "imported_by_count": 4
+      "imported_by_count": 4,
+      "previous_sha256": "5d775300f8f9d7146aba253dcef1656cdf91a9f90daa4808ece673138167db10",
+      "resolution_pr": 95
     },
     {
       "id": "AUD-B02-030",
