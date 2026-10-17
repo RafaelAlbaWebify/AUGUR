@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 87,
+  "reviewed_file_count": 91,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 24.79,
+  "line_by_line_review_percent": 25.93,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -13128,7 +13128,7 @@
       "bucket": "backend/scripts",
       "sha256": "30b158a4b7436a7b5c9e04b273926306f665b2e67ef7564303f660e87de8d693",
       "bytes": 1318,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -13190,7 +13190,7 @@
       "bucket": "backend/scripts",
       "sha256": "05854f80f42ff207f4fb9217c47b7ccd9fb089bd6929b8a489030b3302147345",
       "bytes": 1007,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -13245,7 +13245,7 @@
       "bucket": "backend/scripts",
       "sha256": "0edd169053cafd29a0d520274c45810afb4b8cf1eb268c5b5aad0d9cc3416340",
       "bytes": 1326,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
@@ -13361,7 +13361,7 @@
       "bucket": "backend/scripts",
       "sha256": "c9d961b2079701b5fe60fa0cd8429b67113d678524c5c32c1d26d93c42561eba",
       "bytes": 347,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "main",
