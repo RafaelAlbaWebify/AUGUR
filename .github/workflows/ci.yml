@@ -13,7 +13,7 @@ on:
       - "**/*.md"
 
 concurrency:
-  group: augur-ci-${{ github.ref }}
+  group: augur-ci-v2-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -45,6 +45,7 @@ jobs:
 
   frontend:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     defaults:
       run:
         working-directory: frontend
