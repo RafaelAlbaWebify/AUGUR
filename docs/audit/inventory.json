@@ -13,9 +13,9 @@
   "file_count": 350,
   "python_count": 312,
   "definition_count": 1622,
-  "reviewed_file_count": 49,
-  "stale_review_file_count": 2,
-  "line_by_line_review_percent": 14.0,
+  "reviewed_file_count": 51,
+  "stale_review_file_count": 0,
+  "line_by_line_review_percent": 14.57,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -8312,7 +8312,7 @@
       "bucket": "backend/app/services",
       "sha256": "fd6c170c8250e53044279d3a8dc1aad85017c714018f92464f1f912ea2a1642e",
       "bytes": 4093,
-      "review_status": "stale_review",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "EvidenceContract",
@@ -8390,7 +8390,7 @@
       "bucket": "backend/app/services",
       "sha256": "e1faae19c55baf9e196fa2e653a5d34788b864728e01231b55bc270a274a3369",
       "bytes": 2754,
-      "review_status": "stale_review",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "housing_affordability_evidence",
