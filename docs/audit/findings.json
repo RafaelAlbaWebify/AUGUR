@@ -1574,9 +1574,119 @@
       "status": "reviewed_findings_open",
       "method": "complete source read, OECD HTTP/parsing/provenance and script side-effect inspection; live tests pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_fua_boundaries.py",
+      "sha256": "29bab1c3b325479969cf2d4e2e0b16e2c67efb40631742fce1adfc4f0b8d8cec",
+      "lines_reviewed": "1-142",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_fua_density.py",
+      "sha256": "61eec5fe1baa234aac29b5fcc0fd4152b550457a4467ee741ff5f3926c9d20c6",
+      "lines_reviewed": "1-123",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_fua_green_area.py",
+      "sha256": "4bef8205a71c9584f7dd4028a1c40e47b2608495028bfd03e5f9e0bed6a80e12",
+      "lines_reviewed": "1-117",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_fua_pollution.py",
+      "sha256": "7621ed91deae2312b5eed05b491d41d35d04c6cdaaa83eaca08b1dcdc2feb7f5",
+      "lines_reviewed": "1-126",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_regional_broadband.py",
+      "sha256": "7921d11933d9b397c93ba86452ff150729cfe742934f4cf033b50748bf1ad05a",
+      "lines_reviewed": "1-111",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_regional_demography.py",
+      "sha256": "b53468f71577af36ecd4e47d37c78b89c56ea3d42f4caf36463630dc60edde16",
+      "lines_reviewed": "1-107",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_regional_density.py",
+      "sha256": "11f1c0b331df7b3abd7c6fa266b3fb8c553d293270a9de7c73e46474006d0dd0",
+      "lines_reviewed": "1-131",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_regional_land_temperature.py",
+      "sha256": "f252ddcb9d7ede479611342d9b532544e84aca15b042ff44ec86b4b8683fdd59",
+      "lines_reviewed": "1-102",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_regional_population.py",
+      "sha256": "12c9c6581107b34afb5f451077ccc9fc59494221c45a9f5544c638c4ec99a710",
+      "lines_reviewed": "1-105",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_oecd_regional_safety.py",
+      "sha256": "388bf032902e836f8d06370ba4bd3d19de3cb00b85a5757b88168956684e0193",
+      "lines_reviewed": "1-96",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read with source provenance and HTTP/CSV memory surface analysis; live tests pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 143,
+  "certified_line_by_line_review_count": 153,
   "findings": [
     {
       "id": "LEAD-001",
@@ -2712,8 +2822,48 @@
       "line_range": "45-58",
       "description": "Special-case 404 with NoRecordsFound treats absence of Australian FUA observations as exit 0; safe informational policy but CI invoking success-only cannot distinguish coverage gap without parsing status.",
       "test_required": "Test consumer of status/exit contract to distinguish source valid without values from a successful coverage probe."
+    },
+    {
+      "id": "AUD-B04-027",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_oecd_fua_boundaries.py",
+      "sha256": "29bab1c3b325479969cf2d4e2e0b16e2c67efb40631742fce1adfc4f0b8d8cec",
+      "line_range": "21-32",
+      "description": "Boundary inspector downloads entire external ZIP bytes to memory before checking archive members, with no size bound; unusually large response can exhaust memory.",
+      "test_required": "Streaming size cap, archive-bomb metadata checks, content-type and source checksum fixtures."
+    },
+    {
+      "id": "AUD-B04-028",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_oecd_regional_demography.py",
+      "sha256": "b53468f71577af36ecd4e47d37c78b89c56ea3d42f4caf36463630dc60edde16",
+      "line_range": "48-64",
+      "description": "Demography inspector latest_by_measure_region collapses rows sharing measure and region, disregarding unit, age, sex, level and other dimensions; can report arbitrary latest observations for distinct source tuples.",
+      "test_required": "Multi-dimension colliding tuple fixture and grouped identity key that retains full SDMX dimensions."
+    },
+    {
+      "id": "AUD-B04-029",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_oecd_regional_broadband.py",
+      "sha256": "7921d11933d9b397c93ba86452ff150729cfe742934f4cf033b50748bf1ad05a",
+      "line_range": "15-53",
+      "description": "Broadband inspector queries source /all and materializes all CSV rows even though only Australian diagnostics needed; uncontrolled response/memory volume.",
+      "test_required": "Target source key, stream response with size limits, and large response fixture."
+    },
+    {
+      "id": "AUD-B04-030",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/inspect_oecd_regional_density.py",
+      "sha256": "11f1c0b331df7b3abd7c6fa266b3fb8c553d293270a9de7c73e46474006d0dd0",
+      "line_range": "39-54",
+      "description": "Density inspector caps parsed rows at 5000 only after response.text materializes entire HTTP payload; sampling first 5000 may omit requested geography from later CSV rows.",
+      "test_required": "Bound network download and validate sample representativeness; targeted geography query."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 40.74
+  "certified_line_by_line_review_percent": 43.59
 }
