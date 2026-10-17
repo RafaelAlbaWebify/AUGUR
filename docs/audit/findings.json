@@ -958,9 +958,53 @@
       "status": "reviewed_findings_open",
       "method": "complete source read with static reverse import and called service inspection; regression acceptance pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_cedefop_clssi.py",
+      "sha256": "30b158a4b7436a7b5c9e04b273926306f665b2e67ef7564303f660e87de8d693",
+      "lines_reviewed": "1-59",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import mapping and read/write side-effect review; runtime contract tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_cedefop_oja_imbalance.py",
+      "sha256": "05854f80f42ff207f4fb9217c47b7ccd9fb089bd6929b8a489030b3302147345",
+      "lines_reviewed": "1-32",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import mapping and read/write side-effect review; runtime contract tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_cedefop_reset.py",
+      "sha256": "0edd169053cafd29a0d520274c45810afb4b8cf1eb268c5b5aad0d9cc3416340",
+      "lines_reviewed": "1-48",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import mapping and read/write side-effect review; runtime contract tests pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/inspect_eea_air_quality_api.py",
+      "sha256": "c9d961b2079701b5fe60fa0cd8429b67113d678524c5c32c1d26d93c42561eba",
+      "lines_reviewed": "1-15",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-17",
+      "status": "reviewed_findings_open",
+      "method": "full source read, static import mapping and read/write side-effect review; runtime contract tests pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 87,
+  "certified_line_by_line_review_count": 91,
   "findings": [
     {
       "id": "LEAD-001",
@@ -1886,8 +1930,28 @@
       "line_range": "18-25",
       "description": "official_codes accepts all nonempty NUTS_ID properties without validating country/level/code structure; malformed but matching-country records can be counted as official.",
       "test_required": "Fail-closed malformed feature fixtures and source geometry/version metadata checks."
+    },
+    {
+      "id": "AUD-B04-006",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/scripts/inspect_cedefop_reset.py",
+      "sha256": "0edd169053cafd29a0d520274c45810afb4b8cf1eb268c5b5aad0d9cc3416340",
+      "line_range": "15-43",
+      "description": "Inspector writes downloaded source workbook to cache, despite describing its path as nonwriting; may overwrite existing cached source. Distinguish analytical DB read-only from filesystem writes.",
+      "test_required": "Fixture for existing cache preservation; explicit overwrite/atomic download behavior and meaningful output status."
+    },
+    {
+      "id": "AUD-B04-007",
+      "state": "open_requires_regression",
+      "severity": "low",
+      "component": "backend/scripts/inspect_cedefop_clssi.py",
+      "sha256": "30b158a4b7436a7b5c9e04b273926306f665b2e67ef7564303f660e87de8d693",
+      "line_range": "20-40",
+      "description": "Inspection CLI permits arbitrary max-rows including negative or zero values and may download/overwrite a source cache; actual parser handling and cache lifetime need verification.",
+      "test_required": "Argument bounds and cache write semantics with invalid max-rows and existing-file fixtures."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 24.79
+  "certified_line_by_line_review_percent": 25.93
 }
