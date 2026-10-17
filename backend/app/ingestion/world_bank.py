@@ -382,7 +382,9 @@ class WorldBankAdapter:
                     row["country_iso3"]
                     for row in rows
                 })
+                missing_countries = sorted(set(countries) - {row["country_iso3"] for row in rows})
                 details.append({
+                    "missing_country_iso3": missing_countries,
                     "indicator_id": indicator["indicator_id"],
                     "source_indicator": indicator["source_indicator"],
                     "rows": inserted,
@@ -409,7 +411,9 @@ class WorldBankAdapter:
             "rows": total_rows,
             "indicators": details,
             "failures": failures,
-            "complete": len(failures) == 0,
+            "complete": len(failures) == 0 and len(details) == len(indicators) and all(
+                detail["countries_with_data"] == len(countries) for detail in details
+            ),
         }
 
     def normalize(
@@ -514,5 +518,7 @@ class WorldBankAdapter:
             "rows": total_rows,
             "indicators": details,
             "failures": failures,
-            "complete": len(failures) == 0,
+            "complete": len(failures) == 0 and len(details) == len(indicators) and all(
+                detail["rows"] > 0 for detail in details
+            ),
         }
