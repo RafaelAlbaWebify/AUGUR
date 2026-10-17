@@ -50,3 +50,9 @@ Batches should be measured by **eligible reviewed files with immutable SHA**; pu
 - 8 API/provider/core/provenance modules reviewed at exact SHA; **8/47 B03-source candidates**. The B03 denominator may change if review scope expands beyond app modules; see inventory for total source count.
 - Critical integration discrepancy: single-country ProviderSpec still registers legacy DataMapper April 2026, unlike official global WEO October 2026, and ranking_eligibility lacks quality-status metadata in candidate. These are findings, not certified releases.
 - No automatic ranking unlock or production DB modification. Continue B03 service contracts and route-level consumers.
+
+## B03 current review checkpoint — 2026-10-17
+- Five additional small service modules fully reviewed at their inventory hashes: assessment, compare, country, eea_city_catalog, profile_readiness. Findings AUD-B03-008 to 011 in findings.json.
+- **48/348 inventoried files = 13.79%** reviewed based on this branch's pre-refresh inventory; on merging, rely on inventory.json `reviewed_file_count` rather than this static text, since code edits in this PR invalidate the two modified service hashes until re-reviewed.
+- Indexed global coverage and non-finite housing correction have tests in this same PR; their old review hashes must **not** count after a source edit. Re-review these modules and reattach new SHA in a follow-up acceptance stage rather than claiming 100% unchanged.
+- The review does not authorize unlocking rankings or changing operator production data.
