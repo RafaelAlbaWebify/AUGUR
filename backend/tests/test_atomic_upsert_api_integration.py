@@ -128,3 +128,47 @@ def test_national_upsert_rolls_back_all_rows_on_sql_failure(tmp_path, monkeypatc
         assert con.execute("SELECT COUNT(*) FROM observations").fetchone()[0]==0
     finally:
         con.close()
+
+
+def test_labour_earnings_sql_column_count_and_provenance(tmp_path, monkeypatch):
+    path=tmp_path/"earnings.duckdb"
+    con=duckdb.connect(str(path))
+    con.execute("""CREATE TABLE labour_earnings (
+      country_iso3 VARCHAR, period INTEGER, isco08 VARCHAR, value DOUBLE,
+      unit VARCHAR, source_id VARCHAR, dataset_id VARCHAR,
+      retrieved_at TIMESTAMP, source_updated_at VARCHAR)""")
+    con.close()
+    monkeypatch.setattr(analytics,"settings",SimpleNamespace(duckdb_path=path))
+    row={"country_iso3":"ESP","period":2025,"isco08":"2","value":34000.0,
+         "unit":"eur","source_id":"EUROSTAT","dataset_id":"test",
+         "retrieved_at":datetime.now(timezone.utc),"source_updated_at":"2026-10-17"}
+    assert analytics.upsert_labour_earnings([row])==1
+    con=duckdb.connect(str(path),read_only=True)
+    try:
+        assert con.execute("SELECT source_updated_at FROM labour_earnings").fetchone()[0]=="2026-10-17"
+    finally:
+        con.close()
+
+
+def test_sector_employment_rolls_back_on_later_sql_constraint_failure(tmp_path, monkeypatch):
+    path=tmp_path/"sector.duckdb"
+    con=duckdb.connect(str(path))
+    con.execute("""CREATE TABLE regional_sector_employment (
+      geo_code VARCHAR, geo_name VARCHAR, geo_level VARCHAR,
+      period INTEGER, nace_code VARCHAR, nace_label VARCHAR,
+      employment_thousands DOUBLE CHECK(employment_thousands < 50),
+      source_id VARCHAR, dataset_id VARCHAR, retrieved_at TIMESTAMP,
+      source_updated_at VARCHAR)""")
+    con.close()
+    monkeypatch.setattr(analytics,"settings",SimpleNamespace(duckdb_path=path))
+    base={"geo_code":"ES11","geo_name":"Galicia","geo_level":"NUTS2",
+          "period":2025,"nace_code":"C","employment_thousands":12.0,
+          "source_id":"EUROSTAT","dataset_id":"test",
+          "retrieved_at":datetime.now(timezone.utc)}
+    with pytest.raises(Exception):
+        analytics.upsert_regional_sector_employment([base,dict(base,nace_code="D",employment_thousands=99.0)])
+    con=duckdb.connect(str(path),read_only=True)
+    try:
+        assert con.execute("SELECT COUNT(*) FROM regional_sector_employment").fetchone()[0]==0
+    finally:
+        con.close()
