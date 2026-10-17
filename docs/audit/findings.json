@@ -1772,9 +1772,42 @@
       "status": "reviewed_findings_open",
       "method": "full source inspection of query, reconciliation and persisted-write boundaries; runtime tests pending",
       "imported_by_count": 4
+    },
+    {
+      "path": "backend/scripts/stage_gr2_employment.py",
+      "sha256": "488193bb81f70786b800a8b6c25f64cce60b04cfca973f90446dd6053a9cb813",
+      "lines_reviewed": "1-190",
+      "definitions_reviewed": 3,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full code read with geographical provenance and mutation paths inspected; regression tests outstanding",
+      "imported_by_count": 1
+    },
+    {
+      "path": "backend/scripts/sync_oecd_fua_geometry.py",
+      "sha256": "698c71bef019e83fc1db893abd8eb0d3e5d6ec63a2ee4309c25c079d7c037f3e",
+      "lines_reviewed": "1-166",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full code read with geographical provenance and mutation paths inspected; regression tests outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_subnational.py",
+      "sha256": "5a72d70ef9a404de0afd76e18636795ee1c0d77bf3d553878f7138ed7670aceb",
+      "lines_reviewed": "1-198",
+      "definitions_reviewed": 3,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full code read with geographical provenance and mutation paths inspected; regression tests outstanding",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 161,
+  "certified_line_by_line_review_count": 164,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3030,8 +3063,48 @@
       "line_range": "75-99",
       "description": "Geometry-link inspector follows and probes candidate URLs directly from parsed HTML without official-host allowlist; if the OECD page contains external links this may contact unintended hosts.",
       "test_required": "Restrict candidate probe to official trusted hosts and verify redirect destinations; external-link fixture."
+    },
+    {
+      "id": "AUD-B04-039",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/scripts/sync_subnational.py",
+      "sha256": "5a72d70ef9a404de0afd76e18636795ee1c0d77bf3d553878f7138ed7670aceb",
+      "line_range": "31-50",
+      "description": "City code extraction scans all feature property values looking for valid code; it may pick a coincidental unrelated field rather than a documented official city ID.",
+      "test_required": "Fixture with conflicting city-like metadata; use validated code property only."
+    },
+    {
+      "id": "AUD-B04-040",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/scripts/sync_subnational.py",
+      "sha256": "5a72d70ef9a404de0afd76e18636795ee1c0d77bf3d553878f7138ed7670aceb",
+      "line_range": "134-146",
+      "description": "Regional force-refresh uses explicit NUTS_2024 request, but regional_evidence external branch stores NUTS_UNSPECIFIED and no status indicating vintage gap in result. Registry and observed evidence can diverge.",
+      "test_required": "Assert geographic-vintage labels and source provenance after force-refresh."
+    },
+    {
+      "id": "AUD-B04-041",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/scripts/sync_oecd_fua_geometry.py",
+      "sha256": "698c71bef019e83fc1db893abd8eb0d3e5d6ec63a2ee4309c25c079d7c037f3e",
+      "line_range": "81-119",
+      "description": "Provider access restrictions yield exit zero and recorded backoff; upstream orchestration using exit codes alone may misclassify geometry sync as complete.",
+      "test_required": "Contract status-aware orchestration test, differentiated nonzero or machine-readable skipped state."
+    },
+    {
+      "id": "AUD-B04-042",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/scripts/stage_gr2_employment.py",
+      "sha256": "488193bb81f70786b800a8b6c25f64cce60b04cfca973f90446dd6053a9cb813",
+      "line_range": "135-152",
+      "description": "Staged employment UPDATE matches system/geo/indicator/period but not source_id, despite source ID in observation primary key. Could update multiple rows if alternate sources exist, while first fetched old value hides ambiguity.",
+      "test_required": "Test multiple source_id records and require exact primary key + affected-row count before committing."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 45.87
+  "certified_line_by_line_review_percent": 46.72
 }
