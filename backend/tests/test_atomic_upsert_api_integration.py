@@ -9,7 +9,9 @@ import duckdb
 import pytest
 
 from app.db import analytics
-from app.api.routes import region_rankings_get
+from fastapi import FastAPI
+from fastapi.testclient import TestClient
+from app.api.routes import router
 from app.services.regional_rankings import regional_rankings
 
 
@@ -70,8 +72,11 @@ def test_stored_observation_matches_read_only_ranking_service_and_api(tmp_path, 
     assert analytics.upsert_subnational_observations([sample(value=7.1)])==1
     from app.services import regional_rankings as ranking_module
     monkeypatch.setattr(ranking_module, "settings", SimpleNamespace(duckdb_path=path))
-    blocked=region_rankings_get(indicator_id="regional_unemployment_rate",countries="ESP",
-                                order="asc",limit=10,offset=0)
+    test_app=FastAPI()
+    test_app.include_router(router,prefix="/api")
+    response=TestClient(test_app).get("/api/rankings/regions",params={"indicator_id":"regional_unemployment_rate", "countries":"ESP", "limit":10})
+    assert response.status_code==200
+    blocked=response.json()
     assert blocked["status"]=="blocked_unverified_evidence"
     assert blocked["items"]==[]
     eligible=regional_rankings("regional_unemployment_rate",countries=("ESP",),
