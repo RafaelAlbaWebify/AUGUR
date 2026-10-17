@@ -7,11 +7,11 @@ from app.ingestion.oecd_regional import OECDRegionalAdapter
 
 def payload(levels, values):
     buf=io.StringIO()
-    writer=csv.DictWriter(buf,fieldnames=["TERRITORIAL_LEVEL","MEASURE","AGE","SEX","REF_AREA","COUNTRY","TIME_PERIOD","OBS_VALUE"])
+    writer=csv.DictWriter(buf,fieldnames=["TERRITORIAL_LEVEL","MEASURE","AGE","SEX","UNIT_MEASURE","REF_AREA","COUNTRY","TIME_PERIOD","OBS_VALUE"])
     writer.writeheader()
     for level,value in zip(levels,values):
         writer.writerow({"TERRITORIAL_LEVEL":level,"MEASURE":"POP","AGE":"_T","SEX":"_T",
-                         "REF_AREA":"AU203","COUNTRY":"AUS","TIME_PERIOD":"2022","OBS_VALUE":value})
+                         "UNIT_MEASURE":"PS","REF_AREA":"AU203","COUNTRY":"AUS","TIME_PERIOD":"2022","OBS_VALUE":value})
     return buf.getvalue()
 
 
