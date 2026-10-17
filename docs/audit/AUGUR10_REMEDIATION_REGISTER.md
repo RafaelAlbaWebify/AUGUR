@@ -41,3 +41,17 @@ Updated: 2026-10-17. Basis: main HEAD bab3d35c (PR #114), open PR #115 at review
 
 ## Definition of resolved
 A finding is only resolved after verified source fix, relevant tests, green CI, merge on main, updated SHA evidence and (where needed) separate real-data/operator acceptance. This file contains **proposed fixes only**; no application code has been altered in this AUGUR 10 checkpoint.
+
+## AUGUR 10 continued — scenario/trajectory/peer/compare focused source inspection (2026-10-17)
+Source snapshots independently fetched from main for this pass: `services/scenarios.py` blob 0199e8e, `services/trajectory.py` blob 4d37741, `engines/scenario.py` blob 6708cb1, `services/peer_reference.py` blob 098860e, `services/compare.py` blob ba81af8. Complete text of these five small files inspected; **not counted as certified review** until SHA-256, tests, dependent call paths and generated inventory are reconciled.
+
+| ID | Classification | Evidence | Needed work / test |
+| --- | --- | --- | --- |
+| AUG10-13 | Confirmed bug, overlaps AUD-B03-012 | `trajectory.py:14` defaults an explicit empty horizon list with `horizons or DEFAULT_HORIZONS`; `scenarios.py:14` does likewise on main. | Test `None` versus `[]` in both services and API; PR #115 fixes only scenarios as shown in its patch. |
+| AUG10-14 | Confirmed potential unhandled input / needs downstream contract | `scenarios.py:19` directly indexes `catalog[row['indicator_id']]`; an official future trajectory with an unknown catalog indicator causes KeyError, rather than evidence exclusion. | Read `future_trajectory` SQL and catalog invariants; negative test for unexpected provider indicator; explicit fail-closed/partial contract. |
+| AUG10-15 | Confirmed missing validation, user data impact conditional | `engines/scenario.py:27` converts baseline using `float(baseline)` without finite check; even if DB normally filters invalid data, this engine accepts NaN/Infinity and propagates it through scenario results. | Validate finite baseline, target bounds, year and uncertainty; define rejected/partial state and negative fixtures. |
+| AUG10-16 | Investigate semantics, avoid claiming scientific precision | `engines/scenario.py:58-76` labels moving inflation toward target midpoint as “improvement”, and increases inflation for “stress”; deflation/negative target or source-specific inflation regimes require explanation, not universal desirability assumptions. | Check catalog targets and UX wording; tests around deflation and abnormal inflation; continue labeling experimental. |
+| AUG10-17 | Confirmed quality gap, overlaps AUD-B03-019 | `peer_reference.py:45-59` latest-period selection counts all country rows without source/unit compatibility validation; same country/year duplicates in dict overwrite silently. | Shared comparison validation contract; deterministic duplicates tests and full SQL/source inspection. |
+| AUG10-18 | Confirmed quality gap, overlaps AUD-B03-011 | `compare.py:15-35` picks unit/dimension/name from first country's value, never checks remaining countries; output includes only value/period/source per country, so a conflicting unit is hidden. | Mark incomparable per country and include actual value unit/provider/vintage; tests for mixed units, years, source and absence. |
+
+The above entries do **not** imply all code has been audited, and do not authorize an implementation or ranking unlock. Continue remaining B03 files and consumer tests. Source count remains the last verified 57/351 unless the live machine inventory shows otherwise.
