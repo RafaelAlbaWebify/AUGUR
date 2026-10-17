@@ -4,6 +4,7 @@ import json
 import httpx
 from openpyxl import load_workbook
 from app.ingestion.imf_weo_official import normalize_official_weo
+from scripts.verify_weo_disposable_readthrough import verify_weo_roundtrip
 
 URL="https://data.imf.org/-/media/iData/External-Storage/Documents/0FA3DC49A04D446E9D69DBEB29979E1C/en/WEOOct2026all.xlsx"
 
@@ -47,6 +48,7 @@ def main():
         rows, contract=normalize_official_weo(r.content,{"ESP","PRT","IRL","USA"})
         result["official_contract"]=contract
         result["official_contract"]["parsed_rows"]=len(rows)
+        result["disposable_db_acceptance"]=verify_weo_roundtrip(rows)
     print(json.dumps(result,ensure_ascii=False,indent=2))
 
 
