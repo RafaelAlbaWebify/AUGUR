@@ -2025,9 +2025,163 @@
       "status": "reviewed_findings_open",
       "method": "full 2015-line source read, calibration ingestion, sealing, scoring, observation lifecycle, export/import; runtime tests pending",
       "imported_by_count": 7
+    },
+    {
+      "path": ".github/workflows/audit-repository-inventory.yml",
+      "sha256": "5ac457b08d3d9e4cee43961bec75f92dbc1ef41252434491fc9d559eaaef7258",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/ci.yml",
+      "sha256": "2cc936cc56cf7132a22d89ea652b7a0520bf81655fa140fcdb02077ff0cf7d76",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/eurostat-regional-coverage-smoke.yml",
+      "sha256": "ef05292254b3c0354ccb92f8494265f0d577c38e3c338687980f0d6527f1620f",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/gisco-nuts2024-smoke.yml",
+      "sha256": "8f9b686cbe98882a01393fee67a8139433e1dca588970b161760d24050a65e66",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/global-baseline-smoke.yml",
+      "sha256": "e5b0694fb09e942048dc687cae0a594d08d05c582a0c03d5e64900037790efe6",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/imf-official-source-probe.yml",
+      "sha256": "6e49fde249a640d66b4ac26e1d0b193da50c9a19b703e8ae973e3249367e3d75",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/live-source-smoke.yml",
+      "sha256": "2b8bd7d0204b8efd6cba1b72021784b0a8b49cb587f95b1158d13b65af446d50",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/oecd-fiscal-source-smoke.yml",
+      "sha256": "96cbe5f1f0e234e5e2964a0ce77cbf181dd06227bc3ba295a973a40f59071679",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/oecd-green-area-research.yml",
+      "sha256": "92cff8272058ddedbc287b241fa906e64be53685683c7560a9f64c29d5971740",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/oecd-population-contract-probe.yml",
+      "sha256": "0997817097cca8cb06e0ca52b77e9a5f24eb63db295224e9d7150bf0988fa3fa",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/oecd-regional-safety-research.yml",
+      "sha256": "de39d25ca547ace41868bf2cfdc0fe3c511af7f6e2641501b81e6dc4a0e5cfaf",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/oecd-research-smoke.yml",
+      "sha256": "4e763e4f6f6fdd4c6c8433ea2dd4fe95d46ffd2f9829fb84a78a23de14524a8c",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/official-nuts-catalog-audit.yml",
+      "sha256": "4d43d16927229ed4d0af3509415814e1b218640d35c9422260e119b885f64273",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": ".github/workflows/private-official-reference.yml",
+      "sha256": "f27d346b2ade90291db3b5498ca412235f0dc271d0b188006c825938a75627c8",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 184,
+  "certified_line_by_line_review_count": 198,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3743,8 +3897,58 @@
       "line_range": "1687-1749",
       "description": "Checking existing active observation and inserting a new one occur through different connections without locking; concurrent start requests can create duplicate active cases.",
       "test_required": "Concurrent same-country start fixture with unique active index or transactional lock."
+    },
+    {
+      "id": "AUD-B06-001",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": ".github/workflows/ci.yml",
+      "sha256": "2cc936cc56cf7132a22d89ea652b7a0520bf81655fa140fcdb02077ff0cf7d76",
+      "line_range": "3-12",
+      "description": "CI uses paths-ignore docs/**, so docs/audit/findings.json updates do not invoke main regression suite. Hash inventory is checked in separate workflow but cannot prove audit-note regressions.",
+      "test_required": "Docs-only change to audit ledger must pass targeted ledger validation even without expensive full tests."
+    },
+    {
+      "id": "AUD-B06-002",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": ".github/workflows/audit-repository-inventory.yml",
+      "sha256": "5ac457b08d3d9e4cee43961bec75f92dbc1ef41252434491fc9d559eaaef7258",
+      "line_range": "30-36",
+      "description": "Inventory bot commits and pushes generated snapshot straight to main on trigger using contents:write; workflow lacks explicit merge/push race retries and PR review barrier.",
+      "test_required": "Concurrent source/ledger changes and branch protection interaction test; consider artifact/PR or retry with rebase."
+    },
+    {
+      "id": "AUD-B06-003",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": ".github/workflows/live-source-smoke.yml",
+      "sha256": "2b8bd7d0204b8efd6cba1b72021784b0a8b49cb587f95b1158d13b65af446d50",
+      "line_range": "72-180",
+      "description": "Live-source smoke chains many official-provider probes and mutations in one job; an early temporary provider failure prevents subsequent independent provider diagnostics.",
+      "test_required": "One provider fails fixture; independent matrix jobs with per-provider result aggregation."
+    },
+    {
+      "id": "AUD-B06-004",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": ".github/workflows/global-baseline-smoke.yml",
+      "sha256": "e5b0694fb09e942048dc687cae0a594d08d05c582a0c03d5e64900037790efe6",
+      "line_range": "43-47",
+      "description": "Global-baseline live smoke schedules a full synchronization on hosted runner without a portable persistent datastore; acceptance may certify only transient job-local storage.",
+      "test_required": "Ensure artifacts contain durable source provenance and explicit non-production scope."
+    },
+    {
+      "id": "AUD-B06-005",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": ".github/workflows/ci.yml",
+      "sha256": "2cc936cc56cf7132a22d89ea652b7a0520bf81655fa140fcdb02077ff0cf7d76",
+      "line_range": "50-53",
+      "description": "Frontend CI uses npm install rather than npm ci, potentially permitting dependency installation inconsistent with checked-in lockfile.",
+      "test_required": "Lockfile drift fixture; use immutable install and fail on mismatch."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 52.42
+  "certified_line_by_line_review_percent": 56.41
 }
