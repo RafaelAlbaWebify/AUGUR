@@ -3158,9 +3158,108 @@
       "status": "reviewed_findings_open",
       "method": "All test source read, not executed",
       "imported_by_count": 0
+    },
+    {
+      "path": "frontend/playwright.config.ts",
+      "sha256": "8abd0802377bb6fc93c8247dc222a970ae6590b285046c48bc556d5eb6a615c8",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/lib/countryFlag.ts",
+      "sha256": "f99b66e57960d32cfebd17c3bc5c5ca195f58da7f6db456a9de4f0a954b68b86",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/lib/countryVisuals.ts",
+      "sha256": "55b8e883fbeb39cb75757fa8667ca4a3ad18c282c75bb436666e4dd5e53d1838",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/lib/routing.ts",
+      "sha256": "dc97a5e2c7e5e085eebb6bf01f49b469e3b6ed9d90bba060f5ebdbdc77e46dc8",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/main.tsx",
+      "sha256": "bb4d2b1f013528c27092368ee321b685b2b32c534e6c2ef6c900f9e8f1432726",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/vite.config.ts",
+      "sha256": "a706b643cde05a912cd77532cab6aaa490ebbc140a54e0d2359fa45c0d0b9b7a",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/components/FlagIcon.tsx",
+      "sha256": "b4bc36d97e357fab51d1611b1ee2d8f51fd5f6b8224392eb89061b5b6d97ee6c",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/components/CountrySelect.tsx",
+      "sha256": "6bf101356f942fdf7d801a1bd8d7acbb597122d3fc4fd285aece7eb19f54f3bb",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/components/LayoutControls.tsx",
+      "sha256": "773bdb3d4eba925e76ef8690d8a4699a3a58c05386e5c955c9bd945a1720e304",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire TS/TSX source read, runtime untested",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 287,
+  "certified_line_by_line_review_count": 296,
   "findings": [
     {
       "id": "LEAD-001",
@@ -4926,8 +5025,18 @@
       "line_range": "50-53",
       "description": "Frontend CI uses npm install rather than npm ci, potentially permitting dependency installation inconsistent with checked-in lockfile.",
       "test_required": "Lockfile drift fixture; use immutable install and fail on mismatch."
+    },
+    {
+      "id": "AUD-B05-001",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "frontend/src/lib/routing.ts",
+      "sha256": "dc97a5e2c7e5e085eebb6bf01f49b469e3b6ed9d90bba060f5ebdbdc77e46dc8",
+      "line_range": "64-79",
+      "description": "Invalid comparison deep-link input silently falls back to hardcoded country comparison, potentially showing unrelated results.",
+      "test_required": "Malformed and single-country comparison deep-link fixtures."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 81.77
+  "certified_line_by_line_review_percent": 84.33
 }
