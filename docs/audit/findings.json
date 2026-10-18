@@ -1937,9 +1937,20 @@
       "status": "reviewed_findings_open",
       "method": "complete 1092-line source read; trace cache, geographic vintage, provider ambiguity, comparisons; regression tests pending",
       "imported_by_count": 20
+    },
+    {
+      "path": "backend/app/services/eures_evidence_builder.py",
+      "sha256": "3aff16003174fa955260ba752971d57c62f1bb0e2b2d20c7110142901ff78bf9",
+      "lines_reviewed": "1-517",
+      "definitions_reviewed": 7,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete 517-line code review; ESCO matching, candidate validation, artifact persistence; regression pending",
+      "imported_by_count": 3
     }
   ],
-  "certified_line_by_line_review_count": 176,
+  "certified_line_by_line_review_count": 177,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3415,8 +3426,48 @@
       "line_range": "755-908",
       "description": "Explicit force_refresh path does not include requested geography_system in returned response and stores NUTS_UNSPECIFIED observations; verify that clients do not interpret a NUTS_2024 refresh as vintage-certified.",
       "test_required": "NUTS_2024 force refresh acceptance checking stored geography_system and returned warnings."
+    },
+    {
+      "id": "AUD-B03-036",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/eures_evidence_builder.py",
+      "sha256": "3aff16003174fa955260ba752971d57c62f1bb0e2b2d20c7110142901ff78bf9",
+      "line_range": "101-115",
+      "description": "ESCO candidate resolver skips ambiguity margin when first candidate has match_method 'label_contains' even if another candidate has a near-identical score, allowing ambiguous near-match as resolved.",
+      "test_required": "Two high-scoring label_contains candidates with different ISCO groups must remain unresolved or receive human review."
+    },
+    {
+      "id": "AUD-B03-037",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/eures_evidence_builder.py",
+      "sha256": "3aff16003174fa955260ba752971d57c62f1bb0e2b2d20c7110142901ff78bf9",
+      "line_range": "245-268",
+      "description": "EURES unit-group evidence marks ready_for_review true when input rows are empty, producing empty resolved/unresolved sets without failing readiness.",
+      "test_required": "Empty CSV fixture must fail review readiness."
+    },
+    {
+      "id": "AUD-B03-038",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/eures_evidence_builder.py",
+      "sha256": "3aff16003174fa955260ba752971d57c62f1bb0e2b2d20c7110142901ff78bf9",
+      "line_range": "414-429",
+      "description": "Manifest candidate permits identical country in shortage and surplus lists for same unit group; no conflict rejection before human promotion.",
+      "test_required": "Overlapping shortage/surplus ISO2 lists fixture and explicit conflict policy."
+    },
+    {
+      "id": "AUD-B03-039",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/eures_evidence_builder.py",
+      "sha256": "3aff16003174fa955260ba752971d57c62f1bb0e2b2d20c7110142901ff78bf9",
+      "line_range": "330-341",
+      "description": "Review artifact uses direct write_text to destination, so interrupted writes can truncate existing reviewed evidence.",
+      "test_required": "Fail-midwrite fixture; atomic temp-file plus replacement after validation."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 50.14
+  "certified_line_by_line_review_percent": 50.43
 }
