@@ -3123,6 +3123,43 @@ test('Future Paths distinguishes official baseline from AUGUR model scenarios', 
   await expect(page.locator('.scenarioLine.stress')).toBeVisible()
 })
 
+test('Future Paths renders values and visible marks for one-horizon IMF scenarios', async ({ page }) => {
+  await page.route('**/api/countries/ESP/scenarios', async (route) => {
+    const body = {
+      country_iso3: 'ESP',
+      method: 'augur_scenario_envelope_v2',
+      horizons: [2030],
+      scenario_names: ['baseline', 'improvement', 'stress'],
+      indicators: [{
+        country_iso3: 'ESP',
+        indicator_id: 'imf_unemployment_rate',
+        name: 'Unemployment rate (IMF WEO)',
+        dimension: 'productive_capacity',
+        period: 2030,
+        value: 8.0,
+        unit: 'percent',
+        source_id: 'IMF',
+        source_name: 'IMF',
+        dataset_id: 'WEO',
+        official_baseline: 8.0,
+        scenarios: { baseline: 8.0, improvement: 7.0, stress: 9.5 },
+        assumption: 'Test single horizon.',
+        uncertainty: { multiplier: 1, level: 'near' },
+      }],
+      notes: [],
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+  })
+  await page.goto('/country/ESP/outlook')
+  await page.locator('.futurePathsPage select').first().selectOption('imf_unemployment_rate')
+  const chart = page.getByRole('img', { name: 'AUGUR scenario paths' })
+  await expect(chart).toBeVisible()
+  await expect(chart.locator('circle.scenarioPoint')).toHaveCount(3)
+  await expect(page.locator('.scenarioSingleHorizonValues')).toContainText('Improvement 7.00')
+  await expect(page.locator('.scenarioSingleHorizonValues')).toContainText('Baseline 8.00')
+  await expect(page.locator('.scenarioSingleHorizonValues')).toContainText('Stress 9.50')
+})
+
 test('Future Paths marks the forecast boundary and model status', async ({ page }) => {
   await page.goto('/country/ESP/outlook')
 
