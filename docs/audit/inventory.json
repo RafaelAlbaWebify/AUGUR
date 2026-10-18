@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 179,
+  "reviewed_file_count": 180,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 51.0,
+  "line_by_line_review_percent": 51.28,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -10336,7 +10336,7 @@
       "bucket": "backend/app/services",
       "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
       "bytes": 17722,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "temporal_model_validation_status",
