@@ -1981,9 +1981,20 @@
       "status": "reviewed_findings_open",
       "method": "complete source review of temporal gates, CEFR conversion, experimental hazard and stage graph; tests pending",
       "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/personalized_compare.py",
+      "sha256": "2bd49258d4d5476f5c26873e6aad7d7a62b37a2cf6dd036d7a12b7cfb4638e2b",
+      "lines_reviewed": "1-621",
+      "definitions_reviewed": 10,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source review of utility normalization, Pareto, sensitivity scenarios, incomplete evidence; runtime tests pending",
+      "imported_by_count": 2
     }
   ],
-  "certified_line_by_line_review_count": 180,
+  "certified_line_by_line_review_count": 181,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3559,8 +3570,38 @@
       "line_range": "265-304",
       "description": "Language guided-hour model subtracts cumulative range endpoints and divides by declared weekly study hours, assuming calendar learning is linear and 100% guided-hour equivalent; this is a planning heuristic not an empirically validated individual estimate.",
       "test_required": "Calibration against holdout language learning outcomes and regression for extremes including current B2/C1."
+    },
+    {
+      "id": "AUD-B03-046",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/personalized_compare.py",
+      "sha256": "2bd49258d4d5476f5c26873e6aad7d7a62b37a2cf6dd036d7a12b7cfb4638e2b",
+      "line_range": "31-41",
+      "description": "Explicit dimension weights accept float('nan') because the range comparisons both evaluate false for NaN; this propagates non-finite values into scores and sensitivity calculations.",
+      "test_required": "NaN and Infinity preference weight fixture; reject nonfinite weights."
+    },
+    {
+      "id": "AUD-B03-047",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/personalized_compare.py",
+      "sha256": "2bd49258d4d5476f5c26873e6aad7d7a62b37a2cf6dd036d7a12b7cfb4638e2b",
+      "line_range": "259-296",
+      "description": "Sensitivity analysis truncates first 5000 lexicographic Cartesian configurations. When more scenarios exist, the central base scenario can fall outside sampled prefix; generated ranking ranges can be systematically biased.",
+      "test_required": "High-dimensional 3^N scenario with base positioned beyond sample cap; ensure base included and use balanced deterministic sampling."
+    },
+    {
+      "id": "AUD-B03-048",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/personalized_compare.py",
+      "sha256": "2bd49258d4d5476f5c26873e6aad7d7a62b37a2cf6dd036d7a12b7cfb4638e2b",
+      "line_range": "473-489",
+      "description": "Country-indicator snapshot normalization overwrites duplicate indicator rows without distinguishing period or source in iteration order; lack of explicit canonical selection can change utility scores.",
+      "test_required": "Duplicate-source and duplicate-period snapshot fixtures with deterministic selection or rejection."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 51.28
+  "certified_line_by_line_review_percent": 51.57
 }
