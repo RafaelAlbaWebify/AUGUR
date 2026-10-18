@@ -1992,9 +1992,20 @@
       "status": "reviewed_findings_open",
       "method": "full source review of utility normalization, Pareto, sensitivity scenarios, incomplete evidence; runtime tests pending",
       "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/api/routes.py",
+      "sha256": "4218550ba7799cbc32c22d394cb840e53f3d1686d2898fa9d5c2d29a891e096a",
+      "lines_reviewed": "1-837",
+      "definitions_reviewed": 47,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source read of routes, validation, geography ambiguity, profile mutation and calibration endpoints; runtime tests pending",
+      "imported_by_count": 3
     }
   ],
-  "certified_line_by_line_review_count": 181,
+  "certified_line_by_line_review_count": 182,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3600,8 +3611,58 @@
       "line_range": "473-489",
       "description": "Country-indicator snapshot normalization overwrites duplicate indicator rows without distinguishing period or source in iteration order; lack of explicit canonical selection can change utility scores.",
       "test_required": "Duplicate-source and duplicate-period snapshot fixtures with deterministic selection or rejection."
+    },
+    {
+      "id": "AUD-B03-049",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/api/routes.py",
+      "sha256": "4218550ba7799cbc32c22d394cb840e53f3d1686d2898fa9d5c2d29a891e096a",
+      "line_range": "95-108",
+      "description": "Public health route reveals absolute local SQLite and DuckDB filesystem paths, potentially exposing host/user directory structure to unauthenticated callers.",
+      "test_required": "HTTP health endpoint test with private machine paths; restrict to admin diagnostics or redact."
+    },
+    {
+      "id": "AUD-B03-050",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/api/routes.py",
+      "sha256": "4218550ba7799cbc32c22d394cb840e53f3d1686d2898fa9d5c2d29a891e096a",
+      "line_range": "678-685",
+      "description": "PUT /profile mutates user profile without any authentication or authorization implemented at route level. If server is exposed beyond loopback, another caller may alter profile.",
+      "test_required": "Verify deployment binding/auth middleware and unauthorized remote PUT regression."
+    },
+    {
+      "id": "AUD-B03-051",
+      "state": "open_requires_regression",
+      "severity": "high",
+      "component": "backend/app/api/routes.py",
+      "sha256": "4218550ba7799cbc32c22d394cb840e53f3d1686d2898fa9d5c2d29a891e096a",
+      "line_range": "744-807",
+      "description": "TTV calibration start/complete/cancel/import/export mutation and data exchange endpoints show no route-level access control; user case data could be modified/exfiltrated if reachable over network.",
+      "test_required": "Threat model deployment network exposure; auth tests for all calibration endpoints."
+    },
+    {
+      "id": "AUD-B03-052",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/api/routes.py",
+      "sha256": "4218550ba7799cbc32c22d394cb840e53f3d1686d2898fa9d5c2d29a891e096a",
+      "line_range": "350-422",
+      "description": "Comparison routes permit repeated same country codes (2-5 entries not 2-5 distinct), enabling same-country comparisons and duplicated weighting.",
+      "test_required": "ESP,ESP route fixture; require distinct selected ISO3 countries."
+    },
+    {
+      "id": "AUD-B03-053",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/api/routes.py",
+      "sha256": "4218550ba7799cbc32c22d394cb840e53f3d1686d2898fa9d5c2d29a891e096a",
+      "line_range": "496-532",
+      "description": "Legacy regional-evidence fallback can return evidence for any length-compatible NUTS code with registered ISO2 even when code absent from official geography registry; questionable registered-geography gate.",
+      "test_required": "Unknown-looking NUTS2 code under registered country: assert 404 or explicit legacy-exception label."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 51.57
+  "certified_line_by_line_review_percent": 51.85
 }
