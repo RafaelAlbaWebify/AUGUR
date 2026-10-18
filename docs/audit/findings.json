@@ -1970,9 +1970,20 @@
       "status": "reviewed_findings_open",
       "method": "complete source review including all catalog declarations, CSV import SQL and matching; runtime tests pending",
       "imported_by_count": 31
+    },
+    {
+      "path": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "lines_reviewed": "1-545",
+      "definitions_reviewed": 14,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source review of temporal gates, CEFR conversion, experimental hazard and stage graph; tests pending",
+      "imported_by_count": 3
     }
   ],
-  "certified_line_by_line_review_count": 179,
+  "certified_line_by_line_review_count": 180,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3518,8 +3529,38 @@
       "line_range": "458-465",
       "description": "country_config supports only static COUNTRIES while other ingestion workflows register additional countries dynamically, creating two incompatible notions of supported country.",
       "test_required": "Newly registered country fixture across catalog config and service paths, unify registry lookup or explicit static-only contract."
+    },
+    {
+      "id": "AUD-B03-043",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "line_range": "219-238",
+      "description": "CEFR helper selects maximum declared level across all language matches, which can overstate ability in required target language if multi-language match list includes a stronger unrelated language.",
+      "test_required": "Multi-language profiles with target language B1 and unrelated C1; select target-language-specific CEFR or block ambiguity."
+    },
+    {
+      "id": "AUD-B03-044",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "line_range": "328-343",
+      "description": "Job transition quarter conversion assumes constant independent quarterly transition probability and uses cumulative percentiles; explicit experimental note exists, but ranges may be interpreted as individual forecasts.",
+      "test_required": "Varying-quarterly-hazard fixture, document assumption and prevent outside-scope release."
+    },
+    {
+      "id": "AUD-B03-045",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ttv_temporal.py",
+      "sha256": "902d472246505283bec447922fdd576800f152f08ed36125d52acdaa2d402dd5",
+      "line_range": "265-304",
+      "description": "Language guided-hour model subtracts cumulative range endpoints and divides by declared weekly study hours, assuming calendar learning is linear and 100% guided-hour equivalent; this is a planning heuristic not an empirically validated individual estimate.",
+      "test_required": "Calibration against holdout language learning outcomes and regression for extremes including current B2/C1."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 51
+  "certified_line_by_line_review_percent": 51.28
 }
