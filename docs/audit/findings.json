@@ -2179,9 +2179,251 @@
       "status": "reviewed_findings_open",
       "method": "entire YAML content read, event triggers, paths, steps, errors and artifact retention inspected; runner execution pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eea_air_quality.py",
+      "sha256": "4313ed9eb7253f7fd8a034e85d434ca7c8c2ebfc7f04f359e26a41d2dfe93747",
+      "lines_reviewed": "1-5",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_trajectory.py",
+      "sha256": "06b6a181c3ed5a69da2a15c27ef706251227000ac06897a88b3a7551c735012c",
+      "lines_reviewed": "1-5",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_indicator_inventory.py",
+      "sha256": "20834d755c3e9a51ce5902c3613a7c1de3ed7e9e487ad0527d450aa5c56522a8",
+      "lines_reviewed": "1-9",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_oecd_tax_wedge_catalog.py",
+      "sha256": "cdae37308ef169c20aa86ae31afc15153e706e7111d7473d20db321f6273598e",
+      "lines_reviewed": "1-10",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_source_quality.py",
+      "sha256": "93dcb900109fb4eb77b2f096a924db9cf50a6f97193549aa0e6cc292155854fa",
+      "lines_reviewed": "1-12",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_tax_wedge_contract.py",
+      "sha256": "191a1d616a52a1c657f9bdf8a569e6868205affced90530ac40dea55aca79601",
+      "lines_reviewed": "1-12",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_official_nuts_catalog_audit.py",
+      "sha256": "d900a2c38fb1eb1afd4e4ce202b4276301b4ab2aeb05cd637ec5b9b3a106c673",
+      "lines_reviewed": "1-13",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_sync_subnational.py",
+      "sha256": "323319ae4d7362c365babe81f1752f21ce54bb054568ec9ab68741e868b35b52",
+      "lines_reviewed": "1-13",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_housing_affordability_nonnumeric.py",
+      "sha256": "5530d3e0d393fc069fa2221ff319e79087bd7df1c81161d007628425a387fc2f",
+      "lines_reviewed": "1-15",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_imf_bulk_completion.py",
+      "sha256": "77f4a16884c306307c00766365ba80e297b00c627ee752576bd096e2a8f6b93e",
+      "lines_reviewed": "1-16",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_wpp_missing_country_reporting.py",
+      "sha256": "1291273cb675ff2a57f3cdc7355d4f14aabb3fdef66923e1165d679d056a590a",
+      "lines_reviewed": "1-16",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_regional_labour_canonical_contract.py",
+      "sha256": "7edcd6b73ba7d4b4151304313925a49849b737532ead33fe585f3b1bd3346892",
+      "lines_reviewed": "1-17",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_ranking_pilot_source_contracts.py",
+      "sha256": "c8cc5fd4c96b94501bcfce55058e9a34879510b7594b2b2580123caa495a53ea",
+      "lines_reviewed": "1-19",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_regional_access_safety.py",
+      "sha256": "bc9f868226c3a25837cfa72d8c402e756030b198db0124d09d3f8d6c5ce52169",
+      "lines_reviewed": "1-20",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_ranking_vintage_audit.py",
+      "sha256": "c32105f36c24494048b4ff068c7c36f0fd332a4d493fb6bb27539bc312faca31",
+      "lines_reviewed": "1-20",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_housing_affordability.py",
+      "sha256": "81fe4040e398e98ab634a226522e71f5d157cf11752bc58c284c2d5d9e1422d9",
+      "lines_reviewed": "1-21",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_financial_fit_invalid_inputs.py",
+      "sha256": "5c4a5098e2d1c5a27a147549d487d44752ef67cce9de4c76af708b0d69cacdab",
+      "lines_reviewed": "1-22",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_global_evidence_contract.py",
+      "sha256": "1ae6f97254cbdaee75ba3b27e9c39844ab4cd5ae9ccec7975812774a3db5baec",
+      "lines_reviewed": "1-22",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_geography_discovery.py",
+      "sha256": "ef818481af25190465d95cddcba8b7fd2f8d8d19d7040d22f4ed20298f572cc7",
+      "lines_reviewed": "1-24",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_regional_jvs.py",
+      "sha256": "ed5ea9b042118bdca564dcbb12abb258a8bb1e979e7aee382b170ef8531d3a90",
+      "lines_reviewed": "1-24",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_oecd.py",
+      "sha256": "972858cbcab083f046911f637e7c80758e61b3a3607dd8e96e935780936dc06d",
+      "lines_reviewed": "1-24",
+      "definitions_reviewed": 1,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_inspect_ranking_all_employment.py",
+      "sha256": "ec8dabce7680acb1038ea37598fd8286595736b9b0e3d87a91c00794fa468cba",
+      "lines_reviewed": "1-25",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete compact test source inspected; not executed",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 198,
+  "certified_line_by_line_review_count": 220,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3950,5 +4192,5 @@
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 56.41
+  "certified_line_by_line_review_percent": 62.68
 }
