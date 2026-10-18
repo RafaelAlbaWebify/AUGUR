@@ -31185,8 +31185,8 @@
     {
       "path": "frontend/tests/e2e/app.spec.ts",
       "bucket": "frontend",
-      "sha256": "99b825cfdf562580781d036309f6f87ee003e549f552bbefb4ba60fa2fc60f48",
-      "bytes": 153824,
+      "sha256": "456e60ddae95f70d1bccbe72d38aa0bbee0605e72744d7303dd8cefc130899bf",
+      "bytes": 155443,
       "review_status": "not_reviewed",
       "imported_by": []
     },
