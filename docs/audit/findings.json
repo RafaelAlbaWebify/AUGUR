@@ -2003,9 +2003,20 @@
       "status": "reviewed_findings_open",
       "method": "complete source read of routes, validation, geography ambiguity, profile mutation and calibration endpoints; runtime tests pending",
       "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/services/career_fit.py",
+      "sha256": "1d4ce62fc8736784c8c873e3df364a363b9e82d1b69cee006533f703f280a407",
+      "lines_reviewed": "1-938",
+      "definitions_reviewed": 15,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source inspection of all career market signals, ESCO fallback, skill viability and provenance; runtime tests pending",
+      "imported_by_count": 6
     }
   ],
-  "certified_line_by_line_review_count": 182,
+  "certified_line_by_line_review_count": 183,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3661,8 +3672,38 @@
       "line_range": "496-532",
       "description": "Legacy regional-evidence fallback can return evidence for any length-compatible NUTS code with registered ISO2 even when code absent from official geography registry; questionable registered-geography gate.",
       "test_required": "Unknown-looking NUTS2 code under registered country: assert 404 or explicit legacy-exception label."
+    },
+    {
+      "id": "AUD-B03-054",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/career_fit.py",
+      "sha256": "1d4ce62fc8736784c8c873e3df364a363b9e82d1b69cee006533f703f280a407",
+      "line_range": "104-125",
+      "description": "Career ESCO resolver chooses first candidate at score>=0.72 without considering small margin versus runner-up or exact source quality. Near-tied unrelated ISCO occupations can be classified as matched.",
+      "test_required": "Mock two near-tied occupations in different ISCO groups; require tie/ambiguity gate."
+    },
+    {
+      "id": "AUD-B03-055",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/career_fit.py",
+      "sha256": "1d4ce62fc8736784c8c873e3df364a363b9e82d1b69cee006533f703f280a407",
+      "line_range": "832-850",
+      "description": "Broad market fallback prioritizes shortage over surplus when an occupation group belongs to both broad lists, unlike unit-group handling that explicitly classifies mixed evidence.",
+      "test_required": "Fixture with group in both shortage_groups and surplus_groups; represent conflicting market signals explicitly."
+    },
+    {
+      "id": "AUD-B03-056",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/career_fit.py",
+      "sha256": "1d4ce62fc8736784c8c873e3df364a363b9e82d1b69cee006533f703f280a407",
+      "line_range": "582-631",
+      "description": "Occupation outlook selects rows from first available ISCO level and uses metadata from first row while preserving all horizons, without confirming same scenario and release across rows; can mix incompatible outlook scenarios.",
+      "test_required": "Mixed scenario/release rows fixture, group/filter by consistent release/scenario before presenting trend."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 51.85
+  "certified_line_by_line_review_percent": 52.14
 }
