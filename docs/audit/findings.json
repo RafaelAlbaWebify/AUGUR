@@ -1805,9 +1805,53 @@
       "status": "reviewed_findings_open",
       "method": "full code read with geographical provenance and mutation paths inspected; regression tests outstanding",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/audit_legacy_nuts_vintage.py",
+      "sha256": "6a6b8faca9720fd45dc7f69a9fee0b51470f089900df096d10ac325b1412a688",
+      "lines_reviewed": "1-234",
+      "definitions_reviewed": 5,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, geographic identifier and write-safety crosschecks; runtime acceptance outstanding",
+      "imported_by_count": 3
+    },
+    {
+      "path": "backend/scripts/build_eures_market_evidence_from_annex.py",
+      "sha256": "7375a95a185125475596f0f8e64ff88a0bbb875fba0f4a8fc28d58235db0c974",
+      "lines_reviewed": "1-243",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, geographic identifier and write-safety crosschecks; runtime acceptance outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_oecd_fua.py",
+      "sha256": "7a656a2048df5d237d038893ddb8a30828b3c45c04d9da20364bd237fa12ad7c",
+      "lines_reviewed": "1-260",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, geographic identifier and write-safety crosschecks; runtime acceptance outstanding",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/sync_oecd_regional.py",
+      "sha256": "982580970240414f31d4d5dd4fdf9e3256c995fa98b7048940a9835d478e4dde",
+      "lines_reviewed": "1-265",
+      "definitions_reviewed": 2,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, geographic identifier and write-safety crosschecks; runtime acceptance outstanding",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 164,
+  "certified_line_by_line_review_count": 168,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3103,8 +3147,48 @@
       "line_range": "135-152",
       "description": "Staged employment UPDATE matches system/geo/indicator/period but not source_id, despite source ID in observation primary key. Could update multiple rows if alternate sources exist, while first fetched old value hides ambiguity.",
       "test_required": "Test multiple source_id records and require exact primary key + affected-row count before committing."
+    },
+    {
+      "id": "AUD-B04-043",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_oecd_fua.py",
+      "sha256": "7a656a2048df5d237d038893ddb8a30828b3c45c04d9da20364bd237fa12ad7c",
+      "line_range": "228-260",
+      "description": "FUA synchronization computes complete across datasets but exits zero whenever any rows were written; partial dataset failures can appear successful in CI/operations.",
+      "test_required": "Partial dataset mock with rows>0, complete=false: must report nonzero or explicitly allow and monitor partial."
+    },
+    {
+      "id": "AUD-B04-044",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/sync_oecd_regional.py",
+      "sha256": "982580970240414f31d4d5dd4fdf9e3256c995fa98b7048940a9835d478e4dde",
+      "line_range": "231-265",
+      "description": "Regional synchronization exits zero when total_rows>0 and does not verify individual sync result complete flags; may silently mark partial source ingestion successful.",
+      "test_required": "Mock one region dataset incomplete and others writing rows; nonzero or monitored partial status."
+    },
+    {
+      "id": "AUD-B04-045",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/build_eures_market_evidence_from_annex.py",
+      "sha256": "7375a95a185125475596f0f8e64ff88a0bbb875fba0f4a8fc28d58235db0c974",
+      "line_range": "71-118",
+      "description": "EURES annex extraction initializes mutable datastores before validating external PDF; prior to readiness checking it writes normalized and extraction artifacts at fixed paths, potentially overwriting earlier reviews.",
+      "test_required": "Regression: malformed PDF must preserve production databases and prior review artifacts; stage output atomically."
+    },
+    {
+      "id": "AUD-B04-046",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/audit_legacy_nuts_vintage.py",
+      "sha256": "6a6b8faca9720fd45dc7f69a9fee0b51470f089900df096d10ac325b1412a688",
+      "line_range": "29-55",
+      "description": "GISCO extract_codes verifies expected feature level and length but does not verify country prefix or official catalog signature; malformed same-length geographical IDs pass inclusion.",
+      "test_required": "Incorrect prefix and malformed code tests; provenance checksum and code shape validation."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 46.72
+  "certified_line_by_line_review_percent": 47.86
 }
