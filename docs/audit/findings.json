@@ -2949,9 +2949,141 @@
       "status": "reviewed_findings_open",
       "method": "Complete source inspection of fixture and assertions; not executed",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_accept_g2_local_data_layer.py",
+      "sha256": "5191328ce1494897d9f3623c3d66ae2aee23ff966483f2cbb656e0aa44437892",
+      "lines_reviewed": "1-60",
+      "definitions_reviewed": 3,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_audit_legacy_nuts_vintage.py",
+      "sha256": "4b6aaa4fabb60dd0732b83c396dd807f116dac81e638ee7bc3c9717acb56b1a2",
+      "lines_reviewed": "1-79",
+      "definitions_reviewed": 3,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_b02_cedefop_workbook_integrity.py",
+      "sha256": "9b4a06b9af33a443963437b72ff846d1228020379d295119406b059e03e98464",
+      "lines_reviewed": "1-65",
+      "definitions_reviewed": 11,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_b02_source_evidence_gates.py",
+      "sha256": "90a93ab0c24475ccdd625bd5628a7f7c73804e2db2560e44fc9628be126a7c79",
+      "lines_reviewed": "1-94",
+      "definitions_reviewed": 17,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_catalog.py",
+      "sha256": "aeb81d7ee55ca14e5bb4786dc58b304872d5506202f6ebbf16a55eff397576d3",
+      "lines_reviewed": "1-59",
+      "definitions_reviewed": 8,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_cedefop_oja_imbalance.py",
+      "sha256": "8e4ac3f8ec872d108602d256286704adf6b4726b7d9f630ef21cb3cb5cb9996a",
+      "lines_reviewed": "1-98",
+      "definitions_reviewed": 13,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_compare_official_local_nuts.py",
+      "sha256": "62b307a87db65e8d4daeb9f3f9d48a7f7b15f3fab23d22314c3d773d4fdd4cc2",
+      "lines_reviewed": "1-63",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eures_annex_pdf.py",
+      "sha256": "657629166e69863a57fa499e7bde86ed7edf4bf19f4551342a38a38f900752e1",
+      "lines_reviewed": "1-69",
+      "definitions_reviewed": 3,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_nuts_registry.py",
+      "sha256": "ad104379023939a031800475c5b538d3f6e31e66b8d155c1a6392685c422a8fd",
+      "lines_reviewed": "1-73",
+      "definitions_reviewed": 5,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_regional_labour.py",
+      "sha256": "c9eea60cf18397f44397b35756647ebad333ff9a07ec3039036c528d596a0082",
+      "lines_reviewed": "1-97",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_geography_atomic_backfill.py",
+      "sha256": "72a7dc6538b1cf849c727b3fd23444ebbcd312a62e595820924cd916c8e82251",
+      "lines_reviewed": "1-65",
+      "definitions_reviewed": 5,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_geography_coverage_export.py",
+      "sha256": "81adffd3798292282bd0d88a1436f9f16dbbe28c2bdd378a9153c9b0ee5c695f",
+      "lines_reviewed": "1-91",
+      "definitions_reviewed": 6,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Entire test file read, not executed",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 268,
+  "certified_line_by_line_review_count": 280,
   "findings": [
     {
       "id": "LEAD-001",
@@ -4720,5 +4852,5 @@
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 76.35
+  "certified_line_by_line_review_percent": 79.77
 }
