@@ -2729,9 +2729,229 @@
       "status": "reviewed_findings_open",
       "method": "Full test source inspected; no runtime execution",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_oecd_productivity_dimension_contract.py",
+      "sha256": "b0d54c49b5bca402966be29fd0aec5ecda832de495b2098214679576ec06c633",
+      "lines_reviewed": "1-42",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_providers.py",
+      "sha256": "4942bf9378e29984072d1122150e0ca8834b62f31e15b93c222b48f2b1087dd7",
+      "lines_reviewed": "1-42",
+      "definitions_reviewed": 5,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_observation_provenance.py",
+      "sha256": "0bf6c06fbe1513ce1df7dbb717e59d492b201ae9d0f489482acf68b2344bdeef",
+      "lines_reviewed": "1-43",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_reconcile_ranking_multislice.py",
+      "sha256": "5133380c366ef29fba7750aec8dcff7f7032292bf96085f1efcd6048ff2de5c6",
+      "lines_reviewed": "1-43",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_cedefop_reset.py",
+      "sha256": "85e230792706090aa3a0a680f5d4fbf141cb886a564678ce7c336b5d0b963715",
+      "lines_reviewed": "1-44",
+      "definitions_reviewed": 9,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_regional_housing.py",
+      "sha256": "da0ad200f7e5115785d1a0202244a1f489b4dc982052a6e1e4eff693ebf2169f",
+      "lines_reviewed": "1-45",
+      "definitions_reviewed": 3,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_global_baseline_report_contract.py",
+      "sha256": "7954926f9aefb263eed0863062ee8738aa130d097b1493ddf161648e14cbaa60",
+      "lines_reviewed": "1-45",
+      "definitions_reviewed": 15,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_oecd_explicit_metric_contracts.py",
+      "sha256": "4ab99552890b2f84fbcdfa8dcb1750e5d19101944c4df5e306c57d353a4809c8",
+      "lines_reviewed": "1-45",
+      "definitions_reviewed": 7,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_oecd_population_unit_filter.py",
+      "sha256": "18b096155fc7244f1826651b277b92ae5896213b0378fd435364fa2bbc537153",
+      "lines_reviewed": "1-45",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_regional_ingestion_dimension_safety.py",
+      "sha256": "fc8ef2e25cc5f37d6339dd2c36d5304bdd312ba44d42b2d077c9c3e605c939e7",
+      "lines_reviewed": "1-45",
+      "definitions_reviewed": 8,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_fail_closed_values.py",
+      "sha256": "68683a68cac8d45a40b87196a9eb66869795c5b31801436d1fe603f87319745e",
+      "lines_reviewed": "1-46",
+      "definitions_reviewed": 5,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eea_city_air.py",
+      "sha256": "c6e6c2069a6167f5cf08f6d9bd5b2f137274d872576a11e67d541b41e78821ce",
+      "lines_reviewed": "1-47",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_reconcile_ranking_diagnostics.py",
+      "sha256": "251c99d08d015818abea0763fdae46f36243eba9e90680aa460fda0e3a1d68a1",
+      "lines_reviewed": "1-50",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eurostat_specialized_source_gates.py",
+      "sha256": "7a7fbef96739248c512079aa851d1b1a8994d1d5122b0879f3e1f4446734418f",
+      "lines_reviewed": "1-51",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_official_reference_app_readthrough.py",
+      "sha256": "1caed4b3a433d73a51043794939b330dcc87b1cc30f11ef385e6e47ae0d2777c",
+      "lines_reviewed": "1-51",
+      "definitions_reviewed": 3,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_profile.py",
+      "sha256": "a9f9d25c599ce15edeeaa717be5c69968360c7b58a3cba7c602d394359a8ad7c",
+      "lines_reviewed": "1-53",
+      "definitions_reviewed": 2,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_regional_response_provenance.py",
+      "sha256": "4f8617ec3ec9e237f3c88626ace336ca2e05394f8a12da8c43ac4fd14714d144",
+      "lines_reviewed": "1-54",
+      "definitions_reviewed": 6,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_legal_fit.py",
+      "sha256": "7179d6b498cec6892e44276ab8e340e34cda8111669ae004c2a2407e4854370c",
+      "lines_reviewed": "1-55",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_verify_g2_reconciliation.py",
+      "sha256": "6bddaea8181b335e1a8ab9b774f8053122411b713d5f557a1c188122625c4eee",
+      "lines_reviewed": "1-57",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_sync_eurostat_atomic_regional.py",
+      "sha256": "bcdd577a24cc5101b24dfb2705e432779c064055bd0ee19bb870c01c4033846a",
+      "lines_reviewed": "1-58",
+      "definitions_reviewed": 9,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete source inspection of fixture and assertions; not executed",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 248,
+  "certified_line_by_line_review_count": 268,
   "findings": [
     {
       "id": "LEAD-001",
@@ -4500,5 +4720,5 @@
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 70.66
+  "certified_line_by_line_review_percent": 76.35
 }
