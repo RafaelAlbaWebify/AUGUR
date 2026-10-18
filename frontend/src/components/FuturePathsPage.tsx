@@ -164,6 +164,10 @@ export default function FuturePathsPage({
     ...official.map((item) => ({ year: item.period, value: item.value })),
   ]
   const officialBounds = boundsFor([officialWithCurrent])
+  const latestOfficial = official.at(-1)
+  const difference = current && latestOfficial ? latestOfficial.value - current.value : null
+  const differenceLabel = difference === null ? 'Unavailable' : `${difference > 0 ? '+' : ''}${formatValue(difference, unit)} change from ${current?.period} to ${latestOfficial?.period}`
+
   const baselinePoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.baseline }))
   const improvementPoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.improvement }))
   const stressPoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.stress }))
@@ -260,6 +264,17 @@ export default function FuturePathsPage({
             </div>
           )}
 
+          <div className="outlookNumbers" aria-label="Official forecast numerical values">
+            <h4>Observed and official projected values</h4>
+            <table>
+              <thead><tr><th>Period</th><th>Value ({unit.replaceAll('_', ' ')})</th><th>Evidence</th></tr></thead>
+              <tbody>
+                {current && <tr><td>{current.period}</td><td>{formatValue(current.value, unit)}</td><td>Observed · {current.source_id.replaceAll('_', ' ')}</td></tr>}
+                {official.map((item) => <tr key={item.period}><td>{item.period}</td><td>{formatValue(item.value, unit)}</td><td>Official projection · {item.source_name}</td></tr>)}
+              </tbody>
+            </table>
+            <p>{differenceLabel}</p>
+          </div>
           <div className="forecastDetails">
             <div><span>Source</span><strong>{sourceNames.join(' · ') || 'Unavailable'}</strong></div>
             <div><span>Latest source update</span><strong>{latestUpdate ?? 'Unavailable'}</strong></div>
@@ -323,6 +338,23 @@ export default function FuturePathsPage({
             </div>
           )}
 
+          {scenarioRows.length > 0 && (
+            <div className="outlookNumbers" aria-label="AUGUR experimental scenario numerical values">
+              <h4>Experimental assumptions by horizon</h4>
+              <table>
+                <thead><tr><th>Year</th><th>Improvement</th><th>Baseline</th><th>Stress</th></tr></thead>
+                <tbody>{scenarioRows.map((item) => (
+                  <tr key={item.period}>
+                    <td>{item.period}</td>
+                    <td>{formatValue(item.scenarios.improvement, unit)}</td>
+                    <td>{formatValue(item.scenarios.baseline, unit)}</td>
+                    <td>{formatValue(item.scenarios.stress, unit)}</td>
+                  </tr>
+                ))}</tbody>
+              </table>
+              <p>Illustrative AUGUR assumptions, not official forecasts or confidence intervals.</p>
+            </div>
+          )}
           <div className="scenarioAssumptionsPanel">
             {scenarioRows.length ? (
               <>
