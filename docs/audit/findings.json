@@ -1849,9 +1849,31 @@
       "status": "reviewed_findings_open",
       "method": "full source read, geographic identifier and write-safety crosschecks; runtime acceptance outstanding",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/check_operability.py",
+      "sha256": "464678513f8d3415b090e54eab52878ad188412a0379bcebfcbbc2a41f663c75",
+      "lines_reviewed": "1-339",
+      "definitions_reviewed": 1,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source review including all branch logic and cross-service data read/write contracts; test execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/scripts/ensure_local_evidence.py",
+      "sha256": "26e4df06722939ed6bc8f00d0679840209da9c2817c0b60c7451e97b957c0863",
+      "lines_reviewed": "1-325",
+      "definitions_reviewed": 7,
+      "batch": "B04",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source review including all branch logic and cross-service data read/write contracts; test execution pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 168,
+  "certified_line_by_line_review_count": 170,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3187,8 +3209,48 @@
       "line_range": "29-55",
       "description": "GISCO extract_codes verifies expected feature level and length but does not verify country prefix or official catalog signature; malformed same-length geographical IDs pass inclusion.",
       "test_required": "Incorrect prefix and malformed code tests; provenance checksum and code shape validation."
+    },
+    {
+      "id": "AUD-B04-047",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/check_operability.py",
+      "sha256": "464678513f8d3415b090e54eab52878ad188412a0379bcebfcbbc2a41f663c75",
+      "line_range": "7-9",
+      "description": "A diagnostics-only operability command calls initialize_datastores before collecting readiness state; may mutate storage in a purported status check.",
+      "test_required": "Compare hashes before/after and use no-migration read-only status path."
+    },
+    {
+      "id": "AUD-B04-048",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/ensure_local_evidence.py",
+      "sha256": "26e4df06722939ed6bc8f00d0679840209da9c2817c0b60c7451e97b957c0863",
+      "line_range": "116-165",
+      "description": "NUTS3 evidence ensure checks availability and country prefixes, rather than source/geography/version and indicator coverage completeness; an existing sparse subset may incorrectly prevent repair.",
+      "test_required": "Sparse indicator and stale historical cohort fixtures; differentiated availability/freshness/completeness."
+    },
+    {
+      "id": "AUD-B04-049",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/ensure_local_evidence.py",
+      "sha256": "26e4df06722939ed6bc8f00d0679840209da9c2817c0b60c7451e97b957c0863",
+      "line_range": "169-227",
+      "description": "City expanded evidence repair returns 'available' when any one expanded indicator exists, regardless of target-city or country coverage. Can falsely signal repaired overall evidence.",
+      "test_required": "Add one-city/one-indicator fixture and explicit target-country/indicator completeness thresholds."
+    },
+    {
+      "id": "AUD-B04-050",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/scripts/ensure_local_evidence.py",
+      "sha256": "26e4df06722939ed6bc8f00d0679840209da9c2817c0b60c7451e97b957c0863",
+      "line_range": "292-321",
+      "description": "Ensure workflow writes sequentially across six stores with no top-level error isolation or transaction; one provider failure aborts remaining repairs and leaves prior writes.",
+      "test_required": "Mock middle provider failure; report partial durable results and recoverable rerun semantics."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 47.86
+  "certified_line_by_line_review_percent": 48.43
 }
