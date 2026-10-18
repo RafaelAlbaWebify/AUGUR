@@ -1871,9 +1871,53 @@
       "status": "reviewed_findings_open",
       "method": "full source review including all branch logic and cross-service data read/write contracts; test execution pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/app/services/ttv.py",
+      "sha256": "cf47d4165801fe21220d57cc700508feb97dd250602193c43edbad0b6cc5ecd1",
+      "lines_reviewed": "1-177",
+      "definitions_reviewed": 1,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, direct dependencies and response contract review; regression tests outstanding",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/engines/dimension.py",
+      "sha256": "e9dd7603a0877f8ae88371ff19870856a5810bfe8224c73a0d05ee7a8915e8be",
+      "lines_reviewed": "1-229",
+      "definitions_reviewed": 2,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, direct dependencies and response contract review; regression tests outstanding",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/engines/trend.py",
+      "sha256": "515ac477ffa72d24a62c19d8f1e4416d8dcb3d702cfc165fc27bf2d2b33b2003",
+      "lines_reviewed": "1-294",
+      "definitions_reviewed": 11,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, direct dependencies and response contract review; regression tests outstanding",
+      "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/operability.py",
+      "sha256": "23d37467b9ae79480f6c9c031acaaa76a96ba8196fef5aacc274f594e50107e3",
+      "lines_reviewed": "1-306",
+      "definitions_reviewed": 4,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full source read, direct dependencies and response contract review; regression tests outstanding",
+      "imported_by_count": 2
     }
   ],
-  "certified_line_by_line_review_count": 170,
+  "certified_line_by_line_review_count": 174,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3249,8 +3293,48 @@
       "line_range": "292-321",
       "description": "Ensure workflow writes sequentially across six stores with no top-level error isolation or transaction; one provider failure aborts remaining repairs and leaves prior writes.",
       "test_required": "Mock middle provider failure; report partial durable results and recoverable rerun semantics."
+    },
+    {
+      "id": "AUD-B03-026",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/engines/trend.py",
+      "sha256": "515ac477ffa72d24a62c19d8f1e4416d8dcb3d702cfc165fc27bf2d2b33b2003",
+      "line_range": "172-185",
+      "description": "Trend normalization builds a set of (year,value) tuples and then dictionary by_year, leaving duplicate-year different-value ordering unresolved; non-deterministic current-year value can drive results.",
+      "test_required": "Duplicate-year conflicting observation fixture; reject duplicate period or deterministically choose provenance-aware winner."
+    },
+    {
+      "id": "AUD-B03-027",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ttv.py",
+      "sha256": "cf47d4165801fe21220d57cc700508feb97dd250602193c43edbad0b6cc5ecd1",
+      "line_range": "135-164",
+      "description": "TTV estimate_status can report 'available' when model version and dependency flags are set, while time_estimate remains None unconditionally; future activation risks misleading API contract.",
+      "test_required": "Model-version activation test requiring non-null validated estimate whenever status available."
+    },
+    {
+      "id": "AUD-B03-028",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/operability.py",
+      "sha256": "23d37467b9ae79480f6c9c031acaaa76a96ba8196fef5aacc274f594e50107e3",
+      "line_range": "158-184",
+      "description": "Country readiness requires all found validation countries but does not ensure every expected validation country is present; missing country can be silently omitted when another exists.",
+      "test_required": "Missing validation-country fixture; require set(expected) subset of registered/evidence countries."
+    },
+    {
+      "id": "AUD-B03-029",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/engines/dimension.py",
+      "sha256": "e9dd7603a0877f8ae88371ff19870856a5810bfe8224c73a0d05ee7a8915e8be",
+      "line_range": "105-128",
+      "description": "Dimension synthesis can assign improving trajectory when one improving plus one stable independent construct exists, despite note broad trajectory requires at least two independent directional constructs; ambiguity about stable as directional support.",
+      "test_required": "Single improving plus single stable construct case; explicitly define promotion threshold for improving/deteriorating labels."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 48.43
+  "certified_line_by_line_review_percent": 49.57
 }
