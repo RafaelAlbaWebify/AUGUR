@@ -3257,9 +3257,42 @@
       "status": "reviewed_findings_open",
       "method": "Entire TS/TSX source read, runtime untested",
       "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/components/DimensionSummaryCard.tsx",
+      "sha256": "32e68f8f14c6db0f5cae2ee25fd60fbe7afd79ff2a29059b6860afe99c84f169",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete component source inspected; browser execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/components/FitSnapshot.tsx",
+      "sha256": "3c0dccbfd9d53c3d2641c4a1330c492daf430d9c836fc105fef5706375dcf4bc",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete component source inspected; browser execution pending",
+      "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/components/OverallSignalBalance.tsx",
+      "sha256": "40c9348e9b0418485357cdd926f6ee10874785414dd2dad779fea8fd2d8eb8e1",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Complete component source inspected; browser execution pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 296,
+  "certified_line_by_line_review_count": 299,
   "findings": [
     {
       "id": "LEAD-001",
@@ -5035,8 +5068,28 @@
       "line_range": "64-79",
       "description": "Invalid comparison deep-link input silently falls back to hardcoded country comparison, potentially showing unrelated results.",
       "test_required": "Malformed and single-country comparison deep-link fixtures."
+    },
+    {
+      "id": "AUD-B05-002",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "frontend/src/components/FitSnapshot.tsx",
+      "sha256": "3c0dccbfd9d53c3d2641c4a1330c492daf430d9c836fc105fef5706375dcf4bc",
+      "line_range": "42-65",
+      "description": "UI status tone checks substring 'ready' before blocked/missing; strings such as 'not_ready' can be displayed as positive, misrepresenting readiness.",
+      "test_required": "Status-to-tone unit cases including not_ready and not_market_ready."
+    },
+    {
+      "id": "AUD-B05-003",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "frontend/src/components/FitSnapshot.tsx",
+      "sha256": "3c0dccbfd9d53c3d2641c4a1330c492daf430d9c836fc105fef5706375dcf4bc",
+      "line_range": "87-111",
+      "description": "Fetch handlers parse JSON without validating response.ok; HTTP 4xx/5xx JSON can be treated as fulfilled and stale readiness remains if readiness request fails after previous successful target.",
+      "test_required": "HTTP failure and target-switch UI tests; clear readiness and enforce response.ok."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 84.33
+  "certified_line_by_line_review_percent": 85.19
 }
