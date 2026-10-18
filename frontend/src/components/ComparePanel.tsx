@@ -324,7 +324,7 @@ export default function ComparePanel({
                 <FlagIcon iso3={summary.iso3} />
                 <div>
                   <strong>{country?.name ?? summary.iso3}</strong>
-                  <span>{summary.covered}/{visibleIndicators.length || 0} comparable indicators</span>
+                  <span>{summary.covered}/{visibleIndicators.length || 0} selected indicators with data</span>
                 </div>
               </div>
               <div className="decisionSummaryPositions">
@@ -337,7 +337,7 @@ export default function ComparePanel({
           )
         })}
         <p>
-          Higher/lower describes numerical position only. It is not automatically better/worse; interpretation depends on the indicator.
+          Higher/lower describes numerical position only, not better/worse. Coverage refers only to the indicators currently available in AUGUR, not every factor relevant to relocation. Housing cost burden is population-level; rent and house-price indices are not actual monthly prices or individual affordability. GDP indicators can be distorted by multinational activity, especially in Ireland. Similar unemployment and inflation measures from different providers are separate source views, not additional independent outcomes.
         </p>
       </section>
 
@@ -354,7 +354,7 @@ export default function ComparePanel({
               <article key={item.dimensionId}>
                 <div>
                   <strong>{dimensionLabels[item.dimensionId] ?? item.dimensionId}</strong>
-                  <span>{item.completeCount}/{item.indicatorCount} fully comparable</span>
+                  <span>{item.completeCount}/{item.indicatorCount} selected indicators with data</span>
                 </div>
                 <div className="decisionCoverageTrack">
                   <i style={{ width: `${pct}%` }} />
