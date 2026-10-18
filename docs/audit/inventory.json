@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 174,
+  "reviewed_file_count": 175,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 49.57,
+  "line_by_line_review_percent": 49.86,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -7532,7 +7532,7 @@
       "bucket": "backend/app/services",
       "sha256": "a624ec191de611bc09643c394266745eeeb1b4c7c67fe5885f2f9fead541bf1d",
       "bytes": 19019,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "_city_result_from_local",
