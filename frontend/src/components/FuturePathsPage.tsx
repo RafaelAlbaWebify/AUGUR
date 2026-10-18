@@ -291,11 +291,25 @@ export default function FuturePathsPage({
                 <polyline className="scenarioLine improvement" points={pointsFor(improvementPoints, scenarioBounds)} />
                 <polyline className="scenarioLine baseline" points={pointsFor(baselinePoints, scenarioBounds)} />
                 <polyline className="scenarioLine stress" points={pointsFor(stressPoints, scenarioBounds)} />
+                {scenarioBounds && scenarioRows.length === 1 && [
+                  { name: 'Improvement', value: scenarioRows[0].scenarios.improvement, className: 'improvement' },
+                  { name: 'Baseline', value: scenarioRows[0].scenarios.baseline, className: 'baseline' },
+                  { name: 'Stress', value: scenarioRows[0].scenarios.stress, className: 'stress' },
+                ].map((item) => {
+                  const point = pointFor({ year: scenarioRows[0].period, value: item.value }, scenarioBounds)
+                  return <circle key={item.name} className={`scenarioPoint ${item.className}`} cx={point.x} cy={point.y} r="5" fill="currentColor">
+                    <title>{`${item.name}: ${item.value.toFixed(2)} ${unit} (${scenarioRows[0].period})`}</title>
+                  </circle>
+                })}
+
                 {scenarioBounds && baselinePoints.map((item) => {
                   const point = pointFor(item, scenarioBounds)
                   return <text key={item.year} className="forecastYearLabel" x={point.x} y="224" textAnchor="middle">{item.year}</text>
                 })}
               </svg>
+              {scenarioRows.length === 1 && <p className="scenarioSingleHorizonValues">
+                {scenarioRows[0].period}: Improvement {scenarioRows[0].scenarios.improvement.toFixed(2)} {unit} · Baseline {scenarioRows[0].scenarios.baseline.toFixed(2)} {unit} · Stress {scenarioRows[0].scenarios.stress.toFixed(2)} {unit}
+              </p>}
               <div className="scenarioLegend">
                 <span className="improvement">Improvement</span>
                 <span className="baseline">Baseline</span>
