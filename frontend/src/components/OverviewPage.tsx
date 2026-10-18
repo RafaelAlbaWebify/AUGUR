@@ -1240,7 +1240,7 @@ export default function OverviewPage({
         ) : (
         <section className="recentChangesPanel">
           <div className="radarPanelTopline">
-            <div title="Largest recorded changes among the indicators shown; the observation dates are shown below each signal."><span>RECENT CHANGES (12 MONTHS)</span><strong>Largest measured movements</strong></div>
+            <div title="Changes between available annual observations; the latest reference year is shown for each indicator. These are not necessarily changes in the past 12 calendar months."><span>CHANGES IN AVAILABLE DATA</span><strong>Largest measured movements</strong></div>
           </div>
           <div className="recentChangeList">
             {recentChanges.map((item) => (
@@ -1252,7 +1252,7 @@ export default function OverviewPage({
                 </div>
               </article>
             ))}
-            {!recentChanges.length && <span className="radarEmpty">No directional one-year changes available.</span>}
+            {!recentChanges.length && <span className="radarEmpty">No directional changes between annual observations available.</span>}
           </div>
 
           <button type="button" className="viewAllChanges" onClick={onOpenIndicators}>
