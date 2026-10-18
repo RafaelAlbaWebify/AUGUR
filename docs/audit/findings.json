@@ -3290,9 +3290,20 @@
       "status": "reviewed_findings_open",
       "method": "Complete component source inspected; browser execution pending",
       "imported_by_count": 0
+    },
+    {
+      "path": "frontend/src/components/FuturePathsPage.tsx",
+      "sha256": "d60d61a6981e7982f9f8fc01d6432ebf60f8082aa928dfc596f8ad92a24c07ed",
+      "lines_reviewed": "complete_file",
+      "definitions_reviewed": 0,
+      "batch": "B05",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "Full forecast and scenarios component read; browser checks pending",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 299,
+  "certified_line_by_line_review_count": 300,
   "findings": [
     {
       "id": "LEAD-001",
@@ -5091,5 +5102,5 @@
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 85.19
+  "certified_line_by_line_review_percent": 85.47
 }
