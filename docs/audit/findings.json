@@ -3081,9 +3081,86 @@
       "status": "reviewed_findings_open",
       "method": "Entire test file read, not executed",
       "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_cedefop_stas.py",
+      "sha256": "8cdedf38fcfaac14d157eaf8d5e1509e9e430e20fd32f1af4dfd072c4c5aba2b",
+      "lines_reviewed": "1-119",
+      "definitions_reviewed": 7,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "All test source read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_eea_health_burden.py",
+      "sha256": "eea1f6207912f0cafd9c4ae42de92efd708ff64a9aa0afec1bced93d4641c5f0",
+      "lines_reviewed": "1-111",
+      "definitions_reviewed": 11,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "All test source read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_esco_store.py",
+      "sha256": "4a13ac7321d911ade0998eb44711d08a47ee4170d9dc7ce94c1d2ed3f25a9822",
+      "lines_reviewed": "1-137",
+      "definitions_reviewed": 6,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "All test source read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_live_postings.py",
+      "sha256": "194979decaa30db54ae6102ff7799409fb7afb6e11ecdf6210fa9488c26c370c",
+      "lines_reviewed": "1-72",
+      "definitions_reviewed": 4,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "All test source read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_national_bulk_ingestion.py",
+      "sha256": "2d598dab637960cc643ab2447dc64e6d337518fbc06561584b5deb1b107f80fb",
+      "lines_reviewed": "1-76",
+      "definitions_reviewed": 5,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "All test source read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_nuts_vintage_write_safety.py",
+      "sha256": "d8f923c12abfcc5fe3c5c07297f7dd298afef8e7f9da0659d65e2007be0b19e3",
+      "lines_reviewed": "1-137",
+      "definitions_reviewed": 6,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "All test source read, not executed",
+      "imported_by_count": 0
+    },
+    {
+      "path": "backend/tests/test_official_reference_db_audit.py",
+      "sha256": "cc60ae17e96e56610262f03f836f43618f9c8042b981403fbcf6ae9424cdb1ee",
+      "lines_reviewed": "1-65",
+      "definitions_reviewed": 5,
+      "batch": "B06",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "All test source read, not executed",
+      "imported_by_count": 0
     }
   ],
-  "certified_line_by_line_review_count": 280,
+  "certified_line_by_line_review_count": 287,
   "findings": [
     {
       "id": "LEAD-001",
@@ -4852,5 +4929,5 @@
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 79.77
+  "certified_line_by_line_review_percent": 81.77
 }
