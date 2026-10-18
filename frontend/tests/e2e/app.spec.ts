@@ -3160,6 +3160,21 @@ test('Future Paths renders values and visible marks for one-horizon IMF scenario
   await expect(page.locator('.scenarioSingleHorizonValues')).toContainText('Stress 9.50')
 })
 
+test('Future Paths shows numeric official and experimental values without chart interpretation', async ({ page }) => {
+  await page.goto('/country/ESP/outlook')
+  await page.locator('.futurePathsPage select').first().selectOption('imf_unemployment_rate')
+  const official = page.getByLabel('Official forecast numerical values')
+  await expect(official).toBeVisible()
+  await expect(official.getByRole('table')).toBeVisible()
+  await expect(official.getByText('Official projection', { exact: false }).first()).toBeVisible()
+  const scenarios = page.getByLabel('AUGUR experimental scenario numerical values')
+  await expect(scenarios.getByRole('table')).toBeVisible()
+  await expect(scenarios).toContainText('Improvement')
+  await expect(scenarios).toContainText('Baseline')
+  await expect(scenarios).toContainText('Stress')
+  await expect(scenarios).toContainText('not official forecasts or confidence intervals')
+})
+
 test('Future Paths marks the forecast boundary and model status', async ({ page }) => {
   await page.goto('/country/ESP/outlook')
 
