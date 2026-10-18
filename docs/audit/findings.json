@@ -1948,9 +1948,31 @@
       "status": "reviewed_findings_open",
       "method": "complete 517-line code review; ESCO matching, candidate validation, artifact persistence; regression pending",
       "imported_by_count": 3
+    },
+    {
+      "path": "backend/app/esco_store.py",
+      "sha256": "2f5b028142acd164751d9b50e2042585122e0ee3c7beca180bfaa3d5fa647410",
+      "lines_reviewed": "1-498",
+      "definitions_reviewed": 12,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source review including all catalog declarations, CSV import SQL and matching; runtime tests pending",
+      "imported_by_count": 8
+    },
+    {
+      "path": "backend/app/catalog.py",
+      "sha256": "cce6490998e7078d113f724314ec68c9d6bbfd088aadea3cac07cc9332ba52fe",
+      "lines_reviewed": "1-530",
+      "definitions_reviewed": 3,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete source review including all catalog declarations, CSV import SQL and matching; runtime tests pending",
+      "imported_by_count": 31
     }
   ],
-  "certified_line_by_line_review_count": 177,
+  "certified_line_by_line_review_count": 179,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3466,8 +3488,38 @@
       "line_range": "330-341",
       "description": "Review artifact uses direct write_text to destination, so interrupted writes can truncate existing reviewed evidence.",
       "test_required": "Fail-midwrite fixture; atomic temp-file plus replacement after validation."
+    },
+    {
+      "id": "AUD-B03-040",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/esco_store.py",
+      "sha256": "2f5b028142acd164751d9b50e2042585122e0ee3c7beca180bfaa3d5fa647410",
+      "line_range": "219-354",
+      "description": "ESCO import deletes existing production ESCO tables before proving source row completeness or foreign-key integrity. Atomic rollback may protect exceptions, but accepted empty or incomplete files can commit a 'full' data mode.",
+      "test_required": "Malformed sparse CSV package and missing-relation fixtures; require min counts, version consistency and referential integrity before destructive import."
+    },
+    {
+      "id": "AUD-B03-041",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/esco_store.py",
+      "sha256": "2f5b028142acd164751d9b50e2042585122e0ee3c7beca180bfaa3d5fa647410",
+      "line_range": "421-489",
+      "description": "search_occupations loads every ESCO occupation into memory and computes approximate matches in Python for every request; repeated lookups may cause severe CPU/latency at full ESCO scale.",
+      "test_required": "Benchmark full package lookup across many labels; indexed search/FTS or memoization."
+    },
+    {
+      "id": "AUD-B03-042",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/catalog.py",
+      "sha256": "cce6490998e7078d113f724314ec68c9d6bbfd088aadea3cac07cc9332ba52fe",
+      "line_range": "458-465",
+      "description": "country_config supports only static COUNTRIES while other ingestion workflows register additional countries dynamically, creating two incompatible notions of supported country.",
+      "test_required": "Newly registered country fixture across catalog config and service paths, unify registry lookup or explicit static-only contract."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 50.43
+  "certified_line_by_line_review_percent": 51
 }
