@@ -31073,8 +31073,8 @@
     {
       "path": "frontend/src/components/FuturePathsPage.tsx",
       "bucket": "frontend",
-      "sha256": "b0f059f3cba21c14ae47673292732082625eb43aa380591d2867a36d53e5c76b",
-      "bytes": 14274,
+      "sha256": "340f72cad3009f2a21ca31118f51f25423d2d87374197c55acf02048e163c2bc",
+      "bytes": 16250,
       "review_status": "stale_review",
       "imported_by": []
     },
@@ -31185,8 +31185,8 @@
     {
       "path": "frontend/tests/e2e/app.spec.ts",
       "bucket": "frontend",
-      "sha256": "456e60ddae95f70d1bccbe72d38aa0bbee0605e72744d7303dd8cefc130899bf",
-      "bytes": 155443,
+      "sha256": "0728afebed3309791721049762bcb7fe839064235066c737e25733c3eee69b86",
+      "bytes": 156377,
       "review_status": "not_reviewed",
       "imported_by": []
     },
