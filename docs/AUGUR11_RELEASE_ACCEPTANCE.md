@@ -1,0 +1,43 @@
+# AUGUR 11 — Limited Release Acceptance (2026-10-18)
+
+Status: **NOT ACCEPTED — real-data operator journey pending**.
+Baseline main SHA: `04901c7479475079d277544f0a23d124447b9b59`.
+
+## Outcome
+One user can compare **Spain, Portugal and Ireland** with actual locally stored observations, understand relevant historical trends and employment/housing evidence where present, and identify which location merits further research. The product makes no unsupported claims of personalized suitability, current housing prices, comprehensive regional coverage, or validated time-to-value predictions.
+
+## Freeze
+No new providers, indicators, rankings, scoring engines, general refactoring or redesign before this bounded release. Only defects directly blocking the criteria below, correctness/security repairs and necessary narrowly scoped regression tests. The broader source audit is nonblocking unless a high-severity finding affects this journey.
+
+## Five gates (currently not certified)
+| Gate | Acceptance evidence | State |
+| --- | --- | --- |
+| R1 Runtime | Local app starts, existing SQLite/DuckDB preserved, health and operability outputs saved; startup/reload and API errors documented | NOT TESTED |
+| R2 Compare | Real ESP/PRT/IRL Compare and Overview work end to end; source, period, unit, missing values and comparison methodology visible; one read-only independent observation check | NOT TESTED |
+| R3 Provenance | Trends distinguished from observed values, scenarios/official forecasts separate, employment and housing limitations explicit, no incompatible geography/ranking or misleading global completeness claim | NOT TESTED |
+| R4 User journey | Operator executes 10-minute task: choose ESP/PRT/IRL, compare unemployment/prosperity, inspect trend, assess employment and housing evidence, identify an investigation priority; screenshots/notes plus no critical errors | NOT TESTED |
+| R5 Release qualification | Backend/frontend/ops CI at release commit; reproducible sanitized acceptance evidence; blockers classified; explicit operator sign-off | NOT TESTED |
+
+A missing evidence layer can be marked **LIMITED** without blocking the release only if the user can clearly see it is unavailable and the proposed decision never relies on it. A false or misleading quantitative claim is a blocker.
+
+## Evidence already present (NOT equivalent to acceptance)
+- `frontend/tests/e2e/app.spec.ts` contains extensive mocked provider/API responses for ESP/PRT/IRL; it is not a live-store browser proof.
+- `backend/tests/test_personalized_compare.py` exercises mathematical normalization using synthetic snapshots; it is not personal-fit real-data acceptance.
+- `docs/VALIDATION.md` explicitly reports missing real-data frontend acceptance.
+- `tools/acceptance.ps1` currently scopes to GR2; do not confuse it with this five-gate release.
+
+## Cycle sequence and stop rule
+**Cycle 1 — Baseline:** audit existing read-only tools and UI routes, define minimal operator evidence capture; do not request repeated exports or mutate user data. Deliver actual acceptance run or an exact minimal read-only command plus report format.
+
+**Cycle 2 — Fix blockers only:** group directly observed critical defects in a coherent PR with regression tests. Reject unrelated feature requests.
+
+**Cycle 3 — Re-run + decide:** repeat exactly the same criteria with authentic evidence and sign off PASS / LIMITED / FAIL for each gate. If a genuinely valuable journey still cannot be demonstrated, pause further development and reassess product scope and cost.
+
+## Definition of done
+Five gate decisions backed by evidence and a demonstrated useful journey; zero critical misleading-output defects; release caveats published. Not defined by PR count, code audit percentage, or abstract operability score.
+
+## Safety
+Read-only discovery, no local DuckDB/SQLite changes, no historical cohort rewrite, no unverified rankings unlock, no TTV model publication. Existing Country Radar UX preserved.
+
+## First execution target
+Use existing `check-operability.ps1`, current frontend, and read-only evidence/export routes. First inspect implementation and output safety. Gather local results once in a consolidated operator package only where GitHub cannot access the actual store.
