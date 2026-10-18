@@ -41,3 +41,6 @@ Read-only discovery, no local DuckDB/SQLite changes, no historical cohort rewrit
 
 ## First execution target
 Use existing `check-operability.ps1`, current frontend, and read-only evidence/export routes. First inspect implementation and output safety. Gather local results once in a consolidated operator package only where GitHub cannot access the actual store.
+
+## First operator HTTP evidence — 2026-10-18
+Operator-supplied `AUGUR11_RELEASE_SMOKE.json` generated 2026-10-18T12:20:40Z at existing Windows checkout `C:\\Users\\ralba\\Documents\\GitHub\\AUGUR`. Results: 10/10 HTTP GET probes passed (frontend, /api/health, /api/operability, /api/countries, snapshots and overview-series for ESP, PRT, IRL); zero network failures. This certifies only endpoint **availability**, NOT response correctness, source provenance, nonempty observations, UI interaction, product acceptance, or that data did not change during application startup. Gate R1 = PARTIAL (startup and HTTP reachable, datastore immutability not established), R2–R5 = NOT CERTIFIED. Do not repeat this basic connectivity test absent a regression. Next evidence must inspect bounded, sanitized response content and a real-browser comparison journey, not merely HTTP 200.
