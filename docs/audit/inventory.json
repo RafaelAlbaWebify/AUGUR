@@ -13,9 +13,9 @@
   "file_count": 351,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 220,
+  "reviewed_file_count": 248,
   "stale_review_file_count": 0,
-  "line_by_line_review_percent": 62.68,
+  "line_by_line_review_percent": 70.66,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -18307,7 +18307,7 @@
       "bucket": "backend/tests",
       "sha256": "d2a1738ae4a6b12f27463c1cdbaa6c1852133926289a5866a5418ce9878c5bf8",
       "bytes": 2108,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "Provider",
@@ -18750,7 +18750,7 @@
       "bucket": "backend/tests",
       "sha256": "311cafe3749788598ccd7c97f7c2386a4774801662d2cd35edf5615e713ad19d",
       "bytes": 1655,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_cefedop_missing_occupation_label_not_parser_ready",
@@ -20469,7 +20469,7 @@
       "bucket": "backend/tests",
       "sha256": "1937de8768d65d4a0b2a40de2f9e25419a7a08d8967570c4f6d081ac10dd77b3",
       "bytes": 1109,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_build_comparison_aligns_country_values",
@@ -20557,7 +20557,7 @@
       "bucket": "backend/tests",
       "sha256": "1d975bcf6c661ec5fed7d39fe9255b1ba0269b6fa3fc848a4608f9d7d00ff3cc",
       "bytes": 1234,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_missing_sqlite_is_not_created_by_health_check",
@@ -20915,7 +20915,7 @@
       "bucket": "backend/tests",
       "sha256": "96d00739229ab22e2b0c7b1c22b717a97eae8bb7f71c777a0b8dd9cdd07792cf",
       "bytes": 700,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_eea_post_retry_recovers_from_transient_read_error",
@@ -21022,7 +21022,7 @@
       "bucket": "backend/tests",
       "sha256": "8d879006ec415f243f17c8dccab6c9b32bcc723ce9451276db9c9da98e35b380",
       "bytes": 727,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_resolve_eea_city_uses_cached_mapping",
@@ -22265,7 +22265,7 @@
       "bucket": "backend/tests",
       "sha256": "38564bbd1349acbe5e483b91f745472b617d7af6bc2a243f219e4f651f0b4fab",
       "bytes": 1169,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_dynamic_country_scope_and_pilot_compatibility",
@@ -22515,7 +22515,7 @@
       "bucket": "backend/tests",
       "sha256": "8dfefdf300bea69781dbe637acb4be1bf20de5f2847a628f01dd1ce4ad38933a",
       "bytes": 1403,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_sparse_jsonstat_values_are_mapped_to_correct_regions",
@@ -22598,7 +22598,7 @@
       "bucket": "backend/tests",
       "sha256": "b8eb2b65f6c86195b9c9df49a95fa99e81284d71eff256d76f30bef7e891e5e8",
       "bytes": 1280,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "row",
@@ -22661,7 +22661,7 @@
       "bucket": "backend/tests",
       "sha256": "65b0f5c56ad09181b4cad7813a8a416f0b5b5d13d3254ee7bf7a70cdc68028c2",
       "bytes": 1040,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_ordered_codes_supports_map",
@@ -23369,7 +23369,7 @@
       "bucket": "backend/tests",
       "sha256": "17c23e6a8f7e7d98cd6c04787a02ac7814d196a2e0f9c24b66dc5998cfc0037a",
       "bytes": 2208,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_geo_provenance_preserves_real_code_identity_and_missing_data",
@@ -23659,7 +23659,7 @@
       "bucket": "backend/tests",
       "sha256": "e5f2984afd8664dac7fc8031c1ccc3a7a5c46cf4441f0096096df05fc46a807b",
       "bytes": 1875,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_indexed_coverage_distinguishes_observed_missing_and_incompatible",
@@ -24286,7 +24286,7 @@
       "bucket": "backend/tests",
       "sha256": "85393262b64a49d06301ae6a05d5df4ca6c5bd7c7fc59740f529929bb26b9236",
       "bytes": 1544,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "current_analytics",
@@ -24403,7 +24403,7 @@
       "bucket": "backend/tests",
       "sha256": "be4dd68c1df81f0cfd923d24582139395ee087e1fcba90d58ba6f54fafc6076d",
       "bytes": 1697,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "Provider",
@@ -24475,7 +24475,7 @@
       "bucket": "backend/tests",
       "sha256": "5e483cfe8d74cd4c827f848d90aa723adfac2511d0553cae8040582f3d13c11b",
       "bytes": 1424,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "Source",
@@ -25026,7 +25026,7 @@
       "bucket": "backend/tests",
       "sha256": "614f03d4caa8691d0d0e97db4c2ec64bf2fca4268f02879334ebafdc2bb7b4e1",
       "bytes": 1726,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_accepts_one_valid_observation",
@@ -25130,7 +25130,7 @@
       "bucket": "backend/tests",
       "sha256": "fca1296ddef28d32a53c237c1eb3ed32f9bbe575fe741dabfbb46b01aa4e3e3b",
       "bytes": 1550,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_non_eu_oecd_density_sync_accepts_matching_contract",
@@ -25606,7 +25606,7 @@
       "bucket": "backend/tests",
       "sha256": "8e39ed71a9a37a94b9bcee883d45c7ae99fa4636463049acdd4cd8de5731dbc8",
       "bytes": 1306,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_oecd_guard_accepts_non_eu_valid_sourced_rows",
@@ -25654,7 +25654,7 @@
       "bucket": "backend/tests",
       "sha256": "0098ad12b433a75676febd823ca70133a9dddef16e05b13f9c9518e4abee71fb",
       "bytes": 1339,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "payload",
@@ -26420,7 +26420,7 @@
       "bucket": "backend/tests",
       "sha256": "e26d497efde749ce8ee326b3b271436ac15be032900b964edfa1a06bb1c6d99a",
       "bytes": 1678,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_retains_exact_household_scenario_and_real_period",
@@ -27271,7 +27271,7 @@
       "bucket": "backend/tests",
       "sha256": "212e2408eff5fffc4c03f2cde464a16c9293dd7621a03515a3206ea01b18671b",
       "bytes": 1306,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_empty_profile_reports_missing_fit_inputs",
@@ -27475,7 +27475,7 @@
       "bucket": "backend/tests",
       "sha256": "0dac04a667c2d358b766f122e800f4f281e1eb99003951e97a332b296bcf62d3",
       "bytes": 2269,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_audit_groups_real_rows_by_source_unit_period_without_writes",
@@ -27568,7 +27568,7 @@
       "bucket": "backend/tests",
       "sha256": "a568ac78f014e2d0b7700cb306e3e6fc3df38cff1df9d210b7a7d0368461ae92",
       "bytes": 1098,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "sample",
@@ -27849,7 +27849,7 @@
       "bucket": "backend/tests",
       "sha256": "2f7ed2cd7206821804ecd6fb60d196a2c05cf0276cf31501c4b80b121e762261",
       "bytes": 2117,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "FakeEurostat",
@@ -28691,7 +28691,7 @@
       "bucket": "backend/tests",
       "sha256": "62bad0e7de8831f8c1731dfa8bf8b4bfa3ddbb79546fe0483ca8415a7a6304dc",
       "bytes": 1430,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "AdapterStub",
@@ -28997,7 +28997,7 @@
       "bucket": "backend/tests",
       "sha256": "95de14915b0a092d88466091cbfce7c7c32f50994c4b4b13640d2636c7e35e1f",
       "bytes": 1762,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_specialized_batch_accepts_valid_nullable_outlook",
@@ -30791,7 +30791,7 @@
       "bucket": "backend/tests",
       "sha256": "165bb2595b1709d94a943c3dd8b3187f8e8598530e8b947f2babe58be74fe4c3",
       "bytes": 1619,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "test_world_bank_partial_country_observations_not_complete",
@@ -30868,7 +30868,7 @@
       "bucket": "backend/tests",
       "sha256": "595d9e4bdbc2de36acbfb9623858bf6cd278157eea2303ee66d3c1f36e683d71",
       "bytes": 1208,
-      "review_status": "not_reviewed",
+      "review_status": "verified_reviewed",
       "definitions": [
         {
           "symbol": "Response",
