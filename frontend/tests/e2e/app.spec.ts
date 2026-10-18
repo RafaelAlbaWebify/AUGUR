@@ -2218,7 +2218,7 @@ test('Decision Matrix summarizes numerical position without implying winners', a
   await expect(summary).toBeVisible()
   await expect(summary.getByText('Spain')).toBeVisible()
   await expect(summary.getByText('Portugal')).toBeVisible()
-  await expect(summary.getByText('Ireland')).toBeVisible()
+  await expect(summary.getByText('Ireland', { exact: true })).toBeVisible()
   await expect(summary.getByText(/Higher\/lower describes numerical position only/i)).toBeVisible()
   await expect(page.locator('.matrixIndicatorNote').first()).toContainText('no winner implied')
   await expect(page.getByText(/best country/i)).toHaveCount(0)
@@ -3109,7 +3109,7 @@ test('Country Radar keeps country context and evidence cards visible', async ({ 
   await expect(page.locator('.countryHeroMeta span[title*="indicators currently"]')).toBeVisible()
   await expect(page.locator('.countryHeroMeta span[title*="Indicators classified"]')).toBeVisible()
   await expect(page.locator('.countryMetricGrid button[title^="Open"]')).toHaveCount(10)
-  await expect(page.locator('.recentChangesPanel .radarPanelTopline [title*="Largest recorded changes"]')).toBeVisible()
+  await expect(page.locator('.recentChangesPanel .radarPanelTopline [title*="Changes between available annual observations"]')).toBeVisible()
 })
 
 test('Future Paths distinguishes official baseline from AUGUR model scenarios', async ({ page }) => {
