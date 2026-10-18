@@ -2014,9 +2014,20 @@
       "status": "reviewed_findings_open",
       "method": "full source inspection of all career market signals, ESCO fallback, skill viability and provenance; runtime tests pending",
       "imported_by_count": 6
+    },
+    {
+      "path": "backend/app/services/ttv_calibration.py",
+      "sha256": "6d1e7b0135b832fce7b623596d612686b242ee11a0954ba1a85f10b3c1d04bdf",
+      "lines_reviewed": "1-2015",
+      "definitions_reviewed": 29,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "full 2015-line source read, calibration ingestion, sealing, scoring, observation lifecycle, export/import; runtime tests pending",
+      "imported_by_count": 7
     }
   ],
-  "certified_line_by_line_review_count": 183,
+  "certified_line_by_line_review_count": 184,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3702,8 +3713,38 @@
       "line_range": "582-631",
       "description": "Occupation outlook selects rows from first available ISCO level and uses metadata from first row while preserving all horizons, without confirming same scenario and release across rows; can mix incompatible outlook scenarios.",
       "test_required": "Mixed scenario/release rows fixture, group/filter by consistent release/scenario before presenting trend."
+    },
+    {
+      "id": "AUD-B03-057",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ttv_calibration.py",
+      "sha256": "6d1e7b0135b832fce7b623596d612686b242ee11a0954ba1a85f10b3c1d04bdf",
+      "line_range": "1981-2007",
+      "description": "Development calibration package import writes each case sequentially, so a later invalid case can leave a partially imported package despite method returning failure.",
+      "test_required": "Two-case import with valid then invalid, assert transaction all-or-nothing."
+    },
+    {
+      "id": "AUD-B03-058",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ttv_calibration.py",
+      "sha256": "6d1e7b0135b832fce7b623596d612686b242ee11a0954ba1a85f10b3c1d04bdf",
+      "line_range": "1806-1872",
+      "description": "Completing observation first upserts calibration case then separately marks observation completed in another transaction; a later failure can leave inconsistent completion state.",
+      "test_required": "Inject failure between case upsert and observation UPDATE; require atomic completion/recovery."
+    },
+    {
+      "id": "AUD-B03-059",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/ttv_calibration.py",
+      "sha256": "6d1e7b0135b832fce7b623596d612686b242ee11a0954ba1a85f10b3c1d04bdf",
+      "line_range": "1687-1749",
+      "description": "Checking existing active observation and inserting a new one occur through different connections without locking; concurrent start requests can create duplicate active cases.",
+      "test_required": "Concurrent same-country start fixture with unique active index or transactional lock."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 52.14
+  "certified_line_by_line_review_percent": 52.42
 }
