@@ -13,9 +13,9 @@
   "file_count": 353,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 300,
-  "stale_review_file_count": 0,
-  "line_by_line_review_percent": 84.99,
+  "reviewed_file_count": 299,
+  "stale_review_file_count": 1,
+  "line_by_line_review_percent": 84.7,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -31073,9 +31073,9 @@
     {
       "path": "frontend/src/components/FuturePathsPage.tsx",
       "bucket": "frontend",
-      "sha256": "d60d61a6981e7982f9f8fc01d6432ebf60f8082aa928dfc596f8ad92a24c07ed",
-      "bytes": 13082,
-      "review_status": "verified_reviewed",
+      "sha256": "b0f059f3cba21c14ae47673292732082625eb43aa380591d2867a36d53e5c76b",
+      "bytes": 14274,
+      "review_status": "stale_review",
       "imported_by": []
     },
     {
