@@ -5001,6 +5001,18 @@ body:has(.shell.detailsOpen) {
   stroke: #ef6f76;
 }
 
+/* Single-horizon scenarios use markers rather than one-point SVG polylines. */
+.scenarioPoint.improvement { color: #63dc98; }
+.scenarioPoint.baseline { color: #70b8ed; }
+.scenarioPoint.stress { color: #ef6f76; }
+.scenarioPoint { stroke: #071723; stroke-width: 1.5; }
+.scenarioSingleHorizonValues {
+  font-size: 12px;
+  line-height: 1.65;
+  color: #b6cbd9;
+  margin: 9px 0;
+}
+
 .chartLegend,
 .scenarioLegend {
   display: flex;
