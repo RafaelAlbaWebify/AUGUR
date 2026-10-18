@@ -166,7 +166,11 @@ export default function FuturePathsPage({
   const officialBounds = boundsFor([officialWithCurrent])
   const latestOfficial = official.at(-1)
   const difference = current && latestOfficial ? latestOfficial.value - current.value : null
-  const differenceLabel = difference === null ? 'Unavailable' : `${difference > 0 ? '+' : ''}${formatValue(difference, unit)} change from ${current?.period} to ${latestOfficial?.period}`
+  const differenceUnit = unit === 'percent' || unit === 'percent_gdp' ? 'percentage points' : unit === 'index_eu27_2020_100' || unit.startsWith('index_') ? 'index points' : null
+  const formattedDifference = difference === null ? null : differenceUnit
+    ? `${Math.abs(difference).toFixed(2)} ${differenceUnit}`
+    : formatValue(Math.abs(difference), unit)
+  const differenceLabel = difference === null ? 'Unavailable' : `${difference > 0 ? '+' : difference < 0 ? '−' : ''}${formattedDifference} from ${current?.period} to ${latestOfficial?.period} (different reference/source definitions may affect comparability)`
 
   const baselinePoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.baseline }))
   const improvementPoints = scenarioRows.map((item) => ({ year: item.period, value: item.scenarios.improvement }))
