@@ -1915,9 +1915,20 @@
       "status": "reviewed_findings_open",
       "method": "full source read, direct dependencies and response contract review; regression tests outstanding",
       "imported_by_count": 2
+    },
+    {
+      "path": "backend/app/services/city_evidence.py",
+      "sha256": "a624ec191de611bc09643c394266745eeeb1b4c7c67fe5885f2f9fead541bf1d",
+      "lines_reviewed": "1-569",
+      "definitions_reviewed": 5,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "all 569 source lines and function branches read with DB, Eurostat and EEA entrypoints examined; runtime tests pending",
+      "imported_by_count": 5
     }
   ],
-  "certified_line_by_line_review_count": 174,
+  "certified_line_by_line_review_count": 175,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3333,8 +3344,38 @@
       "line_range": "105-128",
       "description": "Dimension synthesis can assign improving trajectory when one improving plus one stable independent construct exists, despite note broad trajectory requires at least two independent directional constructs; ambiguity about stable as directional support.",
       "test_required": "Single improving plus single stable construct case; explicitly define promotion threshold for improving/deteriorating labels."
+    },
+    {
+      "id": "AUD-B03-030",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/city_evidence.py",
+      "sha256": "a624ec191de611bc09643c394266745eeeb1b4c7c67fe5885f2f9fead541bf1d",
+      "line_range": "333-367",
+      "description": "City batch sync normalizes multiple indicator series and writes them without preserving source dimensions/status, and availability counts any normalized rows. Insufficient differentiation of ambiguous city source slices or quality flags.",
+      "test_required": "Adversarial multi-city, multiple SDMX dimension slices and flagged status fixture; validate city identifier and provenance before upsert."
+    },
+    {
+      "id": "AUD-B03-031",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/city_evidence.py",
+      "sha256": "a624ec191de611bc09643c394266745eeeb1b4c7c67fe5885f2f9fead541bf1d",
+      "line_range": "199-278",
+      "description": "Interactive direct Eurostat city fetch chooses latest by period only; multiple same-year rows can be selected arbitrarily without enforcing unique source-dimension contract.",
+      "test_required": "Same-period duplicate slice fixture; reject ambiguity rather than last row wins."
+    },
+    {
+      "id": "AUD-B03-032",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/city_evidence.py",
+      "sha256": "a624ec191de611bc09643c394266745eeeb1b4c7c67fe5885f2f9fead541bf1d",
+      "line_range": "405-436",
+      "description": "EEA PM2.5 refresh catches all exceptions and returns False without reporting source failure cause, weakening operational debugging.",
+      "test_required": "Injected network/parsing/persistence exceptions and observable error/provenance diagnostics."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 49.57
+  "certified_line_by_line_review_percent": 49.86
 }
