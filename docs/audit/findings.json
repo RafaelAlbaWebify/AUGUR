@@ -1926,9 +1926,20 @@
       "status": "reviewed_findings_open",
       "method": "all 569 source lines and function branches read with DB, Eurostat and EEA entrypoints examined; runtime tests pending",
       "imported_by_count": 5
+    },
+    {
+      "path": "backend/app/services/regional_evidence.py",
+      "sha256": "cd45494f0ddbed58d5d2e483f5cceea74500de30f9300b51d858fae9b7c97e32",
+      "lines_reviewed": "1-1092",
+      "definitions_reviewed": 10,
+      "batch": "B03",
+      "reviewed_on": "2026-10-18",
+      "status": "reviewed_findings_open",
+      "method": "complete 1092-line source read; trace cache, geographic vintage, provider ambiguity, comparisons; regression tests pending",
+      "imported_by_count": 20
     }
   ],
-  "certified_line_by_line_review_count": 175,
+  "certified_line_by_line_review_count": 176,
   "findings": [
     {
       "id": "LEAD-001",
@@ -3374,8 +3385,38 @@
       "line_range": "405-436",
       "description": "EEA PM2.5 refresh catches all exceptions and returns False without reporting source failure cause, weakening operational debugging.",
       "test_required": "Injected network/parsing/persistence exceptions and observable error/provenance diagnostics."
+    },
+    {
+      "id": "AUD-B03-033",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/regional_evidence.py",
+      "sha256": "cd45494f0ddbed58d5d2e483f5cceea74500de30f9300b51d858fae9b7c97e32",
+      "line_range": "629-665",
+      "description": "Regional sector context takes first TOTAL employment record while reporting max period across rows; sector ratios can combine numerators and denominators from different years when source status returns mixed periods.",
+      "test_required": "Fixture with 2024 TOTAL and 2025 sector records; enforce same-period share computation."
+    },
+    {
+      "id": "AUD-B03-034",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/regional_evidence.py",
+      "sha256": "cd45494f0ddbed58d5d2e483f5cceea74500de30f9300b51d858fae9b7c97e32",
+      "line_range": "381-413",
+      "description": "Local regional result indexes indicators by id only, using last row and history keyed by id without geography system/source; if stored bundle contains several source-specific slices, one may overwrite another.",
+      "test_required": "Duplicate indicator_id with multiple source and period fixtures, reject or choose contracted provenance."
+    },
+    {
+      "id": "AUD-B03-035",
+      "state": "open_requires_regression",
+      "severity": "medium",
+      "component": "backend/app/services/regional_evidence.py",
+      "sha256": "cd45494f0ddbed58d5d2e483f5cceea74500de30f9300b51d858fae9b7c97e32",
+      "line_range": "755-908",
+      "description": "Explicit force_refresh path does not include requested geography_system in returned response and stores NUTS_UNSPECIFIED observations; verify that clients do not interpret a NUTS_2024 refresh as vintage-certified.",
+      "test_required": "NUTS_2024 force refresh acceptance checking stored geography_system and returned warnings."
     }
   ],
   "denominator_inventoried_files": 351,
-  "certified_line_by_line_review_percent": 49.86
+  "certified_line_by_line_review_percent": 50.14
 }
