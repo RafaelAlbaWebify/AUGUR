@@ -31073,8 +31073,8 @@
     {
       "path": "frontend/src/components/FuturePathsPage.tsx",
       "bucket": "frontend",
-      "sha256": "f617bded9cfdfe23d9f2174f8849671614cc853fd031d0ae6cfd34fbb76d009d",
-      "bytes": 16683,
+      "sha256": "62972b6afc09cf7e2c7feb124ff9b84fa8912bd12740f64ed9b8ee2714609fd3",
+      "bytes": 17913,
       "review_status": "stale_review",
       "imported_by": []
     },
