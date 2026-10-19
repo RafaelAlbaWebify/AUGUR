@@ -6543,3 +6543,5 @@ body:has(.shell.detailsOpen) {
 .outlookNumbers th, .outlookNumbers td { padding: 8px 9px; border-bottom: 1px solid rgba(112, 145, 168, .2); text-align: left; }
 .outlookNumbers th { color: #b6cbd9; font-weight: 600; }
 .outlookNumbers p { margin: 9px 0 0; color: #b6cbd9; font-size: 12px; line-height: 1.5; }
+
+.forecastValueLabel { fill: #d9e8f4; font-size: 12px; font-weight: 600; paint-order: stroke; stroke: #06111a; stroke-width: 3px; stroke-linejoin: round; }

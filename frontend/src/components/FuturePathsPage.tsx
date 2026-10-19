@@ -183,6 +183,15 @@ export default function FuturePathsPage({
     Math.abs(item.scenarios.improvement - item.scenarios.baseline) > 1e-9 ||
     Math.abs(item.scenarios.stress - item.scenarios.baseline) > 1e-9
   )
+  const readableValue = (value: number) => (unit === 'percent' || unit === 'percent_gdp')
+    ? `${value.toFixed(2)}%`
+    : formatValue(value, unit)
+  const valueTicks = (bounds: ChartBounds | null) => bounds
+    ? [0, 0.5, 1].map((fraction) => ({
+        y: 210 - 190 * fraction,
+        label: readableValue(bounds.minValue + (bounds.maxValue - bounds.minValue) * fraction),
+      }))
+    : []
   const scenarioStatus = scenarios?.model_status
 
   return (
@@ -227,6 +236,12 @@ export default function FuturePathsPage({
               <svg viewBox="0 0 520 230" role="img" aria-label="Official forecast path">
                 <line x1="26" y1="210" x2="494" y2="210" />
                 <line x1="26" y1="20" x2="26" y2="210" />
+                {valueTicks(officialBounds).map((tick) => (
+                  <g key={tick.y}>
+                    <line x1="26" y1={tick.y} x2="494" y2={tick.y} stroke="rgba(112,145,168,.16)" />
+                    <text x="32" y={tick.y - 5} className="forecastValueLabel">{tick.label}</text>
+                  </g>
+                ))}
                 {current && officialBounds && (
                   <>
                     <line
@@ -251,6 +266,7 @@ export default function FuturePathsPage({
                   return (
                     <g key={item.year}>
                       <circle cx={point.x} cy={point.y} r="4" className={index === 0 && current ? 'currentPoint' : 'officialPoint'} />
+                      <text x={point.x} y={point.y < 45 ? point.y + 19 : point.y - 10} textAnchor="middle" className="forecastValueLabel">{readableValue(item.value)}</text>
                       <text className="forecastYearLabel" x={point.x} y="224" textAnchor="middle">{item.year}</text>
                     </g>
                   )
@@ -274,7 +290,7 @@ export default function FuturePathsPage({
               <thead><tr><th>Period</th><th>Value ({unit.replaceAll('_', ' ')})</th><th>Evidence</th></tr></thead>
               <tbody>
                 {current && <tr><td>{current.period}</td><td>{formatValue(current.value, unit)}</td><td>Observed · {current.source_id.replaceAll('_', ' ')}</td></tr>}
-                {official.map((item) => <tr key={item.period}><td>{item.period}</td><td>{formatValue(item.value, unit)}</td><td>Official projection · {item.source_name}</td></tr>)}
+                {official.map((item) => <tr key={item.period}><td>{item.period}</td><td>{readableValue(item.value)}</td><td>Official projection · {item.source_name}</td></tr>)}
               </tbody>
             </table>
             <p>{differenceLabel}</p>
@@ -307,6 +323,12 @@ export default function FuturePathsPage({
               <svg viewBox="0 0 520 230" role="img" aria-label="AUGUR scenario paths">
                 <line x1="26" y1="210" x2="494" y2="210" />
                 <line x1="26" y1="20" x2="26" y2="210" />
+                {valueTicks(scenarioBounds).map((tick) => (
+                  <g key={tick.y}>
+                    <line x1="26" y1={tick.y} x2="494" y2={tick.y} stroke="rgba(112,145,168,.16)" />
+                    <text x="32" y={tick.y - 5} className="forecastValueLabel">{tick.label}</text>
+                  </g>
+                ))}
                 <polyline className="scenarioLine improvement" points={pointsFor(improvementPoints, scenarioBounds)} />
                 <polyline className="scenarioLine baseline" points={pointsFor(baselinePoints, scenarioBounds)} />
                 <polyline className="scenarioLine stress" points={pointsFor(stressPoints, scenarioBounds)} />
@@ -350,9 +372,9 @@ export default function FuturePathsPage({
                 <tbody>{scenarioRows.map((item) => (
                   <tr key={item.period}>
                     <td>{item.period}</td>
-                    <td>{formatValue(item.scenarios.improvement, unit)}</td>
-                    <td>{formatValue(item.scenarios.baseline, unit)}</td>
-                    <td>{formatValue(item.scenarios.stress, unit)}</td>
+                    <td>{readableValue(item.scenarios.improvement)}</td>
+                    <td>{readableValue(item.scenarios.baseline)}</td>
+                    <td>{readableValue(item.scenarios.stress)}</td>
                   </tr>
                 ))}</tbody>
               </table>
