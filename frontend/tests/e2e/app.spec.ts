@@ -3175,6 +3175,18 @@ test('Future Paths shows numeric official and experimental values without chart 
   await expect(scenarios).toContainText('not official forecasts or confidence intervals')
 })
 
+test('Outlook compacts population chart labels but preserves exact evidence values', async ({ page }) => {
+  await page.goto('/country/ESP/outlook')
+  await page.locator('.futurePathsPage select').first().selectOption('population_total')
+  const chart = page.getByRole('img', { name: 'Official forecast path' })
+  await expect(chart).toBeVisible()
+  await expect(chart.locator('.forecastValueLabel').filter({ hasText: /M$/ }).first()).toBeVisible()
+  await expect(chart.locator('.forecastValueLabel').filter({ hasText: /49,590,099/ })).toHaveCount(0)
+  const evidence = page.getByLabel('Official forecast numerical values')
+  await expect(evidence.getByRole('table')).toBeVisible()
+  await expect(evidence).toContainText('49,590,099')
+})
+
 test('Future Paths marks the forecast boundary and model status', async ({ page }) => {
   await page.goto('/country/ESP/outlook')
 
