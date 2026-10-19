@@ -186,10 +186,20 @@ export default function FuturePathsPage({
   const readableValue = (value: number) => (unit === 'percent' || unit === 'percent_gdp')
     ? `${value.toFixed(2)}%`
     : formatValue(value, unit)
+  // Abbreviate large counts in charts only; retain complete figures in evidence tables.
+  const compactChartValue = (value: number) => {
+    if (unit !== 'persons') return readableValue(value)
+    const abs = Math.abs(value)
+    const suffix = abs >= 1_000_000_000 ? 'B' : abs >= 1_000_000 ? 'M' : abs >= 1_000 ? 'k' : ''
+    if (!suffix) return readableValue(value)
+    const scale = suffix === 'B' ? 1_000_000_000 : suffix === 'M' ? 1_000_000 : 1_000
+    const scaled = value / scale
+    return `${Number(scaled.toFixed(1))}${suffix}`
+  }
   const valueTicks = (bounds: ChartBounds | null) => bounds
     ? [0, 0.5, 1].map((fraction) => ({
         y: 210 - 190 * fraction,
-        label: readableValue(bounds.minValue + (bounds.maxValue - bounds.minValue) * fraction),
+        label: compactChartValue(bounds.minValue + (bounds.maxValue - bounds.minValue) * fraction),
       }))
     : []
   const scenarioStatus = scenarios?.model_status
@@ -266,7 +276,7 @@ export default function FuturePathsPage({
                   return (
                     <g key={item.year}>
                       <circle cx={point.x} cy={point.y} r="4" className={index === 0 && current ? 'currentPoint' : 'officialPoint'} />
-                      <text x={point.x} y={point.y < 45 ? point.y + 19 : point.y - 10} textAnchor="middle" className="forecastValueLabel">{readableValue(item.value)}</text>
+                      <text x={point.x} y={point.y < 45 ? point.y + 19 : point.y - 10} textAnchor="middle" className="forecastValueLabel">{compactChartValue(item.value)}</text>
                       <text className="forecastYearLabel" x={point.x} y="224" textAnchor="middle">{item.year}</text>
                     </g>
                   )
