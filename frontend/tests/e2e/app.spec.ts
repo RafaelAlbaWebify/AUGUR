@@ -3176,6 +3176,36 @@ test('Future Paths shows numeric official and experimental values without chart 
 })
 
 test('Outlook compacts population chart labels but preserves exact evidence values', async ({ page }) => {
+  await page.route('**/api/countries/ESP/trajectory', async (route) => {
+    const indicator = (year: number, value: number) => ({
+      country_iso3: 'ESP',
+      indicator_id: 'population_total',
+      name: 'Population, total',
+      dimension: 'demography',
+      period: year,
+      value,
+      unit: 'persons',
+      source_id: 'UN_WPP',
+      source_name: 'UN World Population Prospects',
+      dataset_id: 'WPP2024',
+      source_updated_at: '2024',
+    })
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        country_iso3: 'ESP',
+        method: 'official_forecast_horizon_view_v1',
+        notes: [],
+        horizons: [2030, 2035].map((year) => ({
+          year,
+          indicator_count: 1,
+          sources: ['UN_WPP'],
+          indicators: [indicator(year, year === 2030 ? 49_590_099 : 48_765_432)],
+        })),
+      }),
+    })
+  })
   await page.goto('/country/ESP/outlook')
   await page.locator('.futurePathsPage select').first().selectOption('population_total')
   const chart = page.getByRole('img', { name: 'Official forecast path' })
