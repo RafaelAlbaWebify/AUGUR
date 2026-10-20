@@ -3217,6 +3217,14 @@ test('Outlook compacts population chart labels but preserves exact evidence valu
   await expect(evidence).toContainText('49,590,099')
 })
 
+test('Outlook labels historical years on the forecast chart', async ({ page }) => {
+  await page.goto('/country/ESP/outlook')
+  const chart = page.getByRole('img', { name: 'Official forecast path' })
+  await expect(chart.locator('text.forecastYearLabel').filter({ hasText: '2018' })).toBeVisible()
+  await expect(chart.locator('text.forecastYearLabel').filter({ hasText: '2020' })).toBeVisible()
+  await expect(chart.locator('text.forecastYearLabel').filter({ hasText: '2030' })).toBeVisible()
+})
+
 test('Outlook shows recorded history without implying cycle detection', async ({ page }) => {
   await page.goto('/country/ESP/outlook')
   const history = page.getByLabel('Historical evidence context')
