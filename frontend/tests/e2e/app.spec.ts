@@ -1510,7 +1510,7 @@ test('top navigation uses real routes and exposes all six product views', async 
   await expect(page.getByTestId('regional-map')).toHaveCount(0)
 
   await page.getByRole('button', { name: 'Compare' }).click()
-  await expect(page).toHaveURL(/\/compare\?countries=IRL%2CESP%2CPRT|\/compare\?countries=IRL,ESP,PRT/)
+  await expect(page).toHaveURL(/\/compare\?countries=ESP,IRL/)
   await expect(page.getByText('4. DECISION MATRIX / Compare')).toBeVisible()
 
   await page.getByRole('button', { name: 'Profile' }).click()
@@ -1895,8 +1895,8 @@ test('Outlook labels contextual scenarios without implying statistical uncertain
 test('comparison remains neutral and aligned', async ({ page }) => {
   await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page.getByRole('columnheader', { name: 'Spain' })).toBeVisible()
-  await expect(page.getByRole('columnheader', { name: 'Portugal' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Ireland' })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: 'Portugal' })).toHaveCount(0)
   await expect(page.getByText('Objective data')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Tested preference robustness' })).toBeVisible()
 })
@@ -2951,23 +2951,22 @@ test('unsaved profile draft survives view navigation', async ({ page }) => {
   await expect(page.getByLabel('Profession')).toHaveValue('Draft preserved across views')
 })
 
-test('comparison selectors swap countries without duplicates', async ({ page }) => {
+test('comparison selectors swap Spain and Ireland without duplicates', async ({ page }) => {
   await page.getByRole('button', { name: 'Compare' }).click()
 
   const first = page.getByLabel('Compare country 1', { exact: true })
   const second = page.getByLabel('Compare country 2', { exact: true })
-  const third = page.getByLabel('Compare country 3', { exact: true })
-
-  await expect(first).toHaveValue('IRL')
-  await expect(second).toHaveValue('ESP')
-  await expect(third).toHaveValue('PRT')
-
-  await first.selectOption('ESP')
 
   await expect(first).toHaveValue('ESP')
   await expect(second).toHaveValue('IRL')
-  await expect(third).toHaveValue('PRT')
+  await expect(page.getByLabel('Compare country 3', { exact: true })).toHaveCount(0)
+
+  await first.selectOption('IRL')
+
+  await expect(first).toHaveValue('IRL')
+  await expect(second).toHaveValue('ESP')
 })
+
 
 test('Country Radar domain cards use observed history for sparklines', async ({ page }) => {
   await page.goto('/country/ESP/overview')
