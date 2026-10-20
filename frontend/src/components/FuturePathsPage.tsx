@@ -61,7 +61,16 @@ type ScenarioResponse = {
   model_status?: ScenarioModelStatus
 }
 
+type HistoricalSeries = {
+  indicator_id: string
+  name: string
+  unit: string
+  source_id: string
+  points: Array<{ period: number; value: number }>
+}
+
 type FuturePathsPageProps = {
+  historicalSeries: HistoricalSeries[]
   countryName: string
   currentIndicators: CurrentIndicator[]
   trajectory: TrajectoryResponse | null
@@ -122,6 +131,7 @@ export default function FuturePathsPage({
   currentIndicators,
   trajectory,
   scenarios,
+  historicalSeries,
   formatValue,
 }: FuturePathsPageProps) {
   const available = useMemo(() => {
@@ -159,11 +169,22 @@ export default function FuturePathsPage({
   const current = currentIndicators.find((item) => item.indicator_id === effectiveId)
   const selectedMeta = available.find((item) => item.id === effectiveId)
   const unit = selectedMeta?.unit ?? current?.unit ?? ''
+  const matchedHistory = historicalSeries.find((item) => item.indicator_id === effectiveId && item.unit === unit)
+  const historicPoints = [...(matchedHistory?.points ?? [])]
+    .filter((item) => Number.isFinite(item.value) && Number.isFinite(item.period))
+    .sort((a, b) => a.period - b.period)
+    .map((item) => ({ year: item.period, value: item.value }))
+  const historyBeforeForecast = historicPoints.filter((item) => !official.length || item.year < official[0].period)
+  const historicalChartPoints = historyBeforeForecast.length
+    ? historyBeforeForecast
+    : current ? [{ year: current.period, value: current.value }] : []
   const officialWithCurrent = [
-    ...(current ? [{ year: current.period, value: current.value }] : []),
+    ...(historicalChartPoints.length ? [historicalChartPoints[historicalChartPoints.length - 1]] : []),
     ...official.map((item) => ({ year: item.period, value: item.value })),
   ]
-  const officialBounds = boundsFor([officialWithCurrent])
+  const officialBounds = boundsFor([historicalChartPoints, officialWithCurrent])
+  const historyYearCount = historyBeforeForecast.length
+  const historyTrend = historyYearCount >= 2 ? historyBeforeForecast[historyYearCount - 1].value - historyBeforeForecast[0].value : null
   const latestOfficial = official.at(-1)
   const difference = current && latestOfficial ? latestOfficial.value - current.value : null
   const differenceUnit = unit === 'percent' || unit === 'percent_gdp' ? 'percentage points' : unit === 'index_eu27_2020_100' || unit.startsWith('index_') ? 'index points' : null
@@ -270,6 +291,7 @@ export default function FuturePathsPage({
                     </text>
                   </>
                 )}
+                {historyBeforeForecast.length >= 2 && <polyline className="historicalLine" points={pointsFor(historicalChartPoints, officialBounds)} />}
                 <polyline className="officialLine" points={pointsFor(officialWithCurrent, officialBounds)} />
                 {officialBounds && officialWithCurrent.map((item, index) => {
                   const point = pointFor(item, officialBounds)
@@ -283,6 +305,7 @@ export default function FuturePathsPage({
                 })}
               </svg>
               <div className="chartLegend">
+                {historyBeforeForecast.length >= 2 && <span>Historical · {historyBeforeForecast[0].year}–{historyBeforeForecast.at(-1)?.year}</span>}
                 {current && <span>Historical/current · {current.period}</span>}
                 <span>Official forecast · {official.map((item) => item.period).join(', ')}</span>
               </div>
@@ -294,7 +317,20 @@ export default function FuturePathsPage({
             </div>
           )}
 
-          <div className="outlookNumbers" aria-label="Official forecast numerical values">
+          <div className="outlookNumbers" aria-label="Historical evidence context">
+            <h4>Historical context · {selectedMeta?.name}</h4>
+            {historyBeforeForecast.length >= 2 ? (
+              <>
+                <p>{historyYearCount} recorded periods · {historyBeforeForecast[0].year}–{historyBeforeForecast.at(-1)?.year} · source: {matchedHistory?.source_id ?? 'Unavailable'}</p>
+                <p>Observed net change: {historyTrend === null ? 'Unavailable' : readableValue(historyTrend)}. This is a historical difference, not a forecast or a detected cycle.</p>
+                <table><thead><tr><th>Year</th><th>Recorded value</th></tr></thead><tbody>
+                  {historyBeforeForecast.map((item) => <tr key={item.year}><td>{item.year}</td><td>{readableValue(item.value)}</td></tr>)}
+                </tbody></table>
+              </>
+            ) : <p>Insufficient recorded history for trend or cycle analysis. Official projection remains shown separately; AUGUR scenarios are not historically calibrated.</p>}
+            <p>Historical changes can include cycles and structural breaks. No cycle detection, backtest or regime-change adjustment has been validated in this view.</p>
+          </div>
+                    <div className="outlookNumbers" aria-label="Official forecast numerical values">
             <h4>Observed and official projected values</h4>
             <table>
               <thead><tr><th>Period</th><th>Value ({unit.replaceAll('_', ' ')})</th><th>Evidence</th></tr></thead>

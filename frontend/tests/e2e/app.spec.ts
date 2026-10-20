@@ -3217,6 +3217,28 @@ test('Outlook compacts population chart labels but preserves exact evidence valu
   await expect(evidence).toContainText('49,590,099')
 })
 
+test('Outlook shows recorded history without implying cycle detection', async ({ page }) => {
+  await page.goto('/country/ESP/outlook')
+  const history = page.getByLabel('Historical evidence context')
+  await expect(history).toContainText('8 recorded periods')
+  await expect(history).toContainText('2018–2025')
+  await expect(history).toContainText('No cycle detection')
+})
+
+test('Outlook discloses insufficient history when no observations are returned', async ({ page }) => {
+  await page.route('**/api/countries/ESP/overview-series', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ country_iso3: 'ESP', series: [] }),
+    })
+  })
+  await page.goto('/country/ESP/outlook')
+  const history = page.getByLabel('Historical evidence context')
+  await expect(history).toContainText('Insufficient recorded history')
+  await expect(history).toContainText('No cycle detection')
+})
+
 test('Future Paths marks the forecast boundary and model status', async ({ page }) => {
   await page.goto('/country/ESP/outlook')
 

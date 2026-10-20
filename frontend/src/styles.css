@@ -6545,3 +6545,6 @@ body:has(.shell.detailsOpen) {
 .outlookNumbers p { margin: 9px 0 0; color: #b6cbd9; font-size: 12px; line-height: 1.5; }
 
 .forecastValueLabel { fill: #d9e8f4; font-size: 12px; font-weight: 600; paint-order: stroke; stroke: #06111a; stroke-width: 3px; stroke-linejoin: round; }
+
+/* Historical evidence must remain visually distinct from official projections. */
+.historicalLine { fill: none; stroke: #edb96b; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 5 4; }

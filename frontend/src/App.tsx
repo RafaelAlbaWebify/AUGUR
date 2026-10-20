@@ -599,7 +599,7 @@ export default function App() {
     const requiredKeys: Array<keyof CountryDataBundle> = ['snapshot']
     if (needsOverview) requiredKeys.push('trends', 'assessment', 'scenarios', 'overviewSeries')
     if (needsIndicators) requiredKeys.push('trends', 'sourceQuality', 'assessment', 'overviewSeries')
-    if (needsOutlook) requiredKeys.push('trends', 'trajectory', 'scenarios')
+    if (needsOutlook) requiredKeys.push('trends', 'trajectory', 'scenarios', 'overviewSeries')
 
     const setters: Record<keyof CountryDataBundle, (value: any) => void> = {
       snapshot: setSnapshot,
@@ -850,6 +850,7 @@ export default function App() {
           currentIndicators={enrichedIndicators}
           trajectory={trajectory}
           scenarios={scenarios}
+          historicalSeries={overviewSeries?.series ?? []}
           formatValue={formatValue}
         />
       )}
