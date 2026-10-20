@@ -3217,6 +3217,13 @@ test('Outlook compacts population chart labels but preserves exact evidence valu
   await expect(evidence).toContainText('49,590,099')
 })
 
+test('Outlook gives an explicit warning when historical observations are insufficient', async ({ page }) => {
+  await page.goto('/country/ESP/outlook')
+  await expect(page.getByLabel('Historical evidence context')).toBeVisible()
+  await expect(page.getByLabel('Historical evidence context')).toContainText('Insufficient recorded history')
+  await expect(page.getByLabel('Historical evidence context')).toContainText('No cycle detection')
+})
+
 test('Future Paths marks the forecast boundary and model status', async ({ page }) => {
   await page.goto('/country/ESP/outlook')
 
