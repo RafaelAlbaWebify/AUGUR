@@ -292,6 +292,13 @@ export default function FuturePathsPage({
                   </>
                 )}
                 {historyBeforeForecast.length >= 2 && <polyline className="historicalLine" points={pointsFor(historicalChartPoints, officialBounds)} />}
+                {officialBounds && historyBeforeForecast.length >= 2 && historyBeforeForecast
+                  .filter((item, index, all) => index === 0 || (index < all.length - 1 && item.year % 2 === 0))
+                  .map((item) => {
+                    const point = pointFor(item, officialBounds)
+                    return <text key={`historical-year-${item.year}`} className="forecastYearLabel" x={point.x} y="224" textAnchor="middle">{item.year}</text>
+                  })}
+
                 <polyline className="officialLine" points={pointsFor(officialWithCurrent, officialBounds)} />
                 {officialBounds && officialWithCurrent.map((item, index) => {
                   const point = pointFor(item, officialBounds)
