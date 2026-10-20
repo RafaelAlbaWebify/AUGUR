@@ -3254,7 +3254,10 @@ test('Future Paths marks the forecast boundary and model status', async ({ page 
   await expect(page.getByText('not probabilistic')).toBeVisible()
   await expect(page.locator('.forecastBoundary')).toHaveCount(1)
   await expect(page.getByText('forecast →')).toBeVisible()
-  await expect(page.locator('.forecastYearLabel')).toHaveCount(5)
+  const labels = page.getByRole('img', { name: 'Official forecast path' }).locator('.forecastYearLabel')
+  await expect(labels.filter({ hasText: '2018' })).toBeVisible()
+  await expect(labels.filter({ hasText: '2020' })).toBeVisible()
+  await expect(labels.filter({ hasText: '2030' })).toBeVisible()
 })
 
 test('Future Paths avoids fake model envelopes for contextual indicators', async ({ page }) => {
