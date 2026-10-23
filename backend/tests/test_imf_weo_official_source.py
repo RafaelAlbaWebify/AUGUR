@@ -2,7 +2,7 @@
 from io import BytesIO
 from openpyxl import Workbook
 import pytest
-from app.ingestion.imf_weo_official import normalize_official_weo,DATASET_VERSION
+from app.ingestion.imf_weo_official import normalize_official_weo,DATASET_VERSION,OfficialWEOAdapter
 from scripts.verify_weo_disposable_readthrough import verify_weo_roundtrip
 
 
@@ -62,3 +62,30 @@ def test_official_weo_parser_roundtrips_through_real_disposable_duckdb():
     assert result["expected_rows"]==result["stored_rows"]==6
     assert result["production_writes"]==0
     assert result["ranking_eligible"] is False
+
+
+def test_imf_sync_reports_accepted_scope_separately_from_blocked_metric():
+    adapter=OfficialWEOAdapter(client=object())
+    result=adapter.sync_countries(["ESP"], workbook=workbook())
+    assert result["complete"] is False  # existing conservative public policy
+    assert result["accepted_scope_complete"] is True
+    assert result["missing_requested_countries"] == []
+    assert result["blocked_metric_ids"] == ["imf_unemployment_rate"]
+    assert result["persisted"] is False
+
+
+def test_imf_sync_reports_missing_country_without_imputing_coverage():
+    adapter=OfficialWEOAdapter(client=object())
+    result=adapter.sync_countries(["ESP", "IRL"], workbook=workbook())
+    assert result["accepted_scope_complete"] is False
+    assert result["missing_requested_countries"] == ["IRL"]
+    assert result["country_count"] == 1
+
+
+def test_imf_sync_reports_ambiguous_actual_boundary_as_incomplete_scope():
+    adapter=OfficialWEOAdapter(client=object())
+    result=adapter.sync_countries(["ESP"], workbook=workbook(actual=None))
+    assert result["accepted_scope_complete"] is False
+    assert result["source_contract"]["missing_latest_actual_identifiers"] == [
+        {"country_iso3": "ESP", "indicator_id": "real_gdp_growth"}
+    ]
