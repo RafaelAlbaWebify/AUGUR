@@ -13,9 +13,9 @@
   "file_count": 353,
   "python_count": 313,
   "definition_count": 1625,
-  "reviewed_file_count": 296,
-  "stale_review_file_count": 4,
-  "line_by_line_review_percent": 83.85,
+  "reviewed_file_count": 295,
+  "stale_review_file_count": 5,
+  "line_by_line_review_percent": 83.57,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -5167,15 +5167,15 @@
     {
       "path": "backend/app/ingestion/imf_weo_official.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "87b97cf954040ff8f6f9ec1bb1299f6b3499470da5f06f8cb15df8151aef4f24",
-      "bytes": 6916,
-      "review_status": "verified_reviewed",
+      "sha256": "c3d03c4c1ad5fddfecbccb83437444fe0e8adbab9dc7db7701318f487ef22c24",
+      "bytes": 7193,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "normalize_official_weo",
           "kind": "function",
           "line_start": 25,
-          "line_end": 92,
+          "line_end": 94,
           "signature_arguments": [
             "workbook",
             "country_iso3s"
@@ -5184,15 +5184,15 @@
         {
           "symbol": "OfficialWEOAdapter",
           "kind": "class",
-          "line_start": 96,
-          "line_end": 140,
+          "line_start": 98,
+          "line_end": 142,
           "signature_arguments": []
         },
         {
           "symbol": "OfficialWEOAdapter.__init__",
           "kind": "function",
-          "line_start": 99,
-          "line_end": 102,
+          "line_start": 101,
+          "line_end": 104,
           "signature_arguments": [
             "self",
             "client"
@@ -5201,8 +5201,8 @@
         {
           "symbol": "OfficialWEOAdapter.close",
           "kind": "function",
-          "line_start": 104,
-          "line_end": 106,
+          "line_start": 106,
+          "line_end": 108,
           "signature_arguments": [
             "self"
           ]
@@ -5210,8 +5210,8 @@
         {
           "symbol": "OfficialWEOAdapter.fetch_workbook",
           "kind": "function",
-          "line_start": 108,
-          "line_end": 113,
+          "line_start": 110,
+          "line_end": 115,
           "signature_arguments": [
             "self"
           ]
@@ -5219,8 +5219,8 @@
         {
           "symbol": "OfficialWEOAdapter.sync_countries",
           "kind": "function",
-          "line_start": 115,
-          "line_end": 140,
+          "line_start": 117,
+          "line_end": 142,
           "signature_arguments": [
             "self",
             "country_iso3s"
@@ -5250,11 +5250,11 @@
         },
         {
           "module": "httpx",
-          "line": 100
+          "line": 102
         },
         {
           "module": "app.db.analytics",
-          "line": 123
+          "line": 125
         }
       ],
       "called_names": [
@@ -5286,6 +5286,7 @@
         "now",
         "raise_for_status",
         "set",
+        "sort",
         "sorted",
         "startswith",
         "str",
@@ -5294,7 +5295,7 @@
         "upsert_observations",
         "values"
       ],
-      "lines": 140,
+      "lines": 142,
       "resolved_local_imports": [
         "backend/app/db/analytics.py"
       ],
@@ -24148,8 +24149,8 @@
     {
       "path": "backend/tests/test_imf_weo_official_source.py",
       "bucket": "backend/tests",
-      "sha256": "2c3f5c2067677cd647611fe71a7972d740fb45f21f515eaac9ac69fd58f2a19d",
-      "bytes": 2520,
+      "sha256": "c28d45b0bd602af42bf4d583b4daeb2579fb40d3f02c0cefee9277325de49759",
+      "bytes": 2634,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -24184,21 +24185,21 @@
           "symbol": "test_missing_latest_actual_cannot_be_guessed",
           "kind": "function",
           "line_start": 46,
-          "line_end": 49,
+          "line_end": 50,
           "signature_arguments": []
         },
         {
           "symbol": "test_missing_country_is_not_imputed",
           "kind": "function",
-          "line_start": 52,
-          "line_end": 55,
+          "line_start": 53,
+          "line_end": 56,
           "signature_arguments": []
         },
         {
           "symbol": "test_official_weo_parser_roundtrips_through_real_disposable_duckdb",
           "kind": "function",
-          "line_start": 58,
-          "line_end": 63,
+          "line_start": 59,
+          "line_end": 64,
           "signature_arguments": []
         }
       ],
@@ -24237,7 +24238,7 @@
         "verify_weo_roundtrip",
         "workbook"
       ],
-      "lines": 63,
+      "lines": 64,
       "resolved_local_imports": [
         "backend/app/ingestion/imf_weo_official.py",
         "backend/scripts/verify_weo_disposable_readthrough.py"
