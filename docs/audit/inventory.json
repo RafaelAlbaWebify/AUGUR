@@ -12,10 +12,10 @@
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
   "file_count": 353,
   "python_count": 313,
-  "definition_count": 1624,
-  "reviewed_file_count": 298,
-  "stale_review_file_count": 2,
-  "line_by_line_review_percent": 84.42,
+  "definition_count": 1625,
+  "reviewed_file_count": 296,
+  "stale_review_file_count": 4,
+  "line_by_line_review_percent": 83.85,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -1977,15 +1977,15 @@
     {
       "path": "backend/app/db/write_contract.py",
       "bucket": "backend/app/db",
-      "sha256": "bcb13044426625235f1084736447066f4f5e09d15f0b40effc04a9dc5a2ab52e",
-      "bytes": 3697,
-      "review_status": "verified_reviewed",
+      "sha256": "32792e22879de4fc46132b03e137c2e1e001a11152b91f864ee8fd36714bd410",
+      "bytes": 3803,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "validate_write_batch",
           "kind": "function",
           "line_start": 10,
-          "line_end": 38,
+          "line_end": 41,
           "signature_arguments": [
             "rows"
           ]
@@ -1993,8 +1993,8 @@
         {
           "symbol": "validate_specialized_batch",
           "kind": "function",
-          "line_start": 41,
-          "line_end": 68,
+          "line_start": 44,
+          "line_end": 71,
           "signature_arguments": [
             "rows"
           ]
@@ -2011,7 +2011,7 @@
         },
         {
           "module": "app.db.analytics",
-          "line": 24
+          "line": 23
         }
       ],
       "called_names": [
@@ -2030,7 +2030,7 @@
         "tuple",
         "upper"
       ],
-      "lines": 68,
+      "lines": 71,
       "resolved_local_imports": [
         "backend/app/db/analytics.py"
       ],
@@ -25024,9 +25024,9 @@
     {
       "path": "backend/tests/test_observation_write_contract.py",
       "bucket": "backend/tests",
-      "sha256": "614f03d4caa8691d0d0e97db4c2ec64bf2fca4268f02879334ebafdc2bb7b4e1",
-      "bytes": 1726,
-      "review_status": "verified_reviewed",
+      "sha256": "7c9e34dbc122bdaf42916f77a341b85700e8a071a6b2f587ed97b7e874548240",
+      "bytes": 2234,
+      "review_status": "stale_review",
       "definitions": [
         {
           "symbol": "test_accepts_one_valid_observation",
@@ -25067,6 +25067,16 @@
           "line_start": 34,
           "line_end": 36,
           "signature_arguments": []
+        },
+        {
+          "symbol": "test_rejects_geography_whitespace_before_database_access",
+          "kind": "function",
+          "line_start": 48,
+          "line_end": 50,
+          "signature_arguments": [
+            "subnational",
+            "row"
+          ]
         }
       ],
       "imports": [
@@ -25086,7 +25096,7 @@
         "raises",
         "validate_write_batch"
       ],
-      "lines": 36,
+      "lines": 50,
       "resolved_local_imports": [
         "backend/app/db/write_contract.py"
       ],
