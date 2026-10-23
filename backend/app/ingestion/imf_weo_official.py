@@ -47,7 +47,7 @@ def normalize_official_weo(workbook: bytes, country_iso3s: set[str]) -> tuple[li
                "requested_countries":sorted(wanted),"accepted_series":METRICS,
                "blocked_indicator_ids":list(UNVERIFIED_UNIT_METRICS.values()),
                "blocked_reason":"LUR lacks explicit UNIT in verified official workbook metadata",
-               "missing_latest_actual_series":0,"rows_by_type":{"observed":0,"official_forecast":0},
+               "missing_latest_actual_series":0,"missing_latest_actual_identifiers":[],"rows_by_type":{"observed":0,"official_forecast":0},
                "countries_with_data":[],"production_writes":0}
         covered=set()
         for entry in iterator:
@@ -64,6 +64,7 @@ def normalize_official_weo(workbook: bytes, country_iso3s: set[str]) -> tuple[li
             cutoff=entry[columns["LATEST_ACTUAL_ANNUAL_DATA"]]
             if cutoff is None or isinstance(cutoff,bool) or not str(cutoff).isdigit() or int(cutoff)<1980:
                 stats["missing_latest_actual_series"]+=1
+                stats["missing_latest_actual_identifiers"].append({"country_iso3":code,"indicator_id":METRICS[series]})
                 continue
             cutoff=int(cutoff)
             for year,column in years.items():
@@ -85,6 +86,7 @@ def normalize_official_weo(workbook: bytes, country_iso3s: set[str]) -> tuple[li
                              "source_observation_status":None,"source_decimal":None})
                 stats["rows_by_type"][kind]+=1
                 covered.add(code)
+        stats["missing_latest_actual_identifiers"].sort(key=lambda item: (item["country_iso3"],item["indicator_id"]))
         stats["countries_with_data"]=sorted(covered)
         stats["observation_count"]=len(rows)
         return rows,stats
