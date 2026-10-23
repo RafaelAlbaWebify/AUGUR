@@ -47,6 +47,7 @@ def test_missing_latest_actual_cannot_be_guessed():
     rows,report=normalize_official_weo(workbook(actual=None),{"ESP"})
     assert len(rows)==3
     assert report["missing_latest_actual_series"]==1
+    assert report["missing_latest_actual_identifiers"]==[{"country_iso3":"ESP","indicator_id":"real_gdp_growth"}]
 
 
 def test_missing_country_is_not_imputed():
