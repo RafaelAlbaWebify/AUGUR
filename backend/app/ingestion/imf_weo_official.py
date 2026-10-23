@@ -120,6 +120,11 @@ class OfficialWEOAdapter:
         rows,stats=normalize_official_weo(payload,set(country_iso3s))
         if not rows:
             raise ValueError("No eligible official IMF WEO rows")
+        requested=set(stats["requested_countries"])
+        covered=set(stats["countries_with_data"])
+        missing_countries=sorted(requested-covered)
+        # Accepted-metric coverage is distinct from deliberately blocked LUR scope.
+        accepted_scope_complete=not missing_countries and not stats["missing_latest_actual_identifiers"]
         inserted=0
         if persist:
             from app.db.analytics import upsert_observations
@@ -132,6 +137,9 @@ class OfficialWEOAdapter:
             "rows":inserted if persist else len(rows),
             "persisted":persist,
             "complete":False,
+            "accepted_scope_complete":accepted_scope_complete,
+            "missing_requested_countries":missing_countries,
+            "blocked_metric_ids":sorted(UNVERIFIED_UNIT_METRICS.values()),
             "failure_count":len(UNVERIFIED_UNIT_METRICS),
             "failures":[{"indicator_id":name,"reason":stats["blocked_reason"]}
                         for name in UNVERIFIED_UNIT_METRICS.values()],
