@@ -1892,6 +1892,13 @@ test('Outlook labels contextual scenarios without implying statistical uncertain
   await expect(page.getByText('Official forecast / projection')).toBeVisible()
 })
 
+test('Compare warns when selected country observations use different years', async ({ page }) => {
+  await page.goto('/compare?countries=ESP,IRL')
+  const warnings = page.locator('.matrixPeriodWarning')
+  await expect(warnings.first()).toBeVisible()
+  await expect(warnings.first()).toContainText('Different observation years')
+})
+
 test('comparison remains neutral and aligned', async ({ page }) => {
   await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page.getByRole('columnheader', { name: 'Spain' })).toBeVisible()
