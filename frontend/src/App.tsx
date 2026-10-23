@@ -384,7 +384,7 @@ export default function App() {
   const [comparison, setComparison] = useState<ComparisonResponse | null>(null)
   const [personalizedComparison, setPersonalizedComparison] = useState<PersonalizedComparisonResponse | null>(null)
   const [compareCountries, setCompareCountries] = useState<string[]>(
-    route.kind === 'compare' ? route.countries : ['IRL', 'ESP', 'PRT'],
+    route.kind === 'compare' ? route.countries : ['ESP', 'IRL'],
   )
   const activeView = route.view
   const [error, setError] = useState<string | null>(null)

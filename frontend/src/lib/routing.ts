@@ -26,7 +26,7 @@ export type AugurRoute =
     }
 
 const DEFAULT_COUNTRY = 'ESP'
-const DEFAULT_COMPARE = ['IRL', 'ESP', 'PRT']
+const DEFAULT_COMPARE = ['ESP', 'IRL']
 
 function normalizedIso3(value: string | null | undefined) {
   const code = (value ?? '').toUpperCase()

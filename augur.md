@@ -1,3 +1,8 @@
+## FOCUSED MVP — SPAIN vs IRELAND — 2026-10-20
+- Product priority changed by user: stop expanding Outlook. Target a bounded **Spain (ESP) vs Ireland (IRL)** evidence-based decision comparison. Portugal is deferred, not deleted. Default Compare slots/routes now ESP and IRL. The existing 29-indicator comparison, source/period/unit metadata, category differences and guarded personal weighting should be reused, not rewritten.
+- MVP acceptance: (1) real comparison page loads ESP+IRL with no Portugal, (2) populated indicator pairs have country values, source and year; missing data shown as missing, (3) housing metrics are not misrepresented as actual rents or prices, (4) Ireland GDP distortion and non-comparable periods/provider distinctions are clearly cautioned, (5) never assert a numerical country winner without declared validated preferences, (6) one live local Windows browser check and release qualification. Avoid repeated screenshots for already-passed Outlook tests.
+- Outstanding GR-2 and scientific Outlook model questions remain recorded elsewhere; explicitly out of this bounded compare MVP. Preserve user's existing local data. Next after CI: merge if green; local pull main and review /compare?countries=ESP,IRL in actual browser.
+
 ## SESSION HANDOVER — 2026-10-18 — OUTLOOK READABILITY (STOP FOR TODAY)
 
 - User explicitly paused work for the day; PC may be shut down safely. No local AUGUR execution or database task needs to remain running. Next session should resume from this checkpoint instead of repeating previous diagnostics.
