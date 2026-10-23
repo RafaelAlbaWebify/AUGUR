@@ -9,7 +9,6 @@ import math
 
 def validate_write_batch(rows: list[dict], *, subnational: bool) -> None:
     seen: set[tuple] = set()
-    keys = ("geography_system", "geo_code", "indicator_id", "period", "source_id") if subnational else ("country_iso3", "indicator_id", "period", "source_id")
     for offset, row in enumerate(rows):
         value = row.get("value")
         if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
@@ -25,11 +24,15 @@ def validate_write_batch(rows: list[dict], *, subnational: bool) -> None:
             code = row.get("geo_code")
             if not isinstance(code, str) or not code.strip() or not isinstance(row.get("geo_level"), str) or not row["geo_level"].strip():
                 raise ValueError(f"Invalid subnational geography at row {offset}")
+            if code != code.strip():
+                raise ValueError(f"Invalid subnational geography whitespace at row {offset}")
             identity = (_subnational_geography_system(row), code.upper(), row["indicator_id"], period, row["source_id"])
         else:
             country = row.get("country_iso3")
             if not isinstance(country, str) or len(country) != 3 or not country.isalpha():
                 raise ValueError(f"Invalid national geography at row {offset}")
+            if country != country.strip():
+                raise ValueError(f"Invalid national geography whitespace at row {offset}")
             identity = (country.upper(), row["indicator_id"], period, row["source_id"])
             if not isinstance(row.get("observation_type"), str) or not row["observation_type"]:
                 raise ValueError(f"Missing observation_type at row {offset}")
