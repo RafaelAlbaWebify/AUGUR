@@ -34,3 +34,17 @@ def test_duplicate_region_identity_uses_same_normalized_case():
 def test_bad_later_row_rejects_entire_batch():
     with pytest.raises(ValueError, match="Invalid observation period"):
         validate_write_batch([dict(REGIONAL), dict(REGIONAL, period="2025")], subnational=True)
+
+
+@pytest.mark.parametrize(
+    "subnational,row",
+    [
+        (False, dict(NATIONAL, country_iso3=" ESP")),
+        (False, dict(NATIONAL, country_iso3="ESP ")),
+        (True, dict(REGIONAL, geo_code=" ES11")),
+        (True, dict(REGIONAL, geo_code="ES11 ")),
+    ],
+)
+def test_rejects_geography_whitespace_before_database_access(subnational, row):
+    with pytest.raises(ValueError, match="geography whitespace|Invalid national geography"):
+        validate_write_batch([row], subnational=subnational)
