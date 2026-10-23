@@ -12,7 +12,7 @@
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
   "file_count": 353,
   "python_count": 313,
-  "definition_count": 1625,
+  "definition_count": 1628,
   "reviewed_file_count": 295,
   "stale_review_file_count": 5,
   "line_by_line_review_percent": 83.57,
@@ -5167,8 +5167,8 @@
     {
       "path": "backend/app/ingestion/imf_weo_official.py",
       "bucket": "backend/app/ingestion",
-      "sha256": "c3d03c4c1ad5fddfecbccb83437444fe0e8adbab9dc7db7701318f487ef22c24",
-      "bytes": 7193,
+      "sha256": "46b06b0d6ffc9511b19c8d3c86e2cf88422ced4df7fecdd0430fd749ba067a69",
+      "bytes": 7735,
       "review_status": "stale_review",
       "definitions": [
         {
@@ -5185,7 +5185,7 @@
           "symbol": "OfficialWEOAdapter",
           "kind": "class",
           "line_start": 98,
-          "line_end": 142,
+          "line_end": 150,
           "signature_arguments": []
         },
         {
@@ -5220,7 +5220,7 @@
           "symbol": "OfficialWEOAdapter.sync_countries",
           "kind": "function",
           "line_start": 117,
-          "line_end": 142,
+          "line_end": 150,
           "signature_arguments": [
             "self",
             "country_iso3s"
@@ -5254,7 +5254,7 @@
         },
         {
           "module": "app.db.analytics",
-          "line": 125
+          "line": 130
         }
       ],
       "called_names": [
@@ -5295,7 +5295,7 @@
         "upsert_observations",
         "values"
       ],
-      "lines": 142,
+      "lines": 150,
       "resolved_local_imports": [
         "backend/app/db/analytics.py"
       ],
@@ -24149,8 +24149,8 @@
     {
       "path": "backend/tests/test_imf_weo_official_source.py",
       "bucket": "backend/tests",
-      "sha256": "c28d45b0bd602af42bf4d583b4daeb2579fb40d3f02c0cefee9277325de49759",
-      "bytes": 2634,
+      "sha256": "6d50fae0e3ad149eb6a7369d90abdd377a334f3f4a217123ba5ef127deae0da4",
+      "bytes": 3889,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -24201,6 +24201,27 @@
           "line_start": 59,
           "line_end": 64,
           "signature_arguments": []
+        },
+        {
+          "symbol": "test_imf_sync_reports_accepted_scope_separately_from_blocked_metric",
+          "kind": "function",
+          "line_start": 67,
+          "line_end": 74,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_imf_sync_reports_missing_country_without_imputing_coverage",
+          "kind": "function",
+          "line_start": 77,
+          "line_end": 82,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_imf_sync_reports_ambiguous_actual_boundary_as_incomplete_scope",
+          "kind": "function",
+          "line_start": 85,
+          "line_end": 91,
+          "signature_arguments": []
         }
       ],
       "imports": [
@@ -24227,18 +24248,21 @@
       ],
       "called_names": [
         "BytesIO",
+        "OfficialWEOAdapter",
         "Workbook",
         "append",
         "close",
         "getvalue",
         "len",
         "normalize_official_weo",
+        "object",
         "raises",
         "save",
+        "sync_countries",
         "verify_weo_roundtrip",
         "workbook"
       ],
-      "lines": 64,
+      "lines": 91,
       "resolved_local_imports": [
         "backend/app/ingestion/imf_weo_official.py",
         "backend/scripts/verify_weo_disposable_readthrough.py"
