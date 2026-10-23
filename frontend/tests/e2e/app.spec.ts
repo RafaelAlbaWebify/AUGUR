@@ -1892,6 +1892,30 @@ test('Outlook labels contextual scenarios without implying statistical uncertain
   await expect(page.getByText('Official forecast / projection')).toBeVisible()
 })
 
+test('Compare warns when selected country observations use different years', async ({ page }) => {
+  await page.route('**/api/compare?*', async (route) => {
+    const source = {
+      countries: [{ iso3: 'ESP', name: 'Spain' }, { iso3: 'IRL', name: 'Ireland' }],
+      indicator_count: 1,
+      indicators: [{
+        indicator_id: 'unemployment_rate',
+        name: 'Unemployment rate',
+        dimension: 'productive_capacity',
+        unit: 'percent',
+        countries: {
+          ESP: { period: 2025, value: 10.4, source_id: 'EUROSTAT' },
+          IRL: { period: 2024, value: 4.7, source_id: 'EUROSTAT' },
+        },
+      }],
+    }
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(source) })
+  })
+  await page.goto('/compare?countries=ESP,IRL')
+  const warnings = page.locator('.matrixPeriodWarning')
+  await expect(warnings.first()).toBeVisible()
+  await expect(warnings.first()).toContainText('Different observation years')
+})
+
 test('comparison remains neutral and aligned', async ({ page }) => {
   await page.getByRole('button', { name: 'Compare' }).click()
   await expect(page.getByRole('columnheader', { name: 'Spain' })).toBeVisible()

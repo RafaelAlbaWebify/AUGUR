@@ -115,9 +115,7 @@ function selectedSetPosition(
   if (!current) return null
   if (Math.abs(max - min) < 1e-9) return { label: 'Aligned', position: 50 }
 
-  const sorted = [...entries].sort((a, b) => a.value - b.value)
-  const rank = sorted.findIndex((entry) => entry.iso3 === iso3)
-  const label = rank === 0 ? 'Low' : rank === sorted.length - 1 ? 'High' : 'Mid'
+  const label = current.value === min ? 'Low' : current.value === max ? 'High' : 'Mid'
   const position = ((current.value - min) / (max - min)) * 100
   return { label, position }
 }
@@ -473,6 +471,9 @@ export default function ComparePanel({
                         <td>
                           <strong>{item.name}</strong>
                           <small className="matrixIndicatorNote">descriptive comparison · no winner implied</small>
+                          {new Set(selected.map((iso3) => item.countries[iso3]?.period).filter((year): year is number => year != null)).size > 1 && (
+                            <small className="matrixPeriodWarning">Different observation years · interpret with caution</small>
+                          )}
                         </td>
                         {selected.map((iso3) => {
                           const value = item.countries[iso3]
