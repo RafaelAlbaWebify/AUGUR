@@ -13,9 +13,9 @@
   "file_count": 353,
   "python_count": 313,
   "definition_count": 1624,
-  "reviewed_file_count": 299,
-  "stale_review_file_count": 1,
-  "line_by_line_review_percent": 84.7,
+  "reviewed_file_count": 298,
+  "stale_review_file_count": 2,
+  "line_by_line_review_percent": 84.42,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -31025,8 +31025,8 @@
     {
       "path": "frontend/src/App.tsx",
       "bucket": "frontend",
-      "sha256": "5c07a0bdb9a17018860a89bb5f2b2852032703899e960018b5d907c5f0e52120",
-      "bytes": 25483,
+      "sha256": "5262cca4fe26339edc05a8c678448f06e5ead847632d8ee49a5877a5c44dbe95",
+      "bytes": 25476,
       "review_status": "not_reviewed",
       "imported_by": []
     },
@@ -31169,9 +31169,9 @@
     {
       "path": "frontend/src/lib/routing.ts",
       "bucket": "frontend",
-      "sha256": "dc97a5e2c7e5e085eebb6bf01f49b469e3b6ed9d90bba060f5ebdbdc77e46dc8",
-      "bytes": 4441,
-      "review_status": "verified_reviewed",
+      "sha256": "0341566884856917f1909e2e01bf96f720e52fb94fd2f95ffd70497a8e663be1",
+      "bytes": 4434,
+      "review_status": "stale_review",
       "imported_by": []
     },
     {
@@ -31185,8 +31185,8 @@
     {
       "path": "frontend/tests/e2e/app.spec.ts",
       "bucket": "frontend",
-      "sha256": "24663d6134e33d3b0c942e4b481db439dd66db006c9f1509a86bad5fc732e27e",
-      "bytes": 159732,
+      "sha256": "2326134a77843820c7afbb7e59ccae604c523b2df33af7cca13b2b03b0332ef7",
+      "bytes": 159634,
       "review_status": "not_reviewed",
       "imported_by": []
     },
