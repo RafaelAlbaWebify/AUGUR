@@ -34,7 +34,14 @@ def missing_frontend_api_routes(root: Path) -> list[str]:
     frontend = root / "frontend" / "src" / "App.tsx"
     if not backend.exists() or not frontend.exists():
         return []
-    declared = {"/api" + route for route in API_ROUTE.findall(backend.read_text(encoding="utf-8"))}
+    main_file = root / "backend" / "app" / "main.py"
+    if not main_file.exists():
+        return ["Backend router registration missing: backend/app/main.py"]
+    main_source = main_file.read_text(encoding="utf-8")
+    prefixes = re.findall(r"""app\.include_router\(router,\s*prefix=["']([^"']+)["']\)""", main_source)
+    if len(prefixes) != 1:
+        return ["Cannot verify FastAPI router prefix in backend/app/main.py"]
+    declared = {prefixes[0] + route for route in API_ROUTE.findall(backend.read_text(encoding="utf-8"))}
     app = frontend.read_text(encoding="utf-8")
     requests = set()
     for match in FRONTEND_ROUTE.findall(app):
