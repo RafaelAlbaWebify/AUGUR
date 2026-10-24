@@ -20,6 +20,38 @@ TS_SUFFIXES = (".ts", ".tsx", ".js", ".jsx")
 TS_IGNORED = {"node_modules", "dist", "build", "test-results"}
 
 
+API_ROUTE = re.compile(r"""@router\\.(?:get|post|put|patch|delete)\\(\\s*['"](/[^'"]+)['"]""")
+FRONTEND_ROUTE = re.compile(r"""\\$\\{API_BASE\\}/api/([^\\x60'"]+)""")
+COUNTRY_TEMPLATE = re.compile(r"\\$\\{(?:selectedCountry|countryIso3|iso3)\\}")
+PATH_BUNDLE = re.compile(r"\\$\\{paths\\[key\\]\\}")
+
+
+def missing_frontend_api_routes(root: Path) -> list[str]:
+    """Check statically visible App API requests against declared FastAPI paths.
+
+    Dynamic provider URLs and runtime constructions remain explicitly outside this gate.
+    """
+    backend = root / "backend" / "app" / "api" / "routes.py"
+    frontend = root / "frontend" / "src" / "App.tsx"
+    if not backend.exists() or not frontend.exists():
+        return []
+    declared = set(API_ROUTE.findall(backend.read_text(encoding="utf-8")))
+    app = frontend.read_text(encoding="utf-8")
+    requests = set()
+    for match in FRONTEND_ROUTE.findall(app):
+        candidate = "/api/" + match.split("?", 1)[0]
+        candidate = COUNTRY_TEMPLATE.sub("{country_iso3}", candidate)
+        if PATH_BUNDLE.search(candidate):
+            # The country paths are defined in App; check every literal mapping.
+            values = re.search(r"const paths: Record<keyof CountryDataBundle, string> = \\{([^}]+)\\}", app)
+            if values:
+                for suffix in re.findall(r":\\s*'([a-z-]+)'", values.group(1)):
+                    requests.add(PATH_BUNDLE.sub(suffix, candidate))
+            continue
+        requests.add(candidate)
+    return sorted(path for path in requests if path not in declared)
+
+
 def unresolved_typescript_imports(root: Path) -> list[dict[str, str]]:
     """Catch missing literal relative imports; report rather than guessing dynamic paths."""
     source = root / "frontend" / "src"
@@ -133,9 +165,10 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", help="Git merge-base ref (no fetch performed)")
     parser.add_argument("--check-imports", action="store_true", help="Fail for unresolved literal relative frontend imports")
+    parser.add_argument("--check-api-routes", action="store_true", help="Fail when visible App API routes are absent from FastAPI")
     parser.add_argument("--changed-file", action="append", default=[], help="Repeat for explicit paths")
     args = parser.parse_args()
-    if not args.base and not args.changed_file and not args.check_imports:
+    if not args.base and not args.changed_file and not args.check_imports and not args.check_api_routes:
         parser.error("Provide --base, --changed-file, or --check-imports")
     changed = changed_from_git(args.base) if args.base else []
     changed += args.changed_file
@@ -143,8 +176,12 @@ def main() -> None:
     report = analyze(changed, inventory, typescript_edges(ROOT))
     if args.check_imports:
         report["unresolved_frontend_imports"] = unresolved_typescript_imports(ROOT)
+    if args.check_api_routes:
+        report["missing_frontend_api_routes"] = missing_frontend_api_routes(ROOT)
     print(json.dumps(report, indent=2, ensure_ascii=False))
     if args.check_imports and report["unresolved_frontend_imports"]:
+        raise SystemExit(1)
+    if args.check_api_routes and report["missing_frontend_api_routes"]:
         raise SystemExit(1)
 
 
