@@ -79,8 +79,25 @@ def test_api_route_gate_detects_deleted_endpoint_and_recovers(tmp_path):
         'const request = `${API_BASE}/api/compare?countries=${query}`',
         encoding='utf-8',
     )
+    main = backend.parent / 'main.py'
+    main.write_text('app.include_router(router, prefix="/api")\n', encoding='utf-8')
     routes = backend / 'routes.py'
     routes.write_text('@router.get("/health")\ndef health(): pass\n', encoding='utf-8')
     assert missing_frontend_api_routes(tmp_path) == ['/api/compare']
     routes.write_text('@router.get("/compare")\ndef compare(): pass\n', encoding='utf-8')
+    assert missing_frontend_api_routes(tmp_path) == []
+
+def test_router_prefix_configuration_drift_fails_contract(tmp_path):
+    backend = tmp_path / "backend" / "app" / "api"
+    frontend = tmp_path / "frontend" / "src"
+    backend.mkdir(parents=True)
+    frontend.mkdir(parents=True)
+    main = backend.parent / "main.py"
+    main.write_text('app.include_router(router, prefix="/api")\n', encoding="utf-8")
+    (backend / "routes.py").write_text('@router.get("/compare")\ndef compare(): pass\n', encoding="utf-8")
+    (frontend / "App.tsx").write_text('fetch(`${API_BASE}/api/compare`)', encoding="utf-8")
+    assert missing_frontend_api_routes(tmp_path) == []
+    main.write_text('app.include_router(router, prefix="/api/v2")\n', encoding="utf-8")
+    assert missing_frontend_api_routes(tmp_path) == ["/api/compare"]
+    main.write_text('app.include_router(router, prefix="/api")\n', encoding="utf-8")
     assert missing_frontend_api_routes(tmp_path) == []
