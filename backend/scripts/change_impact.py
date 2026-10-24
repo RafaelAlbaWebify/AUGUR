@@ -8,11 +8,43 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 INVENTORY = ROOT / "docs/audit/inventory.json"
+
+TS_IMPORT = re.compile(r"""(?:from\s+|import\s*\(\s*|require\s*\(\s*)['"]([.][^'"]+)['"]""")
+TS_SUFFIXES = (".ts", ".tsx", ".js", ".jsx")
+TS_IGNORED = {"node_modules", "dist", "build", "test-results"}
+
+
+def typescript_edges(root: Path) -> dict[str, list[str]]:
+    """Resolve literal relative TS/JS imports; dynamic patterns remain out of scope."""
+    source = root / "frontend" / "src"
+    if not source.exists():
+        return {}
+    candidates = {path.resolve(): path.relative_to(root).as_posix()
+                  for path in source.rglob("*")
+                  if path.is_file() and path.suffix in TS_SUFFIXES
+                  and not TS_IGNORED.intersection(path.parts)}
+    reverse: dict[str, set[str]] = {}
+    for absolute, importer in candidates.items():
+        try:
+            content = absolute.read_text(encoding="utf-8")
+        except UnicodeError:
+            continue
+        for target in TS_IMPORT.findall(content):
+            base = (absolute.parent / target).resolve()
+            possible = [base, *[Path(str(base) + suffix) for suffix in TS_SUFFIXES],
+                        *[base / ("index" + suffix) for suffix in TS_SUFFIXES]]
+            for candidate in possible:
+                if candidate in candidates:
+                    reverse.setdefault(candidates[candidate], set()).add(importer)
+                    break
+    return {key: sorted(value) for key, value in reverse.items()}
+
 
 CRITICAL = {
     "frontend/src/components/ComparePanel.tsx": (
@@ -39,12 +71,12 @@ def changed_from_git(base: str) -> list[str]:
     return sorted(set(result.stdout.splitlines()))
 
 
-def analyze(changed: list[str], inventory: dict) -> dict:
+def analyze(changed: list[str], inventory: dict, ts_reverse: dict[str, list[str]] | None = None) -> dict:
     indexed = {entry["path"]: entry for entry in inventory.get("files", [])}
     results = []
     for path in sorted(set(changed)):
         entry = indexed.get(path, {})
-        importers = entry.get("imported_by", [])
+        importers = sorted(set(entry.get("imported_by", []) + (ts_reverse or {}).get(path, [])))
         imports = entry.get("resolved_local_imports", [])
         contracts = list(CRITICAL.get(path, ()))
         tests = sorted(set(
@@ -69,7 +101,7 @@ def analyze(changed: list[str], inventory: dict) -> dict:
             "test_hints": relevant_tests, "uncovered_risks": risks,
         })
     return {
-        "method": "existing audited Python import graph + explicit cross-boundary hints",
+        "method": "audited Python import graph + literal relative TS/JS imports + cross-boundary hints",
         "complete_graph": False, "changed_files": len(results),
         "items": results,
     }
@@ -85,7 +117,7 @@ def main() -> None:
     changed = changed_from_git(args.base) if args.base else []
     changed += args.changed_file
     inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    print(json.dumps(analyze(changed, inventory), indent=2, ensure_ascii=False))
+    print(json.dumps(analyze(changed, inventory, typescript_edges(ROOT)), indent=2, ensure_ascii=False))
 
 
 if __name__ == "__main__":
