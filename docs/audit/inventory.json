@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 355,
-  "python_count": 315,
-  "definition_count": 1642,
+  "file_count": 357,
+  "python_count": 317,
+  "definition_count": 1650,
   "reviewed_file_count": 294,
   "stale_review_file_count": 6,
-  "line_by_line_review_percent": 82.82,
+  "line_by_line_review_percent": 82.35,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 103,
-    "backend/tests": 130,
+    "backend/scripts": 104,
+    "backend/tests": 131,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -43,8 +43,8 @@
     {
       "path": ".github/workflows/ci.yml",
       "bucket": "github/workflows",
-      "sha256": "9dc67c5f23210806d4070785250944ce63bd388f41de10f2faef313ced18b567",
-      "bytes": 3656,
+      "sha256": "e92ca613b89303d509dad2cd920a8bf2ffbf9b4f5bf293a8b0bb7bcb60839374",
+      "bytes": 3778,
       "review_status": "stale_review",
       "imported_by": []
     },
@@ -7723,6 +7723,7 @@
       ],
       "imported_by": [
         "backend/app/api/routes.py",
+        "backend/scripts/check_compare_contract.py",
         "backend/tests/test_compare.py"
       ]
     },
@@ -11937,6 +11938,118 @@
       "resolved_local_imports": [],
       "imported_by": [
         "backend/tests/test_change_impact.py"
+      ]
+    },
+    {
+      "path": "backend/scripts/check_compare_contract.py",
+      "bucket": "backend/scripts",
+      "sha256": "5de9f5e3090ff6c30e07e8cb31de68f84ff5dc3d3478e32a4c4d5757cd9d6738",
+      "bytes": 4098,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "interface_fields",
+          "kind": "function",
+          "line_start": 22,
+          "line_end": 48,
+          "signature_arguments": [
+            "source",
+            "type_name"
+          ]
+        },
+        {
+          "symbol": "verify_compare_shape",
+          "kind": "function",
+          "line_start": 51,
+          "line_end": 81,
+          "signature_arguments": [
+            "payload",
+            "ts_source"
+          ]
+        },
+        {
+          "symbol": "verify_compare_shape.require",
+          "kind": "function",
+          "line_start": 58,
+          "line_end": 64,
+          "signature_arguments": [
+            "record",
+            "fields",
+            "location"
+          ]
+        },
+        {
+          "symbol": "fixture_response",
+          "kind": "function",
+          "line_start": 84,
+          "line_end": 92,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "main",
+          "kind": "function",
+          "line_start": 95,
+          "line_end": 99,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 7
+        },
+        {
+          "module": "re",
+          "line": 9
+        },
+        {
+          "module": "pathlib",
+          "line": 10
+        },
+        {
+          "module": "app.services.compare",
+          "line": 85
+        }
+      ],
+      "called_names": [
+        "Path",
+        "SystemExit",
+        "ValueError",
+        "add",
+        "append",
+        "build_comparison",
+        "count",
+        "dict",
+        "end",
+        "enumerate",
+        "escape",
+        "fixture_response",
+        "get",
+        "group",
+        "interface_fields",
+        "isinstance",
+        "items",
+        "join",
+        "len",
+        "main",
+        "match",
+        "print",
+        "read_text",
+        "require",
+        "resolve",
+        "search",
+        "set",
+        "sorted",
+        "splitlines",
+        "strip",
+        "verify_compare_shape"
+      ],
+      "lines": 103,
+      "resolved_local_imports": [
+        "backend/app/services/compare.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_compare_cross_layer_contract.py"
       ]
     },
     {
@@ -20725,6 +20838,63 @@
       "lines": 36,
       "resolved_local_imports": [
         "backend/app/services/compare.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_compare_cross_layer_contract.py",
+      "bucket": "backend/tests",
+      "sha256": "bd811b00636a5d90ad8a8bee06de195ccd5b0f508e4556f3336723f09765ed7d",
+      "bytes": 1060,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_current_compare_response_matches_frontend_types",
+          "kind": "function",
+          "line_start": 8,
+          "line_end": 9,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_deleted_backend_field_is_detected",
+          "kind": "function",
+          "line_start": 12,
+          "line_end": 16,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_renamed_frontend_field_is_detected",
+          "kind": "function",
+          "line_start": 19,
+          "line_end": 24,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "copy",
+          "line": 2
+        },
+        {
+          "module": "pathlib",
+          "line": 3
+        },
+        {
+          "module": "scripts.check_compare_contract",
+          "line": 5
+        }
+      ],
+      "called_names": [
+        "any",
+        "deepcopy",
+        "fixture_response",
+        "read_text",
+        "replace",
+        "verify_compare_shape"
+      ],
+      "lines": 24,
+      "resolved_local_imports": [
+        "backend/scripts/check_compare_contract.py"
       ],
       "imported_by": []
     },
