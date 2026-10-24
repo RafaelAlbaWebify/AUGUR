@@ -3772,3 +3772,30 @@ test('regional sector context appears for selected NUTS2 region', async ({ page 
   await expect(page.getByText('J · Information and communication')).toBeVisible()
   await expect(page.getByText('7.0%')).toBeVisible()
 })
+
+test('decision insights exclude population and visibly tied safety values are aligned', async ({ page }) => {
+  await page.route('**/api/compare?*', async (route) => {
+    const make = (indicator_id: string, name: string, unit: string, esp: number, irl: number) => ({
+      indicator_id, name, dimension: 'safety', unit,
+      countries: {
+        ESP: { period: 2024, value: esp, source_id: 'EUROSTAT' },
+        IRL: { period: 2024, value: irl, source_id: 'EUROSTAT' },
+      },
+    })
+    const indicators = [
+      make('population_total', 'Population, total', 'persons', 49590099, 5510565),
+      make('homicide_rate', 'Police-recorded intentional homicides', 'per_100k_people', 0.74, 0.71),
+      make('unemployment_rate', 'Unemployment rate', 'percent', 10.5, 4.7),
+    ]
+    await route.fulfill({ status: 200, contentType: 'application/json',
+      body: JSON.stringify({ countries: [{ iso3: 'ESP', name: 'Spain' }, { iso3: 'IRL', name: 'Ireland' }],
+        indicator_count: indicators.length, indicators }) })
+  })
+  await page.goto('/compare?countries=ESP,IRL')
+  const homicide = page.getByRole('row').filter({ hasText: 'Police-recorded intentional homicides' })
+  await expect(homicide.locator('.matrixPositionBadge')).toHaveText(['Aligned', 'Aligned'])
+  await expect(homicide).toContainText('0.7 /100k')
+  await expect(page.getByText('Largest relative spreads')).toBeVisible()
+  const insights = page.locator('.decisionInsightCard')
+  await expect(page.getByText('Population totals are excluded because country size is contextual', { exact: false })).toBeVisible()
+})
