@@ -20,6 +20,28 @@ TS_SUFFIXES = (".ts", ".tsx", ".js", ".jsx")
 TS_IGNORED = {"node_modules", "dist", "build", "test-results"}
 
 
+def unresolved_typescript_imports(root: Path) -> list[dict[str, str]]:
+    """Catch missing literal relative imports; report rather than guessing dynamic paths."""
+    source = root / "frontend" / "src"
+    if not source.exists():
+        return []
+    problems: list[dict[str, str]] = []
+    for importer in sorted(source.rglob("*")):
+        if not importer.is_file() or importer.suffix not in TS_SUFFIXES:
+            continue
+        if TS_IGNORED.intersection(importer.parts):
+            continue
+        content = importer.read_text(encoding="utf-8")
+        for specifier in TS_IMPORT.findall(content):
+            base = (importer.parent / specifier).resolve()
+            choices = [base, *[Path(str(base) + suffix) for suffix in TS_SUFFIXES],
+                       *[base / ("index" + suffix) for suffix in TS_SUFFIXES]]
+            if not any(candidate.is_file() for candidate in choices):
+                problems.append({"importer": importer.relative_to(root).as_posix(),
+                                 "specifier": specifier})
+    return problems
+
+
 def typescript_edges(root: Path) -> dict[str, list[str]]:
     """Resolve literal relative TS/JS imports; dynamic patterns remain out of scope."""
     source = root / "frontend" / "src"
@@ -110,14 +132,20 @@ def analyze(changed: list[str], inventory: dict, ts_reverse: dict[str, list[str]
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--base", help="Git merge-base ref (no fetch performed)")
+    parser.add_argument("--check-imports", action="store_true", help="Fail for unresolved literal relative frontend imports")
     parser.add_argument("--changed-file", action="append", default=[], help="Repeat for explicit paths")
     args = parser.parse_args()
-    if not args.base and not args.changed_file:
-        parser.error("Provide --base or --changed-file")
+    if not args.base and not args.changed_file and not args.check_imports:
+        parser.error("Provide --base, --changed-file, or --check-imports")
     changed = changed_from_git(args.base) if args.base else []
     changed += args.changed_file
     inventory = json.loads(INVENTORY.read_text(encoding="utf-8"))
-    print(json.dumps(analyze(changed, inventory, typescript_edges(ROOT)), indent=2, ensure_ascii=False))
+    report = analyze(changed, inventory, typescript_edges(ROOT))
+    if args.check_imports:
+        report["unresolved_frontend_imports"] = unresolved_typescript_imports(ROOT)
+    print(json.dumps(report, indent=2, ensure_ascii=False))
+    if args.check_imports and report["unresolved_frontend_imports"]:
+        raise SystemExit(1)
 
 
 if __name__ == "__main__":
