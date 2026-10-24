@@ -59,6 +59,9 @@ jobs:
       - name: Audit every central observation write path
         run: python -m scripts.audit_ingestion_write_paths
 
+      - name: Verify frontend/backend comparison response contract
+        run: python -m scripts.check_compare_contract
+
       - name: Run backend tests
         run: python -m pytest
 
