@@ -57,6 +57,23 @@ def audit_source(source: str) -> dict:
                    "validate_specialized_batch" if group=="specialized" else "isfinite")
         if validator not in calls:
             issues.append(f"{name}: missing batch validation {validator}")
+        if group in {"generic", "specialized"}:
+            # A validator must run before the first persistent connection.
+            # Presence-only checks previously accepted validation after DB access.
+            validator_lines = [
+                child.lineno for child in ast.walk(fn)
+                if isinstance(child, ast.Call)
+                and (child.func.id if isinstance(child.func, ast.Name) else
+                     child.func.attr if isinstance(child.func, ast.Attribute) else None) == validator
+            ]
+            connection_lines = [
+                child.lineno for child in ast.walk(fn)
+                if isinstance(child, ast.Call)
+                and isinstance(child.func, ast.Attribute)
+                and child.func.attr == "connect"
+            ]
+            if validator_lines and connection_lines and min(validator_lines) >= min(connection_lines):
+                issues.append(f"{name}: batch validation must precede database connection")
         if group=="sector" and "add" not in calls:
             issues.append(f"{name}: duplicate-key detection missing")
         for action in ("BEGIN TRANSACTION","COMMIT","ROLLBACK"):
