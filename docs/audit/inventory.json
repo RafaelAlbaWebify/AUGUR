@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 361,
-  "python_count": 321,
-  "definition_count": 1666,
+  "file_count": 363,
+  "python_count": 323,
+  "definition_count": 1669,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 80.89,
+  "line_by_line_review_percent": 80.44,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 105,
-    "backend/tests": 134,
+    "backend/scripts": 106,
+    "backend/tests": 135,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -980,6 +980,7 @@
         "backend/scripts/build_eures_market_evidence.py",
         "backend/scripts/build_eures_market_evidence_from_annex.py",
         "backend/scripts/ensure_local_evidence.py",
+        "backend/scripts/export_compare_evidence.py",
         "backend/scripts/export_ranking_evidence_audit.py",
         "backend/scripts/export_ranking_vintage_audit.py",
         "backend/scripts/import_cedefop_clssi.py",
@@ -12654,6 +12655,89 @@
       "imported_by": []
     },
     {
+      "path": "backend/scripts/export_compare_evidence.py",
+      "bucket": "backend/scripts",
+      "sha256": "a45e381bb8ddff469afec4772c493675a3875ec016a2fd6615f4ba7462c147a2",
+      "bytes": 3522,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "collect",
+          "kind": "function",
+          "line_start": 16,
+          "line_end": 58,
+          "signature_arguments": [
+            "path"
+          ]
+        },
+        {
+          "symbol": "main",
+          "kind": "function",
+          "line_start": 61,
+          "line_end": 73,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 6
+        },
+        {
+          "module": "argparse",
+          "line": 7
+        },
+        {
+          "module": "json",
+          "line": 8
+        },
+        {
+          "module": "pathlib",
+          "line": 9
+        },
+        {
+          "module": "duckdb",
+          "line": 10
+        },
+        {
+          "module": "app.core.config",
+          "line": 11
+        }
+      ],
+      "called_names": [
+        "ArgumentParser",
+        "add_argument",
+        "close",
+        "collect",
+        "connect",
+        "dict",
+        "dumps",
+        "error",
+        "execute",
+        "fetchall",
+        "is_file",
+        "isoformat",
+        "len",
+        "list",
+        "lower",
+        "main",
+        "mkdir",
+        "parse_args",
+        "print",
+        "str",
+        "sum",
+        "write_text",
+        "zip"
+      ],
+      "lines": 77,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_export_compare_evidence.py"
+      ]
+    },
+    {
       "path": "backend/scripts/export_geography_coverage.py",
       "bucket": "backend/scripts",
       "sha256": "5af617a210934ca0fd8a59b96750ed6dbda1b98baad728fc5ce328afa65da443",
@@ -23640,6 +23724,48 @@
       "lines": 51,
       "resolved_local_imports": [
         "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_export_compare_evidence.py",
+      "bucket": "backend/tests",
+      "sha256": "1dbd232b430638ecf5e16f8a0ed94756aa1843ff9abf831264a717711cd7c2b1",
+      "bytes": 2268,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_export_matches_compare_source_priority_and_observed_boundary",
+          "kind": "function",
+          "line_start": 6,
+          "line_end": 43,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "duckdb",
+          "line": 2
+        },
+        {
+          "module": "scripts.export_compare_evidence",
+          "line": 3
+        }
+      ],
+      "called_names": [
+        "close",
+        "collect",
+        "connect",
+        "execute",
+        "fetchone",
+        "startswith",
+        "str"
+      ],
+      "lines": 43,
+      "resolved_local_imports": [
+        "backend/scripts/export_compare_evidence.py"
       ],
       "imported_by": []
     },
