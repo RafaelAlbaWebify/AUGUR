@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 360,
-  "python_count": 320,
-  "definition_count": 1662,
+  "file_count": 361,
+  "python_count": 321,
+  "definition_count": 1666,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 81.11,
+  "line_by_line_review_percent": 80.89,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 105,
-    "backend/tests": 133,
+    "backend/tests": 134,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -172,6 +172,7 @@
       "lines": 0,
       "resolved_local_imports": [],
       "imported_by": [
+        "backend/tests/test_compare_http_acceptance.py",
         "backend/tests/test_health.py"
       ]
     },
@@ -7726,7 +7727,8 @@
         "backend/app/api/routes.py",
         "backend/scripts/benchmark_compare.py",
         "backend/scripts/check_compare_contract.py",
-        "backend/tests/test_compare.py"
+        "backend/tests/test_compare.py",
+        "backend/tests/test_compare_http_acceptance.py"
       ]
     },
     {
@@ -12151,7 +12153,8 @@
         "backend/app/services/compare.py"
       ],
       "imported_by": [
-        "backend/tests/test_compare_cross_layer_contract.py"
+        "backend/tests/test_compare_cross_layer_contract.py",
+        "backend/tests/test_compare_http_acceptance.py"
       ]
     },
     {
@@ -21078,6 +21081,92 @@
       ],
       "lines": 24,
       "resolved_local_imports": [
+        "backend/scripts/check_compare_contract.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_compare_http_acceptance.py",
+      "bucket": "backend/tests",
+      "sha256": "f0647f35944264d72e9bb5f2548ee295a5c215ca543c1f2be2a1f61b13643cb3",
+      "bytes": 2313,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "_client",
+          "kind": "function",
+          "line_start": 12,
+          "line_end": 32,
+          "signature_arguments": [
+            "monkeypatch"
+          ]
+        },
+        {
+          "symbol": "_client.comparison",
+          "kind": "function",
+          "line_start": 16,
+          "line_end": 28,
+          "signature_arguments": [
+            "requested"
+          ]
+        },
+        {
+          "symbol": "test_http_compare_preserves_cross_layer_payload_and_mixed_years",
+          "kind": "function",
+          "line_start": 35,
+          "line_end": 45,
+          "signature_arguments": [
+            "monkeypatch"
+          ]
+        },
+        {
+          "symbol": "test_http_compare_rejects_missing_or_unknown_country_without_500",
+          "kind": "function",
+          "line_start": 48,
+          "line_end": 52,
+          "signature_arguments": [
+            "monkeypatch"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "fastapi",
+          "line": 5
+        },
+        {
+          "module": "fastapi.testclient",
+          "line": 6
+        },
+        {
+          "module": "app.api",
+          "line": 7
+        },
+        {
+          "module": "app.services.compare",
+          "line": 8
+        },
+        {
+          "module": "scripts.check_compare_contract",
+          "line": 9
+        }
+      ],
+      "called_names": [
+        "FastAPI",
+        "TestClient",
+        "_client",
+        "build_comparison",
+        "get",
+        "include_router",
+        "json",
+        "read_text",
+        "setattr",
+        "verify_compare_shape"
+      ],
+      "lines": 52,
+      "resolved_local_imports": [
+        "backend/app/api/__init__.py",
+        "backend/app/services/compare.py",
         "backend/scripts/check_compare_contract.py"
       ],
       "imported_by": []
