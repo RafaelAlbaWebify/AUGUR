@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 357,
-  "python_count": 317,
-  "definition_count": 1650,
+  "file_count": 359,
+  "python_count": 319,
+  "definition_count": 1656,
   "reviewed_file_count": 294,
   "stale_review_file_count": 6,
-  "line_by_line_review_percent": 82.35,
+  "line_by_line_review_percent": 81.89,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 104,
-    "backend/tests": 131,
+    "backend/scripts": 105,
+    "backend/tests": 132,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -43,8 +43,8 @@
     {
       "path": ".github/workflows/ci.yml",
       "bucket": "github/workflows",
-      "sha256": "e92ca613b89303d509dad2cd920a8bf2ffbf9b4f5bf293a8b0bb7bcb60839374",
-      "bytes": 3778,
+      "sha256": "d7150dc9b7773d35bb8b67f748431a2d0aa4467fe57ef3983874c74e8054f9cb",
+      "bytes": 3909,
       "review_status": "stale_review",
       "imported_by": []
     },
@@ -7723,6 +7723,7 @@
       ],
       "imported_by": [
         "backend/app/api/routes.py",
+        "backend/scripts/benchmark_compare.py",
         "backend/scripts/check_compare_contract.py",
         "backend/tests/test_compare.py"
       ]
@@ -11529,6 +11530,104 @@
       "lines": 149,
       "resolved_local_imports": [],
       "imported_by": []
+    },
+    {
+      "path": "backend/scripts/benchmark_compare.py",
+      "bucket": "backend/scripts",
+      "sha256": "a872f9a4a39e2e3b0852d028a047ea6839081a1561f422955ae65ba40f384188",
+      "bytes": 2632,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "fixture",
+          "kind": "function",
+          "line_start": 18,
+          "line_end": 29,
+          "signature_arguments": [
+            "count"
+          ]
+        },
+        {
+          "symbol": "benchmark",
+          "kind": "function",
+          "line_start": 32,
+          "line_end": 56,
+          "signature_arguments": [
+            "iterations",
+            "indicators"
+          ]
+        },
+        {
+          "symbol": "main",
+          "kind": "function",
+          "line_start": 59,
+          "line_end": 64,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 7
+        },
+        {
+          "module": "argparse",
+          "line": 9
+        },
+        {
+          "module": "json",
+          "line": 10
+        },
+        {
+          "module": "statistics",
+          "line": 11
+        },
+        {
+          "module": "time",
+          "line": 12
+        },
+        {
+          "module": "tracemalloc",
+          "line": 13
+        },
+        {
+          "module": "app.services.compare",
+          "line": 15
+        }
+      ],
+      "called_names": [
+        "ArgumentParser",
+        "AssertionError",
+        "ValueError",
+        "add_argument",
+        "append",
+        "benchmark",
+        "build_comparison",
+        "dumps",
+        "fixture",
+        "float",
+        "get_traced_memory",
+        "int",
+        "len",
+        "main",
+        "median",
+        "min",
+        "parse_args",
+        "perf_counter_ns",
+        "print",
+        "range",
+        "round",
+        "sorted",
+        "start",
+        "stop"
+      ],
+      "lines": 68,
+      "resolved_local_imports": [
+        "backend/app/services/compare.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_benchmark_compare.py"
+      ]
     },
     {
       "path": "backend/scripts/build_eures_market_evidence.py",
@@ -19289,6 +19388,61 @@
         "backend/app/ingestion/eurostat.py",
         "backend/app/ingestion/eurostat_geography_discovery.py",
         "backend/app/ingestion/eurostat_regional_sector.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_benchmark_compare.py",
+      "bucket": "backend/tests",
+      "sha256": "e5d075c3a0e74a19312b3d508a19241cc5f811accde64fb750470aa232b71f60",
+      "bytes": 956,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_two_country_fixture_has_unique_29_indicator_records",
+          "kind": "function",
+          "line_start": 6,
+          "line_end": 9,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_benchmark_reports_reproducible_units_without_claiming_speedup",
+          "kind": "function",
+          "line_start": 12,
+          "line_end": 19,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_invalid_benchmark_workload_fails",
+          "kind": "function",
+          "line_start": 23,
+          "line_end": 25,
+          "signature_arguments": [
+            "iterations",
+            "indicators"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "pytest",
+          "line": 2
+        },
+        {
+          "module": "scripts.benchmark_compare",
+          "line": 3
+        }
+      ],
+      "called_names": [
+        "benchmark",
+        "fixture",
+        "len",
+        "parametrize",
+        "raises"
+      ],
+      "lines": 25,
+      "resolved_local_imports": [
+        "backend/scripts/benchmark_compare.py"
       ],
       "imported_by": []
     },
