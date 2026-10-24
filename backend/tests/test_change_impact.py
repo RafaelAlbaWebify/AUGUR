@@ -1,5 +1,5 @@
 """Change impact harness contracts: pure, no repo mutations or network needed."""
-from scripts.change_impact import analyze
+from scripts.change_impact import analyze, typescript_edges
 
 
 def test_python_import_graph_exposes_callers_and_tests():
@@ -35,3 +35,26 @@ def test_stale_review_requires_explicit_warning():
                          "review_status":"stale_review"}]}
     item=analyze(["backend/app/example.py"],inventory)["items"][0]
     assert any("invalidated" in reason for reason in item["uncovered_risks"])
+
+
+def test_typescript_relative_imports_resolve_reverse_consumers(tmp_path):
+    root=tmp_path
+    source=root / "frontend" / "src"
+    (source / "components").mkdir(parents=True)
+    (source / "components" / "ComparePanel.tsx").write_text("export default 1", encoding="utf-8")
+    (source / "App.tsx").write_text(
+        'import ComparePanel from "./components/ComparePanel"\\n', encoding="utf-8"
+    )
+    edges=typescript_edges(root)
+    assert edges["frontend/src/components/ComparePanel.tsx"] == ["frontend/src/App.tsx"]
+    result=analyze(["frontend/src/components/ComparePanel.tsx"],
+                   {"files":[]},edges)
+    assert "frontend/src/App.tsx" in result["items"][0]["importers"]
+
+
+def test_dynamic_typescript_import_is_not_assumed_to_be_resolved(tmp_path):
+    source=tmp_path / "frontend" / "src"
+    source.mkdir(parents=True)
+    (source / "source.ts").write_text("export const x = 1", encoding="utf-8")
+    (source / "load.ts").write_text("import(pathFromUser)", encoding="utf-8")
+    assert typescript_edges(tmp_path) == {}
