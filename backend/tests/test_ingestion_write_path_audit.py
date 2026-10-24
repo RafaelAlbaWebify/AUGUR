@@ -35,3 +35,17 @@ def test_missing_batch_validation_rejected():
                                        "list(rows)",1))
     assert result["status"]=="failed"
     assert any("missing batch validation" in x for x in result["issues"])
+
+
+def test_validation_after_database_connection_is_rejected():
+    source = current_analytics()
+    old = "validate_write_batch(rows, subnational=True)"
+    assert old in source
+    mutated = source.replace(
+        old, "duckdb.connect(str(settings.duckdb_path)).close()\n    " + old, 1
+    )
+    result = audit_source(mutated)
+    assert result["status"] == "failed"
+    assert any("upsert_subnational_observations: batch validation must precede database connection"
+               in issue for issue in result["issues"])
+    assert audit_source(source)["status"] == "passed"
