@@ -31803,8 +31803,8 @@
     {
       "path": "frontend/src/components/ComparePanel.tsx",
       "bucket": "frontend",
-      "sha256": "2e67bc0c603bb649c0e89284cb4f4a5b09e46fd8e4d4be6daf7f2669527117cc",
-      "bytes": 24836,
+      "sha256": "a79b19840cf7820238c7fd3a4099b12297720d9df7634cbeb446cedb397f8af8",
+      "bytes": 25300,
       "review_status": "not_reviewed",
       "imported_by": []
     },
@@ -31955,8 +31955,8 @@
     {
       "path": "frontend/tests/e2e/app.spec.ts",
       "bucket": "frontend",
-      "sha256": "54a293fda67f0fb8c4e70c5ed86bb3a6838d39d5ace4a9a8bf4de80abcb3521f",
-      "bytes": 160775,
+      "sha256": "190a1cbdd2c3877ca81c9b0655b8b9b172e2c7b50e2acf9b3d8d00abbeae3b2f",
+      "bytes": 162359,
       "review_status": "not_reviewed",
       "imported_by": []
     },
