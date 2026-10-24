@@ -102,12 +102,17 @@ function selectedSetPosition(
   item: ComparisonIndicator,
   iso3: string,
   selected: string[],
+  formatValue: (value: number, unit: string) => string,
 ) {
   const entries = selected
     .map((country) => ({ iso3: country, value: item.countries[country]?.value }))
     .filter((entry): entry is { iso3: string; value: number } => typeof entry.value === 'number')
 
   if (entries.length < 2) return null
+  // Do not display opposing numeric badges for values indistinguishable in the UI.
+  if (new Set(entries.map((entry) => formatValue(entry.value, item.unit))).size === 1) {
+    return { label: 'Aligned', position: 50 }
+  }
   const values = entries.map((entry) => entry.value)
   const min = Math.min(...values)
   const max = Math.max(...values)
@@ -167,7 +172,7 @@ export default function ComparePanel({
       for (const item of visibleIndicators) {
         if (!item.countries[iso3]) continue
         covered += 1
-        const position = selectedSetPosition(item, iso3, selected)
+        const position = selectedSetPosition(item, iso3, selected, formatValue)
         if (!position) continue
         if (position.label === 'High') higher += 1
         else if (position.label === 'Low') lower += 1
@@ -195,6 +200,7 @@ export default function ComparePanel({
         const entries = selected
           .map((iso3) => ({ iso3, value: item.countries[iso3] }))
           .filter((entry): entry is { iso3: string; value: ComparisonCountryValue } => Boolean(entry.value))
+        if (item.indicator_id === 'population_total') return null
         if (entries.length < 2 || new Set(entries.map((entry) => entry.value.period)).size !== 1) return null
         const max = entries.reduce((best, entry) => entry.value.value > best.value.value ? entry : best)
         const min = entries.reduce((best, entry) => entry.value.value < best.value.value ? entry : best)
@@ -477,7 +483,7 @@ export default function ComparePanel({
                         </td>
                         {selected.map((iso3) => {
                           const value = item.countries[iso3]
-                          const position = selectedSetPosition(item, iso3, selected)
+                          const position = selectedSetPosition(item, iso3, selected, formatValue)
                           return (
                             <td key={iso3}>
                               {value ? (
@@ -536,7 +542,7 @@ export default function ComparePanel({
               {descriptiveInsights.length === 0 && <span>No same-year comparable evidence loaded.</span>}
               {descriptiveInsights.length > 0 && (
                 <p className="relativeSpreadNote">
-                  Only observations from the same year enter this summary. Relative spread normalizes each indicator by the largest absolute value in the selected set. It is descriptive, not a quality score.
+                  Population totals are excluded because country size is contextual, not a relocation outcome. Only observations from the same year enter this summary. Relative spread normalizes each indicator by the largest absolute value in the selected set. It is descriptive, not a quality score.
                 </p>
               )}
             </div>
