@@ -1914,6 +1914,8 @@ test('Compare warns when selected country observations use different years', asy
   const warnings = page.locator('.matrixPeriodWarning')
   await expect(warnings.first()).toBeVisible()
   await expect(warnings.first()).toContainText('Different observation years')
+  await expect(page.getByText('No same-year comparable evidence loaded.')).toBeVisible()
+  await expect(page.locator('.relativeSpreadHeading')).toHaveCount(0)
 })
 
 test('comparison remains neutral and aligned', async ({ page }) => {

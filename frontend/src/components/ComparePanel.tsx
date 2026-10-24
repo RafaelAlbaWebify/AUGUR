@@ -195,9 +195,9 @@ export default function ComparePanel({
         const entries = selected
           .map((iso3) => ({ iso3, value: item.countries[iso3] }))
           .filter((entry): entry is { iso3: string; value: ComparisonCountryValue } => Boolean(entry.value))
-        if (entries.length < 2) return null
-        const max = [...entries].sort((a, b) => b.value.value - a.value.value)[0]
-        const min = [...entries].sort((a, b) => a.value.value - b.value.value)[0]
+        if (entries.length < 2 || new Set(entries.map((entry) => entry.value.period)).size !== 1) return null
+        const max = entries.reduce((best, entry) => entry.value.value > best.value.value ? entry : best)
+        const min = entries.reduce((best, entry) => entry.value.value < best.value.value ? entry : best)
         const spread = Math.abs(max.value.value - min.value.value)
         const denominator = Math.max(Math.abs(max.value.value), Math.abs(min.value.value), 1e-9)
         const relativeSpreadPct = (spread / denominator) * 100
@@ -533,10 +533,10 @@ export default function ComparePanel({
                   </article>
                 )
               })}
-              {descriptiveInsights.length === 0 && <span>No comparable evidence loaded.</span>}
+              {descriptiveInsights.length === 0 && <span>No same-year comparable evidence loaded.</span>}
               {descriptiveInsights.length > 0 && (
                 <p className="relativeSpreadNote">
-                  Relative spread normalizes each indicator by the largest absolute value in the selected set. It is descriptive, not a quality score.
+                  Only observations from the same year enter this summary. Relative spread normalizes each indicator by the largest absolute value in the selected set. It is descriptive, not a quality score.
                 </p>
               )}
             </div>
