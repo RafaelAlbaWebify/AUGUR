@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 359,
-  "python_count": 319,
-  "definition_count": 1657,
+  "file_count": 360,
+  "python_count": 320,
+  "definition_count": 1660,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 81.34,
+  "line_by_line_review_percent": 81.11,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -26,7 +26,7 @@
     "backend/app/models": 1,
     "backend/app/services": 33,
     "backend/scripts": 105,
-    "backend/tests": 132,
+    "backend/tests": 133,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -990,7 +990,8 @@
         "backend/scripts/prepare_eures_manifest_candidate.py",
         "backend/scripts/reconcile_legacy_nuts_vintage.py",
         "backend/scripts/reconcile_ranking_eurostat.py",
-        "backend/scripts/stage_gr2_employment.py"
+        "backend/scripts/stage_gr2_employment.py",
+        "backend/tests/test_harness_configuration.py"
       ]
     },
     {
@@ -11903,15 +11904,15 @@
     {
       "path": "backend/scripts/change_impact.py",
       "bucket": "backend/scripts",
-      "sha256": "7ea29b210c4a3108b027d2266532e23013244661736dd6c96a2fbccbfd41d3ee",
-      "bytes": 8829,
+      "sha256": "e50ddadecaadfab3664e4411f5355b2ba67d5a98d85d7bc0b7f87cd5dd4dce47",
+      "bytes": 9259,
       "review_status": "not_reviewed",
       "definitions": [
         {
           "symbol": "missing_frontend_api_routes",
           "kind": "function",
           "line_start": 28,
-          "line_end": 51,
+          "line_end": 58,
           "signature_arguments": [
             "root"
           ]
@@ -11919,8 +11920,8 @@
         {
           "symbol": "unresolved_typescript_imports",
           "kind": "function",
-          "line_start": 54,
-          "line_end": 73,
+          "line_start": 61,
+          "line_end": 80,
           "signature_arguments": [
             "root"
           ]
@@ -11928,8 +11929,8 @@
         {
           "symbol": "typescript_edges",
           "kind": "function",
-          "line_start": 76,
-          "line_end": 99,
+          "line_start": 83,
+          "line_end": 106,
           "signature_arguments": [
             "root"
           ]
@@ -11937,8 +11938,8 @@
         {
           "symbol": "changed_from_git",
           "kind": "function",
-          "line_start": 118,
-          "line_end": 124,
+          "line_start": 125,
+          "line_end": 131,
           "signature_arguments": [
             "base"
           ]
@@ -11946,8 +11947,8 @@
         {
           "symbol": "analyze",
           "kind": "function",
-          "line_start": 127,
-          "line_end": 160,
+          "line_start": 134,
+          "line_end": 167,
           "signature_arguments": [
             "changed",
             "inventory",
@@ -11957,8 +11958,8 @@
         {
           "symbol": "main",
           "kind": "function",
-          "line_start": 163,
-          "line_end": 184,
+          "line_start": 170,
+          "line_end": 191,
           "signature_arguments": []
         }
       ],
@@ -12034,7 +12035,7 @@
         "typescript_edges",
         "unresolved_typescript_imports"
       ],
-      "lines": 188,
+      "lines": 195,
       "resolved_local_imports": [],
       "imported_by": [
         "backend/tests/test_change_impact.py"
@@ -20590,8 +20591,8 @@
     {
       "path": "backend/tests/test_change_impact.py",
       "bucket": "backend/tests",
-      "sha256": "a9599a33758803cc4434678692d213f7a61e69caed1cfb3e4d7afd4ecd3d4917",
-      "bytes": 4081,
+      "sha256": "6bdad44f91e0c2365ba47d7c2cc8a0a298c2f9fedcc20668b30a4d7d3cd74f8f",
+      "bytes": 5109,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -20653,7 +20654,16 @@
           "symbol": "test_api_route_gate_detects_deleted_endpoint_and_recovers",
           "kind": "function",
           "line_start": 73,
-          "line_end": 86,
+          "line_end": 88,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_router_prefix_configuration_drift_fails_contract",
+          "kind": "function",
+          "line_start": 90,
+          "line_end": 103,
           "signature_arguments": [
             "tmp_path"
           ]
@@ -20674,7 +20684,7 @@
         "unresolved_typescript_imports",
         "write_text"
       ],
-      "lines": 86,
+      "lines": 103,
       "resolved_local_imports": [
         "backend/scripts/change_impact.py"
       ],
@@ -24297,6 +24307,58 @@
       "lines": 22,
       "resolved_local_imports": [
         "backend/app/services/global_evidence_contract.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_harness_configuration.py",
+      "bucket": "backend/tests",
+      "sha256": "cec4c9f18dbda22b5a262fe80ac5aa87797eb415c63b6f21e249d38167f5c5ce",
+      "bytes": 1015,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_local_database_paths_resolve_inside_isolated_project",
+          "kind": "function",
+          "line_start": 7,
+          "line_end": 15,
+          "signature_arguments": [
+            "tmp_path",
+            "monkeypatch"
+          ]
+        },
+        {
+          "symbol": "test_environment_setting_is_read_without_database_creation",
+          "kind": "function",
+          "line_start": 18,
+          "line_end": 23,
+          "signature_arguments": [
+            "tmp_path",
+            "monkeypatch"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "pathlib",
+          "line": 2
+        },
+        {
+          "module": "app.core.config",
+          "line": 4
+        }
+      ],
+      "called_names": [
+        "Settings",
+        "exists",
+        "is_dir",
+        "property",
+        "setattr",
+        "setenv"
+      ],
+      "lines": 23,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
       ],
       "imported_by": []
     },
