@@ -20,11 +20,10 @@ TS_SUFFIXES = (".ts", ".tsx", ".js", ".jsx")
 TS_IGNORED = {"node_modules", "dist", "build", "test-results"}
 
 
-API_ROUTE = re.compile(r"""@router\\.(?:get|post|put|patch|delete)\\(\\s*['"](/[^'"]+)['"]""")
-FRONTEND_ROUTE = re.compile(r"""\\$\\{API_BASE\\}/api/([^\\x60'"]+)""")
-COUNTRY_TEMPLATE = re.compile(r"\\$\\{(?:selectedCountry|countryIso3|iso3)\\}")
-PATH_BUNDLE = re.compile(r"\\$\\{paths\\[key\\]\\}")
-
+API_ROUTE = re.compile(r"""@router\.(?:get|post|put|patch|delete)\(\s*['"](/[^'"]+)['"]""")
+FRONTEND_ROUTE = re.compile(r"""\$\{API_BASE\}/api/([^\x60'"]+)""")
+COUNTRY_TEMPLATE = re.compile(r"\$\{(?:selectedCountry|countryIso3|iso3)\}")
+PATH_BUNDLE = re.compile(r"\$\{paths\[key\]\}")
 
 def missing_frontend_api_routes(root: Path) -> list[str]:
     """Check statically visible App API requests against declared FastAPI paths.
@@ -43,9 +42,9 @@ def missing_frontend_api_routes(root: Path) -> list[str]:
         candidate = COUNTRY_TEMPLATE.sub("{country_iso3}", candidate)
         if PATH_BUNDLE.search(candidate):
             # The country paths are defined in App; check every literal mapping.
-            values = re.search(r"const paths: Record<keyof CountryDataBundle, string> = \\{([^}]+)\\}", app)
+            values = re.search(r"const paths: Record<keyof CountryDataBundle, string> = \{([^}]+)\}", app)
             if values:
-                for suffix in re.findall(r":\\s*'([a-z-]+)'", values.group(1)):
+                for suffix in re.findall(r":\s*'([a-z-]+)'", values.group(1)):
                     requests.add(PATH_BUNDLE.sub(suffix, candidate))
             continue
         requests.add(candidate)
