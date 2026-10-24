@@ -1,5 +1,5 @@
 """Change impact harness contracts: pure, no repo mutations or network needed."""
-from scripts.change_impact import analyze, typescript_edges, unresolved_typescript_imports
+from scripts.change_impact import analyze, typescript_edges, unresolved_typescript_imports, missing_frontend_api_routes
 
 
 def test_python_import_graph_exposes_callers_and_tests():
@@ -69,3 +69,18 @@ def test_missing_frontend_import_is_detected_before_integration(tmp_path):
     ]
     (src / "MissingWidget.tsx").write_text("export default function Widget() {}", encoding="utf-8")
     assert unresolved_typescript_imports(tmp_path) == []
+
+def test_api_route_gate_detects_deleted_endpoint_and_recovers(tmp_path):
+    backend = tmp_path / 'backend' / 'app' / 'api'
+    frontend = tmp_path / 'frontend' / 'src'
+    backend.mkdir(parents=True)
+    frontend.mkdir(parents=True)
+    (frontend / 'App.tsx').write_text(
+        'const request = `${API_BASE}/api/compare?countries=${query}`',
+        encoding='utf-8',
+    )
+    routes = backend / 'routes.py'
+    routes.write_text('@router.get("/health")\ndef health(): pass\n', encoding='utf-8')
+    assert missing_frontend_api_routes(tmp_path) == ['/api/compare']
+    routes.write_text('@router.get("/compare")\ndef compare(): pass\n', encoding='utf-8')
+    assert missing_frontend_api_routes(tmp_path) == []
