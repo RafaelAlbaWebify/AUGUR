@@ -29,7 +29,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Map changed modules, callers, contracts and tests
-        run: python backend/scripts/change_impact.py --base origin/main --check-imports
+        run: python backend/scripts/change_impact.py --base origin/main --check-imports --check-api-routes
       - name: Verify impact analyzer contract
         working-directory: backend
         run: |
