@@ -1,3 +1,10 @@
+## 2026-10-24 — USER PRIORITY: COMPLETE ENGINEERING HARNESS FIRST
+- Explicit priority override: do **not** resume Spain–Ireland feature/interpretation work until the original Engineering Harness directive is certified to an agreed, evidence-based scope. User rejected stopping at 'v1 operational' as complete.
+- Merged #132 impact graph/CI, #133 unresolved TS imports, #134 frontend API route presence, #135 backend comparison shape vs React TypeScript required fields with two controlled negative mutation tests; all green CI and merged. These are **partial** structural gates, not exhaustive runtime or schema certification.
+- PR #136 pending: reproducible in-memory 2-country/29-indicator comparison timing (median/p95) and tracemalloc peak benchmark in backend CI; this does NOT represent HTTP/DB/UI performance and makes no speedup claim.
+- Remaining certification gates: inventory freshness; ensure changed file coverage and false-negative analysis for dynamic imports, SQL/storage and API response nested fields; representative negative tests for configuration, persistence and partial failures; robust performance workload for API/DB/startup as safely possible; record actual metrics, limitations and handover. Never conflate synthetic tests and user machine acceptance. Preserve local data and uncommitted files.
+- Harness completion requires reviewed reproducible evidence and explicit accepted limitations; avoid uncontrolled new infrastructure and gratuitous PRs. Compare ESP vs IRL will resume once harness is closed.
+
 ## 2026-10-24 — ESP–IRL LIVE REVIEW + ENGINEERING HARNESS P1
 
 - Browser tab inspected live at `http://127.0.0.1:5190/compare?countries=ESP,IRL`: Spain/Ireland selectors, 10 dimensions and 29/29 displayed values per country with year/source render. Examples observed: employment 20–64 72.4% vs 80.2% (2025 Eurostat), unmet medical needs 2.3% vs 5.1% (2025 Eurostat), household consumption price level 90.9 vs 138.1 EU=100 (2024 Eurostat). DOM/text inspection only: not full visual acceptance, source verification or endpoint payload inspection.

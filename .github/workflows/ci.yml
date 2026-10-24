@@ -62,6 +62,9 @@ jobs:
       - name: Verify frontend/backend comparison response contract
         run: python -m scripts.check_compare_contract
 
+      - name: Capture synthetic comparison performance baseline
+        run: python -m scripts.benchmark_compare --iterations 300
+
       - name: Run backend tests
         run: python -m pytest
 
