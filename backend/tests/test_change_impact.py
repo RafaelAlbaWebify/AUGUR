@@ -1,5 +1,5 @@
 """Change impact harness contracts: pure, no repo mutations or network needed."""
-from scripts.change_impact import analyze, typescript_edges
+from scripts.change_impact import analyze, typescript_edges, unresolved_typescript_imports
 
 
 def test_python_import_graph_exposes_callers_and_tests():
@@ -58,3 +58,14 @@ def test_dynamic_typescript_import_is_not_assumed_to_be_resolved(tmp_path):
     (source / "source.ts").write_text("export const x = 1", encoding="utf-8")
     (source / "load.ts").write_text("import(pathFromUser)", encoding="utf-8")
     assert typescript_edges(tmp_path) == {}
+
+
+def test_missing_frontend_import_is_detected_before_integration(tmp_path):
+    src = tmp_path / "frontend" / "src"
+    src.mkdir(parents=True)
+    (src / "App.tsx").write_text('import Widget from "./MissingWidget"\\n', encoding="utf-8")
+    assert unresolved_typescript_imports(tmp_path) == [
+        {"importer": "frontend/src/App.tsx", "specifier": "./MissingWidget"}
+    ]
+    (src / "MissingWidget.tsx").write_text("export default function Widget() {}", encoding="utf-8")
+    assert unresolved_typescript_imports(tmp_path) == []
