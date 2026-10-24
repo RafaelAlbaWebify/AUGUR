@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 353,
-  "python_count": 313,
-  "definition_count": 1628,
-  "reviewed_file_count": 295,
-  "stale_review_file_count": 5,
-  "line_by_line_review_percent": 83.57,
+  "file_count": 355,
+  "python_count": 315,
+  "definition_count": 1638,
+  "reviewed_file_count": 294,
+  "stale_review_file_count": 6,
+  "line_by_line_review_percent": 82.82,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 102,
-    "backend/tests": 129,
+    "backend/scripts": 103,
+    "backend/tests": 130,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -43,9 +43,9 @@
     {
       "path": ".github/workflows/ci.yml",
       "bucket": "github/workflows",
-      "sha256": "2cc936cc56cf7132a22d89ea652b7a0520bf81655fa140fcdb02077ff0cf7d76",
-      "bytes": 2994,
-      "review_status": "verified_reviewed",
+      "sha256": "e5b044876f3a60752864425ba1c1cb26e63ddbddf51365ece15a03ee8569a923",
+      "bytes": 3621,
+      "review_status": "stale_review",
       "imported_by": []
     },
     {
@@ -11800,6 +11800,120 @@
       ]
     },
     {
+      "path": "backend/scripts/change_impact.py",
+      "bucket": "backend/scripts",
+      "sha256": "281987c4380e1560462477dc09ab0aa22ed8a2dc894789aefe47eb6529211da7",
+      "bytes": 5418,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "typescript_edges",
+          "kind": "function",
+          "line_start": 23,
+          "line_end": 46,
+          "signature_arguments": [
+            "root"
+          ]
+        },
+        {
+          "symbol": "changed_from_git",
+          "kind": "function",
+          "line_start": 65,
+          "line_end": 71,
+          "signature_arguments": [
+            "base"
+          ]
+        },
+        {
+          "symbol": "analyze",
+          "kind": "function",
+          "line_start": 74,
+          "line_end": 107,
+          "signature_arguments": [
+            "changed",
+            "inventory",
+            "ts_reverse"
+          ]
+        },
+        {
+          "symbol": "main",
+          "kind": "function",
+          "line_start": 110,
+          "line_end": 120,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 7
+        },
+        {
+          "module": "argparse",
+          "line": 9
+        },
+        {
+          "module": "json",
+          "line": 10
+        },
+        {
+          "module": "re",
+          "line": 11
+        },
+        {
+          "module": "subprocess",
+          "line": 12
+        },
+        {
+          "module": "pathlib",
+          "line": 13
+        }
+      ],
+      "called_names": [
+        "ArgumentParser",
+        "Path",
+        "add",
+        "add_argument",
+        "analyze",
+        "append",
+        "as_posix",
+        "changed_from_git",
+        "compile",
+        "dumps",
+        "endswith",
+        "error",
+        "exists",
+        "findall",
+        "get",
+        "intersection",
+        "is_file",
+        "items",
+        "len",
+        "list",
+        "loads",
+        "main",
+        "parse_args",
+        "print",
+        "read_text",
+        "relative_to",
+        "resolve",
+        "rglob",
+        "run",
+        "set",
+        "setdefault",
+        "sorted",
+        "splitlines",
+        "startswith",
+        "str",
+        "typescript_edges"
+      ],
+      "lines": 124,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/tests/test_change_impact.py"
+      ]
+    },
+    {
       "path": "backend/scripts/check_operability.py",
       "bucket": "backend/scripts",
       "sha256": "464678513f8d3415b090e54eab52878ad188412a0379bcebfcbbc2a41f663c75",
@@ -20176,6 +20290,79 @@
       "resolved_local_imports": [
         "backend/app/ingestion/__init__.py",
         "backend/app/ingestion/cedefop_stas.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_change_impact.py",
+      "bucket": "backend/tests",
+      "sha256": "197e29146628224e6ca95756e067ceee7f42ab6a97f07c696ac586fde50ec5bc",
+      "bytes": 2771,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "test_python_import_graph_exposes_callers_and_tests",
+          "kind": "function",
+          "line_start": 5,
+          "line_end": 18,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_unknown_new_file_is_flagged_not_misreported_as_covered",
+          "kind": "function",
+          "line_start": 21,
+          "line_end": 24,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_duplicate_paths_do_not_inflate_impact",
+          "kind": "function",
+          "line_start": 27,
+          "line_end": 29,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_stale_review_requires_explicit_warning",
+          "kind": "function",
+          "line_start": 32,
+          "line_end": 37,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_typescript_relative_imports_resolve_reverse_consumers",
+          "kind": "function",
+          "line_start": 40,
+          "line_end": 52,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_dynamic_typescript_import_is_not_assumed_to_be_resolved",
+          "kind": "function",
+          "line_start": 55,
+          "line_end": 60,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "scripts.change_impact",
+          "line": 2
+        }
+      ],
+      "called_names": [
+        "analyze",
+        "any",
+        "mkdir",
+        "typescript_edges",
+        "write_text"
+      ],
+      "lines": 60,
+      "resolved_local_imports": [
+        "backend/scripts/change_impact.py"
       ],
       "imported_by": []
     },
