@@ -52,3 +52,12 @@ Values below were read from AUGUR's local comparison screen, **not a fresh DB ex
 - Highest priority: read-only local evidence/provenance export with dataset ID, unit, period, source update/retrieval date and dimensions; compare exact country observations against official APIs and source vintage. Prioritize 2024 PPP household price-level revision, 2025 health/housing, IMF LUR and Irish productivity.
 - Do not count IMF/Eurostat unemployment or three inflation figures as independent causal outcomes; rates/indices have distinct units and populations. Housing overburden is not market rent affordability.
 - No claim of post-merge local application acceptance or source-wide 29/29 numerical certification.
+
+## Reproducible local evidence export (read-only)
+
+From the checkout after merging this PR:
+
+    cd backend
+    python -m scripts.export_compare_evidence --output ../compare_esp_irl_evidence.json
+
+The exporter opens the existing analytical DuckDB **read-only** and reproduces the same preferred latest-observed period/source selection as the comparison service. It records exact values, dataset ID, source, unit, period, retrieval/update metadata and status for the current ESP/IRL row of every available national indicator. It intentionally does NOT initialize the database or verify external source vintages. It writes only the expressly selected JSON export path; do not share it without reviewing it. A disposable DuckDB unit test validates priorities, source identity and forecast exclusion. External numerical comparison is a separate stage.
