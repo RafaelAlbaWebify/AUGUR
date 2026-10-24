@@ -34,7 +34,7 @@ def missing_frontend_api_routes(root: Path) -> list[str]:
     frontend = root / "frontend" / "src" / "App.tsx"
     if not backend.exists() or not frontend.exists():
         return []
-    declared = set(API_ROUTE.findall(backend.read_text(encoding="utf-8")))
+    declared = {"/api" + route for route in API_ROUTE.findall(backend.read_text(encoding="utf-8"))}
     app = frontend.read_text(encoding="utf-8")
     requests = set()
     for match in FRONTEND_ROUTE.findall(app):
