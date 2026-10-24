@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 363,
-  "python_count": 323,
-  "definition_count": 1669,
+  "file_count": 365,
+  "python_count": 325,
+  "definition_count": 1683,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 80.44,
+  "line_by_line_review_percent": 80.0,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 106,
-    "backend/tests": 135,
+    "backend/scripts": 107,
+    "backend/tests": 136,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -4089,6 +4089,7 @@
         "backend/app/services/city_evidence.py",
         "backend/app/services/regional_evidence.py",
         "backend/scripts/accept_gr2.py",
+        "backend/scripts/audit_compare_sources.py",
         "backend/scripts/build_official_reference_db.py",
         "backend/scripts/discover_eurostat_regions.py",
         "backend/scripts/ensure_local_evidence.py",
@@ -10847,6 +10848,112 @@
         "backend/app/ingestion/eea_city_air.py"
       ],
       "imported_by": []
+    },
+    {
+      "path": "backend/scripts/audit_compare_sources.py",
+      "bucket": "backend/scripts",
+      "sha256": "3590e9aa6d5122ca38df0ea4001c3052f845ea3baa87b4f97404204fb90b8204",
+      "bytes": 5714,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "audit_eurostat",
+          "kind": "function",
+          "line_start": 19,
+          "line_end": 54,
+          "signature_arguments": [
+            "row",
+            "adapter_factory"
+          ]
+        },
+        {
+          "symbol": "audit",
+          "kind": "function",
+          "line_start": 57,
+          "line_end": 88,
+          "signature_arguments": [
+            "rows",
+            "check_eurostat",
+            "workers"
+          ]
+        },
+        {
+          "symbol": "main",
+          "kind": "function",
+          "line_start": 91,
+          "line_end": 105,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 6
+        },
+        {
+          "module": "argparse",
+          "line": 8
+        },
+        {
+          "module": "concurrent.futures",
+          "line": 9
+        },
+        {
+          "module": "json",
+          "line": 10
+        },
+        {
+          "module": "pathlib",
+          "line": 11
+        },
+        {
+          "module": "app.ingestion.eurostat",
+          "line": 13
+        }
+      ],
+      "called_names": [
+        "ArgumentParser",
+        "ThreadPoolExecutor",
+        "ValueError",
+        "abs",
+        "adapter_factory",
+        "add",
+        "add_argument",
+        "append",
+        "as_completed",
+        "audit",
+        "close",
+        "dumps",
+        "error",
+        "fetch_dataset",
+        "float",
+        "get",
+        "isinstance",
+        "items",
+        "len",
+        "loads",
+        "lower",
+        "main",
+        "normalize",
+        "parse_args",
+        "print",
+        "read_text",
+        "resolve",
+        "result",
+        "set",
+        "sort",
+        "str",
+        "submit",
+        "type",
+        "write_text"
+      ],
+      "lines": 109,
+      "resolved_local_imports": [
+        "backend/app/ingestion/eurostat.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_audit_compare_sources.py"
+      ]
     },
     {
       "path": "backend/scripts/audit_global_evidence.py",
@@ -18987,6 +19094,132 @@
         "backend/app/db/__init__.py",
         "backend/app/services/__init__.py",
         "backend/app/services/regional_rankings.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_audit_compare_sources.py",
+      "bucket": "backend/tests",
+      "sha256": "2880c4a76c5ff7d85c8339eee283f219a67c991bdd8fe8a30a994b4ccfc7c13b",
+      "bytes": 2063,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "row",
+          "kind": "function",
+          "line_start": 5,
+          "line_end": 8,
+          "signature_arguments": [
+            "provider",
+            "dataset",
+            "value"
+          ]
+        },
+        {
+          "symbol": "test_parallel_report_preserves_all_rows_and_marks_unimplemented_sources",
+          "kind": "function",
+          "line_start": 11,
+          "line_end": 17,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_mismatched_persisted_dataset_never_fetches",
+          "kind": "function",
+          "line_start": 20,
+          "line_end": 25,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_mismatched_persisted_dataset_never_fetches.NoFetch",
+          "kind": "class",
+          "line_start": 21,
+          "line_end": 23,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_mismatched_persisted_dataset_never_fetches.NoFetch.__init__",
+          "kind": "function",
+          "line_start": 22,
+          "line_end": 23,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "test_exact_source_value_and_value_drift_with_stub",
+          "kind": "function",
+          "line_start": 28,
+          "line_end": 41,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_exact_source_value_and_value_drift_with_stub.Fake",
+          "kind": "class",
+          "line_start": 29,
+          "line_end": 39,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_exact_source_value_and_value_drift_with_stub.Fake.fetch_dataset",
+          "kind": "function",
+          "line_start": 30,
+          "line_end": 34,
+          "signature_arguments": [
+            "self",
+            "dataset_id",
+            "filters"
+          ]
+        },
+        {
+          "symbol": "test_exact_source_value_and_value_drift_with_stub.Fake.normalize",
+          "kind": "function",
+          "line_start": 35,
+          "line_end": 37,
+          "signature_arguments": [
+            "self",
+            "country",
+            "config",
+            "payload"
+          ]
+        },
+        {
+          "symbol": "test_exact_source_value_and_value_drift_with_stub.Fake.close",
+          "kind": "function",
+          "line_start": 38,
+          "line_end": 39,
+          "signature_arguments": [
+            "self"
+          ]
+        },
+        {
+          "symbol": "test_duplicate_country_indicator_fails_closed",
+          "kind": "function",
+          "line_start": 44,
+          "line_end": 47,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "scripts.audit_compare_sources",
+          "line": 2
+        },
+        {
+          "module": "pytest",
+          "line": 45
+        }
+      ],
+      "called_names": [
+        "AssertionError",
+        "audit",
+        "audit_eurostat",
+        "dict",
+        "raises",
+        "row"
+      ],
+      "lines": 47,
+      "resolved_local_imports": [
+        "backend/scripts/audit_compare_sources.py"
       ],
       "imported_by": []
     },
