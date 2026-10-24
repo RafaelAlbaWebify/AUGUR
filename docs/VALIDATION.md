@@ -1,5 +1,16 @@
 # AUGUR — Validation and Evidence Register
 
+## Engineering Harness operational certification boundary — 2026-10-24
+
+The engineering quality gates are integrated, but **no system can be certified as free from all regressions**. Operational acceptance is asserted *per tested flow and dataset*, not for every future execution.
+
+Automated evidence already integrated on main: source inventory and impact graph; frontend import and API route gates; required comparison response shape against React; central DuckDB writer validation/transaction AST audit; disposable DuckDB atomic rollback/idempotency and DB-to-ranking API tests; backend pytest; TypeScript production build; Playwright browser tests with mocked API responses; PowerShell parsing and dependency audit; synthetic comparison timing/memory benchmark. They do **not** prove full end-user live data reliability.
+
+This PR extends the actual `GET /api/compare` HTTP boundary, using a FastAPI TestClient and synthetic ESP/IRL values, with preserved periods/source and rejected invalid country requests. Verification status must come from PR CI; the user's actual database is never touched by this test. It deliberately does not certify official source freshness, scientific comparability, local data migrations or browser layout.
+
+**Unverified:** full local SQLite/DuckDB real-data state; provider network availability; interactive browser rendering on every screen; runtime SQL edges outside audited writers; complete response schemas for all endpoints; production latency/availability; cross-version upgrades. Retain these as explicit known risks and require task-specific acceptance if modified. Do not claim zero remaining defects or a universal operability certificate.
+
+
 Updated: 2026-10-09. **A green test is only a tested behavior; it is not a real-data acceptance certificate.**
 
 | Capability | Implementation evidence | CI / automated evidence | Real-data evidence | Product acceptance |
