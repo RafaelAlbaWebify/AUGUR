@@ -12,7 +12,7 @@
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
   "file_count": 360,
   "python_count": 320,
-  "definition_count": 1660,
+  "definition_count": 1662,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
   "line_by_line_review_percent": 81.11,
@@ -11904,15 +11904,15 @@
     {
       "path": "backend/scripts/change_impact.py",
       "bucket": "backend/scripts",
-      "sha256": "e50ddadecaadfab3664e4411f5355b2ba67d5a98d85d7bc0b7f87cd5dd4dce47",
-      "bytes": 9259,
+      "sha256": "8973735c1b77d1b28ee34b949983760346875b0931f634f1dfd41bd71ac2df35",
+      "bytes": 9618,
       "review_status": "not_reviewed",
       "definitions": [
         {
           "symbol": "missing_frontend_api_routes",
           "kind": "function",
           "line_start": 28,
-          "line_end": 58,
+          "line_end": 63,
           "signature_arguments": [
             "root"
           ]
@@ -11920,8 +11920,8 @@
         {
           "symbol": "unresolved_typescript_imports",
           "kind": "function",
-          "line_start": 61,
-          "line_end": 80,
+          "line_start": 66,
+          "line_end": 85,
           "signature_arguments": [
             "root"
           ]
@@ -11929,8 +11929,8 @@
         {
           "symbol": "typescript_edges",
           "kind": "function",
-          "line_start": 83,
-          "line_end": 106,
+          "line_start": 88,
+          "line_end": 111,
           "signature_arguments": [
             "root"
           ]
@@ -11938,8 +11938,8 @@
         {
           "symbol": "changed_from_git",
           "kind": "function",
-          "line_start": 125,
-          "line_end": 131,
+          "line_start": 130,
+          "line_end": 136,
           "signature_arguments": [
             "base"
           ]
@@ -11947,8 +11947,8 @@
         {
           "symbol": "analyze",
           "kind": "function",
-          "line_start": 134,
-          "line_end": 167,
+          "line_start": 139,
+          "line_end": 172,
           "signature_arguments": [
             "changed",
             "inventory",
@@ -11958,8 +11958,8 @@
         {
           "symbol": "main",
           "kind": "function",
-          "line_start": 170,
-          "line_end": 191,
+          "line_start": 175,
+          "line_end": 196,
           "signature_arguments": []
         }
       ],
@@ -12011,6 +12011,7 @@
         "intersection",
         "is_file",
         "items",
+        "join",
         "len",
         "list",
         "loads",
@@ -12035,7 +12036,7 @@
         "typescript_edges",
         "unresolved_typescript_imports"
       ],
-      "lines": 195,
+      "lines": 200,
       "resolved_local_imports": [],
       "imported_by": [
         "backend/tests/test_change_impact.py"
@@ -20591,8 +20592,8 @@
     {
       "path": "backend/tests/test_change_impact.py",
       "bucket": "backend/tests",
-      "sha256": "6bdad44f91e0c2365ba47d7c2cc8a0a298c2f9fedcc20668b30a4d7d3cd74f8f",
-      "bytes": 5109,
+      "sha256": "73830f336873ab630ae8d934d7c53ffde443d034229314b46125bd2f8eb3fe91",
+      "bytes": 5973,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -20667,6 +20668,24 @@
           "signature_arguments": [
             "tmp_path"
           ]
+        },
+        {
+          "symbol": "test_missing_contract_input_fails_closed",
+          "kind": "function",
+          "line_start": 106,
+          "line_end": 108,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_missing_country_route_map_fails_closed",
+          "kind": "function",
+          "line_start": 111,
+          "line_end": 121,
+          "signature_arguments": [
+            "tmp_path"
+          ]
         }
       ],
       "imports": [
@@ -20684,7 +20703,7 @@
         "unresolved_typescript_imports",
         "write_text"
       ],
-      "lines": 103,
+      "lines": 121,
       "resolved_local_imports": [
         "backend/scripts/change_impact.py"
       ],
