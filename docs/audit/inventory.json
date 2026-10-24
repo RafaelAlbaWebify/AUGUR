@@ -12,7 +12,7 @@
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
   "file_count": 355,
   "python_count": 315,
-  "definition_count": 1640,
+  "definition_count": 1642,
   "reviewed_file_count": 294,
   "stale_review_file_count": 6,
   "line_by_line_review_percent": 82.82,
@@ -43,8 +43,8 @@
     {
       "path": ".github/workflows/ci.yml",
       "bucket": "github/workflows",
-      "sha256": "fde8e70cc48068c62ff30800083ef983a455204fd0ee7c20f12ca9eab0cfdf3a",
-      "bytes": 3637,
+      "sha256": "9dc67c5f23210806d4070785250944ce63bd388f41de10f2faef313ced18b567",
+      "bytes": 3656,
       "review_status": "stale_review",
       "imported_by": []
     },
@@ -11802,15 +11802,24 @@
     {
       "path": "backend/scripts/change_impact.py",
       "bucket": "backend/scripts",
-      "sha256": "5924f5c28f51f7bb593bb49dafcf525ad3f256350625e91764e98c2174fa4065",
-      "bytes": 6884,
+      "sha256": "7ea29b210c4a3108b027d2266532e23013244661736dd6c96a2fbccbfd41d3ee",
+      "bytes": 8829,
       "review_status": "not_reviewed",
       "definitions": [
         {
+          "symbol": "missing_frontend_api_routes",
+          "kind": "function",
+          "line_start": 28,
+          "line_end": 51,
+          "signature_arguments": [
+            "root"
+          ]
+        },
+        {
           "symbol": "unresolved_typescript_imports",
           "kind": "function",
-          "line_start": 23,
-          "line_end": 42,
+          "line_start": 54,
+          "line_end": 73,
           "signature_arguments": [
             "root"
           ]
@@ -11818,8 +11827,8 @@
         {
           "symbol": "typescript_edges",
           "kind": "function",
-          "line_start": 45,
-          "line_end": 68,
+          "line_start": 76,
+          "line_end": 99,
           "signature_arguments": [
             "root"
           ]
@@ -11827,8 +11836,8 @@
         {
           "symbol": "changed_from_git",
           "kind": "function",
-          "line_start": 87,
-          "line_end": 93,
+          "line_start": 118,
+          "line_end": 124,
           "signature_arguments": [
             "base"
           ]
@@ -11836,8 +11845,8 @@
         {
           "symbol": "analyze",
           "kind": "function",
-          "line_start": 96,
-          "line_end": 129,
+          "line_start": 127,
+          "line_end": 160,
           "signature_arguments": [
             "changed",
             "inventory",
@@ -11847,8 +11856,8 @@
         {
           "symbol": "main",
           "kind": "function",
-          "line_start": 132,
-          "line_end": 148,
+          "line_start": 163,
+          "line_end": 184,
           "signature_arguments": []
         }
       ],
@@ -11896,6 +11905,7 @@
         "exists",
         "findall",
         "get",
+        "group",
         "intersection",
         "is_file",
         "items",
@@ -11903,6 +11913,7 @@
         "list",
         "loads",
         "main",
+        "missing_frontend_api_routes",
         "parse_args",
         "print",
         "read_text",
@@ -11910,16 +11921,19 @@
         "resolve",
         "rglob",
         "run",
+        "search",
         "set",
         "setdefault",
         "sorted",
+        "split",
         "splitlines",
         "startswith",
         "str",
+        "sub",
         "typescript_edges",
         "unresolved_typescript_imports"
       ],
-      "lines": 152,
+      "lines": 188,
       "resolved_local_imports": [],
       "imported_by": [
         "backend/tests/test_change_impact.py"
@@ -20308,8 +20322,8 @@
     {
       "path": "backend/tests/test_change_impact.py",
       "bucket": "backend/tests",
-      "sha256": "7fbda61fda55aa00c554b0391bfa248869ffec3c792a0c28af54629801ff1bf2",
-      "bytes": 3337,
+      "sha256": "a9599a33758803cc4434678692d213f7a61e69caed1cfb3e4d7afd4ecd3d4917",
+      "bytes": 4081,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -20366,6 +20380,15 @@
           "signature_arguments": [
             "tmp_path"
           ]
+        },
+        {
+          "symbol": "test_api_route_gate_detects_deleted_endpoint_and_recovers",
+          "kind": "function",
+          "line_start": 73,
+          "line_end": 86,
+          "signature_arguments": [
+            "tmp_path"
+          ]
         }
       ],
       "imports": [
@@ -20377,12 +20400,13 @@
       "called_names": [
         "analyze",
         "any",
+        "missing_frontend_api_routes",
         "mkdir",
         "typescript_edges",
         "unresolved_typescript_imports",
         "write_text"
       ],
-      "lines": 71,
+      "lines": 86,
       "resolved_local_imports": [
         "backend/scripts/change_impact.py"
       ],
