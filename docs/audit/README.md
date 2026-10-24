@@ -1,5 +1,18 @@
 # AUGUR — Code audit: reproducible baseline
 
+## Harness certification boundary — 2026-10-24
+
+**Decision:** adopt the existing quality system as the mandatory *practical, bounded* engineering harness; stop expanding it without a demonstrated new regression risk. It is not a complete formal certification of every dynamic call, API schema, external provider, database migration or performance path.
+
+**Integrated evidence:** existing `.github/workflows/ci.yml` runs the Python dependency/write-path audit, backend pytest, frontend TypeScript build + Chromium Playwright, npm dependency audit, PowerShell parser, `change_impact.py` static import and API route gate, `check_compare_contract.py` structural comparison response check, and a synthetic 29-indicator timing/memory baseline. GitHub CI was green on merged PRs #132–#138. Isolated mutation regressions detect missing TS imports, deleted API route, wrong FastAPI router prefix, missing comparison response fields, and a database connection moved ahead of batch validation. Transaction rollback/idempotence tests use disposable DuckDB fixtures, not operator data. **The last two fail-closed inputs** (removed contract file, missing frontend route-map) are exercised by this candidate PR; these are pending CI until proven.
+
+**Measured reference (GitHub Actions CI, PR #136):** synthetic in-memory two-country/29-indicator comparison, 300 iterations: median 0.09116 ms, p95 0.09959 ms, tracemalloc peak 54,840 bytes. Not representative of complete local app latency and not a claimed optimization. No comparable before/after speedup is established.
+
+**Explicit residual risks:** Python AST call graph and literal relative TS import graph are partial; dynamic TS imports, aliases/barrels, generated URLs, source-specific SQL, provider contracts, full response type equivalence, browser data accuracy, UI render timing, cold startup, CPU, real DB and HTTP throughput are not exhaustively tracked or benchmarked. Analyzer may produce false negatives outside declared scope; coverage of tests is not measured. The deterministic browser E2E uses mocked responses; live operator UI review is separate. These limitations must be recorded on material PRs rather than hidden as green checks.
+
+**Required workflow:** baseline and change-impact report → identify related consumers/contracts/tests → make focused change with regression → CI checks → report actual metrics/limitations → merge only when green → validate live only when the change requires it. The existing tools are read-only except the explicitly isolated test fixtures; never run destructive probes against personal/operator databases. 
+
+
 ## Engineering Harness — Change Impact Gate (incremental)
 AUGUR reuses `inventory.json` and this project's existing `ci.yml` rather than introducing another inventory. Before editing an existing module, run:
 

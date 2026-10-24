@@ -33,7 +33,8 @@ def missing_frontend_api_routes(root: Path) -> list[str]:
     backend = root / "backend" / "app" / "api" / "routes.py"
     frontend = root / "frontend" / "src" / "App.tsx"
     if not backend.exists() or not frontend.exists():
-        return []
+        missing = [path.relative_to(root).as_posix() for path in (backend, frontend) if not path.exists()]
+        return ["Required API contract input missing: " + ", ".join(missing)]
     main_file = root / "backend" / "app" / "main.py"
     if not main_file.exists():
         return ["Backend router registration missing: backend/app/main.py"]
@@ -50,9 +51,13 @@ def missing_frontend_api_routes(root: Path) -> list[str]:
         if PATH_BUNDLE.search(candidate):
             # The country paths are defined in App; check every literal mapping.
             values = re.search(r"const paths: Record<keyof CountryDataBundle, string> = \{([^}]+)\}", app)
-            if values:
-                for suffix in re.findall(r":\s*'([a-z-]+)'", values.group(1)):
-                    requests.add(PATH_BUNDLE.sub(suffix, candidate))
+            if not values:
+                return ["Cannot resolve frontend country API path map"]
+            suffixes = re.findall(r":\s*'([a-z-]+)'", values.group(1))
+            if not suffixes:
+                return ["Empty frontend country API path map"]
+            for suffix in suffixes:
+                requests.add(PATH_BUNDLE.sub(suffix, candidate))
             continue
         requests.add(candidate)
     return sorted(path for path in requests if path not in declared)

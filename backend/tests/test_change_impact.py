@@ -101,3 +101,21 @@ def test_router_prefix_configuration_drift_fails_contract(tmp_path):
     assert missing_frontend_api_routes(tmp_path) == ["/api/compare"]
     main.write_text('app.include_router(router, prefix="/api")\n', encoding="utf-8")
     assert missing_frontend_api_routes(tmp_path) == []
+
+
+def test_missing_contract_input_fails_closed(tmp_path):
+    assert any("Required API contract input missing" in issue
+               for issue in missing_frontend_api_routes(tmp_path))
+
+
+def test_missing_country_route_map_fails_closed(tmp_path):
+    backend=tmp_path / "backend" / "app" / "api"
+    frontend=tmp_path / "frontend" / "src"
+    backend.mkdir(parents=True)
+    frontend.mkdir(parents=True)
+    (backend.parent / "main.py").write_text('app.include_router(router, prefix="/api")', encoding="utf-8")
+    (backend / "routes.py").write_text('@router.get("/countries/{country_iso3}/snapshot")', encoding="utf-8")
+    (frontend / "App.tsx").write_text(
+        'fetch(`${API_BASE}/api/countries/${selectedCountry}/${paths[key]}`)', encoding="utf-8"
+    )
+    assert missing_frontend_api_routes(tmp_path) == ["Cannot resolve frontend country API path map"]
