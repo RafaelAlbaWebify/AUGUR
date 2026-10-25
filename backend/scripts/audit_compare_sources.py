@@ -54,6 +54,104 @@ def audit_eurostat(row: dict, adapter_factory=EurostatAdapter) -> dict:
             "source_dimensions": fresh.get("source_dimensions")}
 
 
+
+def audit_provider(row: dict) -> dict:
+    """Read an official provider without writing to local storage.
+
+    IMF DataMapper live responses do not certify the WEO_APRIL_2026 workbook
+    vintage or the LUR unit, so those observations are explicitly blocked.
+    """
+    from app.catalog import world_bank_indicators
+    from app.ingestion.world_bank import WorldBankAdapter
+    from app.ingestion.oecd import OECDAdapter
+    from app.ingestion.un_wpp import UNWPPAdapter
+    from app.ingestion.imf import DATASET_ID as IMF_DATASET
+
+    provider = row["source_id"]
+    base = {"country": row["country_iso3"], "indicator_id": row["indicator_id"],
+            "provider": provider, "period": row["period"],
+            "stored_value": row["value"], "stored_dataset": row.get("dataset_id")}
+    if provider == "IMF":
+        return {**base, "status": "vintage_unverifiable",
+                "reason": "Live DataMapper cannot authenticate stored April 2026 WEO release and unit; no speculative comparison",
+                "expected_dataset": IMF_DATASET}
+    adapter = None
+    try:
+        if provider == "WORLD_BANK":
+            config = next((item for item in world_bank_indicators()
+                           if item["indicator_id"] == row["indicator_id"]), None)
+            if config is None or row.get("dataset_id") != "WDI" or config["unit"] != row["unit"]:
+                return {**base, "status": "source_drift",
+                        "reason": "WDI dataset or declared indicator unit mismatch"}
+            adapter = WorldBankAdapter(max_retries=1)
+            metadata, observations = adapter.fetch_indicator(
+                row["country_iso3"], config["source_indicator"],
+                start_year=row["period"], end_year=row["period"])
+            fresh = adapter.normalize(row["country_iso3"], config, metadata, observations)
+        elif provider == "OECD":
+            if row["indicator_id"] != "gdp_per_hour_worked" or row.get("dataset_id") != "DSD_PDB@DF_PDB" or row["unit"] != "usd_ppp_per_hour":
+                return {**base, "status": "source_drift", "reason": "OECD series identity mismatch"}
+            adapter = OECDAdapter(max_retries=1)
+            fresh = adapter.normalize(row["country_iso3"], adapter.fetch_productivity(row["country_iso3"]))
+        else:
+            return {**base, "status": "provider_not_implemented"}
+    except Exception as exc:
+        return {**base, "status": "source_error", "reason": f"{type(exc).__name__}: {exc}"[:350]}
+    finally:
+        if adapter is not None:
+            adapter.close()
+    matches = [v for v in fresh if v["period"] == row["period"] and v["indicator_id"] == row["indicator_id"]]
+    return classify_observation(base, row, matches)
+
+
+def classify_observation(base: dict, stored: dict, matches: list[dict]) -> dict:
+    if len(matches) != 1:
+        return {**base, "status": "missing_or_ambiguous", "count": len(matches)}
+    fresh = matches[0]
+    if fresh["unit"] != stored["unit"] or fresh["dataset_id"] != stored["dataset_id"]:
+        return {**base, "status": "source_drift", "reason": "Returned unit/dataset differs from persisted contract"}
+    if fresh["observation_type"] != stored.get("observation_type", "observed"):
+        return {**base, "status": "observation_type_drift"}
+    delta = abs(float(fresh["value"]) - float(stored["value"]))
+    tolerance = 1e-8 * max(1.0, abs(float(stored["value"])))
+    return {**base, "status": "match" if delta <= tolerance else "value_drift",
+            "current_value": fresh["value"], "difference": delta,
+            "tolerance": tolerance, "source_updated_at": fresh.get("source_updated_at")}
+
+
+def audit_un_bulk(rows: list[dict]) -> list[dict]:
+    """Fetch WPP once for all countries and fields; no duplicate bulk downloads."""
+    from app.ingestion.un_wpp import UNWPPAdapter
+    from app.ingestion.un_wpp import DATASET_ID as WPP_DATASET
+    outputs = []
+    eligible = []
+    for row in rows:
+        base = {"country": row["country_iso3"], "indicator_id": row["indicator_id"],
+                "provider": row["source_id"], "period": row["period"],
+                "stored_value": row["value"], "stored_dataset": row.get("dataset_id")}
+        if row.get("dataset_id") != WPP_DATASET:
+            outputs.append({**base, "status": "source_drift"})
+        else:
+            eligible.append((row, base))
+    if not eligible:
+        return outputs
+    adapter = UNWPPAdapter(max_retries=1)
+    try:
+        data = adapter.fetch_csv()
+        fresh = adapter.normalize_countries(list(ISO2), data)
+    except Exception as exc:
+        outputs.extend({**base, "status": "source_error", "reason": f"{type(exc).__name__}: {exc}"[:350]}
+                       for _, base in eligible)
+        return outputs
+    finally:
+        adapter.close()
+    for row, base in eligible:
+        matches = [item for item in fresh if item["country_iso3"] == row["country_iso3"]
+                   and item["indicator_id"] == row["indicator_id"] and item["period"] == row["period"]]
+        outputs.append(classify_observation(base, row, matches))
+    return outputs
+
+
 def audit(rows: list[dict], check_eurostat=audit_eurostat, workers: int = 4) -> dict:
     if workers < 1 or workers > 8:
         raise ValueError("workers must be between 1 and 8")
@@ -64,19 +162,22 @@ def audit(rows: list[dict], check_eurostat=audit_eurostat, workers: int = 4) -> 
             raise ValueError(f"Duplicate selected indicator: {key}")
         seen.add(key)
     output = []
+    un_rows = []
     with ThreadPoolExecutor(max_workers=workers) as pool:
         futures = {}
         for row in rows:
             if row["country_iso3"] not in ISO2:
                 raise ValueError(f"Unsupported country: {row['country_iso3']}")
-            if row["source_id"] != "EUROSTAT":
-                output.append({"country": row["country_iso3"], "indicator_id": row["indicator_id"],
-                               "provider": row["source_id"], "status": "provider_not_implemented",
-                               "reason": "Requires an exact source-specific historical read contract"})
-            else:
+            if row["source_id"] == "UN_WPP":
+                un_rows.append(row)
+            elif row["source_id"] == "EUROSTAT":
                 futures[pool.submit(check_eurostat, row)] = row
+            else:
+                futures[pool.submit(audit_provider, row)] = row
         for future in as_completed(futures):
             output.append(future.result())
+    if un_rows:
+        output.extend(audit_un_bulk(un_rows))
     output.sort(key=lambda item: (item["indicator_id"], item["country"]))
     counts = {}
     for row in output:
@@ -85,7 +186,7 @@ def audit(rows: list[dict], check_eurostat=audit_eurostat, workers: int = 4) -> 
             "status_counts": counts, "results": output,
             "notes": ["No database writes or synchronization",
                       "A match certifies one source endpoint value on run date, not wider methodology or source vintage",
-                      "Non-Eurostat providers explicitly pending; no silent assumption of validity"]}
+                      "IMF WEO vintage is blocked until exact archived-release evidence is available"]}
 
 
 def main():
