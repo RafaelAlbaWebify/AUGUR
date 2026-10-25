@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 367,
-  "python_count": 327,
-  "definition_count": 1698,
+  "file_count": 369,
+  "python_count": 329,
+  "definition_count": 1705,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 79.56,
+  "line_by_line_review_percent": 79.13,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 108,
-    "backend/tests": 137,
+    "backend/scripts": 109,
+    "backend/tests": 138,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -803,6 +803,7 @@
       ],
       "imported_by": [
         "backend/app/main.py",
+        "backend/scripts/accept_national_compare.py",
         "backend/scripts/verify_reference_app_readthrough.py",
         "backend/tests/test_atomic_upsert_api_integration.py"
       ]
@@ -977,6 +978,7 @@
         "backend/app/services/regional_rankings.py",
         "backend/app/services/ttv_calibration.py",
         "backend/scripts/accept_gr2.py",
+        "backend/scripts/accept_national_compare.py",
         "backend/scripts/apply_compare_revisions.py",
         "backend/scripts/audit_legacy_nuts_vintage.py",
         "backend/scripts/build_eures_market_evidence.py",
@@ -10806,6 +10808,127 @@
       ]
     },
     {
+      "path": "backend/scripts/accept_national_compare.py",
+      "bucket": "backend/scripts",
+      "sha256": "6cbbc753028ec4678fbc5467ae62fd97f04dd6a3d5b1bf2e87df8765169fed2f",
+      "bytes": 4545,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "accept",
+          "kind": "function",
+          "line_start": 19,
+          "line_end": 60,
+          "signature_arguments": [
+            "evidence",
+            "audited",
+            "api_response"
+          ]
+        },
+        {
+          "symbol": "run",
+          "kind": "function",
+          "line_start": 63,
+          "line_end": 72,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "main",
+          "kind": "function",
+          "line_start": 75,
+          "line_end": 85,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 7
+        },
+        {
+          "module": "argparse",
+          "line": 8
+        },
+        {
+          "module": "json",
+          "line": 9
+        },
+        {
+          "module": "pathlib",
+          "line": 10
+        },
+        {
+          "module": "fastapi",
+          "line": 11
+        },
+        {
+          "module": "fastapi.testclient",
+          "line": 12
+        },
+        {
+          "module": "app.api.routes",
+          "line": 13
+        },
+        {
+          "module": "app.core.config",
+          "line": 14
+        },
+        {
+          "module": "scripts.audit_compare_sources",
+          "line": 15
+        },
+        {
+          "module": "scripts.export_compare_evidence",
+          "line": 16
+        }
+      ],
+      "called_names": [
+        "ArgumentParser",
+        "FastAPI",
+        "FileNotFoundError",
+        "TestClient",
+        "abs",
+        "accept",
+        "add_argument",
+        "any",
+        "append",
+        "audit",
+        "collect",
+        "dumps",
+        "error",
+        "float",
+        "get",
+        "include_router",
+        "is_file",
+        "items",
+        "json",
+        "len",
+        "lower",
+        "main",
+        "max",
+        "mkdir",
+        "parse_args",
+        "print",
+        "raise_for_status",
+        "run",
+        "startswith",
+        "str",
+        "sum",
+        "values",
+        "write_text"
+      ],
+      "lines": 89,
+      "resolved_local_imports": [
+        "backend/app/api/routes.py",
+        "backend/app/core/config.py",
+        "backend/scripts/audit_compare_sources.py",
+        "backend/scripts/export_compare_evidence.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_accept_national_compare.py"
+      ]
+    },
+    {
       "path": "backend/scripts/aggregate_eea_city_pm25.py",
       "bucket": "backend/scripts",
       "sha256": "7be50c4bf915d75948eea094f5f4bff97c46cc260c88f2072e8b2298d73d5efa",
@@ -11145,6 +11268,7 @@
         "backend/app/ingestion/world_bank.py"
       ],
       "imported_by": [
+        "backend/scripts/accept_national_compare.py",
         "backend/tests/test_audit_compare_sources.py"
       ]
     },
@@ -13034,6 +13158,7 @@
         "backend/app/core/config.py"
       ],
       "imported_by": [
+        "backend/scripts/accept_national_compare.py",
         "backend/tests/test_export_compare_evidence.py"
       ]
     },
@@ -19117,6 +19242,63 @@
       "lines": 42,
       "resolved_local_imports": [
         "backend/scripts/accept_gr2.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_accept_national_compare.py",
+      "bucket": "backend/tests",
+      "sha256": "62f077ee7602704b69a65d613929aae2511f25f18d55886b9ac8f01c3b79bb41",
+      "bytes": 2469,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "fixture",
+          "kind": "function",
+          "line_start": 5,
+          "line_end": 27,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_operator_acceptance_reaches_explicit_imf_block",
+          "kind": "function",
+          "line_start": 30,
+          "line_end": 36,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_api_value_mismatch_is_detected",
+          "kind": "function",
+          "line_start": 39,
+          "line_end": 44,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_revision_not_silently_accepted",
+          "kind": "function",
+          "line_start": 47,
+          "line_end": 53,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "scripts.accept_national_compare",
+          "line": 2
+        }
+      ],
+      "called_names": [
+        "accept",
+        "any",
+        "enumerate",
+        "fixture",
+        "float",
+        "len",
+        "range"
+      ],
+      "lines": 53,
+      "resolved_local_imports": [
+        "backend/scripts/accept_national_compare.py"
       ],
       "imported_by": []
     },
