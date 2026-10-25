@@ -44,9 +44,9 @@ def accept(evidence: dict, audited: dict, api_response: dict) -> dict:
     if len(rows) != 58 or evidence.get("country_counts") != {"ESP": 29, "IRL": 29}:
         mismatches.append("ESP/IRL national coverage differs from acceptance baseline")
     # Unverified IMF rows must remain visible, never silently accepted as match.
-    imf = [r for r in audited["results"] if r["provider"] == "IMF"]
-    if len(imf) != 6 or any(x["status"] != "vintage_unverifiable" for x in imf):
-        mismatches.append("IMF release-vintage gate changed or disappeared")
+    imf = [r for r in audited["results"] if r["provider"] == "IMF" and r["status"] != "match"]
+    if len([r for r in audited["results"] if r["provider"] == "IMF"]) != 6:
+        mismatches.append("IMF coverage incomplete")
     drift = [r for r in audited["results"] if r["status"] != "match"
              and r["status"] != "vintage_unverifiable"]
     status = "blocked" if mismatches or drift or imf else "accepted"
@@ -60,7 +60,7 @@ def accept(evidence: dict, audited: dict, api_response: dict) -> dict:
                             "No database modifications or synchronization were performed"]}
 
 
-def run() -> dict:
+def run(imf_archive: Path | None = None) -> dict:
     if not settings.duckdb_path.is_file():
         raise FileNotFoundError("Existing AUGUR DuckDB not found")
     evidence = collect(settings.duckdb_path)
@@ -69,16 +69,23 @@ def run() -> dict:
     response = TestClient(app).get("/api/compare?countries=ESP,IRL")
     response.raise_for_status()
     audited = audit(evidence["rows"])
+    if imf_archive is not None:
+        from scripts.verify_imf_weo_archive import compare_weo_archive
+        from collections import Counter
+        imf_results = compare_weo_archive(evidence["rows"], imf_archive)
+        audited["results"] = [r for r in audited["results"] if r["provider"] != "IMF"] + imf_results
+        audited["status_counts"] = dict(Counter(r["status"] for r in audited["results"]))
     return accept(evidence, audited, response.json())
 
 
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--imf-archive", type=Path, help="Official April 2026 WEO dataset XLSX")
     args = parser.parse_args()
     if args.output.suffix.lower() != ".json":
         parser.error("Output needs .json suffix")
-    result = run()
+    result = run(imf_archive=args.imf_archive)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     print(json.dumps({"status": result["status"], "api_alignment": result["api_alignment"],
