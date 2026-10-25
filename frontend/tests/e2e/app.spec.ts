@@ -3784,7 +3784,7 @@ test('decision insights exclude population and visibly tied safety values are al
     })
     const indicators = [
       make('population_total', 'Population, total', 'persons', 49590099, 5510565),
-      make('homicide_rate', 'Police-recorded intentional homicides', 'per_100k_people', 0.74, 0.71),
+      make('homicide_rate', 'Police-recorded intentional homicides', 'per_100k_people', 0.704, 0.701),
       make('unemployment_rate', 'Unemployment rate', 'percent', 10.5, 4.7),
     ]
     await route.fulfill({ status: 200, contentType: 'application/json',
@@ -3794,7 +3794,7 @@ test('decision insights exclude population and visibly tied safety values are al
   await page.goto('/compare?countries=ESP,IRL')
   const homicide = page.getByRole('row').filter({ hasText: 'Police-recorded intentional homicides' })
   await expect(homicide.locator('.matrixPositionBadge')).toHaveText(['Aligned', 'Aligned'])
-  await expect(homicide).toContainText('0.7 /100k')
+  await expect(homicide).toContainText('0.70 /100k')
   await expect(page.getByText('Largest relative spreads')).toBeVisible()
   const insights = page.locator('.decisionInsightCard')
   await expect(page.getByText('Population totals are excluded because country size is contextual', { exact: false })).toBeVisible()
