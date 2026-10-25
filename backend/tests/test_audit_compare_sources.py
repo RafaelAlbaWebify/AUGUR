@@ -8,13 +8,13 @@ def row(provider="EUROSTAT", dataset="tessi163", value=7.2):
                 value=value, unit="percent", source_decimal=None)
 
 
-def test_parallel_report_preserves_all_rows_and_marks_unimplemented_sources():
+def test_parallel_report_marks_bad_other_source_contract():
     result = audit([row(), {**row(provider="OECD"), "country_iso3": "IRL"}],
                    check_eurostat=lambda record: {
                        "country": record["country_iso3"], "indicator_id": record["indicator_id"],
                        "status": "match"}, workers=2)
     assert result["rows"] == 2
-    assert result["status_counts"] == {"match": 1, "provider_not_implemented": 1}
+    assert result["status_counts"] == {"match": 1, "source_drift": 1}
 
 
 def test_mismatched_persisted_dataset_never_fetches():
@@ -45,3 +45,21 @@ def test_duplicate_country_indicator_fails_closed():
     import pytest
     with pytest.raises(ValueError, match="Duplicate"):
         audit([row(), row()])
+
+
+def test_provider_comparison_detects_change_and_type_mismatch():
+    from scripts.audit_compare_sources import classify_observation
+    stored = {"unit": "percent", "dataset_id": "WDI", "value": 4.0,
+              "observation_type": "observed"}
+    base = {"country": "ESP", "indicator_id": "x"}
+    current = {**stored, "value": 4.5}
+    assert classify_observation(base, stored, [current])["status"] == "value_drift"
+    assert classify_observation(base, stored, [{**current, "observation_type": "official_forecast"}])["status"] == "observation_type_drift"
+    assert classify_observation(base, stored, [{**current, "unit": "persons"}])["status"] == "source_drift"
+
+
+def test_imf_archived_vintage_never_silently_passes():
+    from scripts.audit_compare_sources import audit_provider
+    item = row(provider="IMF", dataset="WEO_APRIL_2026")
+    result = audit_provider(item)
+    assert result["status"] == "vintage_unverifiable"
