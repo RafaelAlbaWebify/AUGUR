@@ -108,6 +108,9 @@ def extract_cells(path: Path) -> dict[tuple[str, str], dict]:
 
 
 def compare_weo_archive(rows: list[dict], archive: Path) -> list[dict]:
+    if archive.suffix.lower() == '.csv':
+        from scripts.verify_imf_weo_csv import verify_csv
+        return verify_csv(rows, archive)
     selected = [r for r in rows if r["source_id"] == "IMF"]
     if len(selected) != 6 or {(r["country_iso3"], r["indicator_id"]) for r in selected} != {
         (country, ind) for country in EXPECTED_COUNTRIES for ind in TARGET_CODES
