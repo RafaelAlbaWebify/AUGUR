@@ -12,7 +12,7 @@
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
   "file_count": 365,
   "python_count": 325,
-  "definition_count": 1683,
+  "definition_count": 1688,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
   "line_by_line_review_percent": 80.0,
@@ -861,6 +861,7 @@
         "backend/app/services/regional_rankings.py",
         "backend/app/services/scenarios.py",
         "backend/app/services/trends.py",
+        "backend/scripts/audit_compare_sources.py",
         "backend/scripts/check_radar_evidence.py",
         "backend/scripts/ensure_local_evidence.py",
         "backend/scripts/export_indicator_inventory.py",
@@ -5161,6 +5162,7 @@
       ],
       "imported_by": [
         "backend/app/providers.py",
+        "backend/scripts/audit_compare_sources.py",
         "backend/scripts/inspect_global_country_baseline.py",
         "backend/scripts/sync_global_baseline.py",
         "backend/scripts/sync_imf.py",
@@ -5441,6 +5443,7 @@
       ],
       "imported_by": [
         "backend/app/providers.py",
+        "backend/scripts/audit_compare_sources.py",
         "backend/scripts/sync_oecd.py",
         "backend/tests/test_oecd.py",
         "backend/tests/test_oecd_productivity_dimension_contract.py"
@@ -6670,6 +6673,7 @@
       ],
       "imported_by": [
         "backend/app/providers.py",
+        "backend/scripts/audit_compare_sources.py",
         "backend/scripts/inspect_global_country_baseline.py",
         "backend/scripts/sync_global_baseline.py",
         "backend/scripts/sync_un_wpp.py",
@@ -6908,6 +6912,7 @@
       ],
       "imported_by": [
         "backend/app/providers.py",
+        "backend/scripts/audit_compare_sources.py",
         "backend/scripts/discover_country_catalog.py",
         "backend/scripts/inspect_global_country_baseline.py",
         "backend/scripts/sync_global_baseline.py",
@@ -10852,8 +10857,8 @@
     {
       "path": "backend/scripts/audit_compare_sources.py",
       "bucket": "backend/scripts",
-      "sha256": "3590e9aa6d5122ca38df0ea4001c3052f845ea3baa87b4f97404204fb90b8204",
-      "bytes": 5714,
+      "sha256": "8ae0534d973db1843af085a604114acdc3809654b21f5fd28f311c63a781dd03",
+      "bytes": 10740,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -10867,10 +10872,39 @@
           ]
         },
         {
+          "symbol": "audit_provider",
+          "kind": "function",
+          "line_start": 58,
+          "line_end": 104,
+          "signature_arguments": [
+            "row"
+          ]
+        },
+        {
+          "symbol": "classify_observation",
+          "kind": "function",
+          "line_start": 107,
+          "line_end": 119,
+          "signature_arguments": [
+            "base",
+            "stored",
+            "matches"
+          ]
+        },
+        {
+          "symbol": "audit_un_bulk",
+          "kind": "function",
+          "line_start": 122,
+          "line_end": 152,
+          "signature_arguments": [
+            "rows"
+          ]
+        },
+        {
           "symbol": "audit",
           "kind": "function",
-          "line_start": 57,
-          "line_end": 88,
+          "line_start": 155,
+          "line_end": 189,
           "signature_arguments": [
             "rows",
             "check_eurostat",
@@ -10880,8 +10914,8 @@
         {
           "symbol": "main",
           "kind": "function",
-          "line_start": 91,
-          "line_end": 105,
+          "line_start": 192,
+          "line_end": 206,
           "signature_arguments": []
         }
       ],
@@ -10909,12 +10943,43 @@
         {
           "module": "app.ingestion.eurostat",
           "line": 13
+        },
+        {
+          "module": "app.catalog",
+          "line": 64
+        },
+        {
+          "module": "app.ingestion.world_bank",
+          "line": 65
+        },
+        {
+          "module": "app.ingestion.oecd",
+          "line": 66
+        },
+        {
+          "module": "app.ingestion.un_wpp",
+          "line": 67
+        },
+        {
+          "module": "app.ingestion.imf",
+          "line": 68
+        },
+        {
+          "module": "app.ingestion.un_wpp",
+          "line": 124
+        },
+        {
+          "module": "app.ingestion.un_wpp",
+          "line": 125
         }
       ],
       "called_names": [
         "ArgumentParser",
+        "OECDAdapter",
         "ThreadPoolExecutor",
+        "UNWPPAdapter",
         "ValueError",
+        "WorldBankAdapter",
         "abs",
         "adapter_factory",
         "add",
@@ -10922,19 +10987,29 @@
         "append",
         "as_completed",
         "audit",
+        "audit_un_bulk",
+        "classify_observation",
         "close",
         "dumps",
         "error",
+        "extend",
+        "fetch_csv",
         "fetch_dataset",
+        "fetch_indicator",
+        "fetch_productivity",
         "float",
         "get",
         "isinstance",
         "items",
         "len",
+        "list",
         "loads",
         "lower",
         "main",
+        "max",
+        "next",
         "normalize",
+        "normalize_countries",
         "parse_args",
         "print",
         "read_text",
@@ -10945,11 +11020,17 @@
         "str",
         "submit",
         "type",
+        "world_bank_indicators",
         "write_text"
       ],
-      "lines": 109,
+      "lines": 210,
       "resolved_local_imports": [
-        "backend/app/ingestion/eurostat.py"
+        "backend/app/catalog.py",
+        "backend/app/ingestion/eurostat.py",
+        "backend/app/ingestion/imf.py",
+        "backend/app/ingestion/oecd.py",
+        "backend/app/ingestion/un_wpp.py",
+        "backend/app/ingestion/world_bank.py"
       ],
       "imported_by": [
         "backend/tests/test_audit_compare_sources.py"
@@ -19100,8 +19181,8 @@
     {
       "path": "backend/tests/test_audit_compare_sources.py",
       "bucket": "backend/tests",
-      "sha256": "2880c4a76c5ff7d85c8339eee283f219a67c991bdd8fe8a30a994b4ccfc7c13b",
-      "bytes": 2063,
+      "sha256": "b1ede114f3469fc90483c376759525c489c8652d782687126e2518a797775d29",
+      "bytes": 2965,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -19116,7 +19197,7 @@
           ]
         },
         {
-          "symbol": "test_parallel_report_preserves_all_rows_and_marks_unimplemented_sources",
+          "symbol": "test_parallel_report_marks_bad_other_source_contract",
           "kind": "function",
           "line_start": 11,
           "line_end": 17,
@@ -19197,6 +19278,20 @@
           "line_start": 44,
           "line_end": 47,
           "signature_arguments": []
+        },
+        {
+          "symbol": "test_provider_comparison_detects_change_and_type_mismatch",
+          "kind": "function",
+          "line_start": 50,
+          "line_end": 58,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_imf_archived_vintage_never_silently_passes",
+          "kind": "function",
+          "line_start": 61,
+          "line_end": 65,
+          "signature_arguments": []
         }
       ],
       "imports": [
@@ -19207,17 +19302,27 @@
         {
           "module": "pytest",
           "line": 45
+        },
+        {
+          "module": "scripts.audit_compare_sources",
+          "line": 51
+        },
+        {
+          "module": "scripts.audit_compare_sources",
+          "line": 62
         }
       ],
       "called_names": [
         "AssertionError",
         "audit",
         "audit_eurostat",
+        "audit_provider",
+        "classify_observation",
         "dict",
         "raises",
         "row"
       ],
-      "lines": 47,
+      "lines": 65,
       "resolved_local_imports": [
         "backend/scripts/audit_compare_sources.py"
       ],
