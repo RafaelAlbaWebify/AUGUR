@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 371,
-  "python_count": 331,
-  "definition_count": 1714,
+  "file_count": 373,
+  "python_count": 333,
+  "definition_count": 1718,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 78.71,
+  "line_by_line_review_percent": 78.28,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 110,
-    "backend/tests": 139,
+    "backend/scripts": 111,
+    "backend/tests": 140,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -18911,8 +18911,8 @@
     {
       "path": "backend/scripts/verify_imf_weo_archive.py",
       "bucket": "backend/scripts",
-      "sha256": "83f0bfc03c3e109d9f6113007d0f1b569fbddfc256784d99c50107f94e40a1b9",
-      "bytes": 6248,
+      "sha256": "bb61ddcefaee39fe1e76356b21ed7ab00c59438f1306382c5d4a93b8f7243cbc",
+      "bytes": 6388,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -18965,7 +18965,7 @@
           "symbol": "compare_weo_archive",
           "kind": "function",
           "line_start": 110,
-          "line_end": 137,
+          "line_end": 140,
           "signature_arguments": [
             "rows",
             "archive"
@@ -18996,6 +18996,10 @@
         {
           "module": "zipfile",
           "line": 11
+        },
+        {
+          "module": "scripts.verify_imf_weo_csv",
+          "line": 112
         }
       ],
       "called_names": [
@@ -19020,6 +19024,7 @@
         "items",
         "join",
         "len",
+        "lower",
         "lstrip",
         "match",
         "max",
@@ -19034,13 +19039,76 @@
         "strip",
         "sub",
         "upper",
-        "values"
+        "values",
+        "verify_csv"
       ],
-      "lines": 137,
-      "resolved_local_imports": [],
+      "lines": 140,
+      "resolved_local_imports": [
+        "backend/scripts/verify_imf_weo_csv.py"
+      ],
       "imported_by": [
         "backend/scripts/accept_national_compare.py",
-        "backend/tests/test_verify_imf_weo_archive.py"
+        "backend/tests/test_verify_imf_weo_archive.py",
+        "backend/tests/test_verify_imf_weo_csv.py"
+      ]
+    },
+    {
+      "path": "backend/scripts/verify_imf_weo_csv.py",
+      "bucket": "backend/scripts",
+      "sha256": "a6c1a0fd4140b08f430801ae7a9af2124ad35741deb5ed4bd1d80e311c20c058",
+      "bytes": 4100,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "verify_csv",
+          "kind": "function",
+          "line_start": 16,
+          "line_end": 75,
+          "signature_arguments": [
+            "rows",
+            "file"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 6
+        },
+        {
+          "module": "csv",
+          "line": 7
+        },
+        {
+          "module": "datetime",
+          "line": 8
+        },
+        {
+          "module": "pathlib",
+          "line": 9
+        }
+      ],
+      "called_names": [
+        "DictReader",
+        "ValueError",
+        "abs",
+        "all",
+        "append",
+        "casefold",
+        "float",
+        "get",
+        "len",
+        "open",
+        "replace",
+        "set",
+        "split",
+        "startswith",
+        "values"
+      ],
+      "lines": 75,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/verify_imf_weo_archive.py"
       ]
     },
     {
@@ -32508,6 +32576,71 @@
         "rows"
       ],
       "lines": 23,
+      "resolved_local_imports": [
+        "backend/scripts/verify_imf_weo_archive.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_verify_imf_weo_csv.py",
+      "bucket": "backend/tests",
+      "sha256": "c3b1f12335da2c0c176e651aeb84540233a240d8a196ee2f0c9fa6010d7f00eb",
+      "bytes": 2029,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "prepare",
+          "kind": "function",
+          "line_start": 13,
+          "line_end": 28,
+          "signature_arguments": [
+            "tmp_path",
+            "publish"
+          ]
+        },
+        {
+          "symbol": "test_current_october_csv_is_never_mislabeled_april",
+          "kind": "function",
+          "line_start": 31,
+          "line_end": 35,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_april_csv_supported_for_six_observations",
+          "kind": "function",
+          "line_start": 38,
+          "line_end": 42,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "csv",
+          "line": 2
+        },
+        {
+          "module": "scripts.verify_imf_weo_archive",
+          "line": 3
+        }
+      ],
+      "called_names": [
+        "DictWriter",
+        "all",
+        "append",
+        "compare_weo_archive",
+        "items",
+        "len",
+        "open",
+        "prepare",
+        "str",
+        "writeheader",
+        "writerow"
+      ],
+      "lines": 42,
       "resolved_local_imports": [
         "backend/scripts/verify_imf_weo_archive.py"
       ],
