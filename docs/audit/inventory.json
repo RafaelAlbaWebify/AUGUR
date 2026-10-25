@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 369,
-  "python_count": 329,
-  "definition_count": 1705,
+  "file_count": 371,
+  "python_count": 331,
+  "definition_count": 1714,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 79.13,
+  "line_by_line_review_percent": 78.71,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 109,
-    "backend/tests": 138,
+    "backend/scripts": 110,
+    "backend/tests": 139,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -10810,8 +10810,8 @@
     {
       "path": "backend/scripts/accept_national_compare.py",
       "bucket": "backend/scripts",
-      "sha256": "6cbbc753028ec4678fbc5467ae62fd97f04dd6a3d5b1bf2e87df8765169fed2f",
-      "bytes": 4545,
+      "sha256": "3d6f35801e30829b3f9973ba348a89eb71af3ba4305d41be0cf442f6fb8a4b9d",
+      "bytes": 5106,
       "review_status": "not_reviewed",
       "definitions": [
         {
@@ -10829,14 +10829,16 @@
           "symbol": "run",
           "kind": "function",
           "line_start": 63,
-          "line_end": 72,
-          "signature_arguments": []
+          "line_end": 78,
+          "signature_arguments": [
+            "imf_archive"
+          ]
         },
         {
           "symbol": "main",
           "kind": "function",
-          "line_start": 75,
-          "line_end": 85,
+          "line_start": 81,
+          "line_end": 92,
           "signature_arguments": []
         }
       ],
@@ -10880,10 +10882,19 @@
         {
           "module": "scripts.export_compare_evidence",
           "line": 16
+        },
+        {
+          "module": "scripts.verify_imf_weo_archive",
+          "line": 73
+        },
+        {
+          "module": "collections",
+          "line": 74
         }
       ],
       "called_names": [
         "ArgumentParser",
+        "Counter",
         "FastAPI",
         "FileNotFoundError",
         "TestClient",
@@ -10894,6 +10905,8 @@
         "append",
         "audit",
         "collect",
+        "compare_weo_archive",
+        "dict",
         "dumps",
         "error",
         "float",
@@ -10917,12 +10930,13 @@
         "values",
         "write_text"
       ],
-      "lines": 89,
+      "lines": 96,
       "resolved_local_imports": [
         "backend/app/api/routes.py",
         "backend/app/core/config.py",
         "backend/scripts/audit_compare_sources.py",
-        "backend/scripts/export_compare_evidence.py"
+        "backend/scripts/export_compare_evidence.py",
+        "backend/scripts/verify_imf_weo_archive.py"
       ],
       "imported_by": [
         "backend/tests/test_accept_national_compare.py"
@@ -18892,6 +18906,141 @@
       "resolved_local_imports": [],
       "imported_by": [
         "backend/tests/test_verify_g2_reconciliation.py"
+      ]
+    },
+    {
+      "path": "backend/scripts/verify_imf_weo_archive.py",
+      "bucket": "backend/scripts",
+      "sha256": "83f0bfc03c3e109d9f6113007d0f1b569fbddfc256784d99c50107f94e40a1b9",
+      "bytes": 6248,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "_col",
+          "kind": "function",
+          "line_start": 22,
+          "line_end": 27,
+          "signature_arguments": [
+            "ref"
+          ]
+        },
+        {
+          "symbol": "_read_rows",
+          "kind": "function",
+          "line_start": 30,
+          "line_end": 63,
+          "signature_arguments": [
+            "z",
+            "sheet_name"
+          ]
+        },
+        {
+          "symbol": "_norm",
+          "kind": "function",
+          "line_start": 66,
+          "line_end": 67,
+          "signature_arguments": [
+            "v"
+          ]
+        },
+        {
+          "symbol": "extract_cells",
+          "kind": "function",
+          "line_start": 70,
+          "line_end": 107,
+          "signature_arguments": [
+            "path"
+          ]
+        },
+        {
+          "symbol": "extract_cells.get",
+          "kind": "function",
+          "line_start": 91,
+          "line_end": 93,
+          "signature_arguments": [
+            "name"
+          ]
+        },
+        {
+          "symbol": "compare_weo_archive",
+          "kind": "function",
+          "line_start": 110,
+          "line_end": 137,
+          "signature_arguments": [
+            "rows",
+            "archive"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 6
+        },
+        {
+          "module": "collections",
+          "line": 7
+        },
+        {
+          "module": "pathlib",
+          "line": 8
+        },
+        {
+          "module": "re",
+          "line": 9
+        },
+        {
+          "module": "xml.etree.ElementTree",
+          "line": 10
+        },
+        {
+          "module": "zipfile",
+          "line": 11
+        }
+      ],
+      "called_names": [
+        "ValueError",
+        "ZipFile",
+        "_col",
+        "_norm",
+        "_read_rows",
+        "abs",
+        "all",
+        "append",
+        "casefold",
+        "enumerate",
+        "extract_cells",
+        "find",
+        "findall",
+        "float",
+        "fromstring",
+        "get",
+        "group",
+        "int",
+        "items",
+        "join",
+        "len",
+        "lstrip",
+        "match",
+        "max",
+        "namelist",
+        "next",
+        "ord",
+        "range",
+        "read",
+        "replace",
+        "startswith",
+        "str",
+        "strip",
+        "sub",
+        "upper",
+        "values"
+      ],
+      "lines": 137,
+      "resolved_local_imports": [],
+      "imported_by": [
+        "backend/scripts/accept_national_compare.py",
+        "backend/tests/test_verify_imf_weo_archive.py"
       ]
     },
     {
@@ -32307,6 +32456,60 @@
       "lines": 57,
       "resolved_local_imports": [
         "backend/scripts/verify_g2_reconciliation.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_verify_imf_weo_archive.py",
+      "bucket": "backend/tests",
+      "sha256": "278d1fd204d507b7854ec66c4dbc128f1354065e737d65a64f98b50dc5b08476",
+      "bytes": 948,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "rows",
+          "kind": "function",
+          "line_start": 6,
+          "line_end": 13,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_missing_archived_file_is_not_accepted",
+          "kind": "function",
+          "line_start": 16,
+          "line_end": 18,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_partial_imf_selection_rejected",
+          "kind": "function",
+          "line_start": 21,
+          "line_end": 23,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "pytest",
+          "line": 2
+        },
+        {
+          "module": "scripts.verify_imf_weo_archive",
+          "line": 3
+        }
+      ],
+      "called_names": [
+        "compare_weo_archive",
+        "raises",
+        "rows"
+      ],
+      "lines": 23,
+      "resolved_local_imports": [
+        "backend/scripts/verify_imf_weo_archive.py"
       ],
       "imported_by": []
     },
