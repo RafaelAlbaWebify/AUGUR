@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 373,
+  "file_count": 374,
   "python_count": 333,
   "definition_count": 1718,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 78.28,
+  "line_by_line_review_percent": 78.07,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -29,7 +29,7 @@
     "backend/tests": 140,
     "frontend": 23,
     "github/workflows": 14,
-    "tools": 3
+    "tools": 4
   },
   "files": [
     {
@@ -33197,6 +33197,14 @@
       "bucket": "tools",
       "sha256": "bac19db271588fd70e28c1506c43fcf1e872effae511e533559848c18c2068a5",
       "bytes": 3261,
+      "review_status": "not_reviewed",
+      "imported_by": []
+    },
+    {
+      "path": "tools/global-operability-audit.ps1",
+      "bucket": "tools",
+      "sha256": "05d02fc9289ccb6f41a6b1851873260d199d3859c6e82c7b51911b618f32a147",
+      "bytes": 4382,
       "review_status": "not_reviewed",
       "imported_by": []
     }
