@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 365,
-  "python_count": 325,
-  "definition_count": 1688,
+  "file_count": 367,
+  "python_count": 327,
+  "definition_count": 1698,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 80.0,
+  "line_by_line_review_percent": 79.56,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -25,8 +25,8 @@
     "backend/app/ingestion": 30,
     "backend/app/models": 1,
     "backend/app/services": 33,
-    "backend/scripts": 107,
-    "backend/tests": 136,
+    "backend/scripts": 108,
+    "backend/tests": 137,
     "frontend": 23,
     "github/workflows": 14,
     "tools": 3
@@ -977,6 +977,7 @@
         "backend/app/services/regional_rankings.py",
         "backend/app/services/ttv_calibration.py",
         "backend/scripts/accept_gr2.py",
+        "backend/scripts/apply_compare_revisions.py",
         "backend/scripts/audit_legacy_nuts_vintage.py",
         "backend/scripts/build_eures_market_evidence.py",
         "backend/scripts/build_eures_market_evidence_from_annex.py",
@@ -10855,6 +10856,117 @@
       "imported_by": []
     },
     {
+      "path": "backend/scripts/apply_compare_revisions.py",
+      "bucket": "backend/scripts",
+      "sha256": "85d53873658f0d38fd61ab0d853744e259f3cb2a189423edec5ed889a079bc15",
+      "bytes": 6571,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "prepare",
+          "kind": "function",
+          "line_start": 22,
+          "line_end": 45,
+          "signature_arguments": [
+            "audit"
+          ]
+        },
+        {
+          "symbol": "apply",
+          "kind": "function",
+          "line_start": 48,
+          "line_end": 115,
+          "signature_arguments": [
+            "db_path",
+            "proposals",
+            "backup_path",
+            "commit"
+          ]
+        },
+        {
+          "symbol": "main",
+          "kind": "function",
+          "line_start": 118,
+          "line_end": 127,
+          "signature_arguments": []
+        }
+      ],
+      "imports": [
+        {
+          "module": "__future__",
+          "line": 6
+        },
+        {
+          "module": "argparse",
+          "line": 7
+        },
+        {
+          "module": "datetime",
+          "line": 8
+        },
+        {
+          "module": "json",
+          "line": 9
+        },
+        {
+          "module": "pathlib",
+          "line": 10
+        },
+        {
+          "module": "duckdb",
+          "line": 11
+        },
+        {
+          "module": "app.core.config",
+          "line": 12
+        }
+      ],
+      "called_names": [
+        "ArgumentParser",
+        "FileExistsError",
+        "FileNotFoundError",
+        "ValueError",
+        "abs",
+        "add",
+        "add_argument",
+        "append",
+        "apply",
+        "close",
+        "connect",
+        "dict",
+        "dump",
+        "dumps",
+        "execute",
+        "exists",
+        "fetchall",
+        "float",
+        "get",
+        "is_file",
+        "isinstance",
+        "isoformat",
+        "len",
+        "loads",
+        "main",
+        "mkdir",
+        "now",
+        "open",
+        "parse_args",
+        "prepare",
+        "print",
+        "read_text",
+        "resolve",
+        "set",
+        "str"
+      ],
+      "lines": 131,
+      "resolved_local_imports": [
+        "backend/app/core/config.py"
+      ],
+      "imported_by": [
+        "backend/tests/test_apply_compare_revisions.py"
+      ]
+    },
+    {
       "path": "backend/scripts/audit_compare_sources.py",
       "bucket": "backend/scripts",
       "sha256": "8ae0534d973db1843af085a604114acdc3809654b21f5fd28f311c63a781dd03",
@@ -19005,6 +19117,120 @@
       "lines": 42,
       "resolved_local_imports": [
         "backend/scripts/accept_gr2.py"
+      ],
+      "imported_by": []
+    },
+    {
+      "path": "backend/tests/test_apply_compare_revisions.py",
+      "bucket": "backend/tests",
+      "sha256": "6c86b940d127989be119de0d17087201972fe25e8c0998108a79ddf8a81eaedb",
+      "bytes": 4044,
+      "review_status": "not_reviewed",
+      "definitions": [
+        {
+          "symbol": "report",
+          "kind": "function",
+          "line_start": 8,
+          "line_end": 23,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "make_db",
+          "kind": "function",
+          "line_start": 26,
+          "line_end": 39,
+          "signature_arguments": [
+            "path",
+            "revisions"
+          ]
+        },
+        {
+          "symbol": "test_three_revisions_are_required_not_a_subset",
+          "kind": "function",
+          "line_start": 42,
+          "line_end": 48,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_unreviewed_change_rejected",
+          "kind": "function",
+          "line_start": 51,
+          "line_end": 55,
+          "signature_arguments": []
+        },
+        {
+          "symbol": "test_dry_run_writes_backup_but_not_db",
+          "kind": "function",
+          "line_start": 58,
+          "line_end": 71,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_apply_exactly_three_revisions_and_preserve_audit",
+          "kind": "function",
+          "line_start": 74,
+          "line_end": 88,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        },
+        {
+          "symbol": "test_changed_operator_data_blocks_all_writes",
+          "kind": "function",
+          "line_start": 91,
+          "line_end": 100,
+          "signature_arguments": [
+            "tmp_path"
+          ]
+        }
+      ],
+      "imports": [
+        {
+          "module": "pathlib",
+          "line": 2
+        },
+        {
+          "module": "duckdb",
+          "line": 3
+        },
+        {
+          "module": "pytest",
+          "line": 4
+        },
+        {
+          "module": "scripts.apply_compare_revisions",
+          "line": 5
+        },
+        {
+          "module": "json",
+          "line": 80
+        }
+      ],
+      "called_names": [
+        "append",
+        "apply",
+        "close",
+        "connect",
+        "execute",
+        "exists",
+        "fetchall",
+        "fetchone",
+        "len",
+        "loads",
+        "make_db",
+        "pop",
+        "prepare",
+        "raises",
+        "read_text",
+        "report",
+        "sorted",
+        "str"
+      ],
+      "lines": 100,
+      "resolved_local_imports": [
+        "backend/scripts/apply_compare_revisions.py"
       ],
       "imported_by": []
     },
@@ -32259,7 +32485,7 @@
     {
       "path": "frontend/src/App.tsx",
       "bucket": "frontend",
-      "sha256": "5262cca4fe26339edc05a8c678448f06e5ead847632d8ee49a5877a5c44dbe95",
+      "sha256": "7801fa2ed7a9f698d35bf2f599ecd25c2ec21a138b18bbd17fdeff65ec896965",
       "bytes": 25476,
       "review_status": "not_reviewed",
       "imported_by": []
@@ -32419,8 +32645,8 @@
     {
       "path": "frontend/tests/e2e/app.spec.ts",
       "bucket": "frontend",
-      "sha256": "190a1cbdd2c3877ca81c9b0655b8b9b172e2c7b50e2acf9b3d8d00abbeae3b2f",
-      "bytes": 162359,
+      "sha256": "6abffb396459f190bb2b4aceccb57477baa475537fc38cae0d0b8b42d3c93fd6",
+      "bytes": 162362,
       "review_status": "not_reviewed",
       "imported_by": []
     },
