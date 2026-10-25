@@ -77,7 +77,7 @@ def apply(db_path: Path, proposals: list[dict], backup_path: Path, commit: bool 
                              "status_before": rows[0][6], "source_decimal_before": rows[0][7]})
     finally:
         con.close()
-    report = {"status": "prepared" if not commit else "applied",
+    report = {"status": "preflight_snapshot",
               "audit_scope": "three_reviewed_national_revisions",
               "changes": verified, "operator_database": str(db_path),
               "created_at": datetime.now(timezone.utc).isoformat()}
@@ -91,7 +91,7 @@ def apply(db_path: Path, proposals: list[dict], backup_path: Path, commit: bool 
     try:
         con.execute("BEGIN TRANSACTION")
         for row in verified:
-            updated = con.execute(
+            con.execute(
                 """UPDATE observations SET value=?, source_updated_at=?, retrieved_at=?
                    WHERE country_iso3=? AND indicator_id=? AND period=? AND source_id=?
                      AND dataset_id=? AND observation_type='observed' AND value=?""",
@@ -111,6 +111,7 @@ def apply(db_path: Path, proposals: list[dict], backup_path: Path, commit: bool 
         raise
     finally:
         con.close()
+    report["status"] = "applied"
     return report
 
 
