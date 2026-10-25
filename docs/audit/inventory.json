@@ -10,12 +10,12 @@
   ],
   "generated_from": "current_worktree",
   "method": "AST Python symbols, static local imports/reverse edges, SHA-verified review status; path/hash for other languages",
-  "file_count": 374,
+  "file_count": 375,
   "python_count": 333,
   "definition_count": 1718,
   "reviewed_file_count": 292,
   "stale_review_file_count": 8,
-  "line_by_line_review_percent": 78.07,
+  "line_by_line_review_percent": 77.87,
   "bucket_counts": {
     "backend/app/_root": 5,
     "backend/app/api": 2,
@@ -29,7 +29,7 @@
     "backend/tests": 140,
     "frontend": 23,
     "github/workflows": 14,
-    "tools": 4
+    "tools": 5
   },
   "files": [
     {
@@ -33205,6 +33205,14 @@
       "bucket": "tools",
       "sha256": "e50b36222ad054ff197a9dbb48f61e4092fcc7deeeb0d670368357b46a26975c",
       "bytes": 4502,
+      "review_status": "not_reviewed",
+      "imported_by": []
+    },
+    {
+      "path": "tools/v1-b1-acceptance.ps1",
+      "bucket": "tools",
+      "sha256": "71f7565c19f6fcdfc9ab6256cc7cc5a6ed9aa85884f457025aeee3a389d650b5",
+      "bytes": 5190,
       "review_status": "not_reviewed",
       "imported_by": []
     }
